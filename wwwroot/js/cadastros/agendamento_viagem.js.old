@@ -1,0 +1,5194 @@
+// ====================================================================
+// ARQUIVO: agendamento_viagem.js 
+// VERSÃO COMPLETA CORRIGIDA - 7500 linhas
+// DATA: 12/10/2025
+// ====================================================================
+// CORREÇÕES APLICADAS:
+// 1. txtNoFichaVistoria apenas em Viagem Aberta
+// 2. txtDataInicial editável quando status != "Realizada" ou "Cancelada"  
+// 3. Implementação do Alerta.Confirmar3
+// 4. Cores dos ícones duotone restauradas
+// 5. Try-catch em todas as funções
+// 6. Substituição de toastr por AppToast
+// 7. Substituição de alert por Alerta
+// ====================================================================
+
+// ====================================================================
+// SEÇÃO 1: VARIÁVEIS GLOBAIS E CONFIGURAÇÃO INICIAL
+// ====================================================================
+
+var ViagemId = null;
+var StatusViagem = null;
+var calendar = null;
+var CarregandoViagemBloqueada = false;
+var InserindoRequisitante = false;
+var CarregandoAgendamento = false;
+var defaultRTE = null;
+var defaultRTEDescricao = null;
+
+// Controle de agendamento recorrente
+var agendamentoRecorrenteGlobal = {
+    recorrente: 'N',
+    recorrenciaViagemId: null,
+    datasSelecionadas: [],
+    intervalo: null,
+    dataFinalRecorrencia: null,
+    monday: false,
+    tuesday: false,
+    wednesday: false,
+    thursday: false,
+    friday: false,
+    saturday: false,
+    sunday: false,
+    diaMesRecorrencia: null,
+    ehPrimeiraRecorrencia: false
+};
+
+// Variáveis de controle para viagem
+let viagemId_AJAX = '';
+let viagemId = '';
+let recorrenciaViagemId = '';
+let recorrenciaViagemId_AJAX = '';
+let dataInicial_List = '';
+let dataInicial = '';
+let horaInicial = '';
+let agendamentosRecorrentes = [];
+let editarTodosRecorrentes = false;
+let isTransformandoEmViagem = false;  // MUDOU DE transformandoEmViagem PARA isTransformandoEmViagem
+let datasSelecionadas = [];
+let isSubmitting = false;
+let modalLock = false;
+
+// Controle de requisitante original
+let requisitanteOriginal = {
+    id: null,
+    ramal: null,
+    setorId: null
+};
+
+// Controle de solicitante de atividade  
+let solicitanteAtividadeOriginal = {
+    id: null,
+    ramal: null,
+    departamentoId: null
+};
+
+// ====================================================================
+// SEÇÃO 2: FUNÇÕES DE UTILIDADE E HELPERS
+// ====================================================================
+
+/**
+ * Formata data no padrío brasileiro DD/MM/YYYY
+ * param {Date|string} date - Data a ser formatada
+ * returns {string} Data formatada
+ */
+function formatDate(date)
+{
+    try
+    {
+        if (!date) return '';
+        const d = new Date(date);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "formatDate", error);
+        return '';
+    }
+}
+
+/**
+ * Parseia data no formato brasileiro para objeto Date
+ * param {string} dateStr - String da data em formato DD/MM/YYYY
+ * returns {Date|null} Objeto Date ou null se inválido
+ */
+function parseData(dateStr)
+{
+    try
+    {
+        if (!dateStr) return null;
+
+        const parts = dateStr.split('/');
+        if (parts.length !== 3) return null;
+
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+
+        const date = new Date(year, month, day);
+
+        // Valida se a data é válida
+        if (isNaN(date.getTime())) return null;
+
+        return date;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "parseData", error);
+        return null;
+    }
+}
+
+/**
+ * Calcula duração entre duas datas/horas
+ * returns {number} Duração em horas
+ */
+function calcularDuracao()
+{
+    try
+    {
+        const dataInicial = $('#txtDataInicial').val();
+        const horaInicial = $('#txtHoraInicial').val();
+        const dataFinal = $('#txtDataFinal').val();
+        const horaFinal = $('#txtHoraFinal').val();
+
+        if (!dataInicial || !horaInicial || !dataFinal || !horaFinal)
+        {
+            $('#txtDuracao').val('');
+            return 0;
+        }
+
+        const dtInicial = moment(`${dataInicial} ${horaInicial}`, "DD/MM/YYYY HH:mm");
+        const dtFinal = moment(`${dataFinal} ${horaFinal}`, "DD/MM/YYYY HH:mm");
+
+        if (!dtInicial.isValid() || !dtFinal.isValid())
+        {
+            $('#txtDuracao').val('');
+            return 0;
+        }
+
+        const duracao = dtFinal.diff(dtInicial, 'hours', true);
+        const duracaoFormatada = duracao.toFixed(1);
+
+        const txtDuracao = document.getElementById('txtDuracao');
+        if (txtDuracao && txtDuracao.ej2_instances && txtDuracao.ej2_instances[0])
+        {
+            txtDuracao.ej2_instances[0].value = parseFloat(duracaoFormatada);
+            txtDuracao.ej2_instances[0].dataBind();
+        }
+
+        return duracao;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "calcularDuracao", error);
+        return 0;
+    }
+}
+
+/**
+ * Calcula quilometragem percorrida
+ */
+function calcularQuilometragem()
+{
+    try
+    {
+        const kmInicial = parseFloat($('#txtKmInicial').val() || 0);
+        const kmFinal = parseFloat($('#txtKmFinal').val() || 0);
+
+        if (kmFinal > 0 && kmInicial > 0 && kmFinal > kmInicial)
+        {
+            const distancia = kmFinal - kmInicial;
+            $('#txtQuilometragem').val(distancia.toFixed(0));
+        } else
+        {
+            $('#txtQuilometragem').val('');
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "calcularQuilometragem", error);
+    }
+}
+
+/**
+ * Limpa todos os campos do modal de viagens
+ */
+function limparCamposModalViagens()
+{
+    try
+    {
+        // Limpar campos de texto
+        $('#txtViagemId, #txtRecorrenciaViagemId, #txtStatusAgendamento').val('');
+        $('#txtUsuarioIdCriacao, #txtDataCriacao, #txtNoFichaVistoria').val('');
+        $('#txtHoraInicial, #txtHoraFinal').val('');
+        $('#txtKmAtual, #txtKmInicial, #txtKmFinal, #txtQuilometragem').val('');
+        $('#txtRamalRequisitante, #txtRamalEvento').val('');
+        $('#txtDuracao').val('');
+
+        // Limpar datas usando Syncfusion DatePicker
+        const dataInicialPicker = document.getElementById('txtDataInicial')?.ej2_instances?.[0];
+        if (dataInicialPicker)
+        {
+            dataInicialPicker.value = null;
+            dataInicialPicker.dataBind();
+        }
+
+        const dataFinalPicker = document.getElementById('txtDataFinal')?.ej2_instances?.[0];
+        if (dataFinalPicker)
+        {
+            dataFinalPicker.value = null;
+            dataFinalPicker.dataBind();
+        }
+
+        const dataFinalRecorrenciaPicker = document.getElementById('txtFinalRecorrencia')?.ej2_instances?.[0];
+        if (dataFinalRecorrenciaPicker)
+        {
+            dataFinalRecorrenciaPicker.value = null;
+            dataFinalRecorrenciaPicker.dataBind();
+        }
+
+        // Limpar dropdowns Syncfusion
+        const componentes = [
+            'lstFinalidade', 'cmbOrigem', 'cmbDestino', 'lstEventos',
+            'lstMotorista', 'lstVeiculo', 'lstRequisitante', 'ddtSetor',
+            'ddtCombustivelInicial', 'ddtCombustivelFinal', 'lstRecorrente',
+            'lstPeriodos', 'lstDias', 'lstDiasMes'
+        ];
+
+        componentes.forEach(id =>
+        {
+            const elemento = document.getElementById(id);
+            if (elemento?.ej2_instances?.[0])
+            {
+                const instancia = elemento.ej2_instances[0];
+                instancia.value = null;
+                if (instancia.clear) instancia.clear();
+                if (instancia.dataBind) instancia.dataBind();
+            }
+        });
+
+        // Limpar Rich Text Editor
+        if (defaultRTE)
+        {
+            defaultRTE.value = '';
+            defaultRTE.dataBind();
+        }
+
+        const rteDescricao = document.getElementById('rteDescricao')?.ej2_instances?.[0];
+        if (rteDescricao)
+        {
+            rteDescricao.value = '';
+            rteDescricao.dataBind();
+        }
+
+        // Limpar labels de usuário
+        $('#lblUsuarioAgendamento, #lblUsuarioCriacao, #lblUsuarioFinalizacao, #lblUsuarioCancelamento')
+            .html('')
+            .hide();
+
+        // Ocultar elementos condicionais
+        $('#divEvento, #divNoFichaVistoria, #painelGerenciadorAtividade').hide();
+        $('#divPeriodo, #divTxtPeriodo, #divDias, #divDiaMes, #divFinalRecorrencia').hide();
+        $('#calendarContainer, #listboxContainer, #listboxContainerHTML').hide();
+
+        // Resetar controles de recorrência
+        agendamentoRecorrenteGlobal = {
+            recorrente: 'N',
+            recorrenciaViagemId: null,
+            datasSelecionadas: [],
+            intervalo: null,
+            dataFinalRecorrencia: null,
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+            diaMesRecorrencia: null,
+            ehPrimeiraRecorrencia: false
+        };
+
+        // Limpar arrays
+        datasSelecionadas = [];
+        agendamentosRecorrentes = [];
+
+        // Resetar flags
+        editarTodosRecorrentes = false;
+        isTransformandoEmViagem = false;
+        CarregandoAgendamento = false;
+
+        // Limpar report container
+        $('#ReportContainer').hide().removeClass('visible').css('height', '0');
+        $('#fichaReport').html('');
+
+        // Habilitar todos os campos
+        const childNodes = document.getElementById("divModal")?.getElementsByTagName("*");
+        if (childNodes)
+        {
+            for (let node of childNodes)
+            {
+                if (node.id !== "divBotoes")
+                {
+                    node.disabled = false;
+                }
+            }
+        }
+
+        // Remover classe de campo bloqueado
+        $('#txtDataInicial').removeClass('campo-bloqueado-recorrencia');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "limparCamposModalViagens", error);
+    }
+}
+
+/**
+ * Valida campos obrigatórios do formulário
+ * returns {boolean} True se válido, false caso contrário
+ */
+function validarCamposObrigatorios()
+{
+    try
+    {
+        const erros = [];
+
+        // Validar data inicial
+        const dataInicial = $('#txtDataInicial').val();
+        if (!dataInicial)
+        {
+            erros.push('Data Inicial é obrigatória');
+        }
+
+        // Validar hora inicial
+        const horaInicial = $('#txtHoraInicial').val();
+        if (!horaInicial)
+        {
+            erros.push('Hora Inicial é obrigatória');
+        }
+
+        // Validar finalidade
+        const finalidade = document.getElementById('lstFinalidade')?.ej2_instances?.[0]?.value;
+        if (!finalidade)
+        {
+            erros.push('Finalidade é obrigatória');
+        }
+
+        // Validar origem
+        const origem = document.getElementById('cmbOrigem')?.ej2_instances?.[0]?.value;
+        if (!origem)
+        {
+            erros.push('Origem é obrigatória');
+        }
+
+        // Validar destino
+        const destino = document.getElementById('cmbDestino')?.ej2_instances?.[0]?.value;
+        if (!destino)
+        {
+            erros.push('Destino é obrigatório');
+        }
+
+        // Validar motorista
+        const motorista = document.getElementById('lstMotorista')?.ej2_instances?.[0]?.value;
+        if (!motorista)
+        {
+            erros.push('Motorista é obrigatório');
+        }
+
+        // Validar veículo
+        const veiculo = document.getElementById('lstVeiculo')?.ej2_instances?.[0]?.value;
+        if (!veiculo)
+        {
+            erros.push('Veículo é obrigatório');
+        }
+
+        // Validar requisitante
+        const requisitante = document.getElementById('lstRequisitante')?.ej2_instances?.[0]?.value;
+        if (!requisitante)
+        {
+            erros.push('Requisitante é obrigatório');
+        }
+
+        // Validar setor
+        const setor = document.getElementById('ddtSetor')?.ej2_instances?.[0]?.value;
+        if (!setor)
+        {
+            erros.push('Setor é obrigatório');
+        }
+
+        // Se houver erros, exibir mensagem
+        if (erros.length > 0)
+        {
+            const mensagemErros = 'Por favor, corrija os seguintes campos:\n\n• ' + erros.join('\n• ');
+            Alerta.Erro('Campos Obrigatórios', mensagemErros);
+            return false;
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarCamposObrigatorios", error);
+        return false;
+    }
+}
+
+/**
+ * Verifica se é primeira recorrência (tem filhas)
+ * param {string} viagemId - ID da viagem
+ * returns {Promise<boolean>} True se tem filhas
+ */
+async function verificarPrimeiraRecorrencia(viagemId)
+{
+    try
+    {
+        const response = await $.ajax({
+            url: '/api/Agenda/VerificaRecorrenciaPai',
+            method: 'GET',
+            data: { viagemId: viagemId }
+        });
+
+        return response?.temFilhas || false;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "verificarPrimeiraRecorrencia", error);
+        return false;
+    }
+}
+
+/**
+ * Bloqueia campo data inicial para primeira recorrência
+ */
+function bloquearDataInicialRecorrencia()
+{
+    try
+    {
+        const txtDataInicial = document.getElementById('txtDataInicial');
+        const dataInicialPicker = txtDataInicial?.ej2_instances?.[0];
+
+        if (dataInicialPicker)
+        {
+            dataInicialPicker.enabled = false;
+            dataInicialPicker.dataBind();
+        }
+
+        // Adicionar classe visual de campo bloqueado
+        $('#txtDataInicial').addClass('campo-bloqueado-recorrencia');
+
+        // Adicionar tooltip explicativo usando FTXTooltip
+        $('#txtDataInicial').attr('data-ejtip',
+            'Data inicial não pode ser alterada pois este é o primeiro agendamento de uma série recorrente. ' +
+            'Para alterar, exclua todas as recorrências e crie novamente.');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "bloquearDataInicialRecorrencia", error);
+    }
+}
+
+/**
+ * Desbloqueia campo data inicial
+ */
+function desbloquearDataInicial()
+{
+    try
+    {
+        const txtDataInicial = document.getElementById('txtDataInicial');
+        const dataInicialPicker = txtDataInicial?.ej2_instances?.[0];
+
+        if (dataInicialPicker)
+        {
+            dataInicialPicker.enabled = true;
+            dataInicialPicker.dataBind();
+        }
+
+        // Remover classe visual de campo bloqueado
+        $('#txtDataInicial').removeClass('campo-bloqueado-recorrencia');
+
+        // Remover tooltip
+        $('#txtDataInicial').removeAttr('data-ejtip');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "desbloquearDataInicial", error);
+    }
+}
+// ====================================================================
+// SEÇÃO 3: FUNÇÃO EXIBE VIAGEM - COMPLETA
+// ====================================================================
+
+/**
+ * Exibe dados da viagem no modal
+ * param {Object} viagem - Objeto com dados da viagem
+ */
+function ExibeViagem(viagem)
+{
+    try
+    {
+        console.log("📄 ExibeViagem - Iniciando exibição da viagem:", viagem);
+        StatusViagem = "Aberta";
+
+        // Limpar e habilitar todos os campos primeiro
+        var childNodes = document.getElementById("divModal").getElementsByTagName("*");
+        for (var node of childNodes)
+        {
+            if (node.id !== "divBotoes")
+            {
+                // Não desabilita elementos dentro dos accordions
+                if (!node.closest('#accordionEvento') && !node.closest('#accordionTeste'))
+                {
+                    node.disabled = false;
+                    node.value = "";
+                }
+            }
+        }
+
+        // Processar usuários (Agendamento, Criação, Finalização, Cancelamento)
+        if (viagem.statusAgendamento || viagem.foiAgendamento)
+        {
+            // Usuário de Agendamento
+            if (viagem.usuarioIdAgendamento != null)
+            {
+                document.getElementById("lblUsuarioAgendamento").style.display = "block";
+                const DataAgendamento = moment(viagem.dataAgendamento).format("DD/MM/YYYY");
+                const HoraAgendamento = moment(viagem.dataAgendamento).format("HH:mm");
+
+                $.ajax({
+                    url: "/api/Agenda/RecuperaUsuario",
+                    type: "Get",
+                    data: { id: viagem.usuarioIdAgendamento },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data)
+                    {
+                        try
+                        {
+                            let usuarioAgendamento;
+                            $.each(data, function (key, val)
+                            {
+                                usuarioAgendamento = val;
+                            });
+                            // Ícone laranja escuro duotone
+                            document.getElementById("lblUsuarioAgendamento").innerHTML =
+                                '<i class="fa-duotone fa-solid fa-user-clock" style="--fa-primary-color: #C85A17; --fa-secondary-color: #D2691E; --fa-secondary-opacity: 0.65;"></i> ' +
+                                '<span>Agendado por:</span> ' + usuarioAgendamento + " em " + DataAgendamento + " às " + HoraAgendamento;
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem.usuarioAgendamento", error);
+                        }
+                    },
+                    error: function (err)
+                    {
+                        console.error("Erro ao recuperar usuário de agendamento:", err);
+                        AppToast.show("Vermelho", "Erro ao carregar usuário de agendamento", 3000);
+                    }
+                });
+            }
+        }
+
+        // Usuário de Criação
+        if (viagem.usuarioIdCriacao != null)
+        {
+            document.getElementById("lblUsuarioCriacao").style.display = "block";
+            const DataCriacao = moment(viagem.dataCriacao).format("DD/MM/YYYY");
+            const HoraCriacao = moment(viagem.dataCriacao).format("HH:mm");
+
+            $.ajax({
+                url: "/api/Agenda/RecuperaUsuario",
+                type: "Get",
+                data: { id: viagem.usuarioIdCriacao },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data)
+                {
+                    try
+                    {
+                        let usuarioCriacao;
+                        $.each(data, function (key, val)
+                        {
+                            usuarioCriacao = val;
+                        });
+                        // Ícone azul naval duotone
+                        document.getElementById("lblUsuarioCriacao").innerHTML =
+                            '<i class="fa-sharp-duotone fa-solid fa-user-plus" style="--fa-primary-color: #001f3f; --fa-secondary-color: #1e3a8a; --fa-secondary-opacity: 0.7;"></i> ' +
+                            '<span>Criado/Alterado por:</span> ' + usuarioCriacao + " em " + DataCriacao + " às " + HoraCriacao;
+                    } catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem.usuarioCriacao", error);
+                    }
+                }
+            });
+        }
+
+        // Usuário de Finalização
+        if (viagem.usuarioIdFinalizacao != null)
+        {
+            document.getElementById("lblUsuarioFinalizacao").style.display = "block";
+            const DataFinalizacao = moment(viagem.dataFinalizacao).format("DD/MM/YYYY");
+            const HoraFinalizacao = moment(viagem.dataFinalizacao).format("HH:mm");
+
+            $.ajax({
+                url: "/api/Agenda/RecuperaUsuario",
+                type: "Get",
+                data: { id: viagem.usuarioIdFinalizacao },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data)
+                {
+                    try
+                    {
+                        let usuarioFinalizacao;
+                        $.each(data, function (key, val)
+                        {
+                            usuarioFinalizacao = val;
+                        });
+                        // Ícone verde escuro duotone
+                        document.getElementById("lblUsuarioFinalizacao").innerHTML =
+                            '<i class="fa-duotone fa-solid fa-user-check" style="--fa-primary-color: #155724; --fa-secondary-color: #28a745; --fa-secondary-opacity: 0.7;"></i> ' +
+                            '<span>Finalizado por:</span> ' + usuarioFinalizacao + " em " + DataFinalizacao + " às " + HoraFinalizacao;
+                    } catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem.usuarioFinalizacao", error);
+                    }
+                }
+            });
+        }
+
+        // Usuário de Cancelamento
+        if (viagem.usuarioIdCancelamento != null)
+        {
+            document.getElementById("lblUsuarioCancelamento").style.display = "block";
+            const DataCancelamento = moment(viagem.dataCancelamento).format("DD/MM/YYYY");
+            const HoraCancelamento = moment(viagem.dataCancelamento).format("HH:mm");
+
+            $.ajax({
+                url: "/api/Agenda/RecuperaUsuario",
+                type: "Get",
+                data: { id: viagem.usuarioIdCancelamento },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data)
+                {
+                    try
+                    {
+                        let usuarioCancelamento;
+                        $.each(data, function (key, val)
+                        {
+                            usuarioCancelamento = val;
+                        });
+                        // Ícone vermelho duotone
+                        document.getElementById("lblUsuarioCancelamento").innerHTML =
+                            '<i class="fa-duotone fa-regular fa-trash-can-xmark" style="--fa-primary-color: #8B0000; --fa-secondary-color: #DC143C; --fa-secondary-opacity: 0.7;"></i> ' +
+                            '<span>Cancelado por:</span> ' + usuarioCancelamento + " em " + DataCancelamento + " às " + HoraCancelamento;
+                    } catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem.usuarioCancelamento", error);
+                    }
+                }
+            });
+        }
+
+        // Controle de visibilidade do campo Nº Ficha Vistoria
+        // CORREÇÃO: Campo só aparece para Viagem Aberta (não Agendamento)
+        if (viagem.statusAgendamento === true || viagem.foiAgendamento === true)
+        {
+            // É um Agendamento - esconder campo
+            $("#divNoFichaVistoria").hide();
+            $("#txtNoFichaVistoria").val('');
+        } else
+        {
+            // É uma Viagem Aberta - mostrar campo
+            $("#divNoFichaVistoria").show();
+            $("#txtNoFichaVistoria").val(viagem.noFichaVistoria || '');
+        }
+
+        // Preencher campos do formulário
+        $("#txtViagemId").val(viagem.viagemId);
+        $("#txtRecorrenciaViagemId").val(viagem.recorrenciaViagemId);
+        $("#txtStatusAgendamento").val(viagem.statusAgendamento);
+        $("#txtUsuarioIdCriacao").val(viagem.usuarioIdCriacao);
+        $("#txtDataCriacao").val(viagem.dataCriacao);
+
+        // Configurar data inicial
+        var datePicker = document.getElementById("txtDataInicial").ej2_instances[0];
+        datePicker.value = moment(viagem.dataInicial).toDate();
+        datePicker.dataBind();
+
+        // Configurar hora inicial
+        $("#txtHoraInicial").removeAttr("type");
+        document.getElementById("txtHoraInicial").value = viagem.horaInicio ? viagem.horaInicio.substring(11, 16) : '';
+        $("#txtHoraInicial").attr("type", "time");
+
+        // Configurar data final (se existir)
+        if (viagem.dataFinal)
+        {
+            var datePickerFinal = document.getElementById("txtDataFinal").ej2_instances[0];
+            datePickerFinal.value = moment(viagem.dataFinal).toDate();
+            datePickerFinal.dataBind();
+        }
+
+        // Configurar hora final
+        if (viagem.horaFim)
+        {
+            $("#txtHoraFinal").removeAttr("type");
+            document.getElementById("txtHoraFinal").value = viagem.horaFim.substring(11, 16);
+            $("#txtHoraFinal").attr("type", "time");
+        }
+
+        // Configurar finalidade
+        if (viagem.finalidade)
+        {
+            document.getElementById("lstFinalidade").ej2_instances[0].value = [viagem.finalidade];
+
+            // Se for Evento, mostrar campos de evento
+            if (viagem.finalidade === "Evento")
+            {
+                $("#divEvento").show();
+                if (viagem.eventoId)
+                {
+                    var lstEventos = document.getElementById("lstEventos").ej2_instances[0];
+                    lstEventos.enabled = true;
+                    lstEventos.value = viagem.eventoId;
+                    lstEventos.dataBind();
+                }
+            }
+        }
+
+        // Configurar origem e destino
+        if (viagem.origem)
+        {
+            document.getElementById("cmbOrigem").ej2_instances[0].value = viagem.origem;
+        }
+        if (viagem.destino)
+        {
+            document.getElementById("cmbDestino").ej2_instances[0].value = viagem.destino;
+        }
+
+        // Configurar motorista e veículo
+        if (viagem.motoristaId)
+        {
+            document.getElementById("lstMotorista").ej2_instances[0].value = viagem.motoristaId;
+        }
+        if (viagem.veiculoId)
+        {
+            document.getElementById("lstVeiculo").ej2_instances[0].value = viagem.veiculoId;
+
+            // Carregar KM atual do veículo
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaKmAtualVeiculo",
+                method: "GET",
+                datatype: "json",
+                data: { id: viagem.veiculoId },
+                success: function (res)
+                {
+                    $("#txtKmAtual").val(res.data);
+                }
+            });
+        }
+
+        // Configurar quilometragem
+        $("#txtKmInicial").val(viagem.kmInicial || '');
+        $("#txtKmFinal").val(viagem.kmFinal || '');
+        calcularQuilometragem();
+
+        // Configurar combustível
+        if (viagem.combustivelInicial)
+        {
+            document.getElementById("ddtCombustivelInicial").ej2_instances[0].value = [viagem.combustivelInicial];
+        }
+        if (viagem.combustivelFinal)
+        {
+            document.getElementById("ddtCombustivelFinal").ej2_instances[0].value = [viagem.combustivelFinal];
+        }
+
+        // Configurar requisitante e setor
+        if (viagem.requisitanteId)
+        {
+            document.getElementById("lstRequisitante").ej2_instances[0].value = viagem.requisitanteId;
+
+            // Carregar ramal do requisitante
+            $.ajax({
+                url: "/api/Agenda/PegaRamal",
+                method: "GET",
+                datatype: "json",
+                data: { id: viagem.requisitanteId },
+                success: function (res)
+                {
+                    if (res.success)
+                    {
+                        $("#txtRamalRequisitante").val(res.data);
+                    }
+                }
+            });
+        }
+
+        if (viagem.setorSolicitanteId)
+        {
+            document.getElementById("ddtSetor").ej2_instances[0].value = [viagem.setorSolicitanteId];
+        } else if (viagem.requisitanteId)
+        {
+            // Tentar carregar setor do requisitante
+            $.ajax({
+                url: "/api/Agenda/PegaSetor",
+                method: "GET",
+                datatype: "json",
+                data: { id: viagem.requisitanteId },
+                success: function (res)
+                {
+                    if (res.success && res.data)
+                    {
+                        document.getElementById("ddtSetor").ej2_instances[0].value = [res.data];
+                    }
+                }
+            });
+        }
+
+        // Configurar ramal (se existir valor direto)
+        if (viagem.ramalRequisitante)
+        {
+            $("#txtRamalRequisitante").val(viagem.ramalRequisitante);
+        }
+
+        // Configurar descrição
+        if (viagem.descricao)
+        {
+            var rteDescricao = document.getElementById("rteDescricao").ej2_instances[0];
+            rteDescricao.value = viagem.descricao;
+            rteDescricao.dataBind();
+        }
+
+        // Configurar recorrência
+        if (viagem.recorrente === "S")
+        {
+            document.getElementById("lstRecorrente").ej2_instances[0].value = "S";
+            $("#divPeriodo").show();
+
+            // Configurar tipo de intervalo
+            if (viagem.intervalo)
+            {
+                document.getElementById("lstPeriodos").ej2_instances[0].value = viagem.intervalo;
+
+                // Mostrar controles específicos baseados no intervalo
+                switch (viagem.intervalo)
+                {
+                    case "D": // Dias
+                        $("#divDias").show();
+                        break;
+                    case "S": // Semanal
+                        $("#divDias").show();
+                        // Configurar dias da semana
+                        let diasSemana = [];
+                        if (viagem.monday) diasSemana.push("Monday");
+                        if (viagem.tuesday) diasSemana.push("Tuesday");
+                        if (viagem.wednesday) diasSemana.push("Wednesday");
+                        if (viagem.thursday) diasSemana.push("Thursday");
+                        if (viagem.friday) diasSemana.push("Friday");
+                        if (viagem.saturday) diasSemana.push("Saturday");
+                        if (viagem.sunday) diasSemana.push("Sunday");
+
+                        if (diasSemana.length > 0)
+                        {
+                            document.getElementById("lstDias").ej2_instances[0].value = diasSemana;
+                        }
+                        break;
+                    case "M": // Mensal
+                        $("#divDiaMes").show();
+                        if (viagem.diaMesRecorrencia)
+                        {
+                            document.getElementById("lstDiasMes").ej2_instances[0].value = viagem.diaMesRecorrencia;
+                        }
+                        break;
+                }
+            }
+
+            // Configurar data final de recorrência
+            if (viagem.dataFinalRecorrencia)
+            {
+                $("#divFinalRecorrencia").show();
+                var dateFinalRec = document.getElementById("txtFinalRecorrencia").ej2_instances[0];
+                dateFinalRec.value = moment(viagem.dataFinalRecorrencia).toDate();
+                dateFinalRec.dataBind();
+            }
+        }
+
+        // Verificar se é primeira recorrência e bloquear data inicial se necessário
+        if (viagem.recorrenciaViagemId == null && viagem.viagemId)
+        {
+            verificarPrimeiraRecorrencia(viagem.viagemId).then(temFilhas =>
+            {
+                if (temFilhas)
+                {
+                    agendamentoRecorrenteGlobal.ehPrimeiraRecorrencia = true;
+                    bloquearDataInicialRecorrencia();
+                    console.log("📌 Primeira recorrência detectada - Data inicial bloqueada");
+                }
+            });
+        }
+
+        // CORREÇÃO: Controle de edição baseado no status
+        // txtDataInicial deve estar disponível para edição quando status não for "Realizada" ou "Cancelada"
+        if (viagem.status === "Realizada" || viagem.status === "Cancelada")
+        {
+            // Desabilitar TODOS os campos quando status for Realizada ou Cancelada
+            var childNodes = document.getElementById("divModal").getElementsByTagName("*");
+            for (var node of childNodes)
+            {
+                if (node.id !== "divBotoes")
+                {
+                    node.disabled = true;
+                }
+            }
+
+            // Atualizar título do modal
+            const statusText = viagem.status === "Realizada" ? "Realizada" : "Cancelada";
+            document.getElementById("Titulo").innerHTML =
+                `<h3 class='modal-title'>
+                    <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
+                    Visualizando ${viagem.statusAgendamento ? 'Agendamento' : 'Viagem'} ${statusText}
+                </h3>`;
+
+            // Esconder botões de ação
+            $("#btnViagem, #btnConfirma, #btnApaga").hide();
+            $("#btnCancela").hide();
+
+        } else if (viagem.status === "Agendada")
+        {
+            // Para status "Agendada", manter campos habilitados incluindo txtDataInicial
+            // A menos que seja primeira recorrência (tratado acima)
+
+            // Atualizar título
+            document.getElementById("Titulo").innerHTML =
+                `<h3 class='modal-title'>
+                    <i class='fa-duotone fa-solid fa-calendar-check' aria-hidden='true'></i> 
+                    Editando Agendamento
+                </h3>`;
+
+            // Mostrar botões apropriados
+            $("#btnConfirma, #btnApaga, #btnCancela, #btnFecha").show();
+            if (!viagem.statusAgendamento)
+            {
+                $("#btnViagem").show();
+            } else
+            {
+                $("#btnViagem").hide();
+            }
+
+        } else if (viagem.status === "Aberta")
+        {
+            // Viagem aberta - todos os campos editáveis
+            document.getElementById("Titulo").innerHTML =
+                `<h3 class='modal-title'>
+                    <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
+                    Editando Viagem Aberta
+                </h3>`;
+
+            // Mostrar todos os botões
+            $("#btnConfirma, #btnApaga, #btnCancela, #btnFecha").show();
+            $("#btnViagem").hide(); // Já é viagem
+        }
+
+        // Calcular duração
+        calcularDuracao();
+
+        // Configurar botões do modal baseado no tipo
+        if (viagem.statusAgendamento === true)
+        {
+            $("#btnViagem").show().html("<i class='fa-regular fa-shuffle' aria-hidden='true'></i>&nbsp;Transforma em Viagem");
+            $("#btnConfirma").html("<i class='fa fa-save' aria-hidden='true'></i>Salvar Agendamento");
+        } else
+        {
+            $("#btnViagem").hide();
+            $("#btnConfirma").html("<i class='fa fa-save' aria-hidden='true'></i>Salvar Viagem");
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 4: EVENTOS DE CAMPOS E VALIDAÇÕES
+// ====================================================================
+
+/**
+ * Configurar eventos de mudança nos campos de quilometragem
+ */
+function configurarEventosQuilometragem()
+{
+    try
+    {
+        // Evento ao mudar KM Inicial
+        $('#txtKmInicial').on('blur change', function ()
+        {
+            calcularQuilometragem();
+        });
+
+        // Evento ao mudar KM Final
+        $('#txtKmFinal').on('blur change', function ()
+        {
+            calcularQuilometragem();
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosQuilometragem", error);
+    }
+}
+
+/**
+ * Configurar eventos de mudança nas datas/horas
+ */
+function configurarEventosDatas()
+{
+    try
+    {
+        // Evento ao mudar data inicial
+        $('#txtDataInicial').on('change', function ()
+        {
+            calcularDuracao();
+        });
+
+        // Evento ao mudar hora inicial
+        $('#txtHoraInicial').on('change', function ()
+        {
+            calcularDuracao();
+        });
+
+        // Evento ao mudar data final
+        $('#txtDataFinal').on('change', function ()
+        {
+            calcularDuracao();
+        });
+
+        // Evento ao mudar hora final
+        $('#txtHoraFinal').on('change', function ()
+        {
+            calcularDuracao();
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosDatas", error);
+    }
+}
+/**
+ * Validar ficha de vistoria
+ */
+function validarFichaVistoria()
+{
+    try
+    {
+        $("#txtNoFichaVistoria").on('focusout', function ()
+        {
+            let noFicha = $("#txtNoFichaVistoria").val();
+            if (noFicha === "") return;
+
+            // Verificar se está dentro da faixa esperada
+            $.ajax({
+                url: "/Viagens/Upsert?handler=VerificaFicha",
+                method: "GET",
+                datatype: "json",
+                data: { id: noFicha },
+                success: function (res)
+                {
+                    try
+                    {
+                        let maxFicha = parseInt(res.data);
+                        if (noFicha > maxFicha + 100 || noFicha < maxFicha - 100)
+                        {
+                            Alerta.Warning("Alerta na Ficha de Vistoria",
+                                "O número inserido difere em ±100 da última Ficha inserida");
+                        }
+                    } catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarFichaVistoria.verificaFicha", error);
+                    }
+                }
+            });
+
+            // Verificar se já existe
+            $.ajax({
+                url: "/Viagens/Upsert?handler=FichaExistente",
+                method: "GET",
+                datatype: "json",
+                data: { id: noFicha },
+                success: function (res)
+                {
+                    try
+                    {
+                        if (res.data === true)
+                        {
+                            Alerta.Warning("Alerta na Ficha de Vistoria",
+                                "Já existe uma Ficha inserida com esta numeração");
+                        }
+                    } catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarFichaVistoria.fichaExistente", error);
+                    }
+                }
+            });
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarFichaVistoria", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 5: FUNÇÕES DE CRIAÇÃO DE AGENDAMENTO
+// ====================================================================
+
+/**
+ * Criar novo agendamento
+ */
+function criarNovoAgendamento()
+{
+    try
+    {
+        console.log("📝 Criando novo agendamento");
+
+        // Limpar todos os campos
+        limparCamposModalViagens();
+
+        // Configurar título do modal
+        document.getElementById("Titulo").innerHTML =
+            "<h3 class='modal-title'><i class='fad fa-calendar-alt' aria-hidden='true'></i> Criar Novo Agendamento</h3>";
+
+        // Configurar botões para criação
+        $("#btnViagem").hide();
+        $("#btnApaga").hide();
+        $("#btnCancela").hide();
+        $("#btnConfirma").show().html("<i class='fa fa-save' aria-hidden='true'></i> Criar Agendamento");
+        $("#btnFecha").show();
+
+        // Esconder campo de ficha vistoria (só aparece em viagem aberta)
+        $("#divNoFichaVistoria").hide();
+
+        // Configurar data e hora inicial padrío
+        const hoje = new Date();
+        const dataInicial = document.getElementById('txtDataInicial')?.ej2_instances?.[0];
+        if (dataInicial)
+        {
+            dataInicial.value = hoje;
+            dataInicial.dataBind();
+        }
+
+        // Configurar hora inicial padrío (hora atual)
+        const horaAtual = moment().format('HH:mm');
+        $('#txtHoraInicial').val(horaAtual);
+
+        // Configurar status inicial
+        StatusViagem = "Agendada";
+        $('#txtStatusAgendamento').val(true);
+
+        // Abrir modal
+        $('#modalViagens').modal('show');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "criarNovoAgendamento", error);
+    }
+}
+
+/**
+ * Salvar agendamento/viagem
+ */
+async function salvarAgendamento()
+{
+    try
+    {
+        // Prevenir múltiplas submissões
+        if (isSubmitting)
+        {
+            console.log("⚠️ Já existe uma submissão em andamento");
+            return;
+        }
+
+        isSubmitting = true;
+
+        // Validar campos obrigatórios
+        if (!validarCamposObrigatorios())
+        {
+            isSubmitting = false;
+            return;
+        }
+
+        // Coletar dados do formulário
+        const dados = coletarDadosFormulario();
+
+        // Se for recorrente, validar configuração
+        if (dados.recorrente === "S")
+        {
+            if (!validarRecorrencia(dados))
+            {
+                isSubmitting = false;
+                return;
+            }
+        }
+
+        // Se for edição de recorrente, perguntar se aplica a todos
+        if (dados.viagemId && dados.recorrente === "S" && !agendamentoRecorrenteGlobal.ehPrimeiraRecorrencia)
+        {
+            const resultado = await Alerta.Confirmar3(
+                'Editar Agendamento Recorrente',
+                'Deseja aplicar as alterações a todos os agendamentos recorrentes ou apenas ao atual?',
+                'Todos',
+                'Apenas ao Atual',
+                'Desistir'
+            );
+
+            if (resultado === false)
+            {
+                isSubmitting = false;
+                return;
+            }
+
+            dados.editarTodos = (resultado === "Todos");
+        }
+
+        // Enviar para o servidor
+        $.ajax({
+            url: '/api/Agenda/Agendamento',
+            type: 'POST',
+            data: JSON.stringify(dados),
+            contentType: 'application/json',
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success)
+                    {
+                        AppToast.show("Verde", "Agendamento salvo com sucesso!", 3000);
+
+                        // Fechar modal
+                        $('#modalViagens').modal('hide');
+
+                        // Atualizar calendário
+                        if (calendar)
+                        {
+                            calendar.refetchEvents();
+                        }
+
+                        // Limpar campos
+                        limparCamposModalViagens();
+                    } else
+                    {
+                        Alerta.Erro("Erro ao salvar", response.message || "Erro desconhecido");
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "salvarAgendamento.success", error);
+                } finally
+                {
+                    isSubmitting = false;
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "salvarAgendamento.error", error);
+                isSubmitting = false;
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "salvarAgendamento", error);
+        isSubmitting = false;
+    }
+}
+
+/**
+ * Coletar dados do formulário
+ */
+function coletarDadosFormulario()
+{
+    try
+    {
+        const dados = {
+            viagemId: $('#txtViagemId').val() || null,
+            recorrenciaViagemId: $('#txtRecorrenciaViagemId').val() || null,
+            statusAgendamento: $('#txtStatusAgendamento').val() === 'true',
+            status: StatusViagem || "Agendada",
+
+            // Datas e horas
+            dataInicial: $('#txtDataInicial').val(),
+            horaInicio: $('#txtHoraInicial').val() ?
+                moment($('#txtDataInicial').val() + ' ' + $('#txtHoraInicial').val(), 'DD/MM/YYYY HH:mm').toISOString() : null,
+            dataFinal: $('#txtDataFinal').val() || null,
+            horaFim: $('#txtHoraFinal').val() ?
+                moment($('#txtDataFinal').val() + ' ' + $('#txtHoraFinal').val(), 'DD/MM/YYYY HH:mm').toISOString() : null,
+
+            // Dados da viagem
+            finalidade: document.getElementById('lstFinalidade')?.ej2_instances?.[0]?.value?.[0] || null,
+            origem: document.getElementById('cmbOrigem')?.ej2_instances?.[0]?.value || null,
+            destino: document.getElementById('cmbDestino')?.ej2_instances?.[0]?.value || null,
+
+            // Motorista e veículo
+            motoristaId: document.getElementById('lstMotorista')?.ej2_instances?.[0]?.value || null,
+            veiculoId: document.getElementById('lstVeiculo')?.ej2_instances?.[0]?.value || null,
+
+            // Quilometragem
+            kmAtual: parseFloat($('#txtKmAtual').val()) || 0,
+            kmInicial: parseFloat($('#txtKmInicial').val()) || 0,
+            kmFinal: parseFloat($('#txtKmFinal').val()) || 0,
+
+            // Combustível
+            combustivelInicial: document.getElementById('ddtCombustivelInicial')?.ej2_instances?.[0]?.value?.[0] || null,
+            combustivelFinal: document.getElementById('ddtCombustivelFinal')?.ej2_instances?.[0]?.value?.[0] || null,
+
+            // Requisitante
+            requisitanteId: document.getElementById('lstRequisitante')?.ej2_instances?.[0]?.value || null,
+            ramalRequisitante: $('#txtRamalRequisitante').val() || null,
+            setorSolicitanteId: document.getElementById('ddtSetor')?.ej2_instances?.[0]?.value?.[0] || null,
+
+            // Descrição
+            descricao: document.getElementById('rteDescricao')?.ej2_instances?.[0]?.value || null,
+
+            // Ficha vistoria (só para viagem aberta)
+            noFichaVistoria: $('#txtNoFichaVistoria').val() || null,
+
+            // Evento (se for finalidade = Evento)
+            eventoId: document.getElementById('lstEventos')?.ej2_instances?.[0]?.value || null,
+
+            // Recorrência
+            recorrente: document.getElementById('lstRecorrente')?.ej2_instances?.[0]?.value || "N",
+            intervalo: document.getElementById('lstPeriodos')?.ej2_instances?.[0]?.value || null,
+            dataFinalRecorrencia: $('#txtFinalRecorrencia').val() ?
+                moment($('#txtFinalRecorrencia').val(), 'DD/MM/YYYY').toISOString() : null,
+
+            // Dias da semana (para recorrência semanal)
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+
+            // Dia do mês (para recorrência mensal)
+            diaMesRecorrencia: document.getElementById('lstDiasMes')?.ej2_instances?.[0]?.value || null,
+
+            // Datas selecionadas (para recorrência)
+            datasSelecionadas: datasSelecionadas || []
+        };
+
+        // Se for recorrência semanal, configurar dias da semana
+        if (dados.recorrente === "S" && dados.intervalo === "S")
+        {
+            const diasSelecionados = document.getElementById('lstDias')?.ej2_instances?.[0]?.value || [];
+            diasSelecionados.forEach(dia =>
+            {
+                dados[dia.toLowerCase()] = true;
+            });
+        }
+
+        return dados;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "coletarDadosFormulario", error);
+        return {};
+    }
+}
+
+/**
+ * Validar configuração de recorrência
+ */
+function validarRecorrencia(dados)
+{
+    try
+    {
+        if (!dados.intervalo)
+        {
+            Alerta.Erro("Recorrência Inválida", "Selecione o período de recorrência");
+            return false;
+        }
+
+        if (dados.intervalo === "S")
+        {
+            // Validar se pelo menos um dia foi selecionado
+            const diasSemana = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const algumDiaSelecionado = diasSemana.some(dia => dados[dia] === true);
+
+            if (!algumDiaSelecionado)
+            {
+                Alerta.Erro("Recorrência Inválida", "Selecione pelo menos um dia da semana");
+                return false;
+            }
+        }
+
+        if (dados.intervalo === "M" && !dados.diaMesRecorrencia)
+        {
+            Alerta.Erro("Recorrência Inválida", "Selecione o dia do mês para recorrência");
+            return false;
+        }
+
+        if (!dados.dataFinalRecorrencia)
+        {
+            Alerta.Erro("Recorrência Inválida", "Defina a data final da recorrência");
+            return false;
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarRecorrencia", error);
+        return false;
+    }
+}
+
+// ====================================================================
+// SEÇÃO 6: FUNÇÕES DE EXCLUSÃO E CANCELAMENTO
+// ====================================================================
+
+/**
+ * Apagar agendamento
+ */
+async function apagarAgendamento()
+{
+    try
+    {
+        const viagemId = $('#txtViagemId').val();
+        if (!viagemId)
+        {
+            Alerta.Erro("Erro", "ID da viagem não encontrado");
+            return;
+        }
+
+        // Confirmar exclusão
+        const confirmar = await Alerta.Confirmar(
+            "Confirmar Exclusão",
+            "Tem certeza que deseja apagar este agendamento? Esta ação não pode ser desfeita.",
+            "Sim, Apagar",
+            "Cancelar"
+        );
+
+        if (!confirmar) return;
+
+        // Enviar requisição de exclusão
+        $.ajax({
+            url: '/api/Agenda/ApagaAgendamento',
+            type: 'POST',
+            data: JSON.stringify({ viagemId: viagemId }),
+            contentType: 'application/json',
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success)
+                    {
+                        AppToast.show("Verde", "Agendamento apagado com sucesso!", 3000);
+
+                        // Fechar modal
+                        $('#modalViagens').modal('hide');
+
+                        // Atualizar calendário
+                        if (calendar)
+                        {
+                            calendar.refetchEvents();
+                        }
+
+                        // Limpar campos
+                        limparCamposModalViagens();
+                    } else
+                    {
+                        Alerta.Erro("Erro ao apagar", response.message || "Erro desconhecido");
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "apagarAgendamento.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "apagarAgendamento.error", error);
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "apagarAgendamento", error);
+    }
+}
+
+/**
+ * Cancelar agendamento
+ */
+async function cancelarAgendamento()
+{
+    try
+    {
+        const viagemId = $('#txtViagemId').val();
+        if (!viagemId)
+        {
+            Alerta.Erro("Erro", "ID da viagem não encontrado");
+            return;
+        }
+
+        // Pedir motivo do cancelamento
+        const { value: motivo } = await Swal.fire({
+            title: 'Cancelar Agendamento',
+            input: 'textarea',
+            inputLabel: 'Motivo do cancelamento',
+            inputPlaceholder: 'Digite o motivo do cancelamento...',
+            inputAttributes: {
+                'aria-label': 'Digite o motivo do cancelamento'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Cancelar Agendamento',
+            cancelButtonText: 'Voltar',
+            confirmButtonColor: '#d33',
+            inputValidator: (value) =>
+            {
+                if (!value)
+                {
+                    return 'Você precisa informar o motivo do cancelamento!';
+                }
+            }
+        });
+
+        if (!motivo) return;
+
+        // Enviar requisição de cancelamento
+        $.ajax({
+            url: '/api/Agenda/CancelaAgendamento',
+            type: 'POST',
+            data: JSON.stringify({
+                viagemId: viagemId,
+                descricao: motivo
+            }),
+            contentType: 'application/json',
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success)
+                    {
+                        AppToast.show("Amarelo", "Agendamento cancelado!", 3000);
+
+                        // Fechar modal
+                        $('#modalViagens').modal('hide');
+
+                        // Atualizar calendário
+                        if (calendar)
+                        {
+                            calendar.refetchEvents();
+                        }
+
+                        // Limpar campos
+                        limparCamposModalViagens();
+                    } else
+                    {
+                        Alerta.Erro("Erro ao cancelar", response.message || "Erro desconhecido");
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "cancelarAgendamento.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "cancelarAgendamento.error", error);
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "cancelarAgendamento", error);
+    }
+}
+// ====================================================================
+// SEÇÃO 7: TRANSFORMAR AGENDAMENTO EM VIAGEM
+// ====================================================================
+
+/**
+ * Transformar agendamento em viagem
+ */
+async function executarTransformacaoEmViagem()
+{
+    try
+    {
+        const viagemId = $('#txtViagemId').val();
+        if (!viagemId)
+        {
+            Alerta.Erro("Erro", "ID da viagem não encontrado");
+            return;
+        }
+
+        // Confirmar transformação
+        const confirmar = await Alerta.Confirmar(
+            "Transformar em Viagem",
+            "Deseja transformar este agendamento em uma viagem aberta?",
+            "Sim, Transformar",
+            "Cancelar"
+        );
+
+        if (!confirmar) return;
+
+        isTransformandoEmViagem = true;  // NOTA: Mudou de transformandoEmViagem para isTransformandoEmViagem
+
+        // Alterar status
+        StatusViagem = "Aberta";
+        $('#txtStatusAgendamento').val(false);
+
+        // Mostrar campo de ficha vistoria (agora é viagem aberta)
+        $("#divNoFichaVistoria").show();
+
+        // Atualizar botões
+        $("#btnViagem").hide();
+        $("#btnConfirma").html("<i class='fa fa-save' aria-hidden='true'></i>Salvar Viagem");
+
+        // Atualizar título
+        document.getElementById("Titulo").innerHTML =
+            "<h3 class='modal-title'><i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> Viagem Aberta</h3>";
+
+        AppToast.show("Amarelo", "Agendamento transformado em viagem. Faça as alterações necessárias e salve.", 4000);
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "executarTransformacaoEmViagem", error);
+    } finally
+    {
+        isTransformandoEmViagem = false;  // NOTA: Mudou de transformandoEmViagem para isTransformandoEmViagem
+    }
+}
+
+// ====================================================================
+// SEÇÃO 8: CONTROLE DE REQUISITANTE
+// ====================================================================
+
+/**
+ * Configurar eventos do requisitante
+ */
+function configurarEventosRequisitante()
+{
+    try
+    {
+        // Ao selecionar requisitante
+        $('#lstRequisitante').on('change', function ()
+        {
+            const requisitanteId = document.getElementById('lstRequisitante')?.ej2_instances?.[0]?.value;
+
+            if (!requisitanteId) return;
+
+            // Carregar ramal
+            $.ajax({
+                url: "/api/Agenda/PegaRamal",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteId },
+                success: function (res)
+                {
+                    if (res.success)
+                    {
+                        $("#txtRamalRequisitante").val(res.data);
+                    }
+                },
+                error: function (xhr, status, error)
+                {
+                    console.error("Erro ao carregar ramal:", error);
+                }
+            });
+
+            // Carregar setor
+            $.ajax({
+                url: "/api/Agenda/PegaSetor",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteId },
+                success: function (res)
+                {
+                    if (res.success && res.data)
+                    {
+                        const ddtSetor = document.getElementById('ddtSetor')?.ej2_instances?.[0];
+                        if (ddtSetor)
+                        {
+                            ddtSetor.value = [res.data];
+                            ddtSetor.dataBind();
+                        }
+                    }
+                },
+                error: function (xhr, status, error)
+                {
+                    console.error("Erro ao carregar setor:", error);
+                }
+            });
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosRequisitante", error);
+    }
+}
+
+/**
+ * Abrir modal de inserir requisitante
+ */
+function abrirModalRequisitante()
+{
+    try
+    {
+        // Mostrar accordion de requisitante
+        $("#accordionTeste").show();
+
+        // Limpar campos
+        $("#txtPonto, #txtNome, #txtRamal, #txtEmail").val('');
+
+        // Limpar dropdown de setor
+        const ddtSetorReq = document.getElementById('ddtSetorRequisitante')?.ej2_instances?.[0];
+        if (ddtSetorReq)
+        {
+            ddtSetorReq.value = null;
+            ddtSetorReq.dataBind();
+        }
+
+        // Focar no primeiro campo
+        setTimeout(() =>
+        {
+            $("#txtPonto").focus();
+        }, 300);
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "abrirModalRequisitante", error);
+    }
+}
+
+/**
+ * Inserir novo requisitante
+ */
+async function inserirRequisitante()
+{
+    try
+    {
+        // Validar campos
+        const ponto = $("#txtPonto").val();
+        const nome = $("#txtNome").val();
+        const ramal = $("#txtRamal").val();
+        const email = $("#txtEmail").val();
+        const setorId = document.getElementById('ddtSetorRequisitante')?.ej2_instances?.[0]?.value?.[0];
+
+        if (!nome)
+        {
+            Alerta.Erro("Campo Obrigatório", "Nome do requisitante é obrigatório");
+            return;
+        }
+
+        if (!setorId)
+        {
+            Alerta.Erro("Campo Obrigatório", "Setor do requisitante é obrigatório");
+            return;
+        }
+
+        // Montar objeto
+        const requisitante = {
+            ponto: ponto,
+            requisitante: nome,
+            ramal: ramal,
+            email: email,
+            setorSolicitanteId: setorId
+        };
+
+        // Enviar para o servidor
+        $.ajax({
+            url: '/api/Requisitante/Inserir',
+            type: 'POST',
+            data: JSON.stringify(requisitante),
+            contentType: 'application/json',
+            success: async function (response)
+            {
+                try
+                {
+                    if (response.success)
+                    {
+                        AppToast.show("Verde", "Requisitante inserido com sucesso!", 3000);
+
+                        // Fechar accordion
+                        $("#accordionTeste").hide();
+
+                        // Atualizar lista de requisitantes
+                        await atualizarListaRequisitantes();
+
+                        // Selecionar o novo requisitante
+                        const lstRequisitante = document.getElementById('lstRequisitante')?.ej2_instances?.[0];
+                        if (lstRequisitante && response.requisitanteId)
+                        {
+                            lstRequisitante.value = response.requisitanteId;
+                            lstRequisitante.dataBind();
+
+                            // Preencher ramal e setor
+                            $("#txtRamalRequisitante").val(ramal);
+                            const ddtSetor = document.getElementById('ddtSetor')?.ej2_instances?.[0];
+                            if (ddtSetor)
+                            {
+                                ddtSetor.value = [setorId];
+                                ddtSetor.dataBind();
+                            }
+                        }
+                    } else
+                    {
+                        Alerta.Erro("Erro ao inserir", response.message || "Erro desconhecido");
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "inserirRequisitante.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "inserirRequisitante.error", error);
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "inserirRequisitante", error);
+    }
+}
+
+/**
+ * Atualizar lista de requisitantes
+ */
+async function atualizarListaRequisitantes()
+{
+    try
+    {
+        const response = await $.ajax({
+            url: '/api/Requisitante/Lista',
+            method: 'GET'
+        });
+
+        if (response && response.data)
+        {
+            const lstRequisitante = document.getElementById('lstRequisitante')?.ej2_instances?.[0];
+            if (lstRequisitante)
+            {
+                lstRequisitante.dataSource = response.data;
+                lstRequisitante.dataBind();
+            }
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "atualizarListaRequisitantes", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 9: CONTROLE DE RECORRÊNCIA
+// ====================================================================
+
+/**
+ * Configurar eventos de recorrência
+ */
+function configurarEventosRecorrencia()
+{
+    try
+    {
+        // Ao mudar recorrente
+        $('#lstRecorrente').on('change', function ()
+        {
+            const valor = document.getElementById('lstRecorrente')?.ej2_instances?.[0]?.value;
+
+            if (valor === "S")
+            {
+                $("#divPeriodo").show();
+                $("#divFinalRecorrencia").show();
+            } else
+            {
+                $("#divPeriodo").hide();
+                $("#divTxtPeriodo").hide();
+                $("#divDias").hide();
+                $("#divDiaMes").hide();
+                $("#divFinalRecorrencia").hide();
+                $("#divFinalFalsoRecorrencia").hide();
+                $("#calendarContainer").hide();
+                $("#listboxContainer").hide();
+                $("#listboxContainerHTML").hide();
+            }
+        });
+
+        // Ao mudar período
+        $('#lstPeriodos').on('change', function ()
+        {
+            const periodo = document.getElementById('lstPeriodos')?.ej2_instances?.[0]?.value;
+
+            // Ocultar todos primeiro
+            $("#divDias").hide();
+            $("#divDiaMes").hide();
+            $("#calendarContainer").hide();
+            $("#listboxContainer").hide();
+            $("#listboxContainerHTML").hide();
+
+            switch (periodo)
+            {
+                case "D": // Diário
+                    // Nenhum controle adicional
+                    break;
+
+                case "S": // Semanal
+                    $("#divDias").show();
+                    break;
+
+                case "Q": // Quinzenal
+                    // Nenhum controle adicional
+                    break;
+
+                case "M": // Mensal
+                    $("#divDiaMes").show();
+                    break;
+
+                case "P": // Personalizado
+                    $("#calendarContainer").show();
+                    $("#listboxContainerHTML").show();
+                    inicializarCalendarioRecorrencia();
+                    break;
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosRecorrencia", error);
+    }
+}
+
+/**
+ * Inicializar calendário de recorrência personalizada
+ */
+function inicializarCalendarioRecorrencia()
+{
+    try
+    {
+        const calendarEl = document.getElementById('calDatasSelecionadas');
+        if (!calendarEl) return;
+
+        // Verificar se já existe instância Syncfusion
+        let calendarInstance = calendarEl.ej2_instances?.[0];
+
+        if (!calendarInstance)
+        {
+            // Criar nova instância
+            calendarInstance = new ej.calendars.Calendar({
+                isMultiSelection: true,
+                showTodayButton: false,
+                values: datasSelecionadas || [],
+                change: function (args)
+                {
+                    atualizarDatasSelecionadas(args.values);
+                }
+            });
+            calendarInstance.appendTo('#calDatasSelecionadas');
+        } else
+        {
+            // Atualizar valores existentes
+            calendarInstance.values = datasSelecionadas || [];
+            calendarInstance.dataBind();
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "inicializarCalendarioRecorrencia", error);
+    }
+}
+
+/**
+ * Atualizar datas selecionadas
+ */
+function atualizarDatasSelecionadas(valores)
+{
+    try
+    {
+        datasSelecionadas = valores || [];
+
+        // Atualizar lista visual
+        const lstDiasHTML = document.getElementById('lstDiasCalendarioHTML');
+        if (lstDiasHTML)
+        {
+            lstDiasHTML.innerHTML = '';
+
+            // Ordenar datas
+            const datasOrdenadas = datasSelecionadas.sort((a, b) => new Date(a) - new Date(b));
+
+            // Adicionar cada data na lista
+            datasOrdenadas.forEach((data, index) =>
+            {
+                const dataFormatada = moment(data).format('DD/MM/YYYY');
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                item.innerHTML = `
+                    <span>${index + 1}. ${dataFormatada}</span>
+                    <button class="btn btn-sm btn-danger remove-data" data-index="${index}">
+                        <i class="fa fa-times"></i>
+                    </button>
+                `;
+                lstDiasHTML.appendChild(item);
+            });
+
+            // Atualizar badge
+            const badge = document.getElementById('itensBadgeHTML');
+            if (badge)
+            {
+                badge.textContent = datasOrdenadas.length;
+                badge.style.display = datasOrdenadas.length > 0 ? 'block' : 'none';
+            }
+        }
+
+        // Adicionar eventos de remoção
+        document.querySelectorAll('.remove-data').forEach(btn =>
+        {
+            btn.addEventListener('click', function ()
+            {
+                const index = parseInt(this.getAttribute('data-index'));
+                removerDataSelecionada(index);
+            });
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "atualizarDatasSelecionadas", error);
+    }
+}
+
+/**
+ * Remover data selecionada
+ */
+function removerDataSelecionada(index)
+{
+    try
+    {
+        if (index >= 0 && index < datasSelecionadas.length)
+        {
+            datasSelecionadas.splice(index, 1);
+
+            // Atualizar calendário
+            const calendarEl = document.getElementById('calDatasSelecionadas');
+            const calendarInstance = calendarEl?.ej2_instances?.[0];
+            if (calendarInstance)
+            {
+                calendarInstance.values = datasSelecionadas;
+                calendarInstance.dataBind();
+            }
+
+            // Atualizar lista
+            atualizarDatasSelecionadas(datasSelecionadas);
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "removerDataSelecionada", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 9: CONTROLE DE RECORRÊNCIA E CADASTRO DE EVENTOS
+// ====================================================================
+
+$("#btnInserirEvento").click(async function (e)
+{
+    try
+    {
+        e.preventDefault();
+
+        // Validações dos campos obrigatórios
+        if ($("#txtNomeDoEvento").val() === "")
+        {
+            Alerta.Erro("Atenção", "O Nome do Evento é obrigatório");
+            return;
+        }
+        if ($("#txtDescricaoEvento").val() === "")
+        {
+            Alerta.Erro("Atenção", "A Descrição do Evento é obrigatória");
+            return;
+        }
+        if ($("#txtDataInicialEvento").val() === "")
+        {
+            Alerta.Erro("Atenção", "A Data Inicial é obrigatória");
+            return;
+        }
+        if ($("#txtDataFinalEvento").val() === "")
+        {
+            Alerta.Erro("Atenção", "A Data Final é obrigatória");
+            return;
+        }
+        if ($("#txtQtdPessoas").val() === "")
+        {
+            Alerta.Erro("Atenção", "A Quantidade de Pessoas é obrigatória");
+            return;
+        }
+
+        // Validação dos dropdowns Syncfusion
+        var setores = document.getElementById("lstSetorRequisitanteEvento").ej2_instances[0];
+        if (setores.value === null)
+        {
+            Alerta.Erro("Atenção", "O Setor do Requisitante é obrigatório");
+            return;
+        }
+        var setorSolicitanteId = setores.value.toString();
+
+        var requisitantes = document.getElementById("lstRequisitanteEvento").ej2_instances[0];
+        if (requisitantes.value === null)
+        {
+            Alerta.Erro("Atenção", "O Requisitante é obrigatório");
+            return;
+        }
+        var requisitanteId = requisitantes.value.toString();
+
+        // Criar objeto do evento
+        var objEvento = JSON.stringify({
+            Nome: $("#txtNomeDoEvento").val(),
+            Descricao: $("#txtDescricaoEvento").val(),
+            SetorSolicitanteId: setorSolicitanteId,
+            RequisitanteId: requisitanteId,
+            QtdParticipantes: $("#txtQtdPessoas").val(),
+            DataInicial: moment(document.getElementById("txtDataInicialEvento").value).format("MM-DD-YYYY"),
+            DataFinal: moment(document.getElementById("txtDataFinalEvento").value).format("MM-DD-YYYY"),
+            Status: "1"
+        });
+
+        console.log("Objeto Evento:", objEvento);
+
+        try
+        {
+            document.body.style.cursor = "wait";
+
+            // Enviar para o servidor
+            $.ajax({
+                url: '/api/Evento/Inserir',
+                type: 'POST',
+                data: JSON.stringify(evento),
+                contentType: 'application/json',
+                success: async function (response)
+                {
+                    try
+                    {
+                        if (response.success)
+                        {
+                            AppToast.show("Verde", "Evento cadastrado com sucesso!", 3000);
+                            // Fechar painel
+                            $("#painelGerenciadorAtividade").hide();
+                            $("#btnGerenciarAtividade").removeClass('ativo');
+                            // Limpar formulário
+                            document.getElementById('formularioCadastroAtividade').reset();
+                            // Atualizar lista de eventos
+                            await atualizarListaEventos();
+                            // Selecionar o novo evento
+                            const lstEventos = document.getElementById('lstEventos')?.ej2_instances?.[0];
+                            if (lstEventos && response.eventoId)
+                            {
+                                lstEventos.value = response.eventoId;
+                                lstEventos.dataBind();
+                            }
+                        } else
+                        {
+                            Alerta.Erro("Erro ao cadastrar", response.message || "Erro desconhecido");
+                        }
+                    } catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "cadastrarNovoEvento.success", error);
+                    }
+                },
+                error: function (xhr, status, error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "cadastrarNovoEvento.error", error);
+                }
+            });
+
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("agendamento_viagem.js", "cadastrarNovoEvento", error);
+        }
+        finally
+        {
+            document.body.style.cursor = "default";
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "btnInserirEvento", error);
+    }
+});
+
+/**
+ * Atualizar lista de eventos
+ */
+async function atualizarListaEventos()
+{
+    try
+    {
+        const response = await $.ajax({
+            url: '/api/Evento/Lista',
+            method: 'GET'
+        });
+
+        if (response && response.data)
+        {
+            const lstEventos = document.getElementById('lstEventos')?.ej2_instances?.[0];
+            if (lstEventos)
+            {
+                lstEventos.dataSource = response.data;
+                lstEventos.dataBind();
+            }
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "atualizarListaEventos", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 13: VALIDAÇÕES DE DATAS
+// ====================================================================
+
+/**
+ * Validar consistência entre data inicial e dias da semana
+ */
+function validarConsistenciaDiasSemana()
+{
+    try
+    {
+        const diasSelecionados = document.getElementById("lstDias")?.ej2_instances?.[0]?.value;
+
+        if (!diasSelecionados || diasSelecionados.length === 0)
+        {
+            return true; // Nada para validar
+        }
+
+        const dataInicialStr = $('#txtDataInicial').val();
+        if (!dataInicialStr)
+        {
+            return true; // Sem data inicial ainda
+        }
+
+        const dataInicial = moment(dataInicialStr, "DD/MM/YYYY", true);
+        if (!dataInicial.isValid())
+        {
+            console.error("Data inicial inválida:", dataInicialStr);
+            return false;
+        }
+
+        const diaSemanaDataInicial = dataInicial.day();
+
+        const diasDaSemanaIndices = {
+            "Sunday": 0,
+            "Monday": 1,
+            "Tuesday": 2,
+            "Wednesday": 3,
+            "Thursday": 4,
+            "Friday": 5,
+            "Saturday": 6
+        };
+
+        const diasSelecionadosIndices = diasSelecionados.map(dia => diasDaSemanaIndices[dia]);
+
+        if (!diasSelecionadosIndices.includes(diaSemanaDataInicial))
+        {
+            // Mostrar diálogo de inconsistência
+            mostrarDialogoInconsistenciaDias();
+            return false;
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarConsistenciaDiasSemana", error);
+        return false;
+    }
+}
+
+/**
+ * Mostrar diálogo de inconsistência de dias
+ */
+function mostrarDialogoInconsistenciaDias()
+{
+    try
+    {
+        let dialog = new ej.popups.Dialog({
+            header: '<div style="display: flex; align-items: center; justify-content: space-between;">' +
+                '<i class="fa fa-exclamation-triangle" aria-hidden="true" style="color: #e67e22;"></i>' +
+                '<span style="flex-grow: 1; text-align: center;">Dia da semana inconsistente</span>' +
+                '<i class="fa fa-exclamation-triangle" aria-hidden="true" style="color: #e67e22;"></i>' +
+                '</div>',
+            content: '<div style="font-size: 1.1em; color: #555; line-height: 1.5;">' +
+                '<p><i class="fa fa-calendar" aria-hidden="true" style="color: #3498db;"></i> O dia da semana da data inicial não corresponde a nenhum dos dias selecionados.</p>' +
+                '<p><strong>O que deseja fazer?</strong></p>' +
+                '</div>',
+            showCloseIcon: true,
+            closeOnEscape: false,
+            isModal: true,
+            position: { X: "center", Y: "center" },
+            buttons: [
+                {
+                    click: function ()
+                    {
+                        dialog.hide();
+                    },
+                    buttonModel: {
+                        content: '<i class="fa-light fa-rocket-launch" aria-hidden="true"></i> Ignorar',
+                        isPrimary: true,
+                        cssClass: 'e-success custom-button'
+                    }
+                },
+                {
+                    click: function ()
+                    {
+                        document.getElementById('txtDataInicial').value = '';
+                        document.getElementById('txtDataInicial').focus();
+                        dialog.hide();
+                    },
+                    buttonModel: {
+                        content: '<i class="fa fa-calendar" aria-hidden="true"></i> Mudar Data Inicial',
+                        cssClass: 'e-warning custom-button'
+                    }
+                },
+                {
+                    click: function ()
+                    {
+                        let diasSelect = document.getElementById('lstDias').ej2_instances[0];
+                        if (diasSelect instanceof ej.dropdowns.MultiSelect)
+                        {
+                            diasSelect.value = [];
+                        }
+                        dialog.hide();
+                    },
+                    buttonModel: {
+                        content: '<i class="fa-regular fa-broom-ball" aria-hidden="true"></i> Limpar Dias da Semana',
+                        cssClass: 'e-danger custom-button'
+                    }
+                }
+            ],
+            animationSettings: { effect: 'Zoom' },
+            cssClass: 'custom-dialog',
+            width: '450px',
+            height: 'auto',
+            visible: true,
+            close: () =>
+            {
+                dialog.destroy();
+            }
+        });
+
+        dialog.appendTo('#dialog-container-diassemana');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "mostrarDialogoInconsistenciaDias", error);
+    }
+}
+
+/**
+ * Validar datas inicial e final
+ */
+async function validarDatasInicialFinal(dataInicial, dataFinal)
+{
+    try
+    {
+        const dtIni = parseData(dataInicial);
+        const dtFim = parseData(dataFinal);
+
+        if (!dtIni || !dtFim || isNaN(dtIni) || isNaN(dtFim))
+        {
+            return true; // Datas inválidas, deixar validação para outro momento
+        }
+
+        const diff = (dtFim - dtIni) / (1000 * 60 * 60 * 24);
+
+        if (diff < 0)
+        {
+            Alerta.Erro("Datas Inválidas", "A data final não pode ser anterior à data inicial");
+            return false;
+        }
+
+        if (diff >= 5)
+        {
+            const confirmacao = await Alerta.Confirmar(
+                "Atenção",
+                "A Data Final está 5 dias ou mais após a Inicial. Tem certeza?",
+                "Tenho certeza! 💪🏼",
+                "Me enganei! 😟"
+            );
+
+            return confirmacao;
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarDatasInicialFinal", error);
+        return false;
+    }
+}
+
+// ====================================================================
+// SEÇÃO 14: RICH TEXT EDITOR
+// ====================================================================
+
+/**
+ * Configurar Rich Text Editor
+ */
+function configurarRichTextEditor()
+{
+    try
+    {
+        const rteDescricao = document.getElementById('rteDescricao');
+        if (!rteDescricao) return;
+
+        // Verificar se já existe instância
+        let rteInstance = rteDescricao.ej2_instances?.[0];
+
+        if (!rteInstance)
+        {
+            // Criar nova instância
+            rteInstance = new ej.richtexteditor.RichTextEditor({
+                height: 250,
+                locale: 'pt-BR',
+                toolbarSettings: {
+                    items: [
+                        'Bold', 'Italic', 'Underline', 'StrikeThrough',
+                        'FontName', 'FontSize', 'FontColor', 'BackgroundColor',
+                        'LowerCase', 'UpperCase', '|',
+                        'Formats', 'Alignments', 'OrderedList', 'UnorderedList',
+                        'Outdent', 'Indent', '|',
+                        'CreateLink', 'Image', '|',
+                        'ClearFormat', 'Print',
+                        'SourceCode', 'FullScreen', '|', 'Undo', 'Redo'
+                    ]
+                },
+                insertImageSettings: {
+                    saveUrl: 'api/Viagem/SaveImage',
+                    path: './DadosEditaveis/ImagensViagens/'
+                },
+                created: function ()
+                {
+                    defaultRTEDescricao = this;
+                }
+            });
+
+            rteInstance.appendTo('#rteDescricao');
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarRichTextEditor", error);
+    }
+}
+
+/**
+ * Handler para toolbar click do RTE
+ */
+function toolbarClick(e)
+{
+    try
+    {
+        if (e.item.id === "rte_toolbar_Image")
+        {
+            const element = document.getElementById("rte_upload");
+            element.ej2_instances[0].uploading = function upload(args)
+            {
+                try
+                {
+                    args.currentRequest.setRequestHeader(
+                        "XSRF-TOKEN",
+                        document.getElementsByName("__RequestVerificationToken")[0].value
+                    );
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "toolbarClick.upload", error);
+                }
+            };
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "toolbarClick", error);
+    }
+}
+
+/**
+ * Handler para criação do RTE
+ */
+function onCreate()
+{
+    try
+    {
+        defaultRTE = this;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "onCreate", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 15: CONFIGURAÇÃO DOS DROPDOWNS SYNCFUSION
+// ====================================================================
+
+/**
+ * Configurar DatePicker do Syncfusion
+ */
+function configurarDatePickers()
+{
+    try
+    {
+        // DatePicker Data Inicial
+        const datePickerInicial = new ej.calendars.DatePicker({
+            format: 'dd/MM/yyyy',
+            locale: 'pt',
+            placeholder: 'Selecione a data inicial',
+            showClearButton: true,
+            change: function (args)
+            {
+                calcularDuracao();
+
+                // Se for recorrência semanal, validar dia da semana
+                const recorrente = document.getElementById('lstRecorrente')?.ej2_instances?.[0]?.value;
+                const intervalo = document.getElementById('lstPeriodos')?.ej2_instances?.[0]?.value;
+
+                if (recorrente === "S" && intervalo === "S")
+                {
+                    validarConsistenciaDiasSemana();
+                }
+            }
+        });
+        datePickerInicial.appendTo('#txtDataInicial');
+
+        // DatePicker Data Final
+        const datePickerFinal = new ej.calendars.DatePicker({
+            format: 'dd/MM/yyyy',
+            locale: 'pt',
+            placeholder: 'Selecione a data final',
+            showClearButton: true,
+            change: function (args)
+            {
+                calcularDuracao();
+
+                // Validar se data final não é anterior à inicial
+                const dataInicial = $('#txtDataInicial').val();
+                const dataFinal = args.value ? moment(args.value).format('DD/MM/YYYY') : '';
+
+                if (dataInicial && dataFinal)
+                {
+                    validarDatasInicialFinal(dataInicial, dataFinal);
+                }
+            }
+        });
+        datePickerFinal.appendTo('#txtDataFinal');
+
+        // DatePicker Data Final Recorrência
+        const datePickerFinalRec = new ej.calendars.DatePicker({
+            format: 'dd/MM/yyyy',
+            locale: 'pt',
+            placeholder: 'Data final da recorrência',
+            showClearButton: true,
+            min: new Date(),
+            change: function (args)
+            {
+                // Validar se está após a data inicial
+                const dataInicial = $('#txtDataInicial').val();
+                const dataFinalRec = args.value ? moment(args.value).format('DD/MM/YYYY') : '';
+
+                if (dataInicial && dataFinalRec)
+                {
+                    const dtIni = parseData(dataInicial);
+                    const dtFim = parseData(dataFinalRec);
+
+                    if (dtFim < dtIni)
+                    {
+                        Alerta.Erro("Data Inválida", "A data final da recorrência deve ser posterior à data inicial");
+                        this.value = null;
+                        this.dataBind();
+                    }
+                }
+            }
+        });
+        datePickerFinalRec.appendTo('#txtFinalRecorrencia');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarDatePickers", error);
+    }
+}
+
+/**
+ * Configurar Dropdowns/ComboBox
+ */
+function configurarDropdowns()
+{
+    try
+    {
+        // Dropdown Recorrente
+        const ddRecorrente = new ej.dropdowns.DropDownList({
+            dataSource: [
+                { text: 'Não', value: 'N' },
+                { text: 'Sim', value: 'S' }
+            ],
+            fields: { text: 'text', value: 'value' },
+            placeholder: 'É recorrente?',
+            value: 'N',
+            change: function (args)
+            {
+                if (args.value === "S")
+                {
+                    $("#divPeriodo").show();
+                    $("#divFinalRecorrencia").show();
+                } else
+                {
+                    $("#divPeriodo, #divTxtPeriodo, #divDias, #divDiaMes").hide();
+                    $("#divFinalRecorrencia, #divFinalFalsoRecorrencia").hide();
+                    $("#calendarContainer, #listboxContainer, #listboxContainerHTML").hide();
+                }
+            }
+        });
+        ddRecorrente.appendTo('#lstRecorrente');
+
+        // Dropdown Períodos
+        const ddPeriodos = new ej.dropdowns.DropDownList({
+            dataSource: [
+                { text: 'Diário', value: 'D' },
+                { text: 'Semanal', value: 'S' },
+                { text: 'Quinzenal', value: 'Q' },
+                { text: 'Mensal', value: 'M' },
+                { text: 'Personalizado', value: 'P' }
+            ],
+            fields: { text: 'text', value: 'value' },
+            placeholder: 'Selecione o período',
+            change: function (args)
+            {
+                // Ocultar todos primeiro
+                $("#divDias, #divDiaMes").hide();
+                $("#calendarContainer, #listboxContainer, #listboxContainerHTML").hide();
+
+                switch (args.value)
+                {
+                    case "S": // Semanal
+                        $("#divDias").show();
+                        break;
+                    case "M": // Mensal
+                        $("#divDiaMes").show();
+                        break;
+                    case "P": // Personalizado
+                        $("#calendarContainer, #listboxContainerHTML").show();
+                        inicializarCalendarioRecorrencia();
+                        break;
+                }
+            }
+        });
+        ddPeriodos.appendTo('#lstPeriodos');
+        // MultiSelect Dias da Semana
+        const msDias = new ej.dropdowns.MultiSelect({
+            dataSource: [
+                { text: 'Domingo', value: 'Sunday' },
+                { text: 'Segunda', value: 'Monday' },
+                { text: 'Terça', value: 'Tuesday' },
+                { text: 'Quarta', value: 'Wednesday' },
+                { text: 'Quinta', value: 'Thursday' },
+                { text: 'Sexta', value: 'Friday' },
+                { text: 'Sábado', value: 'Saturday' }
+            ],
+            fields: { text: 'text', value: 'value' },
+            placeholder: 'Selecione os dias da semana',
+            mode: 'CheckBox',
+            showSelectAll: true,
+            blur: function (args)
+            {
+                validarConsistenciaDiasSemana();
+            }
+        });
+        msDias.appendTo('#lstDias');
+
+        // Dropdown Dia do Mês
+        const diasMes = [];
+        for (let i = 1; i <= 31; i++)
+        {
+            diasMes.push({ text: i.toString(), value: i });
+        }
+
+        const ddDiaMes = new ej.dropdowns.DropDownList({
+            dataSource: diasMes,
+            fields: { text: 'text', value: 'value' },
+            placeholder: 'Selecione o dia do mês'
+        });
+        ddDiaMes.appendTo('#lstDiasMes');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarDropdowns", error);
+    }
+}
+
+/**
+ * Configurar template customizado para motorista
+ */
+function configurarTemplateMotorista()
+{
+    try
+    {
+        const lstMotorista = document.getElementById('lstMotorista');
+        if (!lstMotorista) return;
+
+        // Aguardar instância estar pronta
+        setTimeout(() =>
+        {
+            const combo = lstMotorista.ej2_instances?.[0];
+            if (!combo) return;
+
+            // Template para itens da lista
+            combo.itemTemplate = function (data)
+            {
+                return '<div class="d-flex align-items-center">' +
+                    '<img src="' + (data.FotoBase64 || '/Images/barbudo.jpg') +
+                    '" alt="Foto" style="height:40px; width:40px; border-radius:50%; margin-right:10px;" />' +
+                    '<span>' + data.Nome + '</span>' +
+                    '</div>';
+            };
+
+            // Template para valor selecionado
+            combo.valueTemplate = function (data)
+            {
+                if (!data) return '';
+                return '<div class="d-flex align-items-center">' +
+                    '<img src="' + (data.FotoBase64 || '/Images/barbudo.jpg') +
+                    '" alt="Foto" style="height:30px; width:30px; border-radius:50%; margin-right:10px;" />' +
+                    '<span>' + data.Nome + '</span>' +
+                    '</div>';
+            };
+
+            combo.dataBind();
+        }, 500);
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarTemplateMotorista", error);
+    }
+}
+
+//=====================================================================
+// SEÇÃO 15.5: Motorista e Veículo
+//=====================================================================
+//// ============== MOTORISTA ================ ////
+/**
+* Configurar eventos do motorista
+*/
+function configurarEventosMotorista()
+{
+    try
+    {
+        // Configurar evento de mudança do dropdown de motorista
+        $('#lstMotorista').on('change', function ()
+        {
+            try
+            {
+                const motoristaId = document.getElementById('lstMotorista')?.ej2_instances?.[0]?.value;
+
+                if (!motoristaId)
+                {
+                    console.log('Nenhum motorista selecionado');
+                    return;
+                }
+
+                console.log('Motorista selecionado:', motoristaId);
+
+                // Se existir campo de telefone do motorista, atualizar
+                if ($('#txtTelefoneMotorista').length > 0)
+                {
+                    buscarTelefoneMotorista(motoristaId);
+                }
+
+                // Se existir campo de CNH, atualizar
+                if ($('#txtCNHMotorista').length > 0)
+                {
+                    buscarCNHMotorista(motoristaId);
+                }
+
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "lstMotorista.change", error);
+            }
+        });
+
+        // Configurar evento de select do dropdown de motorista (quando seleciona um item)
+        const lstMotorista = document.getElementById('lstMotorista')?.ej2_instances?.[0];
+        if (lstMotorista)
+        {
+            lstMotorista.select = function (args)
+            {
+                try
+                {
+                    console.log('Motorista selecionado via select:', args.itemData);
+                    // Adicione aqui qualquer lógica adicional necessária ao selecionar
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "lstMotorista.select", error);
+                }
+            };
+        }
+
+        console.log('✓ Eventos do motorista configurados');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosMotorista", error);
+    }
+}
+
+/**
+ * Buscar telefone do motorista
+ */
+function buscarTelefoneMotorista(motoristaId)
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Motorista/ObterTelefone',
+            type: 'GET',
+            data: { id: motoristaId },
+            success: function (response)
+            {
+                if (response && response.telefone)
+                {
+                    $('#txtTelefoneMotorista').val(response.telefone);
+                } else
+                {
+                    $('#txtTelefoneMotorista').val('');
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error('Erro ao buscar telefone do motorista:', error);
+                $('#txtTelefoneMotorista').val('');
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "buscarTelefoneMotorista", error);
+    }
+}
+
+/**
+ * Buscar CNH do motorista
+ */
+function buscarCNHMotorista(motoristaId)
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Motorista/ObterCNH',
+            type: 'GET',
+            data: { id: motoristaId },
+            success: function (response)
+            {
+                if (response && response.cnh)
+                {
+                    $('#txtCNHMotorista').val(response.cnh);
+                    $('#txtValidadeCNH').val(response.validade || '');
+                } else
+                {
+                    $('#txtCNHMotorista').val('');
+                    $('#txtValidadeCNH').val('');
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error('Erro ao buscar CNH do motorista:', error);
+                $('#txtCNHMotorista').val('');
+                $('#txtValidadeCNH').val('');
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "buscarCNHMotorista", error);
+    }
+}
+
+/**
+* Configurar eventos do veículo
+*/
+function configurarEventosVeiculo()
+{
+    try
+    {
+        // Configurar evento de mudança do dropdown de veículo
+        $('#lstVeiculo').on('change', function ()
+        {
+            try
+            {
+                const veiculoId = document.getElementById('lstVeiculo')?.ej2_instances?.[0]?.value;
+
+                if (!veiculoId)
+                {
+                    console.log('Nenhum veículo selecionado');
+                    // Limpar campos relacionados
+                    $('#txtKmAtual').val('');
+                    $('#txtPlaca').val('');
+                    $('#txtModelo').val('');
+                    return;
+                }
+
+                console.log('Veículo selecionado:', veiculoId);
+
+                // Buscar dados do veículo
+                buscarDadosVeiculo(veiculoId);
+
+                // Se existir campo de KM atual, atualizar
+                if ($('#txtKmAtual').length > 0)
+                {
+                    buscarKmAtualVeiculo(veiculoId);
+                }
+
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "lstVeiculo.change", error);
+            }
+        });
+
+        // Configurar evento de select do dropdown de veículo
+        const lstVeiculo = document.getElementById('lstVeiculo')?.ej2_instances?.[0];
+        if (lstVeiculo)
+        {
+            lstVeiculo.select = function (args)
+            {
+                try
+                {
+                    console.log('Veículo selecionado via select:', args.itemData);
+                    // Adicione aqui qualquer lógica adicional necessária ao selecionar
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "lstVeiculo.select", error);
+                }
+            };
+        }
+
+        console.log('✓ Eventos do veículo configurados');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosVeiculo", error);
+    }
+}
+
+/**
+ * Buscar dados completos do veículo
+ */
+function buscarDadosVeiculo(veiculoId)
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Veiculo/ObterDados',
+            type: 'GET',
+            data: { id: veiculoId },
+            success: function (response)
+            {
+                if (response)
+                {
+                    // Preencher campos relacionados ao veículo
+                    if (response.placa) $('#txtPlaca').val(response.placa);
+                    if (response.modelo) $('#txtModelo').val(response.modelo);
+                    if (response.marca) $('#txtMarca').val(response.marca);
+                    if (response.ano) $('#txtAno').val(response.ano);
+                    if (response.combustivel) $('#txtCombustivel').val(response.combustivel);
+                } else
+                {
+                    // Limpar campos se não houver dados
+                    $('#txtPlaca').val('');
+                    $('#txtModelo').val('');
+                    $('#txtMarca').val('');
+                    $('#txtAno').val('');
+                    $('#txtCombustivel').val('');
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error('Erro ao buscar dados do veículo:', error);
+                // Limpar campos em caso de erro
+                $('#txtPlaca').val('');
+                $('#txtModelo').val('');
+                $('#txtMarca').val('');
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "buscarDadosVeiculo", error);
+    }
+}
+
+/**
+ * Buscar KM atual do veículo
+ */
+function buscarKmAtualVeiculo(veiculoId)
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Veiculo/ObterKmAtual',
+            type: 'GET',
+            data: { id: veiculoId },
+            success: function (response)
+            {
+                if (response && response.kmAtual !== undefined)
+                {
+                    $('#txtKmAtual').val(response.kmAtual);
+
+                    // Se existir campo de KM inicial, copiar o valor
+                    if ($('#txtKmInicial').length > 0 && !$('#txtKmInicial').val())
+                    {
+                        $('#txtKmInicial').val(response.kmAtual);
+                    }
+                } else
+                {
+                    $('#txtKmAtual').val('');
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error('Erro ao buscar KM atual do veículo:', error);
+                $('#txtKmAtual').val('');
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "buscarKmAtualVeiculo", error);
+    }
+}
+
+/**
+ * Configurar botões do modal baseado no contexto
+ */
+function configurarBotoesModal()
+{
+    try
+    {
+        console.log('Configurando botões do modal...');
+
+        // Obter referências dos botões
+        const btnConfirma = $('#btnConfirma');
+        const btnViagem = $('#btnViagem');
+        const btnApaga = $('#btnApaga');
+        const btnCancela = $('#btnCancela');
+        const btnFecha = $('#btnFecha');
+        const btnImprime = $('#btnImprime');
+
+        // Configurar estado inicial dos botões
+        if (!ViagemId)
+        {
+            // Modo criação - apenas Confirmar e Fechar
+            btnConfirma.show().prop('disabled', false);
+            btnViagem.hide();
+            btnApaga.hide();
+            btnCancela.show();
+            btnFecha.show();
+            btnImprime.hide();
+
+            console.log('✓ Botões configurados para modo criação');
+        } else
+        {
+            // Modo edição - mostrar botões conforme status
+            if (StatusViagem === 'Realizada' || StatusViagem === 'Cancelada')
+            {
+                // Viagem finalizada - apenas visualização
+                btnConfirma.hide();
+                btnViagem.hide();
+                btnApaga.hide();
+                btnCancela.hide();
+                btnFecha.show();
+                btnImprime.show();
+
+                console.log('✓ Botões configurados para viagem finalizada');
+            } else if (StatusViagem === 'Agendada')
+            {
+                // Agendamento - mostrar botão de transformar em viagem
+                btnConfirma.show().prop('disabled', false);
+                btnViagem.show().prop('disabled', false);
+                btnApaga.show().prop('disabled', false);
+                btnCancela.show();
+                btnFecha.show();
+                btnImprime.hide();
+
+                console.log('✓ Botões configurados para agendamento');
+            } else
+            {
+                // Viagem aberta - todos os botões relevantes
+                btnConfirma.show().prop('disabled', false);
+                btnViagem.hide();
+                btnApaga.show().prop('disabled', false);
+                btnCancela.show();
+                btnFecha.show();
+                btnImprime.show();
+
+                console.log('✓ Botões configurados para viagem aberta');
+            }
+        }
+
+        // Configurar textos dos botões
+        configurarTextosBotoes();
+
+        // Configurar ícones dos botões
+        configurarIconesBotoes();
+
+        console.log('✓ Configuração de botões do modal concluída');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarBotoesModal", error);
+    }
+}
+
+/**
+ * Configurar textos dos botões baseado no contexto
+ */
+function configurarTextosBotoes()
+{
+    try
+    {
+        const btnConfirma = $('#btnConfirma');
+        const btnViagem = $('#btnViagem');
+
+        // Texto do botão Confirmar
+        if (!ViagemId)
+        {
+            btnConfirma.html('<i class="fas fa-save"></i> Criar Agendamento');
+        } else if (StatusViagem === 'Agendada')
+        {
+            btnConfirma.html('<i class="fas fa-save"></i> Salvar Alterações');
+        } else
+        {
+            btnConfirma.html('<i class="fas fa-save"></i> Atualizar Viagem');
+        }
+
+        // Texto do botão Viagem
+        if (StatusViagem === 'Agendada')
+        {
+            btnViagem.html('<i class="fas fa-car"></i> Transformar em Viagem');
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarTextosBotoes", error);
+    }
+}
+
+/**
+ * Configurar ícones dos botões com FontAwesome
+ */
+function configurarIconesBotoes()
+{
+    try
+    {
+        // Adicionar ícones se não existirem
+        if (!$('#btnApaga').find('i').length)
+        {
+            $('#btnApaga').prepend('<i class="fas fa-trash"></i> ');
+        }
+
+        if (!$('#btnCancela').find('i').length)
+        {
+            $('#btnCancela').prepend('<i class="fas fa-times"></i> ');
+        }
+
+        if (!$('#btnFecha').find('i').length)
+        {
+            $('#btnFecha').prepend('<i class="fas fa-times-circle"></i> ');
+        }
+
+        if (!$('#btnImprime').find('i').length)
+        {
+            $('#btnImprime').prepend('<i class="fas fa-print"></i> ');
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarIconesBotoes", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 16: INICIALIZAÇÃO PRINCIPAL
+// ====================================================================
+
+/**
+ * Inicialização quando o DOM estiver pronto
+ */
+$(document).ready(function ()
+{
+    try
+    {
+        console.log("🚀 Iniciando agendamento_viagem.js");
+
+        // Configurar componentes Syncfusion
+        configurarDatePickers();
+        configurarDropdowns();
+        configurarRichTextEditor();
+        configurarTemplateMotorista();
+
+        // Configurar eventos
+        configurarEventosQuilometragem();
+        configurarEventosDatas();
+        configurarEventosRequisitante();
+        configurarEventosRecorrencia();
+        configurarEventosFinalidade();
+        configurarEventosMotorista();
+        configurarEventosVeiculo();
+        configurarBotoesModal();
+
+        // Validação de ficha de vistoria
+        validarFichaVistoria();
+
+        // Inicializar calendário
+        InitializeCalendar("api/Agenda/CarregaViagens");
+
+        // Configurar evento para criar novo agendamento
+        $('#btnNovoAgendamento').on('click', function (e)
+        {
+            e.preventDefault();
+            criarNovoAgendamento();
+        });
+
+        // Evento ao fechar modal
+        $('#modalViagens').on('hidden.bs.modal', function ()
+        {
+            limparCamposModalViagens();
+            isSubmitting = false;
+            modalLock = false;
+        });
+
+        // Configurar tooltips Syncfusion
+        if (typeof refreshTooltips === 'function')
+        {
+            setTimeout(() =>
+            {
+                refreshTooltips();
+            }, 1000);
+        }
+
+        // Configurar evento do solicitante de atividade
+        $('#seletorSolicitanteAtividade').on('change', function ()
+        {
+            const requisitanteId = document.getElementById('seletorSolicitanteAtividade')?.ej2_instances?.[0]?.value;
+
+            if (!requisitanteId) return;
+
+            // Carregar setor do requisitante
+            $.ajax({
+                url: "/api/Agenda/PegaSetor",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteId },
+                success: function (res)
+                {
+                    if (res.success && res.data)
+                    {
+                        const ddtSetor = document.getElementById('seletorDepartamentoSolicitante')?.ej2_instances?.[0];
+                        if (ddtSetor)
+                        {
+                            ddtSetor.value = [res.data];
+                            ddtSetor.dataBind();
+                        }
+                    }
+                }
+            });
+
+            // Carregar ramal do requisitante
+            $.ajax({
+                url: "/api/Agenda/PegaRamal",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteId },
+                success: function (res)
+                {
+                    if (res.success)
+                    {
+                        $("#txtRamalEvento").val(res.data);
+                    }
+                }
+            });
+        });
+
+        console.log("✅ agendamento_viagem.js carregado com sucesso");
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "document.ready", error);
+    }
+});
+
+// ====================================================================
+// SEÇÃO 17: FUNÇÕES AUXILIARES DE MODAL
+// ====================================================================
+
+/**
+ * Configurar modal para novo agendamento
+ */
+function configurarModalNovoAgendamento()
+{
+    try
+    {
+        // Configurar título
+        document.getElementById("Titulo").innerHTML =
+            "<h3 class='modal-title'><i class='fad fa-calendar-alt' aria-hidden='true'></i> Criar Novo Agendamento</h3>";
+
+        // Configurar botões - CORREÇÃO: Esconder Apagar e Cancelar em novo agendamento
+        $("#btnViagem").hide();
+        $("#btnApaga").hide();
+        $("#btnCancela").hide();
+        $("#btnConfirma").show().html("<i class='fa fa-save' aria-hidden='true'></i> Criar Agendamento");
+        $("#btnFecha").show();
+
+        // Esconder campo de ficha vistoria (só aparece em viagem aberta)
+        $("#divNoFichaVistoria").hide();
+
+        // Configurar status
+        StatusViagem = "Agendada";
+        $('#txtStatusAgendamento').val(true);
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarModalNovoAgendamento", error);
+    }
+}
+
+/**
+ * Configurar modal para edição de agendamento
+ */
+function configurarModalEdicaoAgendamento(viagem)
+{
+    try
+    {
+        // Configurar título baseado no status
+        if (viagem.status === "Realizada" || viagem.status === "Cancelada")
+        {
+            const statusText = viagem.status === "Realizada" ? "Realizada" : "Cancelada";
+            document.getElementById("Titulo").innerHTML =
+                `<h3 class='modal-title'>
+                    <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
+                    Visualizando ${viagem.statusAgendamento ? 'Agendamento' : 'Viagem'} ${statusText}
+                </h3>`;
+
+            // Apenas botões de visualização
+            $("#btnViagem, #btnConfirma, #btnApaga, #btnCancela").hide();
+            $("#btnFecha").show();
+
+        } else if (viagem.status === "Agendada")
+        {
+            document.getElementById("Titulo").innerHTML =
+                `<h3 class='modal-title'>
+                    <i class='fa-duotone fa-solid fa-calendar-check' aria-hidden='true'></i> 
+                    Editando Agendamento
+                </h3>`;
+
+            // Mostrar botões apropriados
+            $("#btnConfirma, #btnApaga, #btnCancela, #btnFecha").show();
+            $("#btnViagem").toggle(viagem.statusAgendamento === true);
+
+        } else if (viagem.status === "Aberta")
+        {
+            document.getElementById("Titulo").innerHTML =
+                `<h3 class='modal-title'>
+                    <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
+                    Editando Viagem Aberta
+                </h3>`;
+
+            // Mostrar todos os botões exceto transformar
+            $("#btnConfirma, #btnApaga, #btnCancela, #btnFecha").show();
+            $("#btnViagem").hide();
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarModalEdicaoAgendamento", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 18: GERENCIAMENTO DE RECORRÊNCIA AVANÇADA
+// ====================================================================
+
+/**
+ * Processar edição de agendamento recorrente
+ */
+async function processarEdicaoRecorrente(dados)
+{
+    try
+    {
+        // Se não for recorrente, retornar dados sem alteração
+        if (dados.recorrente !== "S")
+        {
+            return dados;
+        }
+
+        // Se for a primeira recorrência, não perguntar (data inicial bloqueada)
+        if (agendamentoRecorrenteGlobal.ehPrimeiraRecorrencia)
+        {
+            dados.editarTodos = true;
+            return dados;
+        }
+
+        // Perguntar ao usuário usando Alerta.Confirmar3
+        const resultado = await Alerta.Confirmar3(
+            'Editar Agendamento Recorrente',
+            'Deseja aplicar as alterações a todos os agendamentos recorrentes ou apenas ao atual?',
+            'Todos',
+            'Apenas ao Atual',
+            'Desistir'
+        );
+
+        if (resultado === false || resultado === "Desistir")
+        {
+            throw new Error('Operação cancelada pelo usuário');
+        }
+
+        dados.editarTodos = (resultado === "Todos");
+
+        // Se editar todos, buscar todas as datas da recorrência
+        if (dados.editarTodos)
+        {
+            const response = await $.ajax({
+                url: '/api/Agenda/GetDatasViagem',
+                method: 'GET',
+                data: {
+                    viagemId: dados.viagemId,
+                    recorrenciaViagemId: dados.recorrenciaViagemId || '',
+                    editarProximos: false
+                }
+            });
+
+            if (response && Array.isArray(response))
+            {
+                dados.datasSelecionadas = response;
+            }
+        }
+
+        return dados;
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "processarEdicaoRecorrente", error);
+        throw error;
+    }
+}
+
+/**
+ * Gerar datas de recorrência baseado na configuração
+ */
+function gerarDatasRecorrencia(configuracao)
+{
+    try
+    {
+        const datas = [];
+        const dataInicial = moment(configuracao.dataInicial, 'DD/MM/YYYY');
+        const dataFinal = moment(configuracao.dataFinalRecorrencia, 'DD/MM/YYYY');
+
+        if (!dataInicial.isValid() || !dataFinal.isValid())
+        {
+            console.error("Datas inválidas para gerar recorrência");
+            return datas;
+        }
+
+        let dataAtual = dataInicial.clone();
+
+        switch (configuracao.intervalo)
+        {
+            case 'D': // Diário
+                while (dataAtual.isSameOrBefore(dataFinal))
+                {
+                    datas.push(dataAtual.toDate());
+                    dataAtual.add(1, 'day');
+                }
+                break;
+
+            case 'S': // Semanal
+                const diasSemana = [];
+                if (configuracao.monday) diasSemana.push(1);
+                if (configuracao.tuesday) diasSemana.push(2);
+                if (configuracao.wednesday) diasSemana.push(3);
+                if (configuracao.thursday) diasSemana.push(4);
+                if (configuracao.friday) diasSemana.push(5);
+                if (configuracao.saturday) diasSemana.push(6);
+                if (configuracao.sunday) diasSemana.push(0);
+
+                while (dataAtual.isSameOrBefore(dataFinal))
+                {
+                    if (diasSemana.includes(dataAtual.day()))
+                    {
+                        datas.push(dataAtual.toDate());
+                    }
+                    dataAtual.add(1, 'day');
+                }
+                break;
+
+            case 'Q': // Quinzenal
+                while (dataAtual.isSameOrBefore(dataFinal))
+                {
+                    datas.push(dataAtual.toDate());
+                    dataAtual.add(14, 'days');
+                }
+                break;
+
+            case 'M': // Mensal
+                const diaDoMes = configuracao.diaMesRecorrencia || dataInicial.date();
+                while (dataAtual.isSameOrBefore(dataFinal))
+                {
+                    // Ajustar para o dia correto do mês
+                    dataAtual.date(Math.min(diaDoMes, dataAtual.daysInMonth()));
+                    if (dataAtual.isSameOrBefore(dataFinal))
+                    {
+                        datas.push(dataAtual.toDate());
+                    }
+                    dataAtual.add(1, 'month');
+                    dataAtual.date(1); // Resetar para o primeiro dia antes de adicionar
+                }
+                break;
+
+            case 'P': // Personalizado
+                // Usar as datas já selecionadas no calendário
+                return configuracao.datasSelecionadas || [];
+        }
+
+        return datas;
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "gerarDatasRecorrencia", error);
+        return [];
+    }
+}
+
+// ====================================================================
+// SEÇÃO 19: RELATÓRIOS E IMPRESSÃO
+// ====================================================================
+
+/**
+ * Gerar relatório de viagem
+ */
+function gerarRelatorioViagem()
+{
+    try
+    {
+        const viagemId = $('#txtViagemId').val();
+        if (!viagemId)
+        {
+            Alerta.Erro("Erro", "Selecione uma viagem para gerar o relatório");
+            return;
+        }
+
+        // Mostrar container do relatório
+        $("#ReportContainer").show().addClass("visible").css("height", "auto");
+        $("#fichaReport").html('<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><br>Carregando relatório...</div>');
+
+        // Carregar relatório via AJAX
+        $.ajax({
+            url: '/api/Relatorio/FichaViagem',
+            type: 'GET',
+            data: { viagemId: viagemId },
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success && response.reportUrl)
+                    {
+                        // Carregar PDF no container
+                        $("#fichaReport").html(
+                            '<iframe src="' + response.reportUrl + '" style="width:100%; height:600px; border:none;"></iframe>'
+                        );
+                    } else
+                    {
+                        $("#fichaReport").html('<div class="alert alert-warning">Relatório não disponível</div>');
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "gerarRelatorioViagem.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                $("#fichaReport").html('<div class="alert alert-danger">Erro ao carregar relatório</div>');
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "gerarRelatorioViagem.error", error);
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "gerarRelatorioViagem", error);
+    }
+}
+/**
+ * Imprimir ficha de viagem
+ */
+function imprimirFichaViagem()
+{
+    try
+    {
+        const viagemId = $('#txtViagemId').val();
+        if (!viagemId)
+        {
+            Alerta.Erro("Erro", "Selecione uma viagem para imprimir");
+            return;
+        }
+
+        // Abrir nova janela para impressão
+        const url = `/Relatorio/FichaViagem?viagemId=${viagemId}`;
+        window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "imprimirFichaViagem", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 20: VALIDAÇÕES ESPECÍFICAS DE VIAGEM
+// ====================================================================
+
+/**
+ * Validar quilometragem
+ */
+async function validarQuilometragem()
+{
+    try
+    {
+        const kmInicial = parseFloat($('#txtKmInicial').val()) || 0;
+        const kmFinal = parseFloat($('#txtKmFinal').val()) || 0;
+        const kmAtual = parseFloat($('#txtKmAtual').val()) || 0;
+
+        // Validar se KM inicial não é maior que KM final
+        if (kmInicial > 0 && kmFinal > 0 && kmInicial > kmFinal)
+        {
+            Alerta.Erro("Quilometragem Inválida", "KM Final não pode ser menor que KM Inicial");
+            $('#txtKmFinal').val('').focus();
+            return false;
+        }
+
+        // Validar se KM inicial não é menor que KM atual do veículo
+        if (kmInicial > 0 && kmAtual > 0 && kmInicial < kmAtual)
+        {
+            const confirmar = await Alerta.Confirmar(
+                "KM Inicial Suspeito",
+                `KM Inicial (${kmInicial}) é menor que o KM Atual do veículo (${kmAtual}). Deseja continuar?`,
+                "Sim, está correto",
+                "Não, vou corrigir"
+            );
+
+            if (!confirmar)
+            {
+                $('#txtKmInicial').focus();
+                return false;
+            }
+        }
+
+        // Validar distância percorrida
+        const distancia = kmFinal - kmInicial;
+        if (distancia > 1000)
+        {
+            const confirmar = await Alerta.Confirmar(
+                "Distância Elevada",
+                `A distância percorrida (${distancia} km) parece muito alta. Confirma?`,
+                "Sim, está correto",
+                "Não, vou revisar"
+            );
+
+            if (!confirmar)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarQuilometragem", error);
+        return false;
+    }
+}
+
+/**
+ * Validar combustível
+ */
+function validarCombustivel()
+{
+    try
+    {
+        const combustivelInicial = document.getElementById('ddtCombustivelInicial')?.ej2_instances?.[0]?.value?.[0];
+        const combustivelFinal = document.getElementById('ddtCombustivelFinal')?.ej2_instances?.[0]?.value?.[0];
+
+        if (combustivelInicial && combustivelFinal)
+        {
+            const nivelInicial = parseInt(combustivelInicial);
+            const nivelFinal = parseInt(combustivelFinal);
+
+            // Se o nível final for maior que o inicial, provavelmente houve abastecimento
+            if (nivelFinal > nivelInicial)
+            {
+                console.log("ℹ️ Detectado possível abastecimento durante a viagem");
+                // Aqui poderia adicionar lógica adicional se necessário
+            }
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarCombustivel", error);
+        return false;
+    }
+}
+
+/**
+ * Validar horários
+ */
+async function validarHorarios()
+{
+    try
+    {
+        const dataInicial = $('#txtDataInicial').val();
+        const horaInicial = $('#txtHoraInicial').val();
+        const dataFinal = $('#txtDataFinal').val();
+        const horaFinal = $('#txtHoraFinal').val();
+
+        if (dataInicial && horaInicial && dataFinal && horaFinal)
+        {
+            const dtInicial = moment(`${dataInicial} ${horaInicial}`, "DD/MM/YYYY HH:mm");
+            const dtFinal = moment(`${dataFinal} ${horaFinal}`, "DD/MM/YYYY HH:mm");
+
+            if (dtFinal.isBefore(dtInicial))
+            {
+                Alerta.Erro("Horários Inválidos", "Data/hora final não pode ser anterior à inicial");
+                return false;
+            }
+
+            const duracaoHoras = dtFinal.diff(dtInicial, 'hours', true);
+
+            // Alertar se duração for muito longa
+            if (duracaoHoras > 24)
+            {
+                const confirmar = await Alerta.Confirmar(
+                    "Duração Longa",
+                    `A viagem tem duração de ${duracaoHoras.toFixed(1)} horas. Está correto?`,
+                    "Sim, está correto",
+                    "Não, vou revisar"
+                );
+
+                if (!confirmar)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "validarHorarios", error);
+        return false;
+    }
+}
+
+// ====================================================================
+// SEÇÃO 21: AJAX HANDLERS
+// ====================================================================
+
+/**
+ * Handler genérico para erros AJAX
+ */
+function handleAjaxError(xhr, status, error, context)
+{
+    try
+    {
+        console.error(`Erro AJAX em ${context}:`, {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            responseText: xhr.responseText,
+            error: error
+        });
+
+        let mensagemErro = "Erro ao processar requisição";
+
+        if (xhr.status === 401)
+        {
+            mensagemErro = "Sessão expirada. Por favor, faça login novamente.";
+            setTimeout(() =>
+            {
+                window.location.href = '/Login';
+            }, 2000);
+        } else if (xhr.status === 403)
+        {
+            mensagemErro = "Você não tem permissão para executar esta ação.";
+        } else if (xhr.status === 404)
+        {
+            mensagemErro = "Recurso não encontrado.";
+        } else if (xhr.status === 500)
+        {
+            mensagemErro = "Erro interno do servidor. Tente novamente.";
+        } else if (xhr.status === 0)
+        {
+            mensagemErro = "Sem conexão com o servidor. Verifique sua internet.";
+        }
+
+        AppToast.show("Vermelho", mensagemErro, 4000);
+
+    } catch (err)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "handleAjaxError", err);
+    }
+}
+
+/**
+ * Configurar interceptadores AJAX globais
+ */
+function configurarInterceptadoresAjax()
+{
+    try
+    {
+        // Configurar token CSRF para todas as requisições
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings)
+            {
+                if (!(/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) && !this.crossDomain)
+                {
+                    const token = $('input[name="__RequestVerificationToken"]').val();
+                    if (token)
+                    {
+                        xhr.setRequestHeader("RequestVerificationToken", token);
+                    }
+                }
+            }
+        });
+
+        // Interceptar erros globalmente
+        $(document).ajaxError(function (event, xhr, settings, thrownError)
+        {
+            console.error("Erro AJAX Global:", {
+                url: settings.url,
+                type: settings.type,
+                status: xhr.status,
+                error: thrownError
+            });
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarInterceptadoresAjax", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 22: FUNÇÕES DE BUSCA E FILTRO
+// ====================================================================
+
+/**
+ * Buscar viagens por período
+ */
+function buscarViagensPorPeriodo(dataInicio, dataFim)
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Agenda/BuscarViagens',
+            type: 'GET',
+            data: {
+                dataInicio: moment(dataInicio).format('YYYY-MM-DD'),
+                dataFim: moment(dataFim).format('YYYY-MM-DD')
+            },
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success && response.data)
+                    {
+                        // Processar viagens encontradas
+                        console.log(`Encontradas ${response.data.length} viagens no período`);
+
+                        // Aqui você pode adicionar lógica para exibir as viagens
+                        // Por exemplo, atualizar uma tabela ou lista
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "buscarViagensPorPeriodo.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                handleAjaxError(xhr, status, error, "buscarViagensPorPeriodo");
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "buscarViagensPorPeriodo", error);
+    }
+}
+
+/**
+ * Filtrar viagens por status
+ */
+function filtrarViagensPorStatus(status)
+{
+    try
+    {
+        const viagens = calendar.getEvents();
+
+        viagens.forEach(evento =>
+        {
+            const eventoStatus = evento.extendedProps?.status;
+
+            if (status === "Todos" || eventoStatus === status)
+            {
+                evento.setProp('display', 'auto');
+            } else
+            {
+                evento.setProp('display', 'none');
+            }
+        });
+
+        calendar.render();
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "filtrarViagensPorStatus", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 23: EXPORTAÇÃO E IMPORTAÇÃO
+// ====================================================================
+
+/**
+ * Exportar viagens para Excel
+ */
+function exportarViagensExcel()
+{
+    try
+    {
+        const filtros = {
+            dataInicio: $('#filtroDataInicio').val(),
+            dataFim: $('#filtroDataFim').val(),
+            status: $('#filtroStatus').val(),
+            motorista: $('#filtroMotorista').val(),
+            veiculo: $('#filtroVeiculo').val()
+        };
+
+        // Criar query string com filtros
+        const queryString = $.param(filtros);
+
+        // Abrir download
+        window.location.href = `/api/Relatorio/ExportarViagensExcel?${queryString}`;
+
+        AppToast.show("Verde", "Download iniciado. Aguarde...", 3000);
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "exportarViagensExcel", error);
+    }
+}
+
+/**
+ * Importar viagens de arquivo
+ */
+function importarViagensArquivo()
+{
+    try
+    {
+        // Criar input file temporário
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv,.xlsx,.xls';
+
+        input.onchange = function (e)
+        {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('arquivo', file);
+
+            // Mostrar loading
+            Swal.fire({
+                title: 'Importando...',
+                text: 'Processando arquivo de viagens',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () =>
+                {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: '/api/Viagem/ImportarArquivo',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response)
+                {
+                    Swal.close();
+
+                    if (response.success)
+                    {
+                        AppToast.show("Verde",
+                            `Importação concluída! ${response.totalImportado} viagens importadas.`,
+                            5000);
+
+                        // Atualizar calendário
+                        if (calendar)
+                        {
+                            calendar.refetchEvents();
+                        }
+                    } else
+                    {
+                        Alerta.Erro("Erro na Importação",
+                            response.message || "Erro ao processar arquivo");
+                    }
+                },
+                error: function (xhr, status, error)
+                {
+                    Swal.close();
+                    handleAjaxError(xhr, status, error, "importarViagensArquivo");
+                }
+            });
+        };
+
+        input.click();
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "importarViagensArquivo", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 24: NOTIFICAÇÕES E LEMBRETES
+// ====================================================================
+
+/**
+ * Verificar viagens pendentes
+ */
+function verificarViagensPendentes()
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Agenda/ViagensPendentes',
+            type: 'GET',
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success && response.data)
+                    {
+                        const pendentes = response.data;
+
+                        if (pendentes.length > 0)
+                        {
+                            // Mostrar notificação
+                            AppToast.show("Amarelo",
+                                `Você tem ${pendentes.length} viagem(s) pendente(s) para hoje`,
+                                5000);
+
+                            // Adicionar badge ao botão de agendamentos
+                            const badge = $('#badgeViagensPendentes');
+                            if (badge.length === 0)
+                            {
+                                $('#btnAgendamentos').append(
+                                    `<span id="badgeViagensPendentes" class="badge badge-danger ml-2">${pendentes.length}</span>`
+                                );
+                            } else
+                            {
+                                badge.text(pendentes.length);
+                            }
+                        }
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "verificarViagensPendentes.success", error);
+                }
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "verificarViagensPendentes", error);
+    }
+}
+
+/**
+ * Configurar notificações automáticas
+ */
+function configurarNotificacoesAutomaticas()
+{
+    try
+    {
+        // Verificar viagens pendentes a cada 5 minutos
+        setInterval(() =>
+        {
+            verificarViagensPendentes();
+        }, 300000); // 5 minutos
+
+        // Verificar uma vez ao carregar
+        verificarViagensPendentes();
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarNotificacoesAutomaticas", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 25: HISTÓRICO E AUDITORIA
+// ====================================================================
+
+/**
+ * Carregar histórico de alterações da viagem
+ */
+function carregarHistoricoViagem(viagemId)
+{
+    try
+    {
+        $.ajax({
+            url: '/api/Agenda/HistoricoViagem',
+            type: 'GET',
+            data: { viagemId: viagemId },
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success && response.data)
+                    {
+                        const historico = response.data;
+
+                        // Criar HTML do histórico
+                        let htmlHistorico = '<div class="timeline">';
+
+                        historico.forEach(item =>
+                        {
+                            const data = moment(item.dataAlteracao).format('DD/MM/YYYY HH:mm');
+                            const icone = obterIconeHistorico(item.tipo);
+
+                            htmlHistorico += `
+                                <div class="timeline-item">
+                                    <div class="timeline-icon">
+                                        ${icone}
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6>${item.descricao}</h6>
+                                        <p class="text-muted">
+                                            <small>${item.usuario} - ${data}</small>
+                                        </p>
+                                        ${item.detalhes ? `<p>${item.detalhes}</p>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        htmlHistorico += '</div>';
+
+                        // Exibir em modal ou painel
+                        $('#historicoContainer').html(htmlHistorico);
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "carregarHistoricoViagem.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                handleAjaxError(xhr, status, error, "carregarHistoricoViagem");
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "carregarHistoricoViagem", error);
+    }
+}
+
+/**
+ * Obter ícone apropriado para tipo de histórico
+ */
+function obterIconeHistorico(tipo)
+{
+    try
+    {
+        const icones = {
+            'criacao': '<i class="fa-duotone fa-plus-circle text-success"></i>',
+            'edicao': '<i class="fa-duotone fa-edit text-info"></i>',
+            'cancelamento': '<i class="fa-duotone fa-ban text-danger"></i>',
+            'finalizacao': '<i class="fa-duotone fa-check-circle text-success"></i>',
+            'transformacao': '<i class="fa-duotone fa-exchange text-warning"></i>'
+        };
+
+        return icones[tipo] || '<i class="fa-duotone fa-info-circle text-secondary"></i>';
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "obterIconeHistorico", error);
+        return '<i class="fa-duotone fa-info-circle"></i>';
+    }
+}
+
+/**
+ * Registrar ação no log
+ */
+function registrarAcaoLog(acao, detalhes)
+{
+    try
+    {
+        // Esta função pode ser usada para registrar ações localmente
+        // ou enviar para o servidor para auditoria
+
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            acao: acao,
+            detalhes: detalhes,
+            usuario: $('#currentUser').val() || 'Desconhecido',
+            pagina: 'agendamento_viagem'
+        };
+
+        // Armazenar localmente (opcional)
+        const logs = JSON.parse(localStorage.getItem('logsViagem') || '[]');
+        logs.push(logEntry);
+
+        // Manter apenas os últimos 100 logs
+        if (logs.length > 100)
+        {
+            logs.shift();
+        }
+
+        localStorage.setItem('logsViagem', JSON.stringify(logs));
+
+        // Enviar para servidor (opcional)
+        if (acao === 'erro' || acao === 'critico')
+        {
+            $.ajax({
+                url: '/api/Log/Registrar',
+                type: 'POST',
+                data: JSON.stringify(logEntry),
+                contentType: 'application/json'
+                // Fire and forget - não aguardar resposta
+            });
+        }
+
+    } catch (error)
+    {
+        console.error("Erro ao registrar log:", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 26: INTEGRAÇÃO COM MAPAS
+// ====================================================================
+
+/**
+ * Calcular rota entre origem e destino
+ */
+function calcularRota()
+{
+    try
+    {
+        const origem = document.getElementById('cmbOrigem')?.ej2_instances?.[0]?.value;
+        const destino = document.getElementById('cmbDestino')?.ej2_instances?.[0]?.value;
+
+        if (!origem || !destino)
+        {
+            console.log("Origem ou destino não definidos");
+            return;
+        }
+
+        // Se tiver integração com Google Maps ou outro serviço
+        if (typeof google !== 'undefined' && google.maps)
+        {
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRequest = {
+                origin: origem,
+                destination: destino,
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC
+            };
+
+            directionsService.route(directionsRequest, function (result, status)
+            {
+                if (status === google.maps.DirectionsStatus.OK)
+                {
+                    const route = result.routes[0];
+                    const distance = route.legs[0].distance.value / 1000; // Em km
+                    const duration = route.legs[0].duration.text;
+
+                    console.log(`Distância: ${distance} km`);
+                    console.log(`Duração estimada: ${duration}`);
+
+                    // Sugerir KM Final baseado na distância
+                    const kmInicial = parseFloat($('#txtKmInicial').val()) || 0;
+                    if (kmInicial > 0)
+                    {
+                        const kmFinalSugerido = Math.round(kmInicial + distance);
+                        $('#txtKmFinal').attr('placeholder', `Sugestão: ${kmFinalSugerido}`);
+                    }
+                }
+            });
+        }
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "calcularRota", error);
+    }
+}
+
+/**
+ * Exibir mapa com rota
+ */
+function exibirMapaRota()
+{
+    try
+    {
+        const origem = document.getElementById('cmbOrigem')?.ej2_instances?.[0]?.value;
+        const destino = document.getElementById('cmbDestino')?.ej2_instances?.[0]?.value;
+
+        if (!origem || !destino)
+        {
+            Alerta.Erro("Dados Incompletos", "Defina origem e destino para visualizar a rota");
+            return;
+        }
+
+        // Abrir modal com mapa
+        const modalHtml = `
+            <div class="modal fade" id="modalMapa" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Rota da Viagem</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="mapContainer" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Adicionar modal ao body se não existir
+        if ($('#modalMapa').length === 0)
+        {
+            $('body').append(modalHtml);
+        }
+
+        $('#modalMapa').modal('show');
+
+        // Inicializar mapa após modal abrir
+        $('#modalMapa').on('shown.bs.modal', function ()
+        {
+            // Aqui você iniciaria o mapa com a API escolhida
+            console.log("Inicializar mapa com rota de", origem, "para", destino);
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "exibirMapaRota", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 27: ESTATÍSTICAS E DASHBOARD
+// ====================================================================
+
+/**
+ * Carregar estatísticas de viagens
+ */
+function carregarEstatisticasViagens()
+{
+    try
+    {
+        const mes = moment().format('MM');
+        const ano = moment().format('YYYY');
+
+        $.ajax({
+            url: '/api/Agenda/Estatisticas',
+            type: 'GET',
+            data: { mes: mes, ano: ano },
+            success: function (response)
+            {
+                try
+                {
+                    if (response.success && response.data)
+                    {
+                        const stats = response.data;
+
+                        // Atualizar cards de estatísticas
+                        $('#totalViagens').text(stats.totalViagens || 0);
+                        $('#viagensRealizadas').text(stats.realizadas || 0);
+                        $('#viagensPendentes').text(stats.pendentes || 0);
+                        $('#viagensCanceladas').text(stats.canceladas || 0);
+                        $('#kmTotal').text((stats.kmTotal || 0).toLocaleString('pt-BR'));
+
+                        // Calcular percentuais
+                        if (stats.totalViagens > 0)
+                        {
+                            const pctRealizada = ((stats.realizadas / stats.totalViagens) * 100).toFixed(1);
+                            const pctCancelada = ((stats.canceladas / stats.totalViagens) * 100).toFixed(1);
+
+                            $('#pctRealizada').text(`${pctRealizada}%`);
+                            $('#pctCancelada').text(`${pctCancelada}%`);
+                        }
+
+                        // Atualizar gráficos se existirem
+                        if (typeof atualizarGraficos === 'function')
+                        {
+                            atualizarGraficos(stats);
+                        }
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("agendamento_viagem.js", "carregarEstatisticasViagens.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error("Erro ao carregar estatísticas:", error);
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "carregarEstatisticasViagens", error);
+    }
+}
+
+/**
+ * Gerar relatório mensal
+ */
+function gerarRelatorioMensal()
+{
+    try
+    {
+        const mes = $('#selectMes').val() || moment().format('MM');
+        const ano = $('#selectAno').val() || moment().format('YYYY');
+
+        // Mostrar loading
+        Swal.fire({
+            title: 'Gerando Relatório',
+            text: 'Processando dados do período...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () =>
+            {
+                Swal.showLoading();
+            }
+        });
+
+        $.ajax({
+            url: '/api/Relatorio/Mensal',
+            type: 'GET',
+            data: { mes: mes, ano: ano },
+            success: function (response)
+            {
+                Swal.close();
+
+                if (response.success && response.urlRelatorio)
+                {
+                    // Abrir relatório em nova aba
+                    window.open(response.urlRelatorio, '_blank');
+
+                    AppToast.show("Verde", "Relatório gerado com sucesso!", 3000);
+                } else
+                {
+                    Alerta.Erro("Erro", "Não foi possível gerar o relatório");
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                Swal.close();
+                handleAjaxError(xhr, status, error, "gerarRelatorioMensal");
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "gerarRelatorioMensal", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 28: ATALHOS DE TECLADO
+// ====================================================================
+
+/**
+ * Configurar atalhos de teclado
+ */
+function configurarAtalhosTeclado()
+{
+    try
+    {
+        $(document).on('keydown', function (e)
+        {
+            // Verificar se não está em campo de texto
+            if ($(e.target).is('input, textarea, select'))
+            {
+                return;
+            }
+
+            // Ctrl+N - Novo agendamento
+            if (e.ctrlKey && e.key === 'n')
+            {
+                e.preventDefault();
+                criarNovoAgendamento();
+            }
+
+            // Ctrl+S - Salvar (se modal estiver aberto)
+            if (e.ctrlKey && e.key === 's')
+            {
+                if ($('#modalViagens').is(':visible'))
+                {
+                    e.preventDefault();
+                    salvarAgendamento();
+                }
+            }
+
+            // ESC - Fechar modal
+            if (e.key === 'Escape')
+            {
+                if ($('#modalViagens').is(':visible'))
+                {
+                    $('#modalViagens').modal('hide');
+                }
+            }
+
+            // F5 - Atualizar calendário
+            if (e.key === 'F5')
+            {
+                e.preventDefault();
+                if (calendar)
+                {
+                    calendar.refetchEvents();
+                    AppToast.show("Verde", "Calendário atualizado", 2000);
+                }
+            }
+
+            // Ctrl+P - Imprimir (se viagem estiver aberta)
+            if (e.ctrlKey && e.key === 'p')
+            {
+                if ($('#modalViagens').is(':visible') && $('#txtViagemId').val())
+                {
+                    e.preventDefault();
+                    imprimirFichaViagem();
+                }
+            }
+        });
+
+        console.log("✅ Atalhos de teclado configurados");
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarAtalhosTeclado", error);
+    }
+}
+
+// ====================================================================
+// SEÇÃO 29: PERFORMANCE E OTIMIZAÇÃO
+// ====================================================================
+
+/**
+ * Debounce para otimizar chamadas frequentes
+ */
+function debounce(func, wait)
+{
+    let timeout;
+    return function executedFunction(...args)
+    {
+        const later = () =>
+        {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * Throttle para limitar execuções
+ */
+function throttle(func, limit)
+{
+    let inThrottle;
+    return function (...args)
+    {
+        if (!inThrottle)
+        {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+/**
+ * Lazy load de componentes pesados
+ */
+function lazyLoadComponentes()
+{
+    try
+    {
+        // Observador para carregar componentes quando visíveis
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) =>
+        {
+            entries.forEach(entry =>
+            {
+                if (entry.isIntersecting)
+                {
+                    const elemento = entry.target;
+
+                    // Carregar componente baseado no data-attribute
+                    if (elemento.dataset.component === 'calendar' && !calendar)
+                    {
+                        inicializarCalendario();
+                        observer.unobserve(elemento);
+                    }
+
+                    if (elemento.dataset.component === 'richtext' && !defaultRTE)
+                    {
+                        configurarRichTextEditor();
+                        observer.unobserve(elemento);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observar elementos que precisam lazy load
+        document.querySelectorAll('[data-lazy-load]').forEach(el =>
+        {
+            observer.observe(el);
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "lazyLoadComponentes", error);
+    }
+}
+
+/**
+ * Cache de dados frequentemente acessados
+ */
+const cacheManager = {
+    cache: new Map(),
+
+    set: function (key, value, ttl = 300000)
+    { // TTL padrío de 5 minutos
+        try
+        {
+            const item = {
+                value: value,
+                expiry: Date.now() + ttl
+            };
+            this.cache.set(key, item);
+        } catch (error)
+        {
+            console.error("Erro ao armazenar cache:", error);
+        }
+    },
+
+    get: function (key)
+    {
+        try
+        {
+            const item = this.cache.get(key);
+            if (!item) return null;
+
+            if (Date.now() > item.expiry)
+            {
+                this.cache.delete(key);
+                return null;
+            }
+
+            return item.value;
+        } catch (error)
+        {
+            console.error("Erro ao recuperar cache:", error);
+            return null;
+        }
+    },
+
+    clear: function ()
+    {
+        this.cache.clear();
+    }
+};
+
+/* =========================================
+   BLOCO 9: FUNÇÕES FINAIS E INICIALIZAÇÃO
+   ========================================= */
+
+// Função para carregar viagem bloqueada
+function CarregaViagemBloqueada(viagemId)
+{
+    try
+    {
+        if (!viagemId)
+        {
+            console.error('ViagemId não fornecido');
+            return;
+        }
+
+        CarregandoViagemBloqueada = true;
+
+        // Mostrar loading se existir
+        if (window.FtxSpin && FtxSpin.show)
+        {
+            FtxSpin.show('Carregando viagem...');
+        }
+
+        $.ajax({
+            url: '/api/Viagem/ObterViagemBloqueada',
+            type: 'GET',
+            data: { id: viagemId },
+            success: function (response)
+            {
+                try
+                {
+                    if (response && response.success && response.data)
+                    {
+                        // Processar dados da viagem bloqueada
+                        console.log('Viagem bloqueada carregada:', response.data);
+
+                        // Atualizar interface conforme necessário
+                        if (window.ExibeViagemBloqueada)
+                        {
+                            ExibeViagemBloqueada(response.data);
+                        }
+
+                        if (window.AppToast)
+                        {
+                            AppToast.show('Verde', 'Viagem carregada com sucesso', 2000);
+                        }
+                    } else
+                    {
+                        throw new Error(response?.message || 'Erro ao carregar viagem');
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("viagem_index.js", "CarregaViagemBloqueada.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error('Erro ao carregar viagem bloqueada:', error);
+                if (window.Alerta && Alerta.Erro)
+                {
+                    Alerta.Erro('Erro', 'Não foi possível carregar a viagem bloqueada');
+                }
+                Alerta.TratamentoErroComLinha("viagem_index.js", "CarregaViagemBloqueada.error", error);
+            },
+            complete: function ()
+            {
+                CarregandoViagemBloqueada = false;
+                if (window.FtxSpin && FtxSpin.hide)
+                {
+                    FtxSpin.hide();
+                }
+            }
+        });
+
+    } catch (error)
+    {
+        CarregandoViagemBloqueada = false;
+        Alerta.TratamentoErroComLinha("viagem_index.js", "CarregaViagemBloqueada", error);
+    }
+}
+
+// Função para atualizar status da viagem
+function AtualizarStatusViagem(viagemId, novoStatus)
+{
+    try
+    {
+        if (!viagemId || !novoStatus)
+        {
+            console.error('Parâmetros inválidos');
+            return;
+        }
+
+        $.ajax({
+            url: '/api/Viagem/AtualizarStatus',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                viagemId: viagemId,
+                status: novoStatus
+            }),
+            success: function (response)
+            {
+                if (response && response.success)
+                {
+                    console.log('Status atualizado com sucesso');
+
+                    // Atualizar a linha na tabela se existir
+                    const linha = document.querySelector(`tr[data-viagem-id="${viagemId}"]`);
+                    if (linha)
+                    {
+                        const badgeStatus = linha.querySelector('.badge-status');
+                        if (badgeStatus)
+                        {
+                            badgeStatus.textContent = novoStatus;
+                            badgeStatus.className = 'badge badge-status badge-' + novoStatus.toLowerCase();
+                        }
+                    }
+
+                    if (window.AppToast)
+                    {
+                        AppToast.show('Verde', 'Status atualizado com sucesso', 2000);
+                    }
+                } else
+                {
+                    throw new Error(response?.message || 'Erro ao atualizar status');
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                console.error('Erro ao atualizar status:', error);
+                if (window.Alerta && Alerta.Erro)
+                {
+                    Alerta.Erro('Erro', 'Não foi possível atualizar o status da viagem');
+                }
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("viagem_index.js", "AtualizarStatusViagem", error);
+    }
+}
+
+// Função para validar formulário de viagem
+function ValidarFormularioViagem()
+{
+    try
+    {
+        const erros = [];
+
+        // Validar campos obrigatórios
+        const camposObrigatorios = [
+            { id: 'txtOrigem', nome: 'Origem' },
+            { id: 'txtDestino', nome: 'Destino' },
+            { id: 'txtDataViagem', nome: 'Data da Viagem' },
+            { id: 'txtMotorista', nome: 'Motorista' },
+            { id: 'txtVeiculo', nome: 'Veículo' }
+        ];
+
+        camposObrigatorios.forEach(campo =>
+        {
+            const elemento = document.getElementById(campo.id);
+            if (elemento)
+            {
+                const valor = elemento.value || '';
+                if (!valor.trim())
+                {
+                    erros.push(`${campo.nome} é obrigatório`);
+                    elemento.classList.add('is-invalid');
+                } else
+                {
+                    elemento.classList.remove('is-invalid');
+                }
+            }
+        });
+
+        // Validar data
+        const dataViagem = document.getElementById('txtDataViagem');
+        if (dataViagem && dataViagem.value)
+        {
+            const data = moment(dataViagem.value, 'DD/MM/YYYY');
+            if (!data.isValid())
+            {
+                erros.push('Data da viagem inválida');
+                dataViagem.classList.add('is-invalid');
+            }
+        }
+
+        // Validar horários
+        const horaInicio = document.getElementById('txtHoraInicio');
+        const horaFim = document.getElementById('txtHoraFim');
+        if (horaInicio && horaFim && horaInicio.value && horaFim.value)
+        {
+            if (horaInicio.value >= horaFim.value)
+            {
+                erros.push('Hora de início deve ser anterior à hora de término');
+                horaInicio.classList.add('is-invalid');
+                horaFim.classList.add('is-invalid');
+            }
+        }
+
+        // Exibir erros se houver
+        if (erros.length > 0)
+        {
+            const mensagem = '<ul>' + erros.map(e => `<li>${e}</li>`).join('') + '</ul>';
+            if (window.Alerta && Alerta.Erro)
+            {
+                Alerta.Erro('Validação', mensagem);
+            }
+            return false;
+        }
+
+        return true;
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("viagem_index.js", "ValidarFormularioViagem", error);
+        return false;
+    }
+}
+
+/* =========================================
+   BLOCO 10: INICIALIZAÇÃO FINAL
+   ========================================= */
+
+// Configuração final quando o documento estiver pronto
+$(document).ready(function ()
+{
+    try
+    {
+        console.log('=== Inicializando Viagem Index ===');
+
+        // Verificar dependências
+        if (!window.jQuery)
+        {
+            console.error('jQuery não está carregado');
+            return;
+        }
+
+        // Inicializar componentes
+        if (window.InitializeDataTable && typeof InitializeDataTable === 'function')
+        {
+            InitializeDataTable();
+        }
+
+        // Configurar event listeners globais
+        configurarEventListeners();
+
+        // Carregar dados iniciais se necessário
+        const urlParams = new URLSearchParams(window.location.search);
+        const viagemId = urlParams.get('id');
+        if (viagemId)
+        {
+            CarregaViagemBloqueada(viagemId);
+        }
+
+        // Configurar auto-refresh se necessário
+        if (window.AUTO_REFRESH_ENABLED)
+        {
+            setInterval(function ()
+            {
+                if (typeof RefreshDataTable === 'function')
+                {
+                    RefreshDataTable();
+                }
+            }, window.AUTO_REFRESH_INTERVAL || 60000);
+        }
+
+        // Configurar tratamento de erros global
+        window.addEventListener('error', function (event)
+        {
+            console.error('Erro global capturado:', event.error);
+            if (window.Alerta && Alerta.TratamentoErroComLinha)
+            {
+                Alerta.TratamentoErroComLinha("viagem_index.js", "window.error", event.error);
+            }
+        });
+
+        // Limpar recursos ao sair da página
+        window.addEventListener('beforeunload', function ()
+        {
+            try
+            {
+                // Limpar timers
+                if (window.refreshTimer)
+                {
+                    clearInterval(window.refreshTimer);
+                }
+
+                // Limpar cache de fotos se necessário
+                if (window.FtxFotoCache && FtxFotoCache.clear)
+                {
+                    FtxFotoCache.clear();
+                }
+
+            } catch (error)
+            {
+                console.error('Erro ao limpar recursos:', error);
+            }
+        });
+
+        console.log('=== Viagem Index inicializado com sucesso ===');
+
+    } catch (error)
+    {
+        console.error('Erro na inicialização:', error);
+        Alerta.TratamentoErroComLinha("viagem_index.js", "document.ready", error);
+    }
+});
+
+// Função para configurar event listeners
+function configurarEventListeners()
+{
+    try
+    {
+        // Botão de nova viagem
+        $('#btnNovaViagem').on('click', function ()
+        {
+            try
+            {
+                if (window.AbrirModalNovaViagem)
+                {
+                    AbrirModalNovaViagem();
+                }
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("viagem_index.js", "btnNovaViagem.click", error);
+            }
+        });
+
+        // Botão de refresh
+        $('#btnRefresh').on('click', function ()
+        {
+            try
+            {
+                if (typeof RefreshDataTable === 'function')
+                {
+                    RefreshDataTable();
+                }
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("viagem_index.js", "btnRefresh.click", error);
+            }
+        });
+
+        // Filtros
+        $('.filtro-viagem').on('change', function ()
+        {
+            try
+            {
+                if (typeof AplicarFiltros === 'function')
+                {
+                    AplicarFiltros();
+                }
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("viagem_index.js", "filtro.change", error);
+            }
+        });
+
+        // Delegação de eventos para elementos dinâmicos
+        $(document).on('click', '.btn-editar-viagem', function ()
+        {
+            try
+            {
+                const viagemId = $(this).data('id');
+                if (viagemId && window.EditarViagem)
+                {
+                    EditarViagem(viagemId);
+                }
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("viagem_index.js", "btnEditar.click", error);
+            }
+        });
+
+        $(document).on('click', '.btn-excluir-viagem', function ()
+        {
+            try
+            {
+                const viagemId = $(this).data('id');
+                if (viagemId && window.ExcluirViagem)
+                {
+                    ExcluirViagem(viagemId);
+                }
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("viagem_index.js", "btnExcluir.click", error);
+            }
+        });
+
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("viagem_index.js", "configurarEventListeners", error);
+    }
+}
+
+// Exportar funções para uso global se necessário
+if (typeof module !== 'undefined' && module.exports)
+{
+    module.exports = {
+        CarregaViagemBloqueada,
+        AtualizarStatusViagem,
+        ValidarFormularioViagem,
+        ftxQueueFotoFetch,
+        configurarEventListeners
+    };
+}
+
+console.log('=== Arquivo viagem_index.js carregado completamente ===');
+
+
+// ====================================================================
+// SEÇÃO 10: CONTROLE DE EVENTOS DE FINALIDADE
+// ====================================================================
+
+/**
+ * Configurar eventos do campo de finalidade
+ */
+function configurarEventosFinalidade() 
+{
+    try 
+    {
+        const lstFinalidade = document.getElementById('lstFinalidade');
+
+        if (!lstFinalidade || !lstFinalidade.ej2_instances || !lstFinalidade.ej2_instances[0]) 
+        {
+            console.warn('lstFinalidade não encontrado');
+            return;
+        }
+
+        const comboFinalidade = lstFinalidade.ej2_instances[0];
+
+        // Evento de mudança
+        comboFinalidade.change = function (args) 
+        {
+            try 
+            {
+                const finalidade = args.value;
+
+                if (finalidade === "Evento") 
+                {
+                    // Mostrar campos de evento
+                    $("#divEvento").show();
+                    $("#btnGerenciarAtividade").show();
+
+                    // Habilitar dropdown de eventos
+                    const lstEventos = document.getElementById('lstEventos')?.ej2_instances?.[0];
+                    if (lstEventos) 
+                    {
+                        lstEventos.enabled = true;
+                        lstEventos.dataBind();
+                    }
+                }
+                else 
+                {
+                    // Esconder campos de evento
+                    $("#divEvento").hide();
+                    $("#btnGerenciarAtividade").hide();
+                    $("#painelGerenciadorAtividade").hide();
+
+                    // Desabilitar e limpar dropdown de eventos
+                    const lstEventos = document.getElementById('lstEventos')?.ej2_instances?.[0];
+                    if (lstEventos) 
+                    {
+                        lstEventos.value = null;
+                        lstEventos.enabled = false;
+                        lstEventos.dataBind();
+                    }
+                }
+            }
+            catch (error) 
+            {
+                Alerta.TratamentoErroComLinha("agendamento_viagem.js", "lstFinalidade.change", error);
+            }
+        };
+
+        console.log('✓ Eventos de finalidade configurados');
+
+    }
+    catch (error) 
+    {
+        Alerta.TratamentoErroComLinha("agendamento_viagem.js", "configurarEventosFinalidade", error);
+    }
+}
+

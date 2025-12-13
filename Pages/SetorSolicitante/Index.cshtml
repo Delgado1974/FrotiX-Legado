@@ -1,0 +1,689 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+
+@inject IUnitOfWork _unitOfWork
+
+@model FrotiX.Models.SetorSolicitante
+
+@{
+	ViewData["Title"] = "Setores Solicitantes";
+	ViewData["PageName"] = "setorsolicitante_index";
+	ViewData["Heading"] = "<i class='fad fa-building'></i> Cadastros: <span class='fw-300'>Setores Solicitantes</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fad fa-building";
+}
+
+@section HeadBlock {
+}
+
+<style>
+	/* Badge de Status */
+	.badge-ativo {
+		background-color: #198754;
+		color: white;
+		padding: 0.35rem 0.75rem;
+		border-radius: 50px;
+		font-size: 0.78rem;
+		font-weight: 600;
+		display: inline-block;
+	}
+
+	.badge-inativo {
+		background-color: #dc3545;
+		color: white;
+		padding: 0.35rem 0.75rem;
+		border-radius: 50px;
+		font-size: 0.78rem;
+		font-weight: 600;
+		display: inline-block;
+	}
+
+	/* Botões de ação na grid - Padrão FrotiX */
+	.btn-acao {
+		width: 32px;
+		height: 30px;
+		padding: 0 !important;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 0.30rem !important;
+		font-size: 0.85rem;
+		margin: 2px;
+		border: none;
+		color: #fff !important;
+		transition: all 0.3s ease;
+		cursor: pointer;
+	}
+
+	.btn-acao i {
+		color: #fff !important;
+	}
+
+	.btn-acao-editar {
+		background-color: #325d88 !important;
+		box-shadow: 0 0 8px rgba(50,93,136,.4);
+	}
+
+	.btn-acao-editar:hover {
+		background-color: #2a4d73 !important;
+		box-shadow: 0 0 15px rgba(50,93,136,.6);
+		color: #fff !important;
+	}
+
+	.btn-acao-excluir {
+		background-color: #722F37 !important;
+		box-shadow: 0 0 8px rgba(114,47,55,.4);
+	}
+
+	.btn-acao-excluir:hover {
+		background-color: #5a252c !important;
+		box-shadow: 0 0 15px rgba(114,47,55,.6);
+		color: #fff !important;
+	}
+
+	/* Modal Header Azul */
+	.modal-header-azul {
+		background: linear-gradient(135deg, #2a4d73 0%, #325d88 100%);
+		color: #fff;
+		border-radius: 0.5rem 0.5rem 0 0;
+	}
+
+	.modal-header-azul .btn-close {
+		filter: brightness(0) invert(1);
+	}
+
+	.modal-header-azul .modal-title i {
+		--fa-primary-color: #fff;
+		--fa-secondary-color: rgba(255,255,255,0.6);
+	}
+
+	/* Labels do formulário */
+	.ftx-label {
+		font-weight: 600;
+		color: #495057;
+		margin-bottom: 0.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.ftx-label i {
+		color: #325d88;
+		font-size: 0.9rem;
+	}
+
+	/* Switch de Status */
+	.form-check-input:checked {
+		background-color: #198754;
+		border-color: #198754;
+	}
+</style>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel ftx-card-styled">
+			<div class="panel-container show">
+
+				<!-- HEADER DO CARD -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-building"></i>
+						Setores Solicitantes
+					</h2>
+					<div class="ftx-card-actions">
+						<button type="button" class="btn btn-fundo-laranja" id="btnAdicionarSetor">
+							<i class="fa-duotone fa-file-plus icon-pulse me-1"></i>
+							Adicionar Setor
+						</button>
+					</div>
+				</div>
+
+				<div class="panel-content">
+					<div class="box-body">
+						<div id="ControlRegion">
+							<div class="control-section">
+								<div id="TreeGrid"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel-content">
+					<div class="d-flex justify-content-end gap-2 pb-3 pe-3">
+						<a href="/SetorSolicitante/RelatorioSetorSolicitante" class="btn btn-dark">
+							<i class="fal fa-file-chart-line"></i>&nbsp; Relatório
+						</a>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@*=========================================================================
+   MODAL UPSERT - CRIAR/EDITAR SETOR
+   =========================================================================*@
+<div class="modal fade" id="modalUpsert" tabindex="-1" aria-labelledby="modalUpsertLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header modal-header-azul">
+				<h5 class="modal-title d-flex align-items-center gap-2" id="modalUpsertLabel">
+					<i class="fa-duotone fa-building"></i>
+					<span id="modalTitulo">Novo Setor Solicitante</span>
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+
+			<div class="modal-body">
+				<input type="hidden" id="hiddenSetorId" />
+
+				<!-- Nome -->
+				<div class="mb-3">
+					<label class="ftx-label">
+						<i class="fa-duotone fa-input-text"></i>
+						Nome do Setor <span class="text-danger">*</span>
+					</label>
+					<input type="text" id="txtNome" class="form-control" placeholder="Digite o nome do setor" maxlength="200" />
+				</div>
+
+				<!-- Sigla -->
+				<div class="mb-3">
+					<label class="ftx-label">
+						<i class="fa-duotone fa-tag"></i>
+						Sigla
+					</label>
+					<input type="text" id="txtSigla" class="form-control" placeholder="Ex: DTI, DRH" maxlength="50" />
+				</div>
+
+				<!-- Ramal -->
+				<div class="mb-3">
+					<label class="ftx-label">
+						<i class="fa-duotone fa-phone"></i>
+						Ramal
+					</label>
+					<input type="number" id="txtRamal" class="form-control" placeholder="Ex: 1234" />
+				</div>
+
+				<!-- Setor Pai -->
+				<div class="mb-3">
+					<label class="ftx-label">
+						<i class="fa-duotone fa-sitemap"></i>
+						Setor Pai (Hierarquia)
+					</label>
+					<select id="ddlSetorPai" class="form-select">
+						<option value="">-- Nenhum (Setor Raiz) --</option>
+					</select>
+				</div>
+
+				<!-- Status -->
+				<div class="mb-3">
+					<label class="ftx-label">
+						<i class="fa-duotone fa-toggle-on"></i>
+						Status
+					</label>
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="chkStatus" checked style="width: 3rem; height: 1.5rem;">
+						<label class="form-check-label ms-2" for="chkStatus" id="lblStatus">Ativo</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+					<i class="fa-solid fa-xmark me-1"></i> Cancelar
+				</button>
+				<button type="button" class="btn btn-azul" id="btnSalvarSetor">
+					<i class="fa-solid fa-check me-1"></i> Salvar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<script asp-append-version="true">
+		var modalUpsert = null;
+		var treeGridObj = null;
+
+		$(document).ready(function () {
+			try {
+				// Inicializa o modal
+				modalUpsert = new bootstrap.Modal(document.getElementById('modalUpsert'));
+
+				// Evento do switch de status
+				$('#chkStatus').on('change', function () {
+					try {
+						$('#lblStatus').text($(this).is(':checked') ? 'Ativo' : 'Inativo');
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "chkStatus.change", error);
+					}
+				});
+
+				// Botão adicionar
+				$('#btnAdicionarSetor').on('click', function () {
+					try {
+						abrirModalNovo();
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "btnAdicionarSetor.click", error);
+					}
+				});
+
+				// Botão salvar
+				$('#btnSalvarSetor').on('click', function () {
+					try {
+						salvarSetor();
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "btnSalvarSetor.click", error);
+					}
+				});
+
+				// Delegação de eventos para botões da grid
+				$(document).on('click', '.btn-editar-setor', function () {
+					try {
+						var id = $(this).data('id');
+						if (id) {
+							abrirModalEditar(id);
+						}
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "btn-editar-setor.click", error);
+					}
+				});
+
+				$(document).on('click', '.btn-excluir-setor', function () {
+					try {
+						var id = $(this).data('id');
+						if (id) {
+							excluirSetor(id);
+						}
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "btn-excluir-setor.click", error);
+					}
+				});
+
+				// Carrega dados e inicializa TreeGrid
+				carregarSetores();
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
+			}
+		});
+
+		function carregarSetores() {
+			try {
+				$.ajax({
+					url: "/api/SetorSolicitante/GetAll",
+					type: "GET",
+					dataType: "json",
+					success: function (data) {
+						try {
+							inicializarTreeGrid(data);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.log(err);
+							AppToast.show('Vermelho', 'Erro ao carregar setores.', 2000);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores.error", error);
+						}
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores", error);
+			}
+		}
+
+		function inicializarTreeGrid(dados) {
+			try {
+				$('#TreeGrid').empty();
+
+				treeGridObj = new ej.treegrid.TreeGrid({
+					dataSource: dados,
+					childMapping: 'children',
+					treeColumnIndex: 1,
+					allowPaging: true,
+					allowSorting: true,
+					enableHover: true,
+					locale: 'pt-BR',
+					toolbar: ['Search', 'ExpandAll', 'CollapseAll'],
+					pageSettings: { pageSize: 15 },
+					sortSettings: {
+						columns: [{ field: 'nome', direction: 'Ascending' }]
+					},
+					queryCellInfo: queryCellInfo,
+					columns: [
+						{ 
+							field: 'setorSolicitanteId', 
+							headerText: 'ID', 
+							visible: false, 
+							width: 0 
+						},
+						{ 
+							field: 'nome', 
+							headerText: 'Nome', 
+							width: 250 
+						},
+						{ 
+							field: 'sigla', 
+							headerText: 'Sigla', 
+							textAlign: 'Center', 
+							width: 100 
+						},
+						{ 
+							field: 'ramal', 
+							headerText: 'Ramal', 
+							textAlign: 'Center', 
+							width: 80 
+						},
+						{ 
+							field: 'status', 
+							headerText: 'Status', 
+							textAlign: 'Center', 
+							width: 100
+						},
+						{ 
+							headerText: 'Ações', 
+							textAlign: 'Center', 
+							width: 120,
+							field: 'acoes'
+						}
+					]
+				});
+				treeGridObj.appendTo('#TreeGrid');
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "inicializarTreeGrid", error);
+			}
+		}
+
+		function queryCellInfo(args) {
+			try {
+				// Coluna Status - Badge
+				if (args.column.field === 'status') {
+					var statusVal = args.data.status;
+					if (statusVal === 1 || statusVal === true || statusVal === "1") {
+						args.cell.innerHTML = '<span class="badge-ativo">Ativo</span>';
+					} else {
+						args.cell.innerHTML = '<span class="badge-inativo">Inativo</span>';
+					}
+				}
+
+				// Coluna Ações - Botões
+				if (args.column.field === 'acoes') {
+					var id = args.data.setorSolicitanteId;
+					args.cell.innerHTML = 
+						'<div class="d-flex justify-content-center gap-1">' +
+							'<button type="button" class="btn-acao btn-acao-editar btn-editar-setor" data-id="' + id + '" title="Editar">' +
+								'<i class="far fa-edit"></i>' +
+							'</button>' +
+							'<button type="button" class="btn-acao btn-acao-excluir btn-excluir-setor" data-id="' + id + '" title="Excluir">' +
+								'<i class="far fa-trash-alt"></i>' +
+							'</button>' +
+						'</div>';
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "queryCellInfo", error);
+			}
+		}
+
+		function carregarSetoresPai(excludeId) {
+			try {
+				var url = "/api/SetorSolicitante/GetSetoresPai";
+				if (excludeId) {
+					url += "?excludeId=" + excludeId;
+				}
+
+				$.ajax({
+					url: url,
+					type: "GET",
+					dataType: "json",
+					success: function (data) {
+						try {
+							var ddl = $('#ddlSetorPai');
+							ddl.empty();
+							ddl.append('<option value="">-- Nenhum (Setor Raiz) --</option>');
+							
+							if (data && Array.isArray(data)) {
+								data.forEach(function (item) {
+									ddl.append('<option value="' + item.id + '">' + item.nome + '</option>');
+								});
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetoresPai.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.log(err);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetoresPai.error", error);
+						}
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetoresPai", error);
+			}
+		}
+
+		function abrirModalNovo() {
+			try {
+				$('#modalTitulo').text('Novo Setor Solicitante');
+				$('#hiddenSetorId').val('');
+				$('#txtNome').val('');
+				$('#txtSigla').val('');
+				$('#txtRamal').val('');
+				$('#ddlSetorPai').val('');
+				$('#chkStatus').prop('checked', true);
+				$('#lblStatus').text('Ativo');
+
+				carregarSetoresPai(null);
+				modalUpsert.show();
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalNovo", error);
+			}
+		}
+
+		function abrirModalEditar(id) {
+			try {
+				if (!id) return;
+
+				$.ajax({
+					url: "/api/SetorSolicitante/GetById?id=" + id,
+					type: "GET",
+					dataType: "json",
+					success: function (response) {
+						try {
+							if (response.success) {
+								var setor = response.data;
+								$('#modalTitulo').text('Editar Setor Solicitante');
+								$('#hiddenSetorId').val(setor.setorSolicitanteId);
+								$('#txtNome').val(setor.nome);
+								$('#txtSigla').val(setor.sigla);
+								$('#txtRamal').val(setor.ramal || '');
+								$('#chkStatus').prop('checked', setor.status);
+								$('#lblStatus').text(setor.status ? 'Ativo' : 'Inativo');
+
+								// Carrega setores pai excluindo o próprio
+								carregarSetoresPai(setor.setorSolicitanteId);
+
+								// Aguarda carregar os setores pai e seleciona o correto
+								setTimeout(function () {
+									$('#ddlSetorPai').val(setor.setorPaiId || '');
+								}, 300);
+
+								modalUpsert.show();
+							} else {
+								AppToast.show('Vermelho', response.message, 2000);
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalEditar.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.log(err);
+							AppToast.show('Vermelho', 'Erro ao carregar dados do setor.', 2000);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalEditar.error", error);
+						}
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalEditar", error);
+			}
+		}
+
+		function salvarSetor() {
+			try {
+				var nome = $('#txtNome').val().trim();
+				if (!nome) {
+					AppToast.show('Amarelo', 'O nome do setor é obrigatório.', 2000);
+					$('#txtNome').focus();
+					return;
+				}
+
+				var model = {
+					SetorSolicitanteId: $('#hiddenSetorId').val() || '',
+					Nome: nome,
+					Sigla: $('#txtSigla').val().trim(),
+					Ramal: $('#txtRamal').val() ? parseInt($('#txtRamal').val()) : null,
+					SetorPaiId: $('#ddlSetorPai').val() || '',
+					Status: $('#chkStatus').is(':checked')
+				};
+
+				$.ajax({
+					url: "/api/SetorSolicitante/Upsert",
+					type: "POST",
+					data: JSON.stringify(model),
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					success: function (response) {
+						try {
+							if (response.success) {
+								AppToast.show('Verde', response.message, 2000);
+								modalUpsert.hide();
+								location.reload();
+							} else {
+								AppToast.show('Vermelho', response.message, 2000);
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "salvarSetor.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.log(err);
+							AppToast.show('Vermelho', 'Erro ao salvar setor.', 2000);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "salvarSetor.error", error);
+						}
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "salvarSetor", error);
+			}
+		}
+
+		function excluirSetor(id) {
+			try {
+				if (!id) return;
+
+				Alerta.Confirmar(
+					"Confirmar Exclusão",
+					"Você tem certeza que deseja apagar este setor? Não será possível recuperar os dados eliminados!",
+					"Excluir",
+					"Cancelar"
+				).then(function (confirmed) {
+					try {
+						if (confirmed) {
+							var dataToPost = JSON.stringify({ "SetorSolicitanteId": id });
+							$.ajax({
+								url: "/api/SetorSolicitante/Delete",
+								type: "POST",
+								data: dataToPost,
+								contentType: "application/json; charset=utf-8",
+								dataType: "json",
+								success: function (data) {
+									try {
+										if (data.success) {
+											AppToast.show('Verde', data.message, 2000);
+											location.reload();
+										} else {
+											AppToast.show('Vermelho', data.message, 2000);
+										}
+									} catch (error) {
+										Alerta.TratamentoErroComLinha("Index.cshtml", "excluirSetor.ajax.success", error);
+									}
+								},
+								error: function (err) {
+									try {
+										console.log(err);
+										AppToast.show('Vermelho', 'Ocorreu um erro ao excluir o registro.', 2000);
+									} catch (error) {
+										Alerta.TratamentoErroComLinha("Index.cshtml", "excluirSetor.ajax.error", error);
+									}
+								}
+							});
+						}
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "excluirSetor.confirmar.then", error);
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "excluirSetor", error);
+			}
+		}
+	</script>
+
+	<script asp-append-version="true">
+		var L10n = ej.base.L10n;
+		L10n.load({
+			"pt-BR": {
+				"treegrid": {
+					"EmptyRecord": "Nenhum registro encontrado",
+					"ExpandAll": "Expandir Tudo",
+					"CollapseAll": "Recolher Tudo",
+					"Print": "Imprimir",
+					"Pdfexport": "Exportar para PDF",
+					"Excelexport": "Exportar para Excel",
+					"Wordexport": "Exportar para Word",
+					"FilterButton": "Filtrar",
+					"ClearButton": "Limpar",
+					"StartsWith": "Começa com",
+					"EndsWith": "Termina com",
+					"Contains": "Contém",
+					"Equal": "Igual",
+					"NotEqual": "Diferente de",
+					"LessThan": "Menor que",
+					"LessThanOrEqual": "Menor ou igual a",
+					"GreaterThan": "Maior que",
+					"GreaterThanOrEqual": "Maior ou igual a",
+					"EnterValue": "Informe um valor",
+					"FilterMenu": "Menu de filtro",
+					"Search": "Buscar"
+				},
+				"pager": {
+					"currentPageInfo": "Página {0} de {1}",
+					"totalItemsInfo": "({0} registro(s))",
+					"firstPageTooltip": "Primeira página",
+					"lastPageTooltip": "Última página",
+					"nextPageTooltip": "Próxima página",
+					"previousPageTooltip": "Página anterior",
+					"nextPagerTooltip": "Próximo paginador",
+					"previousPagerTooltip": "Paginador anterior"
+				},
+				"dropdowns": {
+					"noRecordsTemplate": "Nenhum registro encontrado"
+				},
+				"datepicker": {
+					"placeholder": "Selecione uma data",
+					"today": "Hoje"
+				}
+			}
+		});
+	</script>
+}

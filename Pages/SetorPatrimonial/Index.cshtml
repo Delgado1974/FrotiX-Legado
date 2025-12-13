@@ -1,0 +1,73 @@
+@page
+@model FrotiX.Models.Cadastros.SetorPatrimonial
+@{
+	ViewData["Title"] = "Setores Patrimoniais";
+	ViewData["PageName"] = "setorpatrimonial_index";
+	ViewData["Heading"] = "<i class='fa-duotone fa-solid fa-chess-rook'></i> Cadastros: <span class='fw-300'>Setores Patrimoniais</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fa-regular fa-chess-rook";
+}
+
+@section HeadBlock {
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+
+	.label {
+		color: white;
+	}
+</style>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel" style="width: 90%; margin: 0 auto;">
+			<div class="panel-container show">
+				<!-- Adiciona espaçamento superior -->
+				<div class="pt-4">
+					<!-- Container para título e botão -->
+					<div class="d-flex justify-content-between align-items-center px-3 mb-3 flex-nowrap">
+						<h2 class="titulo-pagina mb-0" style="white-space: nowrap;">
+							<i class="fa-duotone fa-solid fa-warehouse"></i>
+							Listagem de Setores Patrimoniais
+						</h2>
+						<a href="./SetorPatrimonial/Upsert" class="btn btn-azul" style="white-space: nowrap;" data-ejtip="Adicionar novo setor patrimonial ao sistema">
+							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+							&nbsp; Adicionar Setor Patrimonial
+						</a>
+					</div>
+					<!-- Linha divisória -->
+					<div class="col-12" style="border-bottom:1px solid #325d88"></div>
+				</div>
+
+				<div class="panel-content ">
+					<div class="box-body">
+						<br /><br />
+						<table id="tblSetor" class="table table-bordered table-striped" width="100%">
+							<thead>
+								<tr>
+									<th>Setor</th>
+									<th>Detentor</th>
+									<th>Status</th>
+									<th>Ação</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/cadastros/setor_patrimonial.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,858 @@
+@page
+@model FrotiX.Pages.Abastecimento.DashboardAbastecimentoModel
+@{
+    ViewData["Title"] = "Dashboard de Abastecimentos";
+    ViewData["PageName"] = "abastecimento_dashboard";
+    ViewData["Heading"] = "<i class='fad fa-gas-pump'></i> Dashboard: <span class='fw-300'>Abastecimentos</span>";
+    ViewData["Category1"] = "Dashboards";
+    ViewData["PageIcon"] = "fal fa-chart-line";
+}
+
+<style>
+    :root {
+        --dash-verde-escuro: #166534;
+        --dash-verde-medio: #16a34a;
+        --dash-verde-claro: #22c55e;
+        --dash-verde-bg: #dcfce7;
+        --dash-laranja: #ea580c;
+        --dash-azul: #0284c7;
+        --dash-amarelo: #ca8a04;
+        --dash-roxo: #7c3aed;
+    }
+
+    /* ====== HEADER DO DASHBOARD ====== */
+    .dash-header {
+        background: linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3);
+    }
+
+    .dash-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .dash-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .dash-header .btn-header {
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.4);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .dash-header .btn-header:hover {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.6);
+        transform: translateY(-2px);
+    }
+
+    /* ====== NAVEGAÇÃO DE ABAS ====== */
+    .dash-tabs {
+        background: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .dash-tab {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .dash-tab:hover {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .dash-tab.active {
+        background: linear-gradient(135deg, #166534 0%, #16a34a 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+    }
+
+    .dash-tab i {
+        font-size: 1.1rem;
+    }
+
+    /* ====== CONTEÚDO DAS ABAS ====== */
+    .dash-content {
+        display: none !important;
+        visibility: hidden;
+        position: absolute;
+        left: -9999px;
+    }
+
+    .dash-content.active {
+        display: block !important;
+        visibility: visible;
+        position: relative;
+        left: 0;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ====== CARDS DE FILTROS ====== */
+    .filter-card-verde {
+        background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-card-verde .form-label {
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-card-verde .form-control,
+    .filter-card-verde .form-select {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        border-radius: 6px;
+    }
+
+    .filter-card-verde .form-control::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .filter-card-verde .form-control:focus,
+    .filter-card-verde .form-select:focus {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+        color: white;
+    }
+
+    .filter-card-verde .form-select option {
+        background: #166534;
+        color: white;
+    }
+
+    /* ====== CARDS DE ESTATÍSTICAS ====== */
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.25rem;
+        border-left: 4px solid;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: all 0.2s;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .stat-card.verde { border-left-color: var(--dash-verde-medio); }
+    .stat-card.laranja { border-left-color: var(--dash-laranja); }
+    .stat-card.azul { border-left-color: var(--dash-azul); }
+    .stat-card.amarelo { border-left-color: var(--dash-amarelo); }
+    .stat-card.roxo { border-left-color: var(--dash-roxo); }
+
+    .stat-card .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-card.verde .stat-icon { color: var(--dash-verde-medio); }
+    .stat-card.laranja .stat-icon { color: var(--dash-laranja); }
+    .stat-card.azul .stat-icon { color: var(--dash-azul); }
+    .stat-card.amarelo .stat-icon { color: var(--dash-amarelo); }
+    .stat-card.roxo .stat-icon { color: var(--dash-roxo); }
+
+    .stat-card .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+
+    .stat-card .stat-value.small {
+        font-size: 1.25rem;
+    }
+
+    /* ====== CARD DE DESTAQUE (BIG NUMBER) ====== */
+    .big-stat-card {
+        background: linear-gradient(135deg, var(--dash-verde-bg) 0%, #bbf7d0 100%);
+        border: 2px solid var(--dash-verde-claro);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .big-stat-card .big-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--dash-verde-escuro);
+        line-height: 1.1;
+    }
+
+    .big-stat-card .big-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #166534;
+        margin-top: 0.5rem;
+    }
+
+    /* ====== CONTAINERS DE GRÁFICOS ====== */
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        height: 100%;
+    }
+
+    .chart-card .chart-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chart-card .chart-title i {
+        color: var(--dash-verde-medio);
+    }
+
+    /* ====== TABELAS ====== */
+    .table-dash {
+        font-size: 0.875rem;
+    }
+
+    .table-dash thead {
+        background: linear-gradient(135deg, #166534 0%, #16a34a 100%);
+        color: white;
+    }
+
+    .table-dash thead th {
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        border: none;
+    }
+
+    .table-dash tbody tr {
+        transition: background 0.15s;
+    }
+
+    .table-dash tbody tr:hover {
+        background: #f0fdf4;
+    }
+
+    .table-dash tbody td {
+        padding: 0.625rem 1rem;
+        vertical-align: middle;
+    }
+
+    /* ====== TABELA RESUMO POR ANO ====== */
+    .table-anos {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-anos th,
+    .table-anos td {
+        padding: 0.625rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-anos th {
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+
+    .table-anos td {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .table-anos tr.total {
+        background: #f0fdf4;
+        font-weight: 700;
+    }
+
+    .table-anos tr.total td {
+        color: var(--dash-verde-escuro);
+    }
+
+    /* ====== MEDIA DO LITRO CARD ====== */
+    .media-litro-card {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .media-litro-card .title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--dash-verde-escuro);
+        margin-bottom: 0.75rem;
+        text-align: center;
+        background: var(--dash-verde-claro);
+        color: white;
+        padding: 0.375rem;
+        border-radius: 4px;
+    }
+
+    .media-litro-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.375rem 0;
+        border-bottom: 1px solid #dcfce7;
+    }
+
+    .media-litro-item:last-child {
+        border-bottom: none;
+    }
+
+    .media-litro-item .tipo {
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .media-litro-item .valor {
+        font-weight: 700;
+        color: var(--dash-verde-escuro);
+    }
+
+    /* ====== LOADING ====== */
+    .dash-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        color: #64748b;
+    }
+
+    .dash-loading i {
+        font-size: 2rem;
+        color: var(--dash-verde-medio);
+    }
+
+    /* ====== ÍCONE BOMBA DE COMBUSTÍVEL GRANDE ====== */
+    .icon-bomba {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--dash-verde-medio) 0%, var(--dash-verde-escuro) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .icon-bomba i {
+        font-size: 1.75rem;
+        color: white;
+    }
+
+    /* ====== RESPONSIVO ====== */
+    @@media (max-width: 768px) {
+        .dash-tabs {
+            flex-direction: column;
+        }
+        
+        .big-stat-card .big-value {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="dash-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>
+                    <i class="fa-duotone fa-gas-pump"></i>
+                    Dashboard de Abastecimentos
+                </h2>
+                <p>Análise completa de consumo de combustível da frota</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button type="button" class="btn-header me-2" id="btnExportarPDF">
+                    <i class="fa-duotone fa-file-pdf me-1"></i> Exportar PDF
+                </button>
+                <button type="button" class="btn-header" id="btnAtualizar">
+                    <i class="fa-duotone fa-arrows-rotate me-1"></i> Atualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegação de Abas -->
+    <div class="dash-tabs">
+        <button type="button" class="dash-tab active" data-tab="consumo-geral">
+            <i class="fa-duotone fa-house"></i>
+            Consumo Geral
+        </button>
+        <button type="button" class="dash-tab" data-tab="consumo-mensal">
+            <i class="fa-duotone fa-calendar-days"></i>
+            Consumo Mensal
+        </button>
+        <button type="button" class="dash-tab" data-tab="consumo-veiculo">
+            <i class="fa-duotone fa-car"></i>
+            Consumo por Veículo
+        </button>
+    </div>
+
+    <!-- Container das Abas -->
+    <div class="dash-tabs-container" style="position: relative; overflow: hidden;">
+        <!-- ========================================== -->
+        <!-- ABA 1: CONSUMO GERAL -->
+        <!-- ========================================== -->
+        <div id="tab-consumo-geral" class="dash-content active">
+        <!-- Filtro de Ano -->
+        <div class="filter-card-verde">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-filter me-1"></i> Filtro por Ano
+                    </label>
+                    <select id="filtroAnoGeral" class="form-select">
+                        <option value="">Todos os Anos</option>
+                    </select>
+                </div>
+                <div class="col-md-9 text-end">
+                    <small class="opacity-75">
+                        <i class="fa-duotone fa-info-circle me-1"></i>
+                        Dados consolidados de todos os abastecimentos
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Coluna Esquerda: Resumos -->
+            <div class="col-lg-3">
+                <!-- Card Valor por Ano -->
+                <div class="chart-card mb-4">
+                    <div class="icon-bomba">
+                        <i class="fa-duotone fa-sack-dollar"></i>
+                    </div>
+                    <table class="table-anos" id="tabelaValorPorAno">
+                        <thead>
+                            <tr>
+                                <th>Ano</th>
+                                <th class="text-end">Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="2" class="text-center py-3"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Card Média do Litro -->
+                <div class="chart-card">
+                    <div class="media-litro-card">
+                        <div class="title">
+                            <i class="fa-duotone fa-droplet me-1"></i> Valor Médio do Litro
+                        </div>
+                        <div id="mediaLitroGeral">
+                            <div class="text-center py-2"><i class="fa-duotone fa-spinner-third fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Litros por Ano -->
+                <div class="chart-card mt-4">
+                    <div class="icon-bomba" style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);">
+                        <i class="fa-duotone fa-droplet"></i>
+                    </div>
+                    <table class="table-anos" id="tabelaLitrosPorAno">
+                        <thead>
+                            <tr>
+                                <th>Ano</th>
+                                <th class="text-end">Litros</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="2" class="text-center py-3"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Coluna Central e Direita: Gráficos -->
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    <!-- Gráfico: Valor Total por Categoria -->
+                    <div class="col-md-6">
+                        <div class="chart-card" style="min-height: 380px;">
+                            <h5 class="chart-title">
+                                <i class="fa-duotone fa-chart-bar"></i>
+                                Valor Total por Categoria
+                            </h5>
+                            <div id="chartValorCategoria" style="height: 320px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Valor do Litro por Mês -->
+                    <div class="col-md-6">
+                        <div class="chart-card" style="min-height: 380px;">
+                            <h5 class="chart-title">
+                                <i class="fa-duotone fa-chart-line"></i>
+                                Valor do Litro
+                            </h5>
+                            <div id="chartValorLitro" style="height: 320px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Litros por Mês -->
+                    <div class="col-md-6">
+                        <div class="chart-card" style="min-height: 380px;">
+                            <h5 class="chart-title">
+                                <i class="fa-duotone fa-chart-area"></i>
+                                Litros por Mês
+                            </h5>
+                            <div id="chartLitrosMes" style="height: 320px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Consumo Geral por Mês (Valor R$) -->
+                    <div class="col-md-6">
+                        <div class="chart-card" style="min-height: 380px;">
+                            <h5 class="chart-title">
+                                <i class="fa-duotone fa-chart-column"></i>
+                                Consumo Geral por Mês
+                            </h5>
+                            <div id="chartConsumoMes" style="height: 320px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 2: CONSUMO MENSAL -->
+    <!-- ========================================== -->
+    <div id="tab-consumo-mensal" class="dash-content">
+        <!-- Filtros -->
+        <div class="filter-card-verde">
+            <div class="row align-items-end g-3">
+                <div class="col-md-2">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar me-1"></i> Ano
+                    </label>
+                    <select id="filtroAnoMensal" class="form-select">
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar-day me-1"></i> Mês
+                    </label>
+                    <select id="filtroMesMensal" class="form-select">
+                        <option value="">Todos os Meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-md-7 text-end">
+                    <button type="button" class="btn btn-light btn-sm" id="btnFiltrarMensal">
+                        <i class="fa-duotone fa-magnifying-glass me-1"></i> Aplicar Filtro
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Cards de Resumo -->
+            <div class="col-lg-3">
+                <!-- Valor Total do Período -->
+                <div class="big-stat-card mb-4">
+                    <i class="fa-duotone fa-sack-dollar fa-2x mb-2" style="color: var(--dash-verde-escuro);"></i>
+                    <div class="big-value" id="valorTotalMensal">R$ 0</div>
+                    <div class="big-label">Valor Total</div>
+                </div>
+
+                <!-- Breakdown por Combustível -->
+                <div class="chart-card mb-4">
+                    <div id="breakdownCombustivelMensal">
+                        <div class="text-center py-3"><i class="fa-duotone fa-spinner-third fa-spin"></i></div>
+                    </div>
+                </div>
+
+                <!-- Média do Litro -->
+                <div class="chart-card">
+                    <div class="media-litro-card">
+                        <div class="title">
+                            <i class="fa-duotone fa-droplet me-1"></i> Média do Litro
+                        </div>
+                        <div id="mediaLitroMensal">
+                            <div class="text-center py-2"><i class="fa-duotone fa-spinner-third fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Litros -->
+            <div class="col-lg-3">
+                <div class="chart-card mb-4" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #fbbf24;">
+                    <div class="text-center">
+                        <i class="fa-duotone fa-gas-pump fa-2x mb-2" style="color: #b45309;"></i>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #92400e;">Litros</div>
+                        <div style="font-size: 2rem; font-weight: 800; color: #78350f;" id="totalLitrosMensal">0</div>
+                    </div>
+                </div>
+
+                <!-- Gráfico Pizza: Diesel vs Gasolina -->
+                <div class="chart-card" style="min-height: 280px;">
+                    <div id="chartPizzaCombustivel" style="height: 240px;"></div>
+                </div>
+            </div>
+
+            <!-- Gráfico: Litros por Dia -->
+            <div class="col-lg-6">
+                <div class="chart-card" style="min-height: 380px;">
+                    <h5 class="chart-title">
+                        <i class="fa-duotone fa-chart-area"></i>
+                        Litros por Dia
+                    </h5>
+                    <div id="chartLitrosDia" style="height: 320px;"></div>
+                </div>
+            </div>
+
+            <!-- Gráfico: Valor Total por Veículo -->
+            <div class="col-lg-6">
+                <div class="chart-card" style="min-height: 380px;">
+                    <h5 class="chart-title">
+                        <i class="fa-duotone fa-chart-line"></i>
+                        Valor Total por Veículo (Top 30)
+                    </h5>
+                    <div id="chartValorVeiculo" style="height: 320px;"></div>
+                </div>
+            </div>
+
+            <!-- Gráfico: Consumo por Categoria -->
+            <div class="col-lg-6">
+                <div class="chart-card" style="min-height: 380px;">
+                    <h5 class="chart-title">
+                        <i class="fa-duotone fa-chart-column"></i>
+                        Consumo por Categoria
+                    </h5>
+                    <div id="chartConsumoCategoria" style="height: 320px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 3: CONSUMO POR VEÍCULO -->
+    <!-- ========================================== -->
+    <div id="tab-consumo-veiculo" class="dash-content">
+        <!-- Filtros -->
+        <div class="filter-card-verde">
+            <div class="row align-items-end g-3">
+                <div class="col-md-2">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar me-1"></i> Ano
+                    </label>
+                    <select id="filtroAnoVeiculo" class="form-select">
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar-day me-1"></i> Mês
+                    </label>
+                    <select id="filtroMesVeiculo" class="form-select">
+                        <option value="">Todos os Meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-car me-1"></i> Modelo Veículo
+                    </label>
+                    <select id="filtroModeloVeiculo" class="form-select">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-rectangle-barcode me-1"></i> Placa
+                    </label>
+                    <select id="filtroPlacaVeiculo" class="form-select">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-light btn-sm" id="btnFiltrarVeiculo">
+                        <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Coluna Esquerda: Cards e Filtros -->
+            <div class="col-lg-3">
+                <!-- Card Valor Total -->
+                <div class="chart-card mb-4">
+                    <div class="big-stat-card" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #166534;">Valor total por veículo</div>
+                        <div class="big-value" id="valorTotalVeiculo">R$ 0</div>
+                    </div>
+                </div>
+
+                <!-- Card Litros -->
+                <div class="chart-card mb-4">
+                    <div class="big-stat-card" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-color: #38bdf8;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #0369a1;">Consumo de Litros</div>
+                        <div class="big-value" style="color: #0c4a6e;" id="litrosTotalVeiculo">0</div>
+                    </div>
+                </div>
+
+                <!-- Gráfico: Consumo Mensal de Litros -->
+                <div class="chart-card" style="min-height: 280px;">
+                    <h5 class="chart-title" style="font-size: 0.9rem;">
+                        <i class="fa-duotone fa-chart-line"></i>
+                        Consumo Mensal de Litros
+                    </h5>
+                    <div id="chartConsumoMensalVeiculo" style="height: 220px;"></div>
+                </div>
+            </div>
+
+            <!-- Coluna Central: Info do Veículo e Gráfico Mensal -->
+            <div class="col-lg-5">
+                <!-- Info do Veículo -->
+                <div class="chart-card mb-4">
+                    <div class="text-center py-3">
+                        <div style="font-size: 0.85rem; color: #64748b;">Descrição do Veículo</div>
+                        <h3 id="descricaoVeiculoSelecionado" style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0;">
+                            Selecione um veículo
+                        </h3>
+                        <div style="font-size: 0.85rem; color: #64748b;">Categoria do Veículo</div>
+                        <h4 id="categoriaVeiculoSelecionado" style="font-size: 1.25rem; font-weight: 600; color: #374151; margin: 0.25rem 0;">
+                            -
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Gráfico: Valor Total Mensal do Veículo -->
+                <div class="chart-card" style="min-height: 400px;">
+                    <h5 class="chart-title">
+                        <i class="fa-duotone fa-chart-bar"></i>
+                        Valor Total Mensal do Veículo
+                    </h5>
+                    <div id="chartValorMensalVeiculo" style="height: 340px;"></div>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Tabela de Veículos -->
+            <div class="col-lg-4">
+                <div class="chart-card" style="min-height: 540px;">
+                    <h5 class="chart-title">
+                        <i class="fa-duotone fa-list-ol"></i>
+                        Valor Total por Veículo
+                    </h5>
+                    <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                        <table class="table table-sm table-dash mb-0" id="tabelaValorVeiculos">
+                            <thead style="position: sticky; top: 0;">
+                                <tr>
+                                    <th>Veículo</th>
+                                    <th class="text-end">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="2" class="text-center py-4"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div><!-- Fecha dash-tabs-container -->
+</div>
+
+@section ScriptsBlock {
+    <!-- Syncfusion EJ2 Charts -->
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-base/dist/global/ej2-base.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-data/dist/global/ej2-data.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-svg-base/dist/global/ej2-svg-base.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-pdf-export/dist/global/ej2-pdf-export.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-file-utils/dist/global/ej2-file-utils.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-compression/dist/global/ej2-compression.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-charts/dist/global/ej2-charts.min.js" asp-append-version="true"></script>
+
+    <script src="~/js/dashboards/dashboard-abastecimento.js" asp-append-version="true"></script>
+}

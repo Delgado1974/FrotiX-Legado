@@ -1,0 +1,173 @@
+/* =============================================================================
+   FTX CARD STYLED - APENAS Header com Gradiente
+   Complementa o frotix.css - NÃO duplica
+   Versão: 3.0 - Dezembro/2024
+   ============================================================================= */
+
+/* ===== VARIÁVEIS DO CARD ===== */
+:root {
+    /* Header Azul Petróleo (um tom abaixo da navegação) */
+    --ftx-header-start: #2a4d72;
+    --ftx-header-mid: #325d88;
+    --ftx-header-end: #1e3a54;
+    --ftx-header-gradient: linear-gradient(135deg, 
+        var(--ftx-header-start) 0%, 
+        var(--ftx-header-mid) 50%, 
+        var(--ftx-header-end) 100%);
+    --ftx-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --ftx-header-shadow: 0 4px 15px rgba(50, 93, 136, 0.3);
+}
+
+/* ===== CARD CONTAINER ===== */
+.ftx-card-styled {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--ftx-card-shadow);
+    transition: box-shadow 0.3s ease;
+}
+
+.ftx-card-styled:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== CARD HEADER ===== */
+.ftx-card-header {
+    background: var(--ftx-header-gradient);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--ftx-header-shadow);
+}
+
+/* Efeito de brilho animado */
+.ftx-card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: ftxHeaderShine 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ftxHeaderShine {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+}
+
+/* ===== TÍTULO DENTRO DO HEADER - BRANCO ===== */
+.ftx-card-header .titulo-paginas {
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.ftx-card-header .titulo-paginas i.fa-duotone {
+    --fa-primary-color: #fff !important;
+    --fa-secondary-color: rgba(255, 255, 255, 0.7) !important;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+}
+
+.ftx-card-header .titulo-paginas i.fa-solid {
+    color: #fff !important;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ÁREA DE AÇÕES ===== */
+.ftx-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* ===== BOTÃO HEADER LARANJA ===== */
+.btn-header-orange {
+    background: #D35400;
+    border: none;
+    color: #fff;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(211, 84, 0, 0.3);
+}
+
+.btn-header-orange:hover {
+    background: #E67E22;
+    box-shadow: 0 0 20px rgba(211, 84, 0, 0.5), 0 4px 12px rgba(211, 84, 0, 0.4);
+    color: #fff;
+}
+
+/* ===== DATATABLES - HEADER ESCURO ===== */
+table.dataTable thead,
+.dataTables_wrapper table thead,
+#tblViagem thead,
+.ftx-table thead {
+    background: linear-gradient(180deg, #343a40 0%, #23272b 100%) !important;
+}
+
+table.dataTable thead th,
+.dataTables_wrapper table thead th,
+#tblViagem thead th,
+.ftx-table thead th {
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: none !important;
+    background: transparent !important;
+}
+
+/* Header da tabela - corrige seletor de ordenação do Syncfusion/DataTables */
+#tblViagem thead tr,
+.ftx-table thead tr {
+    background: linear-gradient(180deg, #343a40 0%, #23272b 100%) !important;
+}
+
+#tblViagem thead th.sorting,
+#tblViagem thead th.sorting_asc,
+#tblViagem thead th.sorting_desc,
+.ftx-table thead th.sorting,
+.ftx-table thead th.sorting_asc,
+.ftx-table thead th.sorting_desc {
+    background: transparent !important;
+    color: #fff !important;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    .ftx-card-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .ftx-card-actions {
+        width: 100%;
+    }
+    
+    .ftx-card-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ===== ACESSIBILIDADE ===== */
+@media (prefers-reduced-motion: reduce) {
+    .ftx-card-header::before {
+        animation: none;
+    }
+}

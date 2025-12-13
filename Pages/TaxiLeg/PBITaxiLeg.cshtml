@@ -1,0 +1,27 @@
+﻿@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+@model FrotiX.Pages.Viagens.TaxiLegModel
+@Html.AntiForgeryToken()
+
+@{
+    ViewData["Title"] = "TáxiLeg";
+    ViewData["PageName"] = "taxileg_pbitaxileg";
+    ViewData["Heading"] = "<i class='fa-duotone fa-taxi'></i> Gráficos: <span class='fw-300'>TáxiLeg</span>";
+    ViewData["Category1"] = "Gráficos";
+    ViewData["PageIcon"] = "fa-duotone fa-taxi";
+}
+
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+                <div id="divPainel" class="panel-content">
+
+                    <iframe title="Frotix Atualizado - Relatório por Veículo" width="100%" height="900" src="https://app.powerbi.com/view?r=eyJrIjoiMTZlMzQwYWEtYWFhMy00YzNjLWEzMGYtYWZlYjczYjk3NGMwIiwidCI6ImIwNmM0MGIzLWM5MGItNGYwYS1hNWVjLTlkZTRmMGQzMTEzMCJ9" frameborder="0" allowFullScreen="true"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+

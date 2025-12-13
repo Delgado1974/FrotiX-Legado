@@ -1,0 +1,14 @@
+{
+    "name": "vendors-bundle-bs5-patcher",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Patch ciRÊrgico: remove Bootstrap 4 do vendors.bundle.js e injeta Bootstrap 5 (mantendo o resto intocado).",
+    "scripts": {
+        "patch": "node patch-vendors.js",
+        "verify": "node verify-no-bs4.js",
+        "patch:verify": "npm run patch && npm run verify"
+    },
+    "dependencies": {
+        "bootstrap": "5.3.8"
+    }
+}

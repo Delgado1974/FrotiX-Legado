@@ -1,0 +1,1213 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+@model FrotiX.Pages.Viagens.TaxiLegModel
+@Html.AntiForgeryToken()
+
+@{
+    ViewData["Title"] = "Viagens";
+    ViewData["PageName"] = "viagem_index";
+    ViewData["Heading"] = "<i class='fad fa-route'></i> Cadastros: <span class='fw-300'>Viagens</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fad fa-route";
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 10px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .btn-largura {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+
+@section HeadBlock {
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" /> *@
+    @* <link rel="stylesheet" href="~/css/microtip.css" /> *@
+    <!-- DEMO 01 CSS FILE ----------------------------------------------------------------------->
+    <link href="~/css/demo-01.css" rel="stylesheet" />
+}
+
+<script>
+    function stopEnterSubmitting(e) {
+        try {
+            if (e.key === 'Enter') {
+                const src = e.target || e.srcElement;
+                if (src && src.tagName && src.tagName.toLowerCase() !== 'div') {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "stopEnterSubmitting", error);
+        }
+    }
+</script>
+
+<div class="profile-card-1">
+    <div class="profile-content">
+        <!-- PROFILE COVER PHOTO -->
+        <img src="~/Images/profile-bg-1.jpg" class="img img-responsive" alt="Capa" />
+        <div class="profile-content">
+            <!-- PROFILE PHOTO -->
+            <img src="~/assets/img/profile-7.jpg" class="img img-responsive" alt="Perfil" />
+            <!-- PROFILE NAME -->
+            <div class="profile-name">JOHN DOE</div>
+            <!-- PROFILE OVERVIEW -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="profile-overview">
+                        <p>TEAM</p>
+                        <h5>Royal Challengers</h5>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="profile-overview">
+                        <p>RACES</p>
+                        <h5>50</h5>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="profile-overview">
+                        <p>WON</p>
+                        <h5>32</h5>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="profile-overview">
+                        <p>COUNTRY</p>
+                        <h5>India</h5>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="profile-overview">
+                        <p>CHAMPION</p>
+                        <h5>5</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-img">
+        <img src="~/Images/Schedule.jpg" class="img img-responsive" alt="Agenda" />
+    </div>
+    <div class="profile-name">John Doe</div>
+    <div class="profile-address">johndoedesigner</div>
+    <p class="profile-description">
+        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor.
+    </p>
+    <div class="profile-icons">
+        <a href="#" aria-label="Facebook"><i class="fa fa-facebook"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fa fa-linkedin"></i></a>
+    </div>
+</div>
+
+<!-- Modal Inserir Requisitante -->
+<div class="modal fade" id="modalRequisitante">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title" id="DynamicModalLabel">Inserir um novo Requisitante</h4>
+            </div>
+            <div class="modal-body table-bordered">
+                <form id="frmRequisitante">
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Ponto</label>
+                                <input id="txtPonto" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Nome do Requisitante</label>
+                                <input id="txtNome" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Ramal</label>
+                                <input id="txtRamal" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Email</label>
+                                <input id="txtEmail" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="ControlRegion">
+                            <div class="form-control-xs" style="margin: 0 auto; width: 400px;">
+                                <label class="label font-weight-bold">Setor do Requisitante</label>
+                                <ejs-dropdowntree id="ddtSetorRequisitante"
+                                                  placeholder="Selecione um Setor"
+                                                  sortOrder="Ascending"
+                                                  showCheckBox="false"
+                                                  allowMultiSelection="false"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  filterBarPlaceholder="Procurar...">
+                                    <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]"
+                                                           value="SetorSolicitanteId"
+                                                           text="Nome"
+                                                           parentValue="SetorPaiId"
+                                                           hasChildren="HasChild">
+                                    </e-dropdowntree-fields>
+                                </ejs-dropdowntree>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnInserirRequisitante" class="btn btn-azul" type="submit" value="SUBMIT">
+                            Inserir Requisitante
+                        </button>
+                        <button type="button" class="btn btn-vinho" data-dismiss="modal">Fechar</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal footer -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Inserir Setor -->
+<div class="modal fade" id="modalSetor">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title" id="DynamicModalLabel">Inserir um novo Setor Solicitante</h4>
+            </div>
+            <div class="modal-body table-bordered">
+                <form id="frmSetor">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Sigla</label>
+                                <input id="txtSigla" class="form-control form-control-xs" placeholder="Insira a sigla" />
+                            </div>
+                        </div>
+                        <div class="col-7">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Nome do Setor</label>
+                                <input id="txtNomeSetor" class="form-control form-control-xs" placeholder="Insira o nome do setor" />
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Ramal</label>
+                                <input id="txtRamalSetor" class="form-control form-control-xs" placeholder="Insira o ramal" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div id="ControlRegion">
+                            <div class="form-control-xs" style="margin: 0 auto; width: 400px;">
+                                <label class="label font-weight-bold">Setor Pai (se houver)</label>
+                                <ejs-dropdowntree id="ddtSetorPai"
+                                                  placeholder="Selecione um Setor"
+                                                  sortOrder="Ascending"
+                                                  showCheckBox="false"
+                                                  allowMultiSelection="false"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  filterBarPlaceholder="Procurar...">
+                                    <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]"
+                                                           value="SetorSolicitanteId"
+                                                           text="Nome"
+                                                           parentValue="SetorPaiId"
+                                                           hasChildren="HasChild">
+                                    </e-dropdowntree-fields>
+                                </ejs-dropdowntree>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnInserirSetor" class="btn btn-azul" type="submit" value="SUBMIT">
+                            Inserir Setor
+                        </button>
+                        <button type="button" class="btn btn-vinho" data-dismiss="modal">Fechar</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal footer -->
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script type="text/javascript">
+        window.onload = function () {
+            try {
+                if ('@Model.ViagemObj.Viagem.CombustivelInicial' != null) {
+                    var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                    ddtCombustivelInicial.value = '@Model.ViagemObj.Viagem.CombustivelInicial';
+                }
+                if ('@Model.ViagemObj.Viagem.ViagemId' === '00000000-0000-0000-0000-000000000000') {
+                    document.getElementById("txtDataInicial").value = moment(Date()).format("YYYY-MM-DD");
+                    // document.getElementById("txtHoraInicial").value = moment(Date()).format("HH:mm");
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "onload", error);
+            }
+        };
+                // Controla o Submit do formulário através de botões escondidos (permite a validação via javascript)
+        // =================================================================================================
+        $("#btnSubmit").click(function (event) {
+            try {
+                event.preventDefault();
+
+                if (document.getElementById("txtNoFichaVistoria").value === "") {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O número da Ficha de Vistoria é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                if (document.getElementById("txtDataInicial").value === "") {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "A Data Inicial é obrigatória",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                if (document.getElementById("txtHoraInicial").value === "") {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "A Hora Inicial é obrigatória",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                var lstFinalidade = document.getElementById("lstFinalidade").ej2_instances[0];
+                if (lstFinalidade.value === null) {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "A Finalidade é obrigatória",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                if (document.getElementById("txtOrigem").value === "") {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "A Origem é obrigatória",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                var lstMotorista = document.getElementById("lstMotorista").ej2_instances[0];
+                if (lstMotorista.value === null) {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O Motorista é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                var lstVeiculo = document.getElementById("lstVeiculo").ej2_instances[0];
+                if (lstVeiculo.value === null) {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O Veículo é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                if (document.getElementById("txtKmInicial").value === "") {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "A Quilometragem Inicial é obrigatória",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                if (ddtCombustivelInicial.value === null) {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O Nível de Combustível Inicial é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                var ddtRequisitante = document.getElementById("ddtRequisitante").ej2_instances[0];
+                if (ddtRequisitante.value === null) {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O Requisitante é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                if (document.getElementById("txtRamalRequisitante").value === "") {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O Ramal do Requisitante é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                var ddtSetor = document.getElementById("ddtSetor").ej2_instances[0];
+                if (ddtSetor.value === null) {
+                    swal({
+                        title: "Informação Ausente",
+                        text: "O Setor Solicitante é obrigatório",
+                        icon: "error",
+                        buttons: { ok: "Ok" }
+                    });
+                    return;
+                }
+
+                $("#btnEscondido").click();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "#btnSubmit.click", error);
+            }
+        });
+
+        $(document).ready(function () {
+            try {
+                if ('@Model.ViagemObj.Viagem.ViagemId' === '00000000-0000-0000-0000-000000000000') {
+                    document.getElementById("txtDataInicial").value = moment(Date()).format("YYYY-MM-DD");
+                    document.getElementById("txtHoraInicial").value = moment(Date()).format("HH:mm");
+                    document.getElementById("divFicha").style.display = 'none';
+                }
+
+                // Bloqueia controles caso a viagem já tenha sido realizada ou cancelada
+                if ('@Model.ViagemObj.Viagem.Status' === 'Realizada' || '@Model.ViagemObj.Viagem.Status' === 'Cancelada') {
+                    var childNodes = document.getElementById("divPainel").getElementsByTagName('*');
+                    for (var node of childNodes) {
+                        node.disabled = true;
+                    }
+
+                    var rte = document.getElementById("rte").ej2_instances[0];
+                    rte.enabled = false;
+                    var lstMotorista = document.getElementById("lstMotorista").ej2_instances[0];
+                    lstMotorista.enabled = false;
+                    var lstVeiculo = document.getElementById("lstVeiculo").ej2_instances[0];
+                    lstVeiculo.enabled = false;
+                    var ddtRequisitante = document.getElementById("ddtRequisitante").ej2_instances[0];
+                    ddtRequisitante.enabled = false;
+                    var ddtSetor = document.getElementById("ddtSetor").ej2_instances[0];
+                    ddtSetor.enabled = false;
+                    var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                    ddtCombustivelInicial.enabled = false;
+                    var ddtCombustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0];
+                    ddtCombustivelFinal.enabled = false;
+                    var lstFinalidade = document.getElementById("lstFinalidade").ej2_instances[0];
+                    lstFinalidade.enabled = false;
+
+                    document.getElementById("divSubmit").style.display = 'none';
+                    $("#btnSubmit").hide();
+                }
+
+                // Atualiza Controles SYNCFUSION da Página
+                if ('@Model.ViagemObj.Viagem.CombustivelInicial' != null) {
+                    var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                    ddtCombustivelInicial.value = ['@Model.ViagemObj.Viagem.CombustivelInicial'];
+                }
+                if ('@Model.ViagemObj.Viagem.CombustivelFinal' != null) {
+                    var ddtCombustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0];
+                    ddtCombustivelFinal.value = ['@Model.ViagemObj.Viagem.CombustivelFinal'];
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "document.ready", error);
+            }
+        });
+    </script>
+
+    <script type="text/javascript">
+        $("#txtNoFichaVistoria").focusout(function () {
+            if (document.getElementById("txtNoFichaVistoria").value === '') {
+                return;
+            }
+
+            try {
+                // Verifica se Número da Ficha já foi cadastrado
+                $.ajax({
+                    url: "/Viagens/Upsert?handler=FichaExistente",
+                    method: "GET",
+                    datatype: "json",
+                    data: { id: document.getElementById("txtNoFichaVistoria").value },
+                    success: function (res) {
+                        var ExisteFicha = [res.data];
+                        if (ExisteFicha[0] === true) {
+                            swal({
+                                title: "Alerta na Ficha de Vistoria",
+                                text: "Já existe uma Ficha inserida com esta numeração!",
+                                icon: "warning",
+                                buttons: { ok: "Ok" }
+                            });
+                            return;
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "success", error);
+            }
+        });
+
+        // Verifica se Data Final é menor que Data Inicial
+        $("#txtDataFinal").focusout(function () {
+            var DataInicial = $("#txtDataInicial").val();
+            var DataFinal = $("#txtDataFinal").val();
+
+            if (DataFinal === '') {
+                return;
+            }
+
+            if (DataFinal < DataInicial) {
+                $("#txtDataFinal").val('');
+                swal({
+                    title: "Erro na Data",
+                    text: "A data final deve ser maior que a inicial!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+        });
+
+        // Verifica se Data Inicial é maior que Data Final
+        $("#txtDataInicial").focusout(function () {
+            var DataInicial = $("#txtDataInicial").val();
+            var DataFinal = $("#txtDataFinal").val();
+
+            if (DataInicial === '' || DataFinal === '') {
+                return;
+            }
+
+            if (DataInicial > DataFinal) {
+                $("#txtDataInicial").val('');
+                swal({
+                    title: "Erro na Data",
+                    text: "A data inicial deve ser menor que a final!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+        });
+
+        // Verifica se Hora Final é menor que Hora Inicial e se tem Data Final
+        $("#txtHoraFinal").focusout(function () {
+            var HoraInicial = $("#txtHoraInicial").val();
+            var HoraFinal = $("#txtHoraFinal").val();
+            var DataInicial = $("#txtDataInicial").val();
+            var DataFinal = $("#txtDataFinal").val();
+
+            if (DataFinal === '') {
+                $("#txtHoraFinal").val('');
+                swal({
+                    title: "Erro na Hora Final",
+                    text: "Preencha a Data Final para poder preencher a Hora Final!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+
+            if ((HoraFinal < HoraInicial) && (DataInicial === DataFinal)) {
+                $("#txtHoraFinal").val('');
+                swal({
+                    title: "Erro na Hora",
+                    text: "A hora final deve ser maior que a inicial!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+        });
+
+        // Verifica se Hora Inicial é maior que Hora Final
+        $("#txtHoraInicial").focusout(function () {
+            var HoraInicial = $("#txtHoraInicial").val();
+            var HoraFinal = $("#txtHoraFinal").val();
+
+            if (HoraFinal === '') {
+                return;
+            }
+
+            if (HoraInicial > HoraFinal) {
+                $("#txtHoraInicial").val('');
+                swal({
+                    title: "Erro na Hora",
+                    text: "A hora inicial deve ser menor que a final!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+        });
+
+        // Verifica se KM Final é menor que KM Inicial
+        $("#txtKmFinal").focusout(function () {
+            var kmInicial = parseInt($("#txtKmInicial").val());
+            var kmFinal = parseInt($("#txtKmFinal").val());
+
+            if (kmFinal < kmInicial) {
+                $("#txtKmFinal").val('');
+                swal({
+                    title: "Erro na Quilometragem",
+                    text: "A quilometragem final deve ser maior que a inicial!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+
+            if ((kmFinal - kmInicial) > 100) {
+                swal({
+                    title: "Alerta na Quilometragem",
+                    text: "A quilometragem final excede em 100km a inicial!",
+                    icon: "warning",
+                    buttons: { ok: "Ok" }
+                });
+            }
+        });
+
+        // Verifica se KM Inicial é maior que KM Final
+        $("#txtKmInicial").focusout(function () {
+            var kmInicial = parseInt($("#txtKmInicial").val());
+            var kmFinal = parseInt($("#txtKmFinal").val());
+
+            if (kmInicial > kmFinal) {
+                $("#txtKmInicial").val('');
+                swal({
+                    title: "Erro na Quilometragem",
+                    text: "A quilometragem inicial deve ser menor que a final!",
+                    icon: "error",
+                    buttons: { ok: "Ok" }
+                });
+            }
+        });
+
+        function toolbarClick(e) {
+            try {
+                if (e.item.id === "rte_toolbar_Image") {
+                    var element = document.getElementById('rte_upload');
+                    element.ej2_instances[0].uploading = function (args) {
+                        args.currentRequest.setRequestHeader('XSRF-TOKEN',
+                            document.getElementsByName('__RequestVerificationToken')[0].value);
+                    };
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "toolbarClick", error);
+            }
+        }
+
+        $(document).ready(function () {
+            try {
+                document.getElementById("ddtSetor").ej2_instances[0].value = ["@Model.ViagemObj.Viagem.SetorSolicitanteId"];
+                document.getElementById("ddtRequisitante").ej2_instances[0].value = ["@Model.ViagemObj.Viagem.RequisitanteId"];
+
+                // Configura a Exibição do Modal de Requisitantes
+                $("#modalRequisitante").modal({
+                    keyboard: true,
+                    backdrop: "static",
+                    show: false
+                }).on("hide.bs.modal", function () {
+                    var setores = document.getElementById('ddtSetorRequisitante').ej2_instances[0];
+                    setores.value = "";
+                    $("#txtPonto").val('');
+                    $("#txtNome").val('');
+                    $("#txtRamal").val('');
+                    $("#txtEmail").val('');
+                });
+
+                // Configura a Exibição do Modal de Setores
+                $("#modalSetor").modal({
+                    keyboard: true,
+                    backdrop: "static",
+                    show: false
+                }).on("hide.bs.modal", function () {
+                    var setores = document.getElementById('ddtSetorPai').ej2_instances[0];
+                    setores.value = "";
+                    $("#txtSigla").val('');
+                    $("#txtNomeSetor").val('');
+                    $("#txtRamalSetor").val('');
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "document.ready", error);
+            }
+        });
+    </script>
+
+    <script type="text/javascript">
+        // Preenche Lista de Requisitantes Após Inserção de um novo
+        function PreencheListaRequisitantes() {
+            try {
+                $.ajax({
+                    url: "/Viagens/Upsert?handler=AJAXPreencheListaRequisitantes",
+                    method: "GET",
+                    datatype: "json",
+                    success: function (res) {
+                        var requisitanteid = res.data[0].requisitanteId;
+                        var nomerequisitante = res.data[0].requisitante;
+                        let RequisitanteList = [{ "RequisitanteId": requisitanteid, "Requisitante": nomerequisitante }];
+
+                        for (var i = 1; i < res.data.length; ++i) {
+                            requisitanteid = res.data[i].requisitanteId;
+                            nomerequisitante = res.data[i].requisitante;
+                            let requisitante = { RequisitanteId: requisitanteid, Requisitante: nomerequisitante };
+                            RequisitanteList.push(requisitante);
+                        }
+
+                        document.getElementById("ddtRequisitante").ej2_instances[0].fields.dataSource = RequisitanteList;
+                        document.getElementById("ddtRequisitante").ej2_instances[0].refresh();
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "PreencheListaRequisitantes", error);
+            }
+        }
+            // Preenche Lista de Setores Após Inserção de um novo
+    function PreencheListaSetores() {
+        try {
+            $.ajax({
+                url: "/Viagens/Upsert?handler=AJAXPreencheListaSetores",
+                method: "GET",
+                datatype: "json",
+                success: function (res) {
+                    var setorSolicitanteId = res.data[0].setorSolicitanteId;
+                    var setorPaiId = res.data[0].setorPaiId;
+                    var nome = res.data[0].nome;
+                    var hasChild = res.data[0].hasChild;
+
+                    let SetorList = [{
+                        "SetorSolicitanteId": setorSolicitanteId,
+                        "SetorPaiId": setorPaiId,
+                        "Nome": nome,
+                        "HasChild": hasChild
+                    }];
+
+                    for (var i = 1; i < res.data.length; ++i) {
+                        setorSolicitanteId = res.data[i].setorSolicitanteId;
+                        setorPaiId = res.data[i].setorPaiId;
+                        nome = res.data[i].nome;
+                        hasChild = res.data[i].hasChild;
+                        let setor = {
+                            "SetorSolicitanteId": setorSolicitanteId,
+                            "SetorPaiId": setorPaiId,
+                            "Nome": nome,
+                            "HasChild": hasChild
+                        };
+                        SetorList.push(setor);
+                    }
+
+                    document.getElementById("ddtSetor").ej2_instances[0].fields.dataSource = SetorList;
+                    document.getElementById("ddtSetor").ej2_instances[0].refresh();
+                }
+            });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "PreencheListaSetores", error);
+        }
+    }
+
+    // Escolheu um Requisitante
+    function RequisitanteValueChange() {
+        try {
+            var ddTreeObj = document.getElementById("ddtRequisitante").ej2_instances[0];
+            if (ddTreeObj.value === null) return;
+
+            var requisitanteid = String(ddTreeObj.value);
+
+            // Pega Setor Padrío do Requisitante
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaSetor",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteid },
+                success: function (res) {
+                    document.getElementById("ddtSetor").ej2_instances[0].value = [res.data];
+                }
+            });
+
+            // Pega Ramal do Requisitante
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaRamal",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteid },
+                success: function (res) {
+                    var s = document.getElementById("txtRamalRequisitante");
+                    s.value = res.data;
+                }
+            });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "RequisitanteValueChange", error);
+        }
+    }
+
+    // Escolheu um Motorista
+    function MotoristaValueChange() {
+        try {
+            var ddTreeObj = document.getElementById("lstMotorista").ej2_instances[0];
+            if (ddTreeObj.value === null) return;
+
+            var motoristaid = String(ddTreeObj.value);
+
+            // Verifica se Motorista está em alguma viagem
+            $.ajax({
+                url: "/Viagens/Upsert?handler=VerificaMotoristaViagem",
+                method: "GET",
+                datatype: "json",
+                data: { id: motoristaid },
+                success: function (res) {
+                    if (res.data) {
+                        swal({
+                            title: "Motorista em Viagem",
+                            text: "Este motorista encontra-se em uma viagem não terminada!",
+                            icon: "warning",
+                            buttons: { ok: "Ok" }
+                        });
+                    }
+                }
+            });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "MotoristaValueChange", error);
+        }
+    }
+
+    // Escolheu um Veículo
+    function VeiculoValueChange() {
+        try {
+            var ddTreeObj = document.getElementById("lstVeiculo").ej2_instances[0];
+            if (ddTreeObj.value === null) return;
+
+            var veiculoid = String(ddTreeObj.value);
+
+            // Verifica se o veículo está em alguma viagem
+            $.ajax({
+                url: "/Viagens/Upsert?handler=VerificaVeiculoViagem",
+                method: "GET",
+                datatype: "json",
+                data: { id: veiculoid },
+                success: function (res) {
+                    if (res.data) {
+                        swal({
+                            title: "Veículo em Viagem",
+                            text: "Este veículo encontra-se em uma viagem não terminada!",
+                            icon: "warning",
+                            buttons: { ok: "Ok" }
+                        });
+                    }
+                }
+            });
+
+            // Pega Km Atual do Veículo
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaKmAtualVeiculo",
+                method: "GET",
+                datatype: "json",
+                data: { id: veiculoid },
+                success: function (res) {
+                    var kmAtual = document.getElementById("txtKmAtual");
+                    kmAtual.value = res.data;
+                }
+            });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "VeiculoValueChange", error);
+        }
+    }
+
+    function valueChange() {
+        try {
+            // reservado
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "valueChange", error);
+        }
+    }
+
+    function select(args) {
+        try {
+            // reservado
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "select", error);
+        }
+    }
+
+    function ddtCombustivelChange() {
+        try {
+            // reservado
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "ddtCombustivelChange", error);
+        }
+    }
+</script>
+
+<script>
+    // Botão InserirRequisitante do Modal
+    // ===================================
+    $("#btnInserirRequisitante").click(function (e) {
+        try {
+            e.preventDefault();
+
+            if ($("#txtPonto").val() === "") {
+                swal({
+                    title: "Atenção",
+                    text: "O Ponto do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: { close: "Fechar" }
+                });
+                return;
+            }
+
+            if ($("#txtNome").val() === "") {
+                swal({
+                    title: "Atenção",
+                    text: "O Nome do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: { close: "Fechar" }
+                });
+                return;
+            }
+
+            if ($("#txtRamal").val() === "") {
+                swal({
+                    title: "Atenção",
+                    text: "O Ramal do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: { close: "Fechar" }
+                });
+                return;
+            }
+
+            var setores = document.getElementById('ddtSetorRequisitante').ej2_instances[0];
+            if (setores.value === null) {
+                swal({
+                    title: "Atenção",
+                    text: "O Setor do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: { close: "Fechar" }
+                });
+                return;
+            }
+
+            var setorSolicitanteId = setores.value.toString();
+            var objRequisitante = JSON.stringify({
+                "Nome": $('#txtNome').val(),
+                "Ponto": $('#txtPonto').val(),
+                "Ramal": $('#txtRamal').val(),
+                "Email": $('#txtEmail').val(),
+                "SetorSolicitanteId": setorSolicitanteId
+            });
+
+            $.ajax({
+                type: "post",
+                url: "/api/Viagem/AdicionarRequisitante",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: objRequisitante,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('RequestVerificationToken', $('input[name="__RequestVerificationToken"]').val());
+                },
+                success: function (data) {
+                    AppToast.show('Verde', data.message);
+                    PreencheListaRequisitantes();
+                    $("#modalRequisitante").modal('hide');
+                },
+                error: function (data) {
+                    console.log(data);
+                    alert('error');
+                }
+            });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "#btnInserirRequisitante.click", error);
+        }
+    });
+
+    // Botão InserirSetor do Modal
+    // ============================
+    $("#btnInserirSetor").click(function (e) {
+        try {
+            e.preventDefault();
+
+            if ($("#txtNomeSetor").val() === "") {
+                swal({
+                    title: "Atenção",
+                    text: "O Nome do Setor é obrigatório!",
+                    icon: "error",
+                    buttons: { close: "Fechar" }
+                });
+                return;
+            }
+
+            if ($("#txtRamalSetor").val() === "") {
+                swal({
+                    title: "Atenção",
+                    text: "O Ramal do Setor é obrigatório!",
+                    icon: "error",
+                    buttons: { close: "Fechar" }
+                });
+                return;
+            }
+
+            var setorPaiId = null;
+            var ddtPai = document.getElementById('ddtSetorPai').ej2_instances[0];
+
+            if (ddtPai.value !== '' && ddtPai.value !== null) {
+                setorPaiId = ddtPai.value.toString();
+            }
+
+            var objSetor = JSON.stringify({
+                "Nome": $('#txtNomeSetor').val(),
+                "Ramal": $('#txtRamalSetor').val(),
+                "Sigla": $('#txtSigla').val(),
+                "SetorPaiId": setorPaiId
+            });
+
+            $.ajax({
+                type: "post",
+                url: "/api/Viagem/AdicionarSetor",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: objSetor,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('RequestVerificationToken', $('input[name="__RequestVerificationToken"]').val());
+                },
+                success: function (data) {
+                    AppToast.show('Verde', data.message);
+                    PreencheListaSetores();
+                    $("#modalSetor").modal('hide');
+                },
+                error: function (data) {
+                    console.log(data);
+                    alert('error');
+                }
+            });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "#btnInserirSetor.click", error);
+        }
+    });
+
+    ej.base.L10n.load({
+        "pt-BR": {
+            "richtexteditor": {
+                "alignments": "Alinhamentos",
+                "justifyLeft": "Alinhar à Esquerda",
+                "justifyCenter": "Centralizar",
+                "justifyRight": "Alinhar à Direita",
+                "justifyFull": "Justificar",
+                "fontName": "Nome da Fonte",
+                "fontSize": "Tamanho da Fonte",
+                "fontColor": "Cor da Fonte",
+                "backgroundColor": "Cor de Fundo",
+                "bold": "Negrito",
+                "italic": "Itálico",
+                "underline": "Sublinhado",
+                "strikethrough": "Tachado",
+                "clearFormat": "Limpa Formatação",
+                "clearAll": "Limpa Tudo",
+                "cut": "Cortar",
+                "copy": "Copiar",
+                "paste": "Colar",
+                "unorderedList": "Lista com Marcadores",
+                "orderedList": "Lista Numerada",
+                "indent": "Aumentar Identação",
+                "outdent": "Diminuir Identação",
+                "undo": "Desfazer",
+                "redo": "Refazer",
+                "superscript": "Sobrescrito",
+                "subscript": "Subscrito",
+                "createLink": "Inserir Link",
+                "openLink": "Abrir Link",
+                "editLink": "Editar Link",
+                "removeLink": "Remover Link",
+                "image": "Inserir Imagem",
+                "replace": "Substituir",
+                "align": "Alinhar",
+                "caption": "Título da Imagem",
+                "remove": "Remover",
+                "insertLink": "Inserir Link",
+                "display": "Exibir",
+                "altText": "Texto Alternativo",
+                "dimension": "Mudar Tamanho",
+                "fullscreen": "Maximizar",
+                "maximize": "Maximizar",
+                "minimize": "Minimizar",
+                "lowerCase": "Caixa Baixa",
+                "upperCase": "Caixa Alta",
+                "print": "Imprimir",
+                "formats": "Formatos",
+                "sourcecode": "Visualizar Código",
+                "preview": "Exibir",
+                "viewside": "ViewSide",
+                "insertCode": "Inserir Código",
+                "linkText": "Exibir Texto",
+                "linkTooltipLabel": "Título",
+                "linkWebUrl": "Endereço Web",
+                "linkTitle": "Entre com um título",
+                "linkurl": "http://exemplo.com",
+                "linkOpenInNewWindow": "Abrir Link em Nova Janela",
+                "linkHeader": "Inserir Link",
+                "dialogInsert": "Inserir",
+                "dialogCancel": "Cancelar",
+                "dialogUpdate": "Atualizar",
+                "imageHeader": "Inserir Imagem",
+                "imageLinkHeader": "Você pode proporcionar um link da web",
+                "mdimageLink": "Favor proporcionar uma URL para sua imagem",
+                "imageUploadMessage": "Solte a imagem aqui ou busque para o upload",
+                "imageDeviceUploadMessage": "Clique aqui para o upload",
+                "imageAlternateText": "Texto Alternativo",
+                "alternateHeader": "Texto Alternativo",
+                "browse": "Procurar",
+                "imageUrl": "http://exemplo.com/imagem.png",
+                "imageCaption": "Título",
+                "imageSizeHeader": "Tamanho da Imagem",
+                "imageHeight": "Altura",
+                "imageWidth": "Largura",
+                "textPlaceholder": "Entre com um Texto",
+                "inserttablebtn": "Inserir Tabela",
+                "tabledialogHeader": "Inserir Tabela",
+                "tableWidth": "Largura",
+                "cellpadding": "Espaçamento de célula",
+                "cellspacing": "Espaçamento de célula",
+                "columns": "Número de colunas",
+                "rows": "Número de linhas",
+                "tableRows": "Linhas da Tabela",
+                "tableColumns": "Colunas da Tabela",
+                "tableCellHorizontalAlign": "Alinhamento Horizontal da Célular",
+                "tableCellVerticalAlign": "Alinhamento Vertical da Célular",
+                "createTable": "Criar Tabela",
+                "removeTable": "Remover Tabela",
+                "tableHeader": "Cabeçalho da Tabela",
+                "tableRemove": "Remover Tabela",
+                "tableCellBackground": "Fundo da Célula",
+                "tableEditProperties": "Editar Propriedades da Tabela",
+                "styles": "Estilos",
+                "insertColumnLeft": "Inserir Coluna à Esquerda",
+                "insertColumnRight": "Inserir Coluna à Direita",
+                "deleteColumn": "Apagar Coluna",
+                "insertRowBefore": "Inserir Linha Antes",
+                "insertRowAfter": "Inserir Linha Depois",
+                "deleteRow": "Apagar Linha",
+                "tableEditHeader": "Edita Tabela",
+                "TableHeadingText": "Cabeçãlho",
+                "TableColText": "Col",
+                "imageInsertLinkHeader": "Inserir Link",
+                "editImageHeader": "Edita Imagem",
+                "alignmentsDropDownLeft": "Alinhar à Esquerda",
+                "alignmentsDropDownCenter": "Centralizar",
+                "alignmentsDropDownRight": "Alinhar à Direita",
+                "alignmentsDropDownJustify": "Justificar",
+                "imageDisplayDropDownInline": "Inline",
+                "imageDisplayDropDownBreak": "Break",
+                "tableInsertRowDropDownBefore": "Inserir linha antes",
+                "tableInsertRowDropDownAfter": "Inserir linha depois",
+                "tableInsertRowDropDownDelete": "Apagar linha",
+                "tableInsertColumnDropDownLeft": "Inserir coluna à esquerda",
+                "tableInsertColumnDropDownRight": "Inserir coluna à direita",
+                "tableInsertColumnDropDownDelete": "Apagar Coluna",
+                "tableVerticalAlignDropDownTop": "Alinhar no Topo",
+                "tableVerticalAlignDropDownMiddle": "Alinhar no Meio",
+                "tableVerticalAlignDropDownBottom": "Alinhar no Fundo",
+                "tableStylesDropDownDashedBorder": "Bordas Pontilhadas",
+                "tableStylesDropDownAlternateRows": "Linhas Alternadas",
+                "pasteFormat": "Colar Formato",
+                "pasteFormatContent": "Escolha a ação de formatação",
+                "plainText": "Texto Simples",
+                "cleanFormat": "Limpar",
+                "keepFormat": "Manter",
+                "formatsDropDownParagraph": "Parágrafo",
+                "formatsDropDownCode": "Código",
+                "formatsDropDownQuotation": "Citação",
+                "formatsDropDownHeading1": "Cabeçalho 1",
+                "formatsDropDownHeading2": "Cabeçalho 2",
+                "formatsDropDownHeading3": "Cabeçalho 3",
+                "formatsDropDownHeading4": "Cabeçalho 4",
+                "fontNameSegoeUI": "SegoeUI",
+                "fontNameArial": "Arial",
+                "fontNameGeorgia": "Georgia",
+                "fontNameImpact": "Impact",
+                "fontNameTahoma": "Tahoma",
+                "fontNameTimesNewRoman": "Times New Roman",
+                "fontNameVerdana": "Verdana"
+            }
+        }
+    });
+
+    // Carrega a foto no controle e redimensiona o painel
+    // ==================================================
+    $("#txtFile").change(function (event) {
+        try {
+            var files = event.target.files;
+            $("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+            $("#painelfundo").css({ "padding-bottom:": "200px" });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "#txtFile.change", error);
+        }
+    });
+
+    $(document).ready(function () {
+        try {
+            if ('@Model.ViagemObj.Viagem.ViagemId' != '00000000-0000-0000-0000-000000000000') {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Viagem/PegaFicha",
+                    success: function (data) {
+                        if (data.fichaVistoria != null) {
+                            $('#imgViewer').attr('src', "data:image/jpg;base64," + data.fichaVistoria);
+                        } else {
+                            $('#imgViewer').attr('src', "/Images/FichaAmarelaNova.jpg");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            } else {
+                $('#imgViewer').attr('src', "/Images/FichaAmarelaNova.jpg");
+                // Se quiser preencher o file input programaticamente, precisa de um fluxo com fetch/blob
+                // Mantido apenas o placeholder acima.
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("TaxiLeg.cshtml", "document.ready", error);
+        }
+    });
+</script>
+}

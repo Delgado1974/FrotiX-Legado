@@ -1,0 +1,15 @@
+Locais para Personalizar SmartAdmin
+General.cshtml
+Linha 1956 - link id="mytheme" rel="stylesheet" href="~/css/themes/cust-theme-1.css" <-- Theme CSS override</pre>
+Linha 2525 - "cssSourcemaps": true, <-- change to 'true'
+Linha 2268:
+/* #THEME COLOR (variable overrides)
+========================================================================== */
+$color-primary:                     #b56a9f;
+$color-success:                     #1dc958;
+/* #GLOBAL IMPORTS (You must not remove this!)
+========================================================================== */
+@@import './src/scss/_imports/_theme-modules-import';
+/* #My Unique Changes (you can also add CSS overrides below)
+========================================================================== */
+$nav-background:                    #ed1c34; //<-- my unique change here</pre> 

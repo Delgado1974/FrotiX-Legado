@@ -1,0 +1,345 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc;
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+@functions {
+	public void OnGet()
+	{
+		FrotiX.Pages.Viagens.IndexModel.Initialize(_unitOfWork);
+		ViewData["lstVeiculos"] = new ListaEconomildos(_unitOfWork).VeiculosList();
+		ViewData["lstMotoristas"] = new ListaMotoristaMOB(_unitOfWork).MotoristaList();
+	}
+}
+}
+
+@model FrotiX.Models.Viagem
+
+@{
+	ViewData["Title"] = "Viagens";
+	ViewData["PageName"] = "viagens_fluxopassageiros";
+	ViewData["Heading"] = "<i class='fa-duotone fa-car-bus'></i> Cadastros: <span class='fw-300'>Fluxo de Passageiros dos Economildos</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fa-duotone fa-car-bus";
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+</style>
+
+<script>
+	//------ Indica um Item Sendo Escolhido -------------
+	//==================================================
+	function DefineEscolhaVeiculo() {
+		try {
+			var veiculos = document.getElementById('lstVeiculos').ej2_instances?.[0];
+			return veiculos;
+		} catch (error) {
+			Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "DefineEscolhaVeiculo", error);
+		}
+	}
+
+	function DefineEscolhaData() {
+		try {
+			// reservado para futuras regras
+		} catch (error) {
+			Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "DefineEscolhaData", error);
+		}
+	}
+
+	//------ Função de Escolha do ComboBox Veículos ------------------
+	//================================================================
+	function VeiculosValueChange() {
+		try {
+			// reservado para futuras regras
+		} catch (error) {
+			Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "VeiculosValueChange", error);
+		}
+	}
+</script>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<br />
+				<div class="panel-content">
+					<div class="box-body">
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="text-primary">
+								Escolha a Data e o respectivo Economildo para registrar suas Viagens:
+							</h2>
+						</div>
+
+						<div class="col-12" id="divEscolhas">
+							<!-- Lembrete: ideal mover para JS dedicado -->
+							<script>
+								document.addEventListener('DOMContentLoaded', function () {
+									try {
+										var veiculosCombobox = document.getElementById('lstVeiculos')?.ej2_instances?.[0];
+										var motoristasCombobox = document.getElementById('lstMotoristas')?.ej2_instances?.[0];
+
+										if (veiculosCombobox) {
+											veiculosCombobox.focusIn = function () {
+												try {
+													this.showPopup();
+												}
+												catch (error) {
+													Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "veiculos.focusIn", error);
+												}
+											};
+											veiculosCombobox.element.addEventListener('focus', function () {
+												try {
+													veiculosCombobox.focusIn();
+												}
+												catch (error) {
+													Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "veiculos.focus.addEventListener", error);
+												}
+											});
+										}
+
+										if (motoristasCombobox) {
+											motoristasCombobox.focusIn = function () {
+												try {
+													this.showPopup();
+												}
+												catch (error) {
+													Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "motoristas.focusIn", error);
+												}
+											};
+											motoristasCombobox.element.addEventListener('focus', function () {
+												try {
+													motoristasCombobox.focusIn();
+												}
+												catch (error) {
+													Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "motoristas.focus.addEventListener", error);
+												}
+											});
+										}
+									} catch (error) {
+										Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml", "DOMContentLoaded", error);
+									}
+								});
+							</script>
+
+							<div class="form-group row">
+								<div class="col-3 col-sm-3">
+									<br />
+									<label class="label font-weight-bold color-black">Escolha uma Data</label>
+									<input id="txtData" class="form-control form-control-xs" type="date" />
+								</div>
+
+								<div class="col-3 col-sm-3 col-md-3 pb-2">
+									<br />
+									<label class="label font-weight-bold color-black">Placa do Economildo</label>
+									<ejs-combobox id="lstVeiculos"
+												  placeholder="Selecione um Veículo"
+												  allowFiltering="true"
+												  filterType="Contains"
+												  dataSource="@ViewData["lstVeiculos"]"
+												  popupHeight="250px"
+												  width="100%"
+												  showClearButton="true">
+										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+
+								<div class="col-3 col-sm-3 col-md-3 pb-2">
+									<br />
+									<label class="label font-weight-bold color-black">Motorista do Economildo</label>
+									<ejs-combobox id="lstMotoristas"
+												  placeholder="Selecione um Motorista"
+												  allowFiltering="true"
+												  filterType="Contains"
+												  dataSource="@ViewData["lstMotoristas"]"
+												  popupHeight="250px"
+												  width="100%"
+												  showClearButton="true">
+										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+
+								<div class="col-9 col-sm-6 col-md-3 pb-2">
+									<br />
+									<label class="label font-weight-bold">Indique o MOB a ser Registrado</label>
+									<select class="form-control form-control-xs" id="lstMOB">
+										<option value=""></option>
+										<option value="Rodoviaria">Rodoviária</option>
+										<option value="Cefor">Cefor</option>
+										<option value="PGR">PGR</option>
+									</select>
+								</div>
+
+								<div class="col-9 col-sm-6 col-md-3 pb-2">
+									<br />
+									<label class="label font-weight-bold">Indique o Responsável pelo Registro</label>
+									<select class="form-control form-control-xs" id="lstResponsavel">
+										<option value=""></option>
+										<option value="Angela">Angela</option>
+										<option value="Greciane">Greciane</option>
+										<option value="Milena">Milena</option>
+									</select>
+								</div>
+
+								<div class="col-6">
+									<br /><br />
+									<div class="row">
+										<div class="col-6">
+											<button id="btnInsereFicha" type="button" class="btn btn-azul form-control" data-ejtip="Insere Ficha de Registro">
+												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Insere Ficha
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div> <!-- /divEscolhas -->
+
+						<br />
+
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88" hidden="hidden" id="divTitulo">
+							<h3 class="text-primary">
+								Informe todas as viagens de Ida e Volta do referido Economildo:
+							</h3>
+						</div>
+
+						<div class="row" hidden="hidden" id="divInsercao">
+							<div class="col-10">
+								<div class="panel-content">
+									<div class="box-body">
+										<div class="row">
+											<div class="col-3">
+												<div class="form-group">
+													<label class="label font-weight-bold">Ida/Volta</label>
+													<select class="form-control form-control-xs" id="lstIdaVolta">
+														<option value="IDA">Ida</option>
+														<option value="VOLTA">Volta</option>
+													</select>
+												</div>
+											</div>
+
+											<div class="col-2 col-sm-2">
+												<label class="label font-weight-bold color-black">Hora Início</label>
+												<input id="txtHoraInicio" class="form-control form-control-xs" type="time" />
+											</div>
+
+											<div class="col-2 col-sm-2">
+												<label class="label font-weight-bold color-black">Hora Fim</label>
+												<input id="txtHoraFim" class="form-control form-control-xs" type="time" />
+											</div>
+
+											<div class="col-2 col-sm-2">
+												<label class="label font-weight-bold color-black">Quantidade</label>
+												<input id="txtQtd" class="form-control form-control-xs" type="number" />
+											</div>
+
+											<div class="col-1 align-self-end">
+												<a class="btn btn-azul btn-sm text-white btnFicha"
+												   id="btnInsere"
+												   href="#"
+												   style="cursor: pointer;"
+												   data-ejtip="Insere a Linha">
+													<i class="fa-thin fa-clipboard-list"></i>
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div> <!-- /col-10 -->
+						</div> <!-- /divInsercao -->
+
+						<div class="row" hidden="hidden" id="divRegistro">
+							<div class="col-6">
+								<div class="panel-content">
+									<div class="box-body">
+										<h3 id="TituloIdas">Viagens de Ida</h3>
+										@{
+											List<object> colsida = new List<object> { new { field = "horainicioida" , direction = "Ascending" } };
+										}
+										<ejs-grid id="grdIda" toolbar="@(new List<string>() { "Delete" })" GridLines="Both" allowSorting="true">
+											<e-grid-editSettings allowAdding="true"
+																 allowDeleting="true"
+																 allowEditing="true"
+																 newRowPosition="Bottom"
+																 showDeleteConfirmDialog="true"></e-grid-editSettings>
+											<e-grid-sortsettings columns="colsida"></e-grid-sortsettings>
+											<e-grid-columns>
+												<e-grid-column field="horainicioida" headerText="Hora" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+												<e-grid-column field="horafimida" headerText="Hora" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+												<e-grid-column field="qtdpassageirosida" headerText="Quantidade" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
+											</e-grid-columns>
+										</ejs-grid>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-6">
+								<div class="panel-content">
+									<div class="box-body">
+										<h3 id="TituloVoltas">Viagens de Volta</h3>
+										@{
+											List<object> colsvolta = new List<object> { new { field = "horainiciovolta" , direction = "Ascending" } };
+										}
+										<ejs-grid id="grdVolta" toolbar="@(new List<string>() { "Delete" })" GridLines="Both" allowSorting="true">
+											<e-grid-editSettings allowAdding="true"
+																 allowDeleting="true"
+																 allowEditing="true"
+																 newRowPosition="Bottom"
+																 showDeleteConfirmDialog="true"></e-grid-editSettings>
+											<e-grid-sortsettings columns="colsvolta"></e-grid-sortsettings>
+											<e-grid-columns>
+												<e-grid-column field="horainiciovolta" headerText="Hora" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+												<e-grid-column field="horafimvolta" headerText="Hora" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+												<e-grid-column field="qtdpassageirosvolta" headerText="Quantidade" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
+											</e-grid-columns>
+										</ejs-grid>
+									</div>
+									<br />
+								</div>
+							</div>
+						</div> <!-- /divRegistro -->
+
+						<div class="form-group row" hidden="hidden" id="divBotao">
+							<div class="col-9">
+								<div class="row">
+									<div class="col-6">
+										<button id="btnSubmite" type="button" class="btn btn-azul form-control" data-ejtip="Registrar Viagens">
+											<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Registrar Viagens
+										</button>
+									</div>
+									<div class="col-6">
+										<button id="btnCancela" type="button" class="btn btn-vinho form-control" data-ejtip="Cancela Inserção">
+											<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancela Inserção
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div> <!-- /box-body -->
+				</div> <!-- /panel-content -->
+			</div> <!-- /panel-container -->
+		</div> <!-- /panel -->
+	</div> <!-- /col-xl-12 -->
+
+	<input id="txtHoraInicioAnteriorIda" class="form-control form-control-xs" type="time" hidden="hidden" />
+	<input id="txtHoraFimAnteriorIda" class="form-control form-control-xs" type="time" hidden="hidden" />
+	<input id="txtQtdAnteriorIda" class="form-control form-control-xs" type="number" hidden="hidden" />
+
+	<input id="txtHoraInicioAnteriorVolta" class="form-control form-control-xs" type="time" hidden="hidden" />
+	<input id="txtHoraFimAnteriorVolta" class="form-control form-control-xs" type="time" hidden="hidden" />
+	<input id="txtQtdAnteriorVolta" class="form-control form-control-xs" type="number" hidden="hidden" />
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="/js/cadastros/fluxopassageiros.js" asp-append-version="true"></script>
+}

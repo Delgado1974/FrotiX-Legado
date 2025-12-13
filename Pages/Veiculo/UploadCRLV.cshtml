@@ -1,0 +1,351 @@
+@page
+@model FrotiX.Pages.Veiculo.UploadCRLVModel
+
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+
+@{
+	ViewData["Title"] = "Veículos (CRLV)";
+	ViewData["PageName"] = "veiculo_uploadcrlv";
+	ViewData["Heading"] = "<i class='fad fa-file-alt'></i> Cadastros: <span class='fw-300'>Veículos (CRLV)</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-file-alt";
+
+	// Ajustes do uploader (endpoints) - ADICIONE o veiculoId na URL
+	var asyncSettings = new Syncfusion.EJ2.Inputs.UploaderAsyncSettings
+	{
+		SaveUrl = $"api/UploadCRLV/Save?veiculoId={Model.VeiculoObj.Veiculo.VeiculoId}" ,
+		RemoveUrl = $"api/UploadCRLV/Remove?veiculoId={Model.VeiculoObj.Veiculo.VeiculoId}"
+	};
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"]</title>
+
+	<link rel="stylesheet" href="~/css/site.css" />
+	<link rel="stylesheet" href="~/css/ej2/bootstrap.css" />
+</head>
+<body>
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="panel-content">
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="text-primary">
+								Upload do CRLV Digitalizado - (@(Model.VeiculoObj.Veiculo.Placa))
+							</h2>
+						</div>
+
+						<div class="col-12 pt-3">
+							<div class="container">
+								<main role="main" class="pb-3">
+									<div id="ControlRegion">
+										<div class="col-lg-8 control-section">
+											<div class="control_wrapper">
+												<ejs-uploader id="UploadFiles"
+															  removing="onFileRemove"
+															  asyncSettings="@asyncSettings"
+															  locale="pt-BR"
+															  allowedExtensions=".pdf"
+															  actionComplete="onActionComplete">
+												</ejs-uploader>
+											</div>
+										</div>
+
+										<div class="col-lg-4 property-section" style="display:none; visibility:hidden">
+											<div id="property" title="Properties">
+												<div style="margin-left: 50px; padding-top:25px;">
+													<ejs-checkbox id="checkAutoUpload"
+																  label="Auto Upload"
+																  checked="true"
+																  change="onChange">
+													</ejs-checkbox>
+												</div>
+											</div>
+										</div>
+
+										<br />
+										<br />
+
+										<!-- Viewer inicia oculto e é mostrado após upload ou quando já existe CRLV -->
+										<div id="divpdf" style="width:100%; height:0px; visibility:hidden;">
+											<ejs-pdfviewer id="pdfviewer"
+														   style="height:600px"
+														   serviceUrl="/api/PdfViewer"
+														   locale="pt-BR">
+											</ejs-pdfviewer>
+										</div>
+
+										<style>
+											.control_wrapper {
+												max-width: 400px;
+												margin: auto;
+											}
+
+											.e-upload {
+												width: 100%;
+												position: relative;
+												margin-top: 15px;
+											}
+
+											.control_wrapper .e-upload .e-upload-drag-hover {
+												margin: 0;
+											}
+										</style>
+
+										<script>
+											(function() {
+												"use strict";
+
+												window.onActionComplete = function(args) {
+													try {
+														if (!args || !args.fileData || !args.fileData.length) {
+															console.warn("onActionComplete sem arquivo.");
+															return;
+														}
+
+														console.info("Upload concluído:", args.fileData[0].name);
+
+														// Exibe o viewer
+														var div = document.getElementById("divpdf");
+														if (div) {
+															div.style.visibility = "visible";
+															div.style.height = "600px";
+														}
+
+														// Carrega o PDF do veículo
+														$.ajax({
+															url: '/api/PdfViewer/GetDocument?id=@Model.VeiculoObj.Veiculo.VeiculoId',
+															method: 'POST',
+															cache: false,
+															processData: false,
+															contentType: false
+														})
+														.done(function (result) {
+															try {
+																console.log("Documento carregado.");
+																var pdfViewer = document.getElementById('pdfviewer');
+																if (pdfViewer && pdfViewer.ej2_instances && pdfViewer.ej2_instances[0]) {
+																	pdfViewer.ej2_instances[0].load(result, null);
+																}
+															} catch (error) {
+																Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "ajax.done", error);
+															}
+														})
+														.fail(function (msg) {
+															try {
+																console.log('Erro ao carregar documento: ' + (msg && msg.responseText));
+																AppToast.show('Vermelho', "Erro ao carregar documento PDF.", 2000);
+															} catch (error) {
+																Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "ajax.fail", error);
+															}
+														});
+
+													} catch (error) {
+														Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "onActionComplete", error);
+													}
+												};
+
+												window.onFileRemove = function(args) {
+													try {
+														// evita envio do arquivo bruto na remoção
+														args.postRawFile = false;
+													} catch (error) {
+														Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "onFileRemove", error);
+													}
+												};
+
+												window.onChange = function(args) {
+													try {
+														var uploadObj = document.getElementById("UploadFiles");
+														if (!uploadObj || !uploadObj.ej2_instances) return;
+
+														uploadObj.ej2_instances[0].autoUpload = args.checked;
+														uploadObj.ej2_instances[0].clearAll();
+													} catch (error) {
+														Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "onChange", error);
+													}
+												};
+											})();
+										</script>
+
+										<script>
+											(function() {
+												"use strict";
+
+												var L10n = ej.base.L10n;
+												L10n.load({
+													"pt-BR": {
+														"uploader": {
+															"invalidMinFileSize": "O tamanho do arquivo é muito pequeno! Somente são aceitos arquivos com mais de 10kb",
+															"invalidMaxFileSize": "O tamanho do arquivo excede 4 MB",
+															"invalidFileType": "Tipo de arquivo não permitido",
+															"Browse": "Procurar...",
+															"Clear": "Limpar",
+															"Upload": "Upload",
+															"dropFilesHint": "Ou solte os arquivos aqui",
+															"uploadFailedMessage": "Falha no upload",
+															"uploadSuccessMessage": "Upload bem sucedido",
+															"removedSuccessMessage": "Remoção bem sucedida",
+															"removedFailedMessage": "Não foi possível remover o arquivo",
+															"inProgress": "Enviando",
+															"readyToUploadMessage": "Pronto para o upload",
+															"remove": "Remover",
+															"cancel": "Cancelar",
+															"delete": "Apagar arquivo",
+															"abort": "Abortar",
+															"pauseUpload": "Upload pausado",
+															"pause": "Pausar",
+															"resume": "Continuar",
+															"retry": "Tentar novamente",
+															"fileUploadCancel": "Upload cancelado"
+														},
+														"PdfViewer": {
+															"PdfViewer": "Visualizador de PDFs",
+															"Cancel": "Cancelar",
+															"Download file": "Baixar arquivo",
+															"Download": "Baixar",
+															"Enter Password": "Entre com a senha.",
+															"File Corrupted": "Arquivo Corrompido",
+															"File Corrupted Content": "Conteúdo de Arquivo Corrompido.",
+															"Fit Page": "Página",
+															"Fit Width": "Largura",
+															"Automatic": "Automático",
+															"Go To First Page": "Ir para a Primeira Página",
+															"Invalid Password": "Senha Inválida",
+															"Next Page": "Próxima Página",
+															"OK": "Ok",
+															"Open": "Abrir",
+															"Page Number": "Número da Página",
+															"Previous Page": "Página Anterior",
+															"Go To Last Page": "Ir Para a Última Página",
+															"Zoom": "Zoom",
+															"Zoom In": "Mais Zoom",
+															"Zoom Out": "Menos Zoom",
+															"Page Thumbnails": "Miniaturas da Página",
+															"Bookmarks": "Favoritos",
+															"Print": "Imprimir",
+															"Password Protected": "Protegido por Senha",
+															"Copy": "Copiar",
+															"Text Selection": "Seleção de Texto",
+															"Panning": "Habilitar Panning",
+															"Text Search": "Buscar Texto",
+															"Find in document": "Procurar no Documento",
+															"Match case": "Diferenciar maiúsc./minúsc.",
+															"Apply": "Aplicar",
+															"GoToPage": "Ir para a Página",
+															"No matches": "Sem combinações",
+															"No Text Found": "Texto não encontrado",
+															"Undo": "Desfazer",
+															"Redo": "Refazer",
+															"Annotation": "Anotação",
+															"Highlight": "Realçar",
+															"Underline": "Sublinhar",
+															"Strikethrough": "Tachar",
+															"Delete": "Apagar",
+															"Opacity": "Opacidade",
+															"Color edit": "Editar Cor",
+															"Opacity edit": "Editar Opacidade",
+															"Highlight context": "Contexto de realce",
+															"Underline context": "Contexto de sublinhado",
+															"Strikethrough context": "Contexto de tachado",
+															"Server error": "Erro no Servidor",
+															"Open text": "Abrir",
+															"First text": "Primeiro",
+															"Previous text": "Anterior",
+															"Next text": "Próximo",
+															"Last text": "Último",
+															"Zoom in text": "Mais Zoom",
+															"Zoom out text": "Menos Zoom",
+															"Selection text": "Seleção",
+															"Pan text": "Pan",
+															"Print text": "Imprimir",
+															"Search text": "Buscar",
+															"Annotation Edit text": "Editar Anotação"
+														}
+													}
+												});
+											})();
+										</script>
+									</div>
+
+									<br />
+									<a href="/Veiculo/Upsert?id=@Model.VeiculoObj.Veiculo.VeiculoId"
+									   class="btn btn-vinho form-control float-right"
+									   style="cursor:pointer; max-width: 250px;"
+									   data-ejtip="Voltar para edição do veículo">
+										<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar para o Veículo
+									</a>
+									<br /><br />
+								</main>
+							</div>
+
+							<!-- libs -->
+							<script src="~/js/site.js" asp-append-version="true"></script>
+							<ejs-scripts></ejs-scripts>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function() {
+			"use strict";
+
+			// Se já existir CRLV, abre o viewer automaticamente
+			$(document).ready(function () {
+				try {
+					console.log("Página abriu");
+
+					if (@Model.CRLV == 1) {
+						var div = document.getElementById("divpdf");
+						if (div) {
+							div.style.visibility = "visible";
+							div.style.height = "600px";
+						}
+
+						$.ajax({
+							url: '/api/PdfViewer/GetDocument?id=@Model.VeiculoObj.Veiculo.VeiculoId',
+							method: 'POST',
+							cache: false,
+							processData: false,
+							contentType: false
+						})
+						.done(function (result) {
+							try {
+								console.log("Documento carregado (auto).");
+								var pdfViewer = document.getElementById('pdfviewer');
+								if (pdfViewer && pdfViewer.ej2_instances && pdfViewer.ej2_instances[0]) {
+									pdfViewer.ej2_instances[0].load(result, null);
+								}
+							} catch (error) {
+								Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "document.ready.ajax.done", error);
+							}
+						})
+						.fail(function (msg) {
+							try {
+								console.log('Erro ao carregar documento: ' + (msg && msg.responseText));
+								AppToast.show('Vermelho', "Erro ao carregar documento PDF existente.", 2000);
+							} catch (error) {
+								Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "document.ready.ajax.fail", error);
+							}
+						});
+					}
+				} catch (error) {
+					Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "document.ready", error);
+				}
+			});
+		})();
+	</script>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

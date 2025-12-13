@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Neon Admin Panel" />
+    <meta name="author" content="" />
+
+    <link rel="icon" href="~/Neon/images/favicon.ico">
+
+    <title>FrotiX | Login</title>
+
+    <link rel="stylesheet" href="~/Neon/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css">
+    <link rel="stylesheet" href="~/Neon/css/font-icons/entypo/css/entypo.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
+    <link rel="stylesheet" href="~/Neon/css/bootstrap.css">
+    <link rel="stylesheet" href="~/Neon/css/neon-core.css">
+    <link rel="stylesheet" href="~/Neon/css/neon-theme.css">
+    <link rel="stylesheet" href="~/Neon/css/neon-forms.css">
+    <link rel="stylesheet" href="~/Neon/css/custom.css">
+    <link rel="stylesheet" href="~/css/botaologin.css">
+
+
+
+    <link href="~/lib/fontawesome-pro/css/all.css" rel="stylesheet" />
+    @*<link href="~/lib/fontawesome-pro/css/brands.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/duotone.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/fontawesome.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/light.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/regular.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/solid.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/svg-with-js.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/thin.css" rel="stylesheet" />
+    <link href="~/lib/fontawesome-pro/css/v4-shims.css" rel="stylesheet" />*@
+
+    <script src="~/Neon/js/jquery-1.11.3.min.js"></script>
+
+
+</head>
+<body class="page-body login-page login-form-fall">
+
+
+    <script type="text/javascript">var baseurl = '';</script>
+
+
+    <div class="login-header login-caret">
+
+        <div class="container-fluid">
+            <div class="row text-center">
+                <div class="col">
+
+                    <a href="#" class="logo">
+                        <!-- Sua imagem original -->
+                        <img id="logoOriginal" src="~/Images/LogotipoCompletoFrotiXRoxoFundoTransparenteEstreita.png" alt="Logo FrotiX" />
+                        <h4 style="color:#ffffff !important;"></h4>
+                    </a>
+                    <br />
+                    <p class="description">Prezado usuário, logue-se para acessar a área de administração!</p>
+
+                    <!-- progress bar indicator -->
+                    <div class="login-progressbar-indicator">
+                        <h3>3%</h3>
+                        <span>logando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="login-progressbar">
+        <div></div>
+    </div>
+
+    <div class="login-form">
+
+        @RenderBody()
+
+    </div>
+
+    <script>
+        function trimTransparentPNG(img) {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const pixels = imageData.data;
+          const w = canvas.width;
+          const h = canvas.height;
+
+          let top = null, bottom = null, left = null, right = null;
+
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const alpha = pixels[(y * w + x) * 4 + 3];
+              if (alpha > 0) {
+                if (top === null) top = y;
+                bottom = y;
+                if (left === null || x < left) left = x;
+                if (right === null || x > right) right = x;
+              }
+            }
+          }
+
+          const trimmedWidth = right - left + 1;
+          const trimmedHeight = bottom - top + 1;
+          const trimmedData = ctx.getImageData(left, top, trimmedWidth, trimmedHeight);
+
+          const resultCanvas = document.createElement('canvas');
+          resultCanvas.width = trimmedWidth;
+          resultCanvas.height = trimmedHeight;
+          resultCanvas.getContext('2d').putImageData(trimmedData, 0, 0);
+
+          return resultCanvas;
+        }
+    </script>
+
+    <script>
+        window.addEventListener('load', () => {
+            const img = document.getElementById('logoOriginal');
+            const proxyImg = new Image();
+
+            proxyImg.onload = () => {
+            // Largura base desejada
+            const targetWidth = 800;
+
+            // Calcular altura proporcional após o trim
+            const trimmed = trimTransparentPNG(proxyImg); // retorna canvas já cortado sem redimensionar
+            const aspectRatio = trimmed.height / trimmed.width;
+            const targetHeight = Math.round(targetWidth * aspectRatio);
+
+            // Agora redimensiona com proporção correta
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = targetWidth;
+            finalCanvas.height = targetHeight;
+            finalCanvas.getContext('2d').drawImage(trimmed, 0, 0, targetWidth, targetHeight);
+
+            // Substituir imagem original pelo canvas
+            img.replaceWith(finalCanvas);
+            };
+
+            proxyImg.src = img.src;
+        });
+    </script>
+
+    <!-- Bottom scripts (common) -->
+    <script src="~/Neon/js/gsap/TweenMax.min.js"></script>
+    <script src="~/Neon/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js"></script>
+    <script src="~/Neon/js/bootstrap.js"></script>
+    <script src="~/Neon/js/joinable.js"></script>
+    <script src="~/Neon/js/resizeable.js"></script>
+    <script src="~/Neon/js/neon-api.js"></script>
+    <script src="~/Neon/js/jquery.validate.min.js"></script>
+    <script src="~/Neon/js/neon-login.js"></script>
+    <script src="~/Neon/js/neon-register.js"></script>
+
+
+    <!-- JavaScripts initializations and stuff -->
+    <script src="~/Neon/js/neon-custom.js"></script>
+
+
+    <!-- Demo Settings -->
+    <script src="~/Neon/js/neon-demo.js"></script>
+
+</body>
+</html>

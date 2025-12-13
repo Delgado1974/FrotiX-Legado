@@ -1,0 +1,313 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Requisitante.UpsertModel
+
+@{
+	ViewData["Title"] = "Requisitantes";
+	ViewData["PageName"] = "requisitante_index";
+	ViewData["Heading"] = "<i class='fad fa-users-class'></i> Cadastros: <span class='fw-300'>Requisitantes</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-users-class";
+}
+
+<script>
+	// Verifica quando a página carrega
+	document.addEventListener('DOMContentLoaded', function() {
+		console.log('🚀 Página carregada!');
+
+		// Verifica se o DropDownTree existe
+		var ddtree = document.getElementById('ddtree');
+		console.log('DropDownTree encontrado:', ddtree ? 'SIM' : 'NÃO');
+
+		// Verifica o campo hidden
+		var hiddenField = document.getElementById('hiddenSetorId');
+		console.log('Campo hidden encontrado:', hiddenField ? 'SIM' : 'NÃO');
+		console.log('Valor inicial do hidden:', hiddenField?.value);
+	});
+
+	function onSetorChange(args) {
+		console.log('==========================================');
+		console.log('🔍 Evento Change disparado!');
+		console.log('📊 args:', args);
+		console.log('📌 args.value:', args.value);
+		console.log('📌 args.text:', args.text);
+		console.log('📌 args.itemData:', args.itemData);
+
+		var setorId = args.value;
+		console.log('✅ Setor ID capturado:', setorId);
+		console.log('✅ Tipo do valor:', typeof setorId);
+
+		var hiddenField = document.getElementById('hiddenSetorId');
+		if (hiddenField) {
+			hiddenField.value = setorId;
+			console.log('✅ Hidden atualizado para:', hiddenField.value);
+		} else {
+			console.error('❌ Campo hidden NÃO encontrado!');
+		}
+		console.log('==========================================');
+	}
+</script>
+
+<style>
+	.form-control-xs {
+		height: calc(1em + .775rem + 2px) !important;
+		padding: .125rem .25rem !important;
+		font-size: .75rem !important;
+		line-height: 1.5;
+		border-radius: .2rem;
+	}
+
+	.label {
+		margin-bottom: -5px;
+		margin-top: 10px;
+	}
+
+	input[type=checkbox] {
+		vertical-align: middle;
+		position: relative;
+		bottom: 1px;
+	}
+
+	/* classe utilitária (caso precise esconder algo) */
+	.escondido {
+		visibility: hidden;
+	}
+
+	/* Ajustes para o DropDownTree */
+	#ddtree {
+		width: 100% !important;
+	}
+
+	/* Espaçamento entre botões (fallback para navegadores sem suporte a gap) */
+	.gap-2 > * + * {
+		margin-left: 0.5rem;
+	}
+
+	/* Alinhamento dos labels */
+	.form-group label {
+		margin-bottom: 0.5rem;
+		display: block;
+	}
+
+	/* Validação inline */
+	.form-group .text-danger {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 0.875rem;
+	}
+
+	/* Força o DropDownTree a ter borda inferior */
+	.e-ddt.e-control-wrapper .e-ddt-wrap {
+		border-bottom: 1px solid #ced4da !important;
+	}
+
+	.e-ddt.e-control-wrapper.e-input-focus .e-ddt-wrap {
+		border-bottom: 2px solid #325d88 !important;
+	}
+
+	#ddtree {
+		width: 100% !important;
+	}
+
+	.gap-2 > * + * {
+		margin-left: 0.5rem;
+	}
+
+	.form-group label {
+		margin-bottom: 0.5rem;
+		display: block;
+	}
+
+	.form-group .text-danger {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 0.875rem;
+	}
+
+</style>
+
+@section HeadBlock {
+}
+
+<form method="post">
+	@Html.AntiForgeryToken()
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="panel-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						@if (Model.RequisitanteObj.Requisitante.RequisitanteId != Guid.Empty)
+						{
+							<input type="hidden" asp-for="RequisitanteObj.Requisitante.RequisitanteId" />
+						}
+
+						<!-- Cabeçalho -->
+						<div class="header-toolbar">
+							<h2 class="titulo-paginas">
+								<i class="fa-duotone fa-solid fa-person-sign" aria-hidden="true"></i>
+								@(Model.RequisitanteObj.Requisitante.RequisitanteId != Guid.Empty ? "Atualizar " : "Criar ") Requisitante
+							</h2>
+						</div>
+
+						<!-- Formulário -->
+						<div class="col-12 px-3">
+
+							<!-- Linha 1: Ponto, Nome e Ramal -->
+							<div class="row mb-3">
+								<div class="col-md-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="RequisitanteObj.Requisitante.Ponto">
+											Ponto
+										</label>
+										<input class="form-control form-control-sm"
+											   asp-for="RequisitanteObj.Requisitante.Ponto" />
+										<span class="text-danger small"
+											  asp-validation-for="RequisitanteObj.Requisitante.Ponto"></span>
+									</div>
+								</div>
+								<div class="col-md-8">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="RequisitanteObj.Requisitante.Nome">
+											Nome Completo
+										</label>
+										<input class="form-control form-control-sm"
+											   asp-for="RequisitanteObj.Requisitante.Nome" />
+										<span class="text-danger small"
+											  asp-validation-for="RequisitanteObj.Requisitante.Nome"></span>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="RequisitanteObj.Requisitante.Ramal">
+											Ramal
+										</label>
+										<input class="form-control form-control-sm"
+											   asp-for="RequisitanteObj.Requisitante.Ramal" />
+										<span class="text-danger small"
+											  asp-validation-for="RequisitanteObj.Requisitante.Ramal"></span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Linha 2: Email e Setor -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="RequisitanteObj.Requisitante.Email">
+											E-mail
+										</label>
+										<input class="form-control form-control-sm"
+											   asp-for="RequisitanteObj.Requisitante.Email"
+											   type="email" />
+										<span class="text-danger small"
+											  asp-validation-for="RequisitanteObj.Requisitante.Email"></span>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="label font-weight-bold">
+											Setor do Requisitante
+										</label>
+
+										<!-- Campo hidden conectado ao modelo -->
+										<input type="hidden"
+											   asp-for="RequisitanteObj.Requisitante.SetorSolicitanteId"
+											   id="hiddenSetorId" />
+
+										<ejs-dropdowntree id="ddtree"
+														  placeholder="Selecione um Setor"
+														  sortOrder="Ascending"
+														  showCheckBox="false"
+														  allowMultiSelection="false"
+														  allowFiltering="true"
+														  filterType="Contains"
+														  value="@Model.RequisitanteObj.Requisitante.SetorSolicitanteId"
+														  filterBarPlaceholder="Procurar..."
+														  change="onSetorChange">
+											<e-dropdowntree-fields dataSource="@ViewData["dataSource"]"
+																   value="SetorSolicitanteId"
+																   text="Nome"
+																   parentValue="SetorPaiId"
+																   hasChildren="HasChild">
+											</e-dropdowntree-fields>
+										</ejs-dropdowntree>
+									</div>
+								</div>
+							</div>
+
+							<!-- Linha 3: Status -->
+							<div class="row mb-4">
+								<div class="col-12">
+									<div class="form-group mb-0">
+										<div class="custom-control custom-checkbox">
+											<input type="checkbox"
+												   class="custom-control-input"
+												   asp-for="RequisitanteObj.Requisitante.Status"
+												   id="statusCheck" />
+											<label class="custom-control-label font-weight-bold" for="statusCheck">
+												Ativo
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Linha 4: Botões de Ação -->
+							<div class="row mt-4">
+								<div class="col-12">
+									<div class="d-flex justify-content-start gap-2">
+										@if (Model.RequisitanteObj.Requisitante.RequisitanteId != Guid.Empty)
+										{
+											<button type="submit"
+													asp-page-handler="Edit"
+													asp-route-id="@Model.RequisitanteObj.Requisitante.RequisitanteId"
+													class="btn btn-azul px-4">
+												<i class="fa-duotone fa-pen-to-square me-2"></i>
+												Atualizar
+											</button>
+										}
+										else
+										{
+											<button type="submit"
+													asp-page-handler="Submit"
+													class="btn btn-azul px-4">
+												<i class="fa-duotone fa-file-plus me-2"></i>
+												Criar
+											</button>
+										}
+
+										<a asp-page="./Index" class="btn btn-vinho px-4">
+											<i class="fa-solid fa-rotate-left me-2"></i>
+											Voltar à Lista
+										</a>
+									</div>
+								</div>
+							</div>
+
+						</div> <!-- /.col-12 px-3 -->
+					</div> <!-- /.panel-content -->
+				</div> <!-- /.panel-container -->
+			</div> <!-- /#panel-1 -->
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			try {
+				// Define o setor selecionado ao abrir a página (edição)
+				document.getElementById("ddtree").ej2_instances[0].value = ["@Model.RequisitanteObj.Requisitante.SetorSolicitanteId"];
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("Upsert.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+}

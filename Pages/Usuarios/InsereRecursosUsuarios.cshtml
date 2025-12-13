@@ -1,0 +1,140 @@
+@page
+@model FrotiX.Models.Abastecimento
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+	ViewData["Title"] = "Importa Abastecimentos";
+	ViewData["PageName"] = "importa_abastecimento_index";
+	ViewData["Heading"] = "<i class='fad fa-gas-pump'></i> Importação: <span class='fw-300'>Abastecimentos</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-gas-pump";
+}
+
+@section HeadBlock {
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+
+	.label {
+		color: white;
+	}
+</style>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<div class="panel-content">
+					<div class="row">
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="text-primary">Serviços de Inserção dos Recursos nos Usuários</h2>
+						</div>
+					</div>
+					<button id="btnInsereRecursos"
+							type="button"
+							class="btn btn-azul form-control"
+							aria-label="Insere Recursos nos Usuários"
+							aria-busy="false"
+							data-ejtip="Insere todos os recursos disponíveis para todos os usuários">
+						<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Insere Recursos nos Usuários
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-12 pt-2">
+		<div class="clearfix" id="divCustos">&nbsp;</div>
+		<div class="row">
+			<div id="divPrint"></div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+	<script type="text/javascript" src="~/js/loading_script.js"></script>
+
+	<script>
+		(function () {
+			"use strict";
+
+			$(document).ready(function () {
+				try {
+					const $btn = $("#btnInsereRecursos");
+					const $divCustos = $("#divCustos");
+
+					$btn.on("click", function (event) {
+						try {
+							event.preventDefault();
+
+							// evita duplo clique
+							if ($btn.prop("disabled")) return;
+							$btn.prop("disabled", true).attr("aria-busy", "true");
+
+							// Loading
+							if ($divCustos.LoadingScript) {
+								$divCustos.LoadingScript("method_12", {
+									background_image: "img/loading7.png",
+									main_width: 60,
+									animation_speed: 10,
+									additional_style: "",
+									after_element: false
+								});
+							}
+
+							$.ajax({
+								type: "POST",
+								url: "/api/Usuario/InsereRecursosUsuario",
+								success: function (data) {
+									try {
+										const msg = (data && data.message) ? data.message : "Operação concluída.";
+										if (data && data.success === false) {
+											AppToast.show('Vermelho', msg, 2000);
+										} else {
+											AppToast.show('Verde', msg || "Recursos inseridos com sucesso.", 2000);
+										}
+									} catch (inner) {
+										Alerta.TratamentoErroComLinha("InsereRecursosUsuarios.cshtml", "ajax.success", inner);
+									}
+								},
+								error: function (xhr) {
+									try {
+										console.error(xhr);
+										AppToast.show('Vermelho', "Erro ao inserir recursos nos usuários.", 2000);
+									} catch (inner) {
+										Alerta.TratamentoErroComLinha("InsereRecursosUsuarios.cshtml", "ajax.error", inner);
+									}
+								},
+								complete: function () {
+									try {
+										if ($divCustos.LoadingScript) {
+											$divCustos.LoadingScript("destroy");
+										}
+										$btn.prop("disabled", false).attr("aria-busy", "false");
+									} catch (inner) {
+										Alerta.TratamentoErroComLinha("InsereRecursosUsuarios.cshtml", "ajax.complete", inner);
+									}
+								}
+							});
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("InsereRecursosUsuarios.cshtml", "btnInsereRecursos.click", error);
+						}
+					});
+				} catch (error) {
+					Alerta.TratamentoErroComLinha("InsereRecursosUsuarios.cshtml", "document.ready", error);
+				}
+			});
+		})();
+	</script>
+}

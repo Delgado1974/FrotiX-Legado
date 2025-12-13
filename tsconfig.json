@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    // alvo ES2015+ para aceitar private fields e sintaxe moderna
+    "target": "ES2015",
+    // Usa resolução de módulos Node (padrío para npm)
+    "moduleResolution": "node",
+    // Permite que o TS valide .js também
+    "allowJs": true,
+    // Não reclama de declarações em .d.ts dentro de node_modules
+    "skipLibCheck": true,
+    // Não emite nada, só serve para controle de quais arquivos são analisados
+    "noEmit": true
+  },
+  // Aqui falamos ao VS/TS pra não olhar nada em node_modules
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  // (Opcional) Se você só quer que o VS valide seu wwwroot/js:
+  "include": [
+    "wwwroot/js/**/*.js"
+  ]
+}

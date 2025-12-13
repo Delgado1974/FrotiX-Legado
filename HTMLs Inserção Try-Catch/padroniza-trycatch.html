@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Padronizar try/catch — usa &lt;nome_do_arquivo&gt;_&lt;num&gt;(.js)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --accent:#10b981; --border:#1f2937; }
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    header{padding:20px 24px;border-bottom:1px solid var(--border)}
+    h1{margin:0;font-size:18px}
+    .sub{color:var(--muted);margin-top:6px}
+    main{display:grid;grid-template-columns:1fr 460px;gap:14px;height:calc(100% - 110px);padding:14px;box-sizing:border-box}
+    .col{display:flex;flex-direction:column;min-height:0}
+    .drop{flex:0 0 auto;border:2px dashed #334155;border-radius:12px;padding:18px;margin-bottom:12px;text-align:center;background:#0b1220}
+    .drop.drag{background:#0d182b;border-color:var(--accent)}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    button{background:#1f2937;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:10px 12px;cursor:pointer}
+    button.primary{background:var(--accent);border-color:#059669;color:#062d20;font-weight:600}
+    textarea,pre{flex:1 1 auto;background:#0b1022;color:#e2e8f0;border:1px solid var(--border);border-radius:12px;padding:12px;overflow:auto;white-space:pre}
+    .panel{display:flex;flex-direction:column;gap:10px;min-height:0}
+    .list{background:#0b1022;border:1px solid var(--border);border-radius:12px;padding:12px;overflow:auto}
+    code.k{color:#a4cafe}
+    .hint{color:#94a3b8}
+    footer{padding:10px 14px;color:#93a3b8;border-top:1px solid var(--border)}
+    label{color:#cbd5e1}
+    select{background:#0b1022;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px}
+    .opt{display:flex;align-items:center;gap:8px}
+  </style>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Padronizar <code class="k">try/catch</code> em funções Javascript</h1>
+    <div class="sub">
+      Insere no topo do <code class="k">catch</code>:
+      <code class="k">Alerta.TratamentoErroComLinha("&lt;nome_ajustado&gt;_&lt;num&gt;[.js]", "<<< nome da função>>>", error)</code>.<br>
+      Regra do <em>nome_ajustado</em>: se o arquivo terminar com <code>_xxx</code> (3 dígitos), remove os 3 dígitos e mantém o
+      <code>_</code>. Caso contrário, garante um <code>_</code> antes de <code>&lt;num&gt;</code>.
+    </div>
+  </header>
+  <main>
+    <section class="col">
+      <div id="drop" class="drop">
+        <input id="file" type="file" accept=".js,.mjs,.txt" style="display:none" />
+        <p><strong>Solte seu arquivo JS aqui</strong> ou <button id="pick">Selecionar arquivo</button></p>
+        <p class="hint">Ex.: <code>agendamento_viagem_011.js</code> → rótulo: <code>"agendamento_viagem__&lt;num&gt;.js"</code> (remove <code>011</code>, mantém o <code>_</code>).</p>
+      </div>
+      <div class="panel">
+        <div class="btns">
+          <button id="copyOut">Copiar código</button>
+          <label for="ext">Baixar como:</label>
+          <select id="ext" title="Extensão do arquivo ao salvar">
+            <option value=".txt">.txt (recomendado)</option>
+            <option value=".mjs">.mjs</option>
+            <option value=".js">.js</option>
+          </select>
+          <button id="downloadOut" class="primary">Baixar arquivo</button>
+          <button id="downloadZip">Baixar .zip (com .js)</button>
+          <button id="copyList">Copiar lista funções</button>
+          <label class="opt"><input type="checkbox" id="collapse" checked /> Compactar linhas em branco</label>
+          <label class="opt"><input type="checkbox" id="addJs" checked /> Adicionar <code>.js</code> ao rótulo</label>
+        </div>
+        <textarea id="out" placeholder="Código padronizado aparecerá aqui…" spellcheck="false"></textarea>
+      </div>
+    </section>
+    <aside class="col">
+      <div class="panel">
+        <div class="list" id="info">• Nenhum arquivo processado ainda.</div>
+        <div class="list"><strong>Funções alteradas:</strong><pre id="changed">(vazio)</pre></div>
+        <div class="list"><strong>Log:</strong><pre id="log"></pre></div>
+      </div>
+    </aside>
+  </main>
+  <footer>Tudo roda localmente no seu navegador. Nenhum dado é enviado para a internet. 🔐</footer>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+    const info = $('#info'), out = $('#out'), changedOut = $('#changed'), log = $('#log');
+    const drop = $('#drop'), fileInput = $('#file'), extSel = $('#ext'), collapseChk = $('#collapse'), addJsChk = $('#addJs');
+
+    $('#pick').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); drop.classList.add('drag'); }));
+    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag'); }));
+    drop.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+
+    $('#copyOut').addEventListener('click', async () => { if (!out.value) return; await navigator.clipboard.writeText(out.value); toast('Código copiado ✔️'); });
+    $('#copyList').addEventListener('click', async () => { await navigator.clipboard.writeText(changedOut.textContent || ''); toast('Lista copiada ✔️'); });
+    $('#downloadOut').addEventListener('click', () => {
+      if (!out.value) return;
+      const base = (window.__lastOutName || 'arquivo').replace(/\.(js|mjs|txt)$/i,'');
+      const ext = extSel.value || '.txt';
+      downloadBlob(out.value, base + '.padronizado' + ext, 'text/plain;charset=utf-8');
+    });
+    $('#downloadZip').addEventListener('click', async () => {
+      if (!out.value) return;
+      try {
+        const zip = new JSZip();
+        const base = (window.__lastOutName || 'arquivo').replace(/\.(js|mjs|txt)$/i,'');
+        zip.file(base + '.padronizado.js', out.value);
+        const content = await zip.generateAsync({ type: 'blob' });
+        downloadBlob(content, base + '.padronizado.zip', 'application/zip');
+        toast('ZIP gerado ✔️');
+      } catch (e) { appendLog('Erro ZIP: ' + (e?.message || e)); toast('Falha ao gerar ZIP ❗'); }
+    });
+
+    function downloadBlob(data, filename, mime) {
+      const blob = data instanceof Blob ? data : new Blob([data], {type:mime});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    }
+    function toast(msg){ info.textContent = '• ' + msg; }
+    function appendLog(line){ log.textContent += line + '\n'; }
+
+    function baseNameNoExt(name) {
+      const bn = String(name || '').replace(/^.*[\\/]/, '');
+      return bn.replace(/\.[^.]+$/, ''); // remove última extensão
+    }
+
+    // Regra solicitada:
+    // - se terminar com "_xxx" (3 dígitos), removemos os 3 dígitos e mantemos o "_";
+    // - caso contrário, garantimos 1 "_" no final.
+    function adjustedBase(nameNoExt) {
+      if (/_\d{3}$/.test(nameNoExt)) {
+        return nameNoExt.replace(/_\d{3}$/, '_');
+      }
+      return nameNoExt.endsWith('_') ? nameNoExt : (nameNoExt + '_');
+    }
+
+    function handleFiles(fileList){
+      const f = fileList && fileList[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const src = String(reader.result || '');
+          const baseNoExt = baseNameNoExt(f.name || 'arquivo.js');
+          const prefix = adjustedBase(baseNoExt); // aplica a nova regra
+          const fileLabel = addJsChk.checked ? `${prefix}<num>.js` : `${prefix}<num>`;
+          const { code, changed } = transformWithBabel(src, { fileLabel, collapse: collapseChk.checked, maxBlank: 1 });
+          out.value = code;
+          changedOut.textContent = changed.length ? changed.map(n => '- ' + n).join('\n') : '(nenhuma função exigiu alteração)';
+          window.__lastOutName = f.name || 'arquivo.js';
+          toast('Processado: ' + (f.name || 'arquivo') + ' ✔️');
+        } catch (e) { appendLog('Erro ao processar: ' + (e?.message || e)); toast('Falha ao processar. ❗'); }
+      };
+      reader.readAsText(f);
+    }
+
+    function normalizeWhitespace(text, { maxBlank = 1 } = {}) {
+      let s = text.replace(/\r\n/g, '\n');             // normaliza EOL
+      s = s.replace(/[ \t]+$/gm, '');                 // tira espaços à direita
+      if (maxBlank >= 0) {
+        const max = Math.max(0, maxBlank) + 1;
+        const re = new RegExp('\\n{' + (max + 1) + ',}', 'g'); // 3+ -> 2 se maxBlank=1
+        s = s.replace(re, '\n'.repeat(max));
+      }
+      return s;
+    }
+
+    function transformWithBabel(source, { fileLabel, collapse = true, maxBlank = 1 } = {}){
+      const changed = new Set();
+
+      const pluginFactory = ({ types: t }) => {
+        const getKeyName = key => key && (key.name || (key.value != null ? String(key.value) : null));
+
+        const getCalleeName = callee => {
+          if (!callee) return null;
+          if (t.isIdentifier(callee)) return callee.name;
+          if (t.isMemberExpression(callee)) {
+            const p = callee.property;
+            if (!callee.computed && t.isIdentifier(p)) return p.name;
+            if (callee.computed && t.isStringLiteral(p)) return p.value;
+          }
+          return null;
+        };
+
+        const deriveCallbackName = (path) => {
+          const p = path.parentPath;
+          if (!p) return 'anonymous';
+          if (p.isVariableDeclarator() && t.isIdentifier(p.node.id)) return p.node.id.name;
+          if (p.isAssignmentExpression() && t.isMemberExpression(p.node.left)) {
+            const prop = p.node.left.property;
+            if (!p.node.left.computed && t.isIdentifier(prop)) return prop.name;
+            if (p.node.left.computed && t.isStringLiteral(prop)) return prop.value;
+          }
+          if (p.isObjectProperty() || p.isObjectMethod()) return getKeyName(p.node.key) || 'anonymous';
+          if (p.isClassMethod() || p.isClassPrivateMethod()) return getKeyName(p.node.key) || 'anonymous';
+          if (p.isCallExpression()) {
+            const idx = p.node.arguments.findIndex(a => a === path.node);
+            const calleeName = getCalleeName(p.node.callee);
+            if (calleeName === 'addEventListener') {
+              let eventName = '';
+              if (idx === 1 && p.node.arguments[0] && t.isStringLiteral(p.node.arguments[0])) eventName = p.node.arguments[0].value;
+              return eventName ? `addEventListener:${eventName}_callback` : 'addEventListener_callback';
+            }
+            if (calleeName) return `${calleeName}_callback`;
+          }
+          return 'anonymous';
+        };
+
+        const getFunctionName = (path) => {
+          const n = path.node;
+          if (path.isFunctionDeclaration() && n.id) return n.id.name;
+          if (path.isFunctionExpression() && n.id) return n.id.name;
+          const p = path.parentPath;
+          if (p) {
+            if (p.isVariableDeclarator() && t.isIdentifier(p.node.id)) return p.node.id.name;
+            if (p.isAssignmentExpression() && t.isMemberExpression(p.node.left)) {
+              const prop = p.node.left.property;
+              if (!p.node.left.computed && t.isIdentifier(prop)) return prop.name;
+              if (p.node.left.computed && t.isStringLiteral(prop)) return prop.value;
+            }
+            if (p.isObjectProperty() || p.isObjectMethod() || p.isClassMethod() || p.isClassPrivateMethod()) {
+              return getKeyName(p.node.key) || 'anonymous';
+            }
+          }
+          return deriveCallbackName(path);
+        };
+
+        // Detecta chamadas de tratamento (com ou sem Alerta/encadeadas)
+        const isTratamentoLike = (stmt) => {
+          if (!t.isExpressionStatement(stmt)) return false;
+          const expr = stmt.expression;
+          if (!t.isCallExpression(expr)) return false;
+          if (t.isIdentifier(expr.callee, { name: 'TratamentoErroComLinha' })) return true;
+          if (t.isMemberExpression(expr.callee) && t.isIdentifier(expr.callee.property, { name:'TratamentoErroComLinha' })) return true;
+          return false;
+        };
+
+        const buildTratamentoCall = (funcName) =>
+          t.expressionStatement(
+            t.callExpression(
+              t.memberExpression(t.identifier('Alerta'), t.identifier('TratamentoErroComLinha')),
+              [t.stringLiteral(fileLabel), t.stringLiteral(funcName), t.identifier('error')]
+            )
+          );
+
+        const hasTopLevelTryCoveringAll = (bodyArr) =>
+          Array.isArray(bodyArr) && bodyArr.length === 1 && t.isTryStatement(bodyArr[0]);
+
+        // Padroniza: 1 chamada no topo e remove duplicadas top-level
+        const standardizeCatchOnTryPath = (tryPath, funcName) => {
+          if (!tryPath.node.handler) {
+            tryPath.node.handler = t.catchClause(
+              t.identifier('error'),
+              t.blockStatement([buildTratamentoCall(funcName)])
+            );
+            changed.add(funcName);
+            return;
+          }
+          const handlerPath = tryPath.get('handler');
+
+          // Param -> error
+          let paramName = 'error';
+          if (handlerPath.node.param && t.isIdentifier(handlerPath.node.param)) {
+            paramName = handlerPath.node.param.name;
+          } else if (!handlerPath.node.param) {
+            handlerPath.node.param = t.identifier('error'); paramName = 'error';
+          }
+          if (paramName !== 'error') {
+            handlerPath.scope.rename(paramName, 'error');
+            handlerPath.node.param = t.identifier('error');
+          }
+
+          const cbody = handlerPath.node.body.body || [];
+          const rest = cbody.filter(stmt => !isTratamentoLike(stmt));
+          handlerPath.node.body.body = [buildTratamentoCall(funcName), ...rest];
+          changed.add(funcName);
+        };
+
+        const wrapFunctionBody = (path, funcName) => {
+          const n = path.node;
+          if (path.isArrowFunctionExpression() && !t.isBlockStatement(n.body)) {
+            const originalExpr = n.body;
+            n.body = t.blockStatement([
+              t.tryStatement(
+                t.blockStatement([t.returnStatement(originalExpr)]),
+                t.catchClause(t.identifier('error'), t.blockStatement([buildTratamentoCall(funcName)]))
+              )
+            ]);
+            changed.add(funcName);
+            return;
+          }
+          const original = n.body.body;
+          n.body.body = [
+            t.tryStatement(
+              t.blockStatement(original),
+              t.catchClause(t.identifier('error'), t.blockStatement([buildTratamentoCall(funcName)]))
+            )
+          ];
+          changed.add(funcName);
+        };
+
+        return {
+          name: 'padroniza-try-catch-plugin',
+          visitor: {
+            Function(path) {
+              const funcName = getFunctionName(path) || 'anonymous';
+              const body = path.node.body;
+              if (t.isBlockStatement(body) && hasTopLevelTryCoveringAll(body.body)) {
+                const tryPath = path.get('body.body.0');
+                standardizeCatchOnTryPath(tryPath, funcName);
+              } else {
+                wrapFunctionBody(path, funcName);
+              }
+            }
+          }
+        };
+      };
+
+      const result = Babel.transform(source, {
+        plugins: [[pluginFactory]],
+        generatorOpts: { comments: true, retainLines: false, compact: false }
+      });
+
+      const code = collapse ? normalizeWhitespace(result.code, { maxBlank }) : result.code;
+      return { code, changed: Array.from(changed).sort() };
+    }
+  </script>
+</body>
+</html>

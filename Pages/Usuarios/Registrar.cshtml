@@ -1,0 +1,81 @@
+@page
+@model RegisterModel
+@{
+	ViewData["Title"] = "Usuários";
+	ViewData["PageName"] = "usuarios_registrar";
+	ViewData["Heading"] = "<i class='fad fa-user-plus'></i> Cadastros: <span class='fw-300'>Registrar Usuário</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fa-regular fa-user-plus";
+}
+
+<style>
+	.form-control-xs {
+		height: calc(1em + .775rem + 2px) !important;
+		padding: .125rem .25rem !important;
+		font-size: .75rem !important;
+		line-height: 1.5;
+		border-radius: .2rem;
+	}
+
+	.label {
+		margin-bottom: -5px;
+		margin-top: 10px;
+	}
+</style>
+
+@section HeadBlock {
+}
+
+<form method="post">
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="panel-content">
+						<div class="col-xl-12 ml-auto mr-auto">
+							<div class="card p-4 rounded-plus bg-faded">
+								<form id="js-login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+									<div asp-validation-summary="All" class="alert alert-primary text-dark"></div>
+									<div class="form-group row">
+										<div class="col-4 pr-1">
+											<label class="pl-1 text-black-50 font-weight-bold">Entre com o ponto do usuário</label>
+											<span class="invalid-feedback" asp-validation-for="Input.Ponto">O ponto do usuário é obrigatório.</span>
+											<input type="text" asp-for="Input.Ponto" class="form-control" placeholder="p_" />
+											<div class="help-block">O Ponto será o nome do usuário</div>
+										</div>
+										<div class="col-8 pl-1">
+											<label class="pl-1 text-black-50 font-weight-bold">Entre o nome do usuário</label>
+											<span class="invalid-feedback" asp-validation-for="Input.NomeCompleto">O nome é obrigatório.</span>
+											<input type="text" asp-for="Input.NomeCompleto" class="form-control" placeholder="Nome Completo" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="pl-1 text-black-50 font-weight-bold" asp-for="Input.Email">Entre com o email da RedeCamara</label>
+										<span class="invalid-feedback" asp-validation-for="Input.Email">O email é obrigatório.</span>
+										<input type="email" asp-for="Input.Email" class="form-control" placeholder="@@camara.leg.br" required="required" autocomplete="off" />
+									</div>
+									<div class="form-group">
+										<div class="row no-gutters">
+											<div class="col-md-3 ml-auto text-right">
+												<button id="js-login-btn" type="submit" class="btn btn-azul form-control mt-3">
+													<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Enviar Email de Verificação
+												</button>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+}

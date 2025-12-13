@@ -1,0 +1,28 @@
+@* =====================================================
+   _SecaoOcorrenciasFinalizacao.cshtml
+   Seção de ocorrências para o modal de finalização
+   Cor da faixa alterada para azul petróleo (tema FrotiX)
+   ===================================================== *@
+
+<div class="card mb-3" id="cardOcorrencias">
+    <div class="card-header d-flex justify-content-between align-items-center" 
+         style="background-color: #325d88; color: #fff;">
+        <span>
+            <i class="fa-duotone fa-triangle-exclamation me-2"></i>
+            Ocorrências do Veículo
+            <span class="badge bg-light text-dark ms-2" id="badgeContadorOcorrencias">0</span>
+        </span>
+        <button type="button" class="btn btn-sm btn-light" id="btnAdicionarOcorrencia">
+            <i class="fa-duotone fa-plus me-1"></i> Adicionar Ocorrência
+        </button>
+    </div>
+    <div class="card-body p-2">
+        <div id="containerOcorrencias">
+            @* Cards de ocorrências serão adicionados aqui dinamicamente *@
+        </div>
+        <p class="text-muted small mb-0" id="msgSemOcorrencias">
+            <i class="fa-duotone fa-circle-info me-1"></i>
+            Nenhuma ocorrência registrada. Clique em "Adicionar Ocorrência" se houver algum problema com o veículo.
+        </p>
+    </div>
+</div>

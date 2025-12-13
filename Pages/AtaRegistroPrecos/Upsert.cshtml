@@ -1,0 +1,546 @@
+@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.AtaRegistroPrecos.UpsertModel
+
+@{
+    ViewData["Title"] = "Atas de Registro de Preços";
+    ViewData["PageName"] = "ataregistroprecos_index";
+    ViewData["Heading"] = "<i class='fa-duotone fa-folders'></i> Cadastros: <span class='fw-300'>Atas de Registro de Preços</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-regular fa-folders";
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .escondido {
+        visibility: hidden;
+    }
+
+    .input-icons i {
+        position: absolute;
+    }
+
+    .input-icons {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .icon {
+        padding: 10px;
+        min-width: 40px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .disable-element {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+
+    .wrapper {
+        cursor: not-allowed;
+    }
+
+    .e-grid * {
+        font-size: 12px !important;
+    }
+</style>
+
+@section HeadBlock {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <script src="https://cdn.syncfusion.com/js/assets/external/jquery.globalize.min.js"></script>
+}
+
+<form method="post" asp-action="Upsert">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <h2 class="titulo-paginas mb-0">
+                    <i class="fa-duotone fa-folders"></i>
+                    @(Model.AtaObj.AtaRegistroPrecos.AtaId != Guid.Empty ? "Atualizar " : "Criar ") Ata Registro Preços
+                </h2>
+                <!-- Linha divisória -->
+                <div class="col-12" style="border-bottom:1px solid #325d88"></div>
+
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @if (Model.AtaObj.AtaRegistroPrecos.AtaId != Guid.Empty)
+                        {
+                            <input type="hidden" asp-for="AtaObj.AtaRegistroPrecos.AtaId" />
+                        }
+
+                        <div class="col-8 pt-3">
+                            <div class="row">
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.AnoAta"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.AnoAta"></span>
+                                        <input id="txtAno" class="form-control form-control-xs" asp-for="AtaObj.AtaRegistroPrecos.AnoAta" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.NumeroAta"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.NumeroAta"></span>
+                                        <input id="txtNumeroAta" class="form-control form-control-xs" asp-for="AtaObj.AtaRegistroPrecos.NumeroAta" />
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.NumeroProcesso"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.NumeroProcesso"></span>
+                                        <input id="txtNumeroProcesso" class="form-control form-control-xs" asp-for="AtaObj.AtaRegistroPrecos.NumeroProcesso" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.AnoProcesso"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.AnoProcesso"></span>
+                                        <input id="txtAnoProcesso" class="form-control form-control-xs" asp-for="AtaObj.AtaRegistroPrecos.AnoProcesso" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.FornecedorId"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.FornecedorId"></span>
+                                        @Html.DropDownListFor(m => m.AtaObj.AtaRegistroPrecos.FornecedorId,
+                                        Model.AtaObj.FornecedorList,
+                                        "- Selecione um Fornecedor -",
+                                        new { @class = "form-control form-control-xs" })
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.Objeto"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.Objeto"></span>
+                                        <input id="txtObjeto" class="form-control form-control-xs" asp-for="AtaObj.AtaRegistroPrecos.Objeto" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.DataInicio"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.DataInicio"></span>
+                                        <input id="txtDataInicio" class="form-control form-control-xs" type="date" asp-for="AtaObj.AtaRegistroPrecos.DataInicio" />
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.DataFim"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.DataFim"></span>
+                                        <input id="txtDataFim" class="form-control form-control-xs" type="date" asp-for="AtaObj.AtaRegistroPrecos.DataFim" />
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="AtaObj.AtaRegistroPrecos.Valor"></label>
+                                        <span class="text-danger" asp-validation-for="AtaObj.AtaRegistroPrecos.Valor"></span>
+                                        <input id="valor" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="AtaObj.AtaRegistroPrecos.Valor" onKeyPress="return(moeda(this,'.',',',event))" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+                            <div id="divVeiculosAdd" class="row" style="display:none">
+                                @{
+                                    List<object> cols = new List<object>();
+                                    cols.Add(new { field = "numitem", direction = "Ascending" });
+                                }
+                                @{
+                                    <ejs-grid id="grdVeiculos" toolbar="@(new List<string>() { "Add", "Update", "Delete", "Cancel" })" GridLines="Both" QueryCellInfo="calculate" allowSorting="true">
+                                        <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="false" newRowPosition="Bottom"></e-grid-editSettings>
+                                        <e-grid-sortsettings columns="cols"></e-grid-sortsettings>
+                                        <e-grid-columns>
+                                            <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
+                                            <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150" allowEditing="true"></e-grid-column>
+                                            <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+                                            <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" allowEditing="true" format="N2"></e-grid-column>
+                                            <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" allowEditing="false" format="N2"></e-grid-column>
+                                        </e-grid-columns>
+                                    </ejs-grid>
+                                }
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Total Geral</label>
+                                        <input id="txtTotal" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="divVeiculosEdit" class="row" style="display:none">
+                                <div class="col-4">
+                                    <label class="label font-weight-bold">Selecione uma Repactuação para ver os Veículos</label>
+                                    <span class="text-danger font-weight-light"></span>
+                                    <select id="lstRepactuacao" name="lstRepactuacao" class="form-control form-control-xs">
+                                        <option value="">-- Selecione uma Repactuacao --</option>
+                                    </select>
+                                </div>
+                                <br />
+                                <div>
+                                    <ejs-grid id="grdVeiculos2" allowPaging="false" GridLines="Both">
+                                        <e-grid-columns>
+                                            <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20"></e-grid-column>
+                                            <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150"></e-grid-column>
+                                            <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" format="N0"></e-grid-column>
+                                            <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" format="N2"></e-grid-column>
+                                            <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" format="N2"></e-grid-column>
+                                        </e-grid-columns>
+                                    </ejs-grid>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Total Geral</label>
+                                        <input id="txtTotalEdit" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+
+                            <br />
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">
+                                            <input id="chkAtivo" type="checkbox" class="form-check-input" asp-for="AtaObj.AtaRegistroPrecos.Status" />
+                                            Ativo/Inativo
+                                        </label>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            @if (Model.AtaObj.AtaRegistroPrecos.AtaId != Guid.Empty)
+                                            {
+                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id=@Model.AtaObj.AtaRegistroPrecos.AtaId class="btn btn-azul form-control" data-ejtip="Atualizar Ata de Registro de Preços">
+                                                    <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Atualizar
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" data-ejtip="Criar nova Ata de Registro de Preços">
+                                                    <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
+                                                </button>
+                                            }
+                                        </div>
+                                        <div class="col-6">
+                                            <a asp-page="./Index" class="btn btn-vinho form-control" data-ejtip="Voltar para a lista de Atas">
+                                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section ScriptsBlock {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        function InsereRegistro() {
+            try {
+                if ($('#AtaObj_AtaRegistroPrecos_AtaId').val() == '00000000-0000-0000-0000-000000000000') {
+                    // Ajusta valor numérico do Valor do Contrato
+                    var valorata = $('#valor').val().replace('.', '');
+                    valorata = valorata.replace('.', '');
+                    valorata = valorata.replace('.', '');
+                    valorata = valorata.replace('.', '');
+                    valorata = valorata.replace(',', '.');
+
+                    var objAta = JSON.stringify({
+                        "AnoAta": $('#txtAno').val(),
+                        "NumeroAta": $('#txtNumeroAta').val(),
+                        "NumeroProcesso": $('#txtNumeroProcesso').val(),
+                        "AnoProcesso": $('#txtAnoProcesso').val(),
+                        "FornecedorId": $('#AtaObj_AtaRegistroPrecos_FornecedorId').val(),
+                        "Objeto": $('#txtObjeto').val(),
+                        "DataInicio": $('#txtDataInicio').val(),
+                        "DataFim": $('#txtDataFim').val(),
+                        "Valor": valorata,
+                        "Status": document.getElementById("chkAtivo").checked
+                    });
+
+                    console.log(objAta);
+
+                    $.ajax({
+                        type: "post",
+                        url: "api/AtaRegistroPrecos/InsereAta",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: objAta,
+                        success: function (data) {
+                            try {
+                                var RepactuacaoId = data.data;
+                                console.log("RepactuaçãoID: " + RepactuacaoId);
+
+                                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                                var getRows = gridObj.getRows();
+
+                                for (var i = 0; i < getRows.length; i++) {
+                                    // Ajusta valor numérico do Valor Unitário
+                                    var valorunitario = (gridObj.getRows()[i].cells[3].innerHTML).replace('.', '');
+                                    valorunitario = valorunitario.replace('.', '');
+                                    valorunitario = valorunitario.replace('.', '');
+                                    valorunitario = valorunitario.replace('.', '');
+                                    valorunitario = valorunitario.replace(',', '.');
+
+                                    var objItemAta = JSON.stringify({
+                                        "NumItem": gridObj.getRows()[i].cells[0].innerHTML,
+                                        "Descricao": gridObj.getRows()[i].cells[1].innerHTML,
+                                        "Quantidade": gridObj.getRows()[i].cells[2].innerHTML,
+                                        "ValorUnitario": valorunitario,
+                                        "RepactuacaoAtaId": RepactuacaoId
+                                    });
+
+                                    console.log(objItemAta);
+
+                                    $.ajax({
+                                        type: "post",
+                                        url: "api/AtaRegistroPrecos/InsereItemAta",
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        data: objItemAta,
+                                        success: function (data) {
+                                            // Itens inseridos individualmente
+                                        },
+                                        error: function (error) {
+                                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereItemAta.ajax.error", error);
+                                        }
+                                    });
+                                }
+
+								AppToast.show('Verde', "Ata Adicionada com Sucesso!);
+                                location.replace("/ataregistroprecos");
+
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereAta.success", error);
+                            }
+                        },
+                        error: function (data) {
+                            try {
+								AppToast.show('Vermelho', data.message, );
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereAta.error", error);
+                            }
+                        }
+                    });
+                }
+                else {
+                    // Edita Ata Existente
+                    var valorata = $('#valor').val().replace('.', '');
+                    valorata = valorata.replace('.', '');
+                    valorata = valorata.replace('.', '');
+                    valorata = valorata.replace('.', '');
+                    valorata = valorata.replace(',', '.');
+
+                    var objAta = JSON.stringify({
+                        "AtaId": '@Model.AtaObj.AtaRegistroPrecos.AtaId',
+                        "AnoAta": $('#txtAno').val(),
+                        "NumeroAta": $('#txtNumeroAta').val(),
+                        "NumeroProcesso": $('#txtNumeroProcesso').val(),
+                        "AnoProcesso": $('#txtAnoProcesso').val(),
+                        "FornecedorId": $('#AtaObj_AtaRegistroPrecos_FornecedorId').val(),
+                        "Objeto": $('#txtObjeto').val(),
+                        "DataInicio": $('#txtDataInicio').val(),
+                        "DataFim": $('#txtDataFim').val(),
+                        "Valor": valorata,
+                        "Status": document.getElementById("chkAtivo").checked
+                    });
+
+                    console.log(objAta);
+
+                    $.ajax({
+                        type: "post",
+                        url: "api/AtaRegistroPrecos/EditaAta",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: objAta,
+                        success: function (data) {
+                            try {
+								AppToast.show('Verde', "Ata Atualizada com Sucesso!");
+                                location.replace("/ataregistroprecos");
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "EditaAta.success", error);
+                            }
+                        },
+                        error: function (data) {
+                            try {
+								AppToast.show('Vermelho', data.message);
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "EditaAta.error", error);
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereRegistro", error);
+            }
+        }
+    </script>
+
+    <script>
+        function moeda(a, e, r, t) {
+            try {
+                let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "", o = window.Event ? t.which : t.keyCode;
+                if (13 == o || 8 == o)
+                    return true;
+                if (n = String.fromCharCode(o), -1 == "0123456789".indexOf(n))
+                    return false;
+                for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
+                for (l = ""; h < u; h++)
+                    -1 != "0123456789".indexOf(a.value.charAt(h)) && (l += a.value.charAt(h));
+                if (l += n, 0 == (u = l.length) && (a.value = ""), 1 == u && (a.value = "0" + r + "0" + l), 2 == u && (a.value = "0" + r + l), u > 2) {
+                    for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--)
+                        3 == j && (ajd2 += e, j = 0), ajd2 += l.charAt(h), j++;
+                    for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--)
+                        a.value += ajd2.charAt(h);
+                    a.value += r + l.substr(u - 2, u)
+                }
+                return false;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "moeda", error);
+                return false;
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                // Inicialização se necessário
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "DOMContentLoaded", error);
+            }
+        });
+
+        function actionComplete(args) {
+            try {
+                if (args.requestType == "save") {
+                    var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                    gridObj.dataSource.shift();
+                    gridObj.dataSource.push(args.data);
+                    gridObj.refresh();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "actionComplete", error);
+            }
+        }
+
+        function calculate(args) {
+            try {
+                var valorunitario = args.data.valorunitario;
+                var quantidade = args.data.quantidade;
+                valorunitario = (valorunitario).replace(',', '.');
+                var valortotal = valorunitario * quantidade;
+                valortotal = (valortotal).toString().replace('.', ',');
+
+                if (args.column.headerText == "Valor Total") {
+                    $(args.cell).text(valortotal);
+                }
+
+                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                var getRows = gridObj.getRows();
+                var valortotalgrid = 0;
+
+                for (var i = 0; i < getRows.length; i++) {
+                    var qtd = gridObj.getRows()[i].cells[2].innerHTML;
+                    var val = gridObj.getRows()[i].cells[3].innerHTML;
+                    valortotalgrid = valortotalgrid + (val.replace(',', '.') * qtd);
+                }
+
+                var valortotalgeral = Number((valortotal).toString().replace(',', '.')) + valortotalgrid;
+                valortotalgeral = (valortotalgeral).toString().replace('.', ',');
+                $("#txtTotal").val(valortotalgeral);
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "calculate", error);
+            }
+        }
+
+        document.getElementById("lstRepactuacao").addEventListener("change", function () {
+            try {
+                RepactuacaoAtaId = document.getElementById("lstRepactuacao").value;
+                var grid = document.getElementById('grdVeiculos2').ej2_instances[0];
+
+                $.ajax({
+                    url: 'api/GridAta/DataSourceAta',
+                    type: "GET",
+                    success: function (res) {
+                        try {
+                            console.log(res);
+                            objItens = res;
+                            objItens = objItens.filter(function (obj) {
+                                return obj.repactuacaoId === RepactuacaoAtaId;
+                            });
+
+                            grid.dataSource = objItens;
+
+                            var valortotal = 0;
+                            var arrayLength = objItens.length;
+                            for (var i = 0; i < arrayLength; i++) {
+                                console.log(objItens[i].valortotal);
+                                valortotal = valortotal + objItens[i].valortotal;
+                            }
+
+                            document.getElementById("txtTotalEdit").value = (valortotal).toLocaleString();
+
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "lstRepactuacao.ajax.success", error);
+                        }
+                    },
+                    error: function (err) {
+                        try {
+                            console.log(err);
+							AppToast.show('Vermelho', 'Erro ao carregar dados');
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "lstRepactuacao.ajax.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "lstRepactuacao.change", error);
+            }
+        });
+    </script>
+}

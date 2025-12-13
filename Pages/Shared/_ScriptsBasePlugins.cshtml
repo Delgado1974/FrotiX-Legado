@@ -1,0 +1,630 @@
+<!-- ARQUIVO COMPLETO: _ScriptsBasePlugins.cshtml -->
+<!-- COPIE TODO O CONTEÚDO ABAIXO E SUBSTITUA O ARQUIVO EXISTENTE -->
+<!-- ⚠️ ORDEM CRÍTICA - NÃO ALTERE SEM NECESSIDADE ⚠️ -->
+
+<script src="~/js/kendo-error-suppressor.js" asp-append-version="true"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 1: DEPENDÊNCIAS BASE (ORDEM EXATA!) -->
+<!-- ============================================ -->
+<!-- 1. jQuery PRIMEIRO (antes de qualquer plugin que use $) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+		integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+		crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js" asp-append-version="true"></script>
+
+<!-- 2. SignalR CDN (ANTES do signalr_manager.js!) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.14/signalr.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Script de inicialização do SignalR com prevenção de dupla inicialização -->
+<script>
+	// Configuração para inicialização ÚNICA do SignalR
+	(function() {
+		// Flag global para evitar múltiplas inicializações
+		if (window._signalRAlertasIniciado) {
+			console.log('⚠️ Sistema de alertas já foi iniciado, pulando...');
+			return;
+		}
+		window._signalRAlertasIniciado = true;
+
+		document.addEventListener('DOMContentLoaded', function() {
+
+			// Verificar se o SignalR está disponível
+			function verificarSignalR() {
+				if (typeof signalR === 'undefined') {
+					console.error('SignalR não está carregado ainda');
+					setTimeout(verificarSignalR, 500);
+					return;
+				}
+
+				// Adicionar delay extra para garantir que tudo está pronto
+				setTimeout(function() {
+					inicializarSistemaAlertas();
+				}, 2000); // 2 segundos de delay total
+			}
+
+			function inicializarSistemaAlertas() {
+				// Verificar novamente para evitar dupla inicialização
+				if (window._alertasJaInicializados) {
+					console.log('✅ Alertas já inicializados');
+					return;
+				}
+				window._alertasJaInicializados = true;
+
+				console.log('Inicializando sistema de alertas do sino...');
+
+				// Função melhorada para o sino
+				function inicializarSignalR() {
+					console.log('Sino: Conectando ao SignalR Manager...');
+
+					if (!window.SignalRManager) {
+						console.error('SignalRManager não está disponível');
+						setTimeout(inicializarSignalR, 1000);
+						return;
+					}
+
+					// Obter conexão com tratamento de erro melhorado
+					window.SignalRManager.getConnection()
+						.then(function(connection) {
+							console.log('Sino conectado ao SignalRManager');
+
+							// Verificar informações de debug
+							var debugInfo = window.SignalRManager.getDebugInfo();
+							console.log('Informações de conexão:', debugInfo);
+
+							// Configurar eventos do sino (verificar se funções existem)
+							connection.on('NovoAlerta', function(alerta) {
+								console.log('Novo alerta recebido:', alerta);
+								if (typeof exibirNovoAlerta === 'function') {
+									exibirNovoAlerta(alerta);
+								}
+							});
+
+							connection.on('AtualizarBadgeAlertas', function(quantidade) {
+								console.log('Atualizar badge:', quantidade);
+								if (typeof atualizarBadge === 'function') {
+									atualizarBadge(quantidade);
+								}
+							});
+
+							connection.on('ExibirAlertasIniciais', function(alertas) {
+								console.log('Alertas iniciais:', alertas);
+								if (alertas && alertas.length > 0) {
+									if (typeof renderizarAlertas === 'function') {
+										renderizarAlertas(alertas);
+									}
+								}
+							});
+
+							// Registrar callbacks para reconexão
+							window.SignalRManager.registerCallback({
+								onReconnecting: function(error) {
+									console.log('Sino: SignalR reconectando...');
+								},
+								onReconnected: function(connectionId) {
+									console.log('Sino: SignalR reconectado');
+									if (typeof carregarAlertasAtivos === 'function') {
+										carregarAlertasAtivos();
+									}
+								},
+								onClose: function(error) {
+									console.log('Sino: SignalR desconectado');
+								}
+							});
+
+							console.log('Sino: Event handlers configurados');
+
+							if (typeof carregarAlertasAtivos === 'function') {
+								carregarAlertasAtivos();
+							}
+						})
+						.catch(function(error) {
+							// Silenciar erros esperados de WebSocket
+							if (!error.toString().includes('WebSocket')) {
+								console.error('Sino: Erro ao conectar SignalR:', error);
+							}
+						});
+				}
+
+				// Iniciar com delay
+				inicializarSignalR();
+			}
+
+			// Começar verificação
+			verificarSignalR();
+		});
+	})();
+</script>
+
+<!-- 3. SignalR Manager - Gerenciador Global (NOSSO - após SignalR CDN) -->
+<script src="~/js/signalr_manager.js" asp-append-version="true"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 3: FRAMEWORKS UI -->
+<!-- ============================================ -->
+
+<!-- ⚠️ ADICIONE O KENDO UI AQUI, ANTES DO VENDORS.BUNDLE.JS -->
+<!-- Kendo UI - CDN Oficial Telerik -->
+@* <link href="https://kendo.cdn.telerik.com/2023.1.117/styles/kendo.default-main.min.css" rel="stylesheet" /> *@
+<script src="https://kendo.cdn.telerik.com/2023.1.117/js/jszip.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2025.2.520/mjs/kendo.all.js"></script>
+<script src="https://kendo.cdn.telerik.com/2025.2.520/mjs/kendo.aspnetmvc.js"></script>
+
+<!-- PDF.js para o Kendo PDFViewer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+	if (window.pdfjsLib) {
+		pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+	}
+</script>
+
+@* <script src="/api/reports/resources/js/telerikReportViewer-19.1.25.521.min.js"></script>*@
+
+ <script src="/api/reports/resources/js/telerikReportViewer-18.1.24.514.min.js"></script>
+
+<!-- Syncfusion EJ2 -->
+<script src="https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js"></script>
+<!-- Arquivo de localização pt (Português) via jsDelivr -->
+<script src="https://cdn.jsdelivr.net/npm/@@syncfusion/ej2-locale@latest/src/pt.json"></script>
+<script>
+	ej.base.registerLicense("Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXZfeHRSRGhcVUVyWkpWYEg=");
+</script>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+	  rel="stylesheet"
+	  integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+	  crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+		crossorigin="anonymous"></script>
+
+<!-- Font Awesome -->
+<script src="https://kit.fontawesome.com/afeb78ad1f.js" crossorigin="anonymous"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 2: FUNÇÕES GLOBAIS DO PROJETO -->
+<!-- ============================================ -->
+<!-- Funções Globais do FrotiX (usa $, deixe depois do jQuery) -->
+<script src="~/js/dt-better-errors.js" asp-append-version="true"></script>
+<script src="~/js/frotix.js" asp-append-version="true"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 4: BUNDLES DO PROJETO -->
+<!-- ============================================ -->
+
+<script src="~/js/vendors.bundle.js"></script>
+<script src="/js/shims/jquery.throttle-debounce.js"></script>
+<script>
+(function () {
+  if (!(window.bootstrap && (bootstrap.Dropdown || bootstrap.Tooltip || bootstrap.Popover))) return;
+
+  // Dropdowns: inicializa todos os com data-bs-toggle="dropdown"
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
+      new bootstrap.Dropdown(el, {
+        popperConfig: function (defaultCfg) {
+          defaultCfg = defaultCfg || {};
+          defaultCfg.modifiers = (defaultCfg.modifiers || []).concat([
+            { name: 'computeStyles', options: { gpuAcceleration: false } }
+          ]);
+          return defaultCfg;
+        }
+      });
+    });
+
+    // Tooltips (se você usa)
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      new bootstrap.Tooltip(el, {
+        popperConfig: { modifiers: [{ name: 'computeStyles', options: { gpuAcceleration: false } }] }
+      });
+    });
+
+    // Popovers (se você usa)
+    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (el) {
+      new bootstrap.Popover(el, {
+        popperConfig: { modifiers: [{ name: 'computeStyles', options: { gpuAcceleration: false } }] }
+      });
+    });
+  });
+})();
+</script>
+<script src="/js/shims/rgb2hex.js"></script>
+<script src="~/js/app.bundle.js" asp-append-version="true"></script>
+<script src="~/js/site.js"></script>
+<script src="~/js/botao-loading.js"></script>
+<script src="~/js/loading_script.js"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 5: BIBLIOTECAS DE DADOS E TABELAS -->
+<!-- ============================================ -->
+<!-- Moment.js -->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/min/moment.min.js"></script>
+
+<!-- DataTables + Plugins -->
+<link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.13.8/b-2.4.2/r-2.5.0/sl-1.7.0/datatables.min.css">
+<script src="https://cdn.datatables.net/v/dt/dt-1.13.8/b-2.4.2/r-2.5.0/sl-1.7.0/datatables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.13.8/sorting/datetime-moment.js"></script>
+
+<!-- JSZip e PDFMake (para exportação DataTables) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<!-- Configurar formatos de data do DataTables -->
+<script>
+	$.fn.dataTable.moment('DD/MM/YYYY');
+	$.fn.dataTable.moment('DD/MM/YYYY HH:mm:ss');
+</script>
+
+<!-- ============================================ -->
+<!-- GRUPO 6: BIBLIOTECAS UI E ALERTAS -->
+<!-- ============================================ -->
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.min.js"></script>
+
+<!-- Toastr -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+
+<!-- SweetAlert2 (versão fixada) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+
+<!-- Select2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- TinyMCE (com API Key válida) -->
+<script src="https://cdn.tiny.cloud/1/kl9497zd17qjx1o2xzsybc9rf2dikkylq4ou0riihjjo7wbg/tinymce/8/tinymce.min.js"
+		referrerpolicy="origin"
+		crossorigin="anonymous"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 7: HELPERS E WRAPPERS DO PROJETO -->
+<!-- ============================================ -->
+<!-- Helpers próprios (DEPOIS de carregar swal/Swal) -->
+<script src="js/toastHelper_006.js"></script>
+<script src="js/sweetalert_interop.js" asp-append-version="true"></script>
+<script src="js/alerta.js" asp-append-version="true"></script>
+<script src="js/error_handler.js" asp-append-version="true"></script>
+
+<!-- Configurações Syncfusion -->
+<script src="~/js/global-toast.js" asp-append-version="true"></script>
+<script src="~/js/syncfusion_tooltips.js" asp-append-version="true"></script>
+
+<!-- 4. Alertas Navbar (NOSSO - após SignalR Manager) -->
+<script src="~/js/alertasfrotix/alertas_navbar.js" asp-append-version="true"></script>
+<script src="~/js/alertasfrotix/alertas_gestao.js" asp-append-version="true"></script>
+
+<!-- ============================================ -->
+<!-- GRUPO 8: FUNÇÕES UTILITÁRIAS -->
+<!-- ============================================ -->
+<!-- Função moeda (mantida) -->
+<script>
+	function moeda(a,e,r,t){let n="",h=j=0,u=tamanho2=0,l=ajd2="",o=window.Event?t.which:t.keyCode;if(13==o||8==o)return!0;if(n=String.fromCharCode(o),-1=="0123456789".indexOf(n))return!1;for(u=a.value.length,h=0;h<u&&("0"==a.value.charAt(h)||a.value.charAt(h)==r);h++);for(l="";h<u;h++)-1!="0123456789".indexOf(a.value.charAt(h))&&(l+=a.value.charAt(h));if(l+=n,0==(u=l.length)&&(a.value=""),1==u&&(a.value="0"+r+"0"+l),2==u&&(a.value="0"+r+l),u>2){for(ajd2="",j=0,h=u-3;h>=0;h--)3==j&&(ajd2+=e,j=0),ajd2+=l.charAt(h),j++;for(a.value="",tamanho2=ajd2.length,h=tamanho2-1;h>=0;h--)a.value+=ajd2.charAt(h);a.value+=r+l.substr(u-2,u)}return!1}
+</script>
+
+<!-- ============================================ -->
+<!-- GRUPO 9: CONFIGURAÇÕES ESPECÍFICAS -->
+<!-- ============================================ -->
+<!-- Configuração do Rich Text Editor (EJ2) -->
+<script>
+	var defaultRTE;
+	function onCreate(){ defaultRTE = this; }
+	function toolbarClick(e){
+	  if(e.item.id=="rte_toolbar_Image"){
+		var element=document.getElementById('rte_upload');
+		element.ej2_instances[0].uploading=function(args){
+		  args.currentRequest.setRequestHeader('XSRF-TOKEN', document.getElementsByName('__RequestVerificationToken')[0].value);
+		}
+	  }
+	}
+	ej.base.L10n.load({
+	  "pt-BR": { "richtexteditor": {
+		"alignments":"Alinhamentos","justifyLeft":"Alinhar à Esquerda","justifyCenter":"Centralizar","justifyRight":"Alinhar à Direita","justifyFull":"Justificar",
+		"fontName":"Nome da Fonte","fontSize":"Tamanho da Fonte","fontColor":"Cor da Fonte","backgroundColor":"Cor de Fundo","bold":"Negrito","italic":"Itálico",
+		"underline":"Sublinhado","strikethrough":"Tachado","clearFormat":"Limpa Formatação","clearAll":"Limpa Tudo","cut":"Cortar","copy":"Copiar","paste":"Colar",
+		"unorderedList":"Lista com Marcadores","orderedList":"Lista Numerada","indent":"Aumentar Identação","outdent":"Diminuir Identação","undo":"Desfazer",
+		"redo":"Refazer","superscript":"Sobrescrito","subscript":"Subscrito","createLink":"Inserir Link","openLink":"Abrir Link","editLink":"Editar Link",
+		"removeLink":"Remover Link","image":"Inserir Imagem","replace":"Substituir","align":"Alinhar","caption":"Título da Imagem","remove":"Remover",
+		"insertLink":"Inserir Link","display":"Exibir","altText":"Texto Alternativo","dimension":"Mudar Tamanho","fullscreen":"Maximizar","maximize":"Maximizar",
+		"minimize":"Minimizar","lowerCase":"Caixa Baixa","upperCase":"Caixa Alta","print":"Imprimir","formats":"Formatos","sourcecode":"Visualizar Código",
+		"preview":"Exibir","viewside":"ViewSide","insertCode":"Inserir Código","linkText":"Exibir Texto","linkTooltipLabel":"Título","linkWebUrl":"Endereço Web",
+		"linkTitle":"Entre com um título","linkurl":"http://exemplo.com","linkOpenInNewWindow":"Abrir Link em Nova Janela","linkHeader":"Inserir Link",
+		"dialogInsert":"Inserir","dialogCancel":"Cancelar","dialogUpdate":"Atualizar","imageHeader":"Inserir Imagem",
+		"imageLinkHeader":"Você pode proporcionar um link da web","mdimageLink":"Favor proporcionar uma URL para sua imagem",
+		"imageUploadMessage":"Solte a imagem aqui ou busque para o upload","imageDeviceUploadMessage":"Clique aqui para o upload",
+		"imageAlternateText":"Texto Alternativo","alternateHeader":"Texto Alternativo","browse":"Procurar","imageUrl":"http://exemplo.com/imagem.png","imageCaption":"Título",
+		"imageSizeHeader":"Tamanho da Imagem","imageHeight":"Altura","imageWidth":"Largura","textPlaceholder":"Entre com um Texto","inserttablebtn":"Inserir Tabela",
+		"tabledialogHeader":"Inserir Tabela","tableWidth":"Largura","cellpadding":"Espaçamento de célula","cellspacing":"Espaçamento de célula",
+		"columns":"Número de colunas","rows":"Número de linhas","tableRows":"Linhas da Tabela","tableColumns":"Colunas da Tabela",
+		"tableCellHorizontalAlign":"Alinhamento Horizontal da Célular","tableCellVerticalAlign":"Alinhamento Vertical da Célular",
+		"createTable":"Criar Tabela","removeTable":"Remover Tabela","tableHeader":"Cabeçalho da Tabela","tableRemove":"Remover Tabela",
+		"tableCellBackground":"Fundo da Célula","tableEditProperties":"Editar Propriedades da Tabela","styles":"Estilos",
+		"insertColumnLeft":"Inserir Coluna à Esquerda","insertColumnRight":"Inserir Coluna à Direita","deleteColumn":"Apagar Coluna",
+		"insertRowBefore":"Inserir Linha Antes","insertRowAfter":"Inserir Linha Depois","deleteRow":"Apagar Linha","tableEditHeader":"Edita Tabela",
+		"TableHeadingText":"Cabeçalho","TableColText":"Col","imageInsertLinkHeader":"Inserir Link","editImageHeader":"Edita Imagem",
+		"alignmentsDropDownLeft":"Alinhar à Esquerda","alignmentsDropDownCenter":"Centralizar","alignmentsDropDownRight":"Alinhar à Direita",
+		"alignmentsDropDownJustify":"Justificar","imageDisplayDropDownInline":"Inline","imageDisplayDropDownBreak":"Break",
+		"tableInsertRowDropDownBefore":"Inserir linha antes","tableInsertRowDropDownAfter":"Inserir linha depois","tableInsertRowDropDownDelete":"Apagar linha",
+		"tableInsertColumnDropDownLeft":"Inserir coluna à esquerda","tableInsertColumnDropDownRight":"Inserir coluna à direita",
+		"tableInsertColumnDropDownDelete":"Apagar Coluna","tableVerticalAlignDropDownTop":"Alinhar no Topo","tableVerticalAlignDropDownMiddle":"Alinhar no Meio",
+		"tableVerticalAlignDropDownBottom":"Alinhar no Fundo","tableStylesDropDownDashedBorder":"Bordas Pontilhadas","tableStylesDropDownAlternateRows":"Linhas Alternadas",
+		"pasteFormat":"Colar Formato","pasteFormatContent":"Escolha a ação de formatação","plainText":"Texto Simples","cleanFormat":"Limpar","keepFormat":"Manter",
+		"formatsDropDownParagraph":"Parágrafo","formatsDropDownCode":"Código","formatsDropDownQuotation":"Citação","formatsDropDownHeading1":"Cabeçalho 1",
+		"formatsDropDownHeading2":"Cabeçalho 2","formatsDropDownHeading3":"Cabeçalho 3","formatsDropDownHeading4":"Cabeçalho 4",
+		"fontNameSegoeUI":"SegoeUI","fontNameArial":"Arial","fontNameGeorgia":"Georgia","fontNameImpact":"Impact","fontNameTahoma":"Tahoma",
+		"fontNameTimesNewRoman":"Times New Roman","fontNameVerdana":"Verdana"
+	  }}});
+</script>
+
+<!-- ============================================ -->
+<!-- GRUPO 10: UTILITÁRIOS DE LIMPEZA -->
+<!-- ============================================ -->
+<!-- Limpa a tela depois de fechar modais/overlays -->
+<script>
+	function limparResiduosModalVanilla(){
+	  document.querySelectorAll('.modal-backdrop, .swal2-container, .swal2-backdrop-show').forEach(e=>e.remove());
+	  document.body.classList.remove('modal-open');
+	  document.body.style.overflow='';
+	  document.body.style.zIndex='';
+	  document.querySelectorAll('div').forEach(div=>{
+		const s=getComputedStyle(div);
+		if((s.position==='fixed'||s.position==='absolute') && parseInt(s.zIndex||0)>=1040 &&
+		   ((parseInt(s.width)===window.innerWidth)||s.width==='100vw'||s.left==='0px') &&
+		   ((parseInt(s.height)===window.innerHeight)||s.height==='100vh'||s.top==='0px')){
+		  if(!div.classList.contains('fc') && !div.classList.contains('fc-view-harness')){
+			div.remove();
+		  }
+		}
+	  });
+	}
+</script>
+
+<!-- ================================================ -->
+<!-- GRUPO 11: LOCALIZAÇÃO COMPONENTES SYNCFUSION -->
+<!-- ================================================ -->
+<script>
+(function() {
+    'use strict';
+
+    // Configuração de localização
+    const LOCALE_CONFIG = {
+        culture: 'pt-BR',
+        paths: [
+            'supplemental/numberingSystems.json',
+            'main/pt/ca-gregorian.json',
+            'main/pt/numbers.json',
+            'main/pt/timeZoneNames.json'
+        ],
+        sources: [
+            'https://cdn.syncfusion.com/ej2/cldr-data',
+            'https://cdn.jsdelivr.net/npm/cldr-data@latest',
+            'https://unpkg.com/cldr-data@latest'
+        ],
+        translations: {
+            'pt-BR': {
+                timepicker: {
+                    placeholder: 'Selecione o horário'
+                },
+                datepicker: {
+                    placeholder: 'Selecione a data',
+                    today: 'Hoje'
+                },
+                dropdownlist: {
+                    noRecordsTemplate: 'Nenhum registro encontrado',
+                    actionFailureTemplate: 'Falha na requisição'
+                }
+            }
+        }
+    };
+
+    /**
+     * Carrega um arquivo JSON com timeout e retry
+     */
+    async function fetchJsonWithRetry(url, retries = 2, timeout = 5000) {
+        for (let i = 0; i <= retries; i++) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                const response = await fetch(url, {
+                    mode: 'cors',
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                if (i === retries) {
+                    throw error;
+                }
+                // Aguarda antes de tentar novamente
+                await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+            }
+        }
+    }
+
+    /**
+     * Carrega dados CLDR de múltiplas fontes
+     */
+    async function loadCldrData() {
+        // Verifica se Syncfusion está disponível
+        if (typeof ej === 'undefined' || !ej.base) {
+            console.warn('Syncfusion não carregado. Aguardando...');
+            return false;
+        }
+
+        let successfulSource = null;
+        const errors = [];
+
+        // Tenta cada fonte
+        for (const baseUrl of LOCALE_CONFIG.sources) {
+            try {
+                console.log(`Tentando carregar CLDR de: ${baseUrl}`);
+
+                const dataPromises = LOCALE_CONFIG.paths.map(path =>
+                    fetchJsonWithRetry(`${baseUrl}/${path}`, 1, 3000)
+                );
+
+                const cldrData = await Promise.all(dataPromises);
+
+                // Carrega os dados no Syncfusion
+                ej.base.loadCldr(...cldrData);
+
+                successfulSource = baseUrl;
+                console.log(`✅ CLDR carregado com sucesso de: ${baseUrl}`);
+                break;
+
+            } catch (error) {
+                errors.push({ source: baseUrl, error: error.message });
+                console.warn(`Falha ao carregar de ${baseUrl}:`, error.message);
+            }
+        }
+
+        // Se nenhuma fonte funcionou, usa fallback mínimo
+        if (!successfulSource) {
+            console.warn('⚠️ Usando configuração CLDR mínima de fallback');
+            loadMinimalCldr();
+            return false;
+        }
+
+        // Aplica configurações de cultura
+        try {
+            ej.base.setCulture(LOCALE_CONFIG.culture);
+            ej.base.L10n.load(LOCALE_CONFIG.translations);
+            console.log(`✅ Cultura ${LOCALE_CONFIG.culture} configurada`);
+            return true;
+        } catch (error) {
+            console.error('Erro ao configurar cultura:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Carrega configuração CLDR mínima para fallback
+     */
+    function loadMinimalCldr() {
+        try {
+            // Dados mínimos para pt-BR
+            const minimalData = {
+                supplemental: {
+                    numberingSystems: {
+                        latn: {
+                            _type: "numeric",
+                            _digits: "0123456789"
+                        }
+                    }
+                },
+                main: {
+                    pt: {
+                        numbers: {
+                            "symbols-numberSystem-latn": {
+                                decimal: ",",
+                                group: ".",
+                                percentSign: "%",
+                                plusSign: "+",
+                                minusSign: "-"
+                            },
+                            "decimalFormats-numberSystem-latn": {
+                                standard: "#,##0.###"
+                            },
+                            "percentFormats-numberSystem-latn": {
+                                standard: "#,##0%"
+                            },
+                            "currencyFormats-numberSystem-latn": {
+                                standard: "¤ #,##0.00"
+                            }
+                        },
+                        dates: {
+                            calendars: {
+                                gregorian: {
+                                    months: {
+                                        format: {
+                                            wide: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                                                   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+                                        }
+                                    },
+                                    days: {
+                                        format: {
+                                            wide: ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+                                                   "Quinta-feira", "Sexta-feira", "Sábado"],
+                                            abbreviated: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+                                        }
+                                    },
+                                    dateFormats: {
+                                        short: "dd/MM/yyyy",
+                                        medium: "d 'de' MMM 'de' yyyy"
+                                    },
+                                    timeFormats: {
+                                        short: "HH:mm",
+                                        medium: "HH:mm:ss"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (ej && ej.base) {
+                ej.base.loadCldr(minimalData);
+                ej.base.setCulture('pt-BR');
+                ej.base.L10n.load(LOCALE_CONFIG.translations);
+                console.log('✅ Configuração CLDR mínima aplicada');
+            }
+        } catch (error) {
+            console.error('Erro ao aplicar CLDR mínimo:', error);
+        }
+    }
+
+    /**
+     * Inicialização com retry para garantir que Syncfusion esteja pronto
+     */
+    async function initializeCldr(maxAttempts = 5) {
+        let attempts = 0;
+
+        while (attempts < maxAttempts) {
+            if (typeof ej !== 'undefined' && ej.base) {
+                const success = await loadCldrData();
+                window.__cldrLoaded = success;
+                return success;
+            }
+
+            attempts++;
+            console.log(`Aguardando Syncfusion... Tentativa ${attempts}/${maxAttempts}`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        console.error('Syncfusion não foi carregado após múltiplas tentativas');
+        window.__cldrLoaded = false;
+        return false;
+    }
+
+    // Executa inicialização
+    window.__cldrReady = initializeCldr();
+
+    // Listener para garantir que CLDR seja carregado após DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.__cldrLoaded) {
+                initializeCldr();
+            }
+        });
+    }
+})();
+
+</script>

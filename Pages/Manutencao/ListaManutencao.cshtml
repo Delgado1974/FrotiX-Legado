@@ -1,0 +1,709 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+
+@inject IUnitOfWork _unitOfWork
+
+@functions {
+    public void OnGet()
+    {
+        FrotiX.Pages.Manutencao.ListaManutencaoModel.Initialize(_unitOfWork);
+
+        ViewData["lstVeiculos"] = new ListaVeiculosManutencao(_unitOfWork).VeiculosList();
+        ViewData["lstVeiculosReserva"] = new ListaVeiculosReservaManutencao(_unitOfWork).VeiculosReservaList();
+        ViewData["lstStatus"] = new ListaStatusManutencao(_unitOfWork).StatusList();
+    }
+}
+
+@model FrotiX.Models.ViewViagens
+
+@{
+    ViewData["Title"] = "Manutenção";
+    ViewData["PageName"] = "manutencao_listamanutencao";
+    ViewData["Heading"] = "<i class='fa-duotone fa-users-gear'></i> Manutenção: <span class='fw-300'>Registro de Ordens de Serviço</span>";
+    ViewData["Category1"] = "Manutenção";
+    ViewData["PageIcon"] = "fad fa-users-gear";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+}
+
+<style>
+    /* ====== FONTE OUTFIT ====== */
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+    /* ====== VARIÁVEIS LOCAIS ====== */
+    :root {
+        --ftx-manut-chocolate: #7B3F00;
+        --ftx-manut-chocolate-hover: #8C4A10;
+        --ftx-manut-laranja-1: #8B4513;
+        --ftx-manut-laranja-2: #A0522D;
+        --ftx-manut-laranja-3: #CC5500;
+    }
+
+    /* ====== OVERRIDE HEADER (garantir cores e fonte) ====== */
+    .ftx-card-header .ftx-card-title {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 900 !important;
+        color: #fff !important;
+    }
+
+    .ftx-card-header .ftx-card-title i {
+        color: #fff !important;
+        --fa-primary-color: #fff !important;
+        --fa-secondary-color: rgba(255,255,255,0.7) !important;
+    }
+
+    .ftx-card-header .btn-header-orange {
+        background: linear-gradient(135deg, #D2691E 0%, #E07020 100%) !important;
+        color: #fff !important;
+        border: none !important;
+    }
+
+    .ftx-card-header .btn-header-orange:hover {
+        background: linear-gradient(135deg, #E07020 0%, #D2691E 100%) !important;
+        color: #fff !important;
+    }
+
+    /* ====== ÁREA DE FILTROS ====== */
+    .ftx-manut-filters {
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .ftx-manut-filters-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ftx-manut-filters-title i {
+        color: var(--ftx-manut-chocolate);
+    }
+
+    .ftx-manut-filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .ftx-manut-filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ftx-manut-filter-group label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.35rem;
+    }
+
+    .ftx-manut-filter-group .form-control,
+    .ftx-manut-filter-group .form-select {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        height: 38px;
+    }
+
+    .ftx-manut-filter-group .form-control:focus,
+    .ftx-manut-filter-group .form-select:focus {
+        border-color: #0D98BA;
+        box-shadow: 0 0 0 3px rgba(13, 152, 186, 0.15);
+    }
+
+    /* Botão de Filtrar */
+    .btn-filtrar-manut {
+        background: linear-gradient(135deg, var(--ftx-manut-chocolate) 0%, #5a2a00 100%);
+        color: #fff !important;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        height: 38px;
+        box-shadow: 0 2px 6px rgba(123, 63, 0, 0.25);
+    }
+
+    .btn-filtrar-manut:hover {
+        background: linear-gradient(135deg, var(--ftx-manut-chocolate-hover) 0%, #6b3a0f 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(123, 63, 0, 0.35);
+        color: #fff !important;
+    }
+
+    .btn-filtrar-manut i {
+        font-size: 1rem;
+    }
+
+    /* ====== COMBOBOX SYNCFUSION ====== */
+    .ftx-manut-filter-group .e-control-wrapper {
+        height: 38px !important;
+    }
+
+    .ftx-manut-filter-group .e-input-group {
+        border-radius: 6px !important;
+    }
+
+    /* ====== TABELA ====== */
+    #tblManutencao {
+        font-size: 0.82rem;
+    }
+
+    #tblManutencao thead {
+        background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+    }
+
+    #tblManutencao thead th {
+        color: #fff !important;
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 0.75rem 0.625rem;
+        text-align: center;
+        border: none !important;
+        vertical-align: middle !important;
+    }
+
+    #tblManutencao tbody tr {
+        transition: background-color 0.15s ease;
+    }
+
+    #tblManutencao tbody tr:hover {
+        background-color: rgba(50, 93, 136, 0.06) !important;
+    }
+
+    #tblManutencao tbody td {
+        padding: 0.625rem;
+        vertical-align: middle !important;
+        border-color: rgba(0,0,0,0.05) !important;
+    }
+
+    /* ====== BADGES DE STATUS ====== */
+    .ftx-manut-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 1rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .ftx-manut-badge-aberta {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(25, 135, 84, 0.3);
+    }
+
+    .ftx-manut-badge-fechada {
+        background: linear-gradient(135deg, #2F4F4F 0%, #1e3a3a 100%);
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(47, 79, 79, 0.3);
+    }
+
+    .ftx-manut-badge-cancelada {
+        background: linear-gradient(135deg, #561D2D 0%, #3d1520 100%);
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(86, 29, 45, 0.3);
+    }
+
+    .ftx-manut-badge i {
+        color: #fff !important;
+    }
+
+    /* ====== BOTÕES DE AÇÃO ====== */
+    #tblManutencao td:last-child .text-center,
+    #tblManutencao td:last-child > div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: nowrap;
+        height: 100%;
+    }
+
+    .ftx-manut-btn-icon {
+        width: 30px;
+        height: 30px;
+        padding: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px !important;
+        border: none;
+        color: #fff !important;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ftx-manut-btn-icon:hover:not([aria-disabled="true"]) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    }
+
+    .ftx-manut-btn-icon[aria-disabled="true"] {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .ftx-manut-btn-icon i {
+        font-size: 0.9rem;
+        line-height: 1;
+        color: #fff !important;
+    }
+
+    .ftx-manut-btn-editar {
+        background: linear-gradient(135deg, #0D98BA 0%, #0b8099 100%);
+    }
+
+    .ftx-manut-btn-baixar {
+        background: linear-gradient(135deg, var(--ftx-manut-laranja-3) 0%, #b54b00 100%);
+    }
+
+    .ftx-manut-btn-cancelar {
+        background: linear-gradient(135deg, #561D2D 0%, #3d1520 100%);
+    }
+
+    /* ====== DATATABLE CONTROLS ====== */
+    .dataTables_wrapper .dataTables_filter input {
+        font-size: 0.82rem;
+        height: 32px;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        font-size: 0.82rem;
+        height: 32px;
+        padding: 0.15rem 0.35rem;
+        border-radius: 6px;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate,
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        font-size: 0.80rem;
+    }
+
+    .dt-buttons .dt-button {
+        font-size: 0.78rem !important;
+        padding: 0.25rem 0.45rem !important;
+        line-height: 1.1 !important;
+        border-radius: 6px !important;
+    }
+
+    /* ====== RESPONSIVIDADE ====== */
+    @@media (max-width: 992px) {
+        .ftx-manut-filters-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .ftx-manut-header {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .ftx-manut-filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    window.escolhendoVeiculo = window.escolhendoVeiculo ?? false;
+    window.escolhendoData = window.escolhendoData ?? false;
+    window.escolhendoStatus = window.escolhendoStatus ?? false;
+
+    window.URLapi = window.URLapi ?? "";
+    window.IDapi = window.IDapi ?? "";
+
+    function DefineEscolhaVeiculo() {
+        try {
+            escolhendoVeiculo = true;
+            escolhendoData = false;
+            escolhendoStatus = false;
+
+            const veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+            if (veiculos.value === null) {
+                // ListaTodasManutencao();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ListaManutencao.cshtml", "DefineEscolhaVeiculo", error);
+        }
+    }
+
+    function DefineEscolhaData() {
+        try {
+            escolhendoVeiculo = false;
+            escolhendoData = true;
+            escolhendoStatus = false;
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ListaManutencao.cshtml", "DefineEscolhaData", error);
+        }
+    }
+
+    function DefineEscolhaStatus() {
+        try {
+            escolhendoVeiculo = false;
+            escolhendoData = false;
+            escolhendoStatus = true;
+
+            const status = document.getElementById('lstStatus').ej2_instances[0];
+            if (status.value === null) {
+                // ListaTodasManutencao();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ListaManutencao.cshtml", "DefineEscolhaStatus", error);
+        }
+    }
+
+    function VeiculosValueChange() {
+        try {
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ListaManutencao.cshtml", "VeiculosValueChange", error);
+        }
+    }
+
+    function StatusValueChange() {
+        try {
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ListaManutencao.cshtml", "StatusValueChange", error);
+        }
+    }
+</script>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel ftx-card-styled">
+            <div class="panel-container show">
+
+                <!-- Header Padrão FrotiX -->
+                <div class="ftx-card-header">
+                    <h2 class="ftx-card-title">
+                        <i class="fa-duotone fa-engine-warning"></i>
+                        Manutenção: Ordens de Serviço
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/Manutencao/Upsert" class="btn btn-header-orange" data-ejtip="Adicionar Nova Ordem de Serviço">
+                            <i class="fa-duotone fa-plus-circle"></i>
+                            Nova OS
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="ftx-manut-filters">
+                    <div class="ftx-manut-filters-title">
+                        <i class="fa-solid fa-filter"></i>
+                        Filtros de Pesquisa
+                    </div>
+
+                    <div class="ftx-manut-filters-grid">
+                        <!-- Mês -->
+                        <div class="ftx-manut-filter-group">
+                            <label for="lstMes">Mês</label>
+                            <select class="form-select" id="lstMes" aria-label="Selecionar mês">
+                                <option value="">-- Mês --</option>
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+
+                        <!-- Ano -->
+                        <div class="ftx-manut-filter-group">
+                            <label for="lstAno">Ano</label>
+                            <select class="form-select" id="lstAno" aria-label="Selecionar ano">
+                                <option value="">-- Ano --</option>
+                                <option>2027</option>
+                                <option>2026</option>
+                                <option>2025</option>
+                                <option>2024</option>
+                                <option>2023</option>
+                                <option>2022</option>
+                                <option>2021</option>
+                                <option>2020</option>
+                            </select>
+                        </div>
+
+                        <!-- Data Inicial -->
+                        <div class="ftx-manut-filter-group">
+                            <label for="txtDataInicial">Data Inicial</label>
+                            <input id="txtDataInicial" class="form-control" type="date" />
+                        </div>
+
+                        <!-- Data Final -->
+                        <div class="ftx-manut-filter-group">
+                            <label for="txtDataFinal">Data Final</label>
+                            <input id="txtDataFinal" class="form-control" type="date" />
+                        </div>
+
+                        <!-- Veículo -->
+                        <div class="ftx-manut-filter-group" style="grid-column: span 2;">
+                            <label>Veículo</label>
+                            <ejs-combobox id="lstVeiculos"
+                                          placeholder="Selecione um Veículo..."
+                                          allowFiltering="true" filterType="Contains"
+                                          dataSource="@ViewData["lstVeiculos"]"
+                                          popupHeight="250px" width="100%" showClearButton="true">
+                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                            </ejs-combobox>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="ftx-manut-filter-group">
+                            <label>Status</label>
+                            <ejs-combobox id="lstStatus"
+                                          placeholder="Status..."
+                                          allowFiltering="true" filterType="Contains"
+                                          dataSource="@ViewData["lstStatus"]"
+                                          popupHeight="250px" width="100%" showClearButton="true">
+                                <e-combobox-fields text="Status" value="StatusId"></e-combobox-fields>
+                            </ejs-combobox>
+                        </div>
+
+                        <!-- Botão Filtrar -->
+                        <div class="ftx-manut-filter-group">
+                            <label>&nbsp;</label>
+                            <a class="btn-filtrar-manut" id="btnDatas" role="button" data-ejtip="Filtrar Ordens de Serviço">
+                                <i class="fa-duotone fa-magnifying-glass-waveform"></i>
+                                Filtrar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela -->
+                <div class="panel-content">
+                    <div id="divManutencao" class="mt-3 px-3 pb-3">
+                        <table id="tblManutencao" class="table table-bordered table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Nº da OS</th>
+                                    <th>Veículo</th>
+                                    <th>Solicitação</th>
+                                    <th>Disponibilização</th>
+                                    <th>Entrega\Recolhimento</th>
+                                    <th>Devolução</th>
+                                    <th>Dias</th>
+                                    <th>Reserva</th>
+                                    <th>Resumo Solicitação</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Fechar OS -->
+<div class="modal fade" id="modalManutencao" tabindex="-1" aria-labelledby="modalManutencaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h5 class="modal-title" id="modalManutencaoLabel">
+                    <i class="fa-duotone fa-file-check"></i>
+                    Fechar Ordem de Serviço
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="frmManutencao">
+                    <input type="hidden" id="txtId" />
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" for="txtDataDevolucao">Data da Devolução</label>
+                            <input id="txtDataDevolucao" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-9">
+                            <label class="form-label fw-semibold" for="txtResumoOS">Resumo/Observações da Ordem de Serviço</label>
+                            <input id="txtResumoOS" class="form-control" placeholder="Descreva o serviço realizado..." />
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" for="lstReserva">Reserva Enviado</label>
+                            <select id="lstReserva" class="form-select">
+                                <option value="">Selecione...</option>
+                                <option value="1">Enviado</option>
+                                <option value="0">Não Enviado</option>
+                            </select>
+                        </div>
+
+                        <div id="divReserva" class="col-md-9" style="display:none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="lstVeiculoReserva">Veículo Reserva</label>
+                                    <ejs-combobox id="lstVeiculoReserva"
+                                                  placeholder="Selecione um Veículo"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  dataSource="@ViewData["lstVeiculosReserva"]"
+                                                  popupHeight="200px"
+                                                  width="100%"
+                                                  showClearButton="true">
+                                        <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold" for="txtDataRecebimentoReserva">Recebimento Reserva</label>
+                                    <input id="txtDataRecebimentoReserva" class="form-control" type="date" />
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold" for="txtDataDevolucaoReserva">Devolução Reserva</label>
+                                    <input id="txtDataDevolucaoReserva" class="form-control" type="date" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="mb-3 text-muted">
+                            <i class="fa-solid fa-list-check me-2"></i>
+                            Itens da Ordem de Serviço
+                        </h6>
+                        <table id="tblItens" class="table table-bordered table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Ficha</th>
+                                    <th>Data</th>
+                                    <th>Motorista</th>
+                                    <th>Resumo Ocorrência</th>
+                                    <th>Ação</th>
+                                    <th>ItemManutençãoID</th>
+                                    <th>Descrição</th>
+                                    <th>Status</th>
+                                    <th>MotoristaId</th>
+                                    <th>ImagemOcorrencia</th>
+                                    <th>ViagemId</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnFecharManutencao" class="btn btn-azul" type="button" data-ejtip="Baixar Ordem de Serviço">
+                    <i class="fa-duotone fa-file-check icon-pulse"></i>
+                    Baixar OS
+                </button>
+                <button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                    <i class="fa-solid fa-rotate-left icon-rotate-left"></i>
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Foto da Ocorrência -->
+<div class="modal fade" id="modalFoto" tabindex="-1" aria-labelledby="modalFotoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h5 class="modal-title" id="modalFotoLabel">
+                    <i class="fa-duotone fa-image"></i>
+                    Foto da Ocorrência
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <img class="img-fluid img-ocorrencia-viewer" id="imgViewerOcorrencia" alt="Imagem da ocorrência"
+                     style="display:none; border-radius: 10px; max-height: 450px;" />
+                <div class="no-image-placeholder" id="noImagePlaceholder">
+                    <i class="fa-duotone fa-image-slash"></i>
+                    <p>Nenhuma imagem disponível para esta ocorrência</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                    <i class="fa-solid fa-rotate-left icon-rotate-left"></i>
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <ejs-scripts></ejs-scripts>
+    <script src="~/js/cadastros/ListaManutencao.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                var comboVeiculos = document.getElementById('lstVeiculos')?.ej2_instances?.[0];
+                if (comboVeiculos) {
+                    comboVeiculos.change = window.DefineEscolhaVeiculo;
+                    comboVeiculos.close = window.VeiculosValueChange;
+                }
+
+                var comboStatus = document.getElementById('lstStatus')?.ej2_instances?.[0];
+                if (comboStatus) {
+                    comboStatus.change = window.DefineEscolhaStatus;
+                    comboStatus.close = window.StatusValueChange;
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaManutencao.cshtml", "DOMContentLoaded", error);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,1126 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+
+@{
+    ViewData["Title"] = "Eventos";
+    ViewData["PageName"] = "viagens_listaeventos";
+    ViewData["Heading"] = "<i class='fa-duotone fa-calendar-users'></i> Cadastros: <span class='fw-300'>Eventos</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+}
+
+<style>
+    /* ======== ESTILOS FrotiX - TABELA ======== */
+    #tblEventos_wrapper .row {
+        margin-top: .25rem;
+        margin-bottom: .5rem;
+    }
+
+    #tblEventos_wrapper .dataTables_length,
+    #tblEventos_wrapper .dt-buttons,
+    #tblEventos_wrapper .dataTables_filter {
+        margin-top: .25rem;
+        margin-bottom: .25rem;
+    }
+</style>
+
+<form>
+    <div class="row">
+        <div class="col-xl-12">
+            <!-- ============================================
+                 PANEL FrotiX COM HEADER ESTILIZADO
+                 ============================================ -->
+            <div id="panel-1" class="panel ftx-card-styled">
+                <div class="panel-container show">
+                    
+                    <!-- HEADER DO CARD - PADRÃO FrotiX -->
+                    <div class="ftx-card-header">
+                        <h2 class="titulo-paginas">
+                            <i class="fa-duotone fa-calendar-users"></i>
+                            Gestão de Eventos
+                        </h2>
+                        <div class="ftx-card-actions">
+                            <a href="/Viagens/UpsertEvento" class="btn btn-fundo-laranja">
+                                <i class="fa-duotone fa-calendar-plus icon-space"></i>
+                                Adicionar Evento
+                            </a>
+                        </div>
+                    </div>
+                    <!-- FIM: Card Header -->
+
+                    <div class="panel-content">
+                        <div class="box-body">
+                            <div id="divEventos" class="mt-3">
+                                <table id="tblEventos" class="table table-bordered table-striped mt-2 ftx-table" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Evento</th>
+                                            @* <th>Descrição</th> *@
+                                            <th>Início</th>
+                                            <th>Fim</th>
+                                            <th>Participantes</th>
+                                            @* <th>Requisitante</th> *@
+                                            <th>Setor Requisitante</th>
+                                            <th>Custo</th>
+                                            <th>Status</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Custo -->
+    <div class="modal fade" id="modalCusto" tabindex="-1" aria-labelledby="modalCustoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header modal-header-dinheiro">
+                    <h5 class="modal-title" id="modalCustoLabel">
+                        <i class="fa-regular fa-money-check-dollar"></i> Custo do Evento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Título do Evento -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h4 id="tituloEventoCusto" class="text-primary mb-0"></h4>
+                            <small id="periodoEventoCusto" class="text-muted"></small>
+                        </div>
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <!-- Tabela de Viagens -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="fs-5 mb-3">
+                                <i class="fa-solid fa-route"></i> Viagens associadas ao Evento
+                            </h5>
+                            <div class="table-responsive">
+                                <table id="tblViagensModal" class="table table-striped table-bordered table-sm w-100">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Vistoria</th>
+                                            <th>Data</th>
+                                            <th>Início</th>
+                                            <th>Requisitante</th>
+                                            <th>Setor</th>
+                                            <th>Motorista</th>
+                                            <th>Veículo</th>
+                                            <th class="text-end">Custo</th>
+                                            <th class="text-center">Detalhes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Estatísticas das Viagens -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="text-success mb-3">
+                                <i class="fa fa-chart-bar"></i> Estatísticas das Viagens Realizadas
+                            </h5>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="text-info">
+                                    <i class="fa fa-car"></i> Total de Viagens
+                                </label>
+                                <input type="text" id="totalViagensModal"
+                                       class="form-control text-center font-weight-bold"
+                                       readonly value="0"
+                                       style="background-color: #e3f2fd;" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="text-success">
+                                    <i class="fa fa-dollar-sign"></i> Valor Total do Evento
+                                </label>
+                                <input type="text" id="custoTotalViagensModal"
+                                       class="form-control text-center font-weight-bold"
+                                       readonly value="R$ 0,00"
+                                       style="background-color: #e8f5e9;" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="text-warning">
+                                    <i class="fa fa-chart-line"></i> Custo Médio por Viagem
+                                </label>
+                                <input type="text" id="custoMedioViagemModal"
+                                       class="form-control text-center font-weight-bold"
+                                       readonly value="R$ 0,00"
+                                       style="background-color: #fff3e0;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Modal de Custo -->
+
+    <!-- ============================================
+         MODAL DE DETALHAMENTO DE CUSTOS
+         ============================================ -->
+    <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header modal-header-dinheiro">
+                    <h5 class="modal-title text-white" id="modalDetalhesLabel">
+                        <i class="fa-duotone fa-file-invoice-dollar"></i> Detalhamento de Custos da Viagem
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Nome do Evento -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 id="nomeEventoDetalhes" class="text-primary mb-0"></h4>
+                        </div>
+                    </div>
+
+                    <!-- Tempo de Viagem -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-3">
+                                        <i class="fa-duotone fa-clock text-primary"></i> Tempo de Viagem
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <small class="text-muted d-block">Data/Hora Inicial</small>
+                                                <span id="dataHoraInicialDetalhes" class="fw-bold">--</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <small class="text-muted d-block">Data/Hora Final</small>
+                                                <span id="dataHoraFinalDetalhes" class="fw-bold">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-2" />
+                                    <div class="text-center">
+                                        <small class="text-muted d-block">Tempo Total</small>
+                                        <h4 id="tempoTotalDetalhes" class="mb-0 text-primary fw-bold">0,00 horas</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cards de Custos -->
+                    <div class="row mb-3">
+                        <!-- Custo Motorista -->
+                        <div class="col-md-4">
+                            <div class="card border-primary h-100">
+                                <div class="card-body text-center">
+                                    <i class="fa-duotone fa-user-tie fa-2x text-primary mb-2"></i>
+                                    <h6 class="text-muted mb-2">Custo com Motorista</h6>
+                                    <h5 id="custoMotoristaDetalhes" class="mb-0 text-primary fw-bold">R$ 0,00</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custo Veículo -->
+                        <div class="col-md-4">
+                            <div class="card border-success h-100">
+                                <div class="card-body text-center">
+                                    <i class="fa-duotone fa-car fa-2x text-success mb-2"></i>
+                                    <h6 class="text-muted mb-2">Custo com Veículo</h6>
+                                    <h5 id="custoVeiculoDetalhes" class="mb-0 text-success fw-bold">R$ 0,00</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custo Combustível -->
+                        <div class="col-md-4">
+                            <div class="card border-warning h-100">
+                                <div class="card-body text-center">
+                                    <i class="fa-duotone fa-gas-pump fa-2x text-warning mb-2"></i>
+                                    <h6 class="text-muted mb-2">Custo com Combustível</h6>
+                                    <h5 id="custoCombustivelDetalhes" class="mb-0 text-warning fw-bold">R$ 0,00</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <!-- Custo Total -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <div class="card-body text-center py-4">
+                                    <i class="fa-duotone fa-sack-dollar fa-3x mb-2"></i>
+                                    <h5 class="mb-2">Custo Total da Viagem</h5>
+                                    <h2 id="custoTotalDetalhes" class="mb-0 fw-bold">R$ 0,00</h2>
+                                    <small class="opacity-75">Soma de todos os custos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Modal de Detalhamento de Custos -->
+
+    <!-- ============================================
+         MODAL DE LOADING
+         ============================================ -->
+    <div class="modal fade" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
+                <div class="modal-body text-center p-4">
+                    <div class="bg-white rounded-3 p-4 shadow">
+                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <h5 class="mb-0 text-dark" id="loadingMessage">Carregando Eventos...</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Modal de Loading -->
+
+</form>
+
+@section ScriptsBlock
+{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+    </script>
+    <script type="text/javascript" src="js/loading_script.js"></script>
+    <script type="text/javascript" src="js/cadastros/listaeventos.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            try {
+                ListaTodosEventos();
+
+                // Apaga evento
+                $(document).on('click', '.btn-apagar', function () {
+                    try {
+                        const id = $(this).data('id');
+
+                        Alerta.Confirmar(
+                            "Confirmar Exclusão",
+                            "Você tem certeza que deseja apagar este evento? Não será possível recuperar os dados eliminados!",
+                            "Sim, excluir",
+                            "Cancelar"
+                        ).then(function (confirmed) {
+                            try {
+                                if (!confirmed) return;
+
+                                $.ajax({
+                                    url: '/api/Viagem/ApagaEvento',
+                                    type: 'GET',
+                                    data: { eventoId: id },
+                                    contentType: 'application/json; charset=utf-8',
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        try {
+                                            if (data.success) {
+                                                AppToast.show('Verde', data.message, 2000);
+                                                $('#tblEventos').DataTable().ajax.reload(null, false);
+                                            } else {
+                                                AppToast.show('Vermelho', data.message, 3000);
+                                            }
+                                        } catch (error) {
+                                            Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-apagar.ajax.success", error);
+                                        }
+                                    },
+                                    error: function (err) {
+                                        try {
+                                            console.log(err);
+                                            AppToast.show('Vermelho', 'Ocorreu um erro ao apagar.', 3000);
+                                        } catch (error) {
+                                            Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-apagar.ajax.error", error);
+                                        }
+                                    }
+                                });
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-apagar.Confirmar.then", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-apagar.click", error);
+                    }
+                });
+
+                // Atualiza Status
+                $(document).on('click', '.updateStatusEvento', function () {
+                    try {
+                        const url = $(this).data('url');
+                        const $btn = $(this);
+
+                        $.get(url, function (data) {
+                            try {
+                                if (data.success) {
+                                    AppToast.show('Verde', "Status alterado com sucesso!", 2000);
+
+                                    let text = 'Ativo';
+                                    if (data.type === 1) {
+                                        text = 'Inativo';
+                                        $btn.removeClass('btn-verde').addClass('fundo-cinza');
+                                    } else {
+                                        $btn.removeClass('fundo-cinza').addClass('btn-verde');
+                                    }
+                                    $btn.text(text);
+                                } else {
+                                    AppToast.show('Vermelho', 'Algo deu errado!', 3000);
+                                }
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "updateStatusEvento.get.callback", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "updateStatusEvento.click", error);
+                    }
+                });
+
+                // Abre Modal de Custo do Evento
+                $(document).on('click', '.btn-custo-evento', function () {
+                    try {
+                        const eventoId = $(this).data('id');
+
+                        console.log('Clique no botão de custo, ID:', eventoId);
+
+                        if (!eventoId) {
+                            console.error('ID do evento não encontrado');
+                            AppToast.show('Vermelho', 'Erro ao abrir modal: ID não encontrado', 3000);
+                            return;
+                        }
+
+                        // Armazena o ID do evento
+                        eventoIdAtual = eventoId;
+
+                        // Carrega os dados do evento
+                        carregarDadosEvento(eventoId);
+
+                        // Inicializa ou recarrega a tabela de viagens
+                        if (tabelaViagensModal) {
+                            tabelaViagensModal.ajax.reload(null, false);
+                        } else {
+                            inicializarTabelaViagensModal();
+                        }
+
+                        // Abre o modal programaticamente
+                        const modalElement = document.getElementById('modalCusto');
+                        if (modalElement) {
+                            const modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } else {
+                            console.error('Modal não encontrado no DOM');
+                        }
+
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-custo-evento.click", error);
+                    }
+                });
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "document.ready", error);
+            }
+        });
+    </script>
+
+    <script>
+        // Funções do Modal de Loading
+        function mostrarLoading(mensagem = 'Carregando Eventos...') {
+            $('#loadingMessage').text(mensagem);
+            $('#modalLoading').modal('show');
+        }
+
+        function esconderLoading() {
+            $('#modalLoading').modal('hide');
+        }
+
+        function ListaTodosEventos() {
+            try {
+                // Mostra loading IMEDIATAMENTE (sem animação)
+                $('#modalLoading').addClass('show').css('display', 'block');
+                $('body').addClass('modal-open');
+                if (!$('.modal-backdrop').length) {
+                    $('body').append('<div class="modal-backdrop fade show"></div>');
+                }
+
+                // Reset DataTable se já existir
+                const dtExists = $.fn.DataTable.isDataTable('#tblEventos');
+                if (dtExists) {
+                    $('#tblEventos').DataTable().clear().destroy();
+                }
+                $('#tblEventos tbody').empty();
+
+                // Define formato de data (se plugin estiver disponível)
+                if ($.fn.dataTable.moment) {
+                    $.fn.dataTable.moment('DD/MM/YYYY');
+                } else if (typeof DataTable !== 'undefined' && DataTable.datetime) {
+                    DataTable.datetime('DD/MM/YYYY');
+                }
+
+                $('#tblEventos').DataTable({
+                    order: [[1, 'desc']], // Ordenar por Data Inicial decrescente
+                    autoWidth: false,
+                    dom: 'Bfrtip',
+                    lengthMenu: [
+                        [10, 25, 50, -1],
+                        ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']
+                    ],
+                    buttons: [
+                        'pageLength',
+                        'excel',
+                        {
+                            extend: 'pdfHtml5',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL'
+                        }
+                    ],
+                    columnDefs: [
+                        { targets: 0, className: "text-left", width: "22%" }, // Evento
+                        { targets: 1, className: "text-center", width: "3%" }, // Início
+                        { targets: 2, className: "text-center", width: "3%" }, // Fim
+                        { targets: 3, className: "text-center", width: "3%" }, // Participantes
+                        {
+                            targets: 4, className: "text-left", width: "18%", // Setor Requisitante
+                            render: function (data, type, full) {
+                                return `
+                                    <div class="text-center">
+                                        <a data-ejtip="&#129489; (${full.nomeRequisitanteHTML})"
+                                           style="cursor:pointer;"
+                                           data-id='${data}'>
+                                           ${full.nomeSetor}
+                                        </a>
+                                    </div>`;
+                            }
+                        },
+                        { targets: 5, className: "text-right", width: "7%" }, // Custo
+                        { targets: 6, className: "text-center", width: "7%" }, // Status
+                        { targets: 7, className: "text-center", width: "15%" }  // Ação
+                    ],
+                    responsive: true,
+                    ajax: {
+                        url: "/api/viagem/listaeventos",
+                        type: "GET",
+                        datatype: "json",
+                        error: function (xhr, error, thrown) {
+                            try {
+                                // Esconde loading em caso de erro
+                                $('#modalLoading').removeClass('show').css('display', 'none');
+                                $('.modal-backdrop').remove();
+                                $('body').removeClass('modal-open');
+                                console.error('Erro no DataTable:', error);
+                                AppToast.show('Vermelho', 'Erro ao carregar dados', 3000);
+                            } catch (err) {
+                                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "tblEventos.ajax.error", err);
+                            }
+                        }
+                    },
+                    initComplete: function() {
+                        // Esconde loading quando DataTable terminar
+                        $('#modalLoading').removeClass('show').css('display', 'none');
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                    },
+                    columns: [
+                        { data: "nome" },
+                        {
+                            data: "dataInicial",
+                            render: function (data) {
+                                try {
+                                    if (!data) return '-';
+                                    const date = new Date(data);
+                                    const dia = date.getDate().toString().padStart(2, '0');
+                                    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+                                    const ano = date.getFullYear();
+                                    return `${dia}/${mes}/${ano}`;
+                                } catch (error) {
+                                    return '-';
+                                }
+                            }
+                        },
+                        {
+                            data: "dataFinal",
+                            render: function (data) {
+                                try {
+                                    if (!data) return '-';
+                                    const date = new Date(data);
+                                    const dia = date.getDate().toString().padStart(2, '0');
+                                    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+                                    const ano = date.getFullYear();
+                                    return `${dia}/${mes}/${ano}`;
+                                } catch (error) {
+                                    return '-';
+                                }
+                            }
+                        },
+                        { data: "qtdParticipantes" },
+                        { data: "nomeSetor" },
+                        {
+                            data: "custoViagem",
+                            render: function (data) {
+                                try {
+                                    if (!data || data === 0) {
+                                        return '<span class="text-muted">R$ 0,00</span>';
+                                    }
+                                    return parseFloat(data).toLocaleString('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL'
+                                    });
+                                } catch (error) {
+                                    return 'R$ 0,00';
+                                }
+                            }
+                        },
+                        {
+                            data: "status",
+                            orderable: false,
+                            searchable: false,
+                            render: function (data, type, row) {
+                                try {
+                                    if (data === 1) {
+                                        return '<span class="btn btn-verde btn-xs">Ativo</span>';
+                                    } else {
+                                        return '<span class="btn fundo-cinza btn-xs">Inativo</span>';
+                                    }
+                                } catch (error) {
+                                    return '<span class="badge bg-secondary">-</span>';
+                                }
+                            }
+                        },
+                        {
+                            data: "eventoId",
+                            orderable: false,
+                            searchable: false,
+                            render: function (data, type, row) {
+                                try {
+                                    return `
+                                    <div class="text-center">
+                                        <a href="/Viagens/UpsertEvento?id=${data}"
+                                           class="btn btn-azul text-white btn-icon-28"
+                                           data-ejtip="Editar Evento">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <a class="btn btn-foto text-white btn-icon-28 btn-custo-evento"
+                                           data-ejtip="Ver Custo do Evento"
+                                           data-id="${data}">
+                                            <i class="fa-regular fa-money-check-dollar"></i>
+                                        </a>
+                                        <a class="btn btn-vinho text-white btn-icon-28 btn-apagar"
+                                           data-ejtip="Apagar Evento"
+                                           data-id="${data}">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    </div>`;
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "render.acao", error);
+                                    return '';
+                                }
+                            }
+                        }
+                    ],
+                    language: {
+                        emptyTable: "Nenhum registro encontrado",
+                        info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                        infoFiltered: "(Filtrados de _MAX_ registros)",
+                        infoThousands: ".",
+                        loadingRecords: "Carregando...",
+                        processing: "Processando...",
+                        zeroRecords: "Nenhum registro encontrado",
+                        search: "Pesquisar",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                            first: "Primeiro",
+                            last: "Último"
+                        },
+                        aria: {
+                            sortAscending: ": Ordenar colunas de forma ascendente",
+                            sortDescending: ": Ordenar colunas de forma descendente"
+                        },
+                        select: {
+                            rows: { "_": "Selecionado %d linhas", "1": "Selecionado 1 linha" },
+                            cells: { "1": "1 célula selecionada", "_": "%d células selecionadas" },
+                            columns: { "1": "1 coluna selecionada", "_": "%d colunas selecionadas" }
+                        },
+                        buttons: {
+                            copySuccess: { "1": "Uma linha copiada com sucesso", "_": "%d linhas copiadas com sucesso" },
+                            collection: "Coleção",
+                            colvis: "Visibilidade da Coluna",
+                            colvisRestore: "Restaurar Visibilidade",
+                            copy: "Copiar",
+                            copyKeys: "Pressione Ctrl ou ⌘ + C para copiar. Esc para cancelar.",
+                            copyTitle: "Copiar para a Área de Transferência",
+                            csv: "CSV",
+                            excel: "Excel",
+                            pageLength: { "-1": "Mostrar todos os registros", "_": "Mostrar %d registros" },
+                            pdf: "PDF",
+                            print: "Imprimir"
+                        },
+                        autoFill: {
+                            cancel: "Cancelar",
+                            fill: "Preencher todas as células com",
+                            fillHorizontal: "Preencher horizontalmente",
+                            fillVertical: "Preencher verticalmente"
+                        },
+                        lengthMenu: "Exibir _MENU_ resultados por página",
+                        searchBuilder: {
+                            add: "Adicionar Condição",
+                            button: { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+                            clearAll: "Limpar Tudo",
+                            condition: "Condição",
+                            conditions: {
+                                date: { after: "Depois", before: "Antes", between: "Entre", empty: "Vazio", equals: "Igual", not: "Não", notBetween: "Não Entre", notEmpty: "Não Vazio" },
+                                number: { between: "Entre", empty: "Vazio", equals: "Igual", gt: "Maior Que", gte: "Maior ou Igual a", lt: "Menor Que", lte: "Menor ou Igual a", not: "Não", notBetween: "Não Entre", notEmpty: "Não Vazio" },
+                                string: { contains: "Contém", empty: "Vazio", endsWith: "Termina Com", equals: "Igual", not: "Não", notEmpty: "Não Vazio", startsWith: "Começa Com" },
+                                array: { contains: "Contém", empty: "Vazio", equals: "Igual à", not: "Não", notEmpty: "Não vazio", without: "Não possui" }
+                            },
+                            data: "Data",
+                            deleteTitle: "Excluir regra de filtragem",
+                            logicAnd: "E",
+                            logicOr: "Ou",
+                            title: { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+                            value: "Valor",
+                            leftTitle: "Critérios Externos",
+                            rightTitle: "Critérios Internos"
+                        },
+                        searchPanes: {
+                            clearMessage: "Limpar Tudo",
+                            collapse: { "0": "Painéis de Pesquisa", "_": "Painéis de Pesquisa (%d)" },
+                            count: "{total}",
+                            countFiltered: "{shown} ({total})",
+                            emptyPanes: "Nenhum Painel de Pesquisa",
+                            loadMessage: "Carregando Painéis de Pesquisa...",
+                            title: "Filtros Ativos"
+                        },
+                        thousands: ".",
+                        datetime: {
+                            previous: "Anterior",
+                            next: "Próximo",
+                            hours: "Hora",
+                            minutes: "Minuto",
+                            seconds: "Segundo",
+                            amPm: ["am", "pm"],
+                            unknown: "-",
+                            months: {
+                                "0": "Janeiro", "1": "Fevereiro", "2": "Março", "3": "Abril",
+                                "4": "Maio", "5": "Junho", "6": "Julho", "7": "Agosto",
+                                "8": "Setembro", "9": "Outubro", "10": "Novembro", "11": "Dezembro"
+                            },
+                            weekdays: ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinte-feira", "Sexta-feira", "Sábado"]
+                        },
+                        editor: {
+                            close: "Fechar",
+                            create: { button: "Novo", submit: "Criar", title: "Criar novo registro" },
+                            edit: { button: "Editar", submit: "Atualizar", title: "Editar registro" },
+                            error: { system: "Ocorreu um erro no sistema." },
+                            multi: {
+                                noMulti: "Essa entrada pode ser editada individualmente",
+                                restore: "Desfazer alterações",
+                                title: "Múltiplos valores",
+                                info: "Itens selecionados contêm valores diferentes para esta entrada."
+                            },
+                            remove: {
+                                button: "Remover",
+                                confirm: { "_": "Tem certeza que quer deletar %d linhas?", "1": "Tem certeza que quer deletar 1 linha?" },
+                                submit: "Remover",
+                                title: "Remover registro"
+                            }
+                        },
+                        decimal: ","
+                    },
+                    width: "100%"
+                });
+
+            } catch (error) {
+                // Esconde loading em caso de erro
+                $('#modalLoading').removeClass('show').css('display', 'none');
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "ListaTodosEventos", error);
+            }
+        }
+
+        // ==========================================
+        // MODAL DE CUSTO DO EVENTO
+        // ==========================================
+
+        let tabelaViagensModal = null;
+        let eventoIdAtual = null;
+
+        // Limpa dados quando o modal é fechado
+        $('#modalCusto').on('hidden.bs.modal', function () {
+            try {
+                eventoIdAtual = null;
+                $('#tituloEventoCusto').text('');
+                $('#periodoEventoCusto').text('');
+                $('#valorTotalEventoModal').val('R$ 0,00');
+                $('#totalViagensModal').val('0');
+                $('#custoTotalViagensModal').val('R$ 0,00');
+                $('#custoMedioViagemModal').val('R$ 0,00');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "modalCusto.hidden", error);
+            }
+        });
+
+        // Função para carregar dados básicos do evento
+        function carregarDadosEvento(eventoId) {
+            try {
+                $.ajax({
+                    url: '/api/ViagemEvento/ObterPorId',
+                    type: 'GET',
+                    data: { id: eventoId },
+                    success: function (response) {
+                        try {
+                            if (response.success && response.data) {
+                                const evento = response.data;
+
+                                // Atualiza título (camelCase: nome)
+                                $('#tituloEventoCusto').text(evento.nome || 'Evento sem nome');
+
+                                // Formata e exibe período (camelCase: dataInicial, dataFinal)
+                                const dataInicio = evento.dataInicial ? formatarData(evento.dataInicial) : '-';
+                                const dataFim = evento.dataFinal ? formatarData(evento.dataFinal) : '-';
+                                $('#periodoEventoCusto').text(`Período: ${dataInicio} a ${dataFim}`);
+
+                            } else {
+                                console.warn('Dados do evento não encontrados');
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "carregarDadosEvento.success", error);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        try {
+                            console.error('Erro ao carregar dados do evento:', error);
+                            Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "carregarDadosEvento.error", error);
+                        } catch (err) {
+                            console.error('Erro no tratamento de erro:', err);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "carregarDadosEvento", error);
+            }
+        }
+
+        // Função para inicializar a tabela de viagens do modal
+        function inicializarTabelaViagensModal() {
+            try {
+                tabelaViagensModal = $('#tblViagensModal').DataTable({
+                    lengthChange: false,
+                    searching: false,
+                    ordering: false,
+                    deferRender: true,
+                    responsive: true,
+                    processing: true,
+                    ajax: {
+                        url: "/api/viagem/listaviagensevento",
+                        type: "GET",
+                        data: function () {
+                            return { Id: eventoIdAtual };
+                        },
+                        dataSrc: 'data',
+                        complete: function (data) {
+                            try {
+                                console.log('Viagens carregadas:', data.responseJSON?.data?.length);
+                                carregarEstatisticasViagensModal();
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "tabelaViagensModal.ajax.complete", error);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            try {
+                                console.error('Erro ao carregar viagens:', error);
+                                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "tabelaViagensModal.ajax.error", error);
+                            } catch (err) {
+                                console.error('Erro no tratamento de erro:', err);
+                            }
+                        }
+                    },
+                    columns: [
+                        {
+                            data: "noFichaVistoria",
+                            className: "text-center",
+                            width: "8%",
+                            render: function (data) {
+                                return data || '-';
+                            }
+                        },
+                        {
+                            data: "dataInicial",
+                            className: "text-center",
+                            width: "10%",
+                            render: function (data) {
+                                try {
+                                    if (!data) return '-';
+                                    const date = new Date(data);
+                                    const dia = date.getDate().toString().padStart(2, '0');
+                                    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+                                    const ano = date.getFullYear();
+                                    return `${dia}/${mes}/${ano}`;
+                                } catch (error) {
+                                    return '-';
+                                }
+                            }
+                        },
+                        {
+                            data: "horaInicio",
+                            className: "text-center",
+                            width: "8%",
+                            render: function (data) {
+                                try {
+                                    if (!data) return '-';
+                                    const date = new Date(data);
+                                    const horas = date.getHours().toString().padStart(2, '0');
+                                    const minutos = date.getMinutes().toString().padStart(2, '0');
+                                    return `${horas}:${minutos}`;
+                                } catch (error) {
+                                    return '-';
+                                }
+                            }
+                        },
+                        {
+                            data: "nomeRequisitante",
+                            className: "text-left",
+                            width: "15%"
+                        },
+                        {
+                            data: "nomeSetor",
+                            className: "text-left",
+                            width: "15%"
+                        },
+                        {
+                            data: "nomeMotorista",
+                            className: "text-left",
+                            width: "15%",
+                            render: function (data) {
+                                return data || '<span class="text-muted">-</span>';
+                            }
+                        },
+                        {
+                            data: "placa",
+                            className: "text-center",
+                            width: "10%",
+                            render: function (data) {
+                                return data || '<span class="text-muted">-</span>';
+                            }
+                        },
+                        {
+                            data: "custoViagem",
+                            className: "text-end",
+                            width: "12%",
+                            render: function (data) {
+                                try {
+                                    if (!data || data === 0) {
+                                        return '<span class="text-muted">R$ 0,00</span>';
+                                    }
+                                    return formatarMoeda(data);
+                                } catch (error) {
+                                    return 'R$ 0,00';
+                                }
+                            }
+                        },
+                        {
+                            data: "viagemId",  // ✅ CORRETO!
+                            className: "text-center",
+                            width: "7%",
+                            orderable: false,
+                            render: function (data, type, row) {
+                                return `
+                                    <a class="btn fundo-roxo text-white btn-icon-28 btn-detalhes-viagem"
+                                       data-id="${data}"
+                                       data-ejtip="Detalhamento de Custos">
+                                        <i class="fa-duotone fa-file-invoice-dollar"></i>
+                                    </a>
+                                `;
+                            }
+                        }
+                    ],
+                    language: {
+                        emptyTable: "Nenhuma viagem encontrada para este evento",
+                        info: "Mostrando de _START_ até _END_ de _TOTAL_ viagens",
+                        infoEmpty: "Mostrando 0 até 0 de 0 viagens",
+                        infoFiltered: "(Filtradas de _MAX_ viagens)",
+                        loadingRecords: "Carregando...",
+                        processing: "Processando...",
+                        zeroRecords: "Nenhuma viagem encontrada",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                            first: "Primeiro",
+                            last: "Último"
+                        }
+                    },
+                    pageLength: 6,
+                    dom: 'rtip'
+                });
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "inicializarTabelaViagensModal", error);
+            }
+        }
+
+        // Função para carregar estatísticas das viagens
+        function carregarEstatisticasViagensModal() {
+            try {
+                $.ajax({
+                    url: "/api/viagem/ObterTotalCustoViagensEvento",
+                    type: "GET",
+                    data: { Id: eventoIdAtual },
+                    success: function (response) {
+                        try {
+                            if (response.success) {
+                                // Preencher campos de estatísticas
+                                $("#totalViagensModal").val(response.totalViagens || 0);
+                                $("#custoTotalViagensModal").val(response.totalCustoFormatado || "R$ 0,00");
+
+                                // Calcular e preencher média
+                                const media = response.custoMedioFormatado ||
+                                    formatarMoeda(response.totalViagens > 0 ? response.totalCusto / response.totalViagens : 0);
+                                $("#custoMedioViagemModal").val(media);
+
+                                console.log('Estatísticas carregadas:', response);
+                            } else {
+                                // Valores padrão em caso de falha
+                                $("#totalViagensModal").val("0");
+                                $("#custoTotalViagensModal").val("R$ 0,00");
+                                $("#custoMedioViagemModal").val("R$ 0,00");
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "carregarEstatisticasViagensModal.success", error);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        try {
+                            console.error('Erro ao carregar estatísticas:', error);
+                            // Valores padrão em caso de erro
+                            $("#totalViagensModal").val("0");
+                            $("#custoTotalViagensModal").val("R$ 0,00");
+                            $("#custoMedioViagemModal").val("R$ 0,00");
+                        } catch (err) {
+                            console.error('Erro no tratamento de erro:', err);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "carregarEstatisticasViagensModal", error);
+            }
+        }
+
+        // Função auxiliar para formatar moeda
+        function formatarMoeda(valor) {
+            try {
+                if (!valor && valor !== 0) return "R$ 0,00";
+                return parseFloat(valor).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+            } catch (error) {
+                return "R$ 0,00";
+            }
+        }
+
+        // Função auxiliar para formatar data
+        function formatarData(data) {
+            try {
+                if (!data) return '-';
+                const date = new Date(data);
+                const dia = date.getDate().toString().padStart(2, '0');
+                const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+                const ano = date.getFullYear();
+                return `${dia}/${mes}/${ano}`;
+            } catch (error) {
+                return '-';
+            }
+        }
+
+    </script>
+
+    <script>
+        // ============================================
+        // EVENT HANDLER: Abre Modal de Detalhamento
+        // ============================================
+        $(document).ready(function () {
+            try {
+                $(document).on('click', '.btn-detalhes-viagem', function () {
+                    try {
+                        const viagemId = $(this).data('id');
+
+                        console.log('Clique no botão de detalhamento, Viagem ID:', viagemId);
+
+                        if (!viagemId) {
+                            console.error('ID da viagem não encontrado');
+                            AppToast.show('Vermelho', 'Erro ao abrir modal: ID não encontrado', 3000);
+                            return;
+                        }
+
+                        // Carrega detalhamento de custos
+                        carregarDetalhamentoCustos(viagemId);
+
+                        // Abre o modal programaticamente
+                        const modalElement = document.getElementById('modalDetalhes');
+                        if (modalElement) {
+                            const modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } else {
+                            console.error('Modal não encontrado no DOM');
+                        }
+
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-detalhes-viagem.click", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "btn-detalhes-viagem.document.ready", error);
+            }
+        });
+    </script>
+}

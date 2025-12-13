@@ -1,0 +1,1057 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+@using Syncfusion.EJ2.DropDowns
+
+@model FrotiX.Pages.Viagens.UpsertEventoModel
+
+@{
+ViewData["Title"] = "Eventos";
+ViewData["PageName"] = "viagens_upsertevento";
+ViewData["Heading"] = "<i class='fa-duotone fa-calendar-users'></i> Cadastros: <span class='fw-300'>Eventos</span>";
+ViewData["Category1"] = "Cadastros";
+ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+}
+
+<style>
+    /* ========================================
+           ESTILOS OTIMIZADOS PARA BOOTSTRAP 5
+           + COMPONENTES SYNCFUSION
+           ======================================== */
+
+    /* === CONTROLES DE FORMULÁRIO === */
+
+    /* Altura padrão unificada */
+    .form-control,
+    .form-select,
+    .e-dropdowntree,
+    .e-dropdowntree .e-ddt-wrapper,
+    .e-dropdowntree .e-ddt {
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+    }
+
+    /* Estilo dos inputs */
+    .form-control,
+    .form-select {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.875rem !important;
+        border-radius: 0.375rem !important;
+    }
+    
+    .form-control::placeholder {
+        color: #adb5bd !important;
+        font-style: italic;
+    }
+
+    /* ========================================
+           CORREÇÃO CONSERVADORA PARA SYNCFUSION DROPDOWNTREE
+           Mantém a estrutura original do Syncfusion
+           ======================================== */
+
+    /* === AJUSTE BÁSICO DE ALTURA E APARÊNCIA === */
+
+    /* Container principal - ajuste mínimo */
+    .e-control.e-dropdowntree,
+    .e-dropdowntree {
+        width: 100% !important;
+        display: block !important;
+        font-size: 0.875rem !important;
+    }
+
+        /* Input group do Syncfusion */
+        .e-dropdowntree .e-input-group,
+        .e-dropdowntree.e-input-group {
+            height: 40px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 0.375rem !important;
+            background-color: #fff !important;
+        }
+
+        /* Input dentro do dropdown */
+        .e-dropdowntree input.e-dropdownbase,
+        .e-dropdowntree .e-input {
+            height: 38px !important;
+            padding: 0.5rem 0.875rem !important;
+            font-size: 0.875rem !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        /* Texto do placeholder e valor selecionado */
+        .e-dropdowntree .e-input-value,
+        .e-dropdowntree input::placeholder {
+            color: #495057 !important;
+            font-size: 0.875rem !important;
+        }
+
+        .e-dropdowntree input:placeholder-shown {
+            color: #6c757d !important;
+        }
+
+        /* === ÍCONES === */
+
+        /* Container dos ícones */
+        .e-dropdowntree .e-input-group-icon,
+        .e-dropdowntree .e-ddt-icon {
+            border: none !important;
+            background: transparent !important;
+            min-height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 8px !important;
+        }
+
+            /* Ajuste do ícone de dropdown */
+            .e-dropdowntree .e-input-group-icon.e-ddt-icon {
+                border-left: 1px solid #ced4da !important;
+            }
+
+        /* === ESTADOS INTERATIVOS === */
+
+        /* Hover */
+        .e-dropdowntree:hover .e-input-group,
+        .e-dropdowntree .e-input-group:hover {
+            border-color: #86b7fe !important;
+        }
+
+        /* Focus */
+        .e-dropdowntree.e-input-focus .e-input-group,
+        .e-dropdowntree .e-input-group.e-input-focus {
+            border-color: #86b7fe !important;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important;
+            outline: none !important;
+        }
+
+        /* === CHIPS (SELEÇÃO MÚLTIPLA) === */
+
+        .e-dropdowntree .e-chips-wrapper {
+            min-height: 36px !important;
+            padding: 0.25rem !important;
+        }
+
+        .e-dropdowntree .e-chip {
+            height: 24px !important;
+            margin: 2px !important;
+            font-size: 0.75rem !important;
+        }
+
+    /* === POPUP DO DROPDOWN === */
+
+    .e-popup.e-dropdownbase,
+    .e-ddt-popup {
+        border: 1px solid rgba(0,0,0,.15) !important;
+        border-radius: 0.375rem !important;
+        box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,.2) !important;
+        margin-top: 2px !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* === FIX PARA ALINHAMENTO COM BOOTSTRAP === */
+
+    /* Remove margins indesejadas */
+    .form-label + .e-dropdowntree {
+        margin-top: 0 !important;
+    }
+
+    /* IDs específicos dos seus componentes */
+    #lstRequisitanteEvento,
+    #ddtSetorRequisitanteEvento {
+        margin-bottom: 0 !important;
+    }
+
+    /* === COMPATIBILIDADE COM LABELS DO BOOTSTRAP === */
+
+    /* Ajuste quando precedido por label */
+    label.form-label + .e-dropdowntree,
+    label.form-label + #lstRequisitanteEvento,
+    label.form-label + #ddtSetorRequisitanteEvento {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* === LIMPEZA DE ESTILOS CONFLITANTES === */
+
+    /* Remove bordas duplas */
+    .e-dropdowntree .e-input-group .e-input {
+        border: none !important;
+    }
+
+    /* Remove backgrounds extras */
+    .e-dropdowntree .e-input-group .e-control-wrapper {
+        background: transparent !important;
+    }
+
+    /* === GARANTIR VISIBILIDADE DO CONTEÚDO === */
+
+    /* Força exibição do texto */
+    .e-dropdowntree .e-input-value:not(:empty) {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Placeholder visível */
+    .e-dropdowntree .e-placeholder {
+        display: block !important;
+        opacity: 0.6 !important;
+    }
+
+    /* Garante que o input seja visível */
+    .e-dropdowntree input[type="text"] {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* === LABELS === */
+
+    .form-label {
+        margin-bottom: 0.25rem !important;
+        margin-top: 0 !important;
+        font-size: 0.8125rem !important;
+        font-weight: 600 !important;
+        color: #495057 !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+        /* Labels com classe small */
+        .form-label.small {
+            font-size: 0.8125rem !important;
+        }
+        
+    /* Ícones nos labels */
+    .form-label i {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    /* === SEÇÕES DO FORMULÁRIO === */
+    .form-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .form-section-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #3B7DDD;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #3B7DDD;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-section-title i {
+        color: #3B7DDD;
+        font-size: 1rem;
+    }
+
+    /* === ESPAÇAMENTO E LAYOUT === */
+
+    /* Espaçamento entre rows */
+    .row {
+        margin-bottom: 0.75rem;
+    }
+
+        .row:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Gutters personalizados */
+        .row.g-2 > * {
+            padding-right: 0.5rem !important;
+            padding-left: 0.5rem !important;
+        }
+
+    /* Margens bottom específicas */
+    .mb-2 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem !important;
+    }
+
+    /* === MENSAGENS DE VALIDAÇÃO === */
+
+    .text-danger {
+        font-size: 0.75rem !important;
+        margin-top: 0.25rem !important;
+        margin-left: 0 !important;
+        display: block;
+    }
+
+        .text-danger:empty {
+            display: none;
+        }
+
+    .alert-danger:empty {
+        display: none;
+    }
+
+    /* === BOTÕES === */
+    /* Herda estilos do ftx-card-styled.css */
+    
+    .btn.w-100 {
+        width: 100% !important;
+    }
+
+    /* === BOTÃO COM SPINNER === */
+    .btn .btn-loading {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn:disabled {
+        opacity: 0.8;
+        cursor: wait;
+    }
+    
+    .btn .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+    }
+
+    /* === TÍTULOS E CABEÇALHOS === */
+
+    h2.text-primary {
+        font-size: 1.375rem !important;
+        margin-bottom: 0.75rem !important;
+        padding-bottom: 0.5rem !important;
+        font-weight: 600 !important;
+    }
+
+    h3 {
+        font-size: 1.125rem !important;
+        margin-top: 1.25rem !important;
+        margin-bottom: 0.75rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* Ajustes para classes do Bootstrap 5 */
+    .fs-4 {
+        font-size: 1.375rem !important;
+    }
+
+    .fs-5 {
+        font-size: 1.125rem !important;
+    }
+
+    /* === CARDS E CONTAINERS === */
+    /* Herda estilos do ftx-card-styled.css */
+
+    .box-body {
+        padding: 1rem;
+    }
+
+    /* === INPUTS ESPECÍFICOS === */
+
+    /* Inputs de data e número */
+    input[type="date"].form-control,
+    input[type="number"].form-control {
+        height: 38px !important;
+        padding: 0.375rem 0.75rem !important;
+    }
+
+    /* === CARDS DE ESTATÍSTICAS === */
+    #estatisticasViagens .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    #estatisticasViagens .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    #estatisticasViagens h4 {
+        font-size: 1.5rem;
+    }
+
+    /* === TABELAS === */
+
+    #tblViagens,
+    .table {
+        margin-top: 0.75rem;
+        font-size: 0.875rem !important;
+    }
+
+        .table thead th {
+            padding: 0.5rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            background-color: #f8f9fa !important;
+        }
+
+        .table tbody td {
+            padding: 0.375rem !important;
+            font-size: 0.875rem !important;
+            vertical-align: middle !important;
+        }
+
+    /* Tabela responsiva */
+    .table-responsive {
+        border-radius: 0.375rem;
+        overflow-x: auto;
+    }
+
+    /* === ALINHAMENTO VERTICAL === */
+
+    /* Flex para colunas - garante alinhamento */
+    .row > [class*="col-"] {
+        display: flex;
+        flex-direction: column;
+    }
+
+        /* Labels alinhados ao topo */
+        .row > [class*="col-"] .form-label {
+            align-self: flex-start;
+        }
+
+    /* === BORDAS E DIVISORES === */
+
+    .border-bottom {
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+
+
+    /* === UTILITÁRIOS ADICIONAIS === */
+
+    /* Remove outline padrío do browser */
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        border-color: #86b7fe !important;
+        outline: 0 !important;
+    }
+
+    /* Transições suaves */
+    .form-control,
+    .form-select,
+    .btn,
+    .e-dropdowntree {
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    }
+
+    /* Cursor pointer para elementos interativos */
+    .btn,
+    .form-select,
+    label.form-label {
+        cursor: pointer;
+    }
+
+    /* === BOTÃO COM SPINNER === */
+    .btn .btn-loading {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn:disabled {
+        opacity: 0.8;
+        cursor: wait;
+    }
+    
+    .btn .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+    }
+
+    /* Desabilita resize de textarea se houver */
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    /* Campo de texto readonly com aparência apropriada */
+    #txtSetorRequisitante[readonly] {
+        background-color: #e9ecef !important;
+        opacity: 1 !important;
+        cursor: not-allowed !important;
+        color: #495057 !important;
+    }
+
+        /* Placeholder mais visível para campo readonly */
+        #txtSetorRequisitante[readonly]::placeholder {
+            color: #6c757d !important;
+            opacity: 1 !important;
+            font-style: italic;
+        }
+
+    /* Garante que o campo tenha a mesma altura dos outros controles */
+    #txtSetorRequisitante {
+        height: 40px !important;
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Garantir que o DropDownTree oculto não ocupe espaço */
+    #ddtSetorRequisitanteEvento,
+    #ddtSetorRequisitanteEvento * {
+        position: absolute !important;
+        left: -9999px !important;
+        visibility: hidden !important;
+    }
+
+	/* Estilo para o dropdown de setores com hierarquia */
+	#ddlSetorRequisitanteEvento option {
+		font-family: 'Courier New', monospace;
+	}
+
+	/* Opcional: destacar setores raiz */
+	#ddlSetorRequisitanteEvento option[value^="nivel0"] {
+		font-weight: bold;
+	}
+
+</style>
+
+
+<form method="post" asp-action="Upsert" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-xl-12">
+            <!-- ============================================
+                 PANEL FrotiX COM HEADER ESTILIZADO
+                 ============================================ -->
+            <div id="panel-1" class="panel ftx-card-styled">
+                <div class="panel-container show">
+                    
+                    <!-- HEADER DO CARD - PADRÃO FrotiX -->
+                    <div class="ftx-card-header">
+                        <h2 class="titulo-paginas">
+                            <i class="fa-duotone fa-calendar-users"></i>
+                            @(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar" : "Criar") Evento
+                        </h2>
+                        <div class="ftx-card-actions">
+                            <a asp-page="./ListaEventos" class="btn btn-vinho">
+                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                                Voltar à Lista
+                            </a>
+                        </div>
+                    </div>
+                    <!-- FIM: Card Header -->
+
+                    <div class="panel-content">
+                        <div class="box-body p-3">
+                            <!-- Mensagens de Validação -->
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                            @if (Model.EventoObj.Evento.EventoId != Guid.Empty)
+                            {
+                            <input type="hidden" asp-for="EventoObj.Evento.EventoId" />
+                            }
+
+                <!-- Formulário Principal -->
+                
+                <!-- Seção: Informações Básicas -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fa-duotone fa-info-circle"></i> Informações Básicas
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <!-- Nome do Evento -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-input-text"></i> Nome do Evento
+                            </label>
+                            <input id="txtNomeEvento"
+                                   class="form-control"
+                                   asp-for="EventoObj.Evento.Nome"
+                                   placeholder="Digite o nome do evento" />
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.Nome"></span>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="col-12 col-md-8">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-align-left"></i> Descrição
+                            </label>
+                            <input id="txtDescricaoEvento"
+                                   class="form-control"
+                                   asp-for="EventoObj.Evento.Descricao"
+                                   placeholder="Descreva o evento" />
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.Descricao"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Período e Detalhes -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fa-duotone fa-calendar-range"></i> Período e Detalhes
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <!-- Data Inicial -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-calendar-day"></i> Data Inicial
+                            </label>
+                            <input id="txtDataInicialEvento"
+                                   class="form-control"
+                                   asp-for="EventoObj.Evento.DataInicial"
+                                   type="date" />
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.DataInicial"></span>
+                        </div>
+
+                        <!-- Data Final -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-calendar-check"></i> Data Final
+                            </label>
+                            <input id="txtDataFinalEvento"
+                                   class="form-control"
+                                   asp-for="EventoObj.Evento.DataFinal"
+                                   type="date" />
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.DataFinal"></span>
+                        </div>
+
+                        <!-- Quantidade de Participantes -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-users"></i> Qtd. Participantes
+                            </label>
+                            <input id="txtQtdParticipantes"
+                                   class="form-control"
+                                   asp-for="EventoObj.Evento.QtdParticipantes"
+                                   type="number"
+                                   min="0"
+                                   step="1"
+                                   placeholder="0" />
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.QtdParticipantes"></span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-toggle-on"></i> Status
+                            </label>
+                            <select id="lstStatus"
+                                    class="form-select"
+                                    asp-for="EventoObj.Evento.Status">
+                                <option value="1">Ativo</option>
+                                <option value="0">Inativo</option>
+                            </select>
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.Status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Responsáveis -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fa-duotone fa-user-tie"></i> Responsáveis
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <!-- Requisitante do Evento -->
+                        <div class="col-12 col-md-6">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-user"></i> Requisitante do Evento
+                            </label>
+                            <ejs-dropdowntree id="lstRequisitanteEvento"
+                                              class="form-select"
+                                              placeholder="Selecione um Requisitante"
+                                              showCheckBox="false"
+                                              allowMultiSelection="false"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              filterBarPlaceholder="Procurar..."
+                                              popupHeight="200px"
+                                              change="RequisitanteEventoValueChange"
+                                              ejs-for="@Model.EventoObj.Evento.RequisitanteId">
+                                <e-dropdowntree-fields dataSource="@ViewData["dataRequisitante"]"
+                                                       value="RequisitanteId"
+                                                       text="Requisitante">
+                                </e-dropdowntree-fields>
+                            </ejs-dropdowntree>
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.RequisitanteId"></span>
+                        </div>
+
+                        <!-- Setor do Requisitante -->
+                        <div class="col-12 col-md-6">
+                            <label class="form-label mb-1 small fw-bold">
+                                <i class="fa-duotone fa-building"></i> Setor do Requisitante
+                            </label>
+
+                            <!-- Campo de texto visível (readonly) -->
+                            <input type="text"
+                                   id="txtSetorRequisitante"
+                                   class="form-control"
+                                   readonly
+                                   placeholder="Setor será preenchido automaticamente"
+                                   value="" />
+
+
+                            <span class="text-danger small"
+                                  asp-validation-for="EventoObj.Evento.SetorSolicitanteId"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="row g-3 mt-3">
+                    <div class="col-12 col-md-3">
+                        <button type="submit"
+                                id="btnSalvarEvento"
+                                value="Submit"
+                                asp-page-handler="Submit"
+                                class="btn btn-azul w-100"
+                                data-ejtip="@(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar Evento" : "Criar Evento")">
+                            <span class="btn-content">
+                                <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+                                @(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar" : "Salvar") Evento
+                            </span>
+                            <span class="btn-loading d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Salvando...
+                            </span>
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <a asp-page="./ListaEventos"
+                           class="btn btn-vinho w-100"
+                           data-ejtip="Voltar para a Lista de Eventos">
+                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                            Voltar à Lista
+                        </a>
+                    </div>
+                </div>
+
+	            <!-- DropDownTree oculto que mantém o valor real -->
+				<div class="col-12 col-md-6" style="display: none">
+					<label class="form-label mb-1 small fw-bold">Setor do Requisitante</label>
+					<select id="ddlSetorRequisitanteEvento" 
+							class="form-select"
+							asp-for="@Model.EventoObj.Evento.SetorSolicitanteId"
+							asp-items="@(new SelectList(ViewData["dataSetor"] as List<UpsertEventoModel.SetorListItem>, "SetorSolicitanteId", "NomeFormatado"))">
+						<option value="">Selecione um Setor</option>
+					</select>
+					<span class="text-danger small"
+						  asp-validation-for="EventoObj.Evento.SetorSolicitanteId"></span>
+				</div>
+
+                <!-- Tabela de Viagens (quando existe Evento) -->
+                @if (Model.EventoObj.Evento.EventoId != Guid.Empty)
+                {
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="fs-5 mb-2">
+                                <i class="fa-duotone fa-route text-primary"></i> Viagens associadas ao Evento
+                            </h5>
+                            <div class="table-responsive">
+                                <table id="tblViagens" class="table table-striped table-bordered table-hover table-sm w-100">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>Vistoria</th>
+                                            <th>Data</th>
+                                            <th>Início</th>
+                                            <th>Requisitante</th>
+                                            <th>Setor</th>
+                                            <th>Motorista</th>
+                                            <th>Veículo</th>
+                                            <th class="text-end">Custo</th>
+                                            <th class="text-center" style="width:120px">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Estatísticas das Viagens -->
+                    <div class="row mt-4" id="estatisticasViagens">
+                        <div class="col-12">
+                            <h5 class="fs-5 mb-3">
+                                <i class="fa-duotone fa-chart-bar text-success"></i> Estatísticas das Viagens Realizadas
+                            </h5>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center py-3" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 8px;">
+                                    <div class="text-info mb-1">
+                                        <i class="fa-duotone fa-car fa-lg"></i>
+                                    </div>
+                                    <small class="text-muted d-block mb-1">Total de Viagens</small>
+                                    <h4 class="mb-0 fw-bold text-dark" id="totalViagens">0</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center py-3" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 8px;">
+                                    <div class="text-success mb-1">
+                                        <i class="fa-duotone fa-dollar-sign fa-lg"></i>
+                                    </div>
+                                    <small class="text-muted d-block mb-1">Valor Total do Evento</small>
+                                    <h4 class="mb-0 fw-bold text-dark" id="custoTotalViagens">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center py-3" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-radius: 8px;">
+                                    <div class="text-warning mb-1">
+                                        <i class="fa-duotone fa-chart-line fa-lg"></i>
+                                    </div>
+                                    <small class="text-muted d-block mb-1">Custo Médio por Viagem</small>
+                                    <h4 class="mb-0 fw-bold text-dark" id="custoMedioViagem">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                        </div> <!-- /.box-body -->
+                    </div> <!-- /.panel-content -->
+                </div> <!-- /.panel-container -->
+            </div> <!-- /.panel -->
+        </div> <!-- /.col-xl-12 -->
+    </div> <!-- /.row -->
+
+    <!-- ============================================
+         MODAL DE LOADING
+         ============================================ -->
+    <div class="modal fade" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
+                <div class="modal-body text-center p-4">
+                    <div class="bg-white rounded-3 p-4 shadow">
+                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <h5 class="mb-0 text-dark" id="loadingMessage">Carregando...</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Modal de Loading -->
+</form>
+
+@section ScriptsBlock {
+
+@using System.Text.Json
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="~/js/cadastros/eventoupsert.js" asp-append-version="true"></script>
+
+<script>
+    // ==========================================
+    // FUNÇÕES DE LOADING
+    // ==========================================
+    function mostrarLoading(mensagem = 'Carregando...') {
+        try {
+            $('#loadingMessage').text(mensagem);
+            $('#modalLoading').addClass('show').css('display', 'block');
+            $('body').addClass('modal-open');
+            if (!$('.modal-backdrop').length) {
+                $('body').append('<div class="modal-backdrop fade show"></div>');
+            }
+        } catch (error) {
+            console.error('Erro ao mostrar loading:', error);
+        }
+    }
+
+    function esconderLoading() {
+        try {
+            $('#modalLoading').removeClass('show').css('display', 'none');
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        } catch (error) {
+            console.error('Erro ao esconder loading:', error);
+        }
+    }
+
+    // ==========================================
+    // BOTÃO COM SPINNER
+    // ==========================================
+    $(document).ready(function() {
+        try {
+            // Intercepta o submit do formulário
+            $('form').on('submit', function(e) {
+                try {
+                    const btn = $('#btnSalvarEvento');
+                    const form = $(this);
+                    
+                    // Verifica se o formulário é válido
+                    if (form[0].checkValidity && !form[0].checkValidity()) {
+                        return true; // Deixa o browser mostrar os erros de validação
+                    }
+
+                    // Ativa o spinner no botão
+                    btn.prop('disabled', true);
+                    btn.find('.btn-content').addClass('d-none');
+                    btn.find('.btn-loading').removeClass('d-none');
+                    
+                    // Mostra loading geral
+                    mostrarLoading('Salvando Evento...');
+                    
+                } catch (error) {
+                    console.error('Erro no submit:', error);
+                }
+            });
+
+            // Carregar dados do setor quando a página carrega (para edição)
+            @if (Model.EventoObj.Evento.EventoId != Guid.Empty)
+            {
+                <text>
+                // Mostra loading ao carregar viagens
+                mostrarLoading('Carregando Viagens...');
+                
+                // Aguarda o DataTable ser inicializado e esconde o loading
+                var checkDataTable = setInterval(function() {
+                    try {
+                        if ($.fn.DataTable.isDataTable('#tblViagens')) {
+                            var dt = $('#tblViagens').DataTable();
+                            // Verifica se já carregou dados ou se está idle
+                            if (dt.data().count() >= 0) {
+                                clearInterval(checkDataTable);
+                                setTimeout(function() {
+                                    esconderLoading();
+                                }, 300);
+                            }
+                        }
+                    } catch (e) {
+                        clearInterval(checkDataTable);
+                        esconderLoading();
+                    }
+                }, 200);
+                
+                // Timeout de segurança (5 segundos)
+                setTimeout(function() {
+                    clearInterval(checkDataTable);
+                    esconderLoading();
+                }, 5000);
+                
+                // Carrega o nome do setor atual
+                const setorId = '@Model.EventoObj.Evento.SetorSolicitanteId';
+                if (setorId && setorId !== '00000000-0000-0000-0000-000000000000') {
+                    const ddlSetor = document.getElementById('ddlSetorRequisitanteEvento');
+                    const txtSetor = document.getElementById('txtSetorRequisitante');
+                    if (ddlSetor && ddlSetor.value && txtSetor) {
+                        const opcaoSelecionada = ddlSetor.options[ddlSetor.selectedIndex];
+                        if (opcaoSelecionada) {
+                            let textoSetor = opcaoSelecionada.text
+                                .replace(/^[–\s├└│]+/g, '')
+                                .trim();
+                            txtSetor.value = textoSetor;
+                        }
+                    }
+                }
+                </text>
+            }
+
+        } catch (error) {
+            console.error('Erro no document.ready:', error);
+        }
+    });
+
+    const eventoId = @Html.Raw(JsonSerializer.Serialize(@Model.EventoObj.Evento?.EventoId.ToString()));
+    const requisitanteId = @Html.Raw(JsonSerializer.Serialize(@Model.EventoObj.Evento?.RequisitanteId.ToString()));
+    const setorsolicitanteId = @Html.Raw(JsonSerializer.Serialize(@Model.EventoObj.Evento?.SetorSolicitanteId.ToString()));
+
+    window.eventoId = eventoId;
+
+	
+    // FUNÇÃO QUE ESTAVA FALTANDO - ATUALIZADA
+function RequisitanteEventoValueChange() {
+    try {
+        const ddTreeObj = document.getElementById("lstRequisitanteEvento")?.ej2_instances?.[0];
+        
+        if (!ddTreeObj || !ddTreeObj.value || ddTreeObj.value.length === 0) {
+            // Limpar seleção de setor
+            const ddlSetor = document.getElementById('ddlSetorRequisitanteEvento');
+            const txtSetor = document.getElementById('txtSetorRequisitante');
+            
+            if (ddlSetor) ddlSetor.value = '';
+            if (txtSetor) txtSetor.value = '';
+            return;
+        }
+
+        const requisitanteId = String(ddTreeObj.value[0] || ddTreeObj.value);
+        const txtSetor = document.getElementById('txtSetorRequisitante');
+        
+        // Mostra loading
+        if (txtSetor) {
+            txtSetor.value = 'Carregando...';
+        }
+
+        // Busca o setor do requisitante
+        $.ajax({
+            url: "/Viagens/UpsertEvento?handler=PegaSetor",
+            method: "GET",
+            dataType: "json",
+            data: { id: requisitanteId },
+            success: function (res) {
+                if (res.success && res.data) {
+                    // Atualiza o DropDownList
+                    const ddlSetor = document.getElementById('ddlSetorRequisitanteEvento');
+                    if (ddlSetor) {
+                        ddlSetor.value = res.data;
+                        
+                        // Trigger change event para validação
+                        ddlSetor.dispatchEvent(new Event('change'));
+                        
+                        // Pega o texto da opção selecionada (sem a indentação)
+                        const opcaoSelecionada = ddlSetor.options[ddlSetor.selectedIndex];
+                        let textoSetor = opcaoSelecionada ? opcaoSelecionada.text : res.setorNome;
+                        
+                        // Remove caracteres de indentação (–, ├, └, │, espaços extras)
+                        textoSetor = textoSetor
+                            .replace(/^[–\s├└│]+/g, '') // Remove prefixos de hierarquia
+                            .trim();
+                        
+                        // Atualiza o campo de texto
+                        if (txtSetor) {
+                            txtSetor.value = textoSetor;
+                        }
+                        
+                        console.log('✓ Setor selecionado:', textoSetor);
+                    }
+                } else {
+                    if (txtSetor) {
+                        txtSetor.value = '';
+                    }
+                    console.warn('Setor não encontrado:', res.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao buscar setor:', error);
+                if (txtSetor) {
+                    txtSetor.value = 'Erro ao carregar';
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro em RequisitanteEventoValueChange:', error);
+    }
+}
+</script>
+}

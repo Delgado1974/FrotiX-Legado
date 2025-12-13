@@ -1,0 +1,11 @@
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .progress-stats {
+        grid-template-columns: 1fr;
+    }
+}

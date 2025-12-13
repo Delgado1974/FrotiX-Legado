@@ -1,0 +1,54 @@
+@model FrotiX.Pages.Viagens.UpsertModel
+
+@{
+    bool hasBytes = Model.ViagemObj.Viagem.FichaVistoria != null;
+    string defaultImg = Url.Content("~/Images/FichaAmarelaNova.JPG") + "?t=" + DateTime.Now.Ticks;
+
+    // Pré-calcula src e tamanho
+    string imgSrc;
+    int imgWidth;
+    int imgHeight;
+
+    if (hasBytes)
+    {
+        imgSrc = "data:image/jpeg;base64,"
+                 + Convert.ToBase64String(Model.ViagemObj.Viagem.FichaVistoria);
+        // ajuste conforme necessidade
+        imgWidth = imgHeight = 1500;
+    }
+    else
+    {
+        imgSrc = defaultImg;
+        // tamanho "ícone"
+        imgWidth = imgHeight = 1500;
+    }
+}
+
+<div class="row bottom-space" style="margin-top: 2rem;">
+    <div class="col-md-6 col-lg-5">
+        <label class="d-block label font-weight-bold">Ficha de Vistoria</label>
+        <input asp-for="FotoUpload"
+               type="file"
+               id="txtFile"
+               class="form-control mb-3"
+               onchange="VisualizaImagem(this)" />
+    </div>
+
+    <div class="col-md-6 col-lg-5 d-flex align-items-start">
+        <img id="imgViewer"
+             src="@imgSrc"
+             width="@imgWidth"
+             height="@imgHeight"
+             style="object-fit:contain; border:1px solid #000; margin-top:0.5rem;" />
+    </div>
+
+    <div class="col-12 col-lg-2 d-flex align-items-end">
+        <button id="btnFicha"
+                type="button"
+                asp-page-handler="InsereFicha"
+                asp-route-id="@Model.ViagemObj.Viagem.ViagemId"
+                class="btn btn-azul w-100">
+            Insere Ficha
+        </button>
+    </div>
+</div>

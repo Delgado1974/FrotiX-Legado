@@ -1,0 +1,912 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+@using FrotiX.Helpers
+
+@inject IUnitOfWork _unitOfWork
+
+@functions {
+	public void OnGet()
+	{
+		FrotiX.Pages.Viagens.IndexModel.Initialize(_unitOfWork);
+		ViewData["dataCombustivel"] = new ListaNivelCombustivel(_unitOfWork).NivelCombustivelList();
+		ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+		ViewData["lstVeiculos"] = new ListaVeiculos(_unitOfWork).VeiculosList();
+		ViewData["lstSetor"] = new ListaSetores(_unitOfWork).SetoresList();
+		ViewData["dataSetor"] = new ListaSetores(_unitOfWork).SetoresList();
+		ViewData["lstStatus"] = new ListaStatus(_unitOfWork).StatusList();
+		ViewData["lstEventos"] = new ListaEvento(_unitOfWork).EventosList();
+	}
+
+	public void OnPost()
+	{
+		// Console.WriteLine(FrotiX.Pages.Viagens.IndexModel.ViagemId);
+	}
+}
+
+@model FrotiX.Models.ViewViagens
+
+@{
+	ViewData["Title"] = "Viagens";
+	ViewData["PageName"] = "viagens_index";
+	ViewData["Heading"] = "<i class='fad fa-route'></i> Cadastros: <span class='fw-300'>Viagens</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fad fa-route";
+}
+
+@section HeadBlock {
+
+    <script src="~/css/viagemindex.css" asp-append-version="true"></script>
+
+}
+
+
+<style>
+	/* === Estilos específicos da página Viagens === */
+
+	/* Micro botão para grid de Ação */
+	.btn-xxs {
+		--bs-btn-padding-y: .15rem;
+		--bs-btn-padding-x: .35rem;
+		--bs-btn-font-size: .70rem;
+		line-height: 1;
+		border-radius: .2rem;
+	}
+
+	/* Tipografia e alinhamento do grid */
+	#tblViagem, #tblViagem th, #tblViagem td {
+		font-size: .82rem;
+	}
+
+		#tblViagem thead th {
+			font-size: .86rem;
+			font-weight: 700;
+		}
+
+		#tblViagem th, #tblViagem td {
+			vertical-align: middle !important;
+		}
+
+			#tblViagem td:nth-child(9) .btn {
+				width: 32px;
+				height: 30px;
+				padding: 0 !important;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: .30rem !important;
+				--bs-btn-font-size: .75rem;
+				line-height: 1;
+				margin: 2px;
+			}
+
+			#tblViagem td:last-child .btn i {
+				font-size: .95rem;
+				line-height: 1;
+			}
+
+			#tblViagem td:last-child .text-center,
+			#tblViagem td:last-child > div {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 4px;
+				flex-wrap: nowrap;
+				height: 100%;
+			}
+
+			#tblViagem td:nth-child(8) .btn {
+				display: inline-flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				padding: .35rem .70rem !important;
+				min-height: 1.65rem;
+				min-width: 4.8rem;
+				white-space: nowrap;
+				font-size: .80rem !important;
+				line-height: 1 !important;
+				border-radius: 9999px !important;
+				font-weight: 700 !important;
+				color: #fff !important;
+				box-shadow: none !important;
+			}
+
+				#tblViagem td:nth-child(8) .btn i {
+					margin-right: .35rem;
+					line-height: 1;
+				}
+
+	/* LARGURA dos modais específicos */
+	#modalFicha .modal-dialog {
+		--bs-modal-width: 700px;
+	}
+
+	#modalFicha .modal-header, #modalFicha .modal-footer {
+		padding: .75rem 1rem;
+	}
+
+	#modalFicha .modal-body {
+		padding: 1rem;
+	}
+
+	/* Área do relatório */
+	#ReportContainer {
+		min-height: 700px;
+	}
+
+	#reportViewer1 {
+		width: 100%;
+	}
+
+	/* Estados de validação locais */
+	:root {
+		--ftx-invalid: #dc3545;
+		--ftx-glow: rgba(220,53,69,.18);
+		--ftx-glow-focus: rgba(220,53,69,.28);
+		--ftx-high: #fd7e14;
+		--ftx-high-glow: rgba(253,126,20,.18);
+	}
+
+	input.is-invalid, textarea.is-invalid {
+		border-color: var(--ftx-invalid) !important;
+		color: var(--ftx-invalid) !important;
+		box-shadow: 0 0 0 .2rem var(--ftx-glow);
+	}
+
+		input.is-invalid:focus, textarea.is-invalid:focus {
+			box-shadow: 0 0 0 .28rem var(--ftx-glow-focus);
+		}
+
+	.e-input-group.is-invalid, .e-float-input.is-invalid, .e-control-wrapper.is-invalid {
+		box-shadow: 0 0 0 .2rem var(--ftx-glow);
+		border-radius: .25rem;
+	}
+
+		.e-input-group.is-invalid:focus-within, .e-float-input.is-invalid:focus-within, .e-control-wrapper.is-invalid:focus-within {
+			box-shadow: 0 0 0 .28rem var(--ftx-glow-focus);
+		}
+
+		.e-input-group.is-invalid .e-input, .e-float-input.is-invalid input, .e-control-wrapper.is-invalid input {
+			border-color: var(--ftx-invalid) !important;
+			color: var(--ftx-invalid) !important;
+		}
+
+	input.is-high, textarea.is-high {
+		box-shadow: 0 0 0 .2rem var(--ftx-high-glow);
+	}
+
+	.e-input-group.is-high, .e-float-input.is-high, .e-control-wrapper.is-high {
+		box-shadow: 0 0 0 .2rem var(--ftx-high-glow);
+		border-radius: .25rem;
+	}
+
+	/* Loading spinner específico do ModalFicha */
+	#modalFicha #loadingSpinner {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%,-50%);
+		z-index: 10;
+		background: rgba(255,255,255,0.9);
+		padding: 30px;
+		border-radius: 8px;
+	}
+
+	#modalFicha #uploadContainer, #modalFicha #imageContainer {
+		transition: opacity .3s ease;
+	}
+
+	/* Botão alterar ficha */
+	#btnAlterarFicha {
+		transition: all .3s ease;
+		border: 1px solid transparent;
+	}
+
+		#btnAlterarFicha:hover {
+			background-color: #333;
+			border-color: #333;
+			color: #fff;
+			box-shadow: 0 0 4px rgba(51,51,51,.6);
+		}
+
+		/* Espaços do DataTables desta página */
+#tblViagem_wrapper .row{
+    margin-top:.25rem;
+    margin-bottom:.5rem;
+}
+#tblViagem_wrapper .dataTables_length,
+#tblViagem_wrapper .dt-buttons,
+#tblViagem_wrapper .dataTables_filter{
+    margin-top:.25rem;
+    margin-bottom:.25rem;
+}
+
+/* ===== Somente nesta tela (tblViagem) ===== */
+#tblViagem .btn-imprimir{
+    background-color:#4B0082 !important;  /* roxo */
+    border-color:#4B0082 !important;
+    color:#fff !important;
+    box-shadow: 0 0 4px rgba(75,0,130,.28);      /* glow suave padrío */
+    transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+#tblViagem .btn-imprimir:hover{
+    transform: translateY(-1px) scale(1.04);
+    box-shadow: 0 0 0 3px rgba(75,0,130,.18),
+                0 8px 18px rgba(75,0,130,.38);   /* glow mais forte no hover */
+    filter: brightness(1.02);
+}
+
+/* Ícone com leve “zoom” no hover */
+#tblViagem .btn-imprimir i{
+    transition: transform .18s ease;
+}
+#tblViagem .btn-imprimir:hover i{
+    transform: scale(1.12);
+}
+
+</style>
+
+<script>
+	var defaultRTE;
+	var defaultRTEDescricao;
+
+	function onCreate() {
+		try {
+			defaultRTE = this;
+		} catch (error) {
+			Alerta.TratamentoErroComLinha("Index.cshtml", "onCreate", error);
+		}
+	}
+
+	function onCreateDescricao() {
+		try {
+			defaultRTEDescricao = this;
+		} catch (error) {
+			Alerta.TratamentoErroComLinha("Index.cshtml", "onCreateDescricao", error);
+		}
+	}
+</script>
+
+<form>
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="col-12 px-3 header-toolbar">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-solid fa-route"></i>
+							Viagens
+						</h2>
+						<a href="/Viagens/Upsert" class="btn btn-fundo-laranja">
+							<i class="fal fa-route icon-pulse"></i> &nbsp; Adicionar Viagem
+						</a>
+					</div>
+					<div class="panel-content">
+						<div class="box-body">
+							<div class="col-12">
+								<div class="form-group row">
+									<div class="col-2">
+										<label class="label font-weight-bold color-black">Escolha uma Data</label>
+										<input id="txtData" class="form-control form-control-xs" type="date" />
+									</div>
+									<div class="col-4 d-flex align-items-end">
+										<button type="button"
+												class="btn btn-fundo-laranja text-white w-100"
+												id="btnFiltro"
+												name="btnFiltro"
+												style="height: 40px;"
+												onclick="ListaTodasViagens()">
+											<i class="fa-sharp-duotone fa-solid fa-filter-list icon-space icon-pulse"></i>
+											<span>Filtra as Viagens</span>
+										</button>
+									</div>
+								</div>
+								<div class="form-group row">
+									<div class="col-2">
+										<ejs-combobox id="lstVeiculos"
+													  placeholder="Selecione um Veículo"
+													  allowFiltering="true"
+													  filterType="Contains"
+													  dataSource="@ViewData["lstVeiculos"]"
+													  popupHeight="250px"
+													  width="100%"
+													  showClearButton="true">
+											<e-combobox-fields text="Descricao" value="VeiculoId"></e-combobox-fields>
+										</ejs-combobox>
+									</div>
+									<div class="col-3">
+										<ejs-combobox id="lstMotorista"
+													  placeholder="Selecione um Motorista"
+													  allowFiltering="true"
+													  filterType="Contains"
+													  dataSource="@ViewData["lstMotorista"]"
+													  popupHeight="250px"
+													  width="100%"
+													  showClearButton="true">
+											<e-combobox-fields text="Nome" value="MotoristaId"></e-combobox-fields>
+										</ejs-combobox>
+									</div>
+									<div class="col-2">
+										<ejs-combobox id="lstStatus"
+													  placeholder="Viagens com Status..."
+													  allowFiltering="true"
+													  filterType="Contains"
+													  dataSource="@ViewData["lstStatus"]"
+													  popupHeight="250px"
+													  width="100%"
+													  showClearButton="true">
+											<e-combobox-fields text="Status" value="StatusId"></e-combobox-fields>
+										</ejs-combobox>
+									</div>
+									<div class="col-3">
+										<ejs-combobox id="lstEventos"
+													  placeholder="Viagens do Evento..."
+													  allowFiltering="true"
+													  filterType="Contains"
+													  dataSource="@ViewData["lstEventos"]"
+													  popupHeight="250px"
+													  width="100%"
+													  showClearButton="true">
+											<e-combobox-fields text="Evento" value="EventoId"></e-combobox-fields>
+										</ejs-combobox>
+									</div>
+								</div>
+							</div>
+
+							<br /><br />
+
+							<div id="divViagens">
+								<table id="tblViagem" class="table table-bordered table-striped mt-2 ftx-table" width="100%">
+									<thead>
+										<tr>
+											<th>Vistoria</th>
+											<th>Data</th>
+											<th>Início</th>
+											<th>Requisitante</th>
+											<th>Setor</th>
+											<th>Motorista</th>
+											<th>Veiculo</th>
+											<th>Status</th>
+											<th>Ação</th>
+											<th></th>
+											<th>Km Inicial</th>
+											<th>Combustivel Inicial</th>
+											<th>Data Final</th>
+											<th>Hora Final</th>
+											<th>Km Final</th>
+											<th>Combustivel Final</th>
+											<th>Resumo Ocorrência</th>
+											<th>Descrição Ocorrência</th>
+											<th>Status Documento</th>
+											<th>Status Cartão Abastecimento</th>
+											<th>Descricao</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div> <!-- /divViagensContainer -->
+						</div> <!-- /box-body -->
+					</div> <!-- /panel-content -->
+				</div> <!-- /panel-container -->
+			</div> <!-- /panel -->
+		</div> <!-- /col-xl-12 -->
+		<br />
+	</div> <!-- /row -->
+</form>
+
+@*----------------- MODAL de Finalização da Viagem ------------------------*@
+@*=========================================================================*@
+<div class="modal fade" id="modalFinalizaViagem" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-header modal-header-vinho">
+				<h3 class="modal-title" id="h3Titulo">
+					<i class="fa-duotone fa-flag-checkered me-2"></i>Finalizar a Viagem
+				</h3>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+
+			<div class="modal-body">
+				<form id="frmRequisitante">
+					<input type="hidden" id="txtId" />
+
+					<!-- Linha 1 -->
+					<div class="form-row mb-3">
+						<div class="col-md-3">
+							<label><strong>Data Inicial</strong></label>
+							<input readonly id="txtDataInicial" class="form-control" />
+						</div>
+						<div class="col-md-3">
+							<label><strong>Hora Inicial</strong></label>
+							<input readonly id="txtHoraInicial" class="form-control" />
+						</div>
+						<div class="col-md-3">
+							<label><strong>Km Inicial</strong></label>
+							<input readonly id="txtKmInicial" class="form-control" />
+						</div>
+						<div class="col-md-3">
+							<label><strong>Combustível Inicial</strong></label>
+							<ejs-dropdowntree id="ddtCombustivelInicial" popupHeight="200px" showClearButton="true" class="form-control" enabled="false">
+								<e-dropdowntree-fields dataSource="@ViewData["dataCombustivel"]" value="Nivel" text="Descricao" imageURL="Imagem"></e-dropdowntree-fields>
+							</ejs-dropdowntree>
+						</div>
+					</div>
+
+					<!-- Linha 2 -->
+					<div class="form-row mb-3">
+						<div class="col-md-2">
+							<label><strong>Data Final</strong></label>
+							<input id="txtDataFinal" type="date" class="form-control" />
+						</div>
+						<div class="col-md-2">
+							<label><strong>Hora Final</strong></label>
+							<input id="txtHoraFinal" type="time" class="form-control" />
+						</div>
+						<div class="col-md-2">
+							<label><strong>Duração (hs)</strong></label>
+							<input id="txtDuracao" class="form-control" disabled />
+						</div>
+						<div class="col-md-2">
+							<label><strong>Km Final</strong></label>
+							<input id="txtKmFinal" type="number" class="form-control" />
+						</div>
+						<div class="col-md-2">
+							<label><strong>Km Percorrido</strong></label>
+							<input id="txtKmPercorrido" type="number" class="form-control" disabled />
+						</div>
+						<div class="col-md-2">
+							<label><strong>Combustível Final</strong></label>
+							<ejs-dropdowntree id="ddtCombustivelFinal" popupHeight="200px" showClearButton="true" class="form-control">
+								<e-dropdowntree-fields dataSource="@ViewData["dataCombustivel"]" value="Nivel" text="Descricao" imageURL="Imagem"></e-dropdowntree-fields>
+							</ejs-dropdowntree>
+						</div>
+					</div>
+
+					<!-- Checkboxes -->
+					<div class="form-row mb-3">
+						<div class="col-md-3">
+							<input type="checkbox" id="chkStatusDocumento" />
+							<label for="chkStatusDocumento">Documento Entregue</label>
+						</div>
+						<div class="col-md-6">
+							<input type="checkbox" id="chkStatusCartaoAbastecimento" />
+							<label for="chkStatusCartaoAbastecimento">Cartão de Abastecimento Entregue</label>
+						</div>
+					</div>
+
+					<!-- Descrição da Viagem -->
+					<div class="form-group">
+						<label><strong>Descrição da Viagem</strong> — Anotar AQUI observações sobre a entrega do veículo</label>
+						<ejs-richtexteditor id="rteDescricao" created="onCreateDescricao" locale="pt-BR" height="150px">
+							<e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensViagens/"></e-richtexteditor-insertimagesettings>
+						</ejs-richtexteditor>
+					</div>
+
+					<!-- ====== SEÇÃO DE OCORRÊNCIAS MÚLTIPLAS ====== -->
+					@await Html.PartialAsync("_SecaoOcorrenciasFinalizacao")
+
+				</form>
+			</div>
+
+			<div class="modal-footer justify-content-between">
+				<button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal" >
+					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+				</button>
+				<button id="btnFinalizarViagem" class="btn btn-azul" type="submit" >
+					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Finalizar Viagem
+				</button>
+
+                <!-- Modal Bootstrap para o Spinner -->
+                <div class="modal fade" id="modalSpinnerFinalizacao" data-backdrop="static" data-keyboard="false" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-body text-center py-4">
+                                <!-- Spinner -->
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="sr-only">Carregando...</span>
+                                </div>
+
+                                <!-- Texto -->
+                                <h6 class="mb-1">Finalizando a Viagem...</h6>
+                                <small class="text-muted">Isso pode levar alguns segundos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Ficha de Vistoria -->
+<div class="modal fade" id="modalFicha" tabindex="-1" aria-labelledby="modalFichaLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header modal-header-azul">
+				<h3 class="modal-title d-flex align-items-center gap-2" id="modalFichaLabel">
+					<i class="fa-duotone fa-file-invoice" aria-hidden="true"></i>
+					<span>Ficha de Vistoria</span>
+				</h3>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<!-- Hidden para armazenar o ID da viagem -->
+				<input type="hidden" id="hiddenViagemId" />
+
+				<!-- Container para upload -->
+				<div id="uploadContainer" class="mb-3">
+					<label class="form-label fw-bold">Selecionar Arquivo</label>
+					<input type="file"
+						   id="txtFile"
+						   class="form-control"
+						   accept="image/*" />
+					<small class="text-muted">Formatos aceitos: JPG, PNG, GIF (Máximo: 5MB)</small>
+				</div>
+
+				<!-- Container para exibir imagem -->
+				<div id="imageContainer" class="text-center">
+					<img id="imgFichaViewer"
+						 class="img-fluid border rounded shadow-sm"
+						 style="max-height: 500px; display: none;"
+						 alt="Ficha de Vistoria" />
+
+					<!-- Container para quando não há imagem -->
+					<div id="noImageContainer" style="display: none;">
+						<div class="p-4 bg-light rounded">
+							<i class="fa fa-image fa-4x text-muted mb-3"></i>
+							<p class="text-muted">Nenhuma ficha de vistoria cadastrada</p>
+							<p class="text-muted small">Selecione um arquivo para fazer upload</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Loading spinner -->
+				<div id="loadingSpinner" class="text-center" style="display: none;">
+					<div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+						<div>
+							<div class="spinner-border text-primary" role="status">
+								<span class="sr-only">Carregando...</span>
+							</div>
+							<p class="mt-2 text-muted">Processando...</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button"
+						id="btnSalvarFicha"
+						class="btn btn-azul"
+						style="display: none;">
+					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Salvar Ficha
+				</button>
+
+				<button type="button"
+						id="btnAlterarFicha"
+						class="btn btn-azul"
+						style="display: none;">
+					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Alterar Ficha
+				</button>
+
+				<button type="button"
+						id="btnFecharModalFicha"
+						class="btn btn-vinho"
+						data-bs-dismiss="modal">
+					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* -------------- Modal da Ficha da Viagem -------------- *@
+@* ====================================================== *@
+<div class="modal fade" id="modalPrint" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+
+			<div class="modal-header modal-header-azul">
+				<h4 class="modal-title d-flex align-items-center gap-2" id="DynamicModalLabel">
+					<i class="fa-duotone fa-print" aria-hidden="true"></i>
+					<span>Ficha da Viagem</span>
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+
+			<div class="modal-body table-bordered container-fluid">
+				<input type="hidden" id="txtViagemId" asp-for="ViagemId" />
+
+				<div class="row">
+					<div class="col-xl-12">
+						<div id="panel-1" class="panel">
+							<div class="panel-container show">
+								<div id="divPainel" class="panel-content">
+									<div class="d-flex" style="height:700px" id="ReportContainer">
+										<div id="reportViewer1" style="width:100%" class="pb-3">
+											Loading...
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer justify-content-end pe-3">
+				<button id="btnFecharModalPrint"
+						type="button"
+						class="btn btn-vinho d-inline-flex align-items-center gap-2 px-3 py-2"
+						data-bs-dismiss="modal"
+					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+					<span>Fechar</span>
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@* ===============================================================================
+   MODAL CUSTOS DA VIAGEM
+   =============================================================================== *@
+<div class="modal fade" id="modalCustosViagem" tabindex="-1" aria-labelledby="modalCustosViagemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-dinheiro">
+                <h4 class="modal-title d-flex align-items-center gap-2" id="modalCustosViagemLabel">
+                    <i class="fa-duotone fa-money-bill-trend-up" aria-hidden="true"></i>
+                    <span>Custos da Viagem</span>
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Hidden para armazenar o ID da viagem -->
+                <input type="hidden" id="hiddenCustosViagemId" />
+
+                <!-- Informações da Viagem -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-2">
+                            <i class="fa-duotone fa-route me-1"></i>
+                            Viagem Nº <strong id="spanNumeroViagem">-</strong>
+                        </h6>
+                        <small class="text-muted" id="spanInfoViagem">Carregando...</small>
+                    </div>
+                </div>
+
+                <!-- Estatísticas da Viagem -->
+                <div class="row g-3 mb-4">
+                    <!-- Duração -->
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="fa-duotone fa-clock stat-icon icon-duracao"></i>
+                            <div class="stat-label">Duração</div>
+                            <div class="stat-valor" id="spanDuracao">-</div>
+                        </div>
+                    </div>
+                    <!-- Quilometragem -->
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="fa-duotone fa-gauge-high stat-icon icon-km"></i>
+                            <div class="stat-label">Km Percorrido</div>
+                            <div class="stat-valor" id="spanKm">-</div>
+                        </div>
+                    </div>
+                    <!-- Litros Gastos -->
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="fa-duotone fa-gas-pump stat-icon icon-litros"></i>
+                            <div class="stat-label">Litros Gastos</div>
+                            <div class="stat-valor" id="spanLitros">-</div>
+                        </div>
+                    </div>
+                    <!-- Consumo -->
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="fa-duotone fa-leaf stat-icon icon-consumo"></i>
+                            <div class="stat-label">Consumo</div>
+                            <div class="stat-valor" id="spanConsumo">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Combustível -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-info d-flex align-items-center py-2 mb-0" role="alert">
+                            <i class="fa-duotone fa-gas-pump-slash me-2" style="font-size: 1.25rem;"></i>
+                            <span>Combustível: <strong id="spanTipoCombustivel">-</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de Custos Detalhados -->
+                <div class="custos-section">
+                    <div class="section-title">
+                        <i class="fa-duotone fa-coins"></i>
+                        <span>Detalhamento de Custos</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Custo Motorista -->
+                        <div class="col-md-4 col-6">
+                            <div class="custo-card">
+                                <i class="fa-duotone fa-id-card-clip custo-icon icon-motorista"></i>
+                                <div class="custo-label">Motorista</div>
+                                <div class="custo-valor" id="spanCustoMotorista">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <!-- Custo Veículo -->
+                        <div class="col-md-4 col-6">
+                            <div class="custo-card">
+                                <i class="fa-duotone fa-car-bus custo-icon icon-veiculo"></i>
+                                <div class="custo-label">Veículo</div>
+                                <div class="custo-valor" id="spanCustoVeiculo">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <!-- Custo Combustível -->
+                        <div class="col-md-4 col-6">
+                            <div class="custo-card">
+                                <i class="fa-duotone fa-gas-pump custo-icon icon-combustivel"></i>
+                                <div class="custo-label">Combustível</div>
+                                <div class="custo-valor" id="spanCustoCombustivel">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <!-- Custo Operador -->
+                        <div class="col-md-6 col-6">
+                            <div class="custo-card">
+                                <i class="fa-duotone fa-user-headset custo-icon icon-operador"></i>
+                                <div class="custo-label">Operador</div>
+                                <div class="custo-valor" id="spanCustoOperador">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <!-- Custo Lavador -->
+                        <div class="col-md-6 col-6">
+                            <div class="custo-card">
+                                <i class="fa-duotone fa-car-wash custo-icon icon-lavador"></i>
+                                <div class="custo-label">Lavador</div>
+                                <div class="custo-valor" id="spanCustoLavador">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Geral - Compacto -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="custo-total-card">
+                            <i class="fa-duotone fa-sack-dollar custo-icon"></i>
+                            <div class="custo-info">
+                                <div class="custo-label">Custo Total da Viagem</div>
+                                <div class="custo-valor" id="spanCustoTotal">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ===============================================================================
+   MODAL OCORRÊNCIAS DA VIAGEM
+   =============================================================================== *@
+<div class="modal fade" id="modalOcorrenciasViagem" tabindex="-1" aria-labelledby="modalOcorrenciasViagemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h4 class="modal-title d-flex align-items-center gap-2" id="modalOcorrenciasViagemLabel">
+                    <i class="fa-duotone fa-car-burst" aria-hidden="true"></i>
+                    <span>Ocorrências da Viagem</span>
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Hidden para armazenar o ID da viagem -->
+                <input type="hidden" id="hiddenOcorrenciasViagemId" />
+
+                <!-- Tabela de Ocorrências -->
+                <div class="table-responsive">
+                    <table id="tblOcorrenciasViagem" class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">#</th>
+                                <th style="width: 35%;">Resumo</th>
+                                <th style="width: 35%;">Descrição</th>
+                                <th class="text-center" style="width: 100px;">Data</th>
+                                <th class="text-center" style="width: 120px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ===============================================================================
+   MODAL IMAGEM DA OCORRÊNCIA
+   =============================================================================== *@
+<div class="modal fade" id="modalImagemOcorrencia" tabindex="-1" aria-labelledby="modalImagemOcorrenciaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h5 class="modal-title d-flex align-items-center gap-2" id="modalImagemOcorrenciaLabel">
+                    <i class="fa-duotone fa-image" aria-hidden="true"></i>
+                    <span>Imagem da Ocorrência</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body text-center p-3">
+                <img id="imgOcorrenciaViewer" 
+                     class="img-fluid rounded shadow" 
+                     style="max-height: 500px; display: none;" 
+                     alt="Imagem da Ocorrência" />
+                <div id="noImageOcorrencia" class="p-4 bg-light rounded" style="display: none;">
+                    <i class="fa fa-image fa-4x text-muted mb-3"></i>
+                    <p class="text-muted">Nenhuma imagem disponível</p>
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<!-- Kendo UI 2022.1.412 - COMPATÍVEL com Telerik Reporting 18.x -->
+	<link href="https://kendo.cdn.telerik.com/2022.1.412/styles/kendo.common.min.css" rel="stylesheet" />
+	<link href="https://kendo.cdn.telerik.com/2022.1.412/styles/kendo.default.min.css" rel="stylesheet" />
+
+	<script src="https://kendo.cdn.telerik.com/2022.1.412/js/kendo.all.min.js"></script>
+
+	<!-- PDF.js -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+	<script>
+		window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
+	</script>
+
+	<!-- Telerik Report Viewer -->
+	<script src="/api/reports/resources/js/telerikReportViewer"></script>
+
+	<!-- Sistema de Ocorrências Múltiplas -->
+	<link href="~/css/viagens/ocorrencia-viagem.css" rel="stylesheet" asp-append-version="true" />
+	<script src="~/js/viagens/ocorrencia-viagem.js" asp-append-version="true"></script>
+	<script src="~/js/viagens/ocorrencia-viagem-popup.js" asp-append-version="true"></script>
+
+	<script src="~/js/cadastros/ViagemIndex.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,75 @@
+/* =====================================================
+   OCORRENCIA-VIAGEM.CSS
+   Estilos para o sistema de ocorrências de viagem
+   ===================================================== */
+
+.card-ocorrencia {
+    border-left: 4px solid #ffc107 !important;
+    transition: all 0.3s ease;
+}
+
+.card-ocorrencia:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-ocorrencia.border-danger {
+    border-left-color: #dc3545 !important;
+}
+
+/* Animação de shake para validação */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Badge de contador */
+#badgeContadorOcorrencias {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Preview de imagem/vídeo */
+.preview-container img,
+.preview-container video {
+    max-height: 100px;
+    border-radius: 4px;
+}
+
+/* Scrollbar customizada para container de ocorrências */
+#containerOcorrencias {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#containerOcorrencias::-webkit-scrollbar {
+    width: 6px;
+}
+
+#containerOcorrencias::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#containerOcorrencias::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+#containerOcorrencias::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Animação pulse para badges críticos */
+@keyframes pulse-danger {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.badge.bg-danger {
+    animation: pulse-danger 1.5s ease-in-out infinite;
+}

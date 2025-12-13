@@ -1,0 +1,77 @@
+@page
+@model RegisterModel
+@{
+    ViewData["PageName"] = "register";
+}
+
+@section PageHeading {
+    <div class="col-xl-12">
+        <h2 class="fs-xxl fw-500 text-white text-center">
+            Register now, its free!
+            <small class="h3 fw-300 mt-3 mb-5 text-white opacity-60 hidden-sm-down">
+                Your registration is free for a limited time. Enjoy SmartAdmin on your mobile, desktop or tablet.
+                <br>It is ready to go wherever you go!
+            </small>
+        </h2>
+    </div>
+}
+
+<div class="col-xl-6 ml-auto mr-auto">
+    <div class="card p-4 rounded-plus bg-faded">
+        <form id="js-login" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="All" class="alert alert-primary text-dark"></div>
+            <div class="form-group row">
+                <div class="col-4 pr-1">
+                    <label class="pl-1 text-black-50 font-weight-bold">Entre com seu Ponto</label>
+                    <input type="text" asp-for="Input.Ponto" class="form-control" placeholder="p_" />
+                    <span class="invalid-feedback" asp-validation-for="Input.Ponto">Sorry, you missed this one.</span>
+                    <div class="help-block">Será seu nome de usuário</div>
+                </div>
+                <div class="col-8 pl-1">
+                    <label class="pl-1 text-black-50 font-weight-bold">Entre com seu Nome Completo</label>
+                    <input type="text" asp-for="Input.NomeCompleto" class="form-control" placeholder="Nome Completo" />
+                    <span class="invalid-feedback" asp-validation-for="Input.NomeCompleto">Sorry, you missed this one.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="pl-1 text-black-50 font-weight-bold" asp-for="Input.Email">Entre com seu email da RedeCamara</label>
+                <input type="email" asp-for="Input.Email" class="form-control" placeholder="@@camara.leg.br" required="required" autocomplete="off"/>
+                <span class="invalid-feedback" asp-validation-for="Input.Email">Sorry, you missed this one.</span>
+            </div>
+            <div class="form-group">
+                <label class="pl-1 text-black-50 font-weight-bold" asp-for="Input.Senha">Informe sua senha da RedeCamara </label>
+                <input type="password" asp-for="Input.Senha" class="form-control" placeholder="" value="" required="required" />
+                <span class="invalid-feedback" asp-validation-for="Input.Senha">Sorry, you missed this one.</span>
+                <div class="help-block">A senha da RedeCamara é necessária para a visualização dos emails.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" asp-for="Input.ConfirmacaoSenha">Confirme sua senha</label>
+                <input type="password" asp-for="Input.ConfirmacaoSenha" class="form-control" placeholder="" value="" required="required" />
+                <span class="invalid-feedback" asp-validation-for="Input.ConfirmacaoSenha">Sorry, you missed this one.</span>
+            </div>
+            <div class="row no-gutters">
+                <div class="col-md-6 ml-auto text-right">
+                    <button id="js-login-btn" type="submit" class="btn btn-block btn-vinho btn-lg mt-3">Send verification</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @*<partial name="_ValidationScriptsPartial" />
+    <script>
+        $("#js-login-btn").click(function (event) {
+            // Fetch form to apply custom Bootstrap validation
+            var form = $("#js-login");
+
+            if (form[0].checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            form.addClass('was-validated');
+            // Perform ajax submit here...
+        });*@
+    @*</script>*@
+}

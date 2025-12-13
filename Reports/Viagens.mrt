@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <Frotix_x0020_Web Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>Frotix Web</Alias>
+        <ConnectionStringEncrypted>9FD5SE8NWtHiX9Xc73TjP9EUzYlFUdOZaVvowE50rWfIePXJwkrr+flBicRqXHUPkMT5acZM2W1sWrmA8ACxXsTI30hhWZNFYEw9lOQU4GfZGveBYkwB8HJJ6OxjUCV73sj7SUtKkm3tUZzcxGyk</ConnectionStringEncrypted>
+        <Key>97216ba59ab34365a70105cf8a506337</Key>
+        <Name>Frotix Web</Name>
+      </Frotix_x0020_Web>
+    </Databases>
+    <DataSources isList="true" count="1">
+      <ViewViagensReport Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>ViewViagensReport</Alias>
+        <Columns isList="true" count="31">
+          <value>ORIGINAL,ViagemId,ViagemId,ViagemId,System.Guid,d9dbe0573b48415dbd0835ead3b34f20</value>
+          <value>ORIGINAL,DataInicial,DataInicial,DataInicial,System.String,_x0039_7a340d9c7154a64a34740fe21e9df6d</value>
+          <value>ORIGINAL,DataFinal,DataFinal,DataFinal,System.String,_x0033_dbff6081e3e42419c1b2acf0b75c6a6</value>
+          <value>ORIGINAL,HoraInicio,HoraInicio,HoraInicio,System.String,_x0034_f48ae6691a4474ba373a6e1d44f5116</value>
+          <value>ORIGINAL,HoraFim,HoraFim,HoraFim,System.String,bfed4b4d5b994b68b526b4d75f600783</value>
+          <value>ORIGINAL,Descricao,Descricao,Descricao,System.String,eda4c8a83ae94341a6e932ac4e0ac4aa</value>
+          <value>ORIGINAL,Status,Status,Status,System.String,_x0032_d4279b9dde6489fbfcbcd830c8b0f0e</value>
+          <value>ORIGINAL,KmInicial,KmInicial,KmInicial,System.Int32,_x0032_b72706d459740d3892afe189a1cb280</value>
+          <value>ORIGINAL,KmFinal,KmFinal,KmFinal,System.Int32,_x0036_fb24bced8d54ebd9c10d5dedffd92af</value>
+          <value>ORIGINAL,CombustivelInicial,CombustivelInicial,CombustivelInicial,System.String,_x0033_3125538f1454fdfb0b53e285221321a</value>
+          <value>ORIGINAL,CombustivelFinal,CombustivelFinal,CombustivelFinal,System.String,_x0031_5325aeb77fd4ee1ae81f9f2d384654d</value>
+          <value>ORIGINAL,MotoristaId,MotoristaId,MotoristaId,System.Int64,_x0030_b392f8a8f89404e9b557f4bc9e91d25</value>
+          <value>ORIGINAL,VeiculoId,VeiculoId,VeiculoId,System.Int64,_x0033_85b008867d145fbbaccb3c8c6ed89fb</value>
+          <value>ORIGINAL,ResumoOcorrencia,ResumoOcorrencia,ResumoOcorrencia,System.String,_x0032_7f8137f6f334a079a60a6d5d22a7555</value>
+          <value>ORIGINAL,DescricaoOcorrencia,DescricaoOcorrencia,DescricaoOcorrencia,System.String,_x0035_e41c208eaad4697a7a63405931a8b2e</value>
+          <value>ORIGINAL,StatusOcorrencia,StatusOcorrencia,StatusOcorrencia,System.String,c163b68677f94367ae856ebd2f91d9c3</value>
+          <value>ORIGINAL,StatusDocumento,StatusDocumento,StatusDocumento,System.String,_x0035_ffc6ec0b250492e9335cb6ec87eafba</value>
+          <value>ORIGINAL,StatusCartaoAbastecimento,StatusCartaoAbastecimento,StatusCartaoAbastecimento,System.String,_x0038_da975fc38244a38aed65933a8697e54</value>
+          <value>ORIGINAL,StatusAgendamento,StatusAgendamento,StatusAgendamento,System.Boolean,_x0030_d419da840374b3a8bc4cdab6fcadb34</value>
+          <value>ORIGINAL,NoFichaVistoria,NoFichaVistoria,NoFichaVistoria,System.Int32,_x0033_21a7911c00d413c813692b159e4001f</value>
+          <value>ORIGINAL,Finalidade,Finalidade,Finalidade,System.String,b6596e0758e34df0963eff61b5d28d4b</value>
+          <value>ORIGINAL,Origem,Origem,Origem,System.String,_x0036_6b4b1cf2e514a249a29a3d7502c1129</value>
+          <value>ORIGINAL,Destino,Destino,Destino,System.String,_x0033_f3de04b942c4999a28d4be1f0e6dc1f</value>
+          <value>ORIGINAL,NomeRequisitante,NomeRequisitante,NomeRequisitante,System.String,_x0030_39c9e6c5bfe4e11b2e0ade98de8bf2e</value>
+          <value>ORIGINAL,NomeSetor,NomeSetor,NomeSetor,System.String,_x0031_b8df6a09da346c3987a9b0a26910454</value>
+          <value>ORIGINAL,RequisitanteId,RequisitanteId,RequisitanteId,System.Int64,b739afb3cf4540b3a99a3e8b147cf4c7</value>
+          <value>ORIGINAL,SetorSolicitanteId,SetorSolicitanteId,SetorSolicitanteId,System.Int64,_x0037_449f0ac3b9d453ca4feb4f880c500b1</value>
+          <value>ORIGINAL,NomeMotorista,NomeMotorista,NomeMotorista,System.String,_x0039_fa1c3a0293641029f758cc562ea0fbb</value>
+          <value>ORIGINAL,DescricaoVeiculo,DescricaoVeiculo,DescricaoVeiculo,System.String,_x0033_905f8f43e3a4a10953c36810efb370e</value>
+          <value>ORIGINAL,UnidadeId,UnidadeId,UnidadeId,System.Int64,_x0032_0f655f6d9b94db0a6bcc121847266b9</value>
+          <value>ORIGINAL,RowNum,RowNum,RowNum,System.Int64,_x0030_4464bf063b8477f9754865f2eb23e08</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Key>1ef37807c6954e05a0d587fe006d9761</Key>
+        <Name>ViewViagensReport</Name>
+        <NameInSource>Frotix Web</NameInSource>
+        <Parameters isList="true" count="1">
+          <value>_x0040_p_ViagemId,,14,100,023a25ff75194e1b85e5ccb8057d681f</value>
+        </Parameters>
+        <SqlCommand>select * from ViewViagensReport where (ViagemID = @p_ViagemId)</SqlCommand>
+      </ViewViagensReport>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="0" />
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <Key>26f9e788b48946068a02c89f7fda0705</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="4" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="1">
+        <DataBand1 Ref="5" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,0.4,19,1.4</ClientRectangle>
+          <Components isList="true" count="2">
+            <Text1 Ref="6" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,0.6,8.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{ViewViagensReport.ViagemId}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text1>
+            <Text2 Ref="7" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,0,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>Viagem ID</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+            </Text2>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataSourceName>ViewViagensReport</DataSourceName>
+          <Expressions isList="true" count="0" />
+          <Filters isList="true" count="0" />
+          <Name>DataBand1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Sort isList="true" count="0" />
+        </DataBand1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="0" />
+      <Guid>49168cf1b3cb45d49906057b6fd300bf</Guid>
+      <Margins>1,1,1,1</Margins>
+      <Name>Page1</Name>
+      <PageHeight>29.7</PageHeight>
+      <PageWidth>21</PageWidth>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>11/28/2021 5:22:21 PM</ReportChanged>
+  <ReportCreated>11/28/2021 4:17:48 PM</ReportCreated>
+  <ReportFile>C:\FrotiX\Projeto (valendo)\Reports\Viagens.mrt</ReportFile>
+  <ReportGuid>66739a10178f43bdbdb398d9b16c1917</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2021.3.6.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

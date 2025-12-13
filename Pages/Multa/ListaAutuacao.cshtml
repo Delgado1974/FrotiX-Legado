@@ -1,0 +1,1519 @@
+@page
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+@using FrotiX.Services
+@addTagHelper *, Syncfusion.EJ2
+@model FrotiX.Models.Multa
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+	@functions {
+		public void OnGet()
+		{
+			FrotiX.Pages.Multa.ListaMultaModel.Initialize(_unitOfWork);
+			ViewData["dataOrgaoAutuante"] = new ListaOrgaoAutuanteMulta(_unitOfWork).OrgaoAutuanteList();
+			ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+			ViewData["lstVeiculos"] = new ListaVeiculos(_unitOfWork).VeiculosList();
+			ViewData["lstTipoMulta"] = new ListaTipoMulta(_unitOfWork).TipoMultaList();
+			ViewData["lstStatus"] = new ListaStatusAutuacao(_unitOfWork).StatusList();
+			ViewData["lstStatusAlteracao"] = new ListaStatusAutuacaoAlteracao(_unitOfWork).StatusList();
+		}
+	}
+
+	ViewData["Title"] = "Multas";
+	ViewData["PageName"] = "multa_listaautuacao";
+	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Multas: <span class='fw-300'>Autuações</span>";
+	ViewData["Category1"] = "Autuações";
+	ViewData["PageIcon"] = "fad fa-pen-to-square";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-autuacao-laranja: #D2691E;
+			--ftx-autuacao-laranja-hover: #E07020;
+			--ftx-autuacao-chocolate: #7B3F00;
+			--ftx-autuacao-terracota: #A0522D;
+		}
+
+		/* ====== OVERRIDE HEADER ====== */
+		.ftx-card-header .ftx-card-title {
+			font-family: 'Outfit', sans-serif !important;
+			font-weight: 900 !important;
+			color: #fff !important;
+		}
+
+		.ftx-card-header .ftx-card-title i {
+			color: #fff !important;
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: rgba(255,255,255,0.7) !important;
+		}
+
+		.ftx-card-header .btn-header-orange {
+			background: linear-gradient(135deg, var(--ftx-autuacao-laranja) 0%, var(--ftx-autuacao-laranja-hover) 100%) !important;
+			color: #fff !important;
+			border: none !important;
+		}
+
+		.ftx-card-header .btn-header-orange:hover {
+			background: linear-gradient(135deg, var(--ftx-autuacao-laranja-hover) 0%, var(--ftx-autuacao-laranja) 100%) !important;
+			color: #fff !important;
+		}
+
+		/* ====== ÁREA DE FILTROS ====== */
+		.ftx-autuacao-filters {
+			padding: 1.25rem 1.5rem;
+			background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+			border-bottom: 1px solid #e2e8f0;
+		}
+
+		.ftx-autuacao-filters-title {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #64748b;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-autuacao-filters-title i {
+			color: var(--ftx-autuacao-terracota);
+		}
+
+		.ftx-autuacao-filters-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 1rem;
+			align-items: end;
+		}
+
+		.ftx-autuacao-filter-group {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.ftx-autuacao-filter-group label {
+			font-size: 0.75rem;
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 0.35rem;
+		}
+
+		/* Botão de Filtrar */
+		/* Botão Filtrar - COM GLOW AZUL */
+		.btn-filtrar-autuacao {
+			background-color: #3D5771 !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			cursor: pointer;
+			height: 38px;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+
+		.btn-filtrar-autuacao:hover {
+			background-color: #2d4559 !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+			color: #fff !important;
+		}
+
+		.btn-filtrar-autuacao:active, .btn-filtrar-autuacao:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* ====== COMBOBOX SYNCFUSION ====== */
+		.ftx-autuacao-filter-group .e-control-wrapper {
+			height: 38px !important;
+		}
+
+		.ftx-autuacao-filter-group .e-input-group {
+			border-radius: 6px !important;
+		}
+
+		/* ====== TABELA ====== */
+		#tblMulta {
+			font-size: 0.82rem;
+		}
+
+		#tblMulta thead {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+		}
+
+		#tblMulta thead th {
+			color: #fff !important;
+			font-weight: 600;
+			font-size: 0.78rem;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			padding: 0.75rem 0.625rem;
+			text-align: center;
+			border: none !important;
+			vertical-align: middle !important;
+		}
+
+		#tblMulta tbody tr {
+			transition: background-color 0.15s ease;
+		}
+
+		#tblMulta tbody tr:hover {
+			background-color: rgba(50, 93, 136, 0.06) !important;
+		}
+
+		#tblMulta tbody td {
+			padding: 0.625rem;
+			vertical-align: middle !important;
+			border-color: rgba(0,0,0,0.05) !important;
+		}
+
+		/* ====== BADGES DE STATUS FrotiX ====== */
+		.ftx-badge-status {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			padding: 0.2rem 0.55rem;
+			border-radius: 1rem;
+			font-size: 0.72rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			white-space: nowrap;
+		}
+
+		.ftx-badge-status i {
+			font-size: 0.7rem;
+			color: #fff !important;
+		}
+
+		.ftx-badge-notificado {
+			background: linear-gradient(135deg, #4a89c5 0%, #3a6fa0 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(74, 137, 197, 0.3);
+		}
+
+		.ftx-badge-reconhecido {
+			background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(21, 128, 61, 0.3);
+		}
+
+		.ftx-badge-pendente {
+			background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3);
+		}
+
+		.ftx-badge-pago {
+			background: linear-gradient(135deg, #3D5771 0%, #2d4559 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(61, 87, 113, 0.3);
+		}
+
+		.ftx-badge-default {
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+		}
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== BOTÕES DE AÇÃO NA TABELA - COM GLOW FROTIX ====== */
+		.ftx-btn-icon {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: .375rem !important;
+			border: none !important;
+			color: #fff !important;
+			font-size: 0.85rem;
+			cursor: pointer;
+			transition: all .3s ease, transform .2s ease !important;
+			position: relative;
+			overflow: hidden;
+			margin: 1px !important;
+		}
+
+		.ftx-btn-icon:hover:not([aria-disabled="true"]) {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		.ftx-btn-icon:active:not([aria-disabled="true"]),
+		.ftx-btn-icon:focus:not([aria-disabled="true"]) {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		.ftx-btn-icon[aria-disabled="true"] {
+			opacity: 0.35;
+			cursor: not-allowed;
+			pointer-events: none;
+			box-shadow: none !important;
+		}
+
+		.ftx-btn-icon i {
+			font-size: var(--ftx-action-icon, 0.90rem);
+			line-height: 1;
+			color: #fff !important;
+		}
+
+		/* Editar - Azul com GLOW */
+		.ftx-btn-editar {
+			background-color: #3D5771 !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-editar:hover:not([aria-disabled="true"]) {
+			background-color: #2d4559 !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+		.ftx-btn-editar:active, .ftx-btn-editar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* Status - Amarelo/Âmbar com GLOW */
+		.ftx-btn-status {
+			background-color: #d97706 !important;
+			box-shadow: 0 0 8px rgba(217, 119, 6, 0.5), 0 2px 4px rgba(217, 119, 6, 0.3) !important;
+		}
+		.ftx-btn-status:hover:not([aria-disabled="true"]) {
+			background-color: #b45309 !important;
+			box-shadow: 0 0 20px rgba(217, 119, 6, 0.8), 0 6px 12px rgba(217, 119, 6, 0.5) !important;
+		}
+		.ftx-btn-status:active, .ftx-btn-status:focus {
+			box-shadow: 0 0 0 0.2rem rgba(217, 119, 6, 0.35) !important;
+		}
+
+		/* Penalidade - Roxo com GLOW */
+		.ftx-btn-penalidade {
+			background-color: #7c3aed !important;
+			box-shadow: 0 0 8px rgba(124, 58, 237, 0.5), 0 2px 4px rgba(124, 58, 237, 0.3) !important;
+		}
+		.ftx-btn-penalidade:hover:not([aria-disabled="true"]) {
+			background-color: #6d28d9 !important;
+			box-shadow: 0 0 20px rgba(124, 58, 237, 0.8), 0 6px 12px rgba(124, 58, 237, 0.5) !important;
+		}
+		.ftx-btn-penalidade:active, .ftx-btn-penalidade:focus {
+			box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.35) !important;
+		}
+
+		/* Apagar - Vinho com GLOW */
+		.ftx-btn-apagar {
+			background-color: #722f37 !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-apagar:hover:not([aria-disabled="true"]) {
+			background-color: #5a252c !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+		.ftx-btn-apagar:active, .ftx-btn-apagar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		/* PDF - Preto com GLOW */
+		.ftx-btn-pdf {
+			background-color: #1e1e1e !important;
+			box-shadow: 0 0 8px rgba(30, 30, 30, 0.5), 0 2px 4px rgba(30, 30, 30, 0.3) !important;
+		}
+		.ftx-btn-pdf:hover:not([aria-disabled="true"]) {
+			background-color: #333333 !important;
+			box-shadow: 0 0 20px rgba(30, 30, 30, 0.8), 0 6px 12px rgba(30, 30, 30, 0.5) !important;
+		}
+		.ftx-btn-pdf:active, .ftx-btn-pdf:focus {
+			box-shadow: 0 0 0 0.2rem rgba(30, 30, 30, 0.25) !important;
+		}
+
+		/* PDF Desabilitado */
+		.ftx-btn-pdf-disabled {
+			background-color: #999 !important;
+			box-shadow: none !important;
+			cursor: not-allowed !important;
+			opacity: 0.5;
+		}
+
+		/* ====== DATATABLE CONTROLS ====== */
+		.dataTables_wrapper .dataTables_filter input {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.25rem 0.5rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_length select {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.15rem 0.35rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_info,
+		.dataTables_wrapper .dataTables_paginate,
+		.dataTables_wrapper .dataTables_length label,
+		.dataTables_wrapper .dataTables_filter label {
+			font-size: 0.80rem;
+		}
+
+		.dt-buttons .dt-button {
+			font-size: 0.78rem !important;
+			padding: 0.25rem 0.45rem !important;
+			line-height: 1.1 !important;
+			border-radius: 6px !important;
+		}
+
+		/* ====== ESTILOS DOS MODAIS ====== */
+		/* Modal PDF Vistoria */
+		#modalPDF .modal-dialog {
+			max-width: 800px;
+		}
+
+		#modalPDF .modal-header {
+			background: linear-gradient(180deg, var(--ftx-autuacao-terracota) 0%, #8B4513 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalPDF .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalPDF .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		/* Modal Exibe PDF Autuação */
+		#modalExibePDF .modal-dialog {
+			max-width: 900px;
+		}
+
+		#modalExibePDF .modal-header {
+			background: linear-gradient(180deg, var(--ftx-autuacao-terracota) 0%, #8B4513 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalExibePDF .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalExibePDF .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalExibePDF .modal-body {
+			padding: 0;
+		}
+
+		#modalExibePDF .modal-footer {
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* Modal Alterar Status */
+		#modalAlteraStatus .modal-dialog {
+			max-width: 550px;
+		}
+
+		#modalAlteraStatus .modal-header {
+			background: linear-gradient(180deg, var(--ftx-autuacao-terracota) 0%, #8B4513 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalAlteraStatus .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalAlteraStatus .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalAlteraStatus .modal-body {
+			padding: 1.25rem;
+			background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+		}
+
+		#modalAlteraStatus .modal-footer {
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* Modal Transformar Penalidade */
+		#modalTransformaPenalidade .modal-dialog {
+			max-width: 85%;
+			height: auto;
+		}
+
+		#modalTransformaPenalidade .modal-header {
+			background: linear-gradient(180deg, #198754 0%, #157347 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalTransformaPenalidade .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalTransformaPenalidade .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalTransformaPenalidade .modal-body {
+			max-height: 80vh;
+			overflow-y: auto;
+			padding: 1.25rem;
+			background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+		}
+
+		#modalTransformaPenalidade .modal-footer {
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		#modalTransformaPenalidade #PDFContainer {
+			position: relative;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 992px) {
+			.ftx-autuacao-filters-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+
+			.ftx-autuacao-filters-grid {
+				grid-template-columns: 1fr;
+			}
+
+			#modalTransformaPenalidade .modal-dialog,
+			#modalExibePDF .modal-dialog,
+			#modalAlteraStatus .modal-dialog {
+				max-width: 95%;
+				margin: 1rem auto;
+			}
+		}
+	</style>
+}
+
+<script>
+	// URL padrão da API (pode ser mudada pelos filtros)
+	let URLapi = "/api/multa/listamultas";
+</script>
+
+<form>
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel ftx-card-styled">
+				<div class="panel-container show">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-solid fa-file-pen"></i>
+							Multas: Lista de Autuações
+						</h2>
+						<a href="/Multa/UpsertAutuacao" class="btn btn-header-orange" data-ejtip="Adicionar nova autuação">
+							<i class="fa-duotone fa-plus me-2"></i>
+							Adicionar Autuação
+						</a>
+					</div>
+
+					<!-- Área de Filtros -->
+					<div class="ftx-autuacao-filters">
+						<div class="ftx-autuacao-filters-title">
+							<i class="fa-duotone fa-filter"></i>
+							Filtros de Pesquisa
+						</div>
+
+						<div class="ftx-autuacao-filters-grid">
+							<!-- Órgão -->
+							<div class="ftx-autuacao-filter-group">
+								<label>Órgão Autuante</label>
+								<ejs-combobox id="lstOrgao"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["dataOrgaoAutuante"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Infração -->
+							<div class="ftx-autuacao-filter-group">
+								<label>Infração</label>
+								<ejs-combobox id="lstTiposMulta"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstTipoMulta"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Veículo -->
+							<div class="ftx-autuacao-filter-group">
+								<label>Veículo</label>
+								<ejs-combobox id="lstVeiculos"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstVeiculos"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Motorista -->
+							<div class="ftx-autuacao-filter-group">
+								<label>Motorista</label>
+								<ejs-combobox id="lstMotorista"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstMotorista"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Status -->
+							<div class="ftx-autuacao-filter-group">
+								<label>Status</label>
+								<ejs-combobox id="lstStatus"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstStatus"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Status" value="StatusId"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Botão Filtrar -->
+							<div class="ftx-autuacao-filter-group">
+								<label>&nbsp;</label>
+								<a class="btn-filtrar-autuacao" id="btnFiltro" role="button" data-ejtip="Filtrar Autuações" onclick="ListaTodasNotificacoes()">
+									<i class="fa-duotone fa-magnifying-glass-waveform"></i>
+									Filtrar
+								</a>
+							</div>
+						</div>
+					</div>
+
+					<!-- Tabela -->
+					<div class="panel-content">
+						<div id="divNotificacoes" class="mt-3 px-3 pb-3">
+							<table id="tblMulta" class="table table-bordered table-striped" width="100%">
+								<thead>
+									<tr>
+										<th>Nº Infração</th>
+										<th>Data</th>
+										<th>Hora</th>
+										<th>Motorista</th>
+										<th>Veículo</th>
+										<th>Órgão</th>
+										<th>Infração</th>
+										<th>Local</th>
+										<th>Dt.Reconhecimento</th>
+										<th>Até Vencimento</th>
+										<th>Pós Vencimento</th>
+										<th>Status</th>
+										<th>Ação</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@* ================ Modal de Vistoria (PDF) ================ *@
+<form method="post" asp-action="Index" enctype="multipart/form-data">
+	<div class="modal fade" id="modalPDF" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="DynamicModalLabel">
+						<i class="fa-duotone fa-file-lines"></i>
+						Ficha de Vistoria
+					</h4>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+				</div>
+				<div class="modal-body">
+					<div id="pdfViewerVistoria" style="height: 600px;">
+						<ejs-pdfviewer id="pdfViewerVistoriaControl"
+									   style="height:100%"
+									   serviceUrl="/api/MultaPdfViewer"
+									   documentPath="">
+						</ejs-pdfviewer>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+						<i class="fa-solid fa-xmark icon-space"></i>
+						Fechar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@* ================ Modal: Exibir Notificação de Autuação (PDF) ================ *@
+<div class="modal fade" id="modalExibePDF" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-file-pdf"></i>
+					Notificação de Autuação
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<div id="pdfViewerAutuacao" style="height: 600px; width: 100%;">
+					<ejs-pdfviewer id="pdfViewerAutuacaoControl"
+								   style="height:100%; width:100%;"
+								   serviceUrl="/api/MultaPdfViewer"
+								   documentPath=""
+								   enableToolbar="true"
+								   enableNavigationToolbar="true"
+								   enableThumbnail="true"
+								   zoomMode="FitToWidth">
+					</ejs-pdfviewer>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="btnFecharExibePDF" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-solid fa-xmark icon-space"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* ================ Modal: Alterar Status ================ *@
+<div class="modal fade" id="modalAlteraStatus" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-md">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-bolt"></i>
+					Alterar Status da Autuação
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<form id="frmStatusAutuacao">
+					<input type="hidden" id="txtIdStatus" />
+
+					<div class="card mb-3">
+						<div class="card-header bg-light">
+							<strong><i class="fa-solid fa-info-circle me-2"></i> Informações da Autuação</strong>
+						</div>
+						<div class="card-body">
+							<div class="row mb-2">
+								<div class="col-6">
+									<label class="text-muted mb-1"><small>Nº da Infração:</small></label>
+									<div class="font-weight-bold" id="txtNumInfracaoStatus">-</div>
+								</div>
+								<div class="col-3">
+									<label class="text-muted mb-1"><small>Data:</small></label>
+									<div class="font-weight-bold" id="txtDataStatus">-</div>
+								</div>
+								<div class="col-3">
+									<label class="text-muted mb-1"><small>Hora:</small></label>
+									<div class="font-weight-bold" id="txtHoraStatus">-</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<label class="text-muted mb-1"><small>Motorista:</small></label>
+									<div class="font-weight-bold" id="txtMotoristaStatus">-</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<label class="text-muted mb-1"><small>Status Atual:</small></label>
+									<div class="font-weight-bold text-primary" id="txtStatusAtual">-</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="label font-weight-bold">
+							<i class="fa-solid fa-flag me-1"></i> Novo Status da Autuação
+						</label>
+						<ejs-combobox id="lstStatusAlterado"
+									  placeholder="Selecione o novo status..."
+									  allowFiltering="true" filterType="Contains"
+									  dataSource="@ViewData["lstStatusAlteracao"]"
+									  popupHeight="250px" width="100%" showClearButton="true">
+							<e-combobox-fields text="Status" value="StatusId"></e-combobox-fields>
+						</ejs-combobox>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button id="btnAlteraStatus" class="btn btn-azul" type="submit" data-ejtip="Confirmar alteração">
+					<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+					<i class="fa-duotone fa-check icon-space"></i>
+					<span class="btn-text">Alterar Status</span>
+				</button>
+				<button id="btnFecharStatus" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-solid fa-xmark icon-space"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* ================ Modal: Transformar em Penalidade/Boleto ================ *@
+<div class="modal fade" id="modalTransformaPenalidade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="h3Titulo">
+					<i class="fa-duotone fa-money-bill-transfer"></i>
+					Transforma Autuação em Penalidade/Boleto
+				</h3>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<form id="frmTransforma">
+					<input type="hidden" id="txtId" />
+
+					<div class="row">
+						<div class="col-4">
+							<div class="form-group">
+								<label class="label font-weight-bold">Data de Vencimento</label>
+								<input id="txtDataVencimento" class="form-control form-control-xs" type="date" />
+							</div>
+						</div>
+
+						<div class="col-4">
+							<div class="form-group">
+								<label class="label font-weight-bold">Valor a Pagar</label>
+								<input id="txtValorPenalidade" class="form-control form-control-xs" style="text-align:right;" onkeypress="return moeda(this,'.',',',event)" />
+							</div>
+						</div>
+
+						<div class="col-4">
+							<div class="form-group">
+								<label class="label font-weight-bold">Processo eDoc</label>
+								<input id="txtEdoc" class="form-control form-control-xs" />
+							</div>
+						</div>
+					</div>
+
+					<br />
+
+					<div class="row">
+						<div class="col-12">
+							<div class="form-group">
+								<label class="label font-weight-bold">Observações a respeito da Multa</label>
+								<ejs-richtexteditor id="rte" toolbarClick="toolbarClick" locale="pt-BR" height="150px" created="onCreate">
+									<e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensViagens/"></e-richtexteditor-insertimagesettings>
+								</ejs-richtexteditor>
+							</div>
+						</div>
+					</div>
+
+					<br />
+
+					<div class="row">
+						<div class="col-12">
+							<div class="form-group">
+								<label class="label font-weight-bold">Upload da Penalidade/Boleto (PDF)</label>
+								<ejs-uploader id="uploaderPenalidade"
+											  name="UploadFiles"
+											  multiple="false"
+											  autoUpload="true"
+											  allowedExtensions=".pdf">
+									<e-uploader-asyncsettings saveUrl="/api/MultaUpload/save"
+															  removeUrl="/api/MultaUpload/remove">
+									</e-uploader-asyncsettings>
+								</ejs-uploader>
+								<input id="txtPenalidadePDF" class="form-control form-control-xs" hidden />
+								<div id="PDFContainer" style="margin-top: 15px;">
+									<ejs-pdfviewer id="pdfViewerPenalidadeControl"
+												   style="height:600px;width:100%;"
+												   serviceUrl="/api/MultaPdfViewer">
+									</ejs-pdfviewer>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button id="btnFecharTransformaPenalidade" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-solid fa-xmark icon-space"></i>
+					Fechar
+				</button>
+				<button id="btnTransformaPenalidade" class="btn btn-verde" type="submit" value="SUBMIT" data-ejtip="Confirmar transformação">
+					<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+					<i class="fa-duotone fa-money-bill-transfer icon-space"></i>
+					<span class="btn-text">Transformar em Penalidade</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/cadastros/tiraacento_001.js"></script>
+	<script src="~/js/cadastros/listaautuacao.js" asp-append-version="true"></script>
+
+	<script>
+		// Ajusta funcionamento do RTE no Modal
+		var defaultRTE;
+
+		function onCreate() {
+			try {
+				defaultRTE = this;
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "onCreate", error);
+			}
+		}
+
+		// Necessário para upload com antiforgery no RTE
+		function toolbarClick(e) {
+			try {
+				if (e.item.id === "rte_toolbar_Image") {
+					var element = document.getElementById('rte_upload');
+					element.ej2_instances[0].uploading = function (args) {
+						args.currentRequest.setRequestHeader('XSRF-TOKEN', document.getElementsByName('__RequestVerificationToken')[0].value);
+					}
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "toolbarClick", error);
+			}
+		}
+	</script>
+
+	<script>
+		// Localização do RTE (pt-BR)
+		ej.base.L10n.load({
+			"pt-BR": {
+				"richtexteditor": {
+					"alignments": "Alinhamentos", "justifyLeft": "Alinhar à Esquerda", "justifyCenter": "Centralizar", "justifyRight": "Alinhar à Direita", "justifyFull": "Justificar",
+					"fontName": "Nome da Fonte", "fontSize": "Tamanho da Fonte", "fontColor": "Cor da Fonte", "backgroundColor": "Cor de Fundo",
+					"bold": "Negrito", "italic": "Itálico", "underline": "Sublinhado", "strikethrough": "Tachado", "clearFormat": "Limpa Formatação", "clearAll": "Limpa Tudo",
+					"cut": "Cortar", "copy": "Copiar", "paste": "Colar", "unorderedList": "Lista com Marcadores", "orderedList": "Lista Numerada",
+					"indent": "Aumentar Identação", "outdent": "Diminuir Identação", "undo": "Desfazer", "redo": "Refazer",
+					"superscript": "Sobrescrito", "subscript": "Subscrito", "createLink": "Inserir Link", "openLink": "Abrir Link", "editLink": "Editar Link", "removeLink": "Remover Link",
+					"image": "Inserir Imagem", "replace": "Substituir", "align": "Alinhar", "caption": "Título da Imagem", "remove": "Remover",
+					"display": "Exibir", "altText": "Texto Alternativo", "dimension": "Mudar Tamanho", "fullscreen": "Maximizar", "maximize": "Maximizar", "minimize": "Minimizar",
+					"lowerCase": "Caixa Baixa", "upperCase": "Caixa Alta", "print": "Imprimir", "formats": "Formatos", "sourcecode": "Visualizar Código", "preview": "Exibir",
+					"viewside": "ViewSide", "insertCode": "Inserir Código", "linkText": "Exibir Texto", "linkTooltipLabel": "Título", "linkWebUrl": "Endereço Web",
+					"linkTitle": "Entre com um título", "linkurl": "http://exemplo.com", "linkOpenInNewWindow": "Abrir Link em Nova Janela", "linkHeader": "Inserir Link",
+					"dialogInsert": "Inserir", "dialogCancel": "Cancelar", "dialogUpdate": "Atualizar", "imageHeader": "Inserir Imagem",
+					"imageLinkHeader": "Você pode proporcionar um link da web", "mdimageLink": "Favor proporcionar uma URL para sua imagem",
+					"imageUploadMessage": "Solte a imagem aqui ou busque para o upload", "imageDeviceUploadMessage": "Clique aqui para o upload",
+					"imageAlternateText": "Texto Alternativo", "alternateHeader": "Texto Alternativo", "browse": "Procurar",
+					"imageUrl": "http://exemplo.com/imagem.png", "imageCaption": "Título", "imageSizeHeader": "Tamanho da Imagem", "imageHeight": "Altura", "imageWidth": "Largura",
+					"textPlaceholder": "Entre com um Texto", "inserttablebtn": "Inserir Tabela", "tabledialogHeader": "Inserir Tabela", "tableWidth": "Largura",
+					"cellpadding": "Espaçamento de célula", "cellspacing": "Espaçamento de célula", "columns": "Número de colunas", "rows": "Número de linhas",
+					"tableRows": "Linhas da Tabela", "tableColumns": "Colunas da Tabela", "tableCellHorizontalAlign": "Alinhamento Horizontal da Célula",
+					"tableCellVerticalAlign": "Alinhamento Vertical da Célula", "createTable": "Criar Tabela", "removeTable": "Remover Tabela", "tableHeader": "Cabeçalho da Tabela",
+					"tableRemove": "Remover Tabela", "tableCellBackground": "Fundo da Célula", "tableEditProperties": "Editar Propriedades da Tabela",
+					"styles": "Estilos", "insertColumnLeft": "Inserir Coluna à Esquerda", "insertColumnRight": "Inserir Coluna à Direita", "deleteColumn": "Apagar Coluna",
+					"insertRowBefore": "Inserir Linha Antes", "insertRowAfter": "Inserir Linha Depois", "deleteRow": "Apagar Linha", "tableEditHeader": "Editar Tabela",
+					"TableHeadingText": "Cabeçalho", "TableColText": "Col", "imageInsertLinkHeader": "Inserir Link", "editImageHeader": "Editar Imagem",
+					"alignmentsDropDownLeft": "Alinhar à Esquerda", "alignmentsDropDownCenter": "Centralizar", "alignmentsDropDownRight": "Alinhar à Direita", "alignmentsDropDownJustify": "Justificar",
+					"imageDisplayDropDownInline": "Inline", "imageDisplayDropDownBreak": "Break", "tableInsertRowDropDownBefore": "Inserir linha antes", "tableInsertRowDropDownAfter": "Inserir linha depois",
+					"tableInsertRowDropDownDelete": "Apagar linha", "tableInsertColumnDropDownLeft": "Inserir coluna à esquerda", "tableInsertColumnDropDownRight": "Inserir coluna à direita",
+					"tableInsertColumnDropDownDelete": "Apagar Coluna", "tableVerticalAlignDropDownTop": "Alinhar no Topo", "tableVerticalAlignDropDownMiddle": "Alinhar no Meio", "tableVerticalAlignDropDownBottom": "Alinhar no Fundo",
+					"tableStylesDropDownDashedBorder": "Bordas Pontilhadas", "tableStylesDropDownAlternateRows": "Linhas Alternadas", "pasteFormat": "Colar Formato",
+					"pasteFormatContent": "Escolha a ação de formatação", "plainText": "Texto Simples", "cleanFormat": "Limpar", "keepFormat": "Manter",
+					"formatsDropDownParagraph": "Parágrafo", "formatsDropDownCode": "Código", "formatsDropDownQuotation": "Citação", "formatsDropDownHeading1": "Cabeçalho 1",
+					"formatsDropDownHeading2": "Cabeçalho 2", "formatsDropDownHeading3": "Cabeçalho 3", "formatsDropDownHeading4": "Cabeçalho 4",
+					"fontNameSegoeUI": "SegoeUI", "fontNameArial": "Arial", "fontNameGeorgia": "Georgia", "fontNameImpact": "Impact", "fontNameTahoma": "Tahoma", "fontNameTimesNewRoman": "Times New Roman", "fontNameVerdana": "Verdana"
+				}
+			}
+		});
+	</script>
+
+	<script>
+		// --------- Apagar Autuação ----------
+		$(document).on('click', '.btn-apagar', function () {
+			try {
+				const id = $(this).data('id');
+
+				Alerta.Confirmar(
+					"Você tem certeza que deseja apagar esta Autuação?",
+					"Não será possível recuperar os dados eliminados!",
+					"Excluir",
+					"Cancelar"
+				).then(function (confirmed) {
+					try {
+						if (!confirmed) return;
+
+						$.ajax({
+							url: '/api/Multa/Delete',
+							type: "POST",
+							data: JSON.stringify({ MultaId: id }),
+							contentType: "application/json; charset=utf-8",
+							dataType: "json",
+							success: function (data) {
+								try {
+									if (data.success) {
+										AppToast.show('Verde', data.message, 2000);
+										ListaTodasNotificacoes();
+									}
+									else {
+										AppToast.show('Vermelho', data.message, 3000);
+									}
+								}
+								catch (error) {
+									Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "btn-apagar.success", error);
+								}
+							},
+							error: function (err) {
+								try {
+									console.log(err);
+									Alerta.Erro('Erro', 'Ocorreu um problema ao apagar.', 'OK');
+								}
+								catch (error) {
+									Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "btn-apagar.error", error);
+								}
+							}
+						});
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "btn-apagar.confirmar", error);
+					}
+				});
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "btn-apagar.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		// --------- Modal: Alterar Status ----------
+		$('#modalAlteraStatus')
+			.on('shown.bs.modal', function (event) {
+				try {
+					const button = $(event.relatedTarget);
+					const multaId = button.data("id");
+					$('#txtId').val(multaId);
+
+					$.ajax({
+						type: "get",
+						url: "/api/Multa/PegaStatus",
+						data: { Id: multaId },
+						contentType: "application/json; charset=utf-8",
+						dataType: "json",
+						success: function (data) {
+							try {
+								const { numInfracao, nome, status } = data;
+								$("#h3Titulo").html(`Alterar o status da Autuação nº ${numInfracao} de ${nome}`);
+								const lstStatus = document.getElementById('lstStatusAlterado').ej2_instances[0];
+								lstStatus.value = [status];
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "modalAlteraStatus.success", error);
+							}
+						},
+						error: function (data) {
+							Alerta.Erro('Erro', 'Erro ao recuperar status', 'OK');
+							console.log(data);
+						}
+					});
+				}
+				catch (error) {
+					Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "modalAlteraStatus.shown", error);
+				}
+			})
+			.on("hide.bs.modal", function () {
+				try {
+					const lstStatus = document.getElementById('lstStatusAlterado').ej2_instances[0];
+					lstStatus.value = '';
+				}
+				catch (error) {
+					Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "modalAlteraStatus.hide", error);
+				}
+			});
+
+		// Botão Alterar Status - COM SPINNER
+		$("#btnAlteraStatus").click(function (e) {
+			try {
+				e.preventDefault();
+
+				const btn = $(this);
+				const spinner = btn.find('.spinner-border');
+				const icon = btn.find('i');
+				const btnText = btn.find('.btn-text');
+
+				const status = document.getElementById('lstStatusAlterado').ej2_instances[0];
+				if (!status.value) {
+					Alerta.Erro('Atenção', 'O status é obrigatório!', 'Fechar');
+					return;
+				}
+
+				// Ativa spinner
+				spinner.removeClass('d-none');
+				icon.addClass('d-none');
+				btnText.text('Alterando...');
+				btn.prop('disabled', true);
+
+				$.ajax({
+					type: "get",
+					url: "/api/Multa/AlteraStatus",
+					data: { MultaId: $('#txtIdStatus').val(), Status: status.value },
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					success: function (data) {
+						try {
+							if (data.success) {
+								AppToast.show('Verde', data.message, 2000);
+								$('#modalAlteraStatus').modal('hide');
+								setTimeout(function() {
+									$('#tblMulta').DataTable().ajax.reload(null, false);
+								}, 300);
+							}
+							else {
+								AppToast.show('Vermelho', data.message, 3000);
+							}
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "btnAlteraStatus.success", error);
+						}
+						finally {
+							// Restaura botão
+							spinner.addClass('d-none');
+							icon.removeClass('d-none');
+							btnText.text('Alterar Status');
+							btn.prop('disabled', false);
+						}
+					},
+					error: function (data) {
+						Alerta.Erro('Erro', 'Erro ao alterar status', 'OK');
+						console.log(data);
+						// Restaura botão
+						spinner.addClass('d-none');
+						icon.removeClass('d-none');
+						btnText.text('Alterar Status');
+						btn.prop('disabled', false);
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "#btnAlteraStatus.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		// Máscara simples de moeda (pt-BR)
+		function moeda(a, e, r, t) {
+			try {
+				let n = "", h = 0, j = 0, u = 0, tamanho2 = 0, ajd2 = "", l = "";
+				const o = window.Event ? t.which : t.keyCode;
+				if (o === 13 || o === 8) return true;
+				n = String.fromCharCode(o);
+				if ("0123456789".indexOf(n) === -1) return false;
+
+				u = a.value.length;
+				for (h = 0; h < u && ("0" === a.value.charAt(h) || a.value.charAt(h) === r); h++);
+				for (l = ""; h < u; h++) if ("0123456789".indexOf(a.value.charAt(h)) !== -1) l += a.value.charAt(h);
+				l += n;
+				u = l.length;
+
+				if (u === 0) a.value = "";
+				if (u === 1) a.value = "0" + r + "0" + l;
+				if (u === 2) a.value = "0" + r + l;
+
+				if (u > 2) {
+					ajd2 = ""; j = 0;
+					for (h = u - 3; h >= 0; h--) {
+						if (j === 3) { ajd2 += e; j = 0; }
+						ajd2 += l.charAt(h); j++;
+					}
+					a.value = ""; tamanho2 = ajd2.length;
+					for (h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
+					a.value += r + l.substr(u - 2, u);
+				}
+				return false;
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "moeda", error);
+			}
+		}
+	</script>
+
+	<script>
+		// --------- Modal: Transformar em Penalidade ----------
+		$('#modalTransformaPenalidade')
+			.on('shown.bs.modal', function (event) {
+				try {
+					defaultRTE?.refreshUI();
+
+					const multaId = $('#txtId').val();
+
+					if (!multaId || multaId === '' || multaId === 'undefined') {
+						Alerta.Erro("Erro", "ID da multa não encontrado. Por favor, tente novamente.", "Ok");
+						$('#modalTransformaPenalidade').modal('hide');
+						return;
+					}
+
+					$.ajax({
+						type: "get",
+						url: "/api/Multa/PegaObservacao",
+						data: { Id: multaId },
+						contentType: "application/json; charset=utf-8",
+						dataType: "json",
+						success: function (data) {
+							try {
+								const { nomeMotorista, numInfracao, observacao } = {
+									nomeMotorista: data.nomeMotorista,
+									numInfracao: data.numInfracao,
+									observacao: data.observacao
+								};
+								const rte = document.getElementById('rte').ej2_instances[0];
+								rte.value = observacao || "";
+								$("#h3Titulo").html(`<i class="fa-duotone fa-money-bill-transfer me-2"></i>Transformar em Penalidade a Autuação nº ${numInfracao} de ${nomeMotorista}`);
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "modalTransformaPenalidade.success", error);
+							}
+						},
+						error: function (data) {
+							Alerta.Erro('Erro', 'Erro ao carregar observação', 'OK');
+							console.log(data);
+						}
+					});
+
+				}
+				catch (error) {
+					Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "modalTransformaPenalidade.shown", error);
+				}
+			})
+			.on("hide.bs.modal", function () {
+				try {
+					const rte = document.getElementById('rte').ej2_instances[0];
+					rte.value = "";
+					$("#txtDataVencimento").val("");
+					$("#txtValorPenalidade").val("");
+					$("#txtEdoc").val("");
+					$('#txtPenalidadePDF').val("");
+
+					const uploader = document.getElementById('uploaderPenalidade').ej2_instances[0];
+					if (uploader) {
+						uploader.clearAll();
+					}
+
+					const pdfViewer = document.getElementById('pdfViewerPenalidadeControl').ej2_instances[0];
+					if (pdfViewer) {
+						pdfViewer.unload();
+					}
+				}
+				catch (error) {
+					Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "modalTransformaPenalidade.hide", error);
+				}
+			});
+
+		// Submit: Transformar - COM SPINNER
+		$("#btnTransformaPenalidade").click(function (event) {
+			try {
+				event.preventDefault();
+
+				const btn = $(this);
+				const spinner = btn.find('.spinner-border');
+				const icon = btn.find('i');
+				const btnText = btn.find('.btn-text');
+
+				const multaId = $("#txtId").val();
+
+				if (!multaId || multaId === '' || multaId === 'undefined') {
+					Alerta.Erro("Erro", "ID da multa não encontrado. Por favor, feche e abra o modal novamente.", "Ok");
+					return;
+				}
+
+				if (!$("#txtDataVencimento").val()) {
+					Alerta.Erro("Informação Ausente", "A Data de Vencimento é obrigatória", "Ok");
+					return;
+				}
+				if (!$("#txtValorPenalidade").val() || $("#txtValorPenalidade").val() === "0") {
+					Alerta.Erro("Informação Ausente", "O Valor a Pagar é obrigatório", "Ok");
+					return;
+				}
+
+				// Ativa spinner
+				spinner.removeClass('d-none');
+				icon.addClass('d-none');
+				btnText.text('Transformando...');
+				btn.prop('disabled', true);
+
+				const rte = document.getElementById('rte').ej2_instances[0];
+				const valorBr = $('#txtValorPenalidade').val().replaceAll(".", "");
+
+				$.ajax({
+					type: "get",
+					url: "/api/Multa/TransformaPenalidade",
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					data: {
+						MultaId: multaId,
+						DataVencimento: $('#txtDataVencimento').val(),
+						ValorAteVencimento: valorBr,
+						Observacao: rte.value,
+						PenalidadePDF: $('#txtPenalidadePDF').val(),
+						ProcessoEDoc: $('#txtEdoc').val()
+					},
+					success: function (data) {
+						try {
+							AppToast.show('Verde', data.message, 2000);
+							$('#modalTransformaPenalidade').modal('hide');
+							location.reload();
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "btnTransformaPenalidade.success", error);
+						}
+						finally {
+							spinner.addClass('d-none');
+							icon.removeClass('d-none');
+							btnText.text('Transformar em Penalidade');
+							btn.prop('disabled', false);
+						}
+					},
+					error: function (data) {
+						Alerta.Erro('Erro', 'Erro ao transformar em Penalidade', 'OK');
+						console.log(data);
+						spinner.addClass('d-none');
+						icon.removeClass('d-none');
+						btnText.text('Transformar em Penalidade');
+						btn.prop('disabled', false);
+					}
+				});
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "#btnTransformaPenalidade.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		// EVENT HANDLER: BOTÃO FECHAR - MODAL TRANSFORMAR PENALIDADE
+		$(document).on('click', '#btnFecharTransformaPenalidade', function (e) {
+			try {
+				e.preventDefault();
+				$('#modalTransformaPenalidade').modal('hide');
+				console.log('✅ Modal Transformar Penalidade fechado');
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "#btnFecharTransformaPenalidade.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		// ====================================================================
+		// FUNÇÕES AUXILIARES PARA O UPLOADER PENALIDADE
+		// ====================================================================
+
+		function getPenalidadeViewer() {
+			try {
+				const viewerElement = document.getElementById('pdfViewerPenalidadeControl');
+				return viewerElement?.ej2_instances?.[0] || null;
+			} catch (err) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "getPenalidadeViewer", err);
+				return null;
+			}
+		}
+
+		function loadPdfInPenalidadeViewer(fileName) {
+			try {
+				if (!fileName || fileName === '' || fileName === 'null') {
+					console.warn("Nome de arquivo inválido para carregar no viewer");
+					return;
+				}
+
+				const viewer = getPenalidadeViewer();
+				if (!viewer) {
+					console.error("Viewer de penalidade não encontrado");
+					return;
+				}
+
+				viewer.documentPath = fileName;
+				viewer.dataBind();
+				viewer.load(fileName, null);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "loadPdfInPenalidadeViewer", error);
+				console.error(error);
+			}
+		}
+
+		function onPenalidadeUploadSelected(args) {
+			try {
+				if (!args || !args.filesData || args.filesData.length === 0) return;
+
+				const file = args.filesData[0];
+				const fileName = (file?.name || "").toLowerCase();
+
+				if (!fileName.endsWith(".pdf")) {
+					args.cancel = true;
+
+					if (window.AppToast?.show) {
+						AppToast.show('Vermelho', 'Apenas arquivos PDF são permitidos', 3000);
+					} else {
+						Alerta.Warning('Arquivo Inválido', 'Apenas arquivos PDF são permitidos');
+					}
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "onPenalidadeUploadSelected", error);
+			}
+		}
+
+		function onPenalidadeUploadSuccess(args) {
+			try {
+				if (!args || !args.e) return;
+
+				console.log('✅ Upload success args:', args);
+
+				let serverResponse;
+				try {
+					serverResponse = typeof args.e.target.response === 'string'
+						? JSON.parse(args.e.target.response)
+						: args.e.target.response;
+				} catch (parseError) {
+					console.error('Erro ao fazer parse da resposta:', parseError);
+					return;
+				}
+
+				console.log('📦 Server response:', serverResponse);
+
+				if (serverResponse.error) {
+					console.error('❌ Erro do servidor:', serverResponse.error);
+					if (window.AppToast?.show) {
+						AppToast.show('Vermelho', serverResponse.error.message || 'Erro ao enviar arquivo', 3000);
+					}
+					return;
+				}
+
+				const uploadedFiles = serverResponse.files || [];
+				if (uploadedFiles.length === 0) {
+					console.error('❌ Nenhum arquivo retornado pelo servidor');
+					return;
+				}
+
+				const firstFile = uploadedFiles[0];
+				const fileName = firstFile.name;
+
+				console.log('📄 Nome do arquivo recebido:', fileName);
+
+				$('#txtPenalidadePDF').val(fileName);
+				console.log('✅ Campo txtPenalidadePDF atualizado:', fileName);
+
+				loadPdfInPenalidadeViewer(fileName);
+
+				if (window.AppToast?.show) {
+					AppToast.show('Verde', 'PDF de Penalidade enviado com sucesso!', 3000);
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "onPenalidadeUploadSuccess", error);
+			}
+		}
+
+		function onPenalidadeUploadFailure(args) {
+			try {
+				console.error("Erro no upload:", args);
+
+				if (window.AppToast?.show) {
+					AppToast.show('Vermelho', 'Erro ao enviar arquivo PDF', 3000);
+				} else {
+					Alerta.Erro('Erro no Upload', 'Não foi possível enviar o arquivo PDF');
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "onPenalidadeUploadFailure", error);
+			}
+		}
+
+		$(document).ready(function() {
+			try {
+				const uploaderPenalidade = document.getElementById("uploaderPenalidade")?.ej2_instances?.[0];
+				if (uploaderPenalidade) {
+					uploaderPenalidade.selected = onPenalidadeUploadSelected;
+					uploaderPenalidade.success = onPenalidadeUploadSuccess;
+					uploaderPenalidade.failure = onPenalidadeUploadFailure;
+					console.log('✅ Event handlers do uploader de penalidade configurados');
+				}
+
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaAutuacao.cshtml", "document.ready.uploaderPenalidade", error);
+			}
+		});
+	</script>
+}

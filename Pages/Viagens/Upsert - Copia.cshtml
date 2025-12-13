@@ -1,0 +1,1881 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2.DropDowns;
+@using Syncfusion.EJ2;
+@using Syncfusion.Data;
+@using Syncfusion.EJ2.DocumentEditor;
+
+@model FrotiX.Pages.Viagens.UpsertModel
+
+@{
+// Declaração das variáveis que você vai usar no preview
+bool hasBytes = Model.ViagemObj.Viagem.FichaVistoria != null;
+// Garante que o browser não fique carregando uma versão em cache
+string defaultImg = Url.Content("~/Images/FichaAmarelaNova.JPG")
+                    + "?t=" + DateTime.Now.Ticks;
+
+// Pré-calcula src da imagem
+string imgSrc;
+
+if (hasBytes)
+{
+imgSrc = "data:image/jpeg;base64,"
+         + Convert.ToBase64String(Model.ViagemObj.Viagem.FichaVistoria);
+}
+else
+{
+imgSrc = defaultImg;
+}
+}
+
+@{
+string conteudoSfdt = Model.ViagemObj.Viagem.DescricaoViagemWord != null
+    ? System.Text.Encoding.UTF8.GetString(Model.ViagemObj.Viagem.DescricaoViagemWord)
+    : "";
+}
+
+@Html.AntiForgeryToken()
+
+@{
+ViewData["Title"] = "Viagens";
+ViewData["PageName"] = "viagens_upsert";
+ViewData["Heading"] = "";
+ViewData["Category1"] = "Cadastros";
+ViewData["PageIcon"] = "fad fa-route";
+
+ViewData["fieldsMotorista"] = new ComboBoxFieldSettings
+{
+    Text = "Nome",
+    Value = "MotoristaId"
+};
+
+ViewData["itemTemplate"] = @"
+    <div class='d-flex align-items-center'>
+        <img src='${Foto}' style='width:40px; height:40px; border-radius:50%; margin-right:10px;' />
+        <span>${Nome}</span>
+    </div>";
+
+ViewData["valueTemplate"] = @"
+    <div class='d-flex align-items-center'>
+        <img src='${Foto}' style='width:30px; height:30px; border-radius:50%; margin-right:10px;' />
+        <span>${Nome}</span>
+    </div>";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+}
+
+<script>
+    //============================== FUNÇÕES (JS) ===========================================
+
+    // Evita submissão de formulários ao pressionar Enter em certos elementos
+    function stopEnterSubmitting(e) {
+        try {
+            const evt = e || window.event;
+            if (!evt) return;
+            if ((evt.key && evt.key === 'Enter') || evt.keyCode === 13) {
+                const src = evt.target || evt.srcElement;
+                if (!src || src.tagName.toLowerCase() !== "div") {
+                    if (evt.preventDefault) evt.preventDefault();
+                    else evt.returnValue = false;
+                }
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "stopEnterSubmitting", error);
+        }
+    }
+
+    // Toolbar do RTE: injeta AntiForgery no upload de imagem
+    function toolbarClick(e) {
+        try {
+            if (e && e.item && e.item.id && e.item.id.indexOf("Image") >= 0) {
+                var up = document.getElementById('rte_upload');
+                if (up && up.ej2_instances && up.ej2_instances[0]) {
+                    up.ej2_instances[0].uploading = function (args) {
+                        const token =
+                            document.getElementsByName('__RequestVerificationToken')[0]?.value ||
+                            document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                        if (token) {
+                            args.currentRequest.setRequestHeader('XSRF-TOKEN', token);
+                        }
+                    };
+                }
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "toolbarClick", error);
+        }
+    }
+
+    // Templates para o ComboBox de Motoristas
+    function onCmbMotoristaCreated() {
+        try {
+            const combo = document.getElementById('cmbMotorista').ej2_instances[0];
+
+            combo.itemTemplate = function (data) {
+                let imgSrc = (data.Foto && data.Foto.startsWith('data:image'))
+                    ? data.Foto
+                    : '/images/barbudo.jpg';
+                return `
+                <div class="d-flex align-items-center">
+                    <img src="${imgSrc}" alt="Foto" style="height:40px; width:40px; border-radius:50%; margin-right:10px;" />
+                    <span>${data.Nome}</span>
+                </div>`;
+            };
+
+            combo.valueTemplate = function (data) {
+                if (!data) return '';
+                let imgSrc = (data.Foto && data.Foto.startsWith('data:image'))
+                    ? data.Foto
+                    : '/images/barbudo.jpg';
+                return `
+                <div class="d-flex align-items-center">
+                    <img src="${imgSrc}" alt="Foto" style="height:30px; width:30px; border-radius:50%; margin-right:10px;" />
+                    <span>${data.Nome}</span>
+                </div>`;
+            };
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "onCmbMotoristaCreated", error);
+        }
+    }
+
+    function lstFinalidade_Change() {
+        try {
+            try {
+                const finalidade = document.getElementById('ddtFinalidade').ej2_instances[0]?.value?.[0];
+                const lstEvento = document.getElementById("ddtEventos")?.ej2_instances?.[0];
+                const btnEvento = document.getElementById("btnEvento");
+
+                if (finalidade === 'Evento') {
+                    if (lstEvento) {
+                        lstEvento.enabled = true;
+                        lstEvento.dataBind();
+                    }
+                    if (btnEvento) {
+                        btnEvento.style.display = "block";
+                        // compat Bootstrap 5
+                        btnEvento.setAttribute('data-bs-toggle', 'modal');
+                        btnEvento.setAttribute('data-bs-target', '#modalEvento');
+                    }
+                    $(".esconde-diveventos").show();
+                } else {
+                    if (lstEvento) {
+                        lstEvento.enabled = false;
+                        lstEvento.dataBind();
+                    }
+                    if (btnEvento) btnEvento.style.display = "none";
+                    $(".esconde-diveventos").hide();
+                }
+            } catch (error) {
+                TratamentoErroComLinha("Viagem_050", "lstFinalidade_Change", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "lstFinalidade_Change", error);
+        }
+    }
+
+    // Desativa setor ao selecionar motorista
+    function MotoristaValueChange() {
+        try {
+            try {
+                const motoristaId = document.getElementById('cmbMotorista').ej2_instances[0]?.value;
+                if (!motoristaId) return;
+
+                const setorHost = document.getElementById('ddtSetor'); // CORRIGIDO (era cmbSetor)
+                if (setorHost?.ej2_instances?.length) {
+                    setorHost.ej2_instances[0].enabled = false;
+                    setorHost.ej2_instances[0].dataBind();
+                }
+            } catch (error) {
+                TratamentoErroComLinha("Viagem_050", "MotoristaValueChange", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "MotoristaValueChange", error);
+        }
+    }
+
+    // Gatilho ao trocar veículo
+    function VeiculoValueChange() {
+        try {
+            try {
+                const veiculoId = document.getElementById('cmbVeiculo').ej2_instances[0]?.value;
+                if (!veiculoId) return;
+                // Placeholder para lógica futura
+            } catch (error) {
+                TratamentoErroComLinha("Viagem_050", "VeiculoValueChange", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "VeiculoValueChange", error);
+        }
+    }
+
+    // Gatilho ao trocar requisitante (normal)
+    function RequisitanteValueChange() {
+        try {
+            try {
+                const requisitanteId = document.getElementById('cmbRequisitante').ej2_instances[0]?.value;
+                if (!requisitanteId) return;
+                // Placeholder para lógica futura
+            } catch (error) {
+                TratamentoErroComLinha("Viagem_050", "RequisitanteValueChange", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "RequisitanteValueChange", error);
+        }
+    }
+
+    // Gatilho ao trocar requisitante (evento)
+    function RequisitanteEventoValueChange() {
+        try {
+            try {
+                const requisitanteId = document.getElementById('lstRequisitanteEvento').ej2_instances[0]?.value;
+                if (!requisitanteId) return;
+                // Placeholder para lógica futura
+            } catch (error) {
+                TratamentoErroComLinha("Viagem_050", "RequisitanteEventoValueChange", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "RequisitanteEventoValueChange", error);
+        }
+    }
+
+    function onVeiculoComboCreated() {
+        try {
+            try {
+                var veiculoCombo = document.getElementById('cmbVeiculo').ej2_instances[0];
+
+                veiculoCombo.itemTemplate = function (data) {
+                    return '<div class="d-flex align-items-center">' +
+                        '<img src="' + (data.Imagem || '/Images/carro.jpg') + '" alt="Imagem" style="height:30px; width:30px; border-radius:5px; margin-right:10px;" />' +
+                        '<span>' + data.Descricao + '</span>' +
+                        '</div>';
+                };
+
+                veiculoCombo.valueTemplate = function (data) {
+                    if (!data) return '';
+                    return '<div class="d-flex align-items-center">' +
+                        '<img src="' + (data.Imagem || '/Images/carro.jpg') + '" alt="Imagem" style="height:30px; width:30px; border-radius:5px; margin-right:10px;" />' +
+                        '<span>' + data.Descricao + '</span>' +
+                        '</div>';
+                };
+            } catch (error) {
+                TratamentoErroComLinha("Viagem_050", "onVeiculoComboCreated", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "onVeiculoComboCreated", error);
+        }
+    }
+
+    function onMotoristaChange(args) {
+        try {
+            const motoristaId = args?.itemData?.MotoristaId;
+            if (!motoristaId) return;
+            fetch(`/api/Viagem/FotoMotorista?id=${motoristaId}`)
+                .then(resp => resp.json())
+                .then(data => {
+                    if (data.fotoBase64) {
+                        const img = document.getElementById("fotoMotorista");
+                        if (img) {
+                            img.src = data.fotoBase64;
+                            img.style.display = 'block';
+                        }
+                    }
+                });
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "onMotoristaChange", error);
+        }
+    }
+
+    function VisualizaImagem(input) {
+        try {
+            if (!input.files || !input.files[0]) return;
+            var file = input.files[0];
+            if (!file.type.startsWith("image/")) {
+                alert("Por favor escolha um arquivo de imagem.");
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById("imgViewer").src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "VisualizaImagem", error);
+        }
+    }
+
+	// Função para atualizar imagem no modal
+	function atualizarImagemModal()
+	{
+		const imgSrc = document.getElementById('imgViewerItem').src;
+		const modalImg = document.getElementById('imgZoomed');
+		if (modalImg)
+		{
+			modalImg.src = imgSrc;
+		}
+	}
+
+</script>
+<script>
+    // ---------------- Normalização e Similaridade ----------------
+    function normalize(str) {
+        try {
+            if (!str) return "";
+            return String(str)
+                .normalize("NFKC")
+                .replace(/[\u200B-\u200D\uFEFF]/g, "")
+                .replace(/\u00A0/g, " ")
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[\s\u00A0]+/g, " ")
+                .trim();
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "normalize", error);
+        }
+    }
+    function levenshteinRaw(a, b) {
+        try {
+            const n = a.length, m = b.length;
+            if (n === 0) return m;
+            if (m === 0) return n;
+            const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+            for (let i = 0; i <= n; i++) dp[i][0] = i;
+            for (let j = 0; j <= m; j++) dp[0][j] = j;
+            for (let i = 1; i <= n; i++) {
+                for (let j = 1; j <= m; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    dp[i][j] = Math.min(
+                        dp[i - 1][j] + 1,
+                        dp[i][j - 1] + 1,
+                        dp[i - 1][j - 1] + cost
+                    );
+                }
+            }
+            return dp[n][m];
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "levenshteinRaw", error);
+        }
+    }
+    function similarity(a, b) {
+        try {
+            const na = normalize(a), nb = normalize(b);
+            if (!na && !nb) return 1;
+            const dist = levenshteinRaw(na, nb);
+            const maxLen = Math.max(na.length, nb.length) || 1;
+            return 1 - dist / maxLen; // 0..1
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "similarity", error);
+        }
+    }
+
+    // ---------------- Helpers EJ2 ----------------
+    function getCombo(id) {
+        try {
+            const host = document.getElementById(id);
+            return host?.ej2_instances?.[0] ?? null;
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "getCombo", error);
+        }
+    }
+    function extractTexts(items, fields) {
+        try {
+            const textField = fields?.text;
+            if (!Array.isArray(items)) return [];
+            if (items.length && (typeof items[0] === "string" || typeof items[0] === "number")) {
+                return items.map(x => String(x));
+            }
+            return items.map(obj => {
+                if (!obj) return "";
+                if (textField && obj[textField] != null) return String(obj[textField]);
+                if (obj.text != null) return String(obj.text);
+                if (obj.value != null) return String(obj.value);
+                return "";
+            }).filter(x => x !== "");
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "extractTexts", error);
+        }
+    }
+    function getMasterTexts(combo) {
+        try {
+            if (Array.isArray(combo.__masterTexts) && combo.__masterTexts.length) return combo.__masterTexts;
+            let texts = extractTexts(combo.listData, combo.fields);
+            if (!texts.length) {
+                const ds = combo.dataSource;
+                texts = extractTexts(ds?.dataSource?.json ?? ds, combo.fields);
+            }
+            combo.__masterTexts = texts;
+            return texts;
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "getMasterTexts", error);
+        }
+    }
+    function wireMasterCache(combo) {
+        try {
+            if (!combo.__masterTexts || !combo.__masterTexts.length) {
+                combo.__masterTexts = getMasterTexts(combo);
+            }
+            const prev = combo.dataBound;
+            combo.dataBound = function () {
+                if (typeof prev === "function") prev.apply(combo, arguments);
+                if (!combo.__masterTexts || !combo.__masterTexts.length) {
+                    combo.__masterTexts = extractTexts(combo.listData, combo.fields);
+                }
+            };
+            combo.dataBind();
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "wireMasterCache", error);
+        }
+    }
+
+    // ---------------- Alert helpers ----------------
+    function alertInfo(titulo, texto, confirm = "OK") {
+        try {
+            if (typeof Alerta !== "undefined" && Alerta?.Info) Alerta.Info(titulo, texto, confirm);
+            else alert(`${titulo}\n\n${texto}`);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "alertInfo", error);
+        }
+    }
+    function alertWarn(titulo, texto, confirm = "OK") {
+        try {
+            if (typeof Alerta !== "undefined" && Alerta?.Warning) Alerta.Warning(titulo, texto, confirm);
+            else alert(`${titulo}\n\n${texto}`);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "alertWarn", error);
+        }
+    }
+
+    // ---------------- Validação contra a LISTA (usa master) ----------------
+    function validarDuplicadoNaLista(combo, opts) {
+        try {
+            const {
+                infoThreshold = 0.85,
+                warnThreshold = 0.92,
+                confirmarTexto = "OK",
+                incluirSugestao = true,
+                autoCanonizar = true
+            } = opts || {};
+
+            // Se usuário selecionou opção da lista, não alerta
+            if (Number.isInteger(combo.index) && combo.index >= 0) return;
+
+            const digitado = combo.inputElement ? combo.inputElement.value : combo.value;
+            const norm = normalize(digitado);
+            if (!norm) return;
+
+            const opcoes = getMasterTexts(combo);
+            if (!opcoes.length) return;
+
+            // Igualdade exata -> OK
+            const existeExato = opcoes.some(o => String(o) === digitado);
+            if (existeExato) return;
+
+            // Igualdade normalizada -> canoniza sem alertar
+            const mapaNormParaOriginal = new Map();
+            for (const o of opcoes) {
+                const n = normalize(o);
+                if (!mapaNormParaOriginal.has(n)) mapaNormParaOriginal.set(n, o);
+            }
+            if (mapaNormParaOriginal.has(norm)) {
+                const canonico = mapaNormParaOriginal.get(norm);
+                if (autoCanonizar && canonico && digitado !== canonico) {
+                    combo.inputElement.value = canonico;
+                    if ("text" in combo) combo.text = canonico;
+                    if ("value" in combo && (typeof combo.value === "string" || combo.value == null)) combo.value = canonico;
+                    combo.dataBind?.();
+                }
+                return;
+            }
+
+            // Fuzzy
+            let best = { item: null, score: 0 };
+            for (const opt of opcoes) {
+                const s = similarity(digitado, opt);
+                if (s > best.score) best = { item: opt, score: s };
+            }
+            if (!best.item) return;
+
+            const pct = (best.score * 100).toFixed(0);
+            const id = combo.element?.id || "";
+            const tituloBase = id === "cmbOrigem" ? "Origem" : id === "cmbDestino" ? "Destino" : "Item";
+            const sugestao = incluirSugestao ? `\nSugestão: “${best.item}” (similaridade ${pct}%).` : "";
+
+            if (best.score >= warnThreshold) {
+                alertWarn(`Provável duplicado • ${tituloBase}`, `É muito provável que já exista na lista.${sugestao}`, confirmarTexto);
+            } else if (best.score >= infoThreshold) {
+                alertInfo(`Semelhança alta • ${tituloBase}`, `Pode já existir algo parecido na lista.${sugestao}`, confirmarTexto);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "validarDuplicadoNaLista", error);
+        }
+    }
+
+    // ---------------- Validação CRUZADA (Origem x Destino) ----------------
+    function validarCruzado(origemCombo, destinoCombo, opts) {
+        try {
+            const { infoThreshold = 0.85, warnThreshold = 0.92, confirmarTexto = "OK" } = opts || {};
+
+            const origem = origemCombo?.inputElement ? origemCombo.inputElement.value : origemCombo?.value;
+            const destino = destinoCombo?.inputElement ? destinoCombo.inputElement.value : destinoCombo?.value;
+
+            const norigem = normalize(origem);
+            const ndestino = normalize(destino);
+            if (!norigem || !ndestino) return;
+
+            const score = norigem === ndestino ? 1 : similarity(norigem, ndestino);
+            const pct = (score * 100).toFixed(0);
+
+            if (score >= warnThreshold) {
+                alertWarn("Origem e destino muito parecidos", `Os campos parecem referir-se ao mesmo lugar (similaridade ${pct}%).`, confirmarTexto);
+            } else if (score >= infoThreshold) {
+                alertInfo("Origem e destino semelhantes", `Verifique se são realmente distintos (similaridade ${pct}%).`, confirmarTexto);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "validarCruzado", error);
+        }
+    }
+
+    // ---------------- Wire dos dois combos ----------------
+    (function boot() {
+        try {
+            function connect(id, peerId, opts) {
+                const c = getCombo(id);
+                const p = getCombo(peerId);
+                if (!c || !c.inputElement) return false;
+                wireMasterCache(c);
+                c.inputElement.addEventListener("blur", function () {
+                    validarDuplicadoNaLista(c, opts);
+                    if (p && p.inputElement) validarCruzado(id === "cmbOrigem" ? c : p, id === "cmbOrigem" ? p : c, opts);
+                });
+                return true;
+            }
+            function tryWire() {
+                const opts = { infoThreshold: 0.85, warnThreshold: 0.92, autoCanonizar: true };
+                const okO = connect("cmbOrigem", "cmbDestino", opts);
+                const okD = connect("cmbDestino", "cmbOrigem", opts);
+                return okO && okD;
+            }
+            if (!tryWire()) {
+                document.addEventListener("DOMContentLoaded", tryWire, { once: true });
+                window.addEventListener("load", () => setTimeout(tryWire, 0), { once: true });
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "boot", error);
+        }
+    })();
+
+    // Fallback opcional se Alerta não estiver carregado
+    window.Alerta = window.Alerta || {
+        Info: (t, x) => alert(`${t}\n\n${x}`),
+        Warning: (t, x) => alert(`${t}\n\n${x}`)
+    };
+
+    // ====== Modal de Zoom: carrega a imagem ampliada ======
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            var mz = document.getElementById('modalZoom');
+            if (mz) {
+                mz.addEventListener('show.bs.modal', function () {
+                    var src = document.getElementById('imgViewer')?.getAttribute('src') || '';
+                    var target = document.getElementById('imgZoomed');
+                    if (target) target.setAttribute('src', src);
+                });
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "modalZoom.DCL", error);
+        }
+    });
+</script>
+
+<style>
+    /* ======== Inputs e Layout ======== */
+    .form-control-xs {
+        height: calc(1em + .775rem + 10px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .btn-largura {
+        width: 100px;
+        height: 100px;
+    }
+
+    .esconde-diveventos {
+        display: none;
+    }
+
+    .bottom-space {
+        margin-bottom: 2rem;
+    }
+
+    .icon-space {
+        margin-right: 10px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    img[alt="Foto"]:not([src]) {
+        display: none;
+    }
+
+    .modal-divider {
+        height: 1px;
+        border: none;
+        background-color: #dee2e6;
+        margin: 0.5rem 0;
+    }
+
+    .label i {
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+
+    /* ======== Botões customizados ======== */
+    .btn-vinho {
+        background-color: #c82333 !important;
+        color: #fff !important;
+        border: 1px solid #bd2130 !important;
+        transition: background-color 0.2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+    }
+        .btn-vinho:hover,
+        .btn-vinho:focus,
+        .btn-vinho:active,
+        .btn-vinho:focus-visible {
+            background-color: #a71d2a !important;
+            border-color: #a71d2a !important;
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+    .custom-blue-btn {
+        background-color: #6c87a3 !important;
+        color: #fff !important;
+        border: 1px solid #5c748f !important;
+        transition: background-color 0.2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+        .custom-blue-btn:hover,
+        .custom-blue-btn:focus,
+        .custom-blue-btn:active,
+        .custom-blue-btn:focus-visible {
+            background-color: #5c748f !important;
+            color: #fff !important;
+            border-color: #5c748f !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+    /* Botão primário usado nos modais desta página */
+    .custom-primary-btn {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border: 1px solid #0b5ed7 !important;
+        transition: background-color .2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+    }
+        .custom-primary-btn:hover,
+        .custom-primary-btn:focus {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+        .custom-primary-btn .btn-inner i { font-size: 1rem; }
+
+    /* ======== Syncfusion ComboBox personalizado (motorista) ======== */
+    .cmbMotorista_popup .e-dropdownbase .e-list-item {
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        transition: background-color 0.3s;
+    }
+        .cmbMotorista_popup .e-dropdownbase .e-list-item img {
+            height: 45px;
+            width: 45px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: transform 0.3s ease;
+        }
+        .cmbMotorista_popup .e-dropdownbase .e-list-item:hover {
+            background-color: #f0f8ff;
+        }
+    #cmbMotorista_popup .e-dropdownbase .e-list-item:hover img {
+        transform: scale(1.2);
+    }
+    .cmbMotorista .e-input-group .e-input,
+    .cmbMotorista .e-control-wrapper .e-input {
+        display: flex;
+        align-items: center;
+    }
+        .cmbMotorista .e-input-group .e-input img,
+        .cmbMotorista .e-control-wrapper .e-input img {
+            height: 30px;
+            width: 30px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+            /* Balão laranja bonitão */
+    .e-tooltip-wrap,
+    .e-tooltip-wrap.custom-orange-tooltip,
+    .e-tooltip-wrap.tooltip-laranja {
+        background-color: orange !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        padding: 8px 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 0.95rem;
+        z-index: 99999 !important;
+    }
+        .e-tooltip-wrap .e-tip-content,
+        .e-tooltip-wrap.custom-orange-tooltip .e-tip-content,
+        .e-tooltip-wrap.tooltip-laranja .e-tip-content {
+            color: #fff !important;
+            font-weight: 500;
+            line-height: 1.4;
+            background-color: transparent !important;
+        }
+        .e-tooltip-wrap .e-tip-arrow,
+        .e-tooltip-wrap.custom-orange-tooltip .e-tip-arrow,
+        .e-tooltip-wrap.tooltip-laranja .e-tip-arrow {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            width: auto !important;
+            height: auto !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .e-tooltip-wrap .e-arrow-tip-inner,
+        .e-tooltip-wrap.custom-orange-tooltip .e-arrow-tip-inner,
+        .e-tooltip-wrap.tooltip-laranja .e-arrow-tip-inner {
+            background: orange !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .e-tooltip-wrap .e-tip-arrow svg,
+        .e-tooltip-wrap.custom-orange-tooltip .e-tip-arrow svg,
+        .e-tooltip-wrap.tooltip-laranja .e-tip-arrow svg {
+            display: none !important;
+        }
+        .e-tooltip-wrap .e-tip-arrow::before,
+        .e-tooltip-wrap .e-tip-arrow::after,
+        .e-tooltip-wrap .e-arrow-tip-inner::before,
+        .e-tooltip-wrap .e-arrow-tip-inner::after {
+            background: none !important;
+            border: none !important;
+            content: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+    /* ======== ZOOM – botão na imagem ======== */
+    .img-zoom-wrapper {
+        position: relative;
+        display: inline-block;
+        width: fit-content;
+        inline-size: fit-content;
+        width: -moz-fit-content;
+    }
+    .zoom-btn {
+        position: absolute;
+        left: 8px;
+        bottom: 8px;
+        width: 44px;
+        height: 44px;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        background: #ff7a00;
+        color: #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,.25);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, filter .12s ease;
+        z-index: 2;
+    }
+        .zoom-btn:hover {
+            transform: translateY(-1px);
+            background: #ff8f26;
+            box-shadow: 0 0 0 3px rgba(255,122,0,.25), 0 8px 18px rgba(0,0,0,.3);
+            filter: saturate(1.05);
+        }
+        .zoom-btn .fa-duotone {
+            --fa-primary-color: #ffffff;
+            --fa-secondary-color: rgba(255,255,255,.75);
+            --fa-secondary-opacity: 1;
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+
+    .modal-zoom {
+        max-width: 960px;
+    }
+    #modalZoom .modal-body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: .75rem;
+    }
+    #imgZoomed {
+        max-width: 920px;
+        width: 100%;
+        height: auto;
+        max-height: 120vh;
+        object-fit: contain;
+        cursor: zoom-out;
+    }
+    .modal-close-floating {
+        position: absolute;
+        top: .5rem;
+        right: .5rem;
+        z-index: 5;
+        filter: drop-shadow(0 1px 3px rgba(0,0,0,.35));
+    }
+
+    /* Validação sutil */
+    :root {
+        --ftx-invalid: #dc3545;
+        --ftx-glow: rgba(220,53,69,.18);
+        --ftx-glow-focus: rgba(220,53,69,.28);
+    }
+    input.is-invalid,
+    textarea.is-invalid {
+        border-color: var(--ftx-invalid) !important;
+        box-shadow: 0 0 0 .2rem var(--ftx-glow);
+        color: var(--ftx-invalid) !important;
+    }
+        input.is-invalid:focus,
+        textarea.is-invalid:focus {
+            box-shadow: 0 0 0 .28rem var(--ftx-glow-focus);
+        }
+    .e-input-group.is-invalid,
+    .e-float-input.is-invalid,
+    .e-control-wrapper.is-invalid {
+        box-shadow: 0 0 0 .2rem var(--ftx-glow);
+        border-radius: .25rem;
+    }
+        .e-input-group.is-invalid:focus-within,
+        .e-float-input.is-invalid:focus-within,
+        .e-control-wrapper.is-invalid:focus-within {
+            box-shadow: 0 0 0 .28rem var(--ftx-glow-focus);
+        }
+        .e-input-group.is-invalid .e-input,
+        .e-float-input.is-invalid input,
+        .e-control-wrapper.is-invalid input {
+            border-color: var(--ftx-invalid) !important;
+            color: var(--ftx-invalid) !important;
+        }
+        .e-float-input.is-invalid label.e-float-text,
+        .e-float-input.is-invalid .e-float-line {
+            color: var(--ftx-invalid) !important;
+            border-color: var(--ftx-invalid) !important;
+        }
+
+    .img-zoom-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .zoom-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .zoom-btn:hover {
+            background: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .zoom-btn i {
+            font-size: 18px;
+            color: #333;
+        }
+
+    #imgViewerItem {
+        display: block;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
+<!-- FORM PRINCIPAL (MVC) -->
+<form method="post" asp-action="Upsert" onkeypress="stopEnterSubmitting(event)" enctype="multipart/form-data">
+    <!-- Utiliza container-fluid para maior largura e alinhamento à esquerda -->
+    <div class="container-fluid" style="padding-left: 0; margin-left: 0;">
+        <div class="row">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel ftx-card-styled">
+                    <div class="panel-container show">
+                        
+                        <!-- HEADER DO CARD -->
+                        <div class="ftx-card-header">
+                            @if (Model.ViagemObj.Viagem.Status == "Realizada" || Model.ViagemObj.Viagem.Status == "Cancelada")
+                            {
+                                <h2 class="titulo-paginas">
+                                    <i class="fa-duotone fa-solid fa-suitcase-rolling"></i>
+                                    Viagem Realizada/Cancelada - Edição não permitida
+                                </h2>
+                            }
+                            else
+                            {
+                                <h2 class="titulo-paginas">
+                                    <i class="fa-duotone fa-solid fa-suitcase-rolling"></i>
+                                    @(Model.ViagemObj.Viagem.ViagemId != Guid.Empty ? "Atualizar" : "Criar") Viagem
+                                </h2>
+                            }
+                            <div class="ftx-card-actions">
+                                <a asp-page="./Index" class="btn btn-vinho" data-ftx-loading>
+                                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                                    Voltar
+                                </a>
+                            </div>
+                        </div>
+
+                        <div id="divPainel" class="panel-content">
+                            <input type="hidden" asp-for="@Model.ViagemObj.Viagem.ViagemId" id="txtViagemId" />
+
+                            <!-- Campo hidden para manter a imagem existente caso não haja novo upload -->
+                            @if (Model.ViagemObj?.Viagem?.FichaVistoria != null)
+                            {
+                            <input type="hidden"
+                                   asp-for="FichaVistoria"
+                                   value="@Convert.ToBase64String(Model.ViagemObj.Viagem.FichaVistoria)" />
+                            }
+
+                            <div class="p-3">
+                                <!-- Linha 1 -->
+                                <div class="row">
+                                    <div class="col-12 col-md-4 col-xl-2">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.NoFichaVistoria">
+                                                Nº Ficha Vistoria <i class="fa-solid fa-clipboard-list"></i>
+                                            </label>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.NoFichaVistoria"></span>
+                                            <input id="txtNoFichaVistoria" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.NoFichaVistoria" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2 col-xl-2">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.DataInicial">
+                                                Data Inicial <i class="fa-solid fa-calendar-day"></i>
+                                            </label>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.DataInicial"></span>
+                                            <input id="txtDataInicial" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.DataInicial" type="date" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2 col-xl-2">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.HoraInicio">
+                                                Hora de Início <i class="fa-solid fa-clock"></i>
+                                            </label>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.HoraInicio"></span>
+                                            <input id="txtHoraInicial" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.HoraInicio" type="time" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2 col-xl-2">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.DataFinal">
+                                                Data Final <i class="fa-duotone fa-calendar-check"></i>
+                                            </label>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.DataFinal"></span>
+                                            <input id="txtDataFinal" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.DataFinal" type="date" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2 col-xl-2">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.HoraFim">
+                                                Hora Fim <i class="fa-duotone fa-stopwatch"></i>
+                                            </label>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.HoraFim"></span>
+                                            <input id="txtHoraFinal" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.HoraFim" type="time" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-2 col-xl-2">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold">
+                                                Duração (hs) <i class="fa-duotone fa-hourglass-half"></i>
+                                            </label>
+                                            <input id="txtDuracao" class="form-control form-control-xs" disabled data-ejtip="Se a <span style='color: #A0522D; font-weight: bold; text-decoration: underline;'>Duração</span> estiver alta, revise o horário e datas" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Linha 2 -->
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.Finalidade"></label>
+                                            <i class="fa-duotone fa-solid fa-rectangle-history-circle-user" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.Finalidade"></span>
+                                            <ejs-dropdowntree id="ddtFinalidade" placeholder="Escolha a Finalidade..."
+                                                              showCheckBox="false" allowMultiSelection="false"
+                                                              allowFiltering="true" filterType="Contains"
+                                                              ejs-for="@Model.ViagemObj.Viagem.Finalidade" popupHeight="200px"
+                                                              sortOrder="Ascending" showClearButton="true" change="lstFinalidade_Change">
+                                                <e-dropdowntree-fields dataSource="@ViewData["dataFinalidade"]" value="FinalidadeId" text="Descricao"></e-dropdowntree-fields>
+                                            </ejs-dropdowntree>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <div class="form-group">
+                                            <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.Origem"></label>
+                                            <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.Origem"></span>
+                                            <ejs-combobox id="cmbOrigem" ejs-for="ViagemObj.Viagem.Origem"
+                                                          dataSource="@ViewData["ListaOrigem"]"
+                                                          placeholder="Selecione ou digite a Origem"
+                                                          allowFiltering="true" filterType="Contains"
+                                                          allowCustom="true" popupHeight="220px">
+                                            </ejs-combobox>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.Destino"></label>
+                                        <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.Destino"></span>
+                                        <ejs-combobox id="cmbDestino" ejs-for="ViagemObj.Viagem.Destino"
+                                                      dataSource="@ViewData["ListaDestino"]" placeholder="Selecione ou digite o destino"
+                                                      allowFiltering="true" filterType="Contains" allowCustom="true" popupHeight="220px">
+                                        </ejs-combobox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="divEvento" class="row esconde-diveventos">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Nome do Evento</label>
+                                        <div class="d-flex align-items-end">
+                                            <ejs-dropdowntree id="ddtEventos" placeholder="Selecione um Evento..."
+                                                              showCheckBox="false" allowMultiSelection="false"
+                                                              allowFiltering="true" filterType="Contains"
+                                                              filterBarPlaceholder="Procurar..."
+                                                              ejs-for="@Model.ViagemObj.Viagem.EventoId" popupHeight="200px"
+                                                              sortOrder="Ascending" class="flex-grow-1">
+                                                <e-dropdowntree-fields dataSource="@ViewData["dataEvento"]" value="EventoId" text="Nome"></e-dropdowntree-fields>
+                                            </ejs-dropdowntree>
+                                            <a class="btn btn-sm fundo-chocolate text-white ms-2"
+                                               id="btnEvento"
+                                               style="display: none;"
+                                               aria-label="Adicionar Evento!"
+                                               role="tooltip"
+                                               data-microtip-position="top-right"
+                                               title="Adicionar Evento"
+                                               data-bs-toggle="modal" data-bs-target="#modalEvento">
+                                                <i class="fal fa-calendar-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Linha 3: Motorista, Veículo e Quilometragem -->
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <label class="label font-weight-bold">Motorista</label>
+                                    <i class="fa-duotone fa-solid fa-person-biking" style="font-size: 1.25em; cursor: pointer;"></i>
+
+                                    <ejs-combobox id="cmbMotorista"
+                                                  placeholder="Selecione um Motorista"
+                                                  ejs-for="@Model.ViagemObj.Viagem.MotoristaId"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  popupHeight="200px"
+                                                  width="100%"
+                                                  showClearButton="true"
+                                                  dataSource="@ViewData["dataMotorista"]"
+                                                  created="onCmbMotoristaCreated"
+                                                  change="MotoristaValueChange">
+                                        <e-combobox-fields text="Nome" value="MotoristaId"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="label font-weight-bold">Veículo</label>
+                                    <i class="fa-duotone fa-solid fa-truck-bolt" style="font-size: 1.25em; cursor: pointer;"></i>
+                                    <div class="d-flex align-items-center">
+                                        <ejs-combobox id="cmbVeiculo" placeholder="Selecione um Veículo"
+                                                      allowFiltering="true" filterType="Contains"
+                                                      dataSource="@ViewData["dataVeiculo"]" popupHeight="200px"
+                                                      width="100%" showClearButton="true"
+                                                      ejs-for="@Model.ViagemObj.Viagem.VeiculoId" change="VeiculoValueChange">
+                                            <e-combobox-fields text="Descricao" value="VeiculoId"></e-combobox-fields>
+                                        </ejs-combobox>
+                                        @* Botão de Ocorrências do Veículo *@
+                                        <button type="button"
+                                                id="btnOcorrenciasVeiculo"
+                                                class="btn btn-ocorrencias-viagem text-white btn-icon-28 disabled ms-2"
+                                                disabled
+                                                title="Nenhuma ocorrência em aberto"
+                                                style="position: relative; flex-shrink: 0;">
+                                            <i class="fa-duotone fa-car-burst"></i>
+                                            <span id="badgeOcorrenciasVeiculo"
+                                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                                  style="display: none; font-size: 0.65rem;">
+                                                0
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.KmAtual"></label>
+                                        <i class="fa-duotone fa-solid fa-gauge" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.KmAtual"></span>
+                                        <input readonly id="txtKmAtual" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.KmAtual" />
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.KmInicial"></label>
+                                        <i class="fa-duotone fa-solid fa-gauge-max" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.KmInicial"></span>
+                                        <input id="txtKmInicial" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.KmInicial" type="number" />
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.KmFinal"></label>
+                                        <i class="fa-duotone fa-solid fa-gauge-min" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.KmFinal"></span>
+                                        <input id="txtKmFinal" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.KmFinal" type="number" />
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Km Percorrido</label>
+                                        <i class="fa-duotone fa-solid fa-road" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <input id="txtKmPercorrido"
+                                               class="form-control form-control-xs"
+                                               type="number"
+                                               min="0"
+                                               max="100"
+                                               disabled
+                                               data-ejtip="Se a <span style='color: #A0522D; font-weight: bold; text-decoration: underline;'>Quilometragem</span> estiver alta, revise os Km Inicial e Final" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Linha 4: Combustível Inicial e Combustível Final -->
+                            <div class="row">
+                                <div class="col-6 col-md-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Combustível Inicial</label>
+                                        <i class="fa-duotone fa-gauge-circle-plus mr-2" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.CombustivelInicial"></span>
+                                        <ejs-dropdowntree id="ddtCombustivelInicial" popupHeight="200px" showClearButton="true"
+                                                          ejs-for="@Model.ViagemObj.Viagem.CombustivelInicial">
+                                            <e-dropdowntree-fields dataSource="@ViewData["dataCombustivel"]" value="Nivel" text="Descricao" imageURL="Imagem"></e-dropdowntree-fields>
+                                        </ejs-dropdowntree>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Combustível Final</label>
+                                        <i class="fa-duotone fa-solid fa-gauge-circle-minus" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.CombustivelFinal"></span>
+                                        <ejs-dropdowntree id="ddtCombustivelFinal" popupHeight="200px" showClearButton="true"
+                                                          ejs-for="@Model.ViagemObj.Viagem.CombustivelFinal">
+                                            <e-dropdowntree-fields dataSource="@ViewData["dataCombustivel"]" value="Nivel" text="Descricao" imageURL="Imagem"></e-dropdowntree-fields>
+                                        </ejs-dropdowntree>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Linha 5: Requisitante, Botões e Setor -->
+                            <div class="row">
+                                <div class="col-12 col-md-5">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">
+                                            <i class="fa-duotone fa-solid fa-person-simple" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            Requisitante
+                                        </label>
+                                        <div style="display: flex; gap: 6px; align-items: center;">
+                                            <ejs-combobox id="cmbRequisitante" placeholder="Selecione um Requisitante..."
+                                                          allowFiltering="true" filterType="Contains"
+                                                          dataSource="@ViewData["dataRequisitante"]" popupHeight="200px"
+                                                          width="100%" showClearButton="true" change="RequisitanteValueChange"
+                                                          ejs-for="@Model.ViagemObj.Viagem.RequisitanteId">
+                                                <e-combobox-fields text="Requisitante" value="RequisitanteId"></e-combobox-fields>
+                                            </ejs-combobox>
+                                            <a class="btn btn-sm fundo-chocolate text-white btn-nfs"
+                                               id="btnRequisitante"
+                                               style="cursor: pointer;"
+                                               data-bs-toggle="modal" data-bs-target="#modalRequisitante"
+                                               aria-label="Adicionar Requisitante">
+                                                <i class="fal fa-user-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <label class="label font-weight-bold" asp-for="ViagemObj.Viagem.RamalRequisitante">
+                                        <i class="fa-duotone fa-phone-office" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        Ramal
+                                    </label>
+                                    <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.RamalRequisitante"></span>
+                                    <input id="txtRamalRequisitante" class="form-control form-control-xs" asp-for="ViagemObj.Viagem.RamalRequisitante" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">
+                                            <i class="fa-duotone fa-solid fa-building-user" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            Setor Solicitante
+                                        </label>
+                                        <div class="d-flex align-items-end" style="gap: 6px;">
+                                            <ejs-dropdowntree id="ddtSetor" placeholder="Selecione um Setor" enabled="false"
+                                                              sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false"
+                                                              allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar..."
+                                                              ejs-for="@Model.ViagemObj.Viagem.SetorSolicitanteId">
+                                                <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]"
+                                                                       value="SetorSolicitanteId" text="Nome"
+                                                                       parentValue="SetorPaiId" hasChildren="HasChild"></e-dropdowntree-fields>
+                                            </ejs-dropdowntree>
+                                            <a hidden
+                                               class="btn btn-verde btn-nfs btn-sm text-white"
+                                               id="btnSetor"
+                                               data-bs-toggle="modal" data-bs-target="#modalSetor"
+                                               aria-label="Adicionar Setor!"
+                                               role="tooltip"
+                                               title="Adicionar Setor">
+                                                <i class="fa-light fa-house-medical"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Linha 6: Descrição da Viagem -->
+                            <div class="row">
+                                <div class="col-md-12 col-xl-10 control-section">
+                                    <div class="control-wrapper">
+                                        <div>
+                                            <label class="label font-weight-bold">Descrição da Viagem (passageiros / carga)</label>
+                                            <i class="fa-duotone fa-solid fa-typewriter" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <input type="hidden" id="DescricaoViagemWordBase64" name="DescricaoViagemWordBase64" />
+                                            <ejs-richtexteditor ejs-for="@Model.ViagemObj.Viagem.Descricao" id="rte"
+                                                                toolbarClick="toolbarClick" locale="pt-BR" height="500px">
+                                                <e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensViagens/"></e-richtexteditor-insertimagesettings>
+                                            </ejs-richtexteditor>
+                                            <div id="errorMessage">
+                                                <span asp-validation-for="@Model.ViagemObj.Viagem.Descricao"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+
+                            <!-- User Labels -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        @* Agendado por *@
+                                        @if (!string.IsNullOrEmpty(Model.ViagemObj.NomeUsuarioAgendamento))
+                                        {
+                                        <label id="lblUsuarioAgendamento" class="font-weight-light d-block text-muted">
+                                            <i class="fa-duotone fa-solid fa-user-clock"></i>
+                                            Agendado por: @Model.ViagemObj.NomeUsuarioAgendamento
+                                        </label>
+                                        }
+                                        @* Criado por *@
+                                        @if (!string.IsNullOrEmpty(Model.ViagemObj.NomeUsuarioCriacao))
+                                        {
+                                        <label id="lblUsuarioCriacao" class="font-weight-light d-block text-muted">
+                                            <i class="fa-duotone fa-solid fa-user-plus"></i>
+                                            Criado por: @Model.ViagemObj.NomeUsuarioCriacao
+                                        </label>
+                                        }
+                                        @* Finalizado por *@
+                                        @if (!string.IsNullOrEmpty(Model.ViagemObj.NomeUsuarioFinalizacao))
+                                        {
+                                        <label id="lblUsuarioFinalizacao" class="font-weight-light d-block text-muted">
+                                            <i class="fa-duotone fa-solid fa-user-check"></i>
+                                            Finalizado por: @Model.ViagemObj.NomeUsuarioFinalizacao
+                                        </label>
+                                        }
+                                        @* Cancelado por *@
+                                        @if (!string.IsNullOrEmpty(Model.ViagemObj.NomeUsuarioCancelamento))
+                                        {
+                                        <label id="lblUsuarioCancelamento" class="font-weight-light d-block text-muted">
+                                            <i class="fa-duotone fa-regular fa-trash-can-xmark"></i>
+                                            Cancelado por: @Model.ViagemObj.NomeUsuarioCancelamento
+                                        </label>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <!-- Linha 7: Botão de Submit -->
+                            <div class="form-group row">
+                                <div class="col-12">
+                                    <div class="row justify-content-start">
+                                        <!-- Botão visível: Cria/Edita Viagem -->
+                                        <div id="divSubmit" class="col-12 col-md-4 col-lg-3 pb-2">
+                                            @if (Model.ViagemObj.Viagem.ViagemId != Guid.Empty)
+                                            {
+                                            <button id="btnSubmit"
+                                                    type="submit"
+                                                    asp-page-handler="Submit"
+                                                    class="btn btn-azul w-100">
+                                                <span class="d-flex justify-content-center align-items-center">
+                                                    <i class="fa-sharp-duotone fa-solid fa-calendar-lines-pen icon-space icon-pulse"></i>
+                                                    <span>Salvar Alterações</span>
+                                                </span>
+                                            </button>
+                                            }
+                                            else
+                                            {
+                                            <button id="btnSubmit"
+                                                    type="submit"
+                                                    value="Submit"
+                                                    asp-page-handler="Submit"
+                                                    class="btn btn-azul w-100">
+                                                <span class="d-flex justify-content-center align-items-center">
+                                                    <i class="fa-sharp-duotone fa-solid fa-calendar-lines-pen icon-space icon-pulse"></i>
+                                                    <span>Criar Viagem</span>
+                                                </span>
+                                            </button>
+                                            }
+                                        </div>
+
+                                        <!-- Botão oculto para submit via JavaScript -->
+                                        <div class="col-12" hidden>
+                                            @if (Model.ViagemObj.Viagem.ViagemId != Guid.Empty)
+                                            {
+                                            <button id="btnEscondido"
+                                                    type="button"
+                                                    data-handler="Edit"
+                                                    data-id="@Model.ViagemObj.Viagem.ViagemId"
+                                                    class="btn btn-azul form-control">
+                                                Atualizar
+                                            </button>
+                                            }
+                                            else
+                                            {
+                                            <button id="btnEscondido"
+                                                    type="button"
+                                                    data-handler="Submit"
+                                                    class="btn btn-azul form-control">
+                                                Criar
+                                            </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- Fim de div.panel-content -->
+                    </div><!-- Fim de div.panel-container show -->
+                </div><!-- Fim de div#panel-1 -->
+            </div><!-- Fim de col-xl-12 -->
+        </div><!-- Fim de row -->
+    </div><!-- Fim de container-fluid -->
+</form>
+<!-- FIM DO FORM PRINCIPAL -->
+<!-- INÍCIO: FORM DEDICADO À FICHA DE VISTORIA (RAZOR PAGES HANDLER) -->
+<form method="post" asp-page-handler="InsereFicha" enctype="multipart/form-data">
+    <div class="container-fluid" style="padding-left: 0; margin-left: 0;">
+        <div class="row bottom-space" style="margin-top: 2rem;">
+
+            <!-- coluna do input -->
+            <div class="col-md-6 col-lg-5">
+                <label class="d-block label font-weight-bold">Ficha de Vistoria</label>
+                <input asp-for="FotoUpload"
+                       type="file"
+                       id="txtFile"
+                       class="form-control mb-3"
+                       accept="image/*"
+                       onchange="VisualizaImagem(this)" />
+
+                <!-- Campo hidden para o Base64 da nova imagem -->
+                <input type="hidden" id="hiddenFoto" name="FotoBase64" value="" />
+
+                <!-- Campo hidden para preservar imagem existente (caso não haja novo upload) -->
+                @if (Model.ViagemObj?.Viagem?.FichaVistoria != null && Model.ViagemObj.Viagem.FichaVistoria.Length > 0)
+                {
+                <input type="hidden"
+                       id="hiddenFichaExistente"
+                       name="FichaVistoriaExistente"
+                       value="@Convert.ToBase64String(Model.ViagemObj.Viagem.FichaVistoria)" />
+                }
+            </div>
+
+            <!-- coluna do preview + botão -->
+            <div class="col-md-6 col-lg-7 d-flex flex-column align-items-start">
+                <div class="img-zoom-wrapper">
+                    @{
+                    string imageSrc = "/images/FichaAmarelaNova.jpg"; // Imagem padrío/fallback
+                    if (Model.ViagemObj?.Viagem?.FichaVistoria != null && Model.ViagemObj.Viagem.FichaVistoria.Length > 0)
+                    {
+                    imageSrc = $"data:image/jpeg;base64,{Convert.ToBase64String(Model.ViagemObj.Viagem.FichaVistoria)}";
+                    }
+                    }
+                    <img id="imgViewerItem"
+                         src="@imageSrc"
+                         alt="Ficha de Vistoria"
+                         style="max-width: 500px; max-height: 500px; border: 1px solid #ddd; margin-top: .5rem; object-fit: contain;"
+                         class="img-thumbnail" />
+                    <button type="button"
+                            class="zoom-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalZoom"
+                            aria-label="Ampliar imagem"
+                            onclick="atualizarImagemModal()">
+						<i class="fa-solid fa-magnifying-glass-plus" style="font-size: 20px; color: black;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal para zoom da imagem -->
+<div class="modal fade" id="modalZoom" tabindex="-1" aria-labelledby="modalZoomLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h5 class="modal-title" id="modalZoomLabel">Ficha de Vistoria</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="imgZoomed"
+                     src="/images/FichaAmarelaNova.jpg"
+                     alt="Ficha de Vistoria Ampliada"
+                     style="max-width: 100%; height: auto;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Inserir Evento -->
+<div class="modal fade" id="modalEvento" data-backdrop="false" data-bs-backdrop="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title">
+                    <i class="fa-duotone fa-solid fa-users"></i>
+                    Inserir um novo Evento
+                </h4>
+            </div>
+            <div class="modal-body table-bordered">
+                <form id="frmEvento">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Nome do Evento</label>
+                                <input id="txtNomeDoEvento" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Descrição do Evento</label>
+                                <input id="txtDescricaoEvento" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Data Inicial</label>
+                                <input id="txtDataInicialEvento" class="form-control form-control-xs" type="date" />
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Data Final</label>
+                                <input id="txtDataFinalEvento" class="form-control form-control-xs" type="date" />
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Quantidade de Pessoas</label>
+                                <input id="txtQtdPessoas" class="form-control form-control-xs" type="number" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-5 form-control-xs" style="margin: 10px; width: 200px;">
+                            <label class="label font-weight-bold">Requisitante do Evento</label>
+                            <ejs-dropdowntree id="lstRequisitanteEvento" placeholder="Selecione um Requisitante"
+                                              showCheckBox="false" allowMultiSelection="false" allowFiltering="true"
+                                              filterType="Contains" filterBarPlaceholder="Procurar..."
+                                              popupHeight="200px" change="RequisitanteEventoValueChange">
+                                <e-dropdowntree-fields dataSource="@ViewData["dataRequisitante"]"
+                                                       value="RequisitanteId" text="Requisitante">
+                                </e-dropdowntree-fields>
+                            </ejs-dropdowntree>
+                        </div>
+                        <div class="col-5 form-control-xs" style="margin: 10px; width: 200px;">
+                            <label class="label font-weight-bold">Setor do Requisitante</label>
+                            <ejs-dropdowntree id="ddtSetorRequisitanteEvento" placeholder="Selecione um Setor"
+                                              sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false"
+                                              allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar...">
+                                <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]"
+                                                       value="SetorSolicitanteId" text="Nome"
+                                                       parentValue="SetorPaiId" hasChildren="HasChild">
+                                </e-dropdowntree-fields>
+                            </ejs-dropdowntree>
+                        </div>
+                    </div>
+                    <br /><br /><br />
+                    <div class="modal-footer justify-content-between">
+                        <button id="btnInserirEvento"
+                                type="submit"
+                                value="SUBMIT"
+                                class="btn custom-primary-btn">
+                            <span class="btn-inner">
+                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                <span>Inserir Evento</span>
+                            </span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-vinho ml-auto ms-auto"
+                                data-bs-dismiss="modal" data-bs-dismiss="modal" aria-label="Fechar">
+                            <span class="btn-inner">
+                                <i class="fa-regular fa-circle-xmark icon-spin" aria-hidden="true"></i>
+                                <span>Fechar</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal footer -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Inserir Requisitante -->
+<div class="modal fade" id="modalRequisitante">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <!-- Cabeçalho -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title">
+                    <i class="fa-duotone fa-user-plus"></i>
+                    Inserir um novo Requisitante
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-divider"></div>
+
+            <!-- Corpo -->
+            <div class="modal-body">
+                <form id="frmRequisitante">
+                    <div class="form-row mb-3">
+                        <div class="col-md-2">
+                            <label for="txtPonto" class="font-weight-bold">Ponto</label>
+                            <input id="txtPonto" class="form-control" />
+                        </div>
+                        <div class="col-md-8">
+                            <label for="txtNome" class="font-weight-bold">Nome do Requisitante</label>
+                            <input id="txtNome" class="form-control" />
+                        </div>
+                        <div class="col-md-2">
+                            <label for="txtRamal" class="font-weight-bold">Ramal</label>
+                            <input id="txtRamal" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="form-row mb-3">
+                        <div class="col-md-8">
+                            <label for="txtEmail" class="font-weight-bold">Email</label>
+                            <input id="txtEmail" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="form-row mb-4">
+                        <div class="col-md-6">
+                            <label for="ddtSetorRequisitante" class="font-weight-bold">Setor do Requisitante</label>
+                            <ejs-dropdowntree id="ddtSetorRequisitante" placeholder="Selecione um Setor"
+                                              sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false"
+                                              allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar...">
+                                <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]"
+                                                       value="SetorSolicitanteId" text="Nome"
+                                                       parentValue="SetorPaiId" hasChildren="HasChild">
+                                </e-dropdowntree-fields>
+                            </ejs-dropdowntree>
+                        </div>
+                    </div>
+
+                    <div class="modal-divider"></div>
+
+                    <div class="modal-footer justify-content-between">
+                        <!-- Corrigido o texto do botão -->
+                        <button id="btnInserirRequisitante"
+                                class="btn btn-azul"
+                                type="submit"
+                                value="SUBMIT">
+                            <span class="btn-inner">
+                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                <span>Inserir Requisitante</span>
+                            </span>
+                        </button>
+
+                        <button type="button"
+                                class="btn fundo-vermelho"
+                                data-bs-dismiss="modal" data-bs-dismiss="modal" aria-label="Fechar modal">
+                            <span class="btn-inner">
+                                <i class="fa-regular fa-circle-xmark icon-spin" aria-hidden="true"></i>
+                                <span>Fechar</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Inserir Setor -->
+<div class="modal fade" id="modalSetor">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <!-- Cabeçalho -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title">Inserir um novo Setor Solicitante</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-divider"></div>
+
+            <!-- Corpo -->
+            <div class="modal-body">
+                <form id="frmSetor">
+                    <div class="form-row mb-3">
+                        <div class="col-md-3">
+                            <label for="txtSigla" class="font-weight-bold">Sigla</label>
+                            <input id="txtSigla" class="form-control" placeholder="Ex: TI, RH" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="txtNomeSetor" class="font-weight-bold">Nome do Setor</label>
+                            <input id="txtNomeSetor" class="form-control" placeholder="Insira o nome completo do setor" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtRamalSetor" class="font-weight-bold">Ramal</label>
+                            <input id="txtRamalSetor" class="form-control" placeholder="Ex: 1234" type="number" />
+                        </div>
+                    </div>
+
+                    <div class="form-row mb-4">
+                        <div class="col-md-6">
+                            <label for="ddtSetorPai" class="font-weight-bold">Setor Pai (se houver)</label>
+                            <ejs-dropdowntree id="ddtSetorPai" placeholder="Selecione um Setor"
+                                              sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false"
+                                              allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar...">
+                                <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]"
+                                                       value="SetorSolicitanteId" text="Nome"
+                                                       parentValue="SetorPaiId" hasChildren="HasChild">
+                                </e-dropdowntree-fields>
+                            </ejs-dropdowntree>
+                        </div>
+                    </div>
+
+                    <div class="modal-divider"></div>
+
+                    <div class="modal-footer justify-content-between">
+                        <button id="btnInserirSetor"
+                                type="submit"
+                                value="SUBMIT"
+                                class="btn custom-primary-btn">
+                            <span class="btn-inner">
+                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                <span>Inserir Setor</span>
+                            </span>
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-vinho ml-auto ms-auto"
+                                data-bs-dismiss="modal" data-bs-dismiss="modal" aria-label="Fechar">
+                            <span class="btn-inner">
+                                <i class="fa-regular fa-circle-xmark icon-spin" aria-hidden="true"></i>
+                                <span>Fechar</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast_container"></div>
+
+<div id="syncfusion-toast"></div>
+
+@* ===============================================================================
+   MODAL OCORRÊNCIAS DO VEÍCULO (UPSERT)
+   =============================================================================== *@
+<div class="modal fade" id="modalOcorrenciasVeiculoUpsert" tabindex="-1" aria-labelledby="modalOcorrenciasVeiculoUpsertLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h4 class="modal-title d-flex align-items-center gap-2" id="modalOcorrenciasVeiculoUpsertLabel">
+                    <i class="fa-duotone fa-car-burst" aria-hidden="true"></i>
+                    <span>Ocorrências em Aberto do Veículo</span>
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tabela de Ocorrências -->
+                <div class="table-responsive">
+                    <table id="tblOcorrenciasVeiculoUpsert" class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">#</th>
+                                <th style="width: 35%;">Resumo</th>
+                                <th style="width: 35%;">Descrição</th>
+                                <th class="text-center" style="width: 100px;">Data</th>
+                                <th class="text-center" style="width: 120px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ===============================================================================
+   MODAL IMAGEM DA OCORRÊNCIA (UPSERT)
+   =============================================================================== *@
+<div class="modal fade" id="modalImagemOcorrenciaUpsert" tabindex="-1" aria-labelledby="modalImagemOcorrenciaUpsertLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h5 class="modal-title d-flex align-items-center gap-2" id="modalImagemOcorrenciaUpsertLabel">
+                    <i class="fa-duotone fa-image" aria-hidden="true"></i>
+                    <span>Imagem da Ocorrência</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body text-center p-3">
+                <img id="imgOcorrenciaViewerUpsert"
+                     class="img-fluid rounded shadow"
+                     style="max-height: 500px; display: none;"
+                     alt="Imagem da Ocorrência" />
+                <div id="noImageOcorrenciaUpsert" class="p-4 bg-light rounded" style="display: none;">
+                    <i class="fa fa-image fa-4x text-muted mb-3"></i>
+                    <p class="text-muted">Nenhuma imagem disponível</p>
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-end">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*=========================================================================
+   MODAL SOLUÇÃO DA OCORRÊNCIA (PARA BAIXA) - UPSERT
+   =========================================================================*@
+<div class="modal fade" id="modalSolucaoOcorrenciaUpsert" tabindex="-1" aria-labelledby="modalSolucaoOcorrenciaUpsertLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-verde">
+                <h5 class="modal-title d-flex align-items-center gap-2" id="modalSolucaoOcorrenciaUpsertLabel">
+                    <i class="fa-duotone fa-circle-check" aria-hidden="true"></i>
+                    <span>Informar Solução da Ocorrência</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="hiddenOcorrenciaIdSolucaoUpsert" />
+                <div class="form-group">
+                    <label class="form-label fw-bold">
+                        <i class="fa-duotone fa-message-lines me-1"></i>
+                        Solução aplicada (opcional)
+                    </label>
+                    <textarea id="txtSolucaoOcorrenciaUpsert" class="form-control" rows="4" 
+                              placeholder="Descreva a solução aplicada para resolver esta ocorrência..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i> Cancelar
+                </button>
+                <button type="button" id="btnConfirmarSolucaoUpsert" class="btn btn-verde">
+                    <i class="fa-duotone fa-circle-check me-1"></i> Confirmar Baixa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+
+	<script>
+
+		// Passando Parâmetros pro Javascript
+		const ViagemId = "@(Model.ViagemObj.Viagem?.ViagemId.ToString() ?? "")";
+		window.viagemId = ViagemId;
+
+	</script>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/cadastros/ViagemUpsert.js" asp-append-version="true"></script>
+
+}
+

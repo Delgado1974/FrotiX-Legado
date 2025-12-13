@@ -1,0 +1,834 @@
+@page
+@model FrotiX.Models.ContratoViewModel
+
+@{
+    ViewData["Title"] = "Itens dos Contratos";
+    ViewData["PageName"] = "itenscontrato";
+    ViewData["Heading"] = "<i class='fad fa-sitemap'></i> Cadastros: <span class='fw-300'>Itens dos Contratos</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fal fa-sitemap";
+}
+
+@section HeadBlock {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" />
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+
+    .label {
+        color: white;
+    }
+
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .tabs {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        font-weight: 300;
+    }
+</style>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+                <div class="row panel-content float-left">
+                    <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+                        <h2 class="text-primary">
+                            Escolha um Contrato para visualizar seus Itens:
+                        </h2>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group row">
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Contratos com Status...</label>
+                                    <select id="status" class="form-control form-control-sm">
+                                        <option value="1">Ativo</option>
+                                        <option value="0">Inativo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="label font-weight-bold">Contratos</label>
+                                <select id="ListaContratos" name="ListaContratos" class="form-control form-control-sm">
+                                    <option value="">-- Selecione um Contrato --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br /><br /><br /><br /><br /><br /><br />
+
+                <div class="row">
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <ul class="nav nav-tabs tabs" role="tablist">
+                                <li class="nav-item" id="tabMotoristas">
+                                    <a class="nav-link active" data-toggle="tab" href="#tab_borders_icons-1" role="tab">
+                                        <i class="fad fa-user-tie mr-1" id="navMotoristas"></i> Motoristas
+                                    </a>
+                                </li>
+                                <li class="nav-item" id="tabOperadores">
+                                    <a class="nav-link" data-toggle="tab" href="#tab_borders_icons-2" role="tab">
+                                        <i class="fad fa-person-carry" id="navOperadores"></i> Operadores
+                                    </a>
+                                </li>
+                                <li class="nav-item" id="tabLavadores">
+                                    <a class="nav-link" data-toggle="tab" href="#tab_borders_icons-3" role="tab">
+                                        <i class="fad fa-car-wash mr-1" id="navLavadores"></i> Lavadores
+                                    </a>
+                                </li>
+                                <li class="nav-item" id="tabVeiculos">
+                                    <a class="nav-link" data-toggle="tab" href="#tab_borders_icons-4" role="tab">
+                                        <i class="fad fa-car-bus mr-1" id="navVeiculos"></i> Veículos
+                                    </a>
+                                </li>
+                                <li class="nav-item" id="tabNotas">
+                                    <a class="nav-link" data-toggle="tab" href="#tab_borders_icons-5" role="tab">
+                                        <i class="fad fa-file-invoice-dollar mr-1" id="navNotas"></i> Notas Fiscais
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content p-3">
+                                <div class="tab-pane fade show active" id="tab_borders_icons-1" role="tabpanel">
+                                    <table id="tblMotorista" class="table table-bordered table-striped" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Ponto</th>
+                                                <th>CNH</th>
+                                                <th>Categoria</th>
+                                                <th>Celular</th>
+                                                <th>Unidade</th>
+                                                <th>Status</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="tab-pane fade" id="tab_borders_icons-2" role="tabpanel">
+                                    <table id="tblOperador" class="table table-bordered table-striped" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Ponto</th>
+                                                <th>Celular</th>
+                                                <th>Status</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="tab-pane fade" id="tab_borders_icons-3" role="tabpanel">
+                                    <table id="tblLavador" class="table table-bordered table-striped" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Ponto</th>
+                                                <th>Celular</th>
+                                                <th>Status</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="tab-pane fade" id="tab_borders_icons-4" role="tabpanel">
+                                    <table id="tblVeiculo" class="table table-bordered table-striped" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Placa</th>
+                                                <th>Marca</th>
+                                                <th>Unidade</th>
+                                                <th>Combustível</th>
+                                                <th>Status</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="tab-pane fade" id="tab_borders_icons-5" role="tabpanel">
+                                    <table id="tblNotas" class="table table-bordered table-striped" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Número da Nota</th>
+                                                <th>Data de Emissão</th>
+                                                <th>Valor</th>
+                                                <th>Valor de Glosa</th>
+                                                <th>Motivo da Glosa</th>
+                                                <th>Ação</th>
+                                                <th>ContratoId</th>
+                                                <th>EmpenhoId</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            try {
+
+                $("#status").on('change', function () {
+                    try {
+                        var status = $(this).val();
+                        $('#ListaContratos').empty();
+                        loadListaContratos(status);
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "status.change", error);
+                    }
+                });
+
+                $('#tabMotoristas').attr('hidden', 'hidden');
+                $('#tab_borders_icons-1').attr('hidden', 'hidden');
+                $('#tblMotorista').attr('hidden', 'hidden');
+
+                $('#tabOperadores').attr('hidden', 'hidden');
+                $('#tab_borders_icons-2').attr('hidden', 'hidden');
+                $('#tblOperador').attr('hidden', 'hidden');
+
+                $('#tabLavadores').attr('hidden', 'hidden');
+                $('#tab_borders_icons-3').attr('hidden', 'hidden');
+                $('#tblLavador').attr('hidden', 'hidden');
+
+                $('#tabVeiculos').attr('hidden', 'hidden');
+                $('#tab_borders_icons-4').attr('hidden', 'hidden');
+                $('#tblVeiculo').attr('hidden', 'hidden');
+
+                $('#tabNotas').attr('hidden', 'hidden');
+                $('#tab_borders_icons-5').attr('hidden', 'hidden');
+                $('#tblNotas').attr('hidden', 'hidden');
+
+                loadListaContratos(1);
+
+                function loadListaContratos(status) {
+                    try {
+                        var id = status;
+                        $.ajax({
+                            type: "GET",
+                            url: "/api/Contrato/ListaContratos",
+                            data: { id: id },
+                            success: function (res) {
+                                try {
+                                    console.log("Função Nova: ", res.data);
+
+                                    var option = '<option>-- Selecione um Contrato --</option>';
+                                    if (res && res.data && res.data.length) {
+                                        res.data.forEach(function (obj) {
+                                            option += '<option value="' + obj.value + '">' + obj.text + '</option>';
+                                        });
+                                    }
+                                    $('#ListaContratos').empty().append(option);
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadListaContratos.success", error);
+                                }
+                            },
+                            error: function (err) {
+                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadListaContratos.error", err);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadListaContratos", error);
+                    }
+                }
+
+                function loadTblMotoristas() {
+                    try {
+                        var id = $("#ListaContratos").val();
+
+                        var dataTableMotorista = $('#tblMotorista').DataTable();
+                        dataTableMotorista.destroy();
+
+                        dataTableMotorista = $('#tblMotorista').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-left", width: "15%" },
+                                { targets: 1, className: "text-center", width: "6%" },
+                                { targets: 2, className: "text-center", width: "6%" },
+                                { targets: 3, className: "text-center", width: "5%" },
+                                { targets: 4, className: "text-center", width: "8%" },
+                                { targets: 5, className: "text-left", width: "5%" },
+                                { targets: 6, className: "text-center", width: "5%" },
+                                { targets: 7, className: "text-center", width: "8%" }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/motorista/motoristacontratos",
+                                data: { id: id },
+                                type: "GET",
+                                datatype: "json"
+                            },
+                            columns: [
+                                { data: "nome" },
+                                { data: "ponto" },
+                                { data: "cnh" },
+                                { data: "categoriaCNH" },
+                                { data: "celular01" },
+                                { data: "sigla" },
+                                {
+                                    data: "status",
+                                    render: function (data, type, row) {
+                                        if (data) {
+                                            return '<span class="badge bg-success" style="padding: 4px 8px !important; font-size: 11px !important;">Ativo</span>';
+                                        } else {
+                                            return '<span class="badge bg-secondary" style="padding: 4px 8px !important; font-size: 11px !important;">Inativo</span>';
+                                        }
+                                    }
+                                },
+                                {
+                                    data: "motoristaId",
+                                    render: function (data) {
+                                        return `<a class="btn-deletemotoristacontrato btn btn-vinho text-white" data-ejtip="Excluir o Motorista do Contrato" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}"><i class="far fa-trash-alt"></i></a>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Sem Dados para Exibição"
+                            },
+                            width: "100%"
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadTblMotoristas", error);
+                    }
+                }
+
+                function loadTblOperadores() {
+                    try {
+                        var id = $("#ListaContratos").val();
+
+                        var dataTableOperadores = $('#tblOperador').DataTable();
+                        dataTableOperadores.destroy();
+
+                        dataTableOperadores = $('#tblOperador').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-left", width: "15%" },
+                                { targets: 1, className: "text-center", width: "6%" },
+                                { targets: 2, className: "text-center", width: "8%" },
+                                { targets: 3, className: "text-center", width: "5%" },
+                                { targets: 4, className: "text-center", width: "8%" }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/operador/operadorcontratos",
+                                type: "GET",
+                                data: { id: id },
+                                datatype: "json"
+                            },
+                            columns: [
+                                { data: "nome" },
+                                { data: "ponto" },
+                                { data: "celular01" },
+                                {
+                                    data: "status",
+                                    render: function (data, type, row) {
+                                        if (data) {
+                                            return '<span class="badge bg-success" style="padding: 4px 8px !important; font-size: 11px !important;">Ativo</span>';
+                                        } else {
+                                            return '<span class="badge bg-secondary" style="padding: 4px 8px !important; font-size: 11px !important;">Inativo</span>';
+                                        }
+                                    }
+                                },
+                                {
+                                    data: "operadorId",
+                                    render: function (data) {
+                                        return `<a class="btn-deleteoperadorcontrato btn btn-vinho text-white" data-ejtip="Remover o Operador do Contrato" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}"><i class="far fa-trash-alt"></i></a>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Sem Dados para Exibição"
+                            },
+                            width: "100%"
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadTblOperadores", error);
+                    }
+                }
+
+                function loadTblLavadores() {
+                    try {
+                        var id = $("#ListaContratos").val();
+
+                        var dataTableLavadores = $('#tblLavador').DataTable();
+                        dataTableLavadores.destroy();
+
+                        dataTableLavadores = $('#tblLavador').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-left", width: "15%" },
+                                { targets: 1, className: "text-center", width: "6%" },
+                                { targets: 2, className: "text-center", width: "8%" },
+                                { targets: 3, className: "text-center", width: "5%" },
+                                { targets: 4, className: "text-center", width: "8%" }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/lavador/lavadorcontratos",
+                                type: "GET",
+                                data: { id: id },
+                                datatype: "json"
+                            },
+                            columns: [
+                                { data: "nome" },
+                                { data: "ponto" },
+                                { data: "celular01" },
+                                {
+                                    data: "status",
+                                    render: function (data, type, row) {
+                                        if (data) {
+                                            return '<span class="badge bg-success" style="padding: 4px 8px !important; font-size: 11px !important;">Ativo</span>';
+                                        } else {
+                                            return '<span class="badge bg-secondary" style="padding: 4px 8px !important; font-size: 11px !important;">Inativo</span>';
+                                        }
+                                    }
+                                },
+                                {
+                                    data: "lavadorId",
+                                    render: function (data) {
+                                        return `<a class="btn-deletelavadorcontrato btn btn-vinho text-white" data-ejtip="Remover o Lavador do Contrato" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}"><i class="far fa-trash-alt"></i></a>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Sem Dados para Exibição"
+                            },
+                            width: "100%"
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadTblLavadores", error);
+                    }
+                }
+
+                function loadTblVeiculos() {
+                    try {
+                        var id = $("#ListaContratos").val();
+
+                        var dataTableVeiculo = $('#tblVeiculo').DataTable();
+                        dataTableVeiculo.destroy();
+
+                        dataTableVeiculo = $('#tblVeiculo').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-center", width: "9%" },
+                                { targets: 1, className: "text-left", width: "17%" },
+                                { targets: 2, className: "text-center", width: "5%" },
+                                { targets: 3, className: "text-center", width: "5%" },
+                                { targets: 4, className: "text-center", width: "7%" },
+                                { targets: 5, className: "text-center", width: "8%" }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/veiculo/veiculocontratos",
+                                data: { id: id },
+                                type: "GET",
+                                datatype: "json"
+                            },
+                            columns: [
+                                { data: "placa" },
+                                { data: "marcaModelo" },
+                                { data: "sigla" },
+                                { data: "combustivelDescricao" },
+                                {
+                                    data: "status",
+                                    render: function (data, type, row) {
+                                        if (data) {
+                                            return '<span class="badge bg-success" style="padding: 4px 8px !important; font-size: 11px !important;">Ativo</span>';
+                                        } else {
+                                            return '<span class="badge bg-secondary" style="padding: 4px 8px !important; font-size: 11px !important;">Inativo</span>';
+                                        }
+                                    }
+                                },
+                                {
+                                    data: "veiculoId",
+                                    render: function (data) {
+                                        return `<a class="btn-deleteveiculocontrato btn btn-vinho text-white" data-ejtip="Remover o veículo do contrato" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}"><i class="far fa-trash-alt"></i></a>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Sem Dados para Exibição"
+                            },
+                            width: "100%"
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadTblVeiculos", error);
+                    }
+                }
+
+                function loadTblNotas() {
+                    try {
+                        var id = $("#ListaContratos").val();
+
+                        var dataTableNotas = $('#tblNotas').DataTable();
+                        dataTableNotas.destroy();
+
+                        dataTableNotas = $('#tblNotas').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-center", width: "8%" },
+                                { targets: 1, className: "text-center", width: "8%" },
+                                { targets: 2, className: "text-right", width: "10%" },
+                                { targets: 3, className: "text-right", width: "8%" },
+                                { targets: 4, className: "text-left", width: "15%" },
+                                { targets: 5, className: "text-center", width: "8%" },
+                                { targets: 6, className: "text-center", width: "10%", visible: false },
+                                { targets: 7, className: "text-center", width: "10%", visible: false }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/notafiscal/nfcontratos",
+                                data: { id: id },
+                                type: "GET",
+                                datatype: "json"
+                            },
+                            columns: [
+                                { data: "numeroNF" },
+                                { data: "dataFormatada" },
+                                { data: "valorNFFormatado" },
+                                { data: "valorGlosaFormatado" },
+                                { data: "motivoGlosa" },
+                                {
+                                    data: "notaFiscalId",
+                                    render: function (data) {
+                                        return `<a class="btn btn-delete btn-vinho text-white" data-ejtip="Excluir a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}"><i class="far fa-trash-alt"></i></a>`;
+                                    }
+                                },
+                                { data: "contratoId" },
+                                { data: "empenhoId" }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Sem Dados para Exibição"
+                            },
+                            width: "100%"
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "loadTblNotas", error);
+                    }
+                }
+
+                $("#ListaContratos").on('change', function () {
+                    try {
+                        var id = $("#ListaContratos").val();
+
+                        $.ajax({
+                            type: "GET",
+                            url: "/api/Contrato/PegaContrato",
+                            data: { id: id },
+                            success: function (res) {
+                                try {
+                                    console.info(res.data);
+                                    console.info(res.data[0].contratoLavadores);
+                                    console.info(res.data[0].contratoMotoristas);
+                                    console.info(res.data[0].contratoOperadores);
+                                    console.info(res.data[0].tipoContrato);
+
+                                    $('#tabMotoristas').attr('hidden', 'hidden');
+                                    $('#tab_borders_icons-1').attr('hidden', 'hidden');
+                                    $('#tblMotorista').attr('hidden', 'hidden');
+
+                                    $('#tabOperadores').attr('hidden', 'hidden');
+                                    $('#tab_borders_icons-2').attr('hidden', 'hidden');
+                                    $('#tblOperador').attr('hidden', 'hidden');
+
+                                    $('#tabLavadores').attr('hidden', 'hidden');
+                                    $('#tab_borders_icons-3').attr('hidden', 'hidden');
+                                    $('#tblLavador').attr('hidden', 'hidden');
+
+                                    $('#tabVeiculos').attr('hidden', 'hidden');
+                                    $('#tab_borders_icons-4').attr('hidden', 'hidden');
+                                    $('#tblVeiculo').attr('hidden', 'hidden');
+
+                                    $('#tabNotas').attr('hidden', 'hidden');
+                                    $('#tab_borders_icons-5').attr('hidden', 'hidden');
+                                    $('#tblNotas').attr('hidden', 'hidden');
+
+                                    if (res.data[0].tipoContrato === "Terceirização") {
+
+                                        if (res.data[0].contratoMotoristas === true) {
+                                            $('#tabMotoristas').removeAttr('hidden');
+                                            $('#tab_borders_icons-1').removeAttr('hidden');
+                                            $('#tblMotorista').removeAttr('hidden');
+                                            $('.nav-tabs li:eq(0) a').tab('show');
+                                            loadTblMotoristas();
+                                        }
+
+                                        if (res.data[0].contratoOperadores === true) {
+                                            $('#tabOperadores').removeAttr('hidden');
+                                            $('#tab_borders_icons-2').removeAttr('hidden');
+                                            $('#tblOperador').removeAttr('hidden');
+                                            if (res.data[0].contratoMotoristas === false) {
+                                                $('.nav-tabs li:eq(1) a').tab('show');
+                                            }
+                                            loadTblOperadores();
+                                        }
+
+                                        if (res.data[0].contratoLavadores === true) {
+                                            $('#tabLavadores').removeAttr('hidden');
+                                            $('#tab_borders_icons-3').removeAttr('hidden');
+                                            $('#tblLavador').removeAttr('hidden');
+                                            if (res.data[0].contratoMotoristas === false || res.data[0].contratoOperadores === false) {
+                                                $('.nav-tabs li:eq(2) a').tab('show');
+                                            }
+                                            loadTblLavadores();
+                                        }
+                                    }
+
+                                    if (res.data[0].tipoContrato === "Locação") {
+                                        $('#tabVeiculos').removeAttr('hidden');
+                                        $('#tab_borders_icons-4').removeAttr('hidden');
+                                        $('#tblVeiculo').removeAttr('hidden');
+                                        $('.nav-tabs li:eq(3) a').tab('show');
+                                        loadTblVeiculos();
+                                    }
+
+                                    if (res.data[0].tipoContrato === "Serviços") {
+                                        $('#tabNotas').removeAttr('hidden');
+                                        $('#tab_borders_icons-5').removeAttr('hidden');
+                                        $('#tblNotas').removeAttr('hidden');
+                                        $('.nav-tabs li:eq(4) a').tab('show');
+                                        loadTblNotas();
+                                        console.log("Entrei nas Notas");
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "ListaContratos.success", error);
+                                }
+                            },
+                            error: function (err) {
+                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "ListaContratos.error", err);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "ListaContratos.change", error);
+                    }
+                });
+
+                $(document).on('click', '.btn-deletemotoristacontrato', function () {
+                    try {
+                        var id = $(this).data('id');
+                        var contratoid = $("#ListaContratos").val();
+
+                        Alerta.Confirmar(
+                            "Confirmar Exclusão",
+                            "Você tem certeza que deseja remover este motorista do contrato?",
+                            "Sim, remover",
+                            "Cancelar"
+                        ).then(function (confirmed) {
+                            try {
+                                if (confirmed) {
+                                    var dataToPost = JSON.stringify({ 'MotoristaId': id, 'ContratoId': contratoid });
+                                    $.ajax({
+                                        url: '/api/Motorista/DeleteContrato',
+                                        type: "POST",
+                                        data: dataToPost,
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        success: function (data) {
+                                            try {
+                                                if (data.success) {
+                                                    AppToast.show(data.message, 'Verde');
+                                                    loadTblMotoristas();
+                                                } else {
+													AppToast.show(data.message, 'Vermelho');
+                                                }
+                                            } catch (error) {
+                                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletemotorista.success", error);
+                                            }
+                                        },
+                                        error: function (err) {
+                                            Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletemotorista.error", err);
+                                        }
+                                    });
+                                }
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletemotorista.confirmar", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletemotorista.click", error);
+                    }
+                });
+
+                $(document).on('click', '.btn-deleteoperadorcontrato', function () {
+                    try {
+                        var id = $(this).data('id');
+                        var contratoid = $("#ListaContratos").val();
+
+                        Alerta.Confirmar(
+                            "Confirmar Exclusão",
+                            "Você tem certeza que deseja remover este operador do contrato?",
+                            "Sim, remover",
+                            "Cancelar"
+                        ).then(function (confirmed) {
+                            try {
+                                if (confirmed) {
+                                    var dataToPost = JSON.stringify({ 'OperadorId': id, 'ContratoId': contratoid });
+                                    $.ajax({
+                                        url: '/api/Operador/DeleteContrato',
+                                        type: "POST",
+                                        data: dataToPost,
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        success: function (data) {
+                                            try {
+                                                if (data.success) {
+                                                    AppToast.show(data.message, 'Verde');
+                                                    loadTblOperadores();
+                                                } else {
+													AppToast.show(data.message, 'Vermelho');
+                                                }
+                                            } catch (error) {
+                                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteoperador.success", error);
+                                            }
+                                        },
+                                        error: function (err) {
+                                            Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteoperador.error", err);
+                                        }
+                                    });
+                                }
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteoperador.confirmar", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteoperador.click", error);
+                    }
+                });
+
+                $(document).on('click', '.btn-deletelavadorcontrato', function () {
+                    try {
+                        var id = $(this).data('id');
+                        var contratoid = $("#ListaContratos").val();
+
+                        Alerta.Confirmar(
+                            "Confirmar Exclusão",
+                            "Você tem certeza que deseja remover este lavador do contrato?",
+                            "Sim, remover",
+                            "Cancelar"
+                        ).then(function (confirmed) {
+                            try {
+                                if (confirmed) {
+                                    var dataToPost = JSON.stringify({ 'LavadorId': id, 'ContratoId': contratoid });
+                                    $.ajax({
+                                        url: '/api/Lavador/DeleteContrato',
+                                        type: "POST",
+                                        data: dataToPost,
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        success: function (data) {
+                                            try {
+                                                if (data.success) {
+                                                    AppToast.show(data.message, 'Verde');
+                                                    loadTblLavadores();
+                                                } else {
+                                                    AppToast.show(data.message, 'Vermelho');
+                                                }
+                                            } catch (error) {
+                                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletelavador.success", error);
+                                            }
+                                        },
+                                        error: function (err) {
+                                            Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletelavador.error", err);
+                                        }
+                                    });
+                                }
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletelavador.confirmar", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deletelavador.click", error);
+                    }
+                });
+
+                $(document).on('click', '.btn-deleteveiculocontrato', function () {
+                    try {
+                        var id = $(this).data('id');
+                        var contratoid = $("#ListaContratos").val();
+
+                        Alerta.Confirmar(
+                            "Confirmar Exclusão",
+                            "Você tem certeza que deseja remover este veículo do contrato?",
+                            "Sim, remover",
+                            "Cancelar"
+                        ).then(function (confirmed) {
+                            try {
+                                if (confirmed) {
+                                    var dataToPost = JSON.stringify({ 'VeiculoId': id, 'ContratoId': contratoid });
+                                    $.ajax({
+                                        url: '/api/Veiculo/DeleteContrato',
+                                        type: "POST",
+                                        data: dataToPost,
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        success: function (data) {
+                                            try {
+                                                if (data.success) {
+                                                    AppToast.show(data.message, 'Verde');
+                                                    loadTblVeiculos();
+                                                } else {
+                                                    AppToast.show(data.message, 'Vermelho');
+                                                }
+                                            } catch (error) {
+                                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteveiculo.success", error);
+                                            }
+                                        },
+                                        error: function (err) {
+                                            Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteveiculo.error", err);
+                                        }
+                                    });
+                                }
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteveiculo.confirmar", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "deleteveiculo.click", error);
+                    }
+                });
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ItensContrato.cshtml", "document.ready", error);
+            }
+        });
+    </script>
+}

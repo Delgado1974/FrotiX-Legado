@@ -1,0 +1,1845 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.TextAnalytics" Version="5.3.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <UserSecretsId>aspnet-SmartAdmin.WebUI-E383D1D3-A583-4134-97C9-6DFEB2F1657F</UserSecretsId>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DisableImplicitStaticWebAssets>true</DisableImplicitStaticWebAssets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="js\**" />
+    <Compile Remove="Reports.old\**" />
+    <Compile Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <Content Remove="js\**" />
+    <Content Remove="Reports.old\**" />
+    <Content Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <EmbeddedResource Remove="js\**" />
+    <EmbeddedResource Remove="Reports.old\**" />
+    <EmbeddedResource Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <None Remove="js\**" />
+    <None Remove="Reports.old\**" />
+    <None Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <TypeScriptCompile Remove="Reports.old\**" />
+    <TypeScriptCompile Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Data\ControleAcessoDbContext.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="C:\Users\Alexandre\.nuget\packages\dotnetcore.npoi\1.2.3\contentFiles\any\netstandard2.0\NOTICE.TXT" />
+  </ItemGroup>
+  <ItemGroup>
+    <_WebToolingArtifacts Remove="Properties\PublishProfiles\FTP FrotiX Interserver.pubxml.bak" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="nav.json.veio" />
+    <Content Include="wrap-ajax-callbacks.js" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\package.json" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\.package-lock.json" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.rtl.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.rtl.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.rtl.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.rtl.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.rtl.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.rtl.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.rtl.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.rtl.min.css" />
+    <Content Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\package.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Models\ContractDropDownItem.cs" />
+    <None Include="nav.json" />
+    <None Include="Pages\Intel\AnalyticsDashboard.cshtml" />
+    <None Include="Properties\PublishProfiles\Frotix.net.br (local).pubxml.user" />
+    <None Include="Properties\PublishProfiles\FTP Delgado-pro.pubxml.user" />
+    <None Include="Properties\PublishProfiles\FTP FrotiX Interserver.pubxml.user" />
+    <None Include="Properties\PublishProfiles\FTP Frotix.biz.pubxml.user" />
+    <None Include="Properties\PublishProfiles\FTP Frotix.net.br.pubxml.user" />
+    <None Include="wwwroot\css\frotix.css" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\enums.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\enums.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\enums.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper-base.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper-base.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper-base.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper-lite.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper-lite.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper-lite.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\cjs\popper.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\createPopper.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\contains.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getBoundingClientRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getClippingRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getCompositeRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getComputedStyle.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getDocumentElement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getDocumentRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getHTMLElementScroll.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getLayoutRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getNodeName.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getNodeScroll.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getOffsetParent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getParentNode.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getScrollParent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getViewportRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getWindow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getWindowScroll.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\getWindowScrollBarX.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\instanceOf.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\isLayoutViewport.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\isScrollParent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\isTableElement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\dom-utils\listScrollParents.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\enums.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\index.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\applyStyles.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\arrow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\computeStyles.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\eventListeners.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\flip.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\hide.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\index.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\offset.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\popperOffsets.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\modifiers\preventOverflow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\popper-base.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\popper-lite.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\popper.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\types.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\computeAutoPlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\computeOffsets.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\debounce.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\detectOverflow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\expandToHashMap.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getAltAxis.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getAltLen.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getBasePlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getFreshSideObject.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getMainAxisFromPlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getOppositePlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getOppositeVariationPlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\getVariation.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\math.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\mergeByName.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\mergePaddingObject.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\orderModifiers.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\rectToClientRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\uniqueBy.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\userAgent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\esm\utils\within.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\enums.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\enums.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\enums.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\enums.min.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\enums.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-base.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-base.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-base.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-base.min.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-base.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-lite.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-lite.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-lite.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-lite.min.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper-lite.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper.min.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\dist\umd\popper.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\createPopper.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\createPopper.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\contains.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\contains.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getBoundingClientRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getBoundingClientRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getClippingRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getClippingRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getCompositeRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getCompositeRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getComputedStyle.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getComputedStyle.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getDocumentElement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getDocumentElement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getDocumentRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getDocumentRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getHTMLElementScroll.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getHTMLElementScroll.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getLayoutRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getLayoutRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getNodeName.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getNodeName.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getNodeScroll.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getNodeScroll.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getOffsetParent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getOffsetParent.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getParentNode.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getParentNode.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getScrollParent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getScrollParent.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getViewportRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getViewportRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getWindow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getWindow.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getWindowScroll.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getWindowScroll.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getWindowScrollBarX.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\getWindowScrollBarX.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\instanceOf.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\instanceOf.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\isLayoutViewport.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\isLayoutViewport.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\isScrollParent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\isScrollParent.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\isTableElement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\isTableElement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\listScrollParents.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\dom-utils\listScrollParents.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\enums.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\enums.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\index.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\index.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\applyStyles.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\applyStyles.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\arrow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\arrow.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\computeStyles.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\computeStyles.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\eventListeners.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\eventListeners.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\flip.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\flip.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\hide.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\hide.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\index.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\index.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\offset.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\offset.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\popperOffsets.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\popperOffsets.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\preventOverflow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\modifiers\preventOverflow.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\popper-base.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\popper-base.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\popper-lite.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\popper-lite.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\popper.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\popper.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\types.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\types.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\computeAutoPlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\computeAutoPlacement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\computeOffsets.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\computeOffsets.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\debounce.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\debounce.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\detectOverflow.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\detectOverflow.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\expandToHashMap.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\expandToHashMap.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getAltAxis.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getAltAxis.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getAltLen.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getAltLen.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getBasePlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getBasePlacement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getFreshSideObject.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getFreshSideObject.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getMainAxisFromPlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getMainAxisFromPlacement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getOppositePlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getOppositePlacement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getOppositeVariationPlacement.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getOppositeVariationPlacement.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getVariation.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\getVariation.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\math.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\math.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\mergeByName.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\mergeByName.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\mergePaddingObject.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\mergePaddingObject.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\orderModifiers.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\orderModifiers.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\rectToClientRect.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\rectToClientRect.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\uniqueBy.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\uniqueBy.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\userAgent.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\userAgent.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\within.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\lib\utils\within.js.flow" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\LICENSE.md" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\%40popperjs\core\README.md" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.rtl.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.rtl.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.rtl.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.rtl.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\css\bootstrap.rtl.min.css.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.bundle.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.esm.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.esm.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.esm.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.esm.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.min.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\dist\js\bootstrap.min.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\alert.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\alert.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\base-component.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\base-component.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\button.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\button.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\carousel.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\carousel.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\collapse.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\collapse.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\data.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\data.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\event-handler.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\event-handler.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\manipulator.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\manipulator.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\selector-engine.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dom\selector-engine.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dropdown.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\dropdown.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\modal.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\modal.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\offcanvas.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\offcanvas.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\popover.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\popover.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\scrollspy.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\scrollspy.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\tab.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\tab.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\toast.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\toast.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\tooltip.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\tooltip.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\backdrop.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\backdrop.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\component-functions.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\component-functions.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\config.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\config.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\focustrap.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\focustrap.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\index.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\index.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\sanitizer.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\sanitizer.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\scrollbar.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\scrollbar.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\swipe.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\swipe.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\template-factory.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\dist\util\template-factory.js.map" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\index.esm.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\index.umd.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\alert.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\base-component.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\button.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\carousel.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\collapse.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\dom\data.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\dom\event-handler.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\dom\manipulator.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\dom\selector-engine.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\dropdown.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\modal.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\offcanvas.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\popover.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\scrollspy.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\tab.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\toast.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\tooltip.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\backdrop.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\component-functions.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\config.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\focustrap.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\index.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\sanitizer.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\scrollbar.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\swipe.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\js\src\util\template-factory.js" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\LICENSE" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\README.md" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\bootstrap-grid.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\bootstrap-reboot.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\bootstrap-utilities.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\bootstrap.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_floating-labels.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_form-check.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_form-control.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_form-range.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_form-select.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_form-text.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_input-group.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_labels.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\forms\_validation.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_clearfix.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_color-bg.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_colored-links.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_focus-ring.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_icon-link.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_position.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_ratio.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_stacks.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_stretched-link.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_text-truncation.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_visually-hidden.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\helpers\_vr.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_alert.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_backdrop.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_banner.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_border-radius.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_box-shadow.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_breakpoints.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_buttons.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_caret.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_clearfix.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_color-mode.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_color-scheme.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_container.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_deprecate.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_forms.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_gradients.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_grid.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_image.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_list-group.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_lists.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_pagination.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_reset-text.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_resize.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_table-variants.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_text-truncate.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_transition.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_utilities.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\mixins\_visually-hidden.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\utilities\_api.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\vendor\_rfs.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_accordion.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_alert.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_badge.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_breadcrumb.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_button-group.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_buttons.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_card.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_carousel.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_close.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_containers.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_dropdown.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_forms.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_functions.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_grid.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_helpers.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_images.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_list-group.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_maps.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_mixins.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_modal.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_nav.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_navbar.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_offcanvas.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_pagination.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_placeholders.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_popover.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_progress.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_reboot.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_root.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_spinners.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_tables.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_toasts.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_tooltip.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_transitions.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_type.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_utilities.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_variables-dark.scss" />
+    <None Include="wwwroot\js\bs5-patcher\node_modules\bootstrap\scss\_variables.scss" />
+    <None Include="wwwroot\js\ej2\ej2.min.js" />
+    <None Include="wwwroot\Neon\css\font-icons\entypo\font\entypo.svg" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\fonts\fontawesome-webfont.svg" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\fonts\fontawesome-webfont.woff2" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\animated.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\bordered-pulled.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\core.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\fixed-width.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\font-awesome.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\icons.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\larger.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\list.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\mixins.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\path.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\rotated-flipped.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\stacked.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\less\variables.less" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\font-awesome.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_animated.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_bordered-pulled.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_core.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_fixed-width.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_icons.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_larger.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_list.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_mixins.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_path.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_rotated-flipped.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_stacked.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\font-awesome\scss\_variables.scss" />
+    <None Include="wwwroot\Neon\css\font-icons\glyphicons\glyphicons-halflings-regular.svg" />
+    <None Include="wwwroot\Neon\css\font-icons\glyphicons\glyphicons-halflings-regular.woff2" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciFragment.min.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciSortable.min.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.checkbox.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.column.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.core.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.debug.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.dom.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.editable.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.hash.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.min.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.persist.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.radio.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.selectable.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.sortable.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.aciTree.utils.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jquery.min.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\js\jstorage.min.js" />
+    <None Include="wwwroot\Neon\js\aci-tree\php\aciTree.php" />
+    <None Include="wwwroot\Neon\js\aci-tree\php\FsTree.php" />
+    <None Include="wwwroot\Neon\js\aci-tree\php\hugeTree.php" />
+    <None Include="wwwroot\Neon\js\aci-tree\php\Tree.php" />
+    <None Include="wwwroot\Neon\js\aci-tree\sample\sample.php" />
+    <None Include="wwwroot\Neon\js\additional-methods.min.js" />
+    <None Include="wwwroot\Neon\js\bootstrap-colorpicker.min.js" />
+    <None Include="wwwroot\Neon\js\bootstrap-datepicker.js" />
+    <None Include="wwwroot\Neon\js\bootstrap-switch.min.js" />
+    <None Include="wwwroot\Neon\js\bootstrap-tagsinput.min.js" />
+    <None Include="wwwroot\Neon\js\bootstrap-timepicker.min.js" />
+    <None Include="wwwroot\Neon\js\bootstrap.js" />
+    <None Include="wwwroot\Neon\js\bootstrap.min.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\adapters\jquery.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\build-config.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\CHANGES.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\ckeditor.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\config.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\af.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ar.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\bg.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\bn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\bs.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\cs.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\cy.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\da.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\de.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\el.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\en-au.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\en-ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\en-gb.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\en.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\eo.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\es.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\et.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\eu.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\fa.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\fi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\fo.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\fr-ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\fr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\gl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\gu.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\he.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\hi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\hr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\hu.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\id.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\is.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\it.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ja.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ka.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\km.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ko.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ku.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\lt.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\lv.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\mk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\mn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ms.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\nb.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\nl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\no.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\pl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\pt-br.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\pt.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ro.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ru.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\si.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\sk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\sl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\sq.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\sr-latn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\sr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\sv.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\th.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\tr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\ug.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\uk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\vi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\zh-cn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\lang\zh.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\LICENSE.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\a11yhelp.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ar.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\bg.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\cs.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\cy.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\da.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\de.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\el.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\en.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\eo.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\es.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\et.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\fa.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\fi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\fr-ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\fr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\gl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\gu.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\he.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\hi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\hr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\hu.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\id.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\it.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ja.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\km.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ko.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ku.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\lt.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\lv.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\mk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\mn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\nb.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\nl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\no.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\pl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\pt-br.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\pt.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ro.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ru.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\si.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\sk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\sl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\sq.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\sr-latn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\sr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\sv.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\th.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\tr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\ug.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\uk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\vi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\a11yhelp\dialogs\lang\zh-cn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\about\dialogs\about.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\clipboard\dialogs\paste.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\dialog\dialogDefinition.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\image\dialogs\image.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\link\dialogs\anchor.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\link\dialogs\link.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\pastefromword\filter\default.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\scayt\dialogs\options.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\scayt\LICENSE.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\scayt\README.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\ar.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\bg.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\cs.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\cy.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\de.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\el.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\en.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\eo.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\es.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\et.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\fa.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\fi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\fr-ca.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\fr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\gl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\he.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\hr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\hu.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\id.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\it.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\ja.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\km.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\ku.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\lv.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\nb.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\nl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\no.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\pl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\pt-br.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\pt.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\ru.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\si.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\sk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\sl.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\sq.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\sv.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\th.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\tr.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\ug.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\uk.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\vi.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\lang\zh-cn.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\specialchar\dialogs\specialchar.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\tabletools\dialogs\tableCell.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\table\dialogs\table.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\wsc\dialogs\wsc.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\wsc\dialogs\wsc_ie.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\wsc\LICENSE.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\plugins\wsc\README.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\README.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\assets\posteddata.php" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\assets\uilanguages\languages.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\plugins\dialog\assets\my_dialog.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\plugins\htmlwriter\assets\outputforflash\outputforflash.fla" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\plugins\htmlwriter\assets\outputforflash\outputforflash.swf" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\plugins\htmlwriter\assets\outputforflash\swfobject.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\sample.js" />
+    <None Include="wwwroot\Neon\js\ckeditor\samples\sample_posteddata.php" />
+    <None Include="wwwroot\Neon\js\ckeditor\skins\moono\readme.md" />
+    <None Include="wwwroot\Neon\js\ckeditor\styles.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\comment\comment.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\comment\continuecomment.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\dialog\dialog.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\display\fullscreen.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\display\placeholder.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\edit\closebrackets.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\edit\closetag.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\edit\continuelist.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\edit\matchbrackets.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\edit\matchtags.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\edit\trailingspace.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\fold\brace-fold.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\fold\comment-fold.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\fold\foldcode.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\fold\foldgutter.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\fold\indent-fold.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\fold\xml-fold.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\anyword-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\css-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\html-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\javascript-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\pig-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\python-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\show-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\sql-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\hint\xml-hint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\lint\coffeescript-lint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\lint\css-lint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\lint\javascript-lint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\lint\json-lint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\lint\lint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\merge\dep\diff_match_patch.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\merge\merge.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\mode\loadmode.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\mode\multiplex.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\mode\multiplex_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\mode\overlay.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\runmode\colorize.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\runmode\runmode-standalone.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\runmode\runmode.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\runmode\runmode.node.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\scroll\scrollpastend.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\search\match-highlighter.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\search\search.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\search\searchcursor.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\selection\active-line.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\selection\mark-selection.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\tern\tern.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\tern\worker.js" />
+    <None Include="wwwroot\Neon\js\codemirror\addon\wrap\hardwrap.js" />
+    <None Include="wwwroot\Neon\js\codemirror\AUTHORS" />
+    <None Include="wwwroot\Neon\js\codemirror\bin\authors.sh" />
+    <None Include="wwwroot\Neon\js\codemirror\bin\compress" />
+    <None Include="wwwroot\Neon\js\codemirror\bin\lint" />
+    <None Include="wwwroot\Neon\js\codemirror\bin\release" />
+    <None Include="wwwroot\Neon\js\codemirror\bin\source-highlight" />
+    <None Include="wwwroot\Neon\js\codemirror\CONTRIBUTING.md" />
+    <None Include="wwwroot\Neon\js\codemirror\doc\activebookmark.js" />
+    <None Include="wwwroot\Neon\js\codemirror\doc\logo.svg" />
+    <None Include="wwwroot\Neon\js\codemirror\keymap\emacs.js" />
+    <None Include="wwwroot\Neon\js\codemirror\keymap\extra.js" />
+    <None Include="wwwroot\Neon\js\codemirror\keymap\vim.js" />
+    <None Include="wwwroot\Neon\js\codemirror\lib\codemirror.js" />
+    <None Include="wwwroot\Neon\js\codemirror\LICENSE" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\apl\apl.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\asterisk\asterisk.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\clike\clike.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\clojure\clojure.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\cobol\cobol.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\coffeescript\coffeescript.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\commonlisp\commonlisp.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\css\css.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\css\less_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\css\scss_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\css\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\diff\diff.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\dtd\dtd.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\d\d.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\ecl\ecl.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\eiffel\eiffel.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\erlang\erlang.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\fortran\fortran.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\gas\gas.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\gfm\gfm.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\gfm\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\gherkin\gherkin.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\go\go.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\groovy\groovy.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\haml\haml.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\haml\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\haskell\haskell.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\haxe\haxe.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\htmlembedded\htmlembedded.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\htmlmixed\htmlmixed.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\http\http.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\jade\jade.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\javascript\javascript.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\javascript\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\jinja2\jinja2.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\julia\julia.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\less\less.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\livescript\livescript.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\livescript\livescript.ls" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\lua\lua.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\markdown\markdown.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\markdown\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\meta.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\mirc\mirc.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\mllike\mllike.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\nginx\nginx.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\ntriples\ntriples.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\octave\octave.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\pascal\pascal.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\pegjs\pegjs.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\perl\perl.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\php\php.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\pig\pig.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\properties\properties.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\python\python.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\q\q.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\rpm\changes\changes.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\rpm\spec\spec.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\rst\rst.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\ruby\ruby.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\rust\rust.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\r\r.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\sass\sass.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\scheme\scheme.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\shell\shell.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\sieve\sieve.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\smalltalk\smalltalk.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\smartymixed\smartymixed.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\smarty\smarty.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\sparql\sparql.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\sql\sql.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\stex\stex.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\stex\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\tcl\tcl.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\tiddlywiki\tiddlywiki.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\tiki\tiki.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\toml\toml.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\turtle\turtle.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\vbscript\vbscript.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\vb\vb.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\velocity\velocity.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\verilog\verilog.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\xml\xml.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\xquery\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\xquery\xquery.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\yaml\yaml.js" />
+    <None Include="wwwroot\Neon\js\codemirror\mode\z80\z80.js" />
+    <None Include="wwwroot\Neon\js\codemirror\README.md" />
+    <None Include="wwwroot\Neon\js\codemirror\test\comment_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\doc_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\driver.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\emacs_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\lint\acorn.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\lint\lint.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\lint\walk.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\mode_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\phantom_driver.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\run.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\search_test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\test.js" />
+    <None Include="wwwroot\Neon\js\codemirror\test\vim_test.js" />
+    <None Include="wwwroot\Neon\js\cookies.min.js" />
+    <None Include="wwwroot\Neon\js\dataTables.bootstrap.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\css\common.scss" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\css\mixins.scss" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.bootstrap.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.bootstrap.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.colVis.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.colVis.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.flash.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.flash.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.foundation.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.foundation.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.html5.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.html5.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.jqueryui.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.jqueryui.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.print.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\buttons.print.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\dataTables.buttons.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\js\dataTables.buttons.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Buttons-1.0.3\swf\flashExport.swf" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\dataTables.bootstrap.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\dataTables.bootstrap.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\dataTables.foundation.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\dataTables.foundation.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\dataTables.jqueryui.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\dataTables.jqueryui.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\jquery.dataTables.js" />
+    <None Include="wwwroot\Neon\js\datatables\DataTables-1.10.9\js\jquery.dataTables.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\datatables.js" />
+    <None Include="wwwroot\Neon\js\datatables\datatables.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\FixedColumns-3.1.0\js\dataTables.fixedColumns.js" />
+    <None Include="wwwroot\Neon\js\datatables\FixedColumns-3.1.0\js\dataTables.fixedColumns.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\FixedHeader-3.0.0\js\dataTables.fixedHeader.js" />
+    <None Include="wwwroot\Neon\js\datatables\FixedHeader-3.0.0\js\dataTables.fixedHeader.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\jQuery-1.11.3\jquery-1.11.3.js" />
+    <None Include="wwwroot\Neon\js\datatables\jQuery-1.11.3\jquery-1.11.3.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\JSZip-2.5.0\jszip.js" />
+    <None Include="wwwroot\Neon\js\datatables\JSZip-2.5.0\jszip.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\pdfmake-0.1.18\build\pdfmake.js" />
+    <None Include="wwwroot\Neon\js\datatables\pdfmake-0.1.18\build\pdfmake.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\pdfmake-0.1.18\build\vfs_fonts.js" />
+    <None Include="wwwroot\Neon\js\datatables\Responsive-1.0.7\js\dataTables.responsive.js" />
+    <None Include="wwwroot\Neon\js\datatables\Responsive-1.0.7\js\dataTables.responsive.min.js" />
+    <None Include="wwwroot\Neon\js\datatables\Select-1.0.1\js\dataTables.select.js" />
+    <None Include="wwwroot\Neon\js\datatables\Select-1.0.1\js\dataTables.select.min.js" />
+    <None Include="wwwroot\Neon\js\daterangepicker\daterangepicker.js" />
+    <None Include="wwwroot\Neon\js\daterangepicker\moment.js" />
+    <None Include="wwwroot\Neon\js\daterangepicker\moment.min.js" />
+    <None Include="wwwroot\Neon\js\daterangepicker\README.md" />
+    <None Include="wwwroot\Neon\js\dropzone\dropzone.js" />
+    <None Include="wwwroot\Neon\js\dropzone\min\dropzone-min.js" />
+    <None Include="wwwroot\Neon\js\fileinput.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\demos\php\get-events.php" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\demos\php\get-timezones.php" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\demos\php\utils.php" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\fullcalendar.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\fullcalendar.min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\gcal.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang-all.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ar-ma.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ar-sa.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ar.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\bg.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ca.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\cs.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\da.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\de-at.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\de.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\el.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\en-au.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\en-ca.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\en-gb.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\es.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\fa.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\fi.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\fr-ca.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\fr.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\hi.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\hr.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\hu.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\id.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\is.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\it.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ja.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ko.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\lt.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\lv.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ar-ma-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ar-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ar-sa-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\bg-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ca-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\cs-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\da-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\de-at-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\de-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\el-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\en-au-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\en-ca-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\en-gb-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\es-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\fa-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\fi-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\fr-ca-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\fr-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\hi-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\hr-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\hu-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\id-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\is-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\it-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ja-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ko-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\lt-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\lv-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\nl-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\pl-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\pt-br-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\pt-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ro-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\ru-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\sk-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\sl-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\sr-cyrl-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\sr-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\sv-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\th-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\tr-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\uk-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\vi-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\zh-cn-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\min\zh-tw-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\nl.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\pl.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\pt-br.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\pt.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ro.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\ru.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\sk.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\sl.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\sr-cyrl.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\sr.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\sv.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\th.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\tr.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\uk.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\vi.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\zh-cn.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lang\zh-tw.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lib\jquery-ui.custom.min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lib\jquery.min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lib\min\jquery-ui.custom.min-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lib\min\jquery.min-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lib\min\moment.min-min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar-2\lib\moment.min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar\fullcalendar.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar\fullcalendar.min.js" />
+    <None Include="wwwroot\Neon\js\fullcalendar\gcal.js" />
+    <None Include="wwwroot\Neon\js\gsap\easing\EasePack.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\jquery.gsap.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\AttrPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\BezierPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\ColorPropsPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\CSSPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\CSSRulePlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\DirectionalRotationPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\EaselPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\EndArrayPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\KineticPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\RaphaelPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\RoundPropsPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\ScrollToPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\plugins\TextPlugin.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\TimelineLite.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\TimelineMax.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\TweenLite.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\TweenMax.min.js" />
+    <None Include="wwwroot\Neon\js\gsap\utils\Draggable.min.js" />
+    <None Include="wwwroot\Neon\js\icheck\icheck.js" />
+    <None Include="wwwroot\Neon\js\icheck\icheck.min.js" />
+    <None Include="wwwroot\Neon\js\ie8-responsive-file-warning.js" />
+    <None Include="wwwroot\Neon\js\isotope\jquery.isotope.min.js" />
+    <None Include="wwwroot\Neon\js\jcrop\jquery.color.js" />
+    <None Include="wwwroot\Neon\js\jcrop\jquery.Jcrop.js" />
+    <None Include="wwwroot\Neon\js\jcrop\jquery.Jcrop.min.js" />
+    <None Include="wwwroot\Neon\js\joinable.js" />
+    <None Include="wwwroot\Neon\js\jquery-1.11.3.min.js" />
+    <None Include="wwwroot\Neon\js\jquery-ui\js\jquery-1.9.1.js" />
+    <None Include="wwwroot\Neon\js\jquery-ui\js\jquery-ui-1.10.3.custom.js" />
+    <None Include="wwwroot\Neon\js\jquery-ui\js\jquery-ui-1.10.3.custom.min.js" />
+    <None Include="wwwroot\Neon\js\jquery-ui\js\jquery-ui-1.10.3.minimal.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.bootstrap.wizard.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.dataTables.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.inputmask.bundle.js" />
+    <None Include="wwwroot\Neon\js\jquery.knob.js" />
+    <None Include="wwwroot\Neon\js\jquery.multi-select.js" />
+    <None Include="wwwroot\Neon\js\jquery.nestable.js" />
+    <None Include="wwwroot\Neon\js\jquery.nicescroll.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.peity.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.slimscroll.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.sparkline.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.transit.min.js" />
+    <None Include="wwwroot\Neon\js\jquery.validate.min.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-1.2.2.min.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-ar-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-at-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-au-mill-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-be-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-ca-lcc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-ch-mill-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-cn-mill-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-de-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-dk-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-es-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-europe-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-europe-mill-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-fr-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-it-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-nl-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-uk-merc-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-us-aea-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-us-ny-newyork-mill-en.js" />
+    <None Include="wwwroot\Neon\js\jvectormap\jquery-jvectormap-world-mill-en.js" />
+    <None Include="wwwroot\Neon\js\marked.js" />
+    <None Include="wwwroot\Neon\js\moment.min.js" />
+    <None Include="wwwroot\Neon\js\morris.min.js" />
+    <None Include="wwwroot\Neon\js\neon-api.js" />
+    <None Include="wwwroot\Neon\js\neon-calendar-2.js" />
+    <None Include="wwwroot\Neon\js\neon-calendar.js" />
+    <None Include="wwwroot\Neon\js\neon-charts.js" />
+    <None Include="wwwroot\Neon\js\neon-chat.js" />
+    <None Include="wwwroot\Neon\js\neon-custom.js" />
+    <None Include="wwwroot\Neon\js\neon-demo.js" />
+    <None Include="wwwroot\Neon\js\neon-forgotpassword.js" />
+    <None Include="wwwroot\Neon\js\neon-invite-register.js" />
+    <None Include="wwwroot\Neon\js\neon-login.js" />
+    <None Include="wwwroot\Neon\js\neon-mail.js" />
+    <None Include="wwwroot\Neon\js\neon-notes.js" />
+    <None Include="wwwroot\Neon\js\neon-confirmaemail.js" />
+    <None Include="wwwroot\Neon\js\neon-register.js" />
+    <None Include="wwwroot\Neon\js\neon-skins.js" />
+    <None Include="wwwroot\Neon\js\raphael-min.js" />
+    <None Include="wwwroot\Neon\js\resizeable.js" />
+    <None Include="wwwroot\Neon\js\rickshaw\rickshaw.js" />
+    <None Include="wwwroot\Neon\js\rickshaw\rickshaw.min.js" />
+    <None Include="wwwroot\Neon\js\rickshaw\vendor\d3.layout.min.js" />
+    <None Include="wwwroot\Neon\js\rickshaw\vendor\d3.min.js" />
+    <None Include="wwwroot\Neon\js\rickshaw\vendor\d3.v2.js" />
+    <None Include="wwwroot\Neon\js\rickshaw\vendor\d3.v3.js" />
+    <None Include="wwwroot\Neon\js\scrollMonitor.js" />
+    <None Include="wwwroot\Neon\js\select2\CONTRIBUTING.md" />
+    <None Include="wwwroot\Neon\js\select2\LICENSE" />
+    <None Include="wwwroot\Neon\js\select2\README.md" />
+    <None Include="wwwroot\Neon\js\select2\release.sh" />
+    <None Include="wwwroot\Neon\js\select2\select2.js" />
+    <None Include="wwwroot\Neon\js\select2\select2.min.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ar.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_az.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_bg.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ca.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_cs.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_da.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_de.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_el.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_en.js.template" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_es.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_et.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_eu.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_fa.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_fi.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_fr.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_gl.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_he.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_hr.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_hu.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_id.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_is.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_it.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ja.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ka.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ko.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_lt.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_lv.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_mk.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ms.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_nb.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_nl.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_pl.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_pt-BR.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_pt-PT.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ro.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_rs.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ru.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_sk.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_sv.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_th.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_tr.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_ug-CN.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_uk.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_vi.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_zh-CN.js" />
+    <None Include="wwwroot\Neon\js\select2\select2_locale_zh-TW.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\jquery.selectBoxIt.min.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\jquery.selectBoxIt.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.add.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.ariaAccessibility.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.copyAttributes.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.core.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.destroy.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.disable.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.dynamicPositioning.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.enable.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.endClosure.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.keyboardNavigation.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.keyboardSearch.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.mobile.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.remove.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.selectOption.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.setOption.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.setOptions.js" />
+    <None Include="wwwroot\Neon\js\selectboxit\js\modules\jquery.selectBoxIt.wait.js" />
+    <None Include="wwwroot\Neon\js\toastr.js" />
+    <None Include="wwwroot\Neon\js\tocify\jquery.tocify.min.js" />
+    <None Include="wwwroot\Neon\js\typeahead.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\datepicker.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\datepicker.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\form-file.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\form-file.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\form-password.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\form-password.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\markdownarea.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\markdownarea.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\notify.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\notify.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\sortable.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\sortable.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\sticky.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\sticky.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\timepicker.js" />
+    <None Include="wwwroot\Neon\js\uikit\addons\js\timepicker.min.js" />
+    <None Include="wwwroot\Neon\js\uikit\js\uikit.js" />
+    <None Include="wwwroot\Neon\js\uikit\js\uikit.min.js" />
+    <None Include="wwwroot\Neon\js\vertical-timeline\fonts\fontawesome.svg" />
+    <None Include="wwwroot\Neon\js\vertical-timeline\fonts\readme.md" />
+    <None Include="wwwroot\Neon\js\vertical-timeline\fonts\timelineicons\ecoico.dev.svg" />
+    <None Include="wwwroot\Neon\js\vertical-timeline\fonts\timelineicons\ecoico.svg" />
+    <None Include="wwwroot\Neon\js\vertical-timeline\js\modernizr.custom.js" />
+    <None Include="wwwroot\Neon\js\vertical-timeline\README.md" />
+    <None Include="wwwroot\Neon\js\wysihtml5\advanced.js" />
+    <None Include="wwwroot\Neon\js\wysihtml5\bootstrap-wysihtml5.js" />
+    <None Include="wwwroot\Neon\js\wysihtml5\simple.js" />
+    <None Include="wwwroot\Neon\js\wysihtml5\wysihtml5-0.4.0pre.min.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\app.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\app.js.orig" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\forms.jquery.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\jquery.customforms.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\jquery.min.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\jquery.orbit-1.3.0.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\jquery.placeholder.min.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\jquery.reveal.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\javascripts\modernizr.foundation.js" />
+    <None Include="wwwroot\Neon\js\zurb-responsive-tables\responsive-tables.js" />
+    <None Include="wwwroot\Neon\less\bootstrap.less" />
+    <None Include="wwwroot\Neon\less\bs-less\alerts.less" />
+    <None Include="wwwroot\Neon\less\bs-less\badges.less" />
+    <None Include="wwwroot\Neon\less\bs-less\bootstrap.less" />
+    <None Include="wwwroot\Neon\less\bs-less\breadcrumbs.less" />
+    <None Include="wwwroot\Neon\less\bs-less\button-groups.less" />
+    <None Include="wwwroot\Neon\less\bs-less\buttons.less" />
+    <None Include="wwwroot\Neon\less\bs-less\carousel.less" />
+    <None Include="wwwroot\Neon\less\bs-less\close.less" />
+    <None Include="wwwroot\Neon\less\bs-less\code.less" />
+    <None Include="wwwroot\Neon\less\bs-less\component-animations.less" />
+    <None Include="wwwroot\Neon\less\bs-less\dropdowns.less" />
+    <None Include="wwwroot\Neon\less\bs-less\forms.less" />
+    <None Include="wwwroot\Neon\less\bs-less\glyphicons.less" />
+    <None Include="wwwroot\Neon\less\bs-less\grid.less" />
+    <None Include="wwwroot\Neon\less\bs-less\input-groups.less" />
+    <None Include="wwwroot\Neon\less\bs-less\jumbotron.less" />
+    <None Include="wwwroot\Neon\less\bs-less\labels.less" />
+    <None Include="wwwroot\Neon\less\bs-less\list-group.less" />
+    <None Include="wwwroot\Neon\less\bs-less\media.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\alerts.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\background-variant.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\border-radius.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\buttons.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\center-block.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\clearfix.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\forms.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\gradients.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\grid-framework.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\grid.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\hide-text.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\image.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\labels.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\list-group.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\nav-divider.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\nav-vertical-align.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\opacity.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\pagination.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\panels.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\progress-bar.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\reset-filter.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\reset-text.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\resize.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\responsive-visibility.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\size.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\tab-focus.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\table-row.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\text-emphasis.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\text-overflow.less" />
+    <None Include="wwwroot\Neon\less\bs-less\mixins\vendor-prefixes.less" />
+    <None Include="wwwroot\Neon\less\bs-less\modals.less" />
+    <None Include="wwwroot\Neon\less\bs-less\navbar.less" />
+    <None Include="wwwroot\Neon\less\bs-less\navs.less" />
+    <None Include="wwwroot\Neon\less\bs-less\normalize.less" />
+    <None Include="wwwroot\Neon\less\bs-less\pager.less" />
+    <None Include="wwwroot\Neon\less\bs-less\pagination.less" />
+    <None Include="wwwroot\Neon\less\bs-less\panels.less" />
+    <None Include="wwwroot\Neon\less\bs-less\popovers.less" />
+    <None Include="wwwroot\Neon\less\bs-less\print.less" />
+    <None Include="wwwroot\Neon\less\bs-less\progress-bars.less" />
+    <None Include="wwwroot\Neon\less\bs-less\responsive-embed.less" />
+    <None Include="wwwroot\Neon\less\bs-less\responsive-utilities.less" />
+    <None Include="wwwroot\Neon\less\bs-less\scaffolding.less" />
+    <None Include="wwwroot\Neon\less\bs-less\tables.less" />
+    <None Include="wwwroot\Neon\less\bs-less\theme.less" />
+    <None Include="wwwroot\Neon\less\bs-less\thumbnails.less" />
+    <None Include="wwwroot\Neon\less\bs-less\tooltip.less" />
+    <None Include="wwwroot\Neon\less\bs-less\type.less" />
+    <None Include="wwwroot\Neon\less\bs-less\utilities.less" />
+    <None Include="wwwroot\Neon\less\bs-less\variables.less" />
+    <None Include="wwwroot\Neon\less\bs-less\wells.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\button-groups-rtl.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\carousel-rtl.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\grid-rtl.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\list-group-rtl.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\merged-rtl.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\mixins.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\neon.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\type-rtl.less" />
+    <None Include="wwwroot\Neon\less\bs-rtl-less\variables.less" />
+    <None Include="wwwroot\Neon\less\ie.less" />
+    <None Include="wwwroot\Neon\less\neon-core.less" />
+    <None Include="wwwroot\Neon\less\neon-forms.less" />
+    <None Include="wwwroot\Neon\less\neon-less\404.less" />
+    <None Include="wwwroot\Neon\less\neon-less\alerts.less" />
+    <None Include="wwwroot\Neon\less\neon-less\badges.less" />
+    <None Include="wwwroot\Neon\less\neon-less\blockquote.less" />
+    <None Include="wwwroot\Neon\less\neon-less\boxed.less" />
+    <None Include="wwwroot\Neon\less\neon-less\breadcrumbs.less" />
+    <None Include="wwwroot\Neon\less\neon-less\buttons.less" />
+    <None Include="wwwroot\Neon\less\neon-less\calendar-2.less" />
+    <None Include="wwwroot\Neon\less\neon-less\calendar.less" />
+    <None Include="wwwroot\Neon\less\neon-less\chat.less" />
+    <None Include="wwwroot\Neon\less\neon-less\checkbox-replacement.less" />
+    <None Include="wwwroot\Neon\less\neon-less\comments.less" />
+    <None Include="wwwroot\Neon\less\neon-less\datatables.less" />
+    <None Include="wwwroot\Neon\less\neon-less\daterangepicker.less" />
+    <None Include="wwwroot\Neon\less\neon-less\dropdowns.less" />
+    <None Include="wwwroot\Neon\less\neon-less\form-wizard.less" />
+    <None Include="wwwroot\Neon\less\neon-less\forms.less" />
+    <None Include="wwwroot\Neon\less\neon-less\gallery.less" />
+    <None Include="wwwroot\Neon\less\neon-less\icheck.less" />
+    <None Include="wwwroot\Neon\less\neon-less\inbox.less" />
+    <None Include="wwwroot\Neon\less\neon-less\invoice.less" />
+    <None Include="wwwroot\Neon\less\neon-less\jumbotron.less" />
+    <None Include="wwwroot\Neon\less\neon-less\labels.less" />
+    <None Include="wwwroot\Neon\less\neon-less\language-selector.less" />
+    <None Include="wwwroot\Neon\less\neon-less\login.less" />
+    <None Include="wwwroot\Neon\less\neon-less\members.less" />
+    <None Include="wwwroot\Neon\less\neon-less\menu.less" />
+    <None Include="wwwroot\Neon\less\neon-less\miscellaneous.less" />
+    <None Include="wwwroot\Neon\less\neon-less\multiselect.less" />
+    <None Include="wwwroot\Neon\less\neon-less\neon-mixins.less" />
+    <None Include="wwwroot\Neon\less\neon-less\nestable.less" />
+    <None Include="wwwroot\Neon\less\neon-less\notes.less" />
+    <None Include="wwwroot\Neon\less\neon-less\page-transitions.less" />
+    <None Include="wwwroot\Neon\less\neon-less\panels.less" />
+    <None Include="wwwroot\Neon\less\neon-less\portlets.less" />
+    <None Include="wwwroot\Neon\less\neon-less\profile-info.less" />
+    <None Include="wwwroot\Neon\less\neon-less\profile.less" />
+    <None Include="wwwroot\Neon\less\neon-less\progress-bars.less" />
+    <None Include="wwwroot\Neon\less\neon-less\range-slider.less" />
+    <None Include="wwwroot\Neon\less\neon-less\responsive.less" />
+    <None Include="wwwroot\Neon\less\neon-less\search.less" />
+    <None Include="wwwroot\Neon\less\neon-less\select2.less" />
+    <None Include="wwwroot\Neon\less\neon-less\selectboxit.less" />
+    <None Include="wwwroot\Neon\less\neon-less\skin-variants.less" />
+    <None Include="wwwroot\Neon\less\neon-less\tables.less" />
+    <None Include="wwwroot\Neon\less\neon-less\tabs-accordions.less" />
+    <None Include="wwwroot\Neon\less\neon-less\tabs-vertical.less" />
+    <None Include="wwwroot\Neon\less\neon-less\tiles.less" />
+    <None Include="wwwroot\Neon\less\neon-less\tocify.less" />
+    <None Include="wwwroot\Neon\less\neon-less\tooltip-popovers.less" />
+    <None Include="wwwroot\Neon\less\neon-less\typeahead.less" />
+    <None Include="wwwroot\Neon\less\neon-less\variables-aliases.less" />
+    <None Include="wwwroot\Neon\less\neon-less\variables.less" />
+    <None Include="wwwroot\Neon\less\neon-less\vertical-timeline.less" />
+    <None Include="wwwroot\Neon\less\neon-less\wysihtml5.less" />
+    <None Include="wwwroot\Neon\less\neon-rtl.less" />
+    <None Include="wwwroot\Neon\less\neon-theme.less" />
+    <None Include="wwwroot\Neon\less\neon.less" />
+    <None Include="wwwroot\Neon\less\other-less\bootstrap-switch.less" />
+    <None Include="wwwroot\Neon\less\other-less\bootstrap-tagsinput.less" />
+    <None Include="wwwroot\Neon\less\other-less\bs-switch-deps\mixins.less" />
+    <None Include="wwwroot\Neon\less\other-less\bs-switch-deps\variables.less" />
+    <None Include="wwwroot\Neon\less\other-less\colorpicker.less" />
+    <None Include="wwwroot\Neon\less\other-less\datepicker.less" />
+    <None Include="wwwroot\Neon\less\other-less\fileinput.less" />
+    <None Include="wwwroot\Neon\less\other-less\lesshat.less" />
+    <None Include="wwwroot\Neon\less\other-less\morris.core.less" />
+    <None Include="wwwroot\Neon\less\other-less\perfect-scrollbar.less" />
+    <None Include="wwwroot\Neon\less\other-less\timepicker.less" />
+    <None Include="wwwroot\Neon\less\other-less\toastr.less" />
+    <None Include="wwwroot\Neon\less\skins\black.less" />
+    <None Include="wwwroot\Neon\less\skins\blue.less" />
+    <None Include="wwwroot\Neon\less\skins\cafe.less" />
+    <None Include="wwwroot\Neon\less\skins\facebook.less" />
+    <None Include="wwwroot\Neon\less\skins\green.less" />
+    <None Include="wwwroot\Neon\less\skins\purple.less" />
+    <None Include="wwwroot\Neon\less\skins\red.less" />
+    <None Include="wwwroot\Neon\less\skins\white.less" />
+    <None Include="wwwroot\Neon\less\skins\yellow.less" />
+    <None Include="wwwroot\scripts\PdfViewer\PDF_Succinctly.pdf" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AspNetCoreHero.ToastNotification" Version="1.1.0" />
+    <PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
+    <PackageReference Include="EPPlus" Version="8.2.1" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.21" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.9.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MimeKit" Version="4.14.0" />
+    <PackageReference Include="Otp.NET" Version="1.4.0" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
+    <PackageReference Include="Stimulsoft.Reports.Web.NetCore" Version="2025.4.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Cards" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Layouts" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Lists" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.DocIO.Net.Core" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.EJ2.JavaScript" Version="31.2.4" />
+    <PackageReference Include="Syncfusion.EJ2.PdfViewer.AspNet.Core" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.EJ2.SpellChecker.AspNet.Core" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="31.2.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.14.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Telerik.Reporting" Version="18.1.24.514" />
+    <PackageReference Include="Telerik.Reporting.Services.AspNetCore" Version="18.1.24.514" />
+    <PackageReference Include="Telerik.Reporting.Services.HttpClient" Version="18.1.24.514" />
+    <PackageReference Include="Telerik.UI.for.AspNet.Core" Version="2025.2.520" />
+    <PackageReference Include="Telerik.Web.PDF" Version="2025.2.520" />
+    <PackageReference Include="Telerik.WebReportDesigner.Services" Version="18.1.24.514" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\ej2\ej2.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\DadosEditaveis\ImagensOcorrencias\semimagem.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Abastecimento.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\alerta_transparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Arquivos.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\assustado.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\assustado_radioativo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\assustado_radioativo_3D.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\assustado_simples.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\barbudo.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\botao_cancelar.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\botao_confirmar.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\confirmar_transparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\dust_scratches.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\ErroCirculoVermelho.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\erro_transparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\eyebrown.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\FichaAmarelaNova.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\frotix.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\frotixpb.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Frotix_azul_sem_fundo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Frotix_azul_sem_fundo2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Frotix_azul_sem_fundo3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Frotix_cinza_sem_fundo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Frotix_sem_fundo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\GestaoViagens.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\info_sorridente_transparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\LogotipoCompletoFrotiXGrafiteFundoTransparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\LogotipoCompletoFrotiXRoxoFundoTransparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\LogotipoCompletoFrotiXRoxoFundoTransparenteEstreita.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Manutencao.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\MOB.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Multa.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Nervoso.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\profile-bg-1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Question.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Sand.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Schedule.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\success_oculos_transparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\sucesso_transparente.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\tanquecheio.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\tanquemeiotanque.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\tanqueumquarto.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\tanquevazio.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Trip.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\Veiculos.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Images\©.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\alerta_009.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\all.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\app.bundle.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\bootstrap-datepicker.pt-BR.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\bootstrap-datetimepicker.pt-BR.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\botao-loading.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\brands.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\cadastros\atualizacustosviagem_07.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\cadastros\Untitled-2.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\cadastros\ViagemUpsert_214 - Cópia.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\cadastros\ViagemUpsert_180.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\conflict-detection.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\custom.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\dropify.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\duotone.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\FileSaver.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\fontawesome.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\fullcalendar.6.1.8.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\higienizarviagens_054.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\index-date.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\jquery-1.7.0.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\jquery-3.5.1.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\jquery.inputmask.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\light.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\loading_script.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\modernizr-2.6.2.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\regular.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\sharp-duotone-solid.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\sharp-light.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\sharp-regular.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\sharp-solid.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\sharp-thin.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\site.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\solid.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\sweetalert_interop_059.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\thin.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\toastHelper_006.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\v4-shims.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\js\vendors.bundle.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Neon\js\neon-login.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Reports\Agendamento.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaAberta.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaAgendamento.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaCancelada.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaEvento.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaEventoCancelado.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaEventoRealizado.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\FichaRealizada.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\Motoristas.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\Viagem.trdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\DadosEditaveis\Cupons\" />
+    <Folder Include="wwwroot\DadosEditaveis\ImagensOcorrencias\" />
+    <Folder Include="wwwroot\Images\icons\" />
+    <Folder Include="wwwroot\js\vendors-bundle-bs5\dist\" />
+    <Folder Include="wwwroot\scripts\PdfViewer\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="wwwroot\Images\tanquetresquartos.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Controllers\MultaPdfViewerController.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Target Name="PreBuildCleanupSafe" BeforeTargets="CoreCompile" DependsOnTargets="Restore">
+    <ItemGroup>
+      <FilesToIgnore Include="$(BaseIntermediateOutputPath)\**\*.cache.json" />
+    </ItemGroup>
+    <ItemGroup>
+      <FoldersToClean Include="$(BaseIntermediateOutputPath)\ref" />
+      <FoldersToClean Include="$(BaseIntermediateOutputPath)\temp" />
+      <FoldersToClean Include="$(BaseIntermediateOutputPath)\intermediate" />
+      <FoldersToClean Include="$(OutputPath)\temp" />
+    </ItemGroup>
+    <RemoveDir Directories="@(FoldersToClean)" ContinueOnError="true" />
+  </Target>
+</Project>

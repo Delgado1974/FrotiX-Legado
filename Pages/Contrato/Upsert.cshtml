@@ -1,0 +1,1252 @@
+@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Contrato.UpsertModel
+
+@{
+    ViewData["Title"] = "Contratos";
+    ViewData["PageName"] = "contrato_upsert";
+    ViewData["Heading"] = "<i class='fa-duotone fa-folders'></i> Cadastros: <span class='fw-300'>Contratos</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-regular fa-folders";
+}
+
+<script>
+
+    function calculate(args) {
+        try {
+            if (args === undefined) return;
+
+            try {
+                var valorunitario = args.data.valorunitario;
+                var quantidade = args.data.quantidade;
+
+                valorunitario = brToFloat(valorunitario);
+                quantidade = brToFloat(quantidade);
+
+                var valortotal = valorunitario * quantidade;
+
+                if (args.column.headerText == "Valor Total") {
+                    $(args.cell).text(floatToBR(valortotal));
+                }
+
+                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                var rows = gridObj.getRows();
+                var totalGrid = 0;
+
+                for (var i = 0; i < rows.length; i++) {
+                    var qtdCell = gridObj.getRows()[i].cells[2];
+                    var valCell = gridObj.getRows()[i].cells[3];
+                    if (!qtdCell || !valCell) continue;
+
+                    var qtd = brToFloat(qtdCell.innerText);
+                    var val = brToFloat(valCell.innerText);
+                    totalGrid += (val * qtd);
+                }
+
+                $("#txtTotal").val(floatToBR(totalGrid));
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "calculate.inner", error);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "calculate", error);
+        }
+    }
+
+</script>
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    escondido {
+        visibility: hidden;
+    }
+
+    .input-icons i { position: absolute; }
+
+    .input-icons {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .icon { padding: 10px; min-width: 40px; }
+
+    .input-field { width: 100%; padding: 10px; text-align: center; }
+
+    .disable-element { pointer-events: none; opacity: 0.4; }
+
+    .wrapper { cursor: not-allowed; }
+
+    .e-grid * { font-size: 12px !important; }
+</style>
+
+@section HeadBlock {
+}
+
+<form method="post" asp-action="Upsert">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @if (Model.ContratoObj.Contrato.ContratoId != Guid.Empty)
+                        {
+                            <input type="hidden" asp-for="ContratoObj.Contrato.ContratoId" />
+                        }
+
+                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+                            <h2 class="text-primary">
+                                @(Model.ContratoObj.Contrato.ContratoId != Guid.Empty ? "Atualizar " : "Criar ") Contrato
+                            </h2>
+                        </div>
+
+                        <div class="col-12 pt-3">
+
+                            <div class="row">
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.AnoContrato"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.AnoContrato"></span>
+                                        <input id="txtAno" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.AnoContrato" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.NumeroContrato"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.NumeroContrato"></span>
+                                        <input id="txtNumeroContrato" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.NumeroContrato" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.NumeroProcesso"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.NumeroProcesso"></span>
+                                        <input id="txtNumeroProcesso" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.NumeroProcesso" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.AnoProcesso"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.AnoProcesso"></span>
+                                        <input id="txtAnoProcesso" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.AnoProcesso" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.Vigencia"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Vigencia"></span>
+                                        <select id="lstVigencia" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Vigencia">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.Prorrogacao"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Prorrogacao"></span>
+                                        <select id="lstProrrogacao" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Prorrogacao">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.FornecedorId"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.FornecedorId"></span>
+                                        @Html.DropDownListFor(m => m.ContratoObj.Contrato.FornecedorId,
+                                            Model.ContratoObj.FornecedorList,
+                                            "- Selecione um Fornecedor -",
+                                            new { @class = "form-control form-control-xs", @Name = "lstFornecedor" })
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.Objeto"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Objeto"></span>
+                                        <input id="lstObjeto" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Objeto" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="divTipoContrato" class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.TipoContrato"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.TipoContrato"></span>
+                                        <select id="lstTipoContrato" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.TipoContrato">
+                                            <option value="">-- Tipo Contrato --</option>
+                                            <option value="Serviços">Serviços</option>
+                                            <option value="Terceirização">Terceirização</option>
+                                            <option value="Locação">Locação</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.DataInicio"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.DataInicio"></span>
+                                        <input id="txtDataInicio" class="form-control form-control-xs" type="date" asp-for="ContratoObj.Contrato.DataInicio" />
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.DataFim"></label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.DataFim"></span>
+                                        <input id="txtDataFim" class="form-control form-control-xs" type="date" asp-for="ContratoObj.Contrato.DataFim" />
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" id="lblValor">Valor (R$)</label>
+                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Valor"></span>
+                                        <input id="valor" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.Valor" onKeyPress="return(moeda(this,'.',',',event))" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="divListaRepactuacoes" class="row" style="display:none">
+                                <div class="col-6">
+                                    <label class="label font-weight-bold">Selecione uma Repactuação para ver os Itens</label>
+                                    <span class="text-danger font-weight-light"></span>
+                                    <select id="lstRepactuacao" name="lstRepactuacao" class="form-control form-control-xs">
+                                        <option value="">-- Selecione uma Repactuação --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <br />
+                            <br />
+                            <div id="divTerceirizacao" class="col-9" style="display:none">
+                                <label class="label font-weight-bold">Valores Mensais Unitários</label>
+
+                                <div>
+                                    <div class="form-group">
+                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
+                                        {
+                                            <label id="lblencarregados" class="label font-weight-bold">
+                                                <input id="chkencarregados" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoEncarregados" />
+                                                Encarregados (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <input id="CustoMensalEncarregados" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalEncarregado" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input id="txtQtdEncarregados" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeEncarregado" style="text-align: right;" />
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
+                                            {
+                                                <label id="lblencarregados" class="label font-weight-bold">
+                                                    <input disabled id="chkencarregados" type="checkbox" class="form-check-input" />
+                                                    Encarregados (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <input disabled id="CustoMensalEncarregados" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input disabled id="txtQtdEncarregados" class="form-control form-control-xs" style="text-align: right;" />
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="form-group">
+                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
+                                        {
+                                            <label id="lbloperadores" class="label font-weight-bold">
+                                                <input id="chkoperadores" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoOperadores" />
+                                                Operadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <input id="CustoMensalOperadores" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalOperador" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input id="txtQtdOperadores" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeOperador" style="text-align: right;" />
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
+                                            {
+                                                <label id="lbloperadores" class="label font-weight-bold">
+                                                    <input disabled id="chkoperadores" type="checkbox" class="form-check-input" />
+                                                    Operadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <input disabled id="CustoMensalOperadores" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input disabled id="txtQtdOperadores" class="form-control form-control-xs" style="text-align: right;" />
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="form-group">
+                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
+                                        {
+                                            <label id="lblmotoristas" class="label font-weight-bold">
+                                                <input disabled id="chkmotoristas" type="checkbox" class="form-check-input" />
+                                                Motoristas (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <input disabled id="CustoMensalMotoristas" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalMotorista" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input disabled id="txtQtdMotoristas" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeMotorista" style="text-align: right;" />
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
+                                            {
+                                                <label id="lblmotoristas" class="label font-weight-bold">
+                                                    <input disabled id="chkmotoristas" type="checkbox" class="form-check-input" />
+                                                    Motoristas (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <input disabled id="CustoMensalMotoristas" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input disabled id="txtQtdMotoristas" class="form-control form-control-xs" style="text-align: right;" />
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="form-group">
+                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
+                                        {
+                                            <label id="lbllavadores" class="label font-weight-bold">
+                                                <input id="chklavadores" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoLavadores" />
+                                                Lavadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <input id="CustoMensalLavadores" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalLavador" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input id="txtQtdLavadores" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeLavador" style="text-align: right;" />
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
+                                            {
+                                                <label id="lbllavadores" class="label font-weight-bold">
+                                                    <input disabled id="chklavadores" type="checkbox" class="form-check-input" />
+                                                    Lavadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <input disabled id="CustoMensalLavadores" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <input disabled id="txtQtdLavadores" class="form-control form-control-xs" style="text-align: right;" />
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="divVeiculosAdd" class="row" style="display:none">
+                                @{
+                                    List<object> cols = new List<object>();
+                                    cols.Add(new { field = "numitem", direction = "Ascending" });
+                                }
+                                @{
+                                <ejs-grid id="grdVeiculos" toolbar="@(new List<string>() { "Add", "Update", "Delete", "Cancel" })" GridLines="Both" QueryCellInfo="calculate" allowSorting="true">
+                                    <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" newRowPosition="Bottom"></e-grid-editSettings>
+                                    <e-grid-sortsettings columns="cols"></e-grid-sortsettings>
+                                    <e-grid-columns>
+                                        <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" allowEditing="true" format="N2"></e-grid-column>
+                                        <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" allowEditing="false" format="N2"></e-grid-column>
+                                    </e-grid-columns>
+                                </ejs-grid>
+                                }
+                                <div class="row">
+                                    <div class="col-3">
+                                        <label class="label font-weight-bold">Total Geral</label>
+                                        <input id="txtTotal" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
+                                    </div>
+                                    <div class="col-3" style="padding:0px;margin-top:22px;">
+                                        <button id="btnAtualizaTotal" type="button" class="btn btn-azul form-control">
+                                            <i class="fa-duotone fa-arrows-rotate icon-space"></i> Atualizar Total Após Edição
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="divVeiculosEdit" class="row" style="display:none">
+                                <div>
+                                    <ejs-grid id="grdVeiculos2" allowPaging="false" GridLines="Both">
+                                        <e-grid-columns>
+                                            <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20"></e-grid-column>
+                                            <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150"></e-grid-column>
+                                            <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" format="N0"></e-grid-column>
+                                            <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" format="N2"></e-grid-column>
+                                            <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" format="N2"></e-grid-column>
+                                        </e-grid-columns>
+                                    </ejs-grid>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Total Geral</label>
+                                        <input id="txtTotalEdit" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">
+                                            <input id="chkAtivo" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.Status" />
+                                            Ativo/Inativo
+                                        </label>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            @if (Model.ContratoObj.Contrato.ContratoId != Guid.Empty)
+                                            {
+                                            <button id="btnEdita" type="button" asp-page-handler="Edit" asp-route-id="@Model.ContratoObj.Contrato.ContratoId" class="btn btn-azul form-control" data-ejtip="Atualizar Contrato">
+                                                <i class="fa-duotone fa-file-check icon-space icon-pulse"></i> Atualizar
+                                            </button>
+                                            }
+                                            else
+                                            {
+                                            <button id="btnAdiciona" type="button" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" data-ejtip="Criar Novo Contrato">
+                                                <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
+                                            </button>
+                                            }
+                                        </div>
+                                        <div class="col-6">
+                                            <a asp-page="./Index" class="btn btn-vinho form-control" data-ejtip="Voltar para a Lista de Contratos">
+                                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        Number.prototype.format = function(n, x, s, c) {
+            try {
+                var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
+                    num = this.toFixed(Math.max(0, ~~n));
+                return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "format", error);
+            }
+        };
+
+        function brToFloat(v) {
+            try {
+                if (v == null) return 0;
+                if (typeof v === 'number') return v;
+                v = (v + '').replace(/\s/g,'').replace(/\./g, '').replace(',', '.').replace('R$', '').replace('R$&nbsp;', '');
+                var n = parseFloat(v);
+                return isNaN(n) ? 0 : n;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "brToFloat", error);
+                return 0;
+            }
+        }
+
+        function floatToBR(v) {
+            try {
+                return (isNaN(v) ? 0 : v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "floatToBR", error);
+                return "0,00";
+            }
+        }
+
+        $(document).ready(function () {
+            try {
+                const CONTRATO_ID = '@Model.ContratoObj.Contrato.ContratoId';
+                const isEdit = (CONTRATO_ID && CONTRATO_ID !== '00000000-0000-0000-0000-000000000000');
+
+                document.getElementById("divListaRepactuacoes").style.display = "none";
+                document.getElementById("divVeiculosAdd").style.display = "none";
+                document.getElementById("divVeiculosEdit").style.display = "none";
+                document.getElementById("divTerceirizacao").style.display = "none";
+
+                if (isEdit) {
+                    $("#lblValor").text("Valor Repactuado (R$)");
+                    document.getElementById("lblValor").textContent = "Valor Repactuado (R$)";
+
+                    (function formatValorInicial() {
+                        try {
+                            var raw = '@Model.ContratoObj.Contrato.Valor';
+                            var num = brToFloat(raw);
+                            document.getElementById("valor").value = floatToBR(num);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "formatValorInicial", error);
+                        }
+                    })();
+
+                    $("#lstTipoContrato").attr('disabled', 'disabled');
+
+                    document.getElementById("divListaRepactuacoes").style.display = "block";
+
+                    $.ajax({
+                        url: "api/Contrato/RepactuacaoList",
+                        method: "GET",
+                        data: { id: CONTRATO_ID },
+                        success: function (res) {
+                            try {
+                                var option = '<option>-- Selecione uma Repactuação --</option>';
+                                if (res != null && res.data && res.data.length) {
+                                    res.data.forEach(function (obj) {
+                                        option += '<option value="' + obj.repactuacaoContratoId + '">';
+                                        option += obj.repactuacao;
+                                        option += '</option>';
+                                    });
+                                }
+                                $('#lstRepactuacao').empty().append(option);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "RepactuacaoList.success", error);
+                            }
+                        },
+                        error: function (err) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "RepactuacaoList.error", err);
+                        }
+                    });
+
+                    var tipo = '@Model.ContratoObj.Contrato.TipoContrato';
+                    if (tipo === 'Locação' || tipo === 'Loca&#xE7;&#xE3;o') {
+                        document.getElementById("divVeiculosEdit").style.display = "block";
+                        var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                        gridObj.element.classList.add('disable-element');
+                    }
+                    if (tipo === 'Terceirização' || tipo === 'Terceiriza&#xE7;&#xE3;o') {
+                    }
+                } else {
+                    document.getElementById("chkAtivo").checked = true;
+                }
+
+                $('#lstTipoContrato').on('change', function () {
+                    try {
+                        if (!isEdit) {
+                            document.getElementById("divListaRepactuacoes").style.display = "none";
+                        }
+
+                        document.getElementById("divVeiculosAdd").style.display = "none";
+                        document.getElementById("divVeiculosEdit").style.display = "none";
+                        document.getElementById("divTerceirizacao").style.display = "none";
+
+                        if (this.value === 'Terceirização') {
+                            document.getElementById("divTerceirizacao").style.display = "block";
+                            document.getElementById("chkoperadores").checked = false;
+                            document.getElementById("chkmotoristas").checked = false;
+                            document.getElementById("chklavadores").checked = false;
+                            document.getElementById("chkencarregados").checked = false;
+                            document.getElementById("chkmotoristas").disabled = false;
+                        }
+
+                        if (this.value === 'Locação') {
+                            if (isEdit) {
+                                document.getElementById("divVeiculosEdit").style.display = "initial";
+                            } else {
+                                document.getElementById("divVeiculosAdd").style.display = "initial";
+                            }
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "lstTipoContrato.change", error);
+                    }
+                });
+
+                $('#chkencarregados').on('change', function () {
+                    try {
+                        if (!document.getElementById("chkencarregados").checked) {
+                            $("#CustoMensalEncarregados").attr("disabled", "true").val("");
+                            $("#txtQtdEncarregados").attr("disabled", "true").val("");
+                        } else {
+                            $("#CustoMensalEncarregados").removeAttr("disabled");
+                            $("#txtQtdEncarregados").removeAttr("disabled");
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "chkencarregados.change", error);
+                    }
+                });
+
+                $('#chkoperadores').on('change', function () {
+                    try {
+                        if (!document.getElementById("chkoperadores").checked) {
+                            $("#CustoMensalOperadores").attr("disabled", "true").val("");
+                            $("#txtQtdOperadores").attr("disabled", "true").val("");
+                        } else {
+                            $("#CustoMensalOperadores").removeAttr("disabled");
+                            $("#txtQtdOperadores").removeAttr("disabled");
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "chkoperadores.change", error);
+                    }
+                });
+
+                $('#chkmotoristas').on('change', function () {
+                    try {
+                        if (!document.getElementById("chkmotoristas").checked) {
+                            $("#CustoMensalMotoristas").attr("disabled", "true").val("");
+                            $("#txtQtdMotoristas").attr("disabled", "true").val("");
+                        } else {
+                            $("#CustoMensalMotoristas").removeAttr("disabled");
+                            $("#txtQtdMotoristas").removeAttr("disabled");
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "chkmotoristas.change", error);
+                    }
+                });
+
+                $('#chklavadores').on('change', function () {
+                    try {
+                        if (!document.getElementById("chklavadores").checked) {
+                            $("#CustoMensalLavadores").attr("disabled", "true").val("");
+                            $("#txtQtdLavadores").attr("disabled", "true").val("");
+                        } else {
+                            $("#CustoMensalLavadores").removeAttr("disabled");
+                            $("#txtQtdLavadores").removeAttr("disabled");
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "chklavadores.change", error);
+                    }
+                });
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "document.ready", error);
+            }
+        });
+
+        $("#btnAdiciona").click(function (event) {
+            try {
+                event.preventDefault();
+                InsereRegistro();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "btnAdiciona.click", error);
+            }
+        });
+
+        $("#btnEdita").click(function (event) {
+            try {
+                event.preventDefault();
+                InsereRegistro();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "btnEdita.click", error);
+            }
+        });
+
+        function InsereRegistro() {
+            try {
+                if (document.getElementById("txtAno").value === "") {
+                    Alerta.Erro("Informação Ausente", "O ano do contrato é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("txtNumeroContrato").value === "") {
+                    Alerta.Erro("Informação Ausente", "O número do contrato é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("txtNumeroProcesso").value === "") {
+                    Alerta.Erro("Informação Ausente", "O número do processo é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("txtAnoProcesso").value === "") {
+                    Alerta.Erro("Informação Ausente", "O ano do processo é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("lstVigencia").value === "") {
+                    Alerta.Erro("Informação Ausente", "A vigência do contrato é obrigatória");
+                    return;
+                }
+
+                if (document.getElementById("lstProrrogacao").value === "") {
+                    Alerta.Erro("Informação Ausente", "A prorrogação do contrato é obrigatória");
+                    return;
+                }
+
+                if (document.getElementById("ContratoObj_Contrato_FornecedorId").value === "") {
+                    Alerta.Erro("Informação Ausente", "O fornecedor do contrato é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("lstObjeto").value === "") {
+                    Alerta.Erro("Informação Ausente", "O objeto do contrato é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "") {
+                    Alerta.Erro("Informação Ausente", "O tipo do contrato é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("txtDataInicio").value === "") {
+                    Alerta.Erro("Informação Ausente", "A data de início do contrato é obrigatória");
+                    return;
+                }
+
+                if (document.getElementById("txtDataFim").value === "") {
+                    Alerta.Erro("Informação Ausente", "A data de fim do contrato é obrigatória");
+                    return;
+                }
+
+                if (document.getElementById("valor").value === "") {
+                    Alerta.Erro("Informação Ausente", "O valor do contrato é obrigatório");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "Terceirização" && document.getElementById("chkencarregados").checked === false) {
+                    Alerta.Erro("Informação Ausente", "Para um contrato de terceirização, você deve informar ao menos 01 encarregado.");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "Terceirização"
+                    && document.getElementById("chkoperadores").checked === false
+                    && document.getElementById("chkmotoristas").checked === false
+                    && document.getElementById("chklavadores").checked === false) {
+                    Alerta.Erro("Informação Ausente", "Para um contrato de terceirização, você deve escolher ao menos uma opção dentre Operadores/Motoristas/Lavadores.");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "Terceirização"
+                    && document.getElementById("chkencarregados").checked === true
+                    && (document.getElementById("CustoMensalEncarregados").value === '' || document.getElementById("txtQtdEncarregados").value === '')) {
+                    Alerta.Erro("Informação Ausente", "Você deve informar a quantidade e o custo unitário mensal dos Encarregados.");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "Terceirização"
+                    && document.getElementById("chkoperadores").checked === true
+                    && (document.getElementById("CustoMensalOperadores").value === '' || document.getElementById("txtQtdOperadores").value === '')) {
+                    Alerta.Erro("Informação Ausente", "Você deve informar a quantidade e o custo unitário mensal dos Operadores.");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "Terceirização"
+                    && document.getElementById("chkmotoristas").checked === true
+                    && (document.getElementById("CustoMensalMotoristas").value === '' || document.getElementById("txtQtdMotoristas").value === '')) {
+                    Alerta.Erro("Informação Ausente", "Você deve informar a quantidade e o custo unitário mensal dos Motoristas.");
+                    return;
+                }
+
+                if (document.getElementById("lstTipoContrato").value === "Terceirização"
+                    && document.getElementById("chklavadores").checked === true
+                    && (document.getElementById("CustoMensalLavadores").value === '' || document.getElementById("txtQtdLavadores").value === '')) {
+                    Alerta.Erro("Informação Ausente", "Você deve informar a quantidade e o custo unitário mensal dos Lavadores.");
+                    return;
+                }
+
+                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                var getRows = gridObj.getRows();
+
+                if (document.getElementById("lstTipoContrato").value === "Locação" && getRows.length === 0 &&
+                    ('@Model.ContratoObj.Contrato.ContratoId' === null || '@Model.ContratoObj.Contrato.ContratoId' === '00000000-0000-0000-0000-000000000000')) {
+                    Alerta.Erro("Informação Ausente", "Para um contrato de locação, você deve informar ao menos um veículo.");
+                    return;
+                }
+
+                if ('@Model.ContratoObj.Contrato.ContratoId' === null || '@Model.ContratoObj.Contrato.ContratoId' === '00000000-0000-0000-0000-000000000000') {
+
+                    var valorcontrato = brToFloat($('#valor').val());
+
+                    var valorencarregado = 0, valoroperador = 0, valormotorista = 0, valorlavador = 0;
+
+                    if (document.getElementById("lstTipoContrato").value === "Terceirização") {
+                        valorencarregado = brToFloat($('#CustoMensalEncarregados').val());
+                        valoroperador   = brToFloat($('#CustoMensalOperadores').val());
+                        valormotorista  = brToFloat($('#CustoMensalMotoristas').val());
+                        valorlavador    = brToFloat($('#CustoMensalLavadores').val());
+                    }
+
+                    var objContrato = JSON.stringify({
+                        "AnoContrato": $('#txtAno').val(),
+                        "NumeroContrato": $('#txtNumeroContrato').val(),
+                        "NumeroProcesso": $('#txtNumeroProcesso').val(),
+                        "AnoProcesso": $('#txtAnoProcesso').val(),
+                        "Vigencia": $('#lstVigencia').val(),
+                        "Prorrogacao": $('#lstProrrogacao').val(),
+                        "FornecedorId": $('#ContratoObj_Contrato_FornecedorId').val(),
+                        "Objeto": $('#lstObjeto').val(),
+                        "DataInicio": $('#txtDataInicio').val(),
+                        "DataFim": $('#txtDataFim').val(),
+                        "TipoContrato": $('#lstTipoContrato').val(),
+                        "Valor": valorcontrato,
+                        "ContratoEncarregados": $("#chkencarregados").is(':checked'),
+                        "CustoMensalEncarregado": valorencarregado,
+                        "QuantidadeEncarregado": $('#txtQtdEncarregados').val(),
+                        "ContratoOperadores": $("#chkoperadores").is(':checked'),
+                        "CustoMensalOperador": valoroperador,
+                        "QuantidadeOperador": $('#txtQtdOperadores').val(),
+                        "ContratoMotoristas": $("#chkmotoristas").is(':checked'),
+                        "CustoMensalMotorista": valormotorista,
+                        "QuantidadeMotorista": $('#txtQtdMotoristas').val(),
+                        "ContratoLavadores": $("#chklavadores").is(':checked'),
+                        "CustoMensalLavador": valorlavador,
+                        "QuantidadeLavador": $('#txtQtdLavadores').val(),
+                        "Status": document.getElementById("chkAtivo").checked
+                    });
+
+                    $.ajax({
+                        type: "post",
+                        url: "api/Contrato/InsereContrato",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: objContrato,
+                        success: function (data) {
+                            try {
+                                var RepactuacaoId = data.data;
+
+                                if (document.getElementById("lstTipoContrato").value === "Locação") {
+                                    var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                                    var getRows = gridObj.getRows();
+
+                                    for (var i = 0; i < getRows.length; i++) {
+                                        var valorunitario = brToFloat(gridObj.getRows()[i].cells[3].innerHTML);
+
+                                        var objItemContrato = JSON.stringify({
+                                            "NumItem": gridObj.getRows()[i].cells[0].innerHTML,
+                                            "Descricao": gridObj.getRows()[i].cells[1].innerHTML,
+                                            "Quantidade": gridObj.getRows()[i].cells[2].innerHTML,
+                                            "ValorUnitario": valorunitario,
+                                            "RepactuacaoContratoId": RepactuacaoId
+                                        });
+
+                                        $.ajax({
+                                            type: "post",
+                                            url: "api/Contrato/InsereItemContrato",
+                                            contentType: "application/json; charset=utf-8",
+                                            dataType: "json",
+                                            data: objItemContrato
+                                        });
+                                    }
+                                }
+
+                                if (document.getElementById("lstTipoContrato").value === "Terceirização") {
+                                    var objRepactuacaoTerceirizacao = JSON.stringify({
+                                        "RepactuacaoContratoId": RepactuacaoId,
+                                        "DataRepactuacao": $('#txtDataInicio').val(),
+                                        "ValorEncarregado": valorencarregado,
+                                        "QtdEncarregados": document.getElementById("txtQtdEncarregados").value,
+                                        "ValorOperador": valoroperador,
+                                        "QtdOPeradores": document.getElementById("txtQtdOperadores").value,
+                                        "ValorMotorista": valormotorista,
+                                        "QtdMotoristas": document.getElementById("txtQtdMotoristas").value,
+                                        "ValorLavador": valorlavador,
+                                        "QtdLavadores": document.getElementById("txtQtdLavadores").value
+                                    });
+
+                                    $.ajax({
+                                        type: "post",
+                                        url: "api/Contrato/InsereRepactuacaoTerceirizacao",
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        data: objRepactuacaoTerceirizacao
+                                    });
+                                }
+
+                                if (document.getElementById("lstTipoContrato").value === "Serviços") {
+                                    var objRepactuacaoServicos = JSON.stringify({
+                                        "RepactuacaoContratoId": RepactuacaoId,
+                                        "DataRepactuacao": $('#txtDataInicio').val(),
+                                        "Valor": valorcontrato
+                                    });
+
+                                    $.ajax({
+                                        type: "post",
+                                        url: "api/Contrato/InsereRepactuacaoServicos",
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        data: objRepactuacaoServicos
+                                    });
+                                }
+
+                                location.replace("/contrato");
+                                AppToast.show('Verde', "Contrato Adicionado com Sucesso!", 2000);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereContrato.success", error);
+                            }
+                        },
+                        error: function (data) {
+                            try {
+                                AppToast.show('Vermelho', data.message, 2000);
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereContrato.error", error);
+                            }
+                        }
+                    });
+                } else {
+                    var valorcontrato = brToFloat($('#valor').val());
+
+                    var valorencarregado = 0, valoroperador = 0, valormotorista = 0, valorlavador = 0;
+
+                    if (document.getElementById("lstTipoContrato").value === "Terceirização") {
+                        valorencarregado = brToFloat($('#CustoMensalEncarregados').val());
+                        valoroperador   = brToFloat($('#CustoMensalOperadores').val());
+                        valormotorista  = brToFloat($('#CustoMensalMotoristas').val());
+                        valorlavador    = brToFloat($('#CustoMensalLavadores').val());
+                    }
+
+                    var objContrato = JSON.stringify({
+                        "ContratoId": '@Model.ContratoObj.Contrato.ContratoId',
+                        "AnoContrato": $('#txtAno').val(),
+                        "NumeroContrato": $('#txtNumeroContrato').val(),
+                        "NumeroProcesso": $('#txtNumeroProcesso').val(),
+                        "AnoProcesso": $('#txtAnoProcesso').val(),
+                        "Vigencia": $('#lstVigencia').val(),
+                        "Prorrogacao": $('#lstProrrogacao').val(),
+                        "FornecedorId": $('#ContratoObj_Contrato_FornecedorId').val(),
+                        "Objeto": $('#lstObjeto').val(),
+                        "DataInicio": $('#txtDataInicio').val(),
+                        "DataFim": $('#txtDataFim').val(),
+                        "TipoContrato": $('#lstTipoContrato').val(),
+                        "Valor": valorcontrato,
+                        "ContratoEncarregados": $("#chkencarregados").is(':checked'),
+                        "CustoMensalEncarregado": valorencarregado,
+                        "QuantidadeEncarregado": $('#txtQtdEncarregados').val(),
+                        "ContratoOperadores": $("#chkoperadores").is(':checked'),
+                        "CustoMensalOperador": valoroperador,
+                        "QuantidadeOperador": $('#txtQtdOperadores').val(),
+                        "ContratoMotoristas": $("#chkmotoristas").is(':checked'),
+                        "CustoMensalMotorista": valormotorista,
+                        "QuantidadeMotorista": $('#txtQtdMotoristas').val(),
+                        "ContratoLavadores": $("#chklavadores").is(':checked'),
+                        "CustoMensalLavador": valorlavador,
+                        "QuantidadeLavador": $('#txtQtdLavadores').val(),
+                        "Status": document.getElementById("chkAtivo").checked
+                    });
+
+                    $.ajax({
+                        type: "post",
+                        url: "api/Contrato/EditaContrato",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: objContrato,
+                        success: function () {
+                            try {
+                                location.replace("/contrato");
+								AppToast.show('Verde', "Contrato Atualizado com Sucesso!" );
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "EditaContrato.success", error);
+                            }
+                        },
+                        error: function (data) {
+                            try {
+                                AppToast.show('Vermelho', data.message );
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "EditaContrato.error", error);
+                            }
+                        }
+                    });
+                }
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "InsereRegistro", error);
+            }
+        }
+    </script>
+
+    <script>
+        function moeda(a, e, r, t) {
+            try {
+                let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
+                    o = window.Event ? t.which : t.keyCode;
+                if (13 == o || 8 == o) return !0;
+                if (n = String.fromCharCode(o), -1 == "0123456789".indexOf(n)) return !1;
+                for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
+                for (l = ""; h < u; h++) -1 != "0123456789".indexOf(a.value.charAt(h)) && (l += a.value.charAt(h));
+                if (l += n, 0 == (u = l.length) && (a.value = ""), 1 == u && (a.value = "0" + r + "0" + l), 2 == u && (a.value = "0" + r + l), u > 2) {
+                    for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--)
+                        3 == j && (ajd2 += e, j = 0), ajd2 += l.charAt(h), j++;
+                    for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
+                    a.value += r + l.substr(u - 2, u)
+                }
+                return !1
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "moeda", error);
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                function actionComplete(args) {
+                    try {
+                        if (args.requestType == "save") {
+                            var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                            gridObj.dataSource.shift();
+                            gridObj.dataSource.push(args.data);
+                            gridObj.refresh();
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "actionComplete", error);
+                    }
+                }
+
+                document.getElementById("lstRepactuacao").addEventListener("change", function () {
+                    try {
+                        let RepactuacaoContratoId = document.getElementById("lstRepactuacao").value;
+
+                        if (document.getElementById("lstTipoContrato").value === "Locação") {
+
+                            if (RepactuacaoContratoId === "-- Selecione uma Repactuação --" || RepactuacaoContratoId === "") {
+                                document.getElementById("divVeiculosEdit").style.display = "none";
+                                return;
+                            } else {
+                                document.getElementById("divVeiculosEdit").style.display = "block";
+                            }
+
+                            var grid = document.getElementById('grdVeiculos2').ej2_instances[0];
+
+                            $.ajax({
+                                url: 'api/GridContrato/DataSource',
+                                type: "GET",
+                                success: function (res) {
+                                    try {
+                                        var objItens = res || [];
+                                        objItens = objItens.filter(function (obj) {
+                                            return obj.repactuacaoId === RepactuacaoContratoId;
+                                        });
+
+                                        grid.dataSource = objItens;
+
+                                        var valortotal = 0;
+                                        for (var i = 0; i < objItens.length; i++) {
+                                            valortotal += (objItens[i].valortotal || 0);
+                                        }
+                                        document.getElementById("txtTotalEdit").value = floatToBR(valortotal);
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "DataSource.success", error);
+                                    }
+                                },
+                                error: function (err) {
+                                    Alerta.TratamentoErroComLinha("Upsert.cshtml", "DataSource.error", err);
+                                }
+                            });
+                        }
+
+                        if (document.getElementById("lstTipoContrato").value === "Terceirização") {
+
+                            document.getElementById("divTerceirizacao").style.display = "block";
+
+                            if (RepactuacaoContratoId === "-- Selecione uma Repactuação --" || RepactuacaoContratoId === "") {
+                                document.getElementById("divTerceirizacao").style.display = "none";
+                                return;
+                            }
+
+                            $.ajax({
+                                type: "GET",
+                                url: 'api/Contrato/RecuperaRepactuacaoTerceirizacao',
+                                data: { RepactuacaoContratoId: RepactuacaoContratoId },
+                                contentType: "application/json",
+                                dataType: "json",
+                                success: function (objRep) {
+                                    try {
+                                        var o = objRep && objRep.objRepactuacaoTerceirizacao ? objRep.objRepactuacaoTerceirizacao : null;
+                                        if (!o) return;
+
+                                        if (o.valorEncarregado != null && o.valorEncarregado != 0) {
+                                            document.getElementById("chkencarregados").checked = true;
+                                            document.getElementById("CustoMensalEncarregados").value = floatToBR(o.valorEncarregado);
+                                            document.getElementById("txtQtdEncarregados").value = o.qtdEncarregados || "";
+                                        } else {
+                                            document.getElementById("chkencarregados").checked = false;
+                                            document.getElementById("CustoMensalEncarregados").value = "";
+                                            document.getElementById("txtQtdEncarregados").value = "";
+                                        }
+
+                                        if (o.valorOperador != null && o.valorOperador != 0) {
+                                            document.getElementById("chkoperadores").checked = true;
+                                            document.getElementById("CustoMensalOperadores").value = floatToBR(o.valorOperador);
+                                            document.getElementById("txtQtdOperadores").value = o.qtdOperadores || "";
+                                        } else {
+                                            document.getElementById("chkoperadores").checked = false;
+                                            document.getElementById("CustoMensalOperadores").value = "";
+                                            document.getElementById("txtQtdOperadores").value = "";
+                                        }
+
+                                        if (o.valorMotorista != null && o.valorMotorista != 0) {
+                                            document.getElementById("chkmotoristas").checked = true;
+                                            document.getElementById("CustoMensalMotoristas").value = floatToBR(o.valorMotorista);
+                                            document.getElementById("txtQtdMotoristas").value = o.qtdMotoristas || "";
+                                        } else {
+                                            document.getElementById("chkmotoristas").checked = false;
+                                            document.getElementById("CustoMensalMotoristas").value = "";
+                                            document.getElementById("txtQtdMotoristas").value = "";
+                                        }
+
+                                        if (o.valorLavador != null && o.valorLavador != 0) {
+                                            document.getElementById("chklavadores").checked = true;
+                                            document.getElementById("CustoMensalLavadores").value = floatToBR(o.valorLavador);
+                                            document.getElementById("txtQtdLavadores").value = o.qtdLavadores || "";
+                                        } else {
+                                            document.getElementById("chklavadores").checked = false;
+                                            document.getElementById("CustoMensalLavadores").value = "";
+                                            document.getElementById("txtQtdLavadores").value = "";
+                                        }
+
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "RecuperaTerceirizacao.success", error);
+                                    }
+                                },
+                                error: function (data) {
+                                    Alerta.TratamentoErroComLinha("Upsert.cshtml", "RecuperaTerceirizacao.error", data);
+                                }
+                            });
+
+                        }
+
+                        if (document.getElementById("lstTipoContrato").value === "Serviços") {
+
+                            if (RepactuacaoContratoId === "-- Selecione uma Repactuação --" || RepactuacaoContratoId === "") {
+                                document.getElementById("valor").value = floatToBR(0);
+                                return;
+                            }
+
+                            $.ajax({
+                                type: "GET",
+                                url: 'api/Contrato/RecuperaRepactuacaoServicos',
+                                data: { RepactuacaoContratoId: RepactuacaoContratoId },
+                                contentType: "application/json",
+                                dataType: "json",
+                                success: function (data) {
+                                    try {
+                                        var v = (data && data.data && data.data.valor) ? data.data.valor : 0;
+                                        document.getElementById("valor").value = floatToBR(brToFloat(v));
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "RecuperaServicos.success", error);
+                                    }
+                                },
+                                error: function (data) {
+                                    Alerta.TratamentoErroComLinha("Upsert.cshtml", "RecuperaServicos.error", data);
+                                }
+                            });
+                        }
+
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "lstRepactuacao.change", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "DOMContentLoaded", error);
+            }
+        });
+    </script>
+
+    <script>
+        var btnAtualiza = document.getElementById("btnAtualizaTotal");
+
+        if (btnAtualiza) {
+            btnAtualiza.addEventListener("click", function (event) {
+                try {
+                    event.preventDefault();
+                    AtualizaTotal();
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("Upsert.cshtml", "btnAtualizaTotal.click", error);
+                }
+            });
+        }
+
+        function AtualizaTotal() {
+            try {
+                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                var getRows = gridObj.getRows();
+                var valortotalgrid = 0;
+
+                for (var i = 0; i < getRows.length; i++) {
+                    var qtd = brToFloat(gridObj.getRows()[i].cells[2].innerHTML);
+                    var val = brToFloat(gridObj.getRows()[i].cells[3].innerHTML);
+                    valortotalgrid += (val * qtd);
+                }
+
+                var valortotalgeral = valortotalgrid;
+                $("#txtTotal").val(floatToBR(valortotalgeral));
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "AtualizaTotal", error);
+            }
+        }
+    </script>
+}

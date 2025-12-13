@@ -1,0 +1,1155 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc;
+
+@inject IUnitOfWork _unitOfWork
+
+@functions {
+	public void OnGet()
+	{
+		FrotiX.Pages.Abastecimento.IndexModel.Initialize(_unitOfWork);
+		ViewData["lstVeiculos"] = new ListaVeiculos(_unitOfWork).VeiculosList();
+		ViewData["lstCombustivel"] = new ListaCombustivel(_unitOfWork).CombustivelList();
+		ViewData["lstUnidade"] = new ListaUnidade(_unitOfWork).UnidadeList();
+		ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+	}
+}
+
+@model FrotiX.Models.Abastecimento
+
+@{
+	ViewData["Title"] = "Abastecimentos";
+	ViewData["PageName"] = "abastecimento_index";
+	ViewData["Heading"] = "<i class='fad fa-gas-pump'></i> Cadastros: <span class='fw-300'>Abastecimentos</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-gas-pump";
+}
+
+@section HeadBlock {
+
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+</style>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<div class="panel-content float-right">
+					<a href="/Abastecimento/Importacao" class="btn btn-info">
+						<i class="fal fa-gas-pump"></i> &nbsp; Importar Abastecimento
+					</a>
+				</div>
+				<br /><br />
+				<div class="panel-content ">
+					<div class="box-body">
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="text-primary">
+								Escolha os filtros desejados para visualizar os Abastecimentos:
+							</h2>
+						</div>
+						<div class="col-12">
+							<div class="form-group row">
+								<div class="col-8 col-sm-3">
+									<br />
+									<label class="label font-weight-bold color-black ">Escolha uma Data</label>
+									<input id="txtData" class="form-control form-control-xs" type="date" />
+								</div>
+							</div>
+							<div class="form-group row">
+								<div class="col-12 col-sm-6 col-md-3 pb-2">
+									<ejs-combobox id="lstVeiculos" placeholder="Selecione um Veículo" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstVeiculos"]" popupHeight="250px" change="DefineEscolhaVeiculo" width="100%" showClearButton="true" close="VeiculosValueChange">
+										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-12 col-sm-6 col-md-3 pb-2">
+									<ejs-combobox id="lstCombustivel" placeholder="Selecione um Combustível" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstCombustivel"]" popupHeight="250px" change="DefineEscolhaCombustivel" width="100%" showClearButton="true" close="CombustivelValueChange">
+										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-12 col-sm-6 col-md-3 pb-2">
+									<ejs-combobox id="lstUnidade" placeholder="Selecione uma Unidade" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstUnidade"]" popupHeight="250px" change="DefineEscolhaUnidade" width="100%" showClearButton="true" close="UnidadeValueChange">
+										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-12 col-sm-6 col-md-3 pb-2">
+									<ejs-combobox id="lstMotorista" placeholder="Selecione um Motorista" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstMotorista"]" popupHeight="250px" change="DefineEscolhaMotorista" width="100%" showClearButton="true" close="MotoristaValueChange">
+										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+							</div>
+						</div>
+						<br /><br />
+						<div id="divAbastecimentos">
+							<table id="tblAbastecimentos" class="table table-bordered table-striped" width="100%">
+								<thead>
+									<tr>
+										<th>Data</th>
+										<th>Hora</th>
+										<th>Placa</th>
+										<th>Veículo</th>
+										<th>Motorista</th>
+										<th>Combustível</th>
+										<th>Unidade</th>
+										<th>(R$) Unitário</th>
+										<th>(R$) Total</th>
+										<th>Litros</th>
+										<th>Kms</th>
+										<th>Consumo</th>
+										<th>Média</th>
+										<th>Ação</th>
+										<th></th> @* Row Number *@
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalEditaKm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="exampleModalLabel">Edita a Quilometragem do Abastecimento</h3>
+			</div>
+			<div class="modal-body">
+				<form id="frmQuilometragem">
+					<input type="hidden" id="txtId" />
+					<div class="row">
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Quilometragem</label>
+								<input id="txtKm" class="form-control form-control-xs" type="number" />
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="modal-footer">
+					<button id="btnEditaKm" class="btn fundo-azul" type="submit" value="SUBMIT">Confirma a Alteração</button>
+					<button id="btnFechar" type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<script>
+		var escolhendoVeiculo = false;
+		var escolhendoUnidade = false;
+		var escolhendoMotorista = false;
+		var escolhendoCombustivel = false;
+		var escolhendoData = false;
+
+		//------ Indica um Item Sendo Escolhido-------------
+		//==================================================
+		function DefineEscolhaVeiculo() {
+			try {
+				console.log("Fechou Veículo");
+				escolhendoVeiculo = true;
+				escolhendoUnidade = false;
+				escolhendoMotorista = false;
+				escolhendoCombustivel = false;
+				escolhendoData = false;
+
+				var veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+				if (veiculos.value === null) {
+					ListaTodosAbastecimentos();
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "DefineEscolhaVeiculo", error);
+			}
+		}
+
+		function DefineEscolhaUnidade() {
+			try {
+				console.log("Fechou Unidade");
+				escolhendoVeiculo = false;
+				escolhendoUnidade = true;
+				escolhendoMotorista = false;
+				escolhendoCombustivel = false;
+				escolhendoData = false;
+
+				var unidades = document.getElementById('lstUnidade').ej2_instances[0];
+				if (unidades.value === null) {
+					ListaTodosAbastecimentos();
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "DefineEscolhaUnidade", error);
+			}
+		}
+
+		function DefineEscolhaMotorista() {
+			try {
+				console.log("Fechou Motorista");
+				escolhendoVeiculo = false;
+				escolhendoUnidade = false;
+				escolhendoMotorista = true;
+				escolhendoCombustivel = false;
+				escolhendoData = false;
+
+				var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+				if (motoristas.value === null) {
+					ListaTodosAbastecimentos();
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "DefineEscolhaMotorista", error);
+			}
+		}
+
+		function DefineEscolhaCombustivel() {
+			try {
+				console.log("Fechou Combustível");
+				escolhendoVeiculo = false;
+				escolhendoUnidade = false;
+				escolhendoMotorista = false;
+				escolhendoCombustivel = true;
+				escolhendoData = false;
+
+				var combustivel = document.getElementById('lstCombustivel').ej2_instances[0];
+				if (combustivel.value === null) {
+					ListaTodosAbastecimentos();
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "DefineEscolhaCombustivel", error);
+			}
+		}
+
+		function DefineEscolhaData() {
+			try {
+				console.log("Escolheu Data");
+				escolhendoVeiculo = false;
+				escolhendoUnidade = false;
+				escolhendoMotorista = false;
+				escolhendoCombustivel = false;
+				escolhendoData = true;
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "DefineEscolhaData", error);
+			}
+		}
+
+		//------ Lista Todos os Abastecimentos -------------
+		//==================================================
+		function ListaTodosAbastecimentos() {
+			try {
+				console.log("Lista Todos");
+
+				escolhendoVeiculo = false;
+				escolhendoUnidade = false;
+				escolhendoMotorista = false;
+				escolhendoCombustivel = false;
+				escolhendoData = false;
+
+				if ($.fn.DataTable.isDataTable('#tblAbastecimentos')) {
+					$('#tblAbastecimentos').DataTable().clear().destroy();
+				}
+				$('#tblAbastecimentos tbody').empty();
+
+				if ($.fn.dataTable && $.fn.dataTable.moment) {
+					$.fn.dataTable.moment('DD/MM/YYYY');
+				}
+
+				var dataTableAbastecimentos = $('#tblAbastecimentos').DataTable({
+					dom: 'Bfrtip',
+					lengthMenu: [
+						[10, 25, 50, -1],
+						['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']
+					],
+					buttons: ['pageLength', 'excel', {
+						extend: 'pdfHtml5',
+						orientation: 'landscape',
+						pageSize: 'LEGAL'
+					}],
+					"aaSorting": [],
+					'columnDefs': [
+						{ "targets": 0, "className": "text-center", "width": "2%" },   // Data
+						{ "targets": 1, "className": "text-center", "width": "2%" },   // Hora
+						{ "targets": 2, "className": "text-center", "width": "2%" },   // Placa
+						{ "targets": 3, "className": "text-left", "width": "4%" },     // Veiculo
+						{ "targets": 4, "className": "text-left", "width": "12%" },    // Motorista
+						{ "targets": 5, "className": "text-center", "width": "3%" },   // Combustível
+						{ "targets": 6, "className": "text-left", "width": "5%" },     // Unidade
+						{ "targets": 7, "className": "text-right", "width": "2%" },    // Vlr Unit
+						{ "targets": 8, "className": "text-right", "width": "2%" },    // Vlr Total
+						{ "targets": 9, "className": "text-right", "width": "2%" },    // Litros
+						{ "targets": 10, "className": "text-right", "width": "2%" },   // Km
+						{ "targets": 11, "className": "text-center", "width": "2%" },  // Consumo
+						{ "targets": 12, "className": "text-center", "width": "2%" },  // Consumo Geral
+						{ "targets": 13, "className": "text-center", "width": "2%" },  // Ação
+						{ "targets": 14, "className": "text-center", "width": "1%" }   // Row Number
+					],
+					responsive: true,
+					"ajax": {
+						"url": "/api/abastecimento",
+						"type": "GET",
+						"datatype": "json"
+					},
+					"columns": [
+						{ "data": "data" },
+						{ "data": "hora" },
+						{ "data": "placa" },
+						{ "data": "tipoVeiculo" },
+						{ "data": "motoristaCondutor" },
+						{ "data": "tipoCombustivel" },
+						{ "data": "sigla" },
+						{ "data": "valorUnitario" },
+						{ "data": "valorTotal" },
+						{ "data": "litros" },
+						{ "data": "kmRodado" },
+						{ "data": "consumo" },
+						{ "data": "consumoGeral" },
+						{
+							"data": "abastecimentoId",
+							"render": function (data) {
+								return `<div class="text-center">
+											<a class="btn fundo-azul btn-xs text-white btn-confirmar"
+											   data-toggle="modal" data-target="#modalEditaKm"
+											   aria-label="Edita a Quilometragem!"
+											   data-microtip-position="top" role="tooltip"
+											   style="cursor:pointer;" data-id='${data}'>
+												<i class="far fa-edit"></i>
+											</a>
+										</div>`;
+							}
+						},
+						{
+							"data": "abastecimentoId",
+							render: function (data, type, row, meta) {
+								return meta.row + meta.settings._iDisplayStart + 1;
+							}
+						}
+					],
+					"language": {
+						"emptyTable": "Nenhum registro encontrado",
+						"info": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+						"infoEmpty": "Mostrando 0 até 0 de 0 registros",
+						"infoFiltered": "(Filtrados de _MAX_ registros)",
+						"infoThousands": ".",
+						"loadingRecords": "Carregando...",
+						"processing": "Processando...",
+						"zeroRecords": "Nenhum registro encontrado",
+						"search": "Pesquisar",
+						"paginate": {
+							"next": "Próximo",
+							"previous": "Anterior",
+							"first": "Primeiro",
+							"last": "Último"
+						},
+						"aria": {
+							"sortAscending": ": Ordenar colunas de forma ascendente",
+							"sortDescending": ": Ordenar colunas de forma descendente"
+						},
+						"select": {
+							"rows": { "_": " %d linhas selecionadas ", "1": " Selecionado 1 linha" },
+							"cells": { "1": "1 célula selecionada", "_": "%d células selecionadas" },
+							"columns": { "1": "1 coluna selecionada", "_": "%d colunas selecionadas" }
+						},
+						"buttons": {
+							"copySuccess": { "1": "Uma linha copiada com sucesso", "_": "%d linhas copiadas com sucesso" },
+							"collection": "Coleção  <span class=\"ui-button-icon-primary ui-icon ui-icon-triangle-1-s\"></span>",
+							"colvis": "Visibilidade da Coluna",
+							"colvisRestore": "Restaurar Visibilidade",
+							"copy": "Copiar",
+							"copyKeys": "Pressione ctrl ou ⌘ + C para copiar os dados da tabela. Para cancelar, clique nesta mensagem ou pressione Esc.",
+							"copyTitle": "Copiar para a Área de Transferência",
+							"csv": "CSV",
+							"excel": "Excel",
+							"pageLength": { "-1": "Mostrar todos os registros", "_": "Mostrar %d registros" },
+							"pdf": "PDF",
+							"print": "Imprimir"
+						},
+						"autoFill": {
+							"cancel": "Cancelar",
+							"fill": "Preencher todas as células com",
+							"fillHorizontal": "Preencher células horizontalmente",
+							"fillVertical": "Preencher células verticalmente"
+						},
+						"lengthMenu": "Exibir _MENU_ resultados por página",
+						"searchBuilder": {
+							"add": "Adicionar Condição",
+							"button": { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+							"clearAll": "Limpar Tudo",
+							"condition": "Condição",
+							"conditions": {
+								"date": {
+									"after": "Depois",
+									"before": "Antes",
+									"between": "Entre",
+									"empty": "Vazio",
+									"equals": "Igual",
+									"not": "Não",
+									"notBetween": "Não Entre",
+									"notEmpty": "Não Vazio"
+								},
+								"number": {
+									"between": "Entre",
+									"empty": "Vazio",
+									"equals": "Igual",
+									"gt": "Maior Que",
+									"gte": "Maior ou Igual a",
+									"lt": "Menor Que",
+									"lte": "Menor ou Igual a",
+									"not": "Não",
+									"notBetween": "Não Entre",
+									"notEmpty": "Não Vazio"
+								},
+								"string": {
+									"contains": "Contém",
+									"empty": "Vazio",
+									"endsWith": "Termina Com",
+									"equals": "Igual",
+									"not": "Não",
+									"notEmpty": "Não Vazio",
+									"startsWith": "Começa Com"
+								},
+								"array": {
+									"contains": "Contém",
+									"empty": "Vazio",
+									"equals": "Igual à ",
+									"not": "Não",
+									"notEmpty": "Não vazio",
+									"without": "Não possui"
+								}
+							},
+							"data": "Data",
+							"deleteTitle": "Excluir regra de filtragem",
+							"logicAnd": "E",
+							"logicOr": "Ou",
+							"title": { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+							"value": "Valor",
+							"leftTitle": "Critérios Externos",
+							"rightTitle": "Critérios Internos"
+						},
+						"searchPanes": {
+							"clearMessage": "Limpar Tudo",
+							"collapse": { "0": "Painéis de Pesquisa", "_": "Painéis de Pesquisa (%d)" },
+							"count": "{total}",
+							"countFiltered": "{shown} ({total})",
+							"emptyPanes": "Nenhum Painel de Pesquisa",
+							"loadMessage": "Carregando Painéis de Pesquisa...",
+							"title": "Filtros Ativos"
+						},
+						"thousands": ".",
+						"datetime": {
+							"previous": "Anterior",
+							"next": "Próximo",
+							"hours": "Hora",
+							"minutes": "Minuto",
+							"seconds": "Segundo",
+							"amPm": ["am", "pm"],
+							"unknown": "-",
+							"months": {
+								"0": "Janeiro", "1": "Fevereiro", "2": "Março", "3": "Abril",
+								"4": "Maio", "5": "Junho", "6": "Julho", "7": "Agosto",
+								"8": "Setembro", "9": "Outubro", "10": "Novembro", "11": "Dezembro"
+							},
+							"weekdays": [
+								"Domingo", "Segunda-feira", "Terça-feira",
+								"Quarta-feira", "Quinte-feira", "Sexta-feira", "Sábado"
+							]
+						},
+						"editor": {
+							"close": "Fechar",
+							"create": { "button": "Novo", "submit": "Criar", "title": "Criar novo registro" },
+							"edit": { "button": "Editar", "submit": "Atualizar", "title": "Editar registro" },
+							"error": {
+								"system": "Ocorreu um erro no sistema (<a target=\"_blank\" rel=\"nofollow\" href=\"#\">Mais informações</a>)."
+							},
+							"multi": {
+								"noMulti": "Essa entrada pode ser editada individualmente, mas não como parte do grupo",
+								"restore": "Desfazer alterações",
+								"title": "Multiplos valores",
+								"info": "Os itens selecionados contêm valores diferentes para esta entrada."
+							},
+							"remove": {
+								"button": "Remover",
+								"confirm": { "_": "Tem certeza que quer deletar %d linhas?", "1": "Tem certeza que quer deletar 1 linha?" },
+								"submit": "Remover",
+								"title": "Remover registro"
+							}
+						},
+						"decimal": ","
+					},
+					"width": "100%"
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "ListaTodosAbastecimentos", error);
+			}
+		}
+
+		async function confirmarExclusao() {
+			try {
+				const confirmado = await SweetAlertInterop.ShowConfirm(
+					"Tem certeza?",
+					"Deseja mesmo apagar este registro?",
+					"Sim, pode apagar",
+					"Não, cancelar"
+				);
+
+				if (confirmado) {
+					const resposta = await fetch('?handler=ConfirmarExclusao', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' }
+					});
+
+					const resultado = await resposta.json();
+
+					if (resultado.sucesso) {
+						SweetAlertInterop.ShowSuccess("Sucesso", resultado.mensagem);
+					} else {
+						SweetAlertInterop.ShowError("Erro", resultado.mensagem);
+					}
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "confirmarExclusao", error);
+			}
+		}
+
+		function dtDestroySafe() {
+			if ($.fn.DataTable.isDataTable('#tblAbastecimentos')) {
+				$('#tblAbastecimentos').DataTable().clear().destroy();
+			}
+			$('#tblAbastecimentos tbody').empty();
+		}
+
+		function dtCommonOptions() {
+			return {
+				dom: 'Bfrtip',
+				lengthMenu: [
+					[10, 25, 50, -1],
+					['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']
+				],
+				buttons: ['pageLength', 'excel', {
+					extend: 'pdfHtml5',
+					orientation: 'landscape',
+					pageSize: 'LEGAL'
+				}],
+				"aaSorting": [],
+				'columnDefs': [
+					{ "targets": 0, "className": "text-center", "width": "2%" },
+					{ "targets": 1, "className": "text-center", "width": "2%" },
+					{ "targets": 2, "className": "text-center", "width": "2%" },
+					{ "targets": 3, "className": "text-left", "width": "4%" },
+					{ "targets": 4, "className": "text-left", "width": "8%" },
+					{ "targets": 5, "className": "text-center", "width": "3%" },
+					{ "targets": 6, "className": "text-left", "width": "5%" },
+					{ "targets": 7, "className": "text-right", "width": "2%" },
+					{ "targets": 8, "className": "text-right", "width": "2%" },
+					{ "targets": 9, "className": "text-right", "width": "2%" },
+					{ "targets": 10, "className": "text-right", "width": "2%" },
+					{ "targets": 11, "className": "text-center", "width": "2%" },
+					{ "targets": 12, "className": "text-center", "width": "2%" },
+					{ "targets": 13, "className": "text-center", "width": "2%" },
+					{ "targets": 14, "className": "text-center", "width": "1%" }
+				],
+				responsive: true,
+				"language": {
+					"emptyTable": "Nenhum registro encontrado",
+					"info": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+					"infoEmpty": "Mostrando 0 até 0 de 0 registros",
+					"infoFiltered": "(Filtrados de _MAX_ registros)",
+					"infoThousands": ".",
+					"loadingRecords": "Carregando...",
+					"processing": "Processando...",
+					"zeroRecords": "Nenhum registro encontrado",
+					"search": "Pesquisar",
+					"paginate": {
+						"next": "Próximo",
+						"previous": "Anterior",
+						"first": "Primeiro",
+						"last": "Último"
+					},
+					"aria": {
+						"sortAscending": ": Ordenar colunas de forma ascendente",
+						"sortDescending": ": Ordenar colunas de forma descendente"
+					},
+					"select": {
+						"rows": { "_": "Selecionado %d linhas", "1": "Selecionado 1 linha" },
+						"cells": { "1": "1 célula selecionada", "_": "%d células selecionadas" },
+						"columns": { "1": "1 coluna selecionada", "_": "%d colunas selecionadas" }
+					},
+					"buttons": {
+						"copySuccess": { "1": "Uma linha copiada com sucesso", "_": "%d linhas copiadas com sucesso" },
+						"collection": "Coleção  <span class=\"ui-button-icon-primary ui-icon ui-icon-triangle-1-s\"></span>",
+						"colvis": "Visibilidade da Coluna",
+						"colvisRestore": "Restaurar Visibilidade",
+						"copy": "Copiar",
+						"copyKeys": "Pressione ctrl ou ⌘ + C para copiar os dados da tabela.",
+						"copyTitle": "Copiar para a Área de Transferência",
+						"csv": "CSV",
+						"excel": "Excel",
+						"pageLength": { "-1": "Mostrar todos os registros", "_": "Mostrar %d registros" },
+						"pdf": "PDF",
+						"print": "Imprimir"
+					},
+					"autoFill": {
+						"cancel": "Cancelar",
+						"fill": "Preencher todas as células com",
+						"fillHorizontal": "Preencher células horizontalmente",
+						"fillVertical": "Preencher células verticalmente"
+					},
+					"lengthMenu": "Exibir _MENU_ resultados por página",
+					"searchBuilder": {
+						"add": "Adicionar Condição",
+						"button": { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+						"clearAll": "Limpar Tudo",
+						"condition": "Condição",
+						"conditions": {
+							"date": {
+								"after": "Depois", "before": "Antes", "between": "Entre",
+								"empty": "Vazio", "equals": "Igual", "not": "Não",
+								"notBetween": "Não Entre", "notEmpty": "Não Vazio"
+							},
+							"number": {
+								"between": "Entre", "empty": "Vazio", "equals": "Igual",
+								"gt": "Maior Que", "gte": "Maior ou Igual a",
+								"lt": "Menor Que", "lte": "Menor ou Igual a",
+								"not": "Não", "notBetween": "Não Entre", "notEmpty": "Não Vazio"
+							},
+							"string": {
+								"contains": "Contém", "empty": "Vazio", "endsWith": "Termina Com",
+								"equals": "Igual", "not": "Não", "notEmpty": "Não Vazio",
+								"startsWith": "Começa Com"
+							},
+							"array": {
+								"contains": "Contém", "empty": "Vazio", "equals": "Igual à ",
+								"not": "Não", "notEmpty": "Não vazio", "without": "Não possui"
+							}
+						},
+						"data": "Data",
+						"deleteTitle": "Excluir regra de filtragem",
+						"logicAnd": "E",
+						"logicOr": "Ou",
+						"title": { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+						"value": "Valor",
+						"leftTitle": "Critérios Externos",
+						"rightTitle": "Critérios Internos"
+					},
+					"searchPanes": {
+						"clearMessage": "Limpar Tudo",
+						"collapse": { "0": "Painéis de Pesquisa", "_": "Painéis de Pesquisa (%d)" },
+						"count": "{total}",
+						"countFiltered": "{shown} ({total})",
+						"emptyPanes": "Nenhum Painel de Pesquisa",
+						"loadMessage": "Carregando Painéis de Pesquisa...",
+						"title": "Filtros Ativos"
+					},
+					"thousands": ".",
+					"datetime": {
+						"previous": "Anterior", "next": "Próximo",
+						"hours": "Hora", "minutes": "Minuto", "seconds": "Segundo",
+						"amPm": ["am", "pm"], "unknown": "-",
+						"months": {
+							"0": "Janeiro", "1": "Fevereiro", "2": "Março", "3": "Abril",
+							"4": "Maio", "5": "Junho", "6": "Julho", "7": "Agosto",
+							"8": "Setembro", "9": "Outubro", "10": "Novembro", "11": "Dezembro"
+						},
+						"weekdays": [
+							"Domingo", "Segunda-feira", "Terça-feira",
+							"Quarta-feira", "Quinte-feira", "Sexta-feira", "Sábado"
+						]
+					},
+					"editor": {
+						"close": "Fechar",
+						"create": { "button": "Novo", "submit": "Criar", "title": "Criar novo registro" },
+						"edit": { "button": "Editar", "submit": "Atualizar", "title": "Editar registro" },
+						"error": {
+							"system": "Ocorreu um erro no sistema (<a target=\"_blank\" rel=\"nofollow\" href=\"#\">Mais informações</a>)."
+						},
+						"multi": {
+							"noMulti": "Essa entrada pode ser editada individualmente, mas não como parte do grupo",
+							"restore": "Desfazer alterações",
+							"title": "Multiplos valores",
+							"info": "Os itens selecionados contêm valores diferentes."
+						},
+						"remove": {
+							"button": "Remover",
+							"confirm": { "_": "Tem certeza que quer deletar %d linhas?", "1": "Tem certeza que quer deletar 1 linha?" },
+							"submit": "Remover",
+							"title": "Remover registro"
+						}
+					},
+					"decimal": ","
+				},
+				"width": "100%"
+			};
+		}
+
+		$(document).ready(function () {
+			try {
+				ListaTodosAbastecimentos();
+
+				$("#txtData").change(function () {
+					DefineEscolhaData();
+					console.log("txtDataChange");
+
+					var veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+					veiculos.value = "";
+					var unidades = document.getElementById('lstUnidade').ej2_instances[0];
+					unidades.value = "";
+					var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+					motoristas.value = "";
+					var combustivel = document.getElementById('lstCombustivel').ej2_instances[0];
+					combustivel.value = "";
+
+					const partes = $('#txtData').val().split("-");
+					console.log(partes, $('#txtData').val());
+					const [year, month, day] = partes;
+					const dataAbastecimento = `${day}/${month}/${year}`;
+
+					console.log(dataAbastecimento);
+
+					dtDestroySafe();
+
+					var opts = dtCommonOptions();
+					opts.ajax = {
+						"url": "/api/abastecimento/AbastecimentoData",
+						"data": { dataAbastecimento: dataAbastecimento },
+						"type": "GET",
+						"datatype": "json"
+					};
+					opts.columns = [
+						{ "data": "data" },
+						{ "data": "hora" },
+						{ "data": "placa" },
+						{ "data": "tipoVeiculo" },
+						{ "data": "motoristaCondutor" },
+						{ "data": "tipoCombustivel" },
+						{ "data": "sigla" },
+						{ "data": "valorUnitario" },
+						{ "data": "valorTotal" },
+						{ "data": "litros" },
+						{ "data": "kmRodado" },
+						{ "data": "consumo" },
+						{ "data": "consumoGeral" },
+						{
+							"data": "abastecimentoId",
+							"render": function (data) {
+								return `<div class="text-center">
+											<a class="btn fundo-azul btn-xs text-white btn-confirmar"
+											   data-toggle="modal" data-target="#modalEditaKm"
+											   aria-label="Edita a Quilometragem!"
+											   data-microtip-position="top" role="tooltip"
+											   style="cursor:pointer;" data-id='${data}'>
+												<i class="far fa-edit"></i>
+											</a>
+										</div>`;
+							}
+						},
+						{
+							"data": "abastecimentoId",
+							render: function (data, type, row, meta) {
+								return meta.row + meta.settings._iDisplayStart + 1;
+							}
+						}
+					];
+
+					$('#tblAbastecimentos').DataTable(opts);
+				});
+
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
+			}
+		});
+
+		$('#modalEditaKm').on('shown.bs.modal', function (event) {
+			try {
+				var RowNumber = $(event.relatedTarget).closest("tr").find("td:eq(14)").text() - 1;
+				console.log("Row Number: " + RowNumber);
+
+				var button = $(event.relatedTarget); // botão que abriu o modal
+				var abastecimentoId = button.data("id");
+
+				$('#txtId').attr('value', abastecimentoId);
+
+				var data = $('#tblAbastecimentos').DataTable().row(RowNumber).data();
+				var KmRodado = data['kmRodado'];
+
+				$('#txtKm').attr('value', KmRodado);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "shown.bs.modal", error);
+			}
+		}).on("hide.bs.modal", function () {
+			try {
+				$('#txtKm').attr('value', '');
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "hide.bs.modal", error);
+			}
+		});
+
+		//------ Função de Escolha do ComboBox Veículos ------------------
+		//================================================================
+		function VeiculosValueChange() {
+			try {
+				if (escolhendoVeiculo === false) {
+					return;
+				}
+				console.log("VeiculosValueChange");
+
+				dtDestroySafe();
+
+				$("#txtData").val('');
+				var combustivel = document.getElementById('lstCombustivel').ej2_instances[0];
+				combustivel.value = "";
+				var unidades = document.getElementById('lstUnidade').ej2_instances[0];
+				unidades.value = "";
+				var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+				motoristas.value = "";
+
+				var veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+				if (veiculos.value === null) {
+					ListaTodosAbastecimentos();
+					return;
+				}
+				var veiculoId = veiculos.value.toString();
+
+				var opts = dtCommonOptions();
+				opts.ajax = {
+					"url": "/api/abastecimento/AbastecimentoVeiculos",
+					"data": { id: veiculoId },
+					"type": "GET",
+					"datatype": "json"
+				};
+				opts.columns = [
+					{ "data": "data" },
+					{ "data": "hora" },
+					{ "data": "placa" },
+					{ "data": "tipoVeiculo" },
+					{ "data": "motoristaCondutor" },
+					{ "data": "tipoCombustivel" },
+					{ "data": "sigla" },
+					{ "data": "valorUnitario" },
+					{ "data": "valorTotal" },
+					{ "data": "litros" },
+					{ "data": "kmRodado" },
+					{ "data": "consumo" },
+					{ "data": "consumoGeral" },
+					{
+						"data": "abastecimentoId",
+						"render": function (data) {
+							return `<div class="text-center">
+										<a class="btn fundo-azul btn-xs text-white btn-confirmar"
+										   data-toggle="modal" data-target="#modalEditaKm"
+										   aria-label="Edita a Quilometragem!"
+										   data-microtip-position="top" role="tooltip"
+										   style="cursor:pointer;" data-id='${data}'>
+											<i class="far fa-edit"></i>
+										</a>
+									</div>`;
+						}
+					},
+					{
+						"data": "abastecimentoId",
+						render: function (data, type, row, meta) {
+							return meta.row + meta.settings._iDisplayStart + 1;
+						}
+					}
+				];
+
+				$('#tblAbastecimentos').DataTable(opts);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "VeiculosValueChange", error);
+			}
+		}
+
+		//------ Função de Escolha do ComboBox Combustível ------------------
+		//===================================================================
+		function CombustivelValueChange() {
+			try {
+				if (escolhendoCombustivel === false) {
+					return;
+				}
+				console.log("CombustivelValueChange");
+
+				dtDestroySafe();
+
+				$("#txtData").val('');
+				var veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+				veiculos.value = "";
+				var unidades = document.getElementById('lstUnidade').ej2_instances[0];
+				unidades.value = "";
+				var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+				motoristas.value = "";
+
+				var combustiveis = document.getElementById('lstCombustivel').ej2_instances[0];
+				if (combustiveis.value === null) {
+					ListaTodosAbastecimentos();
+					return;
+				}
+				var combustivelId = combustiveis.value.toString();
+
+				var opts = dtCommonOptions();
+				opts.columns[12] = { "targets": 12, "className": "text-center", "width": "2%" }; // cabeçalho "Média"
+				opts.ajax = {
+					"url": "/api/abastecimento/AbastecimentoCombustivel",
+					"data": { id: combustivelId },
+					"type": "GET",
+					"datatype": "json"
+				};
+				opts.columns = [
+					{ "data": "data" },
+					{ "data": "hora" },
+					{ "data": "placa" },
+					{ "data": "tipoVeiculo" },
+					{ "data": "motoristaCondutor" },
+					{ "data": "tipoCombustivel" },
+					{ "data": "sigla" },
+					{ "data": "valorUnitario" },
+					{ "data": "valorTotal" },
+					{ "data": "litros" },
+					{ "data": "kmRodado" },
+					{ "data": "consumo" },
+					{ "data": "consumoGeral" },
+					{
+						"data": "abastecimentoId",
+						"render": function (data) {
+							return `<div class="text-center">
+										<a class="btn fundo-azul btn-xs text-white btn-confirmar"
+										   data-toggle="modal" data-target="#modalEditaKm"
+										   aria-label="Edita a Quilometragem!"
+										   data-microtip-position="top" role="tooltip"
+										   style="cursor:pointer;" data-id='${data}'>
+											<i class="far fa-edit"></i>
+										</a>
+									</div>`;
+						}
+					},
+					{
+						"data": "abastecimentoId",
+						render: function (data, type, row, meta) {
+							return meta.row + meta.settings._iDisplayStart + 1;
+						}
+					}
+				];
+
+				$('#tblAbastecimentos').DataTable(opts);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "CombustivelValueChange", error);
+			}
+		}
+
+		//------ Função de Escolha do ComboBox Unidade ------------------
+		//===============================================================
+		function UnidadeValueChange() {
+			try {
+				console.log("UnidadeValueChange");
+
+				if (escolhendoUnidade === false) {
+					return;
+				}
+
+				dtDestroySafe();
+
+				$("#txtData").val('');
+				var combustivel = document.getElementById('lstCombustivel').ej2_instances[0];
+				combustivel.value = "";
+				var veiculo = document.getElementById('lstVeiculos').ej2_instances[0];
+				veiculo.value = "";
+				var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+				motoristas.value = "";
+
+				var unidades = document.getElementById('lstUnidade').ej2_instances[0];
+				if (unidades.value === null) {
+					ListaTodosAbastecimentos();
+					return;
+				}
+				var unidadeId = unidades.value.toString();
+
+				var opts = dtCommonOptions();
+				opts.columns[12] = { "targets": 12, "className": "text-center", "width": "2%" };
+				opts.ajax = {
+					"url": "/api/abastecimento/AbastecimentoUnidade",
+					"data": { id: unidadeId },
+					"type": "GET",
+					"datatype": "json"
+				};
+				opts.columns = [
+					{ "data": "data" },
+					{ "data": "hora" },
+					{ "data": "placa" },
+					{ "data": "tipoVeiculo" },
+					{ "data": "motoristaCondutor" },
+					{ "data": "tipoCombustivel" },
+					{ "data": "sigla" },
+					{ "data": "valorUnitario" },
+					{ "data": "valorTotal" },
+					{ "data": "litros" },
+					{ "data": "kmRodado" },
+					{ "data": "consumo" },
+					{ "data": "consumoGeral" },
+					{
+						"data": "abastecimentoId",
+						"render": function (data) {
+							return `<div class="text-center">
+										<a class="btn fundo-azul btn-xs text-white btn-confirmar"
+										   data-toggle="modal" data-target="#modalEditaKm"
+										   aria-label="Edita a Quilometragem!"
+										   data-microtip-position="top" role="tooltip"
+										   style="cursor:pointer;" data-id='${data}'>
+											<i class="far fa-edit"></i>
+										</a>
+									</div>`;
+						}
+					},
+					{
+						"data": "abastecimentoId",
+						render: function (data, type, row, meta) {
+							return meta.row + meta.settings._iDisplayStart + 1;
+						}
+					}
+				];
+
+				$('#tblAbastecimentos').DataTable(opts);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "UnidadeValueChange", error);
+			}
+		}
+
+		//------ Função de Escolha do ComboBox Motorista ------------------
+		//=================================================================
+		function MotoristaValueChange() {
+			try {
+				console.log("MotoristaValueChange");
+
+				if (escolhendoMotorista === false) {
+					return;
+				}
+
+				dtDestroySafe();
+
+				$("#txtData").val('');
+				var combustivel = document.getElementById('lstCombustivel').ej2_instances[0];
+				combustivel.value = "";
+				var veiculo = document.getElementById('lstVeiculos').ej2_instances[0];
+				veiculo.value = "";
+				var unidade = document.getElementById('lstUnidade').ej2_instances[0];
+				unidade.value = "";
+
+				var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+				if (motoristas.value === null) {
+					ListaTodosAbastecimentos();
+					return;
+				}
+				var motoristaId = motoristas.value.toString();
+
+				var opts = dtCommonOptions();
+				opts.columns[12] = { "targets": 12, "className": "text-center", "width": "2%" };
+				opts.ajax = {
+					"url": "/api/abastecimento/AbastecimentoMotorista",
+					"data": { id: motoristaId },
+					"type": "GET",
+					"datatype": "json"
+				};
+				opts.columns = [
+					{ "data": "data" },
+					{ "data": "hora" },
+					{ "data": "placa" },
+					{ "data": "tipoVeiculo" },
+					{ "data": "motoristaCondutor" },
+					{ "data": "tipoCombustivel" },
+					{ "data": "sigla" },
+					{ "data": "valorUnitario" },
+					{ "data": "valorTotal" },
+					{ "data": "litros" },
+					{ "data": "kmRodado" },
+					{ "data": "consumo" },
+					{ "data": "consumoGeral" },
+					{
+						"data": "abastecimentoId",
+						"render": function (data) {
+							return `<div class="text-center">
+										<a class="btn fundo-azul btn-xs text-white btn-confirmar"
+										   data-toggle="modal" data-target="#modalEditaKm"
+										   aria-label="Edita a Quilometragem!"
+										   data-microtip-position="top" role="tooltip"
+										   style="cursor:pointer;" data-id='${data}'>
+											<i class="far fa-edit"></i>
+										</a>
+									</div>`;
+						}
+					},
+					{
+						"data": "abastecimentoId",
+						render: function (data, type, row, meta) {
+							return meta.row + meta.settings._iDisplayStart + 1;
+						}
+					}
+				];
+
+				$('#tblAbastecimentos').DataTable(opts);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "MotoristaValueChange", error);
+			}
+		}
+
+		// Botão Editar KM do Modal
+		//=============================
+		$("#btnEditaKm").click(function (e) {
+			e.preventDefault();
+
+			const KmRodado = $("#txtKm").val();
+
+			if (KmRodado === '') {
+				swal({
+					title: "Erro na Quilometragem",
+					text: "A quilometragem é obrigatória!",
+					icon: "error",
+					buttons: {
+						ok: "Ok"
+					}
+				});
+				return;
+			}
+
+			const objViagem = JSON.stringify({
+				"AbastecimentoId": $('#txtId').val(),
+				"KmRodado": KmRodado
+			});
+
+			$.ajax({
+				type: "post",
+				url: "/api/Abastecimento/EditaKm",
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				data: objViagem,
+				success: function (data) {
+					try {
+						AppToast.show('Verde', data.message);
+						$('#tblAbastecimentos').DataTable().ajax.reload(null, false);
+						$('#modalEditaKm').modal('hide');
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "success", error);
+					}
+				},
+				error: function (data) {
+					try {
+						alert('error');
+						console.log(data);
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "error", error);
+					}
+				}
+			});
+		});
+	</script>
+
+	@if (TempData["ErroJs"] != null)
+	{
+		<script>
+			@Html.Raw(TempData["ErroJs"])
+		</script>
+	}
+}

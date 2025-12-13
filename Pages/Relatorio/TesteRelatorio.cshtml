@@ -1,0 +1,111 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+@Html.AntiForgeryToken()
+
+@{
+    ViewData["Title"] = "Viagens";
+    ViewData["PageName"] = "viagem_index";
+    ViewData["Heading"] = "<i class='fad fa-route'></i> Cadastros: <span class='fw-300'>Viagens</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fad fa-route";
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 10px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .btn-largura {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+
+@section HeadBlock {
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" /> *@
+    @* <link rel="stylesheet" href="~/css/microtip.css" /> *@
+
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jquery.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+    </script>
+
+
+}
+
+<form method="post" asp-action="FichasAntigas" onkeypress='stopEnterSubmitting(window.event)' enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
+                    <div id="divPainel" class="panel-content">
+
+                        <div class="d-flex" style="height:700px">
+                            <div id="reportViewer1" style="width:75%" class="pb-3">
+                                Loading...
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section ScriptsBlock
+{
+
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jquery.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+    </script>
+
+    <script src="/api/reports/resources/js/telerikReportViewer"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#reportViewer1")
+                .telerik_ReportViewer({
+                    serviceUrl: "/api/reports/",
+                    reportSource: {
+                        report: 'Viagem.trdp',
+                        parameters: { NoFichaVistoria: 93408 }
+                    },
+                    viewMode: telerikReportViewer.ViewModes.PRINT_PREVIEW,
+                    scaleMode: telerikReportViewer.ScaleModes.SPECIFIC,
+                    scale: 1.0,
+                    enableAccessibility: false,
+                    sendEmail: { enabled: true }
+                });
+        });
+    </script>
+
+}

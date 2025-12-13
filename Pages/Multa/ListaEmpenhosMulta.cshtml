@@ -1,0 +1,1118 @@
+@page
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@addTagHelper *, Syncfusion.EJ2
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+	@functions {
+		public void OnGet()
+		{
+			FrotiX.Pages.Multa.ListaEmpenhosMultaModel.Initialize(_unitOfWork);
+			ViewData["lstOrgaoAutuante"] = new ListaOrgaoAutuante(_unitOfWork).OrgaoAutuanteList();
+		}
+	}
+
+	ViewData["Title"] = "Empenhos dos Órgãos Autuantes";
+	ViewData["PageName"] = "multa_listaempenhosmulta";
+	ViewData["Heading"] = "<i class='fad fa-money-check-alt'></i> Multas: <span class='fw-300'>Empenhos dos Órgãos Autuantes</span>";
+	ViewData["Category1"] = "Multas";
+	ViewData["PageIcon"] = "fad fa-money-check-alt";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-empenho-azul: #3D5771;
+			--ftx-empenho-azul-hover: #2d4559;
+			--ftx-empenho-vinho: #722f37;
+			--ftx-empenho-vinho-hover: #5a252c;
+			--ftx-empenho-verde: #2E8B57;
+			--ftx-empenho-verde-hover: #236B43;
+			--ftx-empenho-roxo: #7c3aed;
+			--ftx-empenho-roxo-hover: #6d28d9;
+			--ftx-empenho-laranja: #D2691E;
+			--ftx-empenho-laranja-hover: #A0522D;
+		}
+
+		/* ====== FILTRO ÓRGÃO ====== */
+		.ftx-filtro-section {
+			background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+			border: 1px solid #e2e8f0;
+			border-radius: 0.5rem;
+			padding: 1.25rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.ftx-filtro-title {
+			font-size: 0.9rem;
+			font-weight: 600;
+			color: var(--ftx-empenho-azul);
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-filtro-title i {
+			font-size: 1rem;
+		}
+
+		/* ====== TABELAS ====== */
+		#tblEmpenho, #tblMultas {
+			font-size: 0.85rem;
+		}
+
+		#tblEmpenho thead, #tblMultas thead {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+		}
+
+		#tblEmpenho thead th, #tblMultas thead th {
+			color: #fff !important;
+			font-weight: 600;
+			font-size: 0.75rem;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			padding: 0.75rem 0.5rem;
+			text-align: center;
+			border: none !important;
+			vertical-align: middle !important;
+		}
+
+		#tblEmpenho tbody tr, #tblMultas tbody tr {
+			transition: background-color 0.15s ease;
+		}
+
+		#tblEmpenho tbody tr:hover, #tblMultas tbody tr:hover {
+			background-color: rgba(50, 93, 136, 0.06) !important;
+		}
+
+		#tblEmpenho tbody td, #tblMultas tbody td {
+			padding: 0.625rem 0.5rem;
+			vertical-align: middle !important;
+			border-color: rgba(0,0,0,0.05) !important;
+		}
+
+		/* ====== BOTÕES DE AÇÃO NA TABELA - COM GLOW FROTIX ====== */
+		.ftx-btn-icon {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: .375rem !important;
+			border: none !important;
+			color: #fff !important;
+			font-size: 0.85rem;
+			cursor: pointer;
+			transition: all .3s ease, transform .2s ease !important;
+			position: relative;
+			overflow: hidden;
+			margin: 1px !important;
+		}
+
+		.ftx-btn-icon:hover:not([aria-disabled="true"]) {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		.ftx-btn-icon:active:not([aria-disabled="true"]),
+		.ftx-btn-icon:focus:not([aria-disabled="true"]) {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		.ftx-btn-icon i {
+			font-size: var(--ftx-action-icon, 0.90rem);
+			line-height: 1;
+			color: #fff !important;
+		}
+
+		/* Editar - Azul com GLOW */
+		.ftx-btn-editar {
+			background-color: var(--ftx-empenho-azul) !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-editar:hover:not([aria-disabled="true"]) {
+			background-color: var(--ftx-empenho-azul-hover) !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+		.ftx-btn-editar:active, .ftx-btn-editar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* Apagar - Vinho com GLOW */
+		.ftx-btn-apagar {
+			background-color: var(--ftx-empenho-vinho) !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-apagar:hover:not([aria-disabled="true"]) {
+			background-color: var(--ftx-empenho-vinho-hover) !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+		.ftx-btn-apagar:active, .ftx-btn-apagar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		/* Aporte - Verde com GLOW */
+		.ftx-btn-aporte {
+			background-color: var(--ftx-empenho-verde) !important;
+			box-shadow: 0 0 8px rgba(46, 139, 87, 0.5), 0 2px 4px rgba(46, 139, 87, 0.3) !important;
+		}
+		.ftx-btn-aporte:hover:not([aria-disabled="true"]) {
+			background-color: var(--ftx-empenho-verde-hover) !important;
+			box-shadow: 0 0 20px rgba(46, 139, 87, 0.8), 0 6px 12px rgba(46, 139, 87, 0.5) !important;
+		}
+		.ftx-btn-aporte:active, .ftx-btn-aporte:focus {
+			box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.25) !important;
+		}
+
+		/* Anulação - Laranja com GLOW */
+		.ftx-btn-anulacao {
+			background-color: var(--ftx-empenho-laranja) !important;
+			box-shadow: 0 0 8px rgba(210, 105, 30, 0.5), 0 2px 4px rgba(210, 105, 30, 0.3) !important;
+		}
+		.ftx-btn-anulacao:hover:not([aria-disabled="true"]) {
+			background-color: var(--ftx-empenho-laranja-hover) !important;
+			box-shadow: 0 0 20px rgba(210, 105, 30, 0.8), 0 6px 12px rgba(210, 105, 30, 0.5) !important;
+		}
+		.ftx-btn-anulacao:active, .ftx-btn-anulacao:focus {
+			box-shadow: 0 0 0 0.2rem rgba(210, 105, 30, 0.25) !important;
+		}
+
+		/* Multas - Roxo com GLOW */
+		.ftx-btn-multas {
+			background-color: var(--ftx-empenho-roxo) !important;
+			box-shadow: 0 0 8px rgba(124, 58, 237, 0.5), 0 2px 4px rgba(124, 58, 237, 0.3) !important;
+		}
+		.ftx-btn-multas:hover:not([aria-disabled="true"]) {
+			background-color: var(--ftx-empenho-roxo-hover) !important;
+			box-shadow: 0 0 20px rgba(124, 58, 237, 0.8), 0 6px 12px rgba(124, 58, 237, 0.5) !important;
+		}
+		.ftx-btn-multas:active, .ftx-btn-multas:focus {
+			box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25) !important;
+		}
+
+		/* ====== MODAIS FrotiX ====== */
+		.ftx-modal-header {
+			background: linear-gradient(135deg, var(--ftx-empenho-azul) 0%, var(--ftx-empenho-azul-hover) 100%);
+			color: #fff;
+			padding: 1rem 1.25rem;
+			border-bottom: none;
+			border-radius: 0.5rem 0.5rem 0 0;
+		}
+
+		.ftx-modal-header .modal-title {
+			font-family: 'Outfit', sans-serif;
+			font-weight: 700;
+			font-size: 1.1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-modal-header .modal-title i {
+			font-size: 1.2rem;
+		}
+
+		.ftx-modal-body {
+			padding: 1.5rem;
+		}
+
+		.ftx-modal-footer {
+			padding: 1rem 1.5rem;
+			border-top: 1px solid #e2e8f0;
+			display: flex;
+			gap: 0.75rem;
+			justify-content: flex-end;
+		}
+
+		/* ====== BOTÕES DOS MODAIS COM GLOW ====== */
+		.ftx-btn-modal {
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			border: none !important;
+			color: #fff !important;
+			transition: all .3s ease, transform .2s ease !important;
+			min-width: 120px;
+		}
+
+		.ftx-btn-modal:hover {
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			color: #fff !important;
+		}
+
+		.ftx-btn-confirmar {
+			background-color: var(--ftx-empenho-azul) !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-confirmar:hover {
+			background-color: var(--ftx-empenho-azul-hover) !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+
+		.ftx-btn-fechar {
+			background-color: var(--ftx-empenho-vinho) !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-fechar:hover {
+			background-color: var(--ftx-empenho-vinho-hover) !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+
+		/* ====== INPUTS DOS MODAIS ====== */
+		.ftx-form-label {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 0.35rem;
+		}
+
+		.ftx-form-control {
+			height: calc(1em + .775rem + 2px) !important;
+			padding: .125rem .5rem !important;
+			font-size: .85rem !important;
+			line-height: 1.5;
+			border-radius: .375rem;
+			border: 1px solid #cbd5e1;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		.ftx-form-control:focus {
+			border-color: var(--ftx-empenho-azul);
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15);
+		}
+
+		/* ====== DATATABLE CONTROLS ====== */
+		.dataTables_wrapper .dataTables_filter input {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.25rem 0.5rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_length select {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.15rem 0.35rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_info,
+		.dataTables_wrapper .dataTables_paginate,
+		.dataTables_wrapper .dataTables_length label,
+		.dataTables_wrapper .dataTables_filter label {
+			font-size: 0.80rem;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+
+			.ftx-modal-footer {
+				flex-direction: column;
+			}
+
+			.ftx-btn-modal {
+				width: 100%;
+			}
+		}
+	</style>
+}
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel ftx-card-styled">
+			<div class="panel-container show">
+
+				<!-- Header Padrão FrotiX -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-money-check-dollar"></i>
+						Empenhos dos Órgãos Autuantes
+					</h2>
+					<a href="/Multa/UpsertEmpenhosMulta" class="btn btn-fundo-laranja" data-ejtip="Adicionar novo empenho">
+						<i class="fa-duotone fa-plus icon-space"></i>
+						Adicionar Empenho
+					</a>
+				</div>
+
+				<!-- Conteúdo -->
+				<div class="panel-content">
+
+					<!-- Filtro de Órgão -->
+					<div class="ftx-filtro-section">
+						<div class="ftx-filtro-title">
+							<i class="fa-duotone fa-building-columns"></i>
+							Selecione um Órgão Autuante para visualizar seus Empenhos
+						</div>
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<ejs-combobox id="lstOrgaosAutuantes"
+											  placeholder="Selecione um Órgão"
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstOrgaoAutuante"]"
+											  popupHeight="250px" width="100%" showClearButton="true"
+											  change="OrgaoValueChange">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+						</div>
+					</div>
+
+					<!-- Tabela de Empenhos -->
+					<div id="divEmpenho" hidden>
+						<table id="tblEmpenho" class="table table-bordered table-striped" width="100%">
+							<thead>
+								<tr>
+									<th>Nota de Empenho</th>
+									<th>Vigência</th>
+									<th>Saldo Inicial</th>
+									<th>Movimentações</th>
+									<th>Saldo Atual</th>
+									<th>Ação</th>
+									<th>Mov. Financeiras</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ====== MODAL APORTAR ====== -->
+<div class="modal fade" id="modalAporte" data-bs-backdrop="static" data-bs-keyboard="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+
+			<div class="ftx-modal-header">
+				<h4 class="modal-title" id="lblTituloAporte">
+					<i class="fa-duotone fa-circle-plus"></i>
+					Aportar Valores ao Empenho
+				</h4>
+			</div>
+
+			<div class="ftx-modal-body">
+				<form id="frmAporte">
+					<input type="hidden" id="txtIdAporte" />
+					<div class="row">
+						<div class="col-12 col-md-5">
+							<div class="form-group">
+								<label class="ftx-form-label">Data do Aporte</label>
+								<input id="txtData" class="form-control ftx-form-control" type="date" />
+							</div>
+						</div>
+						<div class="col-12 col-md-7">
+							<div class="form-group">
+								<label class="ftx-form-label">Descrição</label>
+								<input id="txtDescricao" class="form-control ftx-form-control" placeholder="Descrição do aporte" />
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-12 col-md-4">
+							<div class="form-group">
+								<label class="ftx-form-label">Valor do Aporte</label>
+								<input id="txtValor" class="form-control ftx-form-control" style="text-align:right;"
+									   placeholder="0,00"
+									   onkeypress="return moeda(this,'.',',',event)" />
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="ftx-modal-footer">
+				<button id="btnAportar" class="ftx-btn-modal ftx-btn-confirmar" type="button" data-ejtip="Confirmar aporte">
+					<i class="fa-duotone fa-floppy-disk"></i>
+					Aportar
+				</button>
+				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-duotone fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<!-- ====== MODAL ANULAR ====== -->
+<div class="modal fade" id="modalAnulacao" data-bs-backdrop="static" data-bs-keyboard="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+
+			<div class="ftx-modal-header">
+				<h4 class="modal-title" id="lblTituloAnulacao">
+					<i class="fa-duotone fa-circle-minus"></i>
+					Anular Valores do Empenho
+				</h4>
+			</div>
+
+			<div class="ftx-modal-body">
+				<form id="frmanulacao">
+					<input type="hidden" id="txtIdAnulacao" />
+					<div class="row">
+						<div class="col-12 col-md-5">
+							<div class="form-group">
+								<label class="ftx-form-label">Data da Anulação</label>
+								<input id="txtDataanulacao" class="form-control ftx-form-control" type="date" />
+							</div>
+						</div>
+						<div class="col-12 col-md-7">
+							<div class="form-group">
+								<label class="ftx-form-label">Descrição</label>
+								<input id="txtDescricaoanulacao" class="form-control ftx-form-control" placeholder="Descrição da anulação" />
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-12 col-md-4">
+							<div class="form-group">
+								<label class="ftx-form-label">Valor da Anulação</label>
+								<input id="txtValoranulacao" class="form-control ftx-form-control" style="text-align:right;"
+									   placeholder="0,00"
+									   onkeypress="return moeda(this,'.',',',event)" />
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="ftx-modal-footer">
+				<button id="btnAnular" class="ftx-btn-modal ftx-btn-confirmar" type="button" data-ejtip="Confirmar anulação">
+					<i class="fa-duotone fa-floppy-disk"></i>
+					Anular
+				</button>
+				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-duotone fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<!-- ====== MODAL MULTAS ====== -->
+<div class="modal fade" id="modalMultas" data-bs-backdrop="static" data-bs-keyboard="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+
+			<div class="ftx-modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-file-invoice-dollar"></i>
+					Multas do Empenho
+				</h4>
+			</div>
+
+			<div class="ftx-modal-body">
+				<table id="tblMultas" class="table table-bordered table-striped" width="100%">
+					<thead>
+						<tr>
+							<th>Data</th>
+							<th>Nº Infração</th>
+							<th>Local</th>
+							<th>Data Pagamento</th>
+							<th>Valor Pago</th>
+							<th>Ação</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<div class="ftx-modal-footer">
+				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-duotone fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script>
+		// ============================================================================
+		// ComboBox Change (Órgão) -> Carrega DataTable de Empenhos
+		// ============================================================================
+		function OrgaoValueChange() {
+			try {
+				const table = $('#tblEmpenho').DataTable();
+				table.destroy();
+				$('#tblEmpenho tbody').empty();
+
+				const orgao = document.getElementById('lstOrgaosAutuantes').ej2_instances[0];
+				if (!orgao || orgao.value === null) return;
+
+				const orgaoId = orgao.value.toString();
+				$('#divEmpenho').prop('hidden', false);
+
+				let dataTableEmpenho = $('#tblEmpenho').DataTable({
+					columnDefs: [
+						{ targets: 0, className: "text-center", width: "12%" },
+						{ targets: 1, className: "text-center", width: "8%" },
+						{ targets: 2, className: "text-right", width: "12%" },
+						{ targets: 3, className: "text-right", width: "12%" },
+						{ targets: 4, className: "text-right", width: "12%" },
+						{ targets: 5, className: "text-center", width: "15%" },
+						{ targets: 6, className: "text-center", width: "15%" },
+						{ targets: 7, className: "text-center", visible: false }
+					],
+					responsive: true,
+					ajax: {
+						type: "GET",
+						url: "/api/multa/PegaEmpenhos",
+						data: { id: orgaoId },
+						dataType: "json"
+					},
+					columns: [
+						{ data: "notaEmpenho" },
+						{ data: "anoVigencia" },
+						{ data: "saldoInicialFormatado" },
+						{ data: "saldoMovimentacaoFormatado" },
+						{ data: "saldoAtualFormatado" },
+						{
+							data: "empenhoMultaId",
+							render: function (data) {
+								try {
+									return `
+										<div class="text-center" style="white-space: nowrap;">
+											<a href="/Multa/UpsertEmpenhosMulta?id=${data}"
+											   class="ftx-btn-icon ftx-btn-editar"
+											   data-ejtip="Editar Empenho">
+												<i class="fa-duotone fa-pen-to-square"></i>
+											</a>
+											<a class="ftx-btn-icon ftx-btn-apagar btn-delete"
+											   data-ejtip="Excluir Empenho"
+											   data-id="${data}">
+												<i class="fa-duotone fa-trash-can"></i>
+											</a>
+											<a class="ftx-btn-icon ftx-btn-multas btn-ver-multas"
+											   data-ejtip="Multas do Empenho"
+											   data-id="${data}">
+												<i class="fa-duotone fa-file-invoice-dollar"></i>
+											</a>
+										</div>`;
+								}
+								catch (error) {
+									Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "render.acoes", error);
+									return '';
+								}
+							}
+						},
+						{
+							data: "empenhoMultaId",
+							render: function (data) {
+								try {
+									return `
+										<div class="text-center" style="white-space: nowrap;">
+											<a class="ftx-btn-icon ftx-btn-aporte btn-abrir-aporte"
+											   data-ejtip="Aportar Valor"
+											   data-id="${data}">
+												<i class="fa-duotone fa-circle-plus"></i>
+											</a>
+											<a class="ftx-btn-icon ftx-btn-anulacao btn-abrir-anulacao"
+											   data-ejtip="Anular Valor"
+											   data-id="${data}">
+												<i class="fa-duotone fa-circle-minus"></i>
+											</a>
+										</div>`;
+								}
+								catch (error) {
+									Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "render.movimentacoes", error);
+									return '';
+								}
+							}
+						},
+						{ data: "empenhoMultaId" }
+					],
+					language: {
+						url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+						emptyTable: "Nenhum empenho cadastrado para este órgão"
+					},
+					width: "100%"
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "OrgaoValueChange", error);
+			}
+		}
+	</script>
+
+	<script>
+		// ============================================================================
+		// Botão APORTAR
+		// ============================================================================
+		$("#btnAportar").click(function (e) {
+			try {
+				e.preventDefault();
+
+				if (!$("#txtData").val()) {
+					Alerta.Erro('Atenção', 'A data do Aporte é obrigatória!', 'Fechar');
+					return;
+				}
+				if (!$("#txtDescricao").val()) {
+					Alerta.Erro('Atenção', 'A descrição do Aporte é obrigatória!', 'Fechar');
+					return;
+				}
+				if (!$("#txtValor").val()) {
+					Alerta.Erro('Atenção', 'O valor do Aporte é obrigatório!', 'Fechar');
+					return;
+				}
+
+				let valorAporte = $("#txtValor").val().replace(/\./g, "");
+				const payload = JSON.stringify({
+					EmpenhoMultaId: $('#txtIdAporte').val(),
+					Descricao: $('#txtDescricao').val(),
+					Valor: valorAporte,
+					DataMovimentacao: $('#txtData').val(),
+					TipoMovimentacao: "A"
+				});
+
+				$.ajax({
+					type: "post",
+					url: "/api/Multa/Aporte",
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					data: payload,
+					success: function (data) {
+						try {
+							AppToast.show('Verde', data.message, 2000);
+							$('#tblEmpenho').DataTable().ajax.reload(null, false);
+							// Bootstrap 5: fechar modal
+							const modalAporte = bootstrap.Modal.getInstance(document.getElementById('modalAporte'));
+							if (modalAporte) modalAporte.hide();
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btnAportar.success", error);
+						}
+					},
+					error: function (data) {
+						try {
+							Alerta.Erro('Erro', 'Erro ao realizar aporte', 'OK');
+							console.error('Erro aporte:', data);
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btnAportar.error", error);
+						}
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "#btnAportar.click", error);
+			}
+		});
+
+		// ============================================================================
+		// Botão ANULAR
+		// ============================================================================
+		$("#btnAnular").click(function (e) {
+			try {
+				e.preventDefault();
+
+				if (!$("#txtDataanulacao").val()) {
+					Alerta.Erro('Atenção', 'A data da anulação é obrigatória!', 'Fechar');
+					return;
+				}
+				if (!$("#txtDescricaoanulacao").val()) {
+					Alerta.Erro('Atenção', 'A descrição da anulação é obrigatória!', 'Fechar');
+					return;
+				}
+				if (!$("#txtValoranulacao").val()) {
+					Alerta.Erro('Atenção', 'O valor da anulação é obrigatório!', 'Fechar');
+					return;
+				}
+
+				let valorAnulacao = $("#txtValoranulacao").val().replace(/\./g, "");
+				const payload = JSON.stringify({
+					EmpenhoMultaId: $('#txtIdAnulacao').val(),
+					Descricao: $('#txtDescricaoanulacao').val(),
+					Valor: valorAnulacao,
+					DataMovimentacao: $('#txtDataanulacao').val(),
+					TipoMovimentacao: "G"
+				});
+
+				$.ajax({
+					type: "post",
+					url: "/api/Multa/anulacao",
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					data: payload,
+					success: function (data) {
+						try {
+							AppToast.show('Verde', data.message, 2000);
+							$('#tblEmpenho').DataTable().ajax.reload(null, false);
+							// Bootstrap 5: fechar modal
+							const modalAnulacao = bootstrap.Modal.getInstance(document.getElementById('modalAnulacao'));
+							if (modalAnulacao) modalAnulacao.hide();
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btnAnular.success", error);
+						}
+					},
+					error: function (data) {
+						try {
+							Alerta.Erro('Erro', 'Erro ao realizar anulação', 'OK');
+							console.error('Erro anulação:', data);
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btnAnular.error", error);
+						}
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "#btnAnular.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		// ============================================================================
+		// Variáveis globais para armazenar IDs selecionados
+		// ============================================================================
+		var empenhoSelecionadoId = null;
+		var empenhoSelecionadoNota = '';
+
+		// ============================================================================
+		// Handlers de Click para abrir modais (elementos dinâmicos)
+		// ============================================================================
+		$(document).ready(function () {
+			try {
+				// ====== ABRIR MODAL APORTE ======
+				$(document).on("click", ".btn-abrir-aporte", function (e) {
+					try {
+						e.preventDefault();
+						empenhoSelecionadoId = $(this).data("id");
+						empenhoSelecionadoNota = $(this).closest("tr").find("td:eq(0)").text();
+						
+						// Preencher dados do modal
+						$('#lblTituloAporte').html(`<i class="fa-duotone fa-circle-plus"></i> Aportar Valor: <b>${empenhoSelecionadoNota}</b>`);
+						$('#txtIdAporte').val(empenhoSelecionadoId);
+						$('#btnAportar').attr('data-id', empenhoSelecionadoId);
+						
+						// Limpar campos
+						$('#txtData').val('');
+						$('#txtDescricao').val('');
+						$('#txtValor').val('');
+						
+						// Abrir modal Bootstrap 5
+						var modalAporte = new bootstrap.Modal(document.getElementById('modalAporte'));
+						modalAporte.show();
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-abrir-aporte.click", error);
+					}
+				});
+
+				// ====== ABRIR MODAL ANULAÇÃO ======
+				$(document).on("click", ".btn-abrir-anulacao", function (e) {
+					try {
+						e.preventDefault();
+						empenhoSelecionadoId = $(this).data("id");
+						empenhoSelecionadoNota = $(this).closest("tr").find("td:eq(0)").text();
+						
+						// Preencher dados do modal
+						$('#lblTituloAnulacao').html(`<i class="fa-duotone fa-circle-minus"></i> Anular Valor: <b>${empenhoSelecionadoNota}</b>`);
+						$('#txtIdAnulacao').val(empenhoSelecionadoId);
+						$('#btnAnular').attr('data-id', empenhoSelecionadoId);
+						
+						// Limpar campos
+						$('#txtDataanulacao').val('');
+						$('#txtDescricaoanulacao').val('');
+						$('#txtValoranulacao').val('');
+						
+						// Abrir modal Bootstrap 5
+						var modalAnulacao = new bootstrap.Modal(document.getElementById('modalAnulacao'));
+						modalAnulacao.show();
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-abrir-anulacao.click", error);
+					}
+				});
+
+				// ====== ABRIR MODAL MULTAS DO EMPENHO ======
+				$(document).on("click", ".btn-ver-multas", function (e) {
+					try {
+						e.preventDefault();
+						empenhoSelecionadoId = $(this).data("id");
+						
+						// Destroy DataTable se existir
+						if ($.fn.DataTable.isDataTable('#tblMultas')) {
+							$('#tblMultas').DataTable().destroy();
+						}
+						$('#tblMultas tbody').empty();
+
+						// Carregar DataTable de Multas
+						$('#tblMultas').DataTable({
+							columnDefs: [
+								{ targets: 0, className: "text-center", width: "10%" },
+								{ targets: 1, className: "text-center", width: "10%" },
+								{ targets: 2, className: "text-left", width: "35%" },
+								{ targets: 3, className: "text-center", width: "12%" },
+								{ targets: 4, className: "text-right", width: "10%" },
+								{ targets: 5, className: "text-center", width: "18%" },
+								{ targets: 6, className: "text-center", visible: false }
+							],
+							responsive: true,
+							ajax: {
+								url: "/api/multa/multaempenho",
+								data: { id: empenhoSelecionadoId },
+								type: "GET",
+								datatype: "json"
+							},
+							columns: [
+								{ data: "dataFormatada" },
+								{ data: "numInfracao" },
+								{ data: "localizacao" },
+								{ data: "dataPagamentoFormatada" },
+								{ data: "valorPago" },
+								{
+									data: "multaId",
+									render: function (data) {
+										try {
+											return `
+												<div class="text-center" style="white-space: nowrap;">
+													<a href="/Multa/UpsertAutuacao?id=${data}"
+													   class="ftx-btn-icon ftx-btn-editar"
+													   data-ejtip="Editar Autuação">
+														<i class="fa-duotone fa-file-lines"></i>
+													</a>
+													<a href="/Multa/UpsertPenalidade?id=${data}"
+													   class="ftx-btn-icon ftx-btn-multas"
+													   data-ejtip="Editar Penalidade">
+														<i class="fa-duotone fa-file-invoice-dollar"></i>
+													</a>
+													<a class="ftx-btn-icon ftx-btn-apagar btn-delete-multa"
+													   data-ejtip="Excluir Multa"
+													   data-id="${data}">
+														<i class="fa-duotone fa-trash-can"></i>
+													</a>
+												</div>`;
+										}
+										catch (error) {
+											Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "render.multas", error);
+											return '';
+										}
+									}
+								},
+								{ data: "multaId" }
+							],
+							language: {
+								url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+								emptyTable: "Nenhuma multa vinculada a este empenho"
+							}
+						});
+
+						// Abrir modal Bootstrap 5
+						var modalMultas = new bootstrap.Modal(document.getElementById('modalMultas'));
+						modalMultas.show();
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-ver-multas.click", error);
+					}
+				});
+
+				// ============================================================================
+				// Handler: Excluir Empenho
+				// ============================================================================
+				$(document).on("click", ".btn-delete", function () {
+					try {
+						var id = $(this).data("id");
+
+						Alerta.Confirmar(
+							"Você tem certeza que deseja apagar este empenho?",
+							"Não será possível recuperar os dados eliminados!",
+							"Excluir",
+							"Cancelar"
+						).then(function (confirmed) {
+							try {
+								if (!confirmed) return;
+
+								$.ajax({
+									url: "/api/Multa/DeleteEmpenhoMulta",
+									type: "POST",
+									data: JSON.stringify({ EmpenhoMultaId: id }),
+									contentType: "application/json; charset=utf-8",
+									dataType: "json",
+									success: function (data) {
+										try {
+											if (data.success) {
+												AppToast.show('Verde', data.message, 2000);
+												$('#tblEmpenho').DataTable().ajax.reload(null, false);
+											}
+											else {
+												AppToast.show('Vermelho', data.message, 3000);
+											}
+										}
+										catch (error) {
+											Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete.success", error);
+										}
+									},
+									error: function (err) {
+										try {
+											console.error('Erro ao excluir:', err);
+											Alerta.Erro('Erro', 'Ocorreu um erro ao excluir o empenho', 'OK');
+										}
+										catch (error) {
+											Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete.error", error);
+										}
+									}
+								});
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete.confirmar", error);
+							}
+						});
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete.click", error);
+					}
+				});
+
+				// ============================================================================
+				// Handler: Excluir Multa (dentro do modal)
+				// ============================================================================
+				$(document).on("click", ".btn-delete-multa", function () {
+					try {
+						var id = $(this).data("id");
+
+						Alerta.Confirmar(
+							"Você tem certeza que deseja apagar esta multa?",
+							"Não será possível recuperar os dados eliminados!",
+							"Excluir",
+							"Cancelar"
+						).then(function (confirmed) {
+							try {
+								if (!confirmed) return;
+
+								$.ajax({
+									url: "/api/Multa/Delete",
+									type: "POST",
+									data: JSON.stringify({ MultaId: id }),
+									contentType: "application/json; charset=utf-8",
+									dataType: "json",
+									success: function (data) {
+										try {
+											if (data.success) {
+												AppToast.show('Verde', data.message, 2000);
+												$('#tblMultas').DataTable().ajax.reload(null, false);
+											}
+											else {
+												AppToast.show('Vermelho', data.message, 3000);
+											}
+										}
+										catch (error) {
+											Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete-multa.success", error);
+										}
+									},
+									error: function (err) {
+										try {
+											console.error('Erro ao excluir multa:', err);
+											Alerta.Erro('Erro', 'Ocorreu um erro ao excluir a multa', 'OK');
+										}
+										catch (error) {
+											Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete-multa.error", error);
+										}
+									}
+								});
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete-multa.confirmar", error);
+							}
+						});
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "btn-delete-multa.click", error);
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+
+	<script>
+		// ============================================================================
+		// Máscara simples de moeda (pt-BR)
+		// ============================================================================
+		function moeda(a, e, r, t) {
+			try {
+				let n = "", h = 0, j = 0, u = 0, tamanho2 = 0, ajd2 = "", l = "";
+				const o = window.Event ? t.which : t.keyCode;
+				if (o === 13 || o === 8) return true;
+				n = String.fromCharCode(o);
+				if ("0123456789".indexOf(n) === -1) return false;
+
+				u = a.value.length;
+				for (h = 0; h < u && ("0" === a.value.charAt(h) || a.value.charAt(h) === r); h++);
+				for (l = ""; h < u; h++) if ("0123456789".indexOf(a.value.charAt(h)) !== -1) l += a.value.charAt(h);
+				l += n; u = l.length;
+
+				if (u === 0) a.value = "";
+				if (u === 1) a.value = "0" + r + "0" + l;
+				if (u === 2) a.value = "0" + r + l;
+
+				if (u > 2) {
+					ajd2 = ""; j = 0;
+					for (h = u - 3; h >= 0; h--) {
+						if (j === 3) { ajd2 += e; j = 0; }
+						ajd2 += l.charAt(h); j++;
+					}
+					a.value = ""; tamanho2 = ajd2.length;
+					for (h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
+					a.value += r + l.substr(u - 2, u);
+				}
+				return false;
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaEmpenhosMulta.cshtml", "moeda", error);
+			}
+		}
+	</script>
+}

@@ -1,0 +1,103 @@
+@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Combustivel.UpsertModel
+
+@{
+    ViewData["Title"] = "Tipos de Combustível";
+    ViewData["PageName"] = "combustivel_index";
+    ViewData["Heading"] = "<i class='fa-duotone fa-gas-pump'></i> Cadastros: <span class='fw-300'>Tipos de Combustível</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-duotone fa-chalkboard-user";
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+</style>
+
+@section HeadBlock {
+    <!-- TOASTR REMOVIDO - Agora usamos AppToast -->
+}
+
+<form method="post" asp-action="Upsert">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <h2 class="titulo-paginas mb-0">
+                    <i class="fa-duotone fa-gas-pump"></i>
+                    @(Model.CombustivelObj.CombustivelId != Guid.Empty ? "Atualizar " : "Criar ") Tipo de Combustível
+                </h2>
+                <!-- Linha divisória -->
+                <div class="col-12" style="border-bottom:1px solid #325d88"></div>
+
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @if (Model.CombustivelObj.CombustivelId != Guid.Empty)
+                        {
+                            <input type="hidden" asp-for="CombustivelObj.CombustivelId" />
+                        }
+
+                        <div class="col-8 pt-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" asp-for="CombustivelObj.Descricao"></label>
+                                        <span class="text-danger font-weight-light" asp-validation-for="CombustivelObj.Descricao"></span>
+                                        <input class="form-control form-control-xs" asp-for="CombustivelObj.Descricao" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <span class="text-danger" asp-validation-for="CombustivelObj.Status"></span>
+                                        <input type="checkbox" class="form-check-input" asp-for="CombustivelObj.Status" />
+                                        <label class="font-weight-bold" asp-for="CombustivelObj.Status"></label>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" data-ejtip="@(Model.CombustivelObj.CombustivelId != Guid.Empty ? "Atualizar tipo de combustível" : "Criar novo tipo de combustível")">
+                                                <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                                                @(Model.CombustivelObj.CombustivelId != Guid.Empty ? "Atualizar" : "Criar")
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <a asp-page="./Index" class="btn btn-vinho form-control" data-ejtip="Voltar para a lista de tipos de combustível">
+                                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                                                Voltar à Lista
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section ScriptsBlock {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+}

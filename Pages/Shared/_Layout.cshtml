@@ -1,0 +1,717 @@
+@using System.Text.Json
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+	<partial name="_Head" />
+
+	@* CSS GLOBAIS - MODERNIZAÇÃO FROTIX *@
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	@RenderSection("HeadBlock" , required: false)
+</head>
+<body>
+	@* Carrega scripts/flags de loading/saving cedo, se necessário *@
+	<partial name="_ScriptsLoadingSaving" />
+
+	<div class="page-wrapper">
+		<div class="page-inner">
+			<partial name="_LeftPanel" />
+
+			<div class="page-content-wrapper">
+				<partial name="_PageHeader" />
+
+				<main id="js-page-content"
+					  role="main"
+					  class="page-content"
+					  style="background: url('/images/dust_scratches.png')">
+					@if (ViewBag.PreemptiveClass?.Length > 0)
+					{
+						@* Caso exista uma classe "preemptiva", você pode injetar conteúdo/estilos específicos aqui *@
+					}
+					else
+					{
+						<partial name="_PageBreadcrumb" />
+						<div class="subheader">
+							@RenderSection("Subheaderblock" , required: false)
+						</div>
+					}
+
+					@RenderBody()
+				</main>
+
+				@* -------------- Tela Modal ------------- *@
+				<div class="modal fade"
+					 tabindex="-1"
+					 role="dialog"
+					 data-backdrop="static"
+					 data-keyboard="false"
+					 id="form-modal"
+					 aria-hidden="true">
+					<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header modal-header-terracota">
+								<h5 class="modal-title"></h5>
+								<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+							</div>
+
+							<div class="modal-body">
+								@RenderSection("ModalBody" , required: false)
+							</div>
+
+							<div class="modal-footer">
+								@RenderSection("ModalFooter" , required: false)
+							</div>
+						</div>
+					</div>
+				</div>
+
+<!-- Modal Detalhes do Alerta -->
+<div class="modal fade" id="modalDetalhesAlerta" tabindex="-1" role="dialog" aria-labelledby="modalDetalhesAlertaLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<!-- Header -->
+			<div class="modal-header modal-header-terracota" id="alertaCabecalho">
+				<div class="d-flex align-items-center w-100">
+					<i class="fa-duotone fa-bell fa-3x text-primary mr-3" id="iconeAlerta"></i>
+					<div class="flex-grow-1">
+						<h5 class="modal-title mb-1" id="tituloAlerta">Carregando...</h5>
+						<div>
+							<span class="badge badge-primary mr-2" id="badgeTipo">Tipo</span>
+							<span class="badge badge-danger mr-2" id="badgePrioridade">Prioridade</span>
+							<span id="badgeStatus"></span>
+						</div>
+					</div>
+				</div>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<!-- Body -->
+			<div class="modal-body">
+				<!-- Loader -->
+				<div id="loaderDetalhes" class="text-center py-5">
+					<i class="fa-duotone fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+					<p>Carregando detalhes do alerta...</p>
+				</div>
+
+				<!-- Conteúdo Principal -->
+				<div id="conteudoDetalhes" style="display: none;">
+					<!-- Descrição -->
+					<div class="card mb-3">
+						<div class="card-header bg-light">
+							<i class="fa-duotone fa-info-circle"></i> Descrição
+						</div>
+						<div class="card-body">
+							<p id="descricaoAlerta" class="mb-0"></p>
+						</div>
+					</div>
+
+					<!-- Informações Gerais -->
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<div class="card h-100">
+								<div class="card-header bg-light">
+									<i class="fa-duotone fa-calendar-alt"></i> Informações Gerais
+								</div>
+								<div class="card-body">
+									<p><strong>Data de Criação:</strong> <span id="dataCriacao"></span></p>
+									<p><strong>Data de Exibição:</strong> <span id="dataExibicao"></span></p>
+									<p><strong>Criado Por:</strong> <span id="criadoPor"></span></p>
+									<p class="mb-0"><strong>Tempo no Ar:</strong> <span id="tempoNoAr"></span></p>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="card h-100">
+								<div class="card-header bg-light">
+									<i class="fa-duotone fa-chart-bar"></i> Resumo das Estatísticas
+								</div>
+								<div class="card-body">
+									<div class="row">
+										<div class="col-6">
+											<p class="mb-2">
+												<i class="fa-duotone fa-users text-primary"></i>
+												<strong>Destinatários:</strong> <span id="totalDestinatariosResumo">0</span>
+											</p>
+											<p class="mb-2">
+												<i class="fa-duotone fa-bell text-info"></i>
+												<strong>Notificados:</strong> <span id="totalNotificadosResumo">0</span>
+											</p>
+											<p class="mb-0">
+												<i class="fa-duotone fa-clock text-warning"></i>
+												<strong>Aguardando:</strong> <span id="aguardandoNotificacaoResumo">0</span>
+											</p>
+										</div>
+										<div class="col-6">
+											<p class="mb-2">
+												<i class="fa-duotone fa-check-circle text-success"></i>
+												<strong>Leram:</strong> <span id="usuariosLeramResumo">0</span>
+											</p>
+											<p class="mb-2">
+												<i class="fa-duotone fa-times-circle text-danger"></i>
+												<strong>Não Leram:</strong> <span id="usuariosNaoLeramResumo">0</span>
+											</p>
+											<p class="mb-0">
+												<i class="fa-duotone fa-trash text-secondary"></i>
+												<strong>Apagaram:</strong> <span id="usuariosApagaramResumo">0</span>
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Estatísticas Detalhadas - 6 Cards -->
+					<div class="mb-4">
+						<h6 class="fw-bold mb-3">
+							<i class="fa-duotone fa-chart-line"></i> Estatísticas Detalhadas
+						</h6>
+						<div class="row g-3">
+							<!-- Total Destinatários -->
+							<div class="col-md-4 col-lg-2">
+								<div class="card border-primary shadow-sm h-100">
+									<div class="card-body text-center py-3">
+										<i class="fa-duotone fa-users fa-2x text-primary mb-2"></i>
+										<h6 class="card-subtitle mb-2 text-muted small">Total Destinatários</h6>
+										<h3 class="card-title mb-0" id="totalDestinatarios">0</h3>
+									</div>
+								</div>
+							</div>
+
+							<!-- Total Notificados -->
+							<div class="col-md-4 col-lg-2">
+								<div class="card border-info shadow-sm h-100">
+									<div class="card-body text-center py-3">
+										<i class="fa-duotone fa-bell fa-2x text-info mb-2"></i>
+										<h6 class="card-subtitle mb-2 text-muted small">Já Notificados</h6>
+										<h3 class="card-title mb-0" id="totalNotificados">0</h3>
+									</div>
+								</div>
+							</div>
+
+							<!-- Aguardando Notificação -->
+							<div class="col-md-4 col-lg-2">
+								<div class="card border-warning shadow-sm h-100">
+									<div class="card-body text-center py-3">
+										<i class="fa-duotone fa-clock fa-2x text-warning mb-2"></i>
+										<h6 class="card-subtitle mb-2 text-muted small">Aguardando</h6>
+										<h3 class="card-title mb-0" id="aguardandoNotificacao">0</h3>
+									</div>
+								</div>
+							</div>
+
+							<!-- Leram -->
+							<div class="col-md-4 col-lg-2">
+								<div class="card border-success shadow-sm h-100">
+									<div class="card-body text-center py-3">
+										<i class="fa-duotone fa-check-circle fa-2x text-success mb-2"></i>
+										<h6 class="card-subtitle mb-2 text-muted small">Leram</h6>
+										<h3 class="card-title mb-0" id="usuariosLeram">0</h3>
+									</div>
+								</div>
+							</div>
+
+							<!-- Não Leram -->
+							<div class="col-md-4 col-lg-2">
+								<div class="card border-danger shadow-sm h-100">
+									<div class="card-body text-center py-3">
+										<i class="fa-duotone fa-times-circle fa-2x text-danger mb-2"></i>
+										<h6 class="card-subtitle mb-2 text-muted small">Não Leram</h6>
+										<h3 class="card-title mb-0" id="usuariosNaoLeram">0</h3>
+									</div>
+								</div>
+							</div>
+
+							<!-- Apagaram -->
+							<div class="col-md-4 col-lg-2">
+								<div class="card border-secondary shadow-sm h-100">
+									<div class="card-body text-center py-3">
+										<i class="fa-duotone fa-trash fa-2x text-secondary mb-2"></i>
+										<h6 class="card-subtitle mb-2 text-muted small">Apagaram</h6>
+										<h3 class="card-title mb-0" id="usuariosApagaram">0</h3>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Progresso de Leitura -->
+					<div class="card mb-3">
+						<div class="card-header bg-light">
+							<i class="fa-duotone fa-chart-line"></i> Progresso de Leitura
+						</div>
+						<div class="card-body">
+							<div class="mb-2">
+								<small class="text-muted" id="infoLeitores">Carregando...</small>
+							</div>
+							<div class="progress" style="height: 30px;">
+								<div class="progress-bar progress-bar-striped progress-bar-animated"
+									 id="progressoLeitura"
+									 role="progressbar"
+									 aria-valuenow="0"
+									 aria-valuemin="0"
+									 aria-valuemax="100"
+									 style="width: 0%;">
+									<span id="textoProgressoBarra">0%</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Links Relacionados (se houver) -->
+					<div class="card mb-3" id="linksRelacionados" style="display: none;">
+						<div class="card-header bg-light">
+							<i class="fa-duotone fa-link"></i> Links Relacionados
+						</div>
+						<div class="card-body" id="conteudoLinks">
+							<!-- Links serío inseridos aqui via JS -->
+						</div>
+					</div>
+
+					<!-- Tabela de Usuários que Receberam o Alerta -->
+					<div class="card">
+						<div class="card-header bg-light d-flex justify-content-between align-items-center">
+							<span>
+								<i class="fa-duotone fa-users"></i>
+								Usuários que Receberam o Alerta
+							</span>
+							<button class="btn btn-sm btn-verde" id="btnExportarDetalhes" style="display: none;">
+								<i class="fa-duotone fa-file-excel"></i> Exportar Excel
+							</button>
+						</div>
+						<div class="card-body p-0">
+							<div class="table-responsive">
+								<table class="table table-striped table-sm table-hover mb-0">
+									<thead class="table-dark">
+										<tr>
+											<th>Usuário</th>
+											<th class="text-center">Notificado</th>
+											<th class="text-center">Status Leitura</th>
+											<th class="text-center">Data Notificação</th>
+											<th class="text-center">Data Leitura</th>
+											<th class="text-center">Tempo até Leitura</th>
+										</tr>
+									</thead>
+									<tbody id="tabelaUsuarios">
+										<tr>
+											<td colspan="6" class="text-center py-4">
+												<div class="spinner-border spinner-border-sm text-primary" role="status">
+													<span class="visually-hidden">Carregando...</span>
+												</div>
+												<span class="ms-2 text-muted">Carregando usuários...</span>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Footer com botões -->
+			<div class="modal-footer d-flex justify-content-between">
+				<!-- Botão Baixa no Alerta - Esquerda -->
+				<button type="button"
+						class="btn btn-verde"
+						id="btnBaixaAlerta"
+						onclick="darBaixaNoAlerta()">
+					<i class="fa-duotone fa-check-circle"></i> Baixa no Alerta
+				</button>
+
+				<!-- Botões Direita -->
+				<div>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">
+						<i class="fa-duotone fa-times"></i> Fechar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+				<partial name="_ColorProfileReference" />
+			</div> @* /.page-content-wrapper *@
+		</div>     @* /.page-inner *@
+	</div>         @* /.page-wrapper *@
+
+	<partial name="_ShortcutMenu" />
+	<partial name="_ShortcutMessenger" />
+	<partial name="_PageSettings" />
+	<partial name="_GoogleAnalytics" />
+
+	@* ============================================ *@
+	@* SCRIPTS BASE - ORDEM CRÍTICA MANTIDA *@
+	@* ============================================ *@
+	<partial name="_ScriptsBasePlugins" />
+
+	@* ============================================ *@
+	@* COMPONENTES E SEÇÕES *@
+	@* ============================================ *@
+	@await Component.InvokeAsync("Notyf")
+	@RenderSection("ScriptsBlock" , required: false)
+
+	@* ============================================ *@
+	@* ALERTAS DO SERVIDOR (TEMPDATA) *@
+	@* ============================================ *@
+	@if (TempData["ShowSweetAlert"] != null)
+	{
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				try {
+					const alertData = @Html.Raw(TempData["ShowSweetAlert"]);
+
+					console.log('Alert data recebido:', alertData);
+
+					if (!window.SweetAlertInterop) {
+						console.error('SweetAlertInterop não está carregado!');
+						return;
+					}
+
+					switch(alertData.type) {
+						case 'error':
+							SweetAlertInterop.ShowError(alertData.title, alertData.message, alertData.confirmButton);
+							break;
+						case 'success':
+							SweetAlertInterop.ShowSuccess(alertData.title, alertData.message, alertData.confirmButton);
+							break;
+						case 'info':
+							SweetAlertInterop.ShowInfo(alertData.title, alertData.message, alertData.confirmButton);
+							break;
+						case 'warning':
+							SweetAlertInterop.ShowWarning(alertData.title, alertData.message, alertData.confirmButton);
+							break;
+						case 'confirm':
+							SweetAlertInterop.ShowConfirm(alertData.title, alertData.message, alertData.confirmButton, alertData.cancelButton);
+							break;
+						case 'errorUnexpected':
+							const erroObj = {
+								erro: alertData.erro,
+								message: alertData.erro,
+								stack: alertData.stack,
+								innerErro: alertData.innerErro
+							};
+							SweetAlertInterop.ShowErrorUnexpected(alertData.classe, alertData.metodo, erroObj);
+							break;
+					}
+				} catch (e) {
+					console.error('Erro ao exibir alerta:', e);
+				}
+			});
+		</script>
+	}
+
+	@* ============================================ *@
+	@* SISTEMA GLOBAL DE ALERTAS SYNCFUSION *@
+	@* ============================================ *@
+	<script>
+		window.GlobalAlert = {
+			showError: function(title, message, details = null) {
+				this.showDialog('error', title, message, details);
+			},
+
+			showSuccess: function(title, message) {
+				this.showDialog('success', title, message);
+			},
+
+			showWarning: function(title, message) {
+				this.showDialog('warning', title, message);
+			},
+
+			showDialog: function(type, title, message, details = null) {
+				const dialog = document.getElementById('globalDialog').ej2_instances[0];
+				const content = document.getElementById('globalDialogContent');
+
+				const config = this.getDialogConfig(type);
+				dialog.header = config.icon + ' ' + title;
+
+				content.innerHTML = `
+					<div class="${config.containerClass}">
+						<div class="${config.messageClass}">${message}</div>
+						${details ? `<details class="error-details">
+							<summary>Detalhes técnicos</summary>
+							<pre>${details}</pre>
+						</details>` : ''}
+					</div>`;
+
+				dialog.show();
+			},
+
+			getDialogConfig: function(type) {
+				const configs = {
+					error: {
+						icon: '🚨',
+						containerClass: 'alert-error',
+						messageClass: 'error-message'
+					},
+					success: {
+						icon: '✅',
+						containerClass: 'alert-success',
+						messageClass: 'success-message'
+					},
+					warning: {
+						icon: '⚠️',
+						containerClass: 'alert-warning',
+						messageClass: 'warning-message'
+					}
+				};
+				return configs[type] || configs.error;
+			}
+		};
+
+		document.addEventListener('DOMContentLoaded', function() {
+			if (window.pendingAlert) {
+				GlobalAlert.showError(
+					window.pendingAlert.title,
+					window.pendingAlert.message,
+					window.pendingAlert.details
+				);
+			}
+		});
+	</script>
+
+	@* ============================================ *@
+	@* DIALOG GLOBAL PERSONALIZADO *@
+	@* ============================================ *@
+	<ejs-dialog id="globalDialog" width="500px" isModal="true" visible="false"
+				cssClass="custom-alert-dialog" showCloseIcon="true" allowDragging="false">
+		<e-content-template>
+			<div id="globalDialogContent"></div>
+		</e-content-template>
+		<e-dialog-buttons>
+			<e-dialog-button buttonModel="{ content: 'OK', isPrimary: true }" click="closeGlobalDialog"></e-dialog-button>
+		</e-dialog-buttons>
+	</ejs-dialog>
+
+	<script>
+		function closeGlobalDialog() {
+			document.getElementById('globalDialog').ej2_instances[0].hide();
+		}
+	</script>
+
+	@* ============================================ *@
+	@* ESTILOS PARA DIALOG GLOBAL *@
+	@* ============================================ *@
+	<style>
+		.custom-alert-dialog .e-dialog {
+			border-radius: 15px;
+			font-family: 'Segoe UI', sans-serif;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+		}
+
+		.custom-alert-dialog .e-dlg-header {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			border-radius: 15px 15px 0 0;
+			padding: 20px;
+			font-size: 18px;
+			font-weight: 600;
+		}
+
+		.alert-error {
+			background-color: #fff5f5;
+			border-left: 4px solid #f56565;
+			padding: 20px;
+		}
+
+		.alert-success {
+			background-color: #f0fff4;
+			border-left: 4px solid #48bb78;
+			padding: 20px;
+		}
+
+		.alert-warning {
+			background-color: #fffbeb;
+			border-left: 4px solid #ed8936;
+			padding: 20px;
+		}
+
+		.error-message, .success-message, .warning-message {
+			font-size: 16px;
+			line-height: 1.5;
+			margin-bottom: 10px;
+		}
+
+		.error-details {
+			margin-top: 15px;
+			font-size: 12px;
+			color: #666;
+		}
+
+			.error-details pre {
+				background: #f7fafc;
+				padding: 10px;
+				border-radius: 5px;
+				overflow-x: auto;
+				max-height: 200px;
+			}
+		/* Estilos para o modal */
+		.modal-xl {
+			max-width: 1200px;
+		}
+
+		.border-left-primary {
+			border-left: 4px solid #4e73df;
+		}
+
+		.border-left-success {
+			border-left: 4px solid #1cc88a;
+		}
+
+		.border-left-danger {
+			border-left: 4px solid #e74a3b;
+		}
+
+		.border-left-warning {
+			border-left: 4px solid #f6c23e;
+		}
+
+		.progress {
+			background-color: #e9ecef;
+		}
+
+		.progress-bar {
+			font-weight: bold;
+			font-size: 14px;
+		}
+
+		#btnBaixaAlerta {
+			min-width: 180px;
+		}
+
+		.table-success {
+			background-color: rgba(28, 200, 138, 0.1) !important;
+		}
+
+		.table-warning {
+			background-color: rgba(246, 194, 62, 0.1) !important;
+		}
+
+		.table-danger {
+			background-color: rgba(231, 74, 59, 0.1) !important;
+		}
+	</style>
+
+	@* ============================================ *@
+	@* UTILITÁRIOS E INICIALIZAÇÕES *@
+	@* ============================================ *@
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var el = document.getElementById('txtDataFinal');
+			if (el) {
+				document.documentElement.classList.add('loading');
+			}
+		});
+	</script>
+
+	@* ============================================ *@
+	@* CONFIGURAÇÃO DE CULTURA SYNCFUSION *@
+	@* ============================================ *@
+	<script>
+		(function () {
+			try {
+				var ajax = new ej.base.Ajax(location.origin + '/../../locale/pt-BR.json', 'GET', false);
+				ajax.send().then(function (e) {
+					var loader = JSON.parse(e);
+					ej.base.L10n.load(loader);
+					ej.base.setCulture('pt-BR');
+				});
+			} catch (err) {
+				console.error('Falha ao carregar cultura Syncfusion', err);
+			}
+		})();
+	</script>
+
+	@* ============================================ *@
+	@* SYNCFUSION SCRIPTS *@
+	@* ============================================ *@
+	<ejs-scripts></ejs-scripts>
+
+	@* ============================================ *@
+	@* LOADING OVERLAY *@
+	@* ============================================ *@
+	<div id="loading-overlay" hidden>
+		<div class="spinner"></div>
+	</div>
+
+	@* ============================================ *@
+	@* TRATAMENTO DE ERROS DO SERVIDOR (TEMPDATA) *@
+	@* ============================================ *@
+	@{
+		var uiError = TempData["UiError"] as string;
+	}
+	@if (!string.IsNullOrWhiteSpace(uiError))
+	{
+		<script>
+			(function(){
+				try {
+					var e = JSON.parse(@Html.Raw(JsonSerializer.Serialize(uiError)));
+					if (typeof e === 'string') { e = JSON.parse(e); }
+
+					var origem = e.Origem || 'Servidor';
+					var msg    = e.Mensagem || 'Falha inesperada';
+
+					var p = origem.lastIndexOf('.');
+					var classe = p > 0 ? origem.substring(0, p) : origem;
+					var metodo = p > 0 ? origem.substring(p + 1) : '';
+
+					if (window.Alerta && typeof Alerta.TratamentoErroComLinha === 'function') {
+						Alerta.TratamentoErroComLinha(classe, metodo, msg);
+					} else if (window.SweetAlertInterop && typeof SweetAlertInterop.ShowErrorUnexpected === 'function') {
+						SweetAlertInterop.ShowErrorUnexpected(classe, metodo, msg, "OK");
+					} else {
+						console.error('Não encontrei Alerta.TratamentoErroComLinha nem SweetAlertInterop.ShowErrorUnexpected', e);
+					}
+				} catch(err) {
+					console.error('Falha ao exibir alerta de erro', err);
+				}
+			})();
+		</script>
+	}
+
+	<script>
+
+		function getIconePrioridade(prioridade) {
+			switch(prioridade) {
+				case 1: return 'fa-duotone fa-circle-info';
+				case 2: return 'fa-duotone fa-circle-exclamation';
+				case 3: return 'fa-duotone fa-triangle-exclamation';
+				default: return 'fa-duotone fa-circle';
+			}
+		}
+
+		function getCorPrioridade(prioridade) {
+			switch(prioridade) {
+				case 1: return 'text-info';
+				case 2: return 'text-warning';
+				case 3: return 'text-danger';
+				default: return 'text-secondary';
+			}
+		}
+
+	</script>
+
+    <script src="/js/localization-init.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadSyncfusionLocalization();
+        });
+    </script>
+
+    @* Antes do </body> *@
+
+    @if (TempData["ToastScripts"] != null)
+    {
+        <script>
+            @Html.Raw(TempData["ToastScripts"])
+        </script>
+    }
+
+</body>
+</html>

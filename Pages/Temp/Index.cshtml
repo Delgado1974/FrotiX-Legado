@@ -1,0 +1,99 @@
+@page
+
+@{
+    ViewData["Title"] = "Usuários";
+    ViewData["PageName"] = "usuarios_index";
+    ViewData["Heading"] = "<i class='fad fa-users'></i> Cadastros: <span class='fw-300'>Usuários</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fad fa-users";
+}
+
+@section HeadBlock {
+
+
+
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+
+    .label {
+        color: white;
+    }
+
+    .btn-fundo-laranja {
+        background-color: #D2691E;
+        color: white;
+    }
+
+</style>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kendo UI Grid with Combo Box</title>
+
+    <!-- Include Kendo UI CSS -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2023.1.117/styles/kendo.common.min.css">
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2023.1.117/styles/kendo.default.min.css">
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- Include Kendo UI JavaScript -->
+    <script src="https://kendo.cdn.telerik.com/2023.1.117/js/kendo.all.min.js"></script>
+</head>
+<body>
+
+    <!-- Your Grid will be rendered here -->
+    <div id="grid"></div>
+
+    <script>
+        // Your JavaScript code will go here
+        var dataSource = new kendo.data.DataSource({
+            data: [
+                { ProductID: 1, ProductName: "Product 1", Category: "Category 1" },
+                { ProductID: 2, ProductName: "Product 2", Category: "Category 2" },
+                // Add more data as needed
+            ],
+        });
+
+        $("#grid").kendoGrid({
+            dataSource: dataSource,
+            columns: [
+                { field: "ProductID", title: "Product ID" },
+                { field: "ProductName", title: "Product Name" },
+                {
+                    field: "Category",
+                    title: "Category",
+                    editor: function (container, options)
+                    {
+                        // Create the combo box
+                        $("<input>").attr("name", options.field).appendTo(container).kendoComboBox({
+                            dataSource: ["Category 1", "Category 2", "Category 3"],
+                        });
+                    },
+                },
+            ],
+            editable: "inline", // Enable inline editing
+        });
+    </script>
+</body>
+</html>
+
+
+
+@section ScriptsBlock{
+
+    <script>
+
+
+    </script>
+}

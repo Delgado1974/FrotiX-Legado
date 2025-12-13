@@ -1,0 +1,93 @@
+﻿/* === Paleta: base do anexo + 30% mais clara ===
+               Base (anexo): #3B5F7A
+               Light(30%): mistura 70% base + 30% branco = #768FA2
+               Light(40%): 60% base + 40% branco = #899FAF
+            */
+:root {
+    --brand-base: #3B5F7A;
+    --brand-light-30: #768FA2; /* fallback */
+    --brand-light-40: #899FAF; /* fallback */
+}
+/* Preferência com color-mix (browsers modernos) */
+@supports (color: color-mix(in srgb, black, white)) {
+    : root {
+        --brand-light-30: color-mix(in srgb, var(--brand-base) 70%, #ffffff 30%);
+        --brand-light-40: color-mix(in srgb, var(--brand-base) 60%, #ffffff 40%);
+    }
+}
+
+.btn-filtrar-royal {
+    background-color: var(--brand-light-30) !important;
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: .5rem !important;
+    padding: .55rem 1rem !important;
+    font-weight: 600 !important;
+}
+
+.btn-export-royal {
+    background-color: transparent !important;
+    color: var(--brand-light-30) !important;
+    border: 1px solid var(--brand-light-30) !important;
+    border-radius: .5rem !important;
+    padding: .55rem 1rem !important;
+    font-weight: 600 !important;
+}
+
+    .btn-export-royal:hover {
+        background-color: var(--brand-light-30) !important;
+        color: #fff !important;
+    }
+
+.col-diario, .col-diario .e-headercelldiv {
+    background: rgba(255, 159, 64, .12);
+}
+
+.e-grid .e-aggregatecell {
+    font-weight: 600;
+}
+
+.card-royal .card-header {
+    background: linear-gradient(90deg, var(--brand-light-30), var(--brand-light-40));
+    color: #fff;
+    border-bottom: 0;
+}
+
+    .card-royal .card-header .fa-duotone {
+        margin-right: .5rem;
+    }
+
+.chip-total {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 999px;
+    padding: .35rem .75rem;
+}
+
+.chip-glosa {
+    background: rgba(255,99,132,.1);
+    border-color: rgba(255,99,132,.2);
+}
+
+.chip-ateste {
+    background: rgba(16,185,129,.1);
+    border-color: rgba(16,185,129,.2);
+}
+
+.chip-days {
+    background: rgba(59,130,246,.08);
+    border-color: rgba(59,130,246,.2);
+}
+
+.chip-label {
+    font-weight: 600;
+    opacity: .85;
+}
+
+.chip-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}

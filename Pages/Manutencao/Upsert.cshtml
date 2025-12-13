@@ -1,0 +1,830 @@
+@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Manutencao.UpsertModel
+
+@using Kendo.Mvc.UI
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+
+@{
+    ViewData["Title"] = "Manutenção";
+    ViewData["PageName"] = "manutencao_upsert";
+    ViewData["Heading"] = "<i class='fa-duotone fa-users-gear'></i> Manutenção: <span class='fw-300'>Registro de Ordens de Serviço</span>";
+    ViewData["Category1"] = "Manutenção";
+    ViewData["PageIcon"] = "fad fa-users-gear";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+    <style>
+        /* ===== Fonte Outfit ===== */
+        @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+        /* ===== Override Header (fonte Outfit 900 + cores) ===== */
+        .ftx-card-header .ftx-card-title {
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 900 !important;
+            color: #fff !important;
+        }
+
+        .ftx-card-header .ftx-card-title i {
+            color: #fff !important;
+            --fa-primary-color: #fff !important;
+            --fa-secondary-color: rgba(255,255,255,0.7) !important;
+        }
+
+        .ftx-card-header .btn-header-orange {
+            background: linear-gradient(135deg, #D2691E 0%, #E07020 100%) !important;
+            color: #fff !important;
+            border: none !important;
+        }
+
+        .ftx-card-header .btn-header-orange:hover {
+            background: linear-gradient(135deg, #E07020 0%, #D2691E 100%) !important;
+            color: #fff !important;
+        }
+    </style>
+}
+
+<script>
+    function VeiculoChange() {
+        try {
+            PreenchePagina();
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("Upsert.cshtml", "VeiculoChange", error);
+        }
+    }
+</script>
+
+<style>
+    .bs-form-spaced .row {
+        --bs-gutter-y: .4rem;
+    }
+
+        .bs-form-spaced .row + .row {
+            margin-top: 0.75rem;
+        }
+
+    .bs-form-spaced .form-group {
+        margin-bottom: .25rem;
+    }
+
+    :root {
+        --label-gap: .2rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: var(--label-gap);
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .input-icons i {
+        position: absolute;
+    }
+
+    .input-icons {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .icon {
+        padding: 10px;
+        min-width: 40px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .disable-element {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+
+    .wrapper {
+        cursor: not-allowed;
+    }
+
+    .e-grid * {
+        font-size: 12px !important;
+    }
+
+    .fundo-chocolate {
+        background-color: #7B3F00;
+        color: #fff;
+    }
+
+    .fundo-ebony {
+        background-color: #555D50;
+        color: #fff;
+    }
+
+    .btn_margem {
+        margin: 2px;
+    }
+
+    input.form-control,
+    select.form-control,
+    input[type="text"].form-control,
+    input[type="number"].form-control,
+    input[type="date"].form-control {
+        height: 35px !important;
+        min-height: 35px !important;
+        font-size: 14px;
+        box-sizing: border-box;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .titulo {
+        color: #333 !important;
+        font-weight: 600;
+        font-size: 1.7rem;
+        margin: 8px 0 12px;
+    }
+
+    .btn-add-item {
+        font-size: 1.2em;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 4px;
+        transition: background-color .3s ease;
+    }
+
+        .btn-add-item i {
+            font-size: 1.3em;
+            --fa-primary-color: #ffffff;
+            --fa-secondary-color: #FFD700;
+            --fa-secondary-opacity: 1;
+            transform-origin: center center;
+            display: inline-block;
+            transition: transform .3s ease;
+        }
+
+        .btn-add-item:hover i {
+            transform: rotate(12deg) scale(1.15);
+            --fa-secondary-color: #FFB300;
+        }
+
+    .btn-vinho {
+        background-color: #c82333 !important;
+        color: #fff !important;
+        border: 1px solid #bd2130 !important;
+        transition: background-color .2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+    }
+
+        .btn-vinho:hover, .btn-vinho:focus, .btn-vinho:active, .btn-vinho:focus-visible {
+            background-color: #a71d2a !important;
+            border-color: #a71d2a !important;
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+    .btn-azul {
+        background-color: #0D98BA !important;
+        color: #fff !important;
+        border: 1px solid #0c86a3 !important;
+        transition: background-color .2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .btn-azul:hover, .btn-azul:focus, .btn-azul:active, .btn-azul:focus-visible {
+            background-color: #0c86a3 !important;
+            color: #fff !important;
+            border-color: #0c86a3 !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+    .tblManutencao, .tblManutencao th, .tblManutencao td {
+        font-size: .82rem;
+        vertical-align: middle !important;
+    }
+
+        .tblManutencao thead th {
+            font-size: .86rem;
+            font-weight: 700;
+        }
+
+        .tblManutencao .col-acao {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+            .tblManutencao .col-acao .btn-acao {
+                width: 31px;
+                height: 30px;
+                padding: 0 !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: .30rem;
+                font-size: .95rem;
+                line-height: 1;
+                margin: 2px;
+                position: relative;
+                transition: transform .2s ease, box-shadow .2s ease;
+            }
+
+                .tblManutencao .col-acao .btn-acao:hover {
+                    transform: scale(1.12);
+                    box-shadow: 0 0 4px rgba(0,0,0,.2);
+                }
+
+        .tblManutencao .btn-acao[data-tooltip] {
+            position: relative;
+        }
+
+            .tblManutencao .btn-acao[data-tooltip]::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: 115%;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #444;
+                color: #fff;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: .7rem;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .3s ease, transform .3s ease;
+                z-index: 10;
+            }
+
+            .tblManutencao .btn-acao[data-tooltip]:hover::after {
+                opacity: .95;
+                transform: translateX(-50%) translateY(-4px);
+            }
+
+        .tblManutencao .col-acao > div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: nowrap;
+            height: 100%;
+        }
+
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+    .btn-foto {
+        background: chocolate;
+        border-color: chocolate;
+    }
+
+        .btn-foto:hover {
+            filter: brightness(0.95);
+        }
+
+    .sf-tooltip-darkorange.e-tooltip-wrap {
+        background: #bf5b00;
+        color: #fff;
+        border: none;
+        box-shadow: none;
+        outline: none;
+    }
+
+    .sf-tooltip-darkorange .e-tip-content {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .sf-tooltip-darkorange .e-arrow-tip,
+    .sf-tooltip-darkorange .e-arrow-tip-outer,
+    .sf-tooltip-darkorange .e-arrow-tip-inner {
+        display: none !important;
+    }
+
+    .has-sf-tooltip:focus {
+        outline: none;
+        box-shadow: none;
+    }
+</style>
+
+<form method="post" asp-action="Upsert">
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel ftx-card-styled">
+                <div class="panel-container show">
+
+                    <!-- Header Padrão FrotiX -->
+                    <div class="ftx-card-header">
+                        <h2 class="ftx-card-title">
+                            <i class="fa-duotone fa-screwdriver-wrench"></i>
+                            @(Model.ManutencaoObj.Manutencao.ManutencaoId != Guid.Empty ? "Atualizar " : "Criar ") Registro de Manutenção
+                        </h2>
+                        <div class="ftx-card-actions">
+                        </div>
+                    </div>
+
+                    <div class="panel-content bs-form-spaced">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        @if (Model.ManutencaoObj.Manutencao.ManutencaoId != Guid.Empty)
+                        {
+                            <input type="hidden" asp-for="ManutencaoObj.Manutencao.ManutencaoId" id="txtManutencaoId" />
+                        }
+
+                        <div class="col-12 pt-3">
+                            <div class="row g-4">
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.NumOS"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.NumOS"></span>
+                                        <input id="txtOS" class="form-control form-control-xs" asp-for="ManutencaoObj.Manutencao.NumOS" disabled="disabled" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.DataSolicitacao"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.DataSolicitacao"></span>
+                                        <input id="txtDataSolicitacao" class="form-control form-control-xs" type="date" asp-for="ManutencaoObj.Manutencao.DataSolicitacao" />
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.DataDisponibilidade"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.DataDisponibilidade"></span>
+                                        <input id="txtDataDisponibilidade" class="form-control form-control-xs" type="date" asp-for="ManutencaoObj.Manutencao.DataDisponibilidade" />
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.StatusOS"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.StatusOS"></span>
+                                        <select id="lstStatus" class="form-control form-control-xs" asp-for="ManutencaoObj.Manutencao.StatusOS">
+                                            <option value="Aberta">Aberta</option>
+                                            <option value="Fechada">Fechada</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.DataEntrega"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.DataEntrega"></span>
+                                        <input id="txtDataEntrega" class="form-control form-control-xs" type="date" asp-for="ManutencaoObj.Manutencao.DataEntrega" />
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.DataDevolucao"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.DataDevolucao"></span>
+                                        <input id="txtDataDevolucao" class="form-control form-control-xs" type="date" asp-for="ManutencaoObj.Manutencao.DataDevolucao" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-12 col-md-3 col-xl-2">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.ReservaEnviado"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.ReservaEnviado"></span>
+                                        <select id="lstReserva" class="form-control form-control-xs" asp-for="ManutencaoObj.Manutencao.ReservaEnviado" onchange="fnExibeReserva()">
+                                            <option value="1">Enviado</option>
+                                            <option value="0" selected>Não Enviado</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-9">
+                                    <div id="divReserva" style="display:none">
+                                        <div class="row g-4">
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <label class="fw-bold">Veículo Reserva</label>
+                                                <ejs-combobox id="lstVeiculoReserva"
+                                                              placeholder="Selecione um Veículo"
+                                                              allowFiltering="true"
+                                                              filterType="Contains"
+                                                              dataSource="@ViewData["dataVeiculoReserva"]"
+                                                              popupHeight="200px"
+                                                              width="100%"
+                                                              showClearButton="true"
+                                                              ejs-for="@Model.ManutencaoObj.Manutencao.VeiculoReservaId">
+                                                    <e-combobox-fields text="Descricao" value="VeiculoId"></e-combobox-fields>
+                                                </ejs-combobox>
+                                            </div>
+
+                                            <div class="col-12 col-md-3 col-xl-2">
+                                                <div class="form-group">
+                                                    <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.DataRecebimentoReserva"></label>
+                                                    <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.DataRecebimentoReserva"></span>
+                                                    <input id="txtDataRecebimentoReserva" class="form-control form-control-xs" type="date" asp-for="ManutencaoObj.Manutencao.DataRecebimentoReserva" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-3 col-xl-2">
+                                                <div class="form-group">
+                                                    <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.DataDevolucaoReserva"></label>
+                                                    <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.DataDevolucaoReserva"></span>
+                                                    <input id="txtDataDevolucaoReserva" class="form-control form-control-xs" type="date" asp-for="ManutencaoObj.Manutencao.DataDevolucaoReserva" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="fw-bold" asp-for="ManutencaoObj.Manutencao.ResumoOS"></label>
+                                        <span class="text-danger" asp-validation-for="ManutencaoObj.Manutencao.ResumoOS"></span>
+                                        <input id="txtResumoOS" class="form-control form-control-xs" asp-for="ManutencaoObj.Manutencao.ResumoOS" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4" id="LinhaVeiculo">
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <label class="fw-bold">Veículo</label>
+                                    <ejs-combobox id="lstVeiculo"
+                                                  placeholder="Selecione um Veículo"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  dataSource="@ViewData["dataVeiculo"]"
+                                                  popupHeight="200px"
+                                                  width="100%"
+                                                  showClearButton="true"
+                                                  ejs-for="@Model.ManutencaoObj.Manutencao.VeiculoId"
+                                                  change="VeiculoChange">
+                                        <e-combobox-fields text="Descricao" value="VeiculoId"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div id="divOcorrencias" style="display:none">
+                                        <h4>Ocorrências Disponíveis para o Veículo</h4>
+                                        <table id="tblOcorrencia" class="table table-bordered table-striped tblManutencao" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ficha</th>
+                                                    <th>Data</th>
+                                                    <th>Motorista</th>
+                                                    <th>Resumo Ocorrência</th>
+                                                    <th class="col-acao">Ação</th>
+                                                    <th>Descricao</th>
+                                                    <th>MotoristaId</th>
+                                                    <th>CaminhoImagem</th>
+                                                    <th>ItemManutençãoId</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div id="divPendencias" style="display:none">
+                                        <h4>Pendências em aberto para o Veículo</h4>
+                                        <table id="tblPendencia" class="table table-bordered table-striped tblManutencao" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ficha</th>
+                                                    <th>Data</th>
+                                                    <th>Motorista</th>
+                                                    <th>Resumo Ocorrência</th>
+                                                    <th class="col-acao">Ação</th>
+                                                    <th>Descricao</th>
+                                                    <th>MotoristaId</th>
+                                                    <th>CaminhoImagem</th>
+                                                    <th>ItemManutençãoId</th>
+                                                    <th>ViagemId</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div id="divItens" style="display:none">
+                                        <h4>Ítens selecionados para manutenção no veículo</h4>
+
+                                        <button id="btnAdicionaItem"
+                                                type="button"
+                                                class="btn btn-sm fundo-chocolate btn-add-item"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalManutencao"
+                                                data-ejtip="Adicionar Novo Item de Manutenção">
+                                            <i class="fa-duotone fa-circle-plus"></i>&nbsp;Adicionar Item
+                                        </button>
+
+                                        <table id="tblItens" class="table table-bordered table-striped tblManutencao" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tipo</th>
+                                                    <th>Ficha</th>
+                                                    <th>Data</th>
+                                                    <th>Motorista</th>
+                                                    <th>Resumo Ocorrência</th>
+                                                    <th class="col-acao">Ação</th>
+                                                    <th>ItemManutençãoID</th>
+                                                    <th>Descrição</th>
+                                                    <th>Resumo Limpo</th>
+                                                    <th>MotoristaId</th>
+                                                    <th>CaminhoImagem</th>
+                                                    <th>ViagemId</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="divQuebraLinha" style="display: none;"><br /></div>
+
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <div id="divUsuarioCriacao" style="display: none;">
+                                            <label id="lblUsuarioCriacao" class="font-weight-light d-block text-muted">
+                                                <i class="fa-sharp-duotone fa-solid fa-user-plus"></i><span>Criado por:</span>
+                                            </label>
+                                        </div>
+                                        <div id="divUsuarioCancelamento" style="display: none;">
+                                            <label id="lblUsuarioCancelamento" class="font-weight-light d-block text-muted">
+                                                <i class="fa-duotone fa-regular fa-trash-can-xmark"></i><span>Cancelado por:</span>
+                                            </label>
+                                        </div>
+                                        <div id="divUsuarioFinalizacao" style="display: none;">
+                                            <label id="lblUsuarioFinalizacao" class="font-weight-light d-block text-muted">
+                                                <i class="fa-duotone fa-solid fa-user-check"></i><span>Finalizado por:</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div class="form-group row g-4">
+                                <div class="col-12 col-lg-9">
+                                    <div class="row g-4">
+                                        <div class="col-12 col-md-6">
+                                            @if (Model.ManutencaoObj.Manutencao.ManutencaoId != Guid.Empty)
+                                            {
+                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id="@Model.ManutencaoObj.Manutencao.ManutencaoId" class="btn btn-azul form-control" data-ejtip="Atualizar Registro de Manutenção">
+                                                    <i class="fa-duotone fa-pen-to-square icon-space icon-pulse"></i> Atualizar
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" data-ejtip="Criar Novo Registro de Manutenção">
+                                                    <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
+                                                </button>
+                                            }
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <a asp-page="./ListaManutencao" class="btn btn-vinho form-control" data-ejtip="Voltar à Lista de Manutenções">
+                                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="modalManutencao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" enctype="multipart/form-data">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h3 class="modal-title" id="exampleModalLabel">Novo Item de Manutenção</h3>
+            </div>
+            <div class="modal-body">
+                <div id="frmManutencao">
+                    <input type="hidden" id="txtId" />
+                    <div class="row g-4">
+                        <div class="col-12 col-md-3">
+                            <div class="form-group">
+                                <label class="fw-bold">Data</label>
+                                <input id="txtData" class="form-control form-control-xs" type="date" />
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <div class="form-group">
+                                <label class="fw-bold">Resumo</label>
+                                <input id="txtResumo" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="fw-bold">Descrição do Item</label>
+                    <ejs-richtexteditor id="rteManutencao" created="onCreate" locale="pt-BR" height="200px">
+                        <e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensOcorrencias/"></e-richtexteditor-insertimagesettings>
+                    </ejs-richtexteditor>
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="fw-bold">Motorista</label>
+                            <ejs-combobox id="lstMotorista"
+                                          placeholder="Selecione um Motorista"
+                                          allowFiltering="true"
+                                          filterType="Contains"
+                                          dataSource="@ViewData["dataMotorista"]"
+                                          popupHeight="200px"
+                                          width="100%"
+                                          showClearButton="true">
+                                <e-combobox-fields text="Nome" value="MotoristaId"></e-combobox-fields>
+                            </ejs-combobox>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6">
+                            <label class="fw-bold">Seleciona Imagem do Item</label>
+                            <input class="form-control" type="file" id="txtFileItem" name="files">
+                        </div>
+                        <div class="col-12 col-md-6 d-flex align-items-end">
+                            <img class="img img-fluid" id="imgViewerItem" style="border: 1px solid #000000; max-height: 350px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btnInsereItem" class="btn btn-azul form-control" type="submit" value="SUBMIT" data-ejtip="Inserir Item de Manutenção" style="max-width: 200px;">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Inserir o Item
+                    </button>
+                    <button id="btnFechar" type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal" data-ejtip="Fechar Modal" style="max-width: 150px;">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFotoOcorrencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h4 class="modal-title" id="DynamicModalLabel">Foto da Ocorrência</h4>
+                <button id="btnFecharModal" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+            <div class="modal-body table-bordered container-fluid">
+                <img class="img" id="imgViewerOcorrencia" style="border: 1px solid #000000; margin-top: 10px; height: 400px" />
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFotoPendencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header modal-header-terracota">
+                <h4 class="modal-title">Foto da Pendência</h4>
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="imgViewerPendencia" style="border:1px solid #000; max-width:100%; height:400px" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFotoManutencao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title">Foto do Item de Manutenção</h4>
+                <button id="btnFecharModal" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                </button>
+                <button id="btnAdicionarFoto" type="button" class="btn btn-azul form-control" style="width:200px" data-ejtip="Inserir Foto do Item">
+                    <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Inserir Foto
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="fw-bold">Seleciona Foto</label>
+                        <input class="form-control" type="file" id="txtFileItemNovo" name="filesnovo">
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <img id="imgViewerNovo" style="border:1px solid #000; margin-top:10px; height:400px" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+<form id="uploadForm" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<meta name="request-verification-token" content="@(Antiforgery.GetAndStoreTokens(HttpContext).RequestToken)">
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment-with-locales.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    @using System.Text.Json
+
+    <script>
+        const manutencaoId = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.ManutencaoId.ToString()));
+        const manutencaoDataCriacao = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.DataCriacao?.ToString("O")));
+        const manutencaoDataDisponibilidade = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.DataDisponibilidade?.ToString("O")));
+        const manutencaoIdUsuarioCriacao = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.IdUsuarioCriacao?.ToString()));
+        const manutencaoIdUsuarioCancelamento = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.IdUsuarioCancelamento?.ToString()));
+        const manutencaoDataCancelamento = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.DataCancelamento?.ToString("O")));
+        const manutencaoIdUsuarioFinalizacao = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.IdUsuarioFinalizacao?.ToString()));
+        const manutencaoDataFinalizacao = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.DataFinalizacao?.ToString("O")));
+        const manutencaoReservaEnviado = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.ReservaEnviado));
+        const manutencaoStatusOS = @Html.Raw(JsonSerializer.Serialize(Model.ManutencaoObj.Manutencao?.StatusOS ?? ""));
+
+        window.manutencaoId = manutencaoId;
+        window.manutencaoDataCriacao = manutencaoDataCriacao;
+        window.manutencaoDataDisponibilidade = manutencaoDataDisponibilidade;
+        window.manutencaoIdUsuarioCriacao = manutencaoIdUsuarioCriacao;
+        window.manutencaoIdUsuarioCancelamento = manutencaoIdUsuarioCancelamento;
+        window.manutencaoDataCancelamento = manutencaoDataCancelamento;
+        window.manutencaoIdUsuarioFinalizacao = manutencaoIdUsuarioFinalizacao;
+        window.manutencaoDataFinalizacao = manutencaoDataFinalizacao;
+        window.manutencaoReservaEnviado = manutencaoReservaEnviado;
+        window.manutencaoStatusOS = manutencaoStatusOS;
+    </script>
+
+    <script src="~/js/cadastros/manutencao.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,962 @@
+@page
+@model FrotiX.Pages.Abastecimentos.ImportarModel
+
+@{
+    ViewData["Title"] = "Importar Abastecimentos";
+    ViewData["PageName"] = "abastecimentos_importacao";
+    ViewData["Heading"] = "<i class='fa-duotone fa-gas-pump'></i> Abastecimentos: <span class='fw-300'>Importação</span>";
+    ViewData["Category1"] = "Abastecimentos";
+    ViewData["PageIcon"] = "fa-duotone fa-gas-pump";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+    <style>
+        /* ===== DROP ZONE ===== */
+        .ftx-dropzone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            background: linear-gradient(180deg, #f8fafc, #fff);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .ftx-dropzone:hover {
+            border-color: #3D5771;
+            background: linear-gradient(180deg, #f1f5f9, #fff);
+        }
+
+        .ftx-dropzone.dragover {
+            border-color: #3D5771;
+            background: rgba(61, 87, 113, 0.05);
+            box-shadow: 0 0 20px rgba(61, 87, 113, 0.15);
+        }
+
+        .ftx-dropzone.arquivo-ok {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .ftx-dropzone-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .ftx-dropzone-icon {
+            font-size: 3rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .ftx-dropzone.arquivo-ok .ftx-dropzone-icon {
+            color: #22c55e;
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card-ftx {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card-ftx:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card-ftx .stat-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-ftx .stat-valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-card-ftx .stat-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-card-ftx.stat-total .stat-icon { color: #3D5771; }
+        .stat-card-ftx.stat-total .stat-valor { color: #3D5771; }
+
+        .stat-card-ftx.stat-sucesso .stat-icon { color: #22c55e; }
+        .stat-card-ftx.stat-sucesso .stat-valor { color: #22c55e; }
+
+        .stat-card-ftx.stat-erro .stat-icon { color: #ef4444; }
+        .stat-card-ftx.stat-erro .stat-valor { color: #ef4444; }
+
+        .stat-card-ftx.stat-ignorado .stat-icon { color: #6c757d; }
+        .stat-card-ftx.stat-ignorado .stat-valor { color: #6c757d; }
+
+        /* ===== ESTADOS ===== */
+        .estado-aguardando {
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .estado-aguardando i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== ALERT RESULTADO ===== */
+        .alert-resultado {
+            border: none;
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .alert-resultado .alert-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .alert-resultado.alert-success .alert-icon {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .alert-resultado.alert-warning .alert-icon {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .alert-resultado.alert-danger .alert-icon {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* ===== INFO BOX ===== */
+        .info-box-ftx {
+            background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .info-box-ftx h6 {
+            color: #0369a1;
+            font-weight: 700;
+        }
+
+        .info-box-ftx ul {
+            margin-bottom: 0;
+            padding-left: 1.25rem;
+        }
+
+        .info-box-ftx li {
+            color: #475569;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* ===== LISTA DE ERROS ===== */
+        .lista-erros-ftx {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .lista-erros-ftx .list-group-item {
+            border: none;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 0.75rem;
+        }
+
+        .lista-erros-ftx .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .erro-icon-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            flex-shrink: 0;
+        }
+
+        /* ===== TABELA IMPORTADOS ===== */
+        .tabela-importados-container {
+            max-height: 350px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tabela-importados-container thead {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            z-index: 1;
+        }
+
+        /* ===== BARRA DE PROGRESSO ===== */
+        .ftx-progress-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 1.5rem auto;
+        }
+
+        .ftx-progress-bar {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .ftx-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3D5771, #5a7a9a, #3D5771);
+            background-size: 200% 100%;
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            animation: progressShine 1.5s ease-in-out infinite;
+        }
+
+        @@keyframes progressShine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .ftx-progress-text {
+            text-align: center;
+            margin-top: 0.75rem;
+            font-weight: 600;
+            color: #3D5771;
+        }
+
+        .ftx-progress-detail {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel ftx-card-styled">
+            <div class="panel-container show">
+
+                <!-- Header Padrão FrotiX -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas mb-0">
+                        <i class="fa-duotone fa-gas-pump"></i>
+                        Importar Abastecimentos
+                    </h2>
+                </div>
+
+                <div class="panel-content">
+                    <div class="row">
+                        <!-- Painel de Upload -->
+                        <div class="col-lg-5 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h5 class="mb-0 fw-bold">
+                                        <i class="fa-duotone fa-cloud-arrow-up text-primary me-2"></i>
+                                        Upload de Planilha
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Área de Drop -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fa-duotone fa-file-excel text-success me-2"></i>
+                                            Arquivo Excel
+                                        </label>
+                                        <div id="dropZone" class="ftx-dropzone">
+                                            <input type="file" id="arquivoExcel" accept=".xlsx,.xls" class="ftx-dropzone-input" />
+                                            <div id="dropZoneContent">
+                                                <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon"></i>
+                                                <p class="mb-1 fw-semibold">Arraste o arquivo aqui</p>
+                                                <p class="text-muted small mb-2">ou clique para selecionar</p>
+                                                <span class="badge bg-light text-dark border">.xlsx ou .xls</span>
+                                            </div>
+                                            <div id="arquivoSelecionado" class="d-none">
+                                                <i class="fa-duotone fa-file-excel ftx-dropzone-icon"></i>
+                                                <p class="mb-1 fw-semibold text-success" id="nomeArquivo"></p>
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="btnRemoverArquivo">
+                                                    <i class="fa-solid fa-xmark me-1"></i>Remover
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botão Importar -->
+                                    <button type="button" id="btnImportar" class="btn btn-fundo-laranja btn-lg w-100" disabled>
+                                        <i class="fa-duotone fa-upload me-2"></i>
+                                        Importar Abastecimentos
+                                    </button>
+
+                                    <!-- Info Box -->
+                                    <div class="info-box-ftx mt-4">
+                                        <h6>
+                                            <i class="fa-duotone fa-lightbulb me-2"></i>Informações
+                                        </h6>
+                                        <hr class="my-2">
+                                        <ul>
+                                            <li>Colunas obrigatórias: Autorização, <strong>Data</strong>, <strong>Hora</strong>, Placa, KM, Produto, Qtde, Valor Unitário, Rodado, CodMotorista, KMAnterior</li>
+                                            <li>Produtos aceitos: <strong>Gasolina Comum</strong> e <strong>Diesel S-10</strong></li>
+                                            <li>Outros produtos (ARLA, etc) serão ignorados</li>
+                                            <li>Limite máximo: 500 litros por abastecimento</li>
+                                            <li>Limite máximo: 1.000 km rodados</li>
+                                            <li><strong class="text-success">A data/hora é lida diretamente da planilha</strong></li>
+                                            <li>Linhas válidas são importadas, erros geram arquivo para correção</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Painel de Resultado -->
+                        <div class="col-lg-7 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h5 class="mb-0 fw-bold">
+                                        <i class="fa-duotone fa-clipboard-list text-primary me-2"></i>
+                                        Resultado da Importação
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Estado Inicial -->
+                                    <div id="estadoInicial" class="estado-aguardando">
+                                        <i class="fa-duotone fa-inbox"></i>
+                                        <h5 class="text-muted">Aguardando importação</h5>
+                                        <p class="text-muted mb-0">Selecione o arquivo para começar</p>
+                                    </div>
+
+                                    <!-- Loading com Barra de Progresso -->
+                                    <div id="estadoLoading" class="estado-aguardando d-none">
+                                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                                            <span class="visually-hidden">Processando...</span>
+                                        </div>
+                                        <h5 class="text-primary">Processando planilha...</h5>
+                                        <p class="text-muted mb-0">Aguarde enquanto validamos os dados</p>
+                                        
+                                        <div class="ftx-progress-container">
+                                            <div class="ftx-progress-bar">
+                                                <div class="ftx-progress-fill" id="progressFill" style="width: 0%"></div>
+                                            </div>
+                                            <div class="ftx-progress-text" id="progressText">0%</div>
+                                            <div class="ftx-progress-detail" id="progressDetail">Iniciando...</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resultado Sucesso Total -->
+                                    <div id="estadoSucesso" class="d-none">
+                                        <div class="alert alert-resultado alert-success d-flex align-items-center gap-3 mb-4">
+                                            <div class="alert-icon">
+                                                <i class="fa-duotone fa-circle-check"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="alert-heading mb-1">Importação Concluída!</h5>
+                                                <p class="mb-0" id="msgSucesso"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Estatísticas -->
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-4">
+                                                <div class="stat-card-ftx stat-total">
+                                                    <i class="fa-duotone fa-file-lines stat-icon"></i>
+                                                    <div class="stat-valor" id="statTotal">0</div>
+                                                    <div class="stat-label">Total</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-card-ftx stat-sucesso">
+                                                    <i class="fa-duotone fa-check stat-icon"></i>
+                                                    <div class="stat-valor" id="statImportados">0</div>
+                                                    <div class="stat-label">Importados</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-card-ftx stat-ignorado">
+                                                    <i class="fa-duotone fa-filter stat-icon"></i>
+                                                    <div class="stat-valor" id="statIgnorados">0</div>
+                                                    <div class="stat-label">Ignorados</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tabela de Importados -->
+                                        <div class="tabela-importados-container">
+                                            <table class="table table-sm table-hover mb-0" id="tblImportados">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Data/Hora</th>
+                                                        <th>Placa</th>
+                                                        <th>Motorista</th>
+                                                        <th>Produto</th>
+                                                        <th class="text-end">Qtde</th>
+                                                        <th class="text-end">Km</th>
+                                                        <th class="text-end">Consumo</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbodyImportados"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resultado Parcial -->
+                                    <div id="estadoParcial" class="d-none">
+                                        <div class="alert alert-resultado alert-warning d-flex align-items-center gap-3 mb-4">
+                                            <div class="alert-icon">
+                                                <i class="fa-duotone fa-triangle-exclamation"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="alert-heading mb-1">Importação Parcial</h5>
+                                                <p class="mb-0" id="msgParcial"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Estatísticas Parcial -->
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-3">
+                                                <div class="stat-card-ftx stat-total">
+                                                    <i class="fa-duotone fa-file-lines stat-icon"></i>
+                                                    <div class="stat-valor" id="statTotalParcial">0</div>
+                                                    <div class="stat-label">Total</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="stat-card-ftx stat-sucesso">
+                                                    <i class="fa-duotone fa-check stat-icon"></i>
+                                                    <div class="stat-valor" id="statImportadosParcial">0</div>
+                                                    <div class="stat-label">Importados</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="stat-card-ftx stat-erro">
+                                                    <i class="fa-duotone fa-xmark stat-icon"></i>
+                                                    <div class="stat-valor" id="statErrosParcial">0</div>
+                                                    <div class="stat-label">Com Erro</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="stat-card-ftx stat-ignorado">
+                                                    <i class="fa-duotone fa-filter stat-icon"></i>
+                                                    <div class="stat-valor" id="statIgnoradosParcial">0</div>
+                                                    <div class="stat-label">Ignorados</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Botão Download Erros -->
+                                        <div class="d-grid gap-2 mb-4">
+                                            <button type="button" id="btnDownloadErrosParcial" class="btn btn-vinho btn-lg">
+                                                <i class="fa-duotone fa-download me-2"></i>
+                                                Baixar Planilha com Erros para Correção
+                                            </button>
+                                        </div>
+
+                                        <!-- Lista de Erros -->
+                                        <h6 class="mb-3 fw-bold">
+                                            <i class="fa-duotone fa-bug text-danger me-2"></i>
+                                            Resumo dos Erros
+                                        </h6>
+                                        <div class="list-group lista-erros-ftx" id="listaErrosParcial"></div>
+                                    </div>
+
+                                    <!-- Resultado Erro Total -->
+                                    <div id="estadoErro" class="d-none">
+                                        <div class="alert alert-resultado alert-danger d-flex align-items-center gap-3 mb-4">
+                                            <div class="alert-icon">
+                                                <i class="fa-duotone fa-circle-xmark"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="alert-heading mb-1">Nenhum Registro Importado</h5>
+                                                <p class="mb-0" id="msgErro"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Estatísticas de Erro -->
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-4">
+                                                <div class="stat-card-ftx stat-total">
+                                                    <i class="fa-duotone fa-file-lines stat-icon"></i>
+                                                    <div class="stat-valor" id="statTotalErro">0</div>
+                                                    <div class="stat-label">Total</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-card-ftx stat-erro">
+                                                    <i class="fa-duotone fa-triangle-exclamation stat-icon"></i>
+                                                    <div class="stat-valor" id="statErros">0</div>
+                                                    <div class="stat-label">Com Erro</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-card-ftx stat-ignorado">
+                                                    <i class="fa-duotone fa-filter stat-icon"></i>
+                                                    <div class="stat-valor" id="statIgnoradosErro">0</div>
+                                                    <div class="stat-label">Ignorados</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Botão Download Erros -->
+                                        <div class="d-grid gap-2 mb-4">
+                                            <button type="button" id="btnDownloadErros" class="btn btn-vinho btn-lg">
+                                                <i class="fa-duotone fa-download me-2"></i>
+                                                Baixar Planilha com Erros para Correção
+                                            </button>
+                                        </div>
+
+                                        <!-- Lista de Erros -->
+                                        <h6 class="mb-3 fw-bold">
+                                            <i class="fa-duotone fa-bug text-danger me-2"></i>
+                                            Detalhes dos Erros
+                                        </h6>
+                                        <div class="list-group lista-erros-ftx" id="listaErros"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <!-- SignalR -->
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js" asp-append-version="true"></script>
+
+    <script asp-append-version="true">
+        (function () {
+            'use strict';
+
+            // ===== ELEMENTOS DO DOM =====
+            const arquivoExcel = document.getElementById('arquivoExcel');
+            const dropZone = document.getElementById('dropZone');
+            const dropZoneContent = document.getElementById('dropZoneContent');
+            const arquivoSelecionado = document.getElementById('arquivoSelecionado');
+            const nomeArquivo = document.getElementById('nomeArquivo');
+            const btnRemoverArquivo = document.getElementById('btnRemoverArquivo');
+            const btnImportar = document.getElementById('btnImportar');
+
+            const estadoInicial = document.getElementById('estadoInicial');
+            const estadoLoading = document.getElementById('estadoLoading');
+            const estadoSucesso = document.getElementById('estadoSucesso');
+            const estadoParcial = document.getElementById('estadoParcial');
+            const estadoErro = document.getElementById('estadoErro');
+
+            // Elementos da barra de progresso
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressDetail = document.getElementById('progressDetail');
+
+            let arquivoAtual = null;
+            let arquivoErrosBase64 = null;
+            let nomeArquivoErros = null;
+
+            // ===== SIGNALR =====
+            let hubConnection = null;
+            let connectionId = null;
+
+            async function inicializarSignalR() {
+                try {
+                    hubConnection = new signalR.HubConnectionBuilder()
+                        .withUrl("/hubs/importacao")
+                        .withAutomaticReconnect()
+                        .build();
+
+                    // Evento: Conexão estabelecida
+                    hubConnection.on("Conectado", (connId) => {
+                        connectionId = connId;
+                        console.log("SignalR conectado:", connectionId);
+                    });
+
+                    // Evento: Receber progresso
+                    hubConnection.on("ProgressoImportacao", (progresso) => {
+                        try {
+                            atualizarProgresso(progresso.porcentagem, progresso.detalhe);
+
+                            // Se tem info de linhas, mostrar detalhes
+                            if (progresso.totalLinhas > 0) {
+                                const detalheLinha = `${progresso.detalhe} (${progresso.linhaAtual}/${progresso.totalLinhas})`;
+                                progressDetail.textContent = detalheLinha;
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha('Importacao.cshtml', 'ProgressoImportacao', error);
+                        }
+                    });
+
+                    // Iniciar conexão
+                    await hubConnection.start();
+                    console.log("SignalR iniciado");
+
+                } catch (error) {
+                    console.error("Erro ao conectar SignalR:", error);
+                    // Continua funcionando sem SignalR (fallback para progresso simulado)
+                }
+            }
+
+            function init() {
+                try {
+                    inicializarSignalR();
+                    configurarEventos();
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'init', error);
+                }
+            }
+
+            function configurarEventos() {
+                try {
+                    dropZone.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.add('dragover');
+                    });
+
+                    dropZone.addEventListener('dragleave', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.remove('dragover');
+                    });
+
+                    dropZone.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.remove('dragover');
+
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            selecionarArquivo(files[0]);
+                        }
+                    });
+
+                    arquivoExcel.addEventListener('change', (e) => {
+                        if (e.target.files.length > 0) {
+                            selecionarArquivo(e.target.files[0]);
+                        }
+                    });
+
+                    btnRemoverArquivo.addEventListener('click', removerArquivo);
+                    btnImportar.addEventListener('click', importar);
+
+                    document.getElementById('btnDownloadErros').addEventListener('click', downloadArquivoErros);
+                    document.getElementById('btnDownloadErrosParcial').addEventListener('click', downloadArquivoErros);
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'configurarEventos', error);
+                }
+            }
+
+            function atualizarProgresso(pct, detalhe) {
+                try {
+                    const porcentagem = Math.min(Math.round(pct), 100);
+                    progressFill.style.width = porcentagem + '%';
+                    progressText.textContent = porcentagem + '%';
+                    if (detalhe) {
+                        progressDetail.textContent = detalhe;
+                    }
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarProgresso', error);
+                }
+            }
+
+            function selecionarArquivo(file) {
+                try {
+                    const extensao = file.name.split('.').pop().toLowerCase();
+                    if (extensao !== 'xlsx' && extensao !== 'xls') {
+                        AppToast.show('Amarelo', 'Selecione um arquivo Excel (.xlsx ou .xls)', 4000);
+                        return;
+                    }
+
+                    arquivoAtual = file;
+                    nomeArquivo.textContent = file.name;
+                    dropZoneContent.classList.add('d-none');
+                    arquivoSelecionado.classList.remove('d-none');
+                    dropZone.classList.add('arquivo-ok');
+
+                    atualizarBotaoImportar();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'selecionarArquivo', error);
+                }
+            }
+
+            function removerArquivo() {
+                try {
+                    arquivoAtual = null;
+                    arquivoExcel.value = '';
+                    dropZoneContent.classList.remove('d-none');
+                    arquivoSelecionado.classList.add('d-none');
+                    dropZone.classList.remove('arquivo-ok');
+
+                    atualizarBotaoImportar();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'removerArquivo', error);
+                }
+            }
+
+            function atualizarBotaoImportar() {
+                try {
+                    btnImportar.disabled = arquivoAtual === null;
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarBotaoImportar', error);
+                }
+            }
+
+            async function importar() {
+                try {
+                    mostrarEstado('loading');
+                    atualizarProgresso(0, 'Iniciando importação...');
+
+                    const formData = new FormData();
+                    formData.append('arquivo', arquivoAtual);
+
+                    // Enviar connectionId do SignalR para o servidor
+                    if (connectionId) {
+                        formData.append('connectionId', connectionId);
+                    }
+
+                    const response = await fetch('/api/Abastecimento/ImportarNovo', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    arquivoErrosBase64 = result.arquivoErros;
+                    nomeArquivoErros = result.nomeArquivoErros;
+
+                    // Pequeno delay para garantir que a barra chegou em 100%
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    if (result.sucesso && result.linhasComErro === 0) {
+                        mostrarSucesso(result);
+                    } else if (result.sucesso && result.linhasComErro > 0) {
+                        mostrarParcial(result);
+                    } else {
+                        mostrarErro(result);
+                    }
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'importar', error);
+                    mostrarEstado('inicial');
+                    AppToast.show('Vermelho', 'Erro ao processar importação', 5000);
+                }
+            }
+
+            function mostrarEstado(estado) {
+                try {
+                    estadoInicial.classList.add('d-none');
+                    estadoLoading.classList.add('d-none');
+                    estadoSucesso.classList.add('d-none');
+                    estadoParcial.classList.add('d-none');
+                    estadoErro.classList.add('d-none');
+
+                    switch (estado) {
+                        case 'inicial':
+                            estadoInicial.classList.remove('d-none');
+                            break;
+                        case 'loading':
+                            estadoLoading.classList.remove('d-none');
+                            break;
+                        case 'sucesso':
+                            estadoSucesso.classList.remove('d-none');
+                            break;
+                        case 'parcial':
+                            estadoParcial.classList.remove('d-none');
+                            break;
+                        case 'erro':
+                            estadoErro.classList.remove('d-none');
+                            break;
+                    }
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'mostrarEstado', error);
+                }
+            }
+
+            function mostrarSucesso(result) {
+                try {
+                    mostrarEstado('sucesso');
+
+                    document.getElementById('msgSucesso').textContent = result.mensagem;
+                    document.getElementById('statTotal').textContent = result.totalLinhas;
+                    document.getElementById('statImportados').textContent = result.linhasImportadas;
+                    document.getElementById('statIgnorados').textContent = result.linhasIgnoradas;
+
+                    const tbody = document.getElementById('tbodyImportados');
+                    tbody.innerHTML = '';
+
+                    if (result.linhasImportadasLista && result.linhasImportadasLista.length > 0) {
+                        result.linhasImportadasLista.forEach(linha => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><small class="text-muted">${linha.dataHora}</small></td>
+                                <td><span class="badge bg-secondary">${linha.placa}</span></td>
+                                <td>${linha.motorista || '-'}</td>
+                                <td>
+                                    <span class="badge ${linha.produto === 'Gasolina Comum' ? 'bg-warning text-dark' : 'bg-dark'}">
+                                        ${linha.produto}
+                                    </span>
+                                </td>
+                                <td class="text-end">${linha.quantidade}</td>
+                                <td class="text-end">${linha.kmRodado}</td>
+                                <td class="text-end"><strong>${linha.consumo}</strong></td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+
+                    AppToast.show('Verde', 'Importação concluída com sucesso!', 5000);
+                    removerArquivo();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'mostrarSucesso', error);
+                }
+            }
+
+            function mostrarParcial(result) {
+                try {
+                    mostrarEstado('parcial');
+
+                    document.getElementById('msgParcial').textContent = result.mensagem;
+                    document.getElementById('statTotalParcial').textContent = result.totalLinhas;
+                    document.getElementById('statImportadosParcial').textContent = result.linhasImportadas;
+                    document.getElementById('statErrosParcial').textContent = result.linhasComErro;
+                    document.getElementById('statIgnoradosParcial').textContent = result.linhasIgnoradas;
+
+                    const listaErros = document.getElementById('listaErrosParcial');
+                    listaErros.innerHTML = '';
+
+                    if (result.erros && result.erros.length > 0) {
+                        result.erros.forEach(erro => {
+                            const item = document.createElement('div');
+                            item.className = 'list-group-item';
+                            item.innerHTML = `
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="erro-icon-circle">
+                                        <i class="fa-solid ${erro.icone}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong class="text-danger">Linha ${erro.linhaArquivoErros} (original: ${erro.linhaOriginal})</strong>
+                                            <span class="badge bg-danger">${erro.tipo}</span>
+                                        </div>
+                                        <p class="mb-0 text-muted small">${erro.descricao}</p>
+                                    </div>
+                                </div>
+                            `;
+                            listaErros.appendChild(item);
+                        });
+                    }
+
+                    AppToast.show('Amarelo', `${result.linhasImportadas} importados, ${result.linhasComErro} com erro`, 5000);
+                    removerArquivo();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'mostrarParcial', error);
+                }
+            }
+
+            function mostrarErro(result) {
+                try {
+                    mostrarEstado('erro');
+
+                    document.getElementById('msgErro').textContent = result.mensagem;
+                    document.getElementById('statTotalErro').textContent = result.totalLinhas;
+                    document.getElementById('statErros').textContent = result.linhasComErro;
+                    document.getElementById('statIgnoradosErro').textContent = result.linhasIgnoradas || 0;
+
+                    const listaErros = document.getElementById('listaErros');
+                    listaErros.innerHTML = '';
+
+                    if (result.erros && result.erros.length > 0) {
+                        result.erros.forEach(erro => {
+                            const item = document.createElement('div');
+                            item.className = 'list-group-item';
+                            item.innerHTML = `
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="erro-icon-circle">
+                                        <i class="fa-solid ${erro.icone}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong class="text-danger">Linha ${erro.linhaArquivoErros} (original: ${erro.linhaOriginal})</strong>
+                                            <span class="badge bg-danger">${erro.tipo}</span>
+                                        </div>
+                                        <p class="mb-0 text-muted small">${erro.descricao}</p>
+                                    </div>
+                                </div>
+                            `;
+                            listaErros.appendChild(item);
+                        });
+                    }
+
+                    AppToast.show('Vermelho', 'Nenhum registro importado. Corrija os erros.', 5000);
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'mostrarErro', error);
+                }
+            }
+
+            function downloadArquivoErros() {
+                try {
+                    if (!arquivoErrosBase64 || !nomeArquivoErros) {
+                        AppToast.show('Amarelo', 'Arquivo de erros não disponível', 4000);
+                        return;
+                    }
+
+                    const byteCharacters = atob(arquivoErrosBase64);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = nomeArquivoErros;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+
+                    AppToast.show('Verde', 'Arquivo baixado com sucesso', 3000);
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'downloadArquivoErros', error);
+                    AppToast.show('Vermelho', 'Erro ao baixar arquivo', 5000);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+
+        })();
+    </script>
+}

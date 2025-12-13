@@ -1,0 +1,751 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Newtonsoft.Json
+@using Syncfusion.EJ2
+@model FrotiX.Pages.Multa.UpsertMultaModel
+
+@Html.AntiForgeryToken()
+
+@{
+	ViewData["Title"] = "Notificações";
+	ViewData["PageName"] = "multa_upsertautuacao";
+	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Cadastros: <span class='fw-300'>Notificação de Autuação</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fad fa-pen-to-square";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== ANIMAÇÃO WIGGLE FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-autuacao-azul: #3D5771;
+			--ftx-autuacao-azul-dark: #2d4559;
+			--ftx-autuacao-vinho: #722f37;
+			--ftx-autuacao-vinho-dark: #5a252c;
+			--ftx-autuacao-verde: #2E8B57;
+			--ftx-autuacao-verde-dark: #236B43;
+			--ftx-autuacao-terracota: #A0522D;
+			--ftx-autuacao-terracota-dark: #8B4513;
+		}
+
+		/* ===== FORM CONTROLS ===== */
+		.form-control-xs {
+			height: calc(1em + .775rem + 10px) !important;
+			padding: .125rem .5rem !important;
+			font-size: .8rem !important;
+			line-height: 1.5;
+			border-radius: .35rem;
+			border: 1px solid #ced4da;
+			transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+		}
+
+		.form-control-xs:focus {
+			border-color: var(--ftx-autuacao-azul);
+			box-shadow: 0 0 0 0.15rem rgba(61, 87, 113, 0.2);
+		}
+
+		.label {
+			margin-bottom: 2px;
+			margin-top: 10px;
+			font-size: 0.8rem;
+			color: #495057;
+		}
+
+		input[type=checkbox] {
+			vertical-align: middle;
+			position: relative;
+			bottom: 1px;
+		}
+
+		.btn-largura {
+			width: 100px;
+			height: 100px;
+		}
+
+		.img {
+			width: 100%;
+		}
+
+		.e-upload {
+			width: 100%;
+		}
+
+		.e-pv-toolbar {
+			border-radius: .25rem;
+		}
+
+		#txtValorAteVencimento .e-input-group input,
+		#txtValorPosVencimento .e-input-group input {
+			text-align: right !important;
+		}
+
+		/* ====== BOTÕES DE AÇÃO - COM SOMBREADO FORTE ====== */
+		.btn-azul {
+			background-color: var(--ftx-autuacao-azul) !important;
+			border: none !important;
+			color: #fff !important;
+			border-radius: .375rem !important;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2) !important;
+		}
+
+		.btn-azul:hover {
+			background-color: var(--ftx-autuacao-azul-dark) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 5px 12px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25) !important;
+		}
+
+		.btn-azul:active, .btn-azul:focus {
+			transform: translateY(0) scale(1) !important;
+			color: #fff !important;
+		}
+
+		.btn-vinho {
+			background-color: var(--ftx-autuacao-vinho) !important;
+			border: none !important;
+			color: #fff !important;
+			border-radius: .375rem !important;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2) !important;
+		}
+
+		.btn-vinho:hover {
+			background-color: var(--ftx-autuacao-vinho-dark) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 5px 12px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25) !important;
+		}
+
+		.btn-vinho:active, .btn-vinho:focus {
+			transform: translateY(0) scale(1) !important;
+			color: #fff !important;
+		}
+
+		.btn-verde {
+			background-color: var(--ftx-autuacao-verde) !important;
+			border: none !important;
+			color: #fff !important;
+			border-radius: .375rem !important;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2) !important;
+		}
+
+		.btn-verde:hover {
+			background-color: var(--ftx-autuacao-verde-dark) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 5px 12px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25) !important;
+		}
+
+		.btn-verde:active, .btn-verde:focus {
+			transform: translateY(0) scale(1) !important;
+			color: #fff !important;
+		}
+
+		/* ====== BOTÕES PEQUENOS (INPUT-GROUP) ====== */
+		.input-group .btn-sm {
+			padding: 0.25rem 0.5rem;
+			font-size: 0.8rem;
+			border-radius: .375rem !important;
+		}
+
+		/* ===== ESTILOS DO MODAL FICHA - PADRÃO FROTIX ===== */
+		#modalFicha .modal-dialog {
+			max-width: 650px;
+		}
+
+		#modalFicha .modal-content {
+			border: none;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+		}
+
+		#modalFicha .modal-header {
+			background: linear-gradient(180deg, var(--ftx-autuacao-azul) 0%, var(--ftx-autuacao-azul-dark) 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalFicha .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 1.1rem;
+		}
+
+		#modalFicha .modal-header .modal-title i {
+			color: #fff !important;
+			filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+			--fa-primary-color: #fff;
+			--fa-secondary-color: rgba(255,255,255,0.7);
+		}
+
+		#modalFicha .modal-header .btn-close-white {
+			filter: brightness(0) invert(1);
+			opacity: 0.85;
+			transition: all 0.2s ease;
+		}
+
+		#modalFicha .modal-header .btn-close-white:hover {
+			opacity: 1;
+			transform: rotate(90deg);
+		}
+
+		#modalFicha .modal-body {
+			padding: 0;
+			background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+		}
+
+		#modalFicha #divImagemFicha {
+			max-height: 600px;
+			overflow: auto;
+			padding: 1rem;
+		}
+
+		#modalFicha #imgFichaVistoria {
+			max-width: 100%;
+			height: auto;
+			border: 1px solid #dee2e6;
+			border-radius: 8px;
+			box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+		}
+
+		#modalFicha .modal-footer {
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* ====== BOTÕES DOS MODAIS - COM SOMBREADO FORTE ====== */
+		.btn-modal-fechar {
+			background-color: var(--ftx-autuacao-vinho) !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2) !important;
+		}
+
+		.btn-modal-fechar:hover {
+			background-color: var(--ftx-autuacao-vinho-dark) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 5px 12px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25) !important;
+		}
+
+		.btn-modal-fechar:active, .btn-modal-fechar:focus {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		.btn-modal-confirmar {
+			background-color: var(--ftx-autuacao-azul) !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2) !important;
+		}
+
+		.btn-modal-confirmar:hover {
+			background-color: var(--ftx-autuacao-azul-dark) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 5px 12px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.25) !important;
+		}
+
+		.btn-modal-confirmar:active, .btn-modal-confirmar:focus {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		/* ====== SPINNER NOS BOTÕES ====== */
+		.btn .spinner-border {
+			width: 1rem;
+			height: 1rem;
+			border-width: 2px;
+		}
+
+		.btn:disabled {
+			opacity: 0.65;
+			cursor: not-allowed;
+			box-shadow: none !important;
+			animation: none !important;
+		}
+
+		/* ===== PDF VIEWER ===== */
+		#pdfviewer {
+			border: 1px solid #dee2e6;
+			border-radius: 8px;
+			overflow: hidden;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+		}
+
+		/* ===== RICH TEXT EDITOR ===== */
+		.e-richtexteditor {
+			border-radius: 8px;
+			overflow: hidden;
+		}
+
+		/* ===== SYNCFUSION COMBOBOX/DROPDOWN AJUSTES ===== */
+		.e-input-group {
+			border-radius: .35rem !important;
+		}
+
+		.e-input-group:not(.e-disabled):not(.e-float-icon-left)::before,
+		.e-input-group:not(.e-disabled):not(.e-float-icon-left)::after {
+			background: var(--ftx-autuacao-azul) !important;
+		}
+
+		/* ===== UPLOADER SYNCFUSION ===== */
+		.e-upload .e-upload-files {
+			border-radius: 6px;
+		}
+
+		.e-upload .e-file-select-wrap {
+			border-radius: 6px;
+		}
+
+		/* ===== AJUSTES RESPONSIVOS ===== */
+		@@media (max-width: 768px) {
+			#modalFicha .modal-dialog {
+				max-width: 95%;
+				margin: 1rem auto;
+			}
+
+			.btn-azul, .btn-vinho, .btn-verde {
+				font-size: 0.85rem;
+				padding: 0.5rem 1rem;
+			}
+		}
+	</style>
+}
+
+<form method="post" asp-action="Upsert" onkeypress='stopEnterSubmitting(window.event)' enctype="multipart/form-data" autocomplete="off">
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel ftx-card-styled">
+				<div class="panel-container show">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-solid fa-user-police-tie"></i>
+							@(Model.MultaObj.Multa.MultaId != Guid.Empty ? "Atualizar " : "Criar ") Autuação
+						</h2>
+					</div>
+
+					<div class="panel-content">
+						<div id="divPainel" class="p-3">
+
+							<div asp-validation-summary="ModelOnly" class="text-danger">
+								@if (Model.MultaObj.Multa.MultaId != Guid.Empty)
+								{
+									<input type="hidden" asp-for="MultaObj.Multa.MultaId" />
+								}
+							</div>
+
+							<input type="text" id="txtFase" asp-for="MultaObj.Multa.Fase" hidden />
+
+							<div class="row">
+								<div class="col-12 col-md-4 col-xl-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.NumInfracao"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.NumInfracao"></span>
+										<input id="txtNumInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.NumInfracao" data-ejtip="Número da Infração" />
+									</div>
+								</div>
+								<div class="col-6 col-md-2 col-xl-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Data"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Data"></span>
+										<input id="txtDataInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Data" type="date" data-ejtip="Data da Infração" />
+									</div>
+								</div>
+								<div class="col-6 col-md-2 col-xl-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Hora"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Hora"></span>
+										<input id="txtHoraInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Hora" type="time" data-ejtip="Hora da Infração" />
+									</div>
+								</div>
+								<div class="col-6 col-md-2 col-xl-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.DataNotificacao"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.DataNotificacao"></span>
+										<input id="txtDataNotificacao" class="form-control form-control-xs" asp-for="MultaObj.Multa.DataNotificacao" type="date" data-ejtip="Data de Notificação" />
+									</div>
+								</div>
+								<div class="col-6 col-md-2 col-xl-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.DataLimite"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.DataLimite"></span>
+										<input id="txtDataLimite" class="form-control form-control-xs" asp-for="MultaObj.Multa.DataLimite" type="date" data-ejtip="Data Limite para Pagamento" />
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-12 col-md-4 col-xl-4">
+									<label class="label font-weight-bold" asp-for="MultaObj.Multa.ValorAteVencimento"></label>
+									<span class="text-danger" asp-validation-for="MultaObj.Multa.ValorAteVencimento"></span>
+									<input id="txtValorAteVencimento"
+									       class="form-control form-control-xs moeda-brasileira"
+									       style="text-align:right"
+									       asp-for="MultaObj.Multa.ValorAteVencimento"
+									       placeholder="R$ 0,00"
+									       data-ejtip="Valor até o Vencimento" />
+								</div>
+								<div class="col-12 col-md-4 col-xl-4">
+									<label class="label font-weight-bold" asp-for="MultaObj.Multa.ValorPosVencimento"></label>
+									<span class="text-danger" asp-validation-for="MultaObj.Multa.ValorPosVencimento"></span>
+									<input id="txtValorPosVencimento"
+									       class="form-control form-control-xs moeda-brasileira"
+									       style="text-align:right"
+									       asp-for="MultaObj.Multa.ValorPosVencimento"
+									       placeholder="R$ 0,00"
+									       data-ejtip="Valor após o Vencimento" />
+								</div>
+							</div>
+
+							<div class="row pb-12">
+								<div class="col-12">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Localizacao"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Localizacao"></span>
+										<input id="txtLocalizacao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Localizacao" data-ejtip="Local da Infração" />
+									</div>
+								</div>
+							</div>
+
+							<div class="row pb-12">
+								<div class="col-10">
+									<div class="form-group">
+										<label class="label font-weight-bold">Infração</label>
+										<ejs-dropdownlist id="lstInfracao" dataSource="@ViewData["dataInfracao"]" placeholder="Selecione uma Infração..." allowFiltering="true" filterType="Contains" popupHeight="220px" ejs-for="@Model.MultaObj.Multa.TipoMultaId">
+											<e-dropdownlist-fields text="Descricao" value="TipoMultaId"></e-dropdownlist-fields>
+										</ejs-dropdownlist>
+									</div>
+								</div>
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Status"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Status"></span>
+										<ejs-combobox id="lstStatus" placeholder="Status..." allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataStatus"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.Status">
+											<e-combobox-fields text="Descricao" value="StatusId"></e-combobox-fields>
+										</ejs-combobox>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-12 col-md-6 col-xl-4">
+									<label class="label font-weight-bold">Órgão Autuante</label>
+									<ejs-combobox id="lstOrgao" placeholder="Selecione um Órgão" allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataOrgao"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.OrgaoAutuanteId">
+										<e-combobox-fields text="Descricao" value="OrgaoId"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-12 col-md-6 col-xl-4">
+									<label class="label font-weight-bold">Empenho do Órgão</label>
+									<ejs-dropdownlist id="lstEmpenhos" dataSource="@ViewData["dataTodosEmpenhos"]" placeholder="Selecione um Empenho..." allowFiltering="true" filterType="Contains" popupHeight="220px" ejs-for="@Model.MultaObj.Multa.EmpenhoMultaId">
+										<e-dropdownlist-fields text="NotaEmpenho" value="EmpenhoMultaId"></e-dropdownlist-fields>
+									</ejs-dropdownlist>
+									<input id="txtEmpenhoMultaId" class="form-control form-control-xs" asp-for="MultaObj.Multa.EmpenhoMultaId" hidden />
+								</div>
+								<div class="col-6 col-md-3 col-xl-2">
+									<label class="label font-weight-bold">Saldo do Empenho</label>
+									<input id="txtSaldoEmpenho" class="form-control form-control-xs" disabled style="text-align:right" data-ejtip="Saldo Disponível no Empenho" />
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-12 col-md-6 col-xl-4">
+									<label class="label font-weight-bold">Veículo</label>
+									<ejs-combobox id="lstVeiculo" placeholder="Selecione um Veículo" allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataVeiculo"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.VeiculoId">
+										<e-combobox-fields text="Descricao" value="VeiculoId"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-6 col-md-3 col-xl-2">
+									<label class="label font-weight-bold">Contrato do Veículo</label>
+									<ejs-combobox id="lstContratoVeiculo" placeholder="Selecione um Contrato" allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataContratoVeiculos"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.ContratoVeiculoId" enabled="false">
+										<e-combobox-fields text="Descricao" value="ContratoId"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-6 col-md-3 col-xl-2">
+									<label class="label font-weight-bold">Ata do Veículo</label>
+									<ejs-combobox id="lstAtaVeiculo" placeholder="Selecione uma Ata" allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataAtaVeiculos"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.AtaVeiculoId" enabled="false">
+										<e-combobox-fields text="Descricao" value="AtaId"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-3 col-md-3 col-xl-3">
+									<label class="label font-weight-bold" asp-for="MultaObj.Multa.NoFichaVistoria"></label>
+									<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.NoFichaVistoria"></span>
+									<div class="input-group">
+										<button class="btn btn-verde btn-sm btnViagem" type="button" data-ejtip="Procurar Viagem">
+											<i class="fal fa-route"></i>
+										</button>
+										<input id="txtNoFichaVistoria" class="form-control form-control-xs" disabled />
+										<button class="btn btn-azul btn-sm btnFicha" type="button" data-ejtip="Exibe Ficha de Vistoria">
+											<i class="fa-thin fa-clipboard-list"></i>
+										</button>
+										<input id="txtNoFichaVistoriaEscondido" class="form-control form-control-xs" asp-for="MultaObj.Multa.NoFichaVistoria" hidden />
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-12 col-md-6 col-xl-4">
+									<label class="label font-weight-bold">Motorista</label>
+									<ejs-combobox id="lstMotorista" placeholder="Selecione um Motorista" allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataMotorista"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.MotoristaId">
+										<e-combobox-fields text="Nome" value="MotoristaId"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+								<div class="col-12 col-md-6 col-xl-4">
+									<label class="label font-weight-bold">Contrato do Motorista</label>
+									<ejs-combobox id="lstContratoMotorista" placeholder="Selecione um Contrato" allowFiltering="true" filterType="Contains" dataSource="@ViewData["dataContratoMotoristas"]" popupHeight="200px" width="100%" showClearButton="true" ejs-for="@Model.MultaObj.Multa.ContratoMotoristaId" enabled="false">
+										<e-combobox-fields text="Descricao" value="ContratoId"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+							</div>
+
+							<br />
+
+							<!-- UPLOAD E VIEWER -->
+							<div class="row">
+								<div class="col-md-12 col-xl-10">
+									<label class="label font-weight-bold">Notificação de Autuação (PDF)</label>
+
+									<ejs-uploader id="uploaderAutuacao"
+									              name="UploadFiles"
+									              multiple="false"
+									              autoUpload="true"
+									              allowedExtensions=".pdf">
+										<e-uploader-asyncsettings saveUrl="/api/MultaUpload/save"
+										                          removeUrl="/api/MultaUpload/remove">
+										</e-uploader-asyncsettings>
+									</ejs-uploader>
+
+									<input id="txtAutuacaoPDF" class="form-control form-control-xs" asp-for="MultaObj.Multa.AutuacaoPDF" hidden />
+
+									<ejs-pdfviewer id="pdfviewer"
+									               style="height:500px;width:100%;margin-top:10px;"
+									               serviceUrl="/api/MultaPdfViewer">
+									</ejs-pdfviewer>
+								</div>
+							</div>
+
+							<br />
+
+							<div class="row">
+								<div class="col-md-12 col-xl-10 control-section">
+									<div class="control-wrapper">
+										<div>
+											<label class="label font-weight-bold">Observações a respeito da Multa</label>
+											<ejs-richtexteditor ejs-for="@Model.MultaObj.Multa.Observacao" id="rte" toolbarClick="toolbarClick" locale="pt-BR" height="150px">
+												<e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensViagens/"></e-richtexteditor-insertimagesettings>
+											</ejs-richtexteditor>
+											<div id="errorMessage">
+												<span asp-validation-for="@Model.MultaObj.Multa.Observacao"></span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<br />
+							<br />
+
+							<!-- BOTÕES DE AÇÃO -->
+							<div class="form-group row">
+								<div class="col-12">
+									<div class="row">
+										<div id="divSubmit" class="col-12 col-md-4 pb-2">
+											@if (Model.MultaObj.Multa.MultaId != Guid.Empty)
+											{
+												<button id="btnSubmit" method="post" asp-page-handler="Edit" asp-route-id="@Model.MultaObj.Multa.MultaId" class="btn btn-azul form-control">
+													<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+													<i class="fa-duotone fa-floppy-disk icon-space"></i>
+													<span class="btn-text">Atualizar</span>
+												</button>
+											}
+											else
+											{
+												<button id="btnSubmit" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
+													<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+													<i class="fa-duotone fa-file-plus icon-space"></i>
+													<span class="btn-text">Criar</span>
+												</button>
+											}
+										</div>
+
+										<div class="col-12" hidden>
+											@if (Model.MultaObj.Multa.MultaId != Guid.Empty)
+											{
+												<button id="btnEscondido" method="post" asp-page-handler="Edit" asp-route-id="@Model.MultaObj.Multa.MultaId" class="btn btn-azul form-control">
+													<span class="d-flex justify-content-center align-items-center">
+														<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i><span>&nbsp;Atualizar</span>
+													</span>
+												</button>
+											}
+											else
+											{
+												<button id="btnEscondido" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
+													<span class="d-flex justify-content-center align-items-center">
+														<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i><span>&nbsp;Criar</span>
+													</span>
+												</button>
+											}
+										</div>
+
+										<div class="col-12 col-md-4">
+											<a asp-page="./ListaAutuacao" class="btn btn-vinho form-control">
+												<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+												<span>Voltar à Lista</span>
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div><!-- /p-3 -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@* ================ Modal Ficha de Vistoria - Padrão FrotiX ================ *@
+<div class="modal fade" id="modalFicha" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="DynamicModalLabelFicha">
+					<i class="fa-duotone fa-file-lines"></i>
+					Ficha de Vistoria
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body text-center">
+				<div id="divImagemFicha">
+					<img id="imgFichaVistoria"
+					     style="max-width: 100%; height: auto;"
+					     alt="Ficha de Vistoria" />
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="btnBaixarPDF" type="button" class="btn btn-modal-confirmar" data-ejtip="Baixar como PDF">
+					<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+					<i class="fa-duotone fa-file-pdf"></i>
+					<span class="btn-text">Baixar PDF</span>
+				</button>
+				<button id="btnFecharModalFicha" type="button" class="btn btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-solid fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section ScriptsBlock {
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script>
+		const MultaId = "@(Model.MultaObj.Multa?.MultaId.ToString() ?? "")";
+		window.multaId = MultaId;
+	</script>
+
+	<script>
+		// Configura locale brasileiro para Syncfusion
+		ej.base.setCulture('pt-BR');
+		ej.base.setCurrencyCode('BRL');
+	</script>
+
+	<script src="~/js/cadastros/upsert_autuacao.js" asp-append-version="true"></script>
+
+	<script>
+		// ===== SPINNER NOS BOTÕES DE SUBMIT =====
+		document.addEventListener('DOMContentLoaded', function () {
+			try {
+				const btnSubmit = document.getElementById('btnSubmit');
+				if (btnSubmit) {
+					btnSubmit.addEventListener('click', function (e) {
+						try {
+							const spinner = this.querySelector('.spinner-border');
+							const icon = this.querySelector('i');
+							const btnText = this.querySelector('.btn-text');
+
+							if (spinner && icon) {
+								spinner.classList.remove('d-none');
+								icon.classList.add('d-none');
+								if (btnText) btnText.textContent = 'Salvando...';
+								this.disabled = true;
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UpsertAutuacao.cshtml", "btnSubmit.click", error);
+						}
+					});
+				}
+
+				const btnBaixarPDF = document.getElementById('btnBaixarPDF');
+				if (btnBaixarPDF) {
+					btnBaixarPDF.addEventListener('click', function () {
+						try {
+							const spinner = this.querySelector('.spinner-border');
+							const icon = this.querySelector('i');
+							const btnText = this.querySelector('.btn-text');
+
+							if (spinner && icon) {
+								spinner.classList.remove('d-none');
+								icon.classList.add('d-none');
+								if (btnText) btnText.textContent = 'Gerando...';
+
+								// Restaura após 3 segundos (tempo estimado para gerar PDF)
+								setTimeout(() => {
+									spinner.classList.add('d-none');
+									icon.classList.remove('d-none');
+									if (btnText) btnText.textContent = 'Baixar PDF';
+								}, 3000);
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UpsertAutuacao.cshtml", "btnBaixarPDF.click", error);
+						}
+					});
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertAutuacao.cshtml", "DOMContentLoaded-Spinners", error);
+			}
+		});
+	</script>
+}

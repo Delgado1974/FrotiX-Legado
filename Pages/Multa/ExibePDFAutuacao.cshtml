@@ -1,0 +1,113 @@
+@page
+@model FrotiX.Pages.Multa.ExibePDFAutuacaoModel
+
+@{
+	ViewData["Title"] = "Notificações";
+	ViewData["PageName"] = "notificacao_index";
+	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Cadastros: <span class='fw-300'>Notificação de Autuação - PDF</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fad fa-pen-to-square";
+}
+
+@section HeadBlock {
+	<style>
+		.center {
+			position: absolute;
+			left: 50%;
+			top: 30px;
+			transform: translate(-50%, -50%);
+			padding: 10px;
+		}
+
+		.fundo-chocolate {
+			background-color: #7B3F00;
+			color: #fff;
+		}
+	</style>
+}
+
+<form method="post" asp-action="Upsert" onkeypress="stopEnterSubmitting(window.event)" enctype="multipart/form-data">
+	@Html.AntiForgeryToken()
+
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<br />
+					<div class="col-12 col-md-4 center">
+						<a asp-page="./ListaAutuacao" class="btn btn-vinho form-control" data-ejtip="Retornar para a lista de autuações">
+							<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+							Voltar à Lista
+						</a>
+					</div>
+
+					<br />
+					<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+						<h2 class="text-primary">
+							@($"Autuação da Infração nº: {Model.MultaObj?.Multa?.NumInfracao}")
+						</h2>
+					</div>
+
+					<div id="divPainel" class="panel-content">
+						<div id="pdfContainer" style="height: 800px;">
+							<ejs-pdfviewer id="pdfViewer"
+										   style="height:100%"
+										   serviceUrl="/api/PdfViewer"
+										   documentPath="">
+							</ejs-pdfviewer>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script>
+		// Evita submit com ENTER em campos de formulário
+		function stopEnterSubmitting(e) {
+			try {
+				e = e || window.event;
+				if (e && (e.key === 'Enter' || e.keyCode === 13)) {
+					const src = e.target || e.srcElement;
+					if (src && src.tagName && src.tagName.toLowerCase() !== "div") {
+						if (e.preventDefault) e.preventDefault();
+						else e.returnValue = false;
+					}
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ExibePDFAutuacao.cshtml", "stopEnterSubmitting", error);
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			try {
+				var arquivoPdf = '@(Model.MultaObj?.Multa?.AutuacaoPDF ?? "")';
+
+				if (!arquivoPdf) {
+					AppToast.show('Arquivo de autuação não encontrado para esta infração.', 'Vermelho', 3000);
+					document.getElementById('pdfContainer').innerHTML = "<div class='alert alert-danger text-center mt-5'>PDF não disponível.</div>";
+					return;
+				}
+
+				var caminho = "/DadosEditaveis/Multas/" + arquivoPdf;
+				var pdfViewer = document.getElementById('pdfViewer').ej2_instances[0];
+
+				if (pdfViewer) {
+					pdfViewer.load(caminho, null);
+				}
+				else {
+					AppToast.show('Erro ao inicializar o visualizador de PDF.', 'Vermelho', 3000);
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ExibePDFAutuacao.cshtml", "DOMContentLoaded", error);
+			}
+		});
+	</script>
+}

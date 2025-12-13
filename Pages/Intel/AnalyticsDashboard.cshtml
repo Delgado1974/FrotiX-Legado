@@ -1,0 +1,681 @@
+@page
+@model AnalyticsDashboardModel
+
+@{
+    ViewData["Title"] = "Indice";
+    ViewData["PageName"] = "intel_paginaprincipal";
+    ViewData["Category1"] = "Pagina Principal";
+    //ViewData["Heading"] = "<i class='subheader-icon fas fa-home'></i> Página <span class='fw-300'>Inicial</span>";
+}
+
+@section HeadBlock {
+    <link rel="stylesheet" media="screen, print" href="~/css/miscellaneous/reactions/reactions.css">
+    <link rel="stylesheet" media="screen, print" href="~/css/miscellaneous/fullcalendar/fullcalendar.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="~/css/miscellaneous/jqvmap/jqvmap.bundle.css">
+
+    <!-- PROFILE STYLES -->
+    <link href="~/css/profilecards.css" rel="stylesheet">
+    <!-- ./PROFILE STYLES -->
+    <!-- COMMON STYLES -->
+    <link href="~/css/profilecommon.css" rel="stylesheet">
+    <!-- ./COMMON STYLES -->
+    <!-- CUSTOM JAVASCRIPT -->
+    <script src="~/js/custom.js"></script>
+    <!-- ./CUSTOM JAVASCRIPT -->
+    <!-- DEMO 01 CSS FILE -->
+    <link href="~/css/demo-01.css" rel="stylesheet">
+}
+
+<style>
+    .botaoFormat {
+        color: #b29b2b;
+    }
+
+        .botaoFormat:hover {
+            font-weight: bold;
+            box-shadow: 0 0 0.8em #808080;
+        }
+
+    .row.display-flex {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+        .row.display-flex > [class*='col-'] {
+            display: flex;
+            flex-direction: column;
+        }
+
+    #notify {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 200px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+        display: none;
+        z-index: 99999;
+    }
+
+    /* FIX: Remove rotação das imagens dos cards */
+    .profile-img img {
+        transform: none !important;
+        transition: transform 0s !important;
+    }
+
+    .profile-img:hover img {
+        transform: none !important;
+    }
+
+    /* FIX: Aproxima logo dos cards */
+    #logoOriginal,
+    canvas[aria-label="imagem recortada"] {
+        margin-bottom: 0 !important;
+    }
+
+    .mt-4 {
+        margin-top: 0.5rem !important;
+    }
+</style>
+
+@section SubheaderBlock {
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+
+                <div>
+                    <img id="logoOriginal"
+                         src="~/Images/LogotipoCompletoFrotiXRoxoFundoTransparenteEstreita.png"
+                         alt="FrotiX"
+                         data-trim
+                         data-trim-maxwidth="500"
+                         style="display:block;margin:0 auto;max-width:100%;height:auto;" />
+                </div>
+
+                @*             <script>
+
+                                // Função para simular o que o C# Alerta.cs faria
+                function simularAlertaCS() {
+                    // Simula o que acontece quando o C# salva no TempData
+                    const alertData = {
+                        type: "error",
+                        title: "Erro do C#",
+                        message: "Este alerta foi 'gerado' pelo Helper Alerta.cs",
+                        confirmButton: "OK"
+                    };
+
+                    // Simula o processamento que deveria acontecer no Layout
+                    if (window.SweetAlertInterop) {
+                        switch(alertData.type) {
+                            case 'error':
+                                SweetAlertInterop.ShowError(alertData.title, alertData.message, alertData.confirmButton);
+                                break;
+                            case 'success':
+                                SweetAlertInterop.ShowSuccess(alertData.title, alertData.message, alertData.confirmButton);
+                                break;
+                            // ... outros casos
+                        }
+                    }
+                }
+
+                // Testa TratamentoErroComLinha simulando o C#
+                function simularTratamentoErroCS() {
+                    const alertData = {
+                        type: "errorUnexpected",
+                        classe: "TesteController.cs",
+                        metodo: "TesteFuncao",
+                        erro: "Simulação de erro do C#",
+                        stack: "System.Exception: Erro simulado\n   at TesteFuncao() in TesteController.cs:line 45\n   at MainMethod() in Program.cs:line 123"
+                    };
+
+                    if (window.SweetAlertInterop) {
+                        const fakeError = new Error(alertData.erro);
+                        fakeError.stack = alertData.stack;
+                        SweetAlertInterop.ShowErrorUnexpected(alertData.classe, alertData.metodo, fakeError);
+                    }
+                }
+
+            </script>
+
+            <!-- Adicione após os outros botões -->
+            <hr style="margin: 10px 0; border-color: #ddd;">
+            <div style="font-size: 11px; color: #666; margin-bottom: 8px; text-align: center;">Simulação C#</div>
+
+            <button onclick="simularAlertaCS()" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-code"></i> Simular C# Erro
+            </button>
+
+            <button onclick="simularTratamentoErroCS()" class="btn btn-outline-dark btn-sm">
+                <i class="fas fa-server"></i> Simular C# Técnico
+            </button> *@
+
+                @*             <!-- Painel de Teste dos Alertas SweetAlert -->
+            <div style="position: fixed; top: 10px; right: 10px; z-index: 9999; background: white; padding: 15px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 250px;">
+                <h6 style="margin-bottom: 15px; text-align: center; color: #333;">Teste SweetAlert</h6>
+
+                <div style="display: grid; gap: 8px;">
+                    <!-- Alertas básicos -->
+                    <button onclick="mostrarErro()" class="btn btn-vinho btn-sm" style="width: 100%;">
+                        <i class="fas fa-times-circle"></i> Erro
+                    </button>
+
+                    <button onclick="mostrarAlerta()" class="btn btn-warning btn-sm" style="width: 100%;">
+                        <i class="fas fa-exclamation-triangle"></i> Aviso
+                    </button>
+
+                    <button onclick="mostrarInfo()" class="btn btn-info btn-sm" style="width: 100%;">
+                        <i class="fas fa-info-circle"></i> Informação
+                    </button>
+
+                    <button onclick="mostrarSucesso()" class="btn btn-verde btn-sm" style="width: 100%;">
+                        <i class="fas fa-check-circle"></i> Sucesso
+                    </button>
+
+                    <!-- Alertas especiais -->
+                    <button onclick="mostrarConfirmar()" class="btn btn-primary btn-sm" style="width: 100%;">
+                        <i class="fas fa-question-circle"></i> Confirmar
+                    </button>
+
+                    <button onclick="mostrarUnexpected()" class="btn btn-dark btn-sm" style="width: 100%;">
+                        <i class="fas fa-bug"></i> Erro Técnico
+                    </button>
+
+                    <button onclick="testarPreventionAlert()" class="btn btn-secondary btn-sm" style="width: 100%;">
+                        <i class="fas fa-shield-alt"></i> Prevention Alert
+                    </button>
+                </div>
+
+                <!-- Botão para ocultar o painel -->
+                <button onclick="this.parentElement.style.display='none'" style="position: absolute; top: 5px; right: 8px; background: none; border: none; font-size: 16px; color: #999; cursor: pointer;">
+                    &times;
+                </button>
+            </div> *@
+
+                @*             <!-- Botões de teste para os alertas -->
+            <div style="position: fixed; top: 10px; right: 10px; z-index: 9999; background: white; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                <h5>Teste de Alertas</h5>
+                <button onclick="testarAlertaErro()" class="btn btn-vinho btn-sm">Erro</button>
+                <button onclick="testarAlertaSucesso()" class="btn btn-verde btn-sm">Sucesso</button>
+                <button onclick="testarAlertaAviso()" class="btn btn-warning btn-sm">Aviso</button>
+                <button onclick="testarAlertaComDetalhes()" class="btn btn-info btn-sm">Com Detalhes</button>
+            </div>
+
+            <script>
+                function testarAlertaErro() {
+                    if (window.GlobalAlert) {
+                        GlobalAlert.showError(
+                            "Erro no Sistema",
+                            "Este é um teste de alerta de erro do sistema."
+                        );
+                    } else {
+                        alert("GlobalAlert não está disponível");
+                    }
+                }
+
+                function testarAlertaSucesso() {
+                    if (window.GlobalAlert) {
+                        GlobalAlert.showSuccess(
+                            "Operação Realizada",
+                            "A operação foi executada com sucesso!"
+                        );
+                    } else {
+                        alert("GlobalAlert não está disponível");
+                    }
+                }
+
+                function testarAlertaAviso() {
+                    if (window.GlobalAlert) {
+                        GlobalAlert.showWarning(
+                            "Atenção",
+                            "Este é um aviso importante para o usuário."
+                        );
+                    } else {
+                        alert("GlobalAlert não está disponível");
+                    }
+                }
+
+                function testarAlertaComDetalhes() {
+                    if (window.GlobalAlert) {
+                        GlobalAlert.showError(
+                            "Erro Técnico",
+                            "Erro ao processar solicitação no MultaController.cs",
+                            `System.Exception: Connection timeout
+                   at MultaController.ListaMultas(String fase) in C:\\Projeto\\Controllers\\MultaController.cs:line 45
+                   at System.Web.Mvc.ActionResult.InvokeAction(ControllerContext controllerContext)`
+                        );
+                    } else {
+                        alert("GlobalAlert não está disponível");
+                    }
+                }
+            </script> *@
+
+                @*             <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+                <button id="btn-ok" class="btn btn-verde" type="button">Toast Verde (3s)</button>
+                <button id="btn-err" class="btn btn-vinho" type="button">Toast Vermelho (5s)</button>
+                <button id="btn-warn" class="btn btn-warning" type="button">Toast Amarelo (fixo)</button>
+            </div> *@
+
+                <div class="mt-4">
+                    <div class="row">
+                        <div class="card-container w-100">
+                            <div class="container-fluid">
+                                <div class="row">
+
+                                    <!-- Agenda -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/agenda/index" data-ftx-spin="Carregando Agenda…">
+                                                        <img src="~/Images/Schedule.jpg" class="img img-responsive" alt="Agenda">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name" data-ftx-spin="Carregando Agenda…">
+                                                    <a href="/agenda/index">Agenda</a>
+                                                </div>
+                                                <p class="profile-description">Exibe a Agenda.</p>
+                                                <div class="profile-icons">
+                                                    <a href="/agenda/index" data-ftx-spin="Carregando Agenda…">
+                                                        <i class="fa-duotone fa-calendar-days"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nova Viagem -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/viagens/upsert">
+                                                        <img src="~/Images/Trip.jpg" class="img img-responsive" alt="Nova Viagem">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/viagens/upsert">Nova Viagem</a>
+                                                </div>
+                                                <p class="profile-description">Cadastra uma nova Viagem</p>
+                                                <div class="profile-icons">
+                                                    <a href="/viagens/upsert">
+                                                        <i class="fa-duotone fa-location-dot"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gestão de Viagens -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/viagens/index" data-ftx-spin="Carregando viagens…">
+                                                        <img src="~/Images/GestaoViagens.jpg" class="img img-responsive" alt="Gestão de Viagens">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/viagens/index" data-ftx-spin="Carregando viagens…">Gestão de Viagens</a>
+                                                </div>
+                                                <p class="profile-description">Gerencia as Viagens Cadastradas</p>
+                                                <div class="profile-icons">
+                                                    <a href="/viagens/index" data-ftx-spin="Carregando viagens…">
+                                                        <i class="fa-duotone fa-car-bus"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gestão de Veículos -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/veiculo/index">
+                                                        <img src="~/Images/Veiculos.jpg" class="img img-responsive" alt="Gestão de Veículos">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/veiculo/index">Gestão de Veículos</a>
+                                                </div>
+                                                <p class="profile-description">Gerencia os Veículos</p>
+                                                <div class="profile-icons">
+                                                    <a href="/veiculo/index">
+                                                        <i class="fa-duotone fa-bus-school"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gestão de Abastecimento -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/abastecimento/index">
+                                                        <img src="~/Images/Abastecimento.jpg" class="img img-responsive" alt="Gestão de Abastecimento">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/abastecimento/index">Gestão de Abastecimento</a>
+                                                </div>
+                                                <p class="profile-description">Controla os Abastecimentos</p>
+                                                <div class="profile-icons">
+                                                    <a href="/abastecimento/index">
+                                                        <i class="fa-duotone fa-gas-pump"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gestão de Manutenções -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/manutencao/listamanutencao">
+                                                        <img src="~/Images/Manutencao.jpg" class="img img-responsive" alt="Gestão de Manutenções">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/manutencao/listamanutencao">Gestão de Manutenções</a>
+                                                </div>
+                                                <p class="profile-description">Gerencia as Manutenções</p>
+                                                <div class="profile-icons">
+                                                    <a href="/manutencao/listamanutencao">
+                                                        <i class="fa-duotone fa-car-wrench"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gestão de Multas -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/multa/listapenalidade">
+                                                        <img src="~/Images/Multa.jpg" class="img img-responsive" alt="Gestão de Multas">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/multa/listapenalidade">Gestão de Multas</a>
+                                                </div>
+                                                <p class="profile-description">Gerencia as Penalidades</p>
+                                                <div class="profile-icons">
+                                                    <a href="/multa/listapenalidade">
+                                                        <i class="fad fa-pen-to-square"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Inserir Fichas MOB -->
+                                    <div class="col-md-3">
+                                        <div class="profile-card-1">
+                                            <div class="profile-content">
+                                                <div class="profile-img">
+                                                    <a href="/viagens/fluxopassageiros">
+                                                        <img src="~/Images/MOB.jpg" class="img img-responsive" alt="Inserir Fichas MOB">
+                                                    </a>
+                                                </div>
+                                                <div class="profile-name">
+                                                    <a href="/viagens/fluxopassageiros">Inserir Fichas MOB</a>
+                                                </div>
+                                                <p class="profile-description">Insere Fichas dos MOBs</p>
+                                                <div class="profile-icons">
+                                                    <a href="/viagens/fluxopassageiros">
+                                                        <i class="fa-duotone fa-bus-school"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div> <!-- /.row -->
+                            </div> <!-- /.container-fluid -->
+                        </div> <!-- /.card-container -->
+                    </div> <!-- /.row -->
+                </div> <!-- /.mt-4 -->
+
+            </div> <!-- /.col -->
+        </div> <!-- /.row -->
+    </div> <!-- /.container -->
+}
+
+@section ScriptsBlock {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        // document.getElementById('btn-ok').addEventListener('click', function () {
+        //   AppToast.show('Verde', 'Ocorrência baixada com sucesso!');
+        // });
+
+        // document.getElementById('btn-err').addEventListener('click', function () {
+        //   AppToast.show('Vermelho', 'Falha ao baixar ocorrência. Tente novamente.', 5000);
+        // });
+
+        // document.getElementById('btn-warn').addEventListener('click', function () {
+        //   AppToast.show('Amarelo', 'Atenção: verifique os campos obrigatórios.', 0); // fixo
+        //   // fecha manualmente após 3s só para demonstrar:
+        //   setTimeout(() => AppToast.close(), 3000);
+        // });
+
+        // ====== Alertas de exemplo usando SweetAlertInterop (strings corrigidas) ======
+        function mostrarErro() {
+            try {
+                SweetAlertInterop.ShowError("Falha", "Não foi possível concluir a operação.", "Fechar");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarErro", error);
+            }
+        }
+
+        function mostrarAlerta() {
+            try {
+                SweetAlertInterop.ShowWarning("Atenção", "Você tem certeza que deseja continuar?", "Fechar");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarAlerta", error);
+            }
+        }
+
+        function mostrarInfo() {
+            try {
+                SweetAlertInterop.ShowInfo("Informação", "O sistema foi atualizado com sucesso.", "Fechar");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarInfo", error);
+            }
+        }
+
+        function mostrarSucesso() {
+            try {
+                SweetAlertInterop.ShowSuccess("Sucesso", "A operação foi realizada!", "Fechar");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarSucesso", error);
+            }
+        }
+
+        function mostrarConfirmar() {
+            try {
+                SweetAlertInterop.ShowConfirm("Você tem certeza?", "Confirme para prosseguir.", "Confirmar", "Fechar");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarConfirmar", error);
+            }
+        }
+
+        function mostrarUnexpected() {
+            try {
+                SweetAlertInterop.ShowTratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarUnexpected()");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "mostrarUnexpected", error);
+            }
+        }
+
+        async function testarPreventionAlert() {
+            try {
+                const confirmado = await window.SweetAlertInterop.ShowPreventionAlert("A Data Final está 5 dias ou mais após a Inicial. Tem certeza?");
+                if (!confirmado) {
+                    // Usuário cancelou
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "testarPreventionAlert", error);
+            }
+        }
+    </script>
+
+    <script>
+        /* ========= NÚCLEO: recorta bordas transparentes de PNG ========= */
+        function trimTransparentPNG(img, { alphaThreshold = 1 } = {}) {
+            try {
+                const src = document.createElement('canvas');
+                const sctx = src.getContext('2d');
+
+                src.width = img.naturalWidth || img.width;
+                src.height = img.naturalHeight || img.height;
+                sctx.drawImage(img, 0, 0);
+
+                // Pode lançar se CORS bloquear leitura
+                let imageData;
+                try {
+                    imageData = sctx.getImageData(0, 0, src.width, src.height);
+                } catch (e) {
+                    console.error("Canvas bloqueado por CORS. Ative CORS no servidor ou sirva a imagem do mesmo domínio.", e);
+                    return null;
+                }
+
+                const { data, width: w, height: h } = imageData;
+                let top = h, left = w, right = -1, bottom = -1;
+
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const a = data[(y * w + x) * 4 + 3];
+                        if (a >= alphaThreshold) {
+                            if (x < left) left = x;
+                            if (x > right) right = x;
+                            if (y < top) top = y;
+                            if (y > bottom) bottom = y;
+                        }
+                    }
+                }
+
+                // Caso a imagem seja totalmente transparente
+                if (right < left || bottom < top) {
+                    return null;
+                }
+
+                const tw = right - left + 1;
+                const th = bottom - top + 1;
+
+                const out = document.createElement('canvas');
+                out.width = tw;
+                out.height = th;
+                out.getContext('2d').drawImage(src, left, top, tw, th, 0, 0, tw, th);
+                return out;
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "trimTransparentPNG", error);
+            }
+        }
+
+        /* ========= HELPER: aplica o trim num <img> ========= */
+        function applyTrimToImg(imgEl, {
+            targetWidth,         // opcional: largura final
+            maxWidth = 500,      // limite de largura (responsivo)
+            alphaThreshold = 1,  // 0–255: quanto de opacidade considerar "visível"
+            replace = true       // true -> troca <img> por <canvas>; false -> insere após
+        } = {}) {
+            try {
+                const proxy = new Image();
+                // Habilite CORS se for outro domínio
+                if (imgEl.crossOrigin) proxy.crossOrigin = imgEl.crossOrigin;
+
+                proxy.onload = () => {
+                    try {
+                        const trimmedCanvas = trimTransparentPNG(proxy, { alphaThreshold });
+                        if (!trimmedCanvas) {
+                            console.warn("Trim não executado (CORS ou imagem 100% transparente). Mantendo <img> original.");
+                            return;
+                        }
+
+                        // Redimensiona mantendo proporção (opcional)
+                        let finalCanvas = trimmedCanvas;
+                        if (targetWidth || maxWidth) {
+                            const containerW = imgEl.parentElement ? imgEl.parentElement.clientWidth : trimmedCanvas.width;
+                            const desiredW = Math.min(
+                                targetWidth || trimmedCanvas.width,
+                                maxWidth || trimmedCanvas.width,
+                                containerW || (targetWidth || trimmedCanvas.width)
+                            );
+                            const scale = desiredW / trimmedCanvas.width;
+                            const desiredH = Math.round(trimmedCanvas.height * scale);
+
+                            finalCanvas = document.createElement('canvas');
+                            finalCanvas.width = desiredW;
+                            finalCanvas.height = desiredH;
+
+                            const ctx = finalCanvas.getContext('2d');
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(trimmedCanvas, 0, 0, desiredW, desiredH);
+                        }
+
+                        // Responsividade via CSS inline simples
+                        finalCanvas.style.maxWidth = "100%";
+                        finalCanvas.style.height = "auto";
+                        finalCanvas.setAttribute('aria-label', imgEl.alt || 'imagem recortada');
+
+                        if (replace) {
+                            imgEl.replaceWith(finalCanvas);
+                        } else {
+                            imgEl.insertAdjacentElement('afterend', finalCanvas);
+                        }
+
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "applyTrimToImg.onload", error);
+                    }
+                };
+
+                proxy.onerror = () => console.error("Falha ao carregar imagem para trim:", imgEl.src);
+                proxy.src = imgEl.currentSrc || imgEl.src;
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "applyTrimToImg", error);
+            }
+        }
+
+        /* ========= AUTOAPLICAÇÃO =========
+           1) Aplica no #logoOriginal
+           2) Aplica em qualquer <img data-trim> da página
+        */
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const logo = document.getElementById('logoOriginal');
+                if (logo) {
+                    applyTrimToImg(logo, { maxWidth: 520, alphaThreshold: 1, replace: true });
+                }
+
+                document.querySelectorAll('img[data-trim]').forEach(img => {
+                    try {
+                        applyTrimToImg(img, {
+                            maxWidth: Number(img.dataset.trimMaxwidth) || 480,
+                            alphaThreshold: Number(img.dataset.trimAlpha) || 1,
+                            replace: img.dataset.trimReplace !== "false"
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "DOMContentLoaded.forEach", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "DOMContentLoaded", error);
+            }
+        });
+    </script>
+}

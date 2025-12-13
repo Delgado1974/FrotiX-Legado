@@ -1,0 +1,960 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+    // Inicializações que estavam em @functions/OnGet
+    FrotiX.Pages.Manutencao.ControleLavagemModel.Initialize(_unitOfWork);
+    ViewData["dataCombustivel"] = new ListaNivelCombustivel(_unitOfWork).NivelCombustivelList();
+    ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+    ViewData["lstVeiculos"] = new ListaVeiculos(_unitOfWork).VeiculosList();
+    ViewData["lstLavadores"] = new ListaLavador(_unitOfWork).LavadorList();
+}
+
+@model FrotiX.Models.ViewViagens
+
+@{
+    ViewData["Title"] = "Manutenção";
+    ViewData["PageName"] = "manutencao_controlelavagem";
+    ViewData["Heading"] = "<i class='fa-duotone fa-car-wash'></i> Manutenção: <span class='fw-300'>Controle de Lavagens</span>";
+    ViewData["Category1"] = "Manutenção";
+    ViewData["PageIcon"] = "fa-duotone fa-car-wash";
+}
+
+@section HeadBlock {
+
+    <!-- Kendo (somente para o MultiSelect dos lavadores) -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.3.913/styles/kendo.default-ocean-blue.min.css" />
+    <!-- Google Fonts - Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ===== CARD STYLED FROTIX ===== */
+        .ftx-card-styled {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .ftx-card-header {
+            background: linear-gradient(135deg, #2a4d73 0%, #325d88 50%, #2a4d73 100%);
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: none;
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: #a8c5e2;
+            --fa-secondary-opacity: 0.8;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        }
+
+        /* ===== BOTÃO HEADER LARANJA ===== */
+        .btn-header-orange {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(211, 84, 0, 0.35);
+        }
+
+        .btn-header-orange:hover {
+            background: linear-gradient(135deg, #d35400 0%, #c0392b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(211, 84, 0, 0.45);
+            color: #fff !important;
+        }
+
+        .btn-header-orange i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-header-orange:hover i {
+            transform: scale(1.15);
+        }
+
+        /* ===== CARDS INTERNOS DAS SEÇÕES ===== */
+        .ftx-section-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border-left: 4px solid #325d88;
+        }
+
+        .ftx-section-card.card-inserir {
+            border-left-color: #0D98BA;
+        }
+
+        .ftx-section-card.card-filtros {
+            border-left-color: #557570;
+        }
+
+        .ftx-section-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .ftx-section-header .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .ftx-section-header .section-icon.icon-inserir {
+            background: linear-gradient(135deg, #0D98BA 0%, #0a7a96 100%);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(13, 152, 186, 0.3);
+        }
+
+        .ftx-section-header .section-icon.icon-inserir i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: #a8e6f0;
+            --fa-secondary-opacity: 0.8;
+        }
+
+        .ftx-section-header .section-icon.icon-filtros {
+            background: linear-gradient(135deg, #557570 0%, #446560 100%);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(85, 117, 112, 0.3);
+        }
+
+        .ftx-section-header .section-icon.icon-filtros i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: #a8c5c2;
+            --fa-secondary-opacity: 0.8;
+        }
+
+        .ftx-section-header .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #2F4F4F;
+            margin: 0;
+        }
+
+        .ftx-section-body {
+            padding: 1.25rem;
+        }
+
+        /* ===== BOTÕES DE FORMULÁRIO ===== */
+        .btn-inserir-ftx {
+            background: linear-gradient(135deg, #0D98BA 0%, #0a7a96 100%);
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(13, 152, 186, 0.35);
+        }
+
+        .btn-inserir-ftx:hover {
+            background: linear-gradient(135deg, #0a7a96 0%, #086a82 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 152, 186, 0.45);
+            color: #fff !important;
+        }
+
+        .btn-limpar-ftx {
+            background: linear-gradient(135deg, #722F37 0%, #5a252c 100%);
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(114, 47, 55, 0.35);
+        }
+
+        .btn-limpar-ftx:hover {
+            background: linear-gradient(135deg, #5a252c 0%, #4a1f24 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(114, 47, 55, 0.45);
+            color: #fff !important;
+        }
+
+        /* ===== BOTÃO APAGAR NA TABELA ===== */
+        .btn-apagar-ftx {
+            width: 28px;
+            height: 28px;
+            padding: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #722F37 0%, #8B3A44 100%);
+            color: #fff !important;
+            border: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(114, 47, 55, 0.3);
+        }
+
+        .btn-apagar-ftx:hover {
+            background: linear-gradient(135deg, #5a252c 0%, #722F37 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(114, 47, 55, 0.45);
+            color: #fff !important;
+        }
+
+        .btn-apagar-ftx i {
+            font-size: 0.85rem;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-apagar-ftx:hover i {
+            transform: scale(1.15);
+        }
+
+        /* ===== DATATABLE FROTIX ===== */
+        .ftx-table thead {
+            background: linear-gradient(180deg, #343a40 0%, #2d3339 100%);
+        }
+
+        .ftx-table thead th {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border: none !important;
+            padding: 0.75rem 0.5rem;
+        }
+
+        .ftx-table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .ftx-table tbody tr:hover {
+            background-color: rgba(50, 93, 136, 0.06) !important;
+        }
+
+        .ftx-table tbody td {
+            vertical-align: middle;
+            padding: 0.625rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* ===== LABELS DOS CAMPOS ===== */
+        .ftx-label {
+            font-weight: 600;
+            color: #2F4F4F;
+            font-size: 0.875rem;
+            margin-bottom: 0.35rem;
+        }
+
+        /* ===== KENDO MULTISELECT AJUSTE ===== */
+        .k-multiselect {
+            border-radius: 6px !important;
+        }
+
+        .k-multiselect .k-input {
+            min-height: 38px;
+        }
+    </style>
+}
+
+<script>
+    // ==================== VARS & FLAGS ====================
+    var URLapi = "/api/manutencao/ListaLavagens";
+    var IDapi = "";
+
+    var escolhendoVeiculo = false;
+    var escolhendoMotorista = false;
+    var escolhendoData = false;
+    var escolhendoLavador = false;
+
+    // ==================== FLAGS: quem está filtrando ====================
+    function DefineEscolhaVeiculo() {
+        try {
+            escolhendoVeiculo = true;
+            escolhendoMotorista = false;
+            escolhendoData = false;
+            escolhendoLavador = false;
+
+            var veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+            if (veiculos.value === null) {
+                //ListaTodasLavagens();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "DefineEscolhaVeiculo", error);
+        }
+    }
+
+    function DefineEscolhaMotorista() {
+        try {
+            escolhendoVeiculo = false;
+            escolhendoMotorista = true;
+            escolhendoData = false;
+            escolhendoLavador = false;
+
+            var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+            if (motoristas.value === null) {
+                //ListaTodasLavagens();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "DefineEscolhaMotorista", error);
+        }
+    }
+
+    function DefineEscolhaData() {
+        try {
+            escolhendoVeiculo = false;
+            escolhendoMotorista = false;
+            escolhendoData = true;
+            escolhendoLavador = false;
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "DefineEscolhaData", error);
+        }
+    }
+
+    function DefineEscolhaLavador() {
+        try {
+            escolhendoVeiculo = false;
+            escolhendoMotorista = false;
+            escolhendoData = false;
+            escolhendoLavador = true;
+
+            var lavador = document.getElementById('lstLavador').ej2_instances[0];
+            if (lavador.value === null) {
+                //ListaTodasLavagens();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "DefineEscolhaLavador", error);
+        }
+    }
+
+    // ==================== LISTA TODAS ====================
+    function ListaTodasLavagens() {
+        try {
+            URLapi = "/api/manutencao/ListaLavagens";
+            IDapi = "";
+            ListaTblLavagens(URLapi, IDapi);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "ListaTodasLavagens", error);
+        }
+    }
+
+    // ==================== CHANGE: VEÍCULOS ====================
+    function VeiculosValueChange() {
+        try {
+            if (!escolhendoVeiculo) return;
+
+            $("#txtData").val('');
+            var motoristas = document.getElementById('lstMotorista').ej2_instances[0]; motoristas.value = "";
+            var lavador = document.getElementById('lstLavador').ej2_instances[0]; lavador.value = "";
+
+            var veiculos = document.getElementById('lstVeiculos').ej2_instances[0];
+            if (veiculos.value === null) { ListaTodasLavagens(); return; }
+
+            var veiculoId = veiculos.value.toString();
+            ListaTblLavagens("/api/manutencao/ListaLavagemVeiculos", veiculoId);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "VeiculosValueChange", error);
+        }
+    }
+
+    // ==================== CHANGE: MOTORISTA ====================
+    function MotoristaValueChange() {
+        try {
+            if (!escolhendoMotorista) return;
+
+            $("#txtData").val('');
+            var veiculo = document.getElementById('lstVeiculos').ej2_instances[0]; veiculo.value = "";
+            var lavador = document.getElementById('lstLavador').ej2_instances[0]; lavador.value = "";
+
+            var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+            if (motoristas.value === null) { ListaTodasLavagens(); return; }
+
+            var motoristaId = motoristas.value.toString();
+            ListaTblLavagens("/api/manutencao/ListaLavagemMotoristas", motoristaId);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "MotoristaValueChange", error);
+        }
+    }
+
+    // ==================== CHANGE: LAVADOR ====================
+    function LavadorValueChange() {
+        try {
+            if (!escolhendoLavador) return;
+
+            $("#txtData").val('');
+            var veiculo = document.getElementById('lstVeiculos').ej2_instances[0]; veiculo.value = "";
+            var motorista = document.getElementById('lstMotorista').ej2_instances[0]; motorista.value = "";
+
+            var lavador = document.getElementById('lstLavador').ej2_instances[0];
+            if (lavador.value === null) { ListaTodasLavagens(); return; }
+
+            var lavadorId = lavador.value.toString();
+            ListaTblLavagens("/api/manutencao/ListaLavagemLavadores", lavadorId);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "LavadorValueChange", error);
+        }
+    }
+</script>
+
+<form>
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel ftx-card-styled">
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-car-wash"></i>
+                        Controle de Lavagens
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="box-body p-3">
+
+                            <!-- ===== CARD: INSERIR LAVAGEM ===== -->
+                            <div class="ftx-section-card card-inserir">
+                                <div class="ftx-section-header">
+                                    <div class="section-icon icon-inserir">
+                                        <i class="fa-duotone fa-file-plus"></i>
+                                    </div>
+                                    <h3 class="section-title">Insira uma Lavagem</h3>
+                                </div>
+                                <div class="ftx-section-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="ftx-label">Data</label>
+                                            <input id="txtDataLavagem" class="form-control" type="date" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="ftx-label">Hora</label>
+                                            <input id="txtHoraLavagem" class="form-control" type="time" />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="ftx-label">Veículo Lavado</label>
+                                            <ejs-combobox id="lstVeiculoLavagem"
+                                                          placeholder="Selecione um Veículo"
+                                                          allowFiltering="true"
+                                                          filterType="Contains"
+                                                          dataSource="@ViewData["lstVeiculos"]"
+                                                          popupHeight="250px"
+                                                          width="100%"
+                                                          showClearButton="true">
+                                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                            </ejs-combobox>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="ftx-label">Condutor do Veículo</label>
+                                            <ejs-combobox id="lstMotoristaLavagem"
+                                                          placeholder="Selecione um Motorista"
+                                                          allowFiltering="true"
+                                                          filterType="Contains"
+                                                          dataSource="@ViewData["lstMotorista"]"
+                                                          popupHeight="250px"
+                                                          width="100%"
+                                                          showClearButton="true">
+                                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                            </ejs-combobox>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="ftx-label">Lavadores Participantes</label>
+                                            <select id="lstLavadores"
+                                                    data-placeholder="Selecione os lavadores participantes da lavagem..."
+                                                    style="width:100%; max-width:600px;"></select>
+                                        </div>
+                                        <div class="col-12 d-flex gap-2 mt-2">
+                                            <button id="btnInserir" type="button" class="btn btn-inserir-ftx" data-ejtip="Inserir Lavagem">
+                                                <i class="fa-duotone fa-file-plus icon-pulse"></i> Inserir
+                                            </button>
+                                            <button id="btnLimpar" type="button" class="btn btn-limpar-ftx" data-ejtip="Limpar Campos">
+                                                <i class="fa-solid fa-rotate-left icon-rotate-left"></i> Limpar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== CARD: FILTROS DE PESQUISA ===== -->
+                            <div class="ftx-section-card card-filtros">
+                                <div class="ftx-section-header">
+                                    <div class="section-icon icon-filtros">
+                                        <i class="fa-duotone fa-filter-list"></i>
+                                    </div>
+                                    <h3 class="section-title">Filtros de Pesquisa</h3>
+                                </div>
+                                <div class="ftx-section-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="ftx-label">Escolha uma Data</label>
+                                            <input id="txtData" class="form-control" type="date" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="ftx-label">Veículo</label>
+                                            <ejs-combobox id="lstVeiculos"
+                                                          placeholder="Selecione um Veículo"
+                                                          allowFiltering="true"
+                                                          filterType="Contains"
+                                                          dataSource="@ViewData["lstVeiculos"]"
+                                                          popupHeight="250px"
+                                                          change="DefineEscolhaVeiculo"
+                                                          width="100%"
+                                                          showClearButton="true"
+                                                          close="VeiculosValueChange">
+                                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                            </ejs-combobox>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="ftx-label">Motorista</label>
+                                            <ejs-combobox id="lstMotorista"
+                                                          placeholder="Selecione um Motorista"
+                                                          allowFiltering="true"
+                                                          filterType="Contains"
+                                                          dataSource="@ViewData["lstMotorista"]"
+                                                          popupHeight="250px"
+                                                          change="DefineEscolhaMotorista"
+                                                          width="100%"
+                                                          showClearButton="true"
+                                                          close="MotoristaValueChange">
+                                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                            </ejs-combobox>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="ftx-label">Lavador</label>
+                                            <ejs-combobox id="lstLavador"
+                                                          placeholder="Selecione um Lavador"
+                                                          allowFiltering="true"
+                                                          filterType="Contains"
+                                                          dataSource="@ViewData["lstLavadores"]"
+                                                          popupHeight="250px"
+                                                          width="100%"
+                                                          showClearButton="true"
+                                                          change="DefineEscolhaLavador"
+                                                          close="LavadorValueChange">
+                                                <e-combobox-fields text="Nome" value="LavadorId"></e-combobox-fields>
+                                            </ejs-combobox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== TABELA DE LAVAGENS ===== -->
+                            <div id="divViagens">
+                                <table id="tblLavagem" class="table table-bordered table-striped ftx-table" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Horário</th>
+                                            <th>Veículo</th>
+                                            <th>Motorista</th>
+                                            <th>Lavadores</th>
+                                            <th>Ação</th>
+                                            <th>#</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                        </div><!-- /.box-body -->
+                    </div><!-- /.panel-content -->
+                </div><!-- /.panel-container -->
+            </div><!-- /.panel -->
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</form>
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <!-- Kendo (MultiSelect) -->
+    <script src="https://kendo.cdn.telerik.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+
+    <script>
+        // ==================== DOCUMENT READY (principal) ====================
+        $(document).ready(function () {
+            try {
+                // Habilita ordenação de datas dd/MM/yyyy no DataTables
+                if ($.fn.dataTable.moment) {
+                    $.fn.dataTable.moment('DD/MM/YYYY');
+                }
+
+                // Enter no campo data de filtro dispara o change
+                $("#txtData").on('keyup', function (e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        $(this).trigger('change');
+                    }
+                });
+
+                // Lista inicial
+                ListaTodasLavagens();
+
+                // Mudança de data (filtro)
+                $("#txtData").change(function () {
+                    DefineEscolhaData();
+
+                    // zera filtros de combos
+                    var veiculos = document.getElementById('lstVeiculos').ej2_instances[0]; veiculos.value = "";
+                    var lavadores = document.getElementById('lstLavador').ej2_instances[0]; lavadores.value = "";
+                    var motoristas = document.getElementById('lstMotorista').ej2_instances[0]; motoristas.value = "";
+
+                    var date = $('#txtData').val().split("-");
+                    if (date.length === 3) {
+                        var dataLavagem = (date[2] + "/" + date[1] + "/" + date[0]);
+                        ListaTblLavagens("/api/manutencao/ListaLavagensData", dataLavagem);
+                    }
+                });
+
+                // MultiSelect de Lavadores (via Kendo)
+                $.ajax({
+                    url: '/api/Manutencao/RecuperaLavador',
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        try {
+                            $("#lstLavadores").kendoMultiSelect({
+                                dataTextField: "nome",
+                                dataValueField: "lavadorId",
+                                dataSource: data,
+                                autoClose: false,
+                                placeholder: "Selecione os lavadores participantes..."
+                            });
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "RecuperaLavador.success", error);
+                        }
+                    },
+                    error: function (err) {
+                        try {
+                            console.log("Erro ao carregar lavadores:", err);
+                            AppToast.show('Vermelho', "Falha ao carregar lista de lavadores.");
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "RecuperaLavador.error", error);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "document.ready", error);
+            }
+        });
+
+        // ==================== BOtão LIMPAR ====================
+        $("#btnLimpar").click(function () {
+            try {
+                LimpaControles();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "#btnLimpar.click", error);
+            }
+        });
+
+        // ==================== TABELA ====================
+        function ListaTblLavagens(URLapi, IDapi) {
+            try {
+                // Spinner se o plugin existir
+                if ($.fn.LoadingScript) {
+                    $('#divViagens').LoadingScript('method_12', {
+                        'background_image': 'img/loading7.png',
+                        'main_width': 200,
+                        'animation_speed': 10,
+                        'additional_style': '',
+                        'after_element': false
+                    });
+                }
+
+                var dt = $('#tblLavagem').DataTable();
+                if (dt) { dt.destroy(); }
+                $('#tblLavagem tbody').empty();
+
+                $('#tblLavagem').DataTable({
+                    autoWidth: false,
+                    dom: 'Bfrtip',
+                    lengthMenu: [
+                        [10, 25, 50, -1],
+                        ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']
+                    ],
+                    buttons: ['pageLength', 'excel', {
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL'
+                    }],
+                    order: [[0, 'desc']],
+                    columnDefs: [
+                        { targets: 0, className: "text-center", width: "6%" },  // Data
+                        { targets: 1, className: "text-center", width: "6%" },  // Horário
+                        { targets: 2, className: "text-left", width: "14%" }, // Veículo
+                        { targets: 3, className: "text-left", width: "14%" }, // Motorista
+                        { targets: 4, className: "text-left", width: "42%" }, // Lavadores
+                        { targets: 5, className: "text-center", width: "6%" }, // Ação
+                        { targets: 6, className: "text-center", width: "2%" }  // #
+                    ],
+                    responsive: true,
+                    ajax: {
+                        url: URLapi,
+                        type: "GET",
+                        data: { id: IDapi },
+                        datatype: "json"
+                    },
+                    columns: [
+                        { data: "data" },
+                        { data: "horario" },
+                        { data: "descricaoVeiculo" },
+                        { data: "nome" },
+                        { data: "lavadores" },
+                        {
+                            data: "lavagemId",
+                            render: function (data) {
+                                return `
+                                    <div class="text-center">
+                                        <a class="btn btn-apagar btn-apagar-ftx"
+                                           aria-label="Apagar a Lavagem!"
+                                           data-ejtip="Apagar Lavagem"
+                                           style="cursor:pointer;"
+                                           data-id='${data}'>
+                                           <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>`;
+                            }
+                        },
+                        {
+                            data: "lavagemId",
+                            render: function (data, type, row, meta) {
+                                return meta.row + meta.settings._iDisplayStart + 1;
+                            }
+                        }
+                    ],
+                    language: {
+                        emptyTable: "Nenhum registro encontrado",
+                        info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                        infoFiltered: "(Filtrados de _MAX_ registros)",
+                        loadingRecords: "Carregando...",
+                        processing: "Processando...",
+                        zeroRecords: "Nenhum registro encontrado",
+                        search: "Pesquisar",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                            first: "Primeiro",
+                            last: "Último"
+                        },
+                        lengthMenu: "Exibir _MENU_ resultados por página",
+                        buttons: {
+                            pageLength: { "-1": "Mostrar todos os registros", "_": "Mostrar %d registros" },
+                            excel: "Excel",
+                            pdf: "PDF",
+                            print: "Imprimir",
+                            copy: "Copiar",
+                            colvis: "Visibilidade da Coluna",
+                            colvisRestore: "Restaurar Visibilidade"
+                        }
+                    },
+                    width: "100%"
+                });
+
+                if ($.fn.LoadingScript) {
+                    $('#divViagens').LoadingScript('destroy');
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "ListaTblLavagens", error);
+            }
+        }
+
+        // ==================== INSERIR LAVAGEM ====================
+        $("#btnInserir").click(function (e) {
+            try {
+                e.preventDefault();
+
+                var DataLavagem = $("#txtDataLavagem").val();
+                if (!DataLavagem) {
+                    Alerta.Erro("Erro na Data", "A data de lavagem é obrigatória!");
+                    return;
+                }
+
+                var HoraLavagem = $("#txtHoraLavagem").val();
+                if (!HoraLavagem) {
+                    Alerta.Erro("Erro na Hora", "A hora da lavagem é obrigatória!");
+                    return;
+                }
+
+                var veiculo = document.getElementById('lstVeiculoLavagem').ej2_instances[0];
+                if (veiculo.value === null) {
+                    Alerta.Erro("Atenção", "O veículo lavado é obrigatório!");
+                    return;
+                }
+
+                var motorista = document.getElementById('lstMotoristaLavagem').ej2_instances[0];
+                if (motorista.value === null) {
+                    Alerta.Erro("Atenção", "O condutor do veículo é obrigatório!");
+                    return;
+                }
+
+                var multi = $("#lstLavadores").data("kendoMultiSelect");
+                if (!multi || multi.value().length === 0) {
+                    Alerta.Erro("Atenção", "Ao menos um Lavador é obrigatório!");
+                    return;
+                }
+
+                var objLavagem = JSON.stringify({
+                    "Data": DataLavagem,
+                    "Horario": HoraLavagem,
+                    "VeiculoId": veiculo.value,
+                    "MotoristaId": motorista.value
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/Manutencao/InsereLavagem",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: objLavagem,
+                    success: function (data) {
+                        try {
+                            AppToast.show('Verde', data.message);
+
+                            var lavadoresSelecionados = multi.value();
+                            var calls = [];
+
+                            for (var i = 0; i < lavadoresSelecionados.length; i++) {
+                                var objLavadoresLavagem = JSON.stringify({
+                                    "LavadorId": lavadoresSelecionados[i],
+                                    "LavagemId": data.lavagemId
+                                });
+
+                                calls.push($.ajax({
+                                    type: "POST",
+                                    url: "/api/Manutencao/InsereLavadoresLavagem",
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    data: objLavadoresLavagem
+                                }));
+                            }
+
+                            $.when.apply($, calls).always(function () {
+                                ListaTodasLavagens();
+                                LimpaControles();
+                            });
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "InsereLavagem.success", error);
+                        }
+                    },
+                    error: function (xhr) {
+                        try {
+                            AppToast.show('Vermelho', "Falha ao inserir lavagem.");
+                            console.log(xhr);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "InsereLavagem.error", error);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "#btnInserir.click", error);
+            }
+        });
+
+        // ==================== LIMPAR CAMPOS ====================
+        function LimpaControles() {
+            try {
+                $("#txtDataLavagem").val("");
+                $("#txtHoraLavagem").val("");
+
+                var veiculo = document.getElementById('lstVeiculoLavagem').ej2_instances[0]; veiculo.value = null;
+                var motorista = document.getElementById('lstMotoristaLavagem').ej2_instances[0]; motorista.value = null;
+
+                var multi = $("#lstLavadores").data("kendoMultiSelect");
+                if (multi) multi.value([]);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "LimpaControles", error);
+            }
+        }
+
+        // ==================== EXCLUIR LAVAGEM ====================
+        $(document).on('click', '.btn-apagar', function () {
+            try {
+                var id = $(this).data('id');
+
+                Alerta.Confirmar(
+                    "Confirmar Exclusão",
+                    "Você tem certeza que deseja apagar esta Lavagem? Não será possível recuperar os dados eliminados!",
+                    "Sim, excluir",
+                    "Cancelar"
+                ).then(function (confirmed) {
+                    try {
+                        if (confirmed) {
+                            var dataToPost = JSON.stringify({ 'LavagemId': id });
+
+                            $.ajax({
+                                url: "/api/Manutencao/ApagaLavagem",
+                                type: "POST",
+                                data: dataToPost,
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function (data) {
+                                    try {
+                                        if (data.success) {
+                                            AppToast.show('Verde', data.message);
+                                            ListaTodasLavagens();
+                                        } else {
+                                            AppToast.show('Vermelho', data.message);
+                                        }
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "ApagaLavagem.success", error);
+                                    }
+                                },
+                                error: function (err) {
+                                    try {
+                                        console.log(err);
+                                        AppToast.show('Vermelho', 'Ocorreu um erro ao excluir a lavagem.');
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "ApagaLavagem.error", error);
+                                    }
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", "ApagaLavagem.confirmar", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ControleLavagem.cshtml", ".btn-apagar.click", error);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,816 @@
+@page
+@model FrotiX.Pages.Viagens.DashboardViagensModel
+@{
+    ViewData["Title"] = "Dashboard de Viagens";
+    ViewData["PageName"] = "viagens_dashboardviagens";
+}
+
+<style>
+    /* Cards de Estatísticas - Estilo PowerBI Clean */
+    .card-estatistica-dash {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        border-left: 4px solid;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .card-estatistica-dash:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .card-borda-azul {
+        border-left-color: #0D47A1;
+    }
+    
+    .card-borda-verde {
+        border-left-color: #16a34a;
+    }
+    
+    .card-borda-laranja {
+        border-left-color: #d97706;
+    }
+    
+    .card-borda-amarelo {
+        border-left-color: #f59e0b;
+    }
+    
+    .card-borda-roxo {
+        border-left-color: #9d4edd;
+    }
+    
+    .icone-card-dash {
+        font-size: 24px;
+        margin-bottom: 12px;
+        opacity: 0.85;
+    }
+    
+    .icone-azul {
+        color: #0D47A1;
+    }
+    
+    .icone-verde {
+        color: #16a34a;
+    }
+    
+    .icone-laranja {
+        color: #d97706;
+    }
+    
+    .icone-amarelo {
+        color: #f59e0b;
+    }
+    
+    .icone-roxo {
+        color: #9d4edd;
+    }
+    
+    .texto-metrica {
+        font-size: 0.75rem;
+        color: #6B7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+    }
+    
+    .valor-metrica {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.2;
+    }
+    
+    .variacao-metrica {
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 8px;
+    }
+    
+    .variacao-positiva {
+        color: #16a34a;
+    }
+    
+    .variacao-negativa {
+        color: #dc2626;
+    }
+    
+    .variacao-neutra {
+        color: #6B7280;
+    }
+    
+    /* Cards secundários */
+    .card-dashboard {
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .card-dashboard:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+    
+    /* Container de Filtros */
+    .filter-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+    
+    .filter-card .form-label {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    /* Botões de Período Rápido */
+    .btn-period {
+        border-radius: 20px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.15);
+        color: white;
+    }
+    
+    .btn-period:hover {
+        transform: scale(1.05);
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+        color: white;
+    }
+    
+    .btn-period.active {
+        background: white;
+        color: #667eea;
+        border-color: white;
+    }
+
+    .btn-laranja {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        border: none;
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-laranja:hover {
+        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+    }
+
+    .btn-laranja:active {
+        transform: translateY(0);
+    }
+    
+    /* Containers de Gráficos */
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .chart-container:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* Loading */
+    #loadingDashboard {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.95);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        display: none !important;
+    }
+    
+    /* Tabela TOP 10 */
+    .table-top10 {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table-top10 thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .table-top10 tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Footer dos Cards com info Ctran */
+    .chart-footer-info {
+        padding: 10px 16px;
+        margin-top: 16px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Footer Requisitantes - Rosa para combinar com o gráfico */
+    #footerRequisitante {
+        border-top: 2px solid rgba(236, 72, 153, 0.3);
+        background-color: rgba(236, 72, 153, 0.08);
+        color: #ec4899;
+    }
+
+    #footerRequisitante i {
+        color: #ec4899;
+    }
+
+    /* Footer Setores - Amarelo para combinar com o gráfico */
+    #footerSetor {
+        border-top: 2px solid rgba(251, 191, 36, 0.3);
+        background-color: rgba(251, 191, 36, 0.08);
+        color: #d97706;
+    }
+
+    #footerSetor i {
+        color: #d97706;
+    }
+</style>
+
+<!-- Loading Overlay -->
+<div id="loadingDashboard">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 fw-bold">Carregando Dashboard...</p>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Header com Botões -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="mb-1">
+                <i class="fa-duotone fa-chart-line text-primary me-2"></i>
+                Dashboard de Viagens
+            </h2>
+            <p class="text-muted mb-0">Análise completa e estatísticas de viagens</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <button type="button" class="btn btn-marrom me-2" id="btnExportarPDF">
+                <i class="fa-solid fa-file-pdf me-2"></i>
+                Exportar PDF
+            </button>
+            <button type="button" class="btn btn-azul" id="btnAtualizar">
+                <i class="fa-solid fa-arrows-rotate me-2"></i>
+                Atualizar Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">
+                    <i class="fa-solid fa-calendar-range me-2"></i>
+                    Período de Análise
+                </label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label small mb-1">De:</label>
+                        <input type="date" id="dataInicio" class="form-control" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-1">Até:</label>
+                        <input type="date" id="dataFim" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-laranja" id="btnFiltrar">
+                    <i class="fa-solid fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col">
+                <label class="form-label">Períodos Rápidos</label>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn-period" id="btn7Dias">7 dias</button>
+                    <button type="button" class="btn-period" id="btn15Dias">15 dias</button>
+                    <button type="button" class="btn-period" id="btn30Dias">30 dias</button>
+                    <button type="button" class="btn-period" id="btn60Dias">60 dias</button>
+                    <button type="button" class="btn-period" id="btn90Dias">90 dias</button>
+                    <button type="button" class="btn-period" id="btn180Dias">180 dias</button>
+                    <button type="button" class="btn-period" id="btn365Dias">1 ano</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas Principais -->
+    <div class="row g-3 mb-4">
+        <div class="col">
+            <div id="cardCustoTotal" class="card-estatistica-dash card-borda-azul">
+                <div class="icone-card-dash icone-azul">
+                    <i class="fa-duotone fa-sack-dollar"></i>
+                </div>
+                <small class="texto-metrica">Custo Total</small>
+                <h3 class="valor-metrica mb-0" id="statCustoTotal">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCusto">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div id="cardTotalViagens" class="card-estatistica-dash card-borda-verde">
+                <div class="icone-card-dash icone-verde">
+                    <i class="fa-duotone fa-route"></i>
+                </div>
+                <small class="texto-metrica">Total Viagens</small>
+                <h3 class="valor-metrica mb-0" id="statTotalViagens">0</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoViagens">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div id="cardCustoMedio" class="card-estatistica-dash card-borda-laranja">
+                <div class="icone-card-dash icone-laranja">
+                    <i class="fa-duotone fa-chart-line"></i>
+                </div>
+                <small class="texto-metrica">Custo Médio</small>
+                <h3 class="valor-metrica mb-0" id="statCustoMedio">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCustoMedio">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div id="cardKmTotal" class="card-estatistica-dash card-borda-amarelo">
+                <div class="icone-card-dash icone-amarelo">
+                    <i class="fa-duotone fa-gauge-high"></i>
+                </div>
+                <small class="texto-metrica">KM Total</small>
+                <h3 class="valor-metrica mb-0" id="statKmTotal">0 km</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoKm">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div id="cardKmMedio" class="card-estatistica-dash card-borda-roxo">
+                <div class="icone-card-dash icone-roxo">
+                    <i class="fa-duotone fa-tachometer-alt"></i>
+                </div>
+                <small class="texto-metrica">KM Médio</small>
+                <h3 class="valor-metrica mb-0" id="statKmMedio">0 km</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoKmMedio">-</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Viagens por Status -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div id="cardViagensFinalizadas" class="card-estatistica-dash card-borda-verde">
+                <div class="icone-card-dash icone-verde">
+                    <i class="fa-duotone fa-circle-check"></i>
+                </div>
+                <small class="texto-metrica">Realizadas</small>
+                <h3 class="valor-metrica mb-0" id="statViagensFinalizadas">0</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoRealizadas">-</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div id="cardViagensEmAndamento" class="card-estatistica-dash card-borda-amarelo">
+                <div class="icone-card-dash icone-amarelo">
+                    <i class="fa-duotone fa-clock"></i>
+                </div>
+                <small class="texto-metrica">Abertas</small>
+                <h3 class="valor-metrica mb-0" id="statViagensEmAndamento">0</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoAbertas">-</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div id="cardViagensAgendadas" class="card-estatistica-dash card-borda-azul">
+                <div class="icone-card-dash icone-azul">
+                    <i class="fa-duotone fa-calendar-circle-plus"></i>
+                </div>
+                <small class="texto-metrica">Agendadas</small>
+                <h3 class="valor-metrica mb-0" id="statViagensAgendadas">0</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoAgendadas">-</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div id="cardViagensCanceladas" class="card-estatistica-dash card-borda-laranja">
+                <div class="icone-card-dash icone-laranja">
+                    <i class="fa-duotone fa-circle-xmark"></i>
+                </div>
+                <small class="texto-metrica">Canceladas</small>
+                <h3 class="valor-metrica mb-0" id="statViagensCanceladas">0</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCanceladas">-</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Custos por Tipo (5 cards) -->
+    <div class="row g-3 mb-4">
+        <div class="col">
+            <div class="card-estatistica-dash card-borda-azul">
+                <div class="icone-card-dash icone-azul">
+                    <i class="fa-duotone fa-gas-pump"></i>
+                </div>
+                <small class="texto-metrica">Custo Combustível</small>
+                <h3 class="valor-metrica mb-0" id="statCustoCombustivel">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCustoCombustivel">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-dash card-borda-roxo">
+                <div class="icone-card-dash icone-roxo">
+                    <i class="fa-duotone fa-car"></i>
+                </div>
+                <small class="texto-metrica">Custo Veículo</small>
+                <h3 class="valor-metrica mb-0" id="statCustoVeiculo">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCustoVeiculo">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-dash card-borda-verde">
+                <div class="icone-card-dash icone-verde">
+                    <i class="fa-duotone fa-id-card"></i>
+                </div>
+                <small class="texto-metrica">Custo Motorista</small>
+                <h3 class="valor-metrica mb-0" id="statCustoMotorista">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCustoMotorista">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-dash card-borda-laranja">
+                <div class="icone-card-dash icone-laranja">
+                    <i class="fa-duotone fa-user-hard-hat"></i>
+                </div>
+                <small class="texto-metrica">Custo Operador</small>
+                <h3 class="valor-metrica mb-0" id="statCustoOperador">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCustoOperador">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-dash card-borda-amarelo">
+                <div class="icone-card-dash icone-amarelo">
+                    <i class="fa-duotone fa-spray-can"></i>
+                </div>
+                <small class="texto-metrica">Custo Lavador</small>
+                <h3 class="valor-metrica mb-0" id="statCustoLavador">R$ 0,00</h3>
+                <small class="variacao-metrica variacao-neutra" id="variacaoCustoLavador">-</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos - Linha 1 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="chart-container" style="min-height: 450px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-calendar-week text-primary"></i>
+                    Viagens por Dia da Semana
+                </h5>
+                <div id="chartViagensPorDia" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container" style="min-height: 450px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-pie text-success"></i>
+                    Status das Viagens
+                </h5>
+                <div id="chartViagensPorStatus" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos - Linha 2 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 400px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-info"></i>
+                    Top 10 Motoristas
+                </h5>
+                <div id="chartViagensPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 400px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-warning"></i>
+                    Top 10 Veículos
+                </h5>
+                <div id="chartViagensPorVeiculo" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos - Linha 3 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="chart-container" style="min-height: 400px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-area"></i>
+                    Evolução de Custos ao Longo do Tempo
+                </h5>
+                <div id="chartCustosPorDia" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container" style="min-height: 400px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-pie text-danger"></i>
+                    Distribuição de Custos
+                </h5>
+                <div id="chartCustosPorTipo" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos - Linha 4 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-5">
+            <div class="chart-container" style="min-height: 500px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-primary"></i>
+                    Viagens por Finalidade (Top 15)
+                </h5>
+                <div id="chartViagensPorFinalidade" style="height: 420px;"></div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="chart-container" style="min-height: 500px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-info"></i>
+                    KM Rodados por Veículo
+                </h5>
+                <div id="chartKmPorVeiculo" style="height: 420px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos - Linha 5 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 380px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-success"></i>
+                    Top 6 Requisitantes
+                </h5>
+                <div id="chartViagensPorRequisitante" style="height: 280px;"></div>
+                <div id="footerRequisitante" class="chart-footer-info d-none">
+                    <i class="fa-duotone fa-chart-pie-simple me-1"></i>
+                    <span id="infoViagensCtranRequisitante"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 380px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-warning"></i>
+                    Top 6 Setores
+                </h5>
+                <div id="chartViagensPorSetor" style="height: 280px;"></div>
+                <div id="footerSetor" class="chart-footer-info d-none">
+                    <i class="fa-duotone fa-chart-pie-simple me-1"></i>
+                    <span id="infoViagensCtranSetor"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos - Linha 6 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 400px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column text-danger"></i>
+                    Custos por Motorista
+                </h5>
+                <div id="chartCustosPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 400px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-chart-column"></i>
+                    Custos por Veículo
+                </h5>
+                <div id="chartCustosPorVeiculo" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================================================================ -->
+    <!-- NOVOS GRÁFICOS - Linha 7: Heatmap de Viagens -->
+    <!-- ================================================================ -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-grid-2 text-info"></i>
+                    Mapa de Calor - Distribuição de Viagens (Dia x Hora)
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0" id="tabelaHeatmap" style="font-size: 0.8rem;">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center" style="width: 100px;">Dia/Hora</th>
+                                <th class="text-center" style="width: 35px;">00</th>
+                                <th class="text-center" style="width: 35px;">01</th>
+                                <th class="text-center" style="width: 35px;">02</th>
+                                <th class="text-center" style="width: 35px;">03</th>
+                                <th class="text-center" style="width: 35px;">04</th>
+                                <th class="text-center" style="width: 35px;">05</th>
+                                <th class="text-center" style="width: 35px;">06</th>
+                                <th class="text-center" style="width: 35px;">07</th>
+                                <th class="text-center" style="width: 35px;">08</th>
+                                <th class="text-center" style="width: 35px;">09</th>
+                                <th class="text-center" style="width: 35px;">10</th>
+                                <th class="text-center" style="width: 35px;">11</th>
+                                <th class="text-center" style="width: 35px;">12</th>
+                                <th class="text-center" style="width: 35px;">13</th>
+                                <th class="text-center" style="width: 35px;">14</th>
+                                <th class="text-center" style="width: 35px;">15</th>
+                                <th class="text-center" style="width: 35px;">16</th>
+                                <th class="text-center" style="width: 35px;">17</th>
+                                <th class="text-center" style="width: 35px;">18</th>
+                                <th class="text-center" style="width: 35px;">19</th>
+                                <th class="text-center" style="width: 35px;">20</th>
+                                <th class="text-center" style="width: 35px;">21</th>
+                                <th class="text-center" style="width: 35px;">22</th>
+                                <th class="text-center" style="width: 35px;">23</th>
+                            </tr>
+                        </thead>
+                        <tbody id="heatmapBody">
+                            <tr>
+                                <td colspan="25" class="text-center py-4">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                    <span class="ms-2">Carregando dados...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-center align-items-center mt-3 gap-2">
+                    <span class="small text-muted">Menos viagens</span>
+                    <div style="width: 25px; height: 20px; background-color: #f5f5f5; border: 1px solid #ddd;"></div>
+                    <div style="width: 25px; height: 20px; background-color: #c8e6c9; border: 1px solid #ddd;"></div>
+                    <div style="width: 25px; height: 20px; background-color: #81c784; border: 1px solid #ddd;"></div>
+                    <div style="width: 25px; height: 20px; background-color: #4caf50; border: 1px solid #ddd;"></div>
+                    <div style="width: 25px; height: 20px; background-color: #2e7d32; border: 1px solid #ddd;"></div>
+                    <span class="small text-muted">Mais viagens</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- NOVOS GRÁFICOS - Linha 8: Top 10 Veículos por KM + Custo por Finalidade -->
+    <!-- ================================================================ -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 450px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-gauge-high text-success"></i>
+                    Top 10 Veículos por KM Rodado
+                </h5>
+                <div id="chartTop10VeiculosKm" style="height: 380px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container" style="min-height: 450px;">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-money-bill-trend-up text-danger"></i>
+                    Custo Médio por Finalidade
+                </h5>
+                <div id="chartCustoMedioPorFinalidade" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela TOP 10 Viagens Mais Caras -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fa-duotone fa-trophy text-warning"></i>
+                    TOP 10 Viagens Mais Caras
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-top10 mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center" width="60">#</th>
+                                <th class="text-center" width="120">Nº Ficha</th>
+                                <th width="150">Data Inicial</th>
+                                <th width="150">Data Final</th>
+                                <th>Motorista</th>
+                                <th>Veículo</th>
+                                <th class="text-end" width="150">Custo Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaTop10Body">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal PDF Viewer -->
+<div class="modal fade" id="modalPDFViewer" tabindex="-1" aria-labelledby="modalPDFViewerLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h5 class="modal-title" id="modalPDFViewerLabel">
+                    <i class="fas fa-file-pdf text-danger me-2"></i>Dashboard de Viagens - PDF
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-0" style="height: 700px;">
+                <div id="pdfViewerContainer" style="height: 100%;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fechar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnBaixarPDF">
+                    <i class="fas fa-download me-2"></i>Baixar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <!-- html2canvas para capturar cards como imagem -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" 
+            integrity="sha512-tdxPp0jvLhL+OLj3yBKfzLBJ8g75qDWQJWJqKdmM6Oj23s9zqG0UKA5LPqjbCfL9Jk9q/tHBtDa93BqKlAVhA==" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer"
+            asp-append-version="true"></script>
+
+    <!-- Syncfusion EJ2 - Apenas para Gráficos -->
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-base/dist/global/ej2-base.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-data/dist/global/ej2-data.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-svg-base/dist/global/ej2-svg-base.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-pdf-export/dist/global/ej2-pdf-export.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-file-utils/dist/global/ej2-file-utils.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-compression/dist/global/ej2-compression.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-charts/dist/global/ej2-charts.min.js"></script>
+    
+    <script src="~/js/dashboards/dashboard-viagens.js" asp-append-version="true"></script>
+}

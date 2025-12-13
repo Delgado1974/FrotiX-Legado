@@ -1,0 +1,97 @@
+/* ============================================
+   PATRIMÔNIO - ESTILOS ESPECÍFICOS
+   ============================================ */
+
+/* Estilização dos botões de adicionar */
+.btn-add-item {
+    width: 35px !important;
+    height: 35px !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+    .btn-add-item:hover:not(:disabled) {
+        transform: scale(1.1);
+    }
+
+    .btn-add-item:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* Ajuste do layout com flexbox */
+.d-flex.align-items-center {
+    gap: 8px;
+}
+
+/* Estilização dos modais */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.modal-title {
+    color: #325d88;
+    font-weight: 600;
+}
+
+.modal-body .form-control-plaintext {
+    font-weight: 600;
+    color: #495057;
+    background-color: #f8f9fa;
+    padding: 0.375rem 0.75rem;
+    border-radius: 4px;
+}
+
+/* Input com validação */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+
+.form-control.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+/* Ajuste da largura das combobox quando há botão ao lado */
+.e-control-wrapper.e-input-group {
+    flex: 1;
+}
+
+/* Animação para modais */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+    .d-flex.align-items-center {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .btn-add-item {
+        width: 100% !important;
+        margin-top: 8px;
+    }
+}

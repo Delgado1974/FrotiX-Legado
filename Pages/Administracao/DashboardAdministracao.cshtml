@@ -1,0 +1,417 @@
+@page
+@model FrotiX.Pages.Administracao.DashboardAdministracaoModel
+@{
+    ViewData["Title"] = "Dashboard Administração";
+}
+
+<style>
+    /* ====== FONTE OUTFIT ====== */
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+    /* Header Padrão FrotiX */
+    .dashboard-header {
+        background: linear-gradient(135deg, #4a6075 0%, #3d5266 50%, #2f4050 100%);
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(74, 96, 117, 0.25);
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.03) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+
+    @@keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .dashboard-header .header-icon {
+        font-size: 2.8rem;
+        color: #fff;
+        margin-right: 1rem;
+        --fa-primary-color: #fff;
+        --fa-secondary-color: rgba(255,255,255,0.7);
+        --fa-secondary-opacity: 0.7;
+        align-self: center;
+    }
+
+    .dashboard-header h4 {
+        font-family: 'Outfit', sans-serif !important;
+        color: #fff !important;
+        font-size: 1.5rem;
+        font-weight: 900 !important;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .dashboard-header h4 span {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 300 !important;
+    }
+
+    .dashboard-header .subtitle {
+        font-family: 'Outfit', sans-serif;
+        color: rgba(255,255,255,0.75);
+        font-size: 0.85rem;
+        margin-top: 0.15rem;
+        font-weight: 400;
+    }
+
+    /* Botão Atualizar Laranja */
+    .btn-atualizar {
+        background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        border: none;
+        color: #fff;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+        transition: all 0.2s;
+    }
+
+    .btn-atualizar:hover {
+        background: linear-gradient(135deg, #d35400 0%, #c0392b 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(230, 126, 34, 0.4);
+        color: #fff;
+    }
+
+    /* Cards */
+    .card {
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Heatmap */
+    .heatmap-cell {
+        width: 35px;
+        height: 25px;
+        text-align: center;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .heatmap-cell:hover {
+        transform: scale(1.1);
+        z-index: 1;
+        position: relative;
+    }
+
+    /* Mensagem sem dados */
+    .sem-dados {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 200px;
+        color: #6c757d;
+        font-style: italic;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header Padrão FrotiX -->
+    <div class="dashboard-header">
+        <div class="d-flex align-items-center">
+            <i class="fa-duotone fa-chart-line header-icon"></i>
+            <div>
+                <h4>Dashboard de <span class="fw-300">Administração</span></h4>
+                <div class="subtitle">Visão gerencial da frota com indicadores de normalização e eficiência</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <label class="form-label mb-0 small fw-bold">Período:</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" id="dataInicio" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-auto">
+                            <span class="text-muted">até</span>
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" id="dataFim" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-atualizar btn-sm" onclick="carregarTodosGraficos()">
+                                <i class="fas fa-sync-alt me-1"></i>Atualizar
+                            </button>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="definirPeriodo(7)">7 dias</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="definirPeriodo(30)">30 dias</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="definirPeriodo(90)">90 dias</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="definirPeriodo(180)">6 meses</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="definirPeriodo(365)">1 ano</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card shadow-sm border-start border-primary border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1 small text-uppercase">Veículos Ativos</h6>
+                            <h3 class="mb-0 fw-bold" id="cardVeiculosAtivos">-</h3>
+                        </div>
+                        <div class="text-primary opacity-50">
+                            <i class="fas fa-car fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card shadow-sm border-start border-success border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1 small text-uppercase">Motoristas Ativos</h6>
+                            <h3 class="mb-0 fw-bold" id="cardMotoristasAtivos">-</h3>
+                        </div>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-id-card fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card shadow-sm border-start border-info border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1 small text-uppercase">Viagens no Período</h6>
+                            <h3 class="mb-0 fw-bold" id="cardViagensRealizadas">-</h3>
+                        </div>
+                        <div class="text-info opacity-50">
+                            <i class="fas fa-route fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card shadow-sm border-start border-warning border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1 small text-uppercase">Total KM Rodados</h6>
+                            <h3 class="mb-0 fw-bold" id="cardTotalKm">-</h3>
+                        </div>
+                        <div class="text-warning opacity-50">
+                            <i class="fas fa-tachometer-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha 1: Normalização -->
+    <div class="row mb-4">
+        <!-- Pizza: Originais vs Normalizadas -->
+        <div class="col-xl-4 col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Viagens Originais vs Normalizadas</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerPizzaNormalizacao" style="height: 280px;">
+                        <canvas id="chartNormalizacaoPizza"></canvas>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted" id="lblPercentualNormalizadas"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barras: Por Tipo de Normalização -->
+        <div class="col-xl-4 col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2 text-info"></i>Por Tipo de Normalização</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerNormalizacaoTipo" style="height: 320px;">
+                        <canvas id="chartNormalizacaoTipo"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pizza: Distribuição Tipo de Uso -->
+        <div class="col-xl-4 col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-car-side me-2 text-success"></i>Distribuição por Tipo de Uso</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerTipoUso" style="height: 280px;">
+                        <canvas id="chartTipoUso"></canvas>
+                    </div>
+                    <div id="legendaTipoUso" class="mt-2 small"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha 2: Heatmap -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-th me-2 text-danger"></i>Mapa de Calor - Viagens por Dia/Hora</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-0" id="tabelaHeatmap">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 100px;">Dia</th>
+                                    @for (int h = 0; h < 24; h++)
+                                    {
+                                        <th class="text-center small" style="min-width: 35px;">@h.ToString("D2")</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody id="heatmapBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="me-2">Menor</span>
+                            <div style="width: 20px; height: 15px; background: #f5f5f5; border: 1px solid #ddd;"></div>
+                            <div style="width: 20px; height: 15px; background: #c8e6c9;"></div>
+                            <div style="width: 20px; height: 15px; background: #81c784;"></div>
+                            <div style="width: 20px; height: 15px; background: #4caf50;"></div>
+                            <div style="width: 20px; height: 15px; background: #2e7d32;"></div>
+                            <span class="ms-2">Maior</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha 3: Top 10 Veículos e Motoristas -->
+    <div class="row mb-4">
+        <div class="col-xl-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-car me-2 text-primary"></i>Top 10 Veículos por KM</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerTop10Veiculos" style="height: 350px;">
+                        <canvas id="chartTop10Veiculos"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-user me-2 text-success"></i>Top 10 Motoristas por KM</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerTop10Motoristas" style="height: 350px;">
+                        <canvas id="chartTop10Motoristas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha 4: Custos -->
+    <div class="row mb-4">
+        <div class="col-xl-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-money-bill-wave me-2 text-warning"></i>Custo Médio por Finalidade</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerCustoPorFinalidade" style="height: 350px;">
+                        <canvas id="chartCustoPorFinalidade"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-balance-scale me-2 text-info"></i>Próprios vs Terceirizados</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerPropriosTerceirizados" style="height: 350px;">
+                        <canvas id="chartPropriosTerceirizados"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha 5: Eficiência e Evolução -->
+    <div class="row mb-4">
+        <div class="col-xl-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-trophy me-2 text-success"></i>Eficiência da Frota (Menor Custo/KM)</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerEficiencia" style="height: 350px;">
+                        <canvas id="chartEficiencia"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-chart-area me-2 text-primary"></i>Evolução Mensal de Custos</h6>
+                </div>
+                <div class="card-body">
+                    <div id="containerEvolucaoMensal" style="height: 350px;">
+                        <canvas id="chartEvolucaoMensal"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/administracao.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,66 @@
+@page
+@model FrotiX.Models.PlacaBronze
+
+@{
+	ViewData["Title"] = "Placas de Bronze";
+	ViewData["PageName"] = "cadastros_placabronze";
+	ViewData["Heading"] = "<i class='fad fa-file-certificate'></i> Cadastros: <span class='fw-300'>Placas de Bronze</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fa-regular fa-file-certificate";
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+</style>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<div class="col-12 px-3">
+
+					<div class="header-toolbar">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-solid fa-rectangle-history"></i>
+							Listagem de Placas de Bronze
+						</h2>
+
+						<a href="/PlacaBronze/Upsert"
+						   class="btn btn-azul form-control flex-shrink-0"
+						   style="width: 250px;"
+						   data-ejtip="Adicionar nova placa de bronze ao sistema">
+							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+							Adicionar Placa de Bronze
+						</a>
+					</div>
+				</div>
+
+				<div class="panel-content">
+					<div class="box-body">
+						<br /><br />
+						<table id="tblPlacaBronze" class="table table-bordered table-striped" width="100%">
+							<thead>
+								<tr>
+									<th>Descrição da Placa</th>
+									<th>Veículo Associado</th>
+									<th>Status</th>
+									<th>Ação</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	@* IMPORTANTE: Não incluir global-toast.js aqui se já estiver no _Layout *@
+	@* Carregar o script específico da página apenas uma vez *@
+	<script src="~/js/cadastros/placabronze.js" asp-append-version="true"></script>
+}

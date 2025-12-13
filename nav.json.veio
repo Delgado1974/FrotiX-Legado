@@ -1,0 +1,455 @@
+{
+  "version": "0.9",
+  "lists": [
+    {
+      "title": "P&aacute;gina Inicial",
+      "nomeMenu": "Página Inicial",
+      "icon": "fa-regular fa-home",
+      "href": "intel_analyticsdashboard.html",
+      "roles": []
+    },
+
+    {
+      "title": "Agenda",
+      "nomeMenu": "Agenda",
+      "icon": "fa-regular fa-calendar-alt",
+      "href": "agenda_index.html",
+      "roles": []
+    },
+
+    {
+      "title": "Nova Viagem",
+      "nomeMenu": "Nova Viagem",
+      "icon": "fa-regular fa-route",
+      "href": "viagens_upsert.html",
+      "roles": []
+    },
+
+    {
+      "title": "Gest&atilde;o de Requisi&ccedil;&otilde;es",
+      "nomeMenu": "Gestão de Requisições",
+      "icon": "fa-regular fa-calendar-alt",
+      "roles": [],
+      "items": [
+        {
+          "title": "Setores Solicitantes",
+          "nomeMenu": "Setores Solicitantes",
+          "href": "setorsolicitante_index.html",
+          "roles": []
+        },
+        {
+          "title": "Requisitantes",
+          "nomeMenu": "Requisitantes",
+          "href": "requisitante_index.html",
+          "roles": []
+        }
+      ]
+    },
+    {
+      "title": "Gest&atilde;o de Viagens",
+      "nomeMenu": "Gestão de Viagens",
+      "icon": "fa-regular fa-briefcase-clock",
+      "roles": [],
+      "items": [
+        {
+          "title": "Insere Nova Viagem",
+          "nomeMenu": "Insere Nova Viagem",
+          "href": "viagens_upsert.html",
+          "roles": []
+        },
+        {
+          "title": "Controle de Viagens",
+          "nomeMenu": "Controle de Viagens",
+          "href": "viagens_index.html",
+          "roles": []
+        },
+        {
+          "title": "Gerencia Eventos",
+          "nomeMenu": "Gerencia Eventos",
+          "href": "viagens_listaeventos.html",
+          "roles": []
+        },
+        {
+          "title": "Fluxo de Passageiros",
+          "nomeMenu": "Fluxo de Passageiros",
+          "roles": [],
+          "items": [
+            {
+              "title": "Inserir Fichas MOB",
+              "nomeMenu": "Inserir Fichas MOB",
+              "href": "viagens_fluxopassageiros.html",
+              "roles": []
+            },
+            {
+              "title": "Gest&atilde;o Fichas MOB",
+              "nomeMenu": "Gestão Fichas MOB",
+              "href": "viagens_gestaofluxo.html",
+              "roles": []
+            }
+          ]
+        },
+        {
+          "title": "Gr&aacute;ficos Gerenciais",
+          "nomeMenu": "Viagens - Gráficos Gerenciais",
+          "roles": [],
+          "items": [
+            {
+              "title": "Fluxo de Passageiros - MOB",
+              "nomeMenu": "Fluxo de Passageiros - MOB",
+              "href": "viagens_pbimob.html",
+              "roles": []
+            },
+            {
+              "title": "Dashboard de Viagens",
+              "nomeMenu": "Dashboard de Viagens",
+              "href": "viagens_pbiviagens.html",
+              "roles": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Gest&atilde;o de Manuten&ccedil;&atilde;o",
+      "nomeMenu": "Gestão de Manutenção",
+      "icon": "fa-regular fa-car-wrench",
+      "roles": [],
+      "items": [
+        {
+          "title": "Ocorr&ecirc;ncias",
+          "nomeMenu": "Ocorrências",
+          "href": "ocorrencia_ocorrencias.html",
+          "roles": []
+        },
+        {
+          "title": "Registro de Manuten&ccedil;&atilde;o",
+          "nomeMenu": "Registro de Manutenção",
+          "href": "manutencao_listamanutencao.html",
+          "roles": []
+        },
+        {
+          "title": "Relat&oacute;rio de Glosa",
+          "nomeMenu": "Relatório de Glosa",
+          "href": "authorization_roles.html",
+          "roles": []
+        },
+        {
+          "title": "Controle de Lavagens",
+          "nomeMenu": "Controle de Lavagens",
+          "href": "manutencao_controlelavagem.html",
+          "roles": []
+        },
+        {
+          "title": "Gr&aacute;ficos Gerenciais",
+          "nomeMenu": "Manutenção - Gráficos Gerenciais",
+          "roles": [],
+          "items": [
+            {
+              "title": "Estat&iacute;sticas de Lavagens",
+              "nomeMenu": "Estatísticas de Lavagens",
+              "href": "manutencao_pbilavagem.html",
+              "roles": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Gest&atilde;o de Abastecimento",
+      "nomeMenu": "Gestão de Abastecimento",
+      "icon": "fa-regular fa-gas-pump",
+      "roles": [],
+      "items": [
+        {
+          "title": "Abastecimentos",
+          "nomeMenu": "Abastecimentos",
+          "href": "abastecimento_index.html",
+          "roles": []
+        },
+        {
+          "title": "Importa&ccedil;&atilde;o de Dados",
+          "nomeMenu": "Importação de Dados",
+          "href": "abastecimento_importacao.html",
+          "roles": []
+        },
+        {
+          "title": "Registro de Cupons",
+          "nomeMenu": "Registro de Cupons",
+          "href": "abastecimento_registracupons.html",
+          "roles": []
+        },
+        {
+          "title": "Graficos Gerenciais - Abastecimento",
+          "nomeMenu": "Gráficos Gerenciais - Abastecimento",
+          "href": "abastecimento_pbi.html",
+          "roles": []
+        }
+      ]
+    },
+    {
+      "title": "Gest&atilde;o de Contratos",
+      "nomeMenu": "Gestão de Contratos",
+      "icon": "fa-regular fa-folders",
+      "roles": [],
+      "items": [
+        {
+          "title": "Rela&ccedil;&atilde;o de Contratos",
+          "nomeMenu": "Relação de Contratos",
+          "href": "contrato_index.html",
+          "roles": []
+        },
+        {
+          "title": "Atas de Registro de Pre&ccedil;os",
+          "nomeMenu": "Atas de Registro de Preços",
+          "href": "ataregistroprecos_index.html",
+          "roles": []
+        },
+        {
+          "title": "Repactua&ccedil;&atilde;o de Contratos",
+          "nomeMenu": "Repactuação de Contratos",
+          "href": "contrato_RepactuacaoContrato.html",
+          "roles": []
+        },
+        {
+          "title": "Notas Fiscais e Empenhos",
+          "nomeMenu": "Notas Fiscais e Empenhos",
+          "roles": [],
+          "items": [
+            {
+              "title": "Cadastro de Empenhos",
+              "nomeMenu": "Cadastro de Empenhos",
+              "href": "empenho_index.html",
+              "roles": []
+            },
+            {
+              "title": "Entrada de Notas Fiscais",
+              "nomeMenu": "Entrada de Notas Fiscais",
+              "href": "notafiscal_index.html",
+              "roles": []
+            }
+          ]
+        },
+        {
+          "title": "Itens dos Contratos",
+          "nomeMenu": "Itens dos Contratos",
+          "href": "contrato_itenscontrato.html",
+          "roles": []
+        },
+        {
+          "title": "Cadastro de Fornecedores",
+          "nomeMenu": "Cadastro de Fornecedores",
+          "href": "fornecedor_index.html",
+          "roles": []
+        }
+      ]
+    },
+    {
+      "title": "Gest&atilde;o de Multas",
+      "nomeMenu": "Gestão de Multas",
+      "icon": "fa-regular fa-pen-to-square",
+      "roles": [],
+      "items": [
+        {
+          "title": "Nova Autua&ccedil;&atilde;o",
+          "nomeMenu": "Nova Autuação",
+          "href": "multa_upsertautuacao.html",
+          "roles": []
+        },
+        {
+          "title": "Gest&atilde;o de Autua&ccedil;&atilde;o",
+          "nomeMenu": "Gestão de Autuações",
+          "href": "multa_listaautuacao.html",
+          "roles": []
+        },
+        {
+          "title": "Gest&atilde;o de Penalidades",
+          "nomeMenu": "Gestão de Penalidades",
+          "href": "multa_listapenalidade.html",
+          "roles": []
+        },
+        {
+          "title": "&Oacute;rg&atilde;os Autuantes",
+          "nomeMenu": "Órgãos Autuantes",
+          "href": "multa_listaorgaosautuantes.html",
+          "roles": []
+        },
+        {
+          "title": "Empenhos",
+          "nomeMenu": "Empenhos",
+          "href": "multa_listaempenhosmulta.html",
+          "roles": []
+        },
+        {
+          "title": "Infra&ccedil;&otilde;es de Tr&acirc;nsito",
+          "nomeMenu": "Infrações de Trânsito",
+          "href": "multa_listatiposmulta.html",
+          "roles": []
+        }
+      ]
+    },
+    {
+      "title": "Gest&atilde;o de Cadastros",
+      "nomeMenu": "Gestão de Cadastros",
+      "icon": "fal fa-map-marker-alt",
+      "roles": [],
+      "items": [
+        {
+          "title": "Motoristas",
+          "nomeMenu": "Motoristas",
+          "roles": [],
+          "items": [
+            {
+              "title": "Cadastro de Motoristas",
+              "nomeMenu": "Cadastro de Motoristas",
+              "href": "motorista_index.html",
+              "roles": []
+            },
+            {
+              "title": "Lota&ccedil;&atilde;o de Motoristas",
+              "nomeMenu": "Lotação de Motoristas",
+              "href": "unidade_lotacaomotoristas.html;",
+              "roles": []
+            },
+            {
+              "title": "Visualiza Lota&ccedil;&otilde;es",
+              "nomeMenu": "Visualiza Lotações",
+              "href": "unidade_visualizalotacoes.html;",
+              "roles": []
+            },
+            {
+              "title": "Gr&aacute;ficos Gerenciais - Motoristas",
+              "nomeMenu": "Gráficos Gerenciais - Motoristas",
+              "href": "motorista_pbilotacaomotorista.html;",
+              "roles": []
+            }
+          ]
+        },
+        {
+          "title": "Cadastro de Operadores",
+          "nomeMenu": "Cadastro de Operadores",
+          "href": "operador_index.html",
+          "roles": []
+        },
+        {
+          "title": "Cadastro de Lavadores",
+          "nomeMenu": "Cadastro de Lavadores",
+          "href": "lavador_index.html",
+          "roles": []
+        },
+        {
+          "title": "Ve&iacute;culos",
+          "nomeMenu": "Veículos",
+          "icon": "fal fa-map-marker-alt",
+          "roles": [],
+          "items": [
+            {
+              "title": "Cadastro de Ve&iacute;culos",
+              "nomeMenu": "Cadastro de Veículos",
+              "href": "veiculo_index.html",
+              "roles": []
+            },
+            {
+              "title": "Tipos de Combustivel",
+              "nomeMenu": "Tipos de Combustível",
+              "href": "combustivel_index.html",
+              "roles": []
+            },
+            {
+              "title": "Cadastro de Marcas",
+              "nomeMenu": "Cadastro de Marcas",
+              "href": "marcaveiculo_index.html",
+              "roles": []
+            },
+            {
+              "title": "Cadastro de Modelos",
+              "nomeMenu": "Cadastro de Modelos",
+              "href": "modeloveiculo_index.html",
+              "roles": []
+            },
+            {
+              "title": "Cadastro de Unidades Usu&aacute;rias",
+              "nomeMenu": "Cadastro de Unidades Usuárias",
+              "href": "unidade_index.html;",
+              "roles": []
+            },
+            {
+              "title": "Cadastro de Placas de Bronze",
+              "nomeMenu": "Cadastro de Placas de Bronze",
+              "href": "placabronze_index.html;",
+              "roles": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "TaxiLeg",
+      "nomeMenu": "TaxiLeg",
+      "icon": "fal fa-taxi",
+      "roles": [],
+      "items": [
+        {
+          "title": "Importa&ccedil;&atilde;o de Viagens Realizadas",
+          "nomeMenu": "Importação de Viagens Realizadas",
+          "href": "taxileg_importacao.html",
+          "roles": []
+        },
+        {
+          "title": "Importa&ccedil;&atilde;o de Viagens Canceladas",
+          "nomeMenu": "Importação de Viagens Canceladas",
+          "href": "taxileg_canceladas.html",
+          "roles": []
+        },
+        {
+          "title": "Graficos Gerenciais - TaxiLeg",
+          "nomeMenu": "Gráficos Gerenciais - TaxiLeg",
+          "href": "taxileg_PBITaxiLeg",
+          "roles": []
+        }
+      ]
+    },
+    {
+      "title": "Administra&ccedil;&atilde;o",
+      "nomeMenu": "Administração",
+      "icon": "fal fa-user-shield",
+      "roles": [],
+      "items": [
+        {
+          "title": "Cadastro de Usu&aacute;rios",
+          "nomeMenu": "Cadastro de Usuários",
+          "href": "usuarios_registrar.html",
+          "roles": []
+        },
+        {
+          "title": "Gest&atilde;o de Usu&aacute;rios",
+          "nomeMenu": "Gestão de Usuários",
+          "href": "usuarios_index.html",
+          "roles": []
+        },
+        {
+          "title": "Insere Recursos",
+          "nomeMenu": "Insere Recursos",
+          "href": "usuarios_InsereRecursosUsuarios.html",
+          "roles": []
+        },
+        {
+          "title": "Gest&atilde;o de Recursos",
+          "nomeMenu": "Gestão de Recursos",
+          "href": "usuarios_recursos.html",
+          "roles": []
+        },
+        {
+          "title": "Atualiza Custo das Viagens",
+          "nomeMenu": "Atualiza Custo das Viagens",
+          "href": "administracao_CalculaCustoViagensTotal.html",
+          "roles": []
+        },
+        {
+          "title": "Ajusta Custo das Viagens",
+          "nomeMenu": "Ajusta Custo das Viagens",
+          "href": "administracao_AjustaCustosViagem.html",
+          "roles": []
+        }      ]
+    }
+  ]
+}

@@ -1,0 +1,1454 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+@model FrotiX.Pages.Viagens.TaxiLegModel
+@Html.AntiForgeryToken()
+
+@{
+    ViewData["Title"] = "Abastecimento";
+    ViewData["PageName"] = "abastecimento_pbi";
+    ViewData["Heading"] = "<i class='fa-duotone fa-chart-user'></i> Gráficos: <span class='fw-300'>Abastecimento</span>";
+    ViewData["Category1"] = "Gráficos";
+    ViewData["PageIcon"] = "fa-duotone fa-chart-user";
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 10px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .btn-largura {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+
+@section HeadBlock {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    @* <link rel="stylesheet" href="~/css/microtip.css" /> *@
+
+}
+
+<script>
+    function stopEnterSubmitting(e) {
+        if (e.keyCode == 13) {
+            var src = e.srcElement || e.target;
+
+            console.log(src.tagName.toLowerCase());
+
+            if (src.tagName.toLowerCase() != "div") {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                } else {
+                    e.returnValue = false;
+                }
+            }
+        }
+    }
+</script>
+
+<form method="post" asp-action="FichasAntigas" onkeypress='stopEnterSubmitting(window.event)' enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
+                    <div id="divPainel" class="panel-content">
+
+                        <iframe title="Frotix Atualizado - Relatório por Veículo" width="100%" height="900" src="https://app.powerbi.com/view?r=eyJrIjoiNmVhZjNhYTktZGYwNy00NDdkLTk5NGEtNTc2NzU1OTUzMjEwIiwidCI6IjU2MjFkNjRmLTRjZjgtNDdmNS1iMzc5LTJiMmFiNzljMWM1ZiJ9" frameborder="0" allowFullScreen="true"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<!-- Modal Inserir Requisitante -->
+<div class="modal fade" id="modalRequisitante">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title" id="DynamicModalLabel">Inserir um novo Requisitante</h4>
+            </div>
+
+
+            <div class="modal-body table-bordered">
+                <!-- Dynamic Data is displayed in this part of the modal body -->
+                <!-- Modal body id = "modal_body" (note underscore) -->
+                <form id="frmRequisitante">
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Ponto</label>
+                                <input id="txtPonto" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Nome do Requisitante</label>
+                                <input id="txtNome" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Ramal</label>
+                                <input id="txtRamal" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Email</label>
+                                <input id="txtEmail" class="form-control form-control-xs" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="ControlRegion">
+                            <div class="form-control-xs" style="margin: 0 auto; width: 400px;">
+                                <label class="label font-weight-bold">Setor do Requisitante</label>
+                                <ejs-dropdowntree id="ddtSetorRequisitante" placeholder="Selecione um Setor" sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false" allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar...">
+                                    <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]" value="SetorSolicitanteId" text="Nome" parentValue="SetorPaiId" hasChildren="HasChild"></e-dropdowntree-fields>
+                                </ejs-dropdowntree>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnInserirRequisitante" class="btn btn-azul" type="submit" value="SUBMIT">Inserir Requisitante</button>
+                        <button type="button" class="btn btn-vinho" data-dismiss="modal">Fechar</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal footer -->
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Inserir Setor -->
+<div class="modal fade" id="modalSetor">
+    <div class="modal-dialog modal-lg" role="document">
+
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header modal-header-azul">
+                <h4 class="modal-title" id="DynamicModalLabel">Inserir um novo Setor Solicitante</h4>
+            </div>
+
+
+            <div class="modal-body table-bordered">
+                <!-- Dynamic Data is displayed in this part of the modal body -->
+                <!-- Modal body id = "modal_body" (note underscore) -->
+                <form id="frmSetor">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Sigla</label>
+                                <input id="txtSigla" class="form-control form-control-xs" placeholder="Insira a sigla" />
+                            </div>
+                        </div>
+                        <div class="col-7">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Nome do Setor</label>
+                                <input id="txtNomeSetor" class="form-control form-control-xs" placeholder="Insira o nome do setor" />
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Ramal</label>
+                                <input id="txtRamalSetor" class="form-control form-control-xs" placeholder="Insira o ramal" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div id="ControlRegion">
+                            <div class="form-control-xs" style="margin: 0 auto; width: 400px;">
+                                <label class="label font-weight-bold">Setor Pai (se houver)</label>
+                                <ejs-dropdowntree id="ddtSetorPai" placeholder="Selecione um Setor" sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false" allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar...">
+                                    <e-dropdowntree-fields dataSource="@ViewData["dataSetor"]" value="SetorSolicitanteId" text="Nome" parentValue="SetorPaiId" hasChildren="HasChild"></e-dropdowntree-fields>
+                                </ejs-dropdowntree>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnInserirSetor" class="btn btn-azul" type="submit" value="SUBMIT">Inserir Setor</button>
+                        <button type="button" class="btn btn-vinho" data-dismiss="modal">Fechar</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal footer -->
+        </div>
+    </div>
+</div>
+
+
+
+@section ScriptsBlock
+{
+
+    <script type="text/javascript">
+
+
+        window.onload = function () {
+            if ('@Model.ViagemObj.Viagem.CombustivelInicial' != null) {
+                var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                ddtCombustivelInicial.value = '@Model.ViagemObj.Viagem.CombustivelInicial';
+            }
+
+            if ('@Model.ViagemObj.Viagem.ViagemId' === '00000000-0000-0000-0000-000000000000')
+            {
+                document.getElementById("txtDataInicial").value = moment(Date()).format("YYYY-MM-DD");
+                //document.getElementById("txtHoraInicial").value = moment(Date()).format("HH:mm");
+            }
+
+        }
+
+
+        //Controla o Submit do formulário através de botões escondidos (permite a validação via javascript)
+        //=================================================================================================
+        $("#btnSubmit").click(function (event) {
+
+            event.preventDefault()
+
+
+            if (document.getElementById("txtNoFichaVistoria").value === "") {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O número da Ficha de Vistoria é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            if (document.getElementById("txtDataInicial").value === "") {
+                swal({
+                    title: "Informação Ausente",
+                    text: "A Data Inicial é obrigatória",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            if (document.getElementById("txtHoraInicial").value === "") {
+                swal({
+                    title: "Informação Ausente",
+                    text: "A Hora Inicial é obrigatória",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            var lstFinalidade = document.getElementById("lstFinalidade").ej2_instances[0];
+            if (lstFinalidade.value === null) {
+                swal({
+                    title: "Informação Ausente",
+                    text: "A Finalidade é obrigatória",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            if (document.getElementById("txtOrigem").value === "") {
+                swal({
+                    title: "Informação Ausente",
+                    text: "A Origem é obrigatória",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            var lstMotorista = document.getElementById("lstMotorista").ej2_instances[0];
+            if (lstMotorista.value === null) {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O Motorista é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            var lstVeiculo = document.getElementById("lstVeiculo").ej2_instances[0];
+            if (lstVeiculo.value === null) {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O Veículo é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            if (document.getElementById("txtKmInicial").value === "") {
+                swal({
+                    title: "Informação Ausente",
+                    text: "A Quilometragem Inicial é obrigatória",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+
+            console.log(ddtCombustivelInicial.value);
+
+            if (ddtCombustivelInicial.value != "tanquevazio" && ddtCombustivelInicial.value != "tanqueumquarto" && ddtCombustivelInicial.value != "tanquemeiotanque" && ddtCombustivelInicial.value != "tanquetresquartos" && ddtCombustivelInicial.value != "tanquecheio") {
+                console.log("Compustível Inicial: " + ddtCombustivelInicial.value);
+            }
+
+            if (ddtCombustivelInicial.value === null) {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O Nível de Combustível Inicial é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            var ddtRequisitante = document.getElementById("ddtRequisitante").ej2_instances[0];
+            if (ddtRequisitante.value === null) {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O Requisitante é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            if (document.getElementById("txtRamalRequisitante").value === "") {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O Ramal do Requisitante é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            var ddtSetor = document.getElementById("ddtSetor").ej2_instances[0];
+            if (ddtSetor.value === null) {
+                swal({
+                    title: "Informação Ausente",
+                    text: "O Setor Solicitante é obrigatório",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+                return;
+            }
+
+            $("#btnEscondido").click();
+
+        });
+
+
+
+        $(document).ready(function () {
+
+            if ('@Model.ViagemObj.Viagem.ViagemId' === '00000000-0000-0000-0000-000000000000')
+            {
+                document.getElementById("txtDataInicial").value = moment(Date()).format("YYYY-MM-DD");
+                document.getElementById("txtHoraInicial").value = moment(Date()).format("HH:mm");
+                document.getElementById("divFicha").style.display = 'none';
+
+            }
+
+            //Bloqueia controles caso a viagem já tenha sido realizada ou cancelada
+            if ('@Model.ViagemObj.Viagem.Status' === 'Realizada' || '@Model.ViagemObj.Viagem.Status' === 'Cancelada') {
+
+                var childNodes = document.getElementById("divPainel").getElementsByTagName('*');
+                for (var node of childNodes) {
+                    node.disabled = true;
+                }
+
+                var rte = document.getElementById("rte").ej2_instances[0];
+                rte.enabled = false; // To disable
+                var lstMotorista = document.getElementById("lstMotorista").ej2_instances[0];
+                lstMotorista.enabled = false; // To disable
+                var lstVeiculo = document.getElementById("lstVeiculo").ej2_instances[0];
+                lstVeiculo.enabled = false; // To disable
+                var ddtRequisitante = document.getElementById("ddtRequisitante").ej2_instances[0];
+                ddtRequisitante.enabled = false; // To disable
+                var ddtSetor = document.getElementById("ddtSetor").ej2_instances[0];
+                ddtSetor.enabled = false; // To disable
+                var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                ddtCombustivelInicial.enabled = false; // To disable
+                var ddtCombustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0];
+                ddtCombustivelFinal.enabled = false; // To disable
+                var lstFinalidade = document.getElementById("lstFinalidade").ej2_instances[0];
+                lstFinalidade.enabled = false; // To disable
+
+                document.getElementById("divSubmit").style.display = 'none';
+                $("#btnSubmit").hide();
+
+            }
+
+
+            //Atualiza Controles SYNCFUSION da Página
+            if ('@Model.ViagemObj.Viagem.CombustivelInicial' != null) {
+
+                var ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+                ddtCombustivelInicial.value = ['@Model.ViagemObj.Viagem.CombustivelInicial'];
+
+            }
+
+            if ('@Model.ViagemObj.Viagem.CombustivelFinal' != null) {
+
+                var ddtCombustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0];
+                ddtCombustivelFinal.value = ['@Model.ViagemObj.Viagem.CombustivelFinal'];
+
+            }
+
+        });
+
+    </script>
+
+
+    <script type="text/javascript">
+
+
+        $("#txtNoFichaVistoria").focusout(function () {
+
+            if (document.getElementById("txtNoFichaVistoria").value === '') {
+                return;
+            }
+
+            var noFichaVistoria = document.getElementById("txtNoFichaVistoria").value;
+
+
+            ////Verifica se Número da Ficha está muito diferente do último inserido
+            //$.ajax({
+            //    url: "/Viagens/Upsert?handler=VerificaFicha",
+            //    method: "GET",
+            //    datatype: "json",
+            //    data: { id: document.getElementById("txtNoFichaVistoria").value },
+            //    success: function (res) {
+
+            //        var maxFichaVistoria = [res.data];
+
+            //        console.log("NoFichaVistoria: " + noFichaVistoria);
+            //        console.log("MAxFichaVistoria: " + maxFichaVistoria);
+
+            //        if ((noFichaVistoria > (parseInt(maxFichaVistoria) + 100))) {
+            //            swal({
+            //                title: "Alerta na Ficha de Vistoria",
+            //                text: "O número inserido difere em +100 da última Ficha inserida!",
+            //                icon: "warning",
+            //                buttons: true,
+            //                
+            //                buttons: {
+            //                    ok: "Ok"
+            //                }
+            //            })
+
+            //            return;
+            //        }
+
+            //        if ((noFichaVistoria < (parseInt(maxFichaVistoria) - 100))) {
+            //            swal({
+            //                title: "Alerta na Ficha de Vistoria",
+            //                text: "O número inserido difere em -100 da última Ficha inserida!",
+            //                icon: "warning",
+            //                buttons: true,
+            //                
+            //                buttons: {
+            //                    ok: "Ok"
+            //                }
+            //            })
+
+            //            return;
+            //        }
+
+            //        //debugger;
+            //    }
+            //})
+
+
+            //Verifica se Número da Ficha já foi cadastrado
+            $.ajax({
+                url: "/Viagens/Upsert?handler=FichaExistente",
+                method: "GET",
+                datatype: "json",
+                data: { id: document.getElementById("txtNoFichaVistoria").value },
+                success: function (res) {
+
+                    var ExisteFicha = [res.data];
+
+                    console.log("Data: " + [res.data]);
+                    console.log("ExisteFicha: " + ExisteFicha);
+
+                    //debugger;
+
+                    if (ExisteFicha[0] === true) {
+                        swal({
+                            title: "Alerta na Ficha de Vistoria",
+                            text: "Já existe uma Ficha inserida com esta numeração!",
+                            icon: "warning",
+                            buttons: true,
+                            
+                            buttons: {
+                                ok: "Ok"
+                            }
+                        })
+
+                        return;
+                    }
+
+                    //debugger;
+                }
+            })
+
+
+        });
+
+
+        //Verifica se Data Final é menor que Data Inicial
+        $("#txtDataFinal").focusout(function () {
+
+            DataInicial = $("#txtDataInicial").val();
+            DataFinal = $("#txtDataFinal").val();
+
+            if (DataFinal === '') {
+                return;
+            }
+
+            if ((DataFinal < DataInicial)) {
+                $("#txtDataFinal").val('');
+                swal({
+                    title: "Erro na Data",
+                    text: "A data final deve ser maior que a inicial!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+        });
+
+        //Verifica se Data Inicial é maior que Data Final
+        $("#txtDataInicial").focusout(function () {
+
+            DataInicial = $("#txtDataInicial").val();
+            DataFinal = $("#txtDataFinal").val();
+
+            if (DataInicial === '' || DataFinal === '') {
+                return;
+            }
+
+            if ((DataInicial > DataFinal)) {
+                $("#txtDataInicial").val('');
+                swal({
+                    title: "Erro na Data",
+                    text: "A data inicial deve ser menor que a final!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+        });
+
+        //Verifica se Hora Final é menor que Hora Inicial e se tem Data Final
+        $("#txtHoraFinal").focusout(function () {
+
+            HoraInicial = $("#txtHoraInicial").val();
+            HoraFinal = $("#txtHoraFinal").val();
+            DataInicial = $("#txtDataInicial").val();
+            DataFinal = $("#txtDataFinal").val();
+
+            console.log(HoraInicial);
+            console.log(HoraFinal);
+            console.log(DataFinal);
+
+            if (DataFinal === '') {
+                $("#txtHoraFinal").val('');
+                swal({
+                    title: "Erro na Hora Final",
+                    text: "Preencha a Data Final para poder preencher a Hora Final!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+            }
+
+            if ((HoraFinal < HoraInicial) && (DataInicial === DataFinal)) {
+                $("#txtHoraFinal").val('');
+                swal({
+                    title: "Erro na Hora",
+                    text: "A hora final deve ser maior que a inicial!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+        });
+
+        //Verifica se Hora inicial é maior que Hora final
+        $("#txtHoraInicial").focusout(function () {
+
+            HoraInicial = $("#txtHoraInicial").val();
+            HoraFinal = $("#txtHoraFinal").val();
+
+            console.log(HoraInicial);
+            console.log(HoraFinal);
+
+            if (HoraFinal === '') {
+                return;
+            }
+
+            if (HoraInicial > HoraFinal) {
+                $("#txtHoraInicial").val('');
+                swal({
+                    title: "Erro na Hora",
+                    text: "A hora inicial deve ser menor que a final!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+        });
+
+
+        //Verifica se KM Final é menor que KM Inicial
+        $("#txtKmFinal").focusout(function () {
+
+            kmInicial = parseInt($("#txtKmInicial").val());
+            kmFinal = parseInt($("#txtKmFinal").val());
+
+            if (kmFinal < kmInicial) {
+                $("#txtKmFinal").val('');
+                swal({
+                    title: "Erro na Quilometragem",
+                    text: "A quilometragem final deve ser maior que a inicial!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+
+
+            if ((kmFinal - kmInicial) > 100) {
+                swal({
+                    title: "Alerta na Quilometragem",
+                    text: "A quilometragem final excede em 100km a inicial!",
+                    icon: "warning",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+
+
+
+        });
+
+
+        //Verifica se KM Inicial é maior que KM Inicial
+        $("#txtKmInicial").focusout(function () {
+
+            kmInicial = parseInt($("#txtKmInicial").val());
+            kmFinal = parseInt($("#txtKmFinal").val());
+
+            if (kmInicial > kmFinal) {
+                $("#txtKmInicial").val('');
+                swal({
+                    title: "Erro na Quilometragem",
+                    text: "A quilometragem inicial deve ser menor que a final!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        ok: "Ok"
+                    }
+                })
+
+            }
+        });
+
+        //Verifica se KM Inicial é menor ou diferente de KM Atual
+        //$("#txtKmInicial").focusout(function () {
+
+        //    if ($("#txtKmInicial").val() === '' || $("#txtKmInicial").val() === null) {
+        //        return;
+        //    }
+
+        //    kmInicial = parseInt($("#txtKmInicial").val());
+        //    kmAtual = parseInt($("#txtKmAtual").val());
+
+        //    console.log(kmInicial);
+
+        //    if (kmInicial < kmAtual) {
+        //        $("#txtKmInicial").val('');
+        //        swal({
+        //            title: "Erro na Quilometragem",
+        //            text: "A quilometragem inicial deve ser maior que a atual!",
+        //            icon: "error",
+        //            buttons: true,
+        //            
+        //            buttons: {
+        //                ok: "Ok"
+        //            }
+        //        })
+        //        return;
+        //    }
+
+        //    if (kmInicial != kmAtual) {
+        //        //$("#txtKmInicial").val('');
+        //        swal({
+        //            title: "Erro na Quilometragem",
+        //            text: "A quilometragem inicial não confere com a atual!",
+        //            icon: "warning",
+        //            buttons: true,
+        //            
+        //            buttons: {
+        //                ok: "Ok"
+        //            }
+        //        })
+        //        return;
+        //    }
+
+        //});
+
+
+        function toolbarClick(e) {
+            if (e.item.id == "rte_toolbar_Image") {
+                var element = document.getElementById('rte_upload')
+                element.ej2_instances[0].uploading = function upload(args) {
+                    args.currentRequest.setRequestHeader('XSRF-TOKEN', document.getElementsByName('__RequestVerificationToken')[0].value);
+                }
+            }
+        }
+
+        $(document).ready(function () {
+
+
+            document.getElementById("ddtSetor").ej2_instances[0].value = ["@Model.ViagemObj.Viagem.SetorSolicitanteId"];
+            document.getElementById("ddtRequisitante").ej2_instances[0].value = ["@Model.ViagemObj.Viagem.RequisitanteId"];
+
+            //Configura a Exibição do Modal de Requisitantes
+            //==============================================
+            $("#modalRequisitante").modal({
+                keyboard: true,
+                backdrop: "static",
+                show: false,
+
+            }).on("show.bs.modal", function (event) {
+
+
+            }).on("hide.bs.modal", function (event) {
+                var setores = document.getElementById('ddtSetorRequisitante').ej2_instances[0];
+                setores.value = "";
+                $("#txtPonto").val('');
+                $("#txtNome").val('');
+                $("#txtRamal").val('');
+                $("#txtEmail").val('');
+            });
+
+            //Configura a Exibição do Modal de Setores
+            //========================================
+            $("#modalSetor").modal({
+                keyboard: true,
+                backdrop: "static",
+                show: false,
+
+            }).on("show.bs.modal", function (event) {
+
+
+            }).on("hide.bs.modal", function (event) {
+                var setores = document.getElementById('ddtSetorPai').ej2_instances[0];
+                setores.value = "";
+                $("#txtSigla").val('');
+                $("#txtNomeSetor").val('');
+                $("#txtRamalSetor").val('');
+            });
+
+        });
+
+    </script>
+
+    <script type="text/javascript">
+
+
+        //Preenche Lista de Requisitantes Após Inserção de um novo
+        function PreencheListaRequisitantes() {
+
+            $.ajax({
+                url: "/Viagens/Upsert?handler=AJAXPreencheListaRequisitantes",
+                method: "GET",
+                datatype: "json",
+                success: function (res) {
+
+                    var requisitanteid = res.data[0].requisitanteId;
+                    var nomerequisitante = res.data[0].requisitante;
+
+                    let RequisitanteList = [{ "RequisitanteId": requisitanteid, "Requisitante": nomerequisitante }];
+
+                    for (var i = 1; i < res.data.length; ++i) {
+                        console.log(res.data[i].requisitanteId + res.data[i].requisitante);
+
+                        requisitanteid = res.data[i].requisitanteId;
+                        nomerequisitante = res.data[i].requisitante;
+
+                        let requisitante = { RequisitanteId: requisitanteid, Requisitante: nomerequisitante }
+                        RequisitanteList.push(requisitante);
+
+                    }
+
+                    console.log(RequisitanteList);
+
+                    document.getElementById("ddtRequisitante").ej2_instances[0].fields.dataSource = RequisitanteList;
+
+                }
+            })
+
+            document.getElementById("ddtRequisitante").ej2_instances[0].refresh();
+        }
+
+        //Preenche Lista de Setores Após Inserção de um novo
+        function PreencheListaSetores() {
+
+            $.ajax({
+                url: "/Viagens/Upsert?handler=AJAXPreencheListaSetores",
+                method: "GET",
+                datatype: "json",
+                success: function (res) {
+
+
+                    var setorSolicitanteId = res.data[0].setorSolicitanteId;
+                    var setorPaiId = res.data[0].setorPaiId;
+                    var nome = res.data[0].nome;
+                    var hasChild = res.data[0].hasChild;
+
+                    let SetorList = [{ "SetorSolicitanteId": setorSolicitanteId, "SetorPaiId": setorPaiId, "Nome": nome, "HasChild": hasChild }];
+
+                    for (var i = 1; i < res.data.length; ++i) {
+                        console.log(res.data[i].requisitanteId + res.data[i].requisitante);
+
+                        setorSolicitanteId = res.data[i].setorSolicitanteId;
+                        setorPaiId = res.data[i].setorPaiId;
+                        nome = res.data[i].nome;
+                        hasChild = res.data[i].hasChild;
+
+                        let setor = { "SetorSolicitanteId": setorSolicitanteId, "SetorPaiId": setorPaiId, "Nome": nome, "HasChild": hasChild }
+                        SetorList.push(setor);
+                    }
+
+                    console.log(SetorList);
+
+                    document.getElementById("ddtSetor").ej2_instances[0].fields.dataSource = SetorList;
+
+                }
+            })
+
+            document.getElementById("ddtSetor").ej2_instances[0].refresh();
+        }
+
+        //Escolheu um Requisitante
+        function RequisitanteValueChange() {
+
+            var ddTreeObj = document.getElementById("ddtRequisitante").ej2_instances[0];
+
+            if (ddTreeObj.value === null) {
+                return;
+            }
+
+            var requisitanteid = String(ddTreeObj.value);
+
+            //Pega Setor Padrío do Requisitante
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaSetor",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteid },
+                success: function (res) {
+                    document.getElementById("ddtSetor").ej2_instances[0].value = [res.data];
+                }
+            })
+
+            //Pega Ramal do Requisitante
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaRamal",
+                method: "GET",
+                datatype: "json",
+                data: { id: requisitanteid },
+                success: function (res) {
+                    var ramal = res.data;
+                    var s = document.getElementById("txtRamalRequisitante");
+                    s.value = ramal;
+                }
+            })
+        }
+
+        //Escolheu um Motorista
+        function MotoristaValueChange() {
+
+            var ddTreeObj = document.getElementById("lstMotorista").ej2_instances[0];
+
+            console.log("Objeto Requisitante: " + ddTreeObj);
+
+            if (ddTreeObj.value === null) {
+                return;
+            }
+
+            var motoristaid = String(ddTreeObj.value);
+
+            //Verifica se Motorista está em alguma viagem
+            $.ajax({
+                url: "/Viagens/Upsert?handler=VerificaMotoristaViagem",
+                method: "GET",
+                datatype: "json",
+                data: { id: motoristaid },
+                success: function (res) {
+
+                    var viajando = res.data;
+
+                    console.log(viajando);
+
+                    if (viajando) {
+                        swal({
+                            title: "Motorista em Viagem",
+                            text: "Este motorista encontra-se em uma viagem não terminada!",
+                            icon: "warning",
+                            buttons: true,
+                            
+                            buttons: {
+                                ok: "Ok"
+                            }
+                        })
+                    }
+                }
+            })
+        }
+
+        //Escolheu um Veículo
+        function VeiculoValueChange() {
+
+            var ddTreeObj = document.getElementById("lstVeiculo").ej2_instances[0];
+
+            console.log("Objeto Requisitante: " + ddTreeObj);
+
+            if (ddTreeObj.value === null) {
+                return;
+            }
+
+            var veiculoid = String(ddTreeObj.value);
+
+            //Verifica se o veículo está em alguma viagem
+            $.ajax({
+                url: "/Viagens/Upsert?handler=VerificaVeiculoViagem",
+                method: "GET",
+                datatype: "json",
+                data: { id: veiculoid },
+                success: function (res) {
+                    var viajando = res.data;
+                    console.log(viajando);
+                    if (viajando) {
+                        swal({
+                            title: "Veículo em Viagem",
+                            text: "Este veículo encontra-se em uma viagem não terminada!",
+                            icon: "warning",
+                            buttons: true,
+                            
+                            buttons: {
+                                ok: "Ok"
+                            }
+                        })
+                    }
+                }
+            })
+
+            //Pega Km Atual do Veículo
+            $.ajax({
+                url: "/Viagens/Upsert?handler=PegaKmAtualVeiculo",
+                method: "GET",
+                datatype: "json",
+                data: { id: veiculoid },
+                success: function (res) {
+                    var km = res.data;
+                    var kmAtual = document.getElementById("txtKmAtual");
+                    kmAtual.value = km;
+                }
+            })
+
+        }
+
+        function valueChange() {
+            //    var ddTreeObj = document.getElementById("ddtree").ej2_instances[0];
+            //    console.info(ddTreeObj.value + " - " + ddTreeObj.text);
+        }
+
+        function select(args) {
+            //    var ddTreeObj = document.getElementById("ddtree").ej2_instances[0];
+            //    console.info(ddTreeObj.value + " - " + ddTreeObj.text);
+        }
+
+        function ddtCombustivelChange() {
+
+            //var ddtCombustivel = document.getElementById("ddtCombustivel").ej2_instances[0];
+            //console.log(ddtCombustivel.value);
+
+        }
+
+    </script>
+
+    <script>
+
+        // Botão InserirRequisitante do Modal
+        //===================================
+        $("#btnInserirRequisitante").click(function (e) {
+
+            e.preventDefault();
+
+            if ($("#txtPonto").val() === "") {
+                swal({
+                    title: 'Atenção',
+                    text: "O Ponto do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        close: "Fechar",
+                    }
+                });
+                return
+            };
+
+            if ($("#txtNome").val() === "") {
+                swal({
+                    title: 'Atenção',
+                    text: "O Nome do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        close: "Fechar",
+                    }
+                });
+                return
+            };
+
+            if ($("#txtRamal").val() === "") {
+                swal({
+                    title: 'Atenção',
+                    text: "O Ramal do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        close: "Fechar",
+                    }
+                });
+                return
+            };
+
+            var setores = document.getElementById('ddtSetorRequisitante').ej2_instances[0];
+            if ((setores.value === null)) {
+                swal({
+                    title: 'Atenção',
+                    text: "O Setor do Requisitante é obrigatório!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        close: "Fechar",
+                    }
+                });
+                return
+            };
+
+            var setorSolicitanteId = setores.value.toString();
+
+            var objRequisitante = JSON.stringify({ "Nome": $('#txtNome').val(), "Ponto": $('#txtPonto').val(), "Ramal": $('#txtRamal').val(), "Email": $('#txtEmail').val(), "SetorSolicitanteId": setorSolicitanteId })
+
+            $.ajax({
+                type: "post",
+                url: "/api/Viagem/AdicionarRequisitante",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: objRequisitante,
+
+                success: function (data) {
+                    AppToast.show('Verde', data.message);
+                    PreencheListaRequisitantes();
+                    $("#modalRequisitante").hide();
+
+                },
+                error: function (data) {
+                    alert('error');
+                    console.log(data);
+                }
+            });
+        });
+
+
+        // Botão InserirSetor do Modal
+        //============================
+        $("#btnInserirSetor").click(function (e) {
+
+            e.preventDefault();
+
+            if ($("#txtNomeSetor").val() === "") {
+                swal({
+                    title: 'Atenção',
+                    text: "O Nome do Setor é obrigatório!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        close: "Fechar",
+                    }
+                });
+                return
+            };
+
+            if ($("#txtRamalSetor").val() === "") {
+                swal({
+                    title: 'Atenção',
+                    text: "O Ramal do Seor é obrigatório!",
+                    icon: "error",
+                    buttons: true,
+                    
+                    buttons: {
+                        close: "Fechar",
+                    }
+                });
+                return
+            };
+
+            setorPaiId = null;
+
+            if (document.getElementById('ddtSetorPai').ej2_instances[0].value != '' && document.getElementById('ddtSetorPai').ej2_instances[0].value != null ) {
+                setorPaiId = document.getElementById('ddtSetorPai').ej2_instances[0].value.toString();
+            }
+
+            if ((setorPaiId === null)) {
+                var objSetor = JSON.stringify({ "Nome": $('#txtNomeSetor').val(), "Ramal": $('#txtRamalSetor').val(), "Sigla": $('#txtSigla').val() })
+            }
+            else {
+                var objSetor = JSON.stringify({ "Nome": $('#txtNomeSetor').val(), "Ramal": $('#txtRamalSetor').val(), "Sigla": $('#txtSigla').val(), "SetorPaiId": setorPaiId })
+            };
+
+            console.log(objSetor);
+
+            $.ajax({
+                type: "post",
+                url: "/api/Viagem/AdicionarSetor",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: objSetor,
+
+                success: function (data) {
+                    AppToast.show('Verde', data.message);
+                    PreencheListaSetores();
+                    $("#modalSetor").hide();
+                    //location.reload();
+
+                },
+                error: function (data) {
+                    alert('error');
+                    console.log(data);
+                }
+            });
+        });
+
+
+        ej.base.L10n.load({
+            "pt-BR": {
+                "richtexteditor": {
+                    "alignments": "Alinhamentos",
+                    "justifyLeft": "Alinhar à Esquerda",
+                    "justifyCenter": "Centralizar",
+                    "justifyRight": "Alinhar à Direita",
+                    "justifyFull": "Justificar",
+                    "fontName": "Nome da Fonte",
+                    "fontSize": "Tamanho da Fonte",
+                    "fontColor": "Cor da Fonte",
+                    "backgroundColor": "Cor de Fundo",
+                    "bold": "Negrito",
+                    "italic": "Itálico",
+                    "underline": "Sublinhado",
+                    "strikethrough": "Tachado",
+                    "clearFormat": "Limpa Formatação",
+                    "clearAll": "Limpa Tudo",
+                    "cut": "Cortar",
+                    "copy": "Copiar",
+                    "paste": "Colar",
+                    "unorderedList": "Lista com Marcadores",
+                    "orderedList": "Lista Numerada",
+                    "indent": "Aumentar Identação",
+                    "outdent": "Diminuir Identação",
+                    "undo": "Desfazer",
+                    "redo": "Refazer",
+                    "superscript": "Sobrescrito",
+                    "subscript": "Subscrito",
+                    "createLink": "Inserir Link",
+                    "openLink": "Abrir Link",
+                    "editLink": "Editar Link",
+                    "removeLink": "Remover Link",
+                    "image": "Inserir Imagem",
+                    "replace": "Substituir",
+                    "align": "Alinhar",
+                    "caption": "Título da Imagem",
+                    "remove": "Remover",
+                    "insertLink": "Inserir Link",
+                    "display": "Exibir",
+                    "altText": "Texto Alternativo",
+                    "dimension": "Mudar Tamanho",
+                    "fullscreen": "Maximizar",
+                    "maximize": "Maximizar",
+                    "minimize": "Minimizar",
+                    "lowerCase": "Caixa Baixa",
+                    "upperCase": "Caixa Alta",
+                    "print": "Imprimir",
+                    "formats": "Formatos",
+                    "sourcecode": "Visualizar Código",
+                    "preview": "Exibir",
+                    "viewside": "ViewSide",
+                    "insertCode": "Inserir Código",
+                    "linkText": "Exibir Texto",
+                    "linkTooltipLabel": "Título",
+                    "linkWebUrl": "Endereço Web",
+                    "linkTitle": "Entre com um título",
+                    "linkurl": "http://exemplo.com",
+                    "linkOpenInNewWindow": "Abrir Link em Nova Janela",
+                    "linkHeader": "Inserir Link",
+                    "dialogInsert": "Inserir",
+                    "dialogCancel": "Cancelar",
+                    "dialogUpdate": "Atualizar",
+                    "imageHeader": "Inserir Imagem",
+                    "imageLinkHeader": "Você pode proporcionar um link da web",
+                    "mdimageLink": "Favor proporcionar uma URL para sua imagem",
+                    "imageUploadMessage": "Solte a imagem aqui ou busque para o upload",
+                    "imageDeviceUploadMessage": "Clique aqui para o upload",
+                    "imageAlternateText": "Texto Alternativo",
+                    "alternateHeader": "Texto Alternativo",
+                    "browse": "Procurar",
+                    "imageUrl": "http://exemplo.com/imagem.png",
+                    "imageCaption": "Título",
+                    "imageSizeHeader": "Tamanho da Imagem",
+                    "imageHeight": "Altura",
+                    "imageWidth": "Largura",
+                    "textPlaceholder": "Entre com um Texto",
+                    "inserttablebtn": "Inserir Tabela",
+                    "tabledialogHeader": "Inserir Tabela",
+                    "tableWidth": "Largura",
+                    "cellpadding": "Espaçamento de célula",
+                    "cellspacing": "Espaçamento de célula",
+                    "columns": "Número de colunas",
+                    "rows": "Número de linhas",
+                    "tableRows": "Linhas da Tabela",
+                    "tableColumns": "Colunas da Tabela",
+                    "tableCellHorizontalAlign": "Alinhamento Horizontal da Célular",
+                    "tableCellVerticalAlign": "Alinhamento Vertical da Célular",
+                    "createTable": "Criar Tabela",
+                    "removeTable": "Remover Tabela",
+                    "tableHeader": "Cabeçalho da Tabela",
+                    "tableRemove": "Remover Tabela",
+                    "tableCellBackground": "Fundo da Célula",
+                    "tableEditProperties": "Editar Propriedades da Tabela",
+                    "styles": "Estilos",
+                    "insertColumnLeft": "Inserir Coluna à Esquerda",
+                    "insertColumnRight": "Inserir Coluna à Direita",
+                    "deleteColumn": "Apagar Coluna",
+                    "insertRowBefore": "Inserir Linha Antes",
+                    "insertRowAfter": "Inserir Linha Depois",
+                    "deleteRow": "Apagar Linha",
+                    "tableEditHeader": "Edita Tabela",
+                    "TableHeadingText": "Cabeçãlho",
+                    "TableColText": "Col",
+                    "imageInsertLinkHeader": "Inserir Link",
+                    "editImageHeader": "Edita Imagem",
+                    "alignmentsDropDownLeft": "Alinhar à Esquerda",
+                    "alignmentsDropDownCenter": "Centralizar",
+                    "alignmentsDropDownRight": "Alinhar à Direita",
+                    "alignmentsDropDownJustify": "Justificar",
+                    "imageDisplayDropDownInline": "Inline",
+                    "imageDisplayDropDownBreak": "Break",
+                    "tableInsertRowDropDownBefore": "Inserir linha antes",
+                    "tableInsertRowDropDownAfter": "Inserir linha depois",
+                    "tableInsertRowDropDownDelete": "Apagar linha",
+                    "tableInsertColumnDropDownLeft": "Inserir coluna à esquerda",
+                    "tableInsertColumnDropDownRight": "Inserir coluna à direita",
+                    "tableInsertColumnDropDownDelete": "Apagar Coluna",
+                    "tableVerticalAlignDropDownTop": "Alinhar no Topo",
+                    "tableVerticalAlignDropDownMiddle": "Alinhar no Meio",
+                    "tableVerticalAlignDropDownBottom": "Alinhar no Fundo",
+                    "tableStylesDropDownDashedBorder": "Bordas Pontilhadas",
+                    "tableStylesDropDownAlternateRows": "Linhas Alternadas",
+                    "pasteFormat": "Colar Formato",
+                    "pasteFormatContent": "Escolha a ação de formatação",
+                    "plainText": "Texto Simples",
+                    "cleanFormat": "Limpar",
+                    "keepFormat": "Manter",
+                    "formatsDropDownParagraph": "Parágrafo",
+                    "formatsDropDownCode": "Código",
+                    "formatsDropDownQuotation": "Citação",
+                    "formatsDropDownHeading1": "Cabeçalho 1",
+                    "formatsDropDownHeading2": "Cabeçalho 2",
+                    "formatsDropDownHeading3": "Cabeçalho 3",
+                    "formatsDropDownHeading4": "Cabeçalho 4",
+                    "fontNameSegoeUI": "SegoeUI",
+                    "fontNameArial": "Arial",
+                    "fontNameGeorgia": "Georgia",
+                    "fontNameImpact": "Impact",
+                    "fontNameTahoma": "Tahoma",
+                    "fontNameTimesNewRoman": "Times New Roman",
+                    "fontNameVerdana": "Verdana"
+                }
+            }
+        })
+
+
+        //Carrega a foto no controle e redimensiona o painel
+        //==================================================
+        $("#txtFile").change(function (event) {
+            var files = event.target.files;
+            $("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+            $("#painelfundo").css({
+                "padding-bottom:": "200px"
+            });
+        });
+
+
+        $(document).ready(function () {
+            if ('@Model.ViagemObj.Viagem.ViagemId' != '00000000-0000-0000-0000-000000000000') {
+                console.info("Foto do Editar");
+                console.info('@Model.ViagemObj.Viagem.FichaVistoria');
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Viagem/PegaFicha",
+                    success: function (data) {
+                        console.info(data);
+
+                        if (data.fichaVistoria != null) {
+                            $('#imgViewer').attr('src', "data:image/jpg;base64," + data.fichaVistoria + "");
+                        }
+                        else
+                        {
+                            $('#imgViewer').attr('src', "/Images/FichaAmarelaNova.jpg");
+                        }
+
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            } else {
+                console.info("Foto do Inserir");
+                var origin = window.location.origin
+                console.info(origin + "/Images/FichaAmarelaNova.jpg");
+                $('#imgViewer').attr('src', "/Images/FichaAmarelaNova.jpg");
+
+
+                let list = new DataTransfer();
+                let file = new File(["content"], origin + "/Images/FichaAmarelaNova.jpg");
+                list.items.add(file);
+                let myFileList = list.files;
+                document.querySelector('.image-url').files = myFileList;
+                //$('#txtFile').attr('value', origin + "/Images/barbudo.jpg");
+
+            }
+        });
+
+
+    </script>
+
+}

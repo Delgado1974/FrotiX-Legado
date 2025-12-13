@@ -1,0 +1,323 @@
+@page
+@model FrotiX.Pages.Motorista.UploadCNHModel
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+
+@{
+	ViewData["Title"] = "Motoristas (CNH)";
+	ViewData["PageName"] = "veiculo_index";
+	ViewData["Heading"] = "<i class='fad fa-id-card'></i> Cadastros: <span class='fw-300'>Motoristas (CNH)</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-id-card";
+
+	var asyncSettings = new Syncfusion.EJ2.Inputs.UploaderAsyncSettings
+	{
+		SaveUrl = $"/api/UploadCNH/Save?motoristaId={Model.MotoristaObj.Motorista.MotoristaId}" ,
+		RemoveUrl = $"/api/UploadCNH/Remove?motoristaId={Model.MotoristaObj.Motorista.MotoristaId}"
+	};
+}
+
+@section HeadBlock {
+	<link rel="stylesheet" href="~/css/site.css" />
+	<style>
+		.control_wrapper {
+			max-width: 480px;
+			margin: 0 auto;
+		}
+
+		.e-upload {
+			width: 100%;
+			position: relative;
+			margin-top: 16px;
+		}
+
+		.control_wrapper .e-upload .e-upload-drag-hover {
+			margin: 0;
+		}
+
+		#divpdf {
+			width: 100%;
+			height: 0;
+			visibility: hidden;
+			transition: height .3s ease, visibility .3s ease;
+		}
+
+		.panel-content .page-title {
+			border-bottom: 1px solid #325d88;
+			padding-bottom: .25rem;
+		}
+	</style>
+}
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<div class="panel-content">
+					<div class="col-12 px-3 page-title">
+						<h2 class="text-primary">
+							Upload da CNH Digitalizada - (@Model.MotoristaObj.Motorista.Nome)
+						</h2>
+					</div>
+
+					<div class="col-12 pt-3">
+						<div class="container">
+							<main role="main" class="pb-3">
+								<div id="ControlRegion" class="row">
+									<div class="col-lg-8">
+										<div class="control_wrapper">
+											<ejs-uploader id="UploadFiles"
+														  removing="onFileRemove"
+														  dropArea=".control-fluid"
+														  asyncSettings="asyncSettings"
+														  locale="pt-BR"
+														  allowedExtensions=".pdf"
+														  actionComplete="onActionComplete">
+											</ejs-uploader>
+										</div>
+									</div>
+
+									<div class="col-lg-4 property-section d-none">
+										<div id="property" title="Properties">
+											<div style="margin-left: 50px; padding-top:25px;">
+												<ejs-checkbox id="checkAutoUpload"
+															  label="Auto Upload"
+															  checked="true"
+															  change="onChange">
+												</ejs-checkbox>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<br />
+
+								<div id="divpdf">
+									<ejs-pdfviewer id="pdfviewer"
+												   style="height:600px"
+												   serviceUrl="/api/PdfViewerCNH"
+												   locale="pt-BR">
+									</ejs-pdfviewer>
+								</div>
+
+								<br />
+								<a href="/Motorista/Upsert?id=@Model.MotoristaObj.Motorista.MotoristaId"
+								   class="btn btn-vinho form-control float-right" style="width: 300px;" data-ejtip="Voltar para a edição do motorista">
+									<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar para o Motorista
+								</a>
+								<div class="clearfix"></div>
+							</main>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<ejs-scripts></ejs-scripts>
+
+	<script>
+		ej.base.L10n.load({
+			"pt-BR": {
+				"uploader": {
+					"invalidMinFileSize": "O tamanho do arquivo é muito pequeno! Somente são aceitos arquivos com mais de 10kb",
+					"invalidMaxFileSize": "O tamanho do arquivo excede 4 MB",
+					"invalidFileType": "Tipo de arquivo não permitido",
+					"Browse": "Procurar...",
+					"Clear": "Limpar",
+					"Upload": "Upload",
+					"dropFilesHint": "Ou solte os arquivos aqui",
+					"uploadFailedMessage": "Falha no upload",
+					"uploadSuccessMessage": "Upload bem sucedido",
+					"removedSuccessMessage": "Remoção bem sucedida",
+					"removedFailedMessage": "Não foi possível remover o arquivo",
+					"inProgress": "Enviando...",
+					"readyToUploadMessage": "Pronto para o upload",
+					"remove": "Remover",
+					"cancel": "Cancelar",
+					"delete": "Apagar o arquivo",
+					"abort": "Abortar",
+					"pauseUpload": "Upload pausado",
+					"pause": "Pausar",
+					"resume": "Continuar",
+					"retry": "Tentar novamente",
+					"fileUploadCancel": "Upload cancelado"
+				},
+				"PdfViewer": {
+					"PdfViewer": "Visualizador de PDFs",
+					"Cancel": "Cancelar",
+					"Download file": "Baixar arquivo",
+					"Download": "Baixar",
+					"Enter Password": "Entre com a senha.",
+					"File Corrupted": "Arquivo corrompido",
+					"File Corrupted Content": "Conteúdo de arquivo corrompido.",
+					"Fit Page": "Página",
+					"Fit Width": "Largura",
+					"Automatic": "Automático",
+					"Go To First Page": "Ir para a primeira página",
+					"Invalid Password": "Senha inválida",
+					"Next Page": "Próxima página",
+					"OK": "Ok",
+					"Open": "Abrir",
+					"Page Number": "Número da página",
+					"Previous Page": "Página anterior",
+					"Go To Last Page": "Ir para a última página",
+					"Zoom": "Zoom",
+					"Zoom In": "Aumentar zoom",
+					"Zoom Out": "Reduzir zoom",
+					"Page Thumbnails": "Miniaturas",
+					"Bookmarks": "Marcadores",
+					"Print": "Imprimir",
+					"Password Protected": "Protegido por senha",
+					"Copy": "Copiar",
+					"Text Selection": "Seleção de texto",
+					"Panning": "Habilitar deslocamento",
+					"Text Search": "Buscar texto",
+					"Find in document": "Procurar no documento",
+					"Match case": "Diferenciar maiúsc./minúsc.",
+					"Apply": "Aplicar",
+					"GoToPage": "Ir para a página",
+					"No matches": "Sem correspondências",
+					"No Text Found": "Texto não encontrado",
+					"Undo": "Desfazer",
+					"Redo": "Refazer",
+					"Annotation": "Anotação",
+					"Highlight": "Realçar",
+					"Underline": "Sublinhar",
+					"Strikethrough": "Tachar",
+					"Delete": "Apagar",
+					"Opacity": "Opacidade",
+					"Color edit": "Editar cor",
+					"Opacity edit": "Editar opacidade",
+					"Highlight context": "Realce",
+					"Underline context": "Sublinhado",
+					"Strikethrough context": "Tachado",
+					"Server error": "Erro no servidor",
+					"Open text": "Abrir",
+					"First text": "Primeira",
+					"Previous text": "Anterior",
+					"Next text": "Próxima",
+					"Last text": "Última",
+					"Zoom in text": "Aumentar zoom",
+					"Zoom out text": "Reduzir zoom",
+					"Selection text": "Seleção",
+					"Pan text": "Mover",
+					"Print text": "Imprimir",
+					"Search text": "Buscar",
+					"Annotation Edit text": "Editar anotação"
+				}
+			}
+		});
+
+		function onActionComplete(args) {
+			try {
+				if (!args || !args.fileData || !args.fileData.length) {
+					console.warn("onActionComplete sem arquivo.");
+					return;
+				}
+
+				console.info("Upload concluído:", args.fileData[0].name);
+
+				var div = document.getElementById("divpdf");
+				div.style.visibility = "visible";
+				div.style.height = "600px";
+
+				$.ajax({
+					url: '/api/PdfViewerCNH/GetDocument?id=@Model.MotoristaObj.Motorista.MotoristaId',
+					method: 'POST',
+					cache: false,
+					processData: false,
+					contentType: false
+				})
+				.done(function (result) {
+					try {
+						console.log("Documento carregado.");
+						var pdfViewer = document.getElementById('pdfviewer').ej2_instances[0];
+						pdfViewer.load(result, null);
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "onActionComplete.ajax.done", error);
+					}
+				})
+				.fail(function (msg) {
+					try {
+						console.error('Erro ao carregar PDF: ' + (msg && msg.responseText));
+						AppToast.show("Vermelho", "Erro ao carregar o PDF", 3000);
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "onActionComplete.ajax.fail", error);
+					}
+				});
+
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "onActionComplete", error);
+			}
+		}
+
+		function onFileRemove(args) {
+			try {
+				args.postRawFile = false;
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "onFileRemove", error);
+			}
+		}
+
+		function onChange(args) {
+			try {
+				var uploadObj = document.getElementById("UploadFiles");
+				if (!uploadObj || !uploadObj.ej2_instances) return;
+
+				uploadObj.ej2_instances[0].autoUpload = args.checked;
+				uploadObj.ej2_instances[0].clearAll();
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "onChange", error);
+			}
+		}
+
+		$(document).ready(function () {
+			try {
+				console.log("Página abriu");
+
+				var possuiCNH = @Model.CNHDigital;
+
+				if (possuiCNH === 1) {
+					var div = document.getElementById("divpdf");
+					div.style.visibility = "visible";
+					div.style.height = "600px";
+
+					$.ajax({
+						url: '/api/PdfViewerCNH/GetDocument?id=@Model.MotoristaObj.Motorista.MotoristaId',
+						method: 'POST',
+						cache: false,
+						processData: false,
+						contentType: false
+					})
+					.done(function (result) {
+						try {
+							console.log("Documento carregado (auto).");
+							var pdfViewer = document.getElementById('pdfviewer').ej2_instances[0];
+							pdfViewer.load(result, null);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "document.ready.ajax.done", error);
+						}
+					})
+					.fail(function (msg) {
+						try {
+							console.error('Erro ao carregar PDF: ' + (msg && msg.responseText));
+							AppToast.show("Vermelho", "Erro ao carregar o PDF existente", 3000);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "document.ready.ajax.fail", error);
+						}
+					});
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadCNH.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+}

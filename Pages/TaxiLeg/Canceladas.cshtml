@@ -1,0 +1,191 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@model FrotiX.Models.CorridasTaxiLeg
+@Html.AntiForgeryToken()
+
+@{
+	ViewData["Title"] = "Importa Registros TaxiLeg";
+	ViewData["PageName"] = "taxileg_canceladas";
+	ViewData["Heading"] = "<i class='fa-duotone fa-taxi'></i> Importação: <span class='fw-300'>Viagens Canceladas TaxiLeg</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-taxi";
+}
+
+@section HeadBlock {
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+
+	.label {
+		color: white;
+	}
+</style>
+
+<form>
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="panel-content">
+						<div class="row">
+							<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+								<h2 class="text-primary">Selecione a Planilha com as Viagens Canceladas do TaxiLeg para Importação</h2>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-12 pt-3">
+								<input type="file"
+									   id="fileupload"
+									   name="files"
+									   class="form-control-file"
+									   accept=".xls,.xlsx" />
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-6 pt-3">
+								<button type="button" id="btnupload" class="btn btn-azul text-white" data-ejtip="Enviar planilha para importação" aria-label="Enviar planilha para importação">
+									<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>&nbsp; Upload
+								</button>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-12 pt-2">
+								<div class="clearfix" id="divTaxiLeg">&nbsp;</div>
+								<div class="row">
+									<div id="divPrint"></div>
+								</div>
+							</div>
+						</div>
+					</div> <!-- /.panel-content -->
+				</div> <!-- /.panel-container -->
+			</div> <!-- /.panel -->
+		</div> <!-- /.col-xl-12 -->
+	</div> <!-- /.row -->
+</form>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+		$(function () {
+			try {
+				// Clique do botão de upload
+				$('#btnupload').on('click', function (e) {
+					try {
+						e.preventDefault();
+
+						const $input = $('#fileupload');
+						const filename = $input.val();
+						const allowed = ['xls', 'xlsx'];
+
+						if (!filename || filename.length === 0) {
+							AppToast.show("Amarelo", "Selecione um arquivo .xls ou .xlsx para continuar.", 2000);
+							return false;
+						}
+
+						const extension = filename.split('.').pop().toLowerCase();
+						if ($.inArray(extension, allowed) === -1) {
+							AppToast.show("Vermelho", "Formato inválido. Selecione apenas arquivos do Excel (.xls, .xlsx).", 2000);
+							return false;
+						}
+
+						const fileUpload = $input.get(0);
+						if (!fileUpload || !fileUpload.files || fileUpload.files.length === 0) {
+							AppToast.show("Vermelho", "Nenhum arquivo selecionado.", 2000);
+							return false;
+						}
+
+						const fdata = new FormData();
+						// Use uma chave fixa esperada pela API (não o nome do arquivo)
+						fdata.append('file', fileUpload.files[0]);
+
+						// Ativa o spinner de loading
+						$('#divTaxiLeg').LoadingScript('method_12', {
+							'background_image': 'img/loading7.png',
+							'main_width': 60,
+							'animation_speed': 10,
+							'additional_style': '',
+							'after_element': false
+						});
+
+						// Desabilita o botão enquanto processa
+						$('#btnupload').prop('disabled', true).addClass('disabled');
+
+						$.ajax({
+							type: "POST",
+							url: "api/TaxiLeg/ImportCanceladas",
+							beforeSend: function (xhr) {
+								try {
+									xhr.setRequestHeader(
+										"XSRF-TOKEN",
+										$('input:hidden[name="__RequestVerificationToken"]').val()
+									);
+								} catch (error) {
+									Alerta.TratamentoErroComLinha("Canceladas.cshtml", "btnupload.ajax.beforeSend", error);
+								}
+							},
+							data: fdata,
+							contentType: false,
+							processData: false,
+							success: function (data) {
+								try {
+									// Limpa a área de resultado antes de renderizar
+									$('#divPrint').empty();
+
+									if (data && data.success) {
+										AppToast.show("Verde", data.message || "Importação realizada com sucesso.", 2000);
+										// A API retorna um HTML com a tabela (id="tblImportacao")
+										$('#divPrint').html(data.response?.content || "");
+
+										// Inicializa DataTables apenas se a tabela existir
+										if ($('#tblImportacao').length) {
+											$('#tblImportacao').DataTable({
+												responsive: true,
+												language: {
+													url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+													emptyTable: "Sem Dados para Exibição"
+												}
+											});
+										}
+									} else {
+										AppToast.show("Vermelho", data?.message || "Falha ao processar o arquivo.", 2000);
+										$('#divTaxiLeg').append(
+											'<br/><br/><div><h4>' + (data?.message || 'Erro ao importar.') + '</h4></div>'
+										);
+									}
+								} catch (error) {
+									Alerta.TratamentoErroComLinha("Canceladas.cshtml", "btnupload.ajax.success", error);
+								} finally {
+									$('#divTaxiLeg').LoadingScript('destroy');
+									$('#btnupload').prop('disabled', false).removeClass('disabled');
+								}
+							},
+							error: function (err) {
+								try {
+									console.log(err);
+									AppToast.show("Vermelho", "Ocorreu um erro durante o upload. Tente novamente.", 2000);
+									$('#divTaxiLeg').LoadingScript('destroy');
+									$('#btnupload').prop('disabled', false).removeClass('disabled');
+								} catch (error) {
+									Alerta.TratamentoErroComLinha("Canceladas.cshtml", "btnupload.ajax.error", error);
+								}
+							}
+						});
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Canceladas.cshtml", "btnupload.click", error);
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Canceladas.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+}

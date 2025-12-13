@@ -1,0 +1,43 @@
+@page
+@model FrotiX.Pages.Usuarios.ReportModel
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>BoldReports - Relatório de Usuários</title>
+
+	<!-- BoldReports CSS -->
+	<link href="https://cdn.boldreports.com/embeddedreporting/commons/css/bold.reports.all.min.css" rel="stylesheet" />
+
+	<!-- BoldReports scripts -->
+	<script src="https://cdn.boldreports.com/embeddedreporting/commons/scripts/bold.reports.all.min.js"></script>
+	<script src="https://cdn.boldreports.com/embeddedreporting/commons/scripts/bold.report-viewer.min.js"></script>
+</head>
+<body>
+
+	<div id="report-viewer"></div>
+
+	<script>
+		(function() {
+			"use strict";
+
+			document.addEventListener("DOMContentLoaded", function () {
+				try {
+					BoldReportViewer.create({
+						element: document.getElementById("report-viewer"),
+						reportPath: "wwwroot/reports/Abastecimento.rdl",
+						reportServiceUrl: "/api/reportviewer/PostReportAction"
+					});
+				} catch (error) {
+					console.error("Erro ao inicializar BoldReportViewer:", error);
+				}
+			});
+		})();
+	</script>
+
+</body>
+</html>

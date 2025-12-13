@@ -1,0 +1,32 @@
+@* _AlertasSino.cshtml - Sistema de Alertas no Sino *@
+
+<!-- HTML do Sino de Alertas -->
+<div class="alertas-sino-container" id="alertasSinoContainer">
+	<button class="alertas-sino-btn" id="alertasSinoBtn" aria-label="Alertas">
+		<i class="fa-duotone fa-bell"></i>
+		<span class="alertas-badge" id="badgeAlertasSino" style="display: none;">0</span>
+	</button>
+
+	<div class="alertas-menu" id="alertasMenu">
+		<div class="alertas-menu-header">
+			<h6><i class="fa-duotone fa-bell me-2"></i>Alertas</h6>
+			<button class="btn-marcar-todos" id="btnMarcarTodosLidos" style="display: none;">
+				<i class="fa-duotone fa-check-double"></i> Marcar todos
+			</button>
+		</div>
+
+		<div class="alertas-menu-body" id="listaAlertasSino">
+			<div class="alertas-vazio">
+				<i class="fa-duotone fa-spinner fa-spin"></i>
+				<p>Carregando alertas...</p>
+			</div>
+		</div>
+
+		<div class="alertas-menu-footer">
+			<a href="/AlertasFrotiX/AlertasFrotiX">
+				<i class="fa-duotone fa-list me-1"></i>Ver todos os alertas
+			</a>
+		</div>
+	</div>
+</div>
+

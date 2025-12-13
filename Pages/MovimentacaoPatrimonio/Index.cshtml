@@ -1,0 +1,160 @@
+@page
+@using Syncfusion.EJ2
+@addTagHelper *, Syncfusion.EJ2
+@model FrotiX.Pages.MovimentacaoPatrimonio.IndexModel
+
+@{
+	ViewData["Title"] = "Movimentações";
+	ViewData["PageName"] = "movimentacaopatrimonio_index";
+	ViewData["Heading"] = "<i class='fa-duotone fa-solid fa-truck-fast'></i> Cadastros: <span class='fw-300'>Movimentações</span>";
+	ViewData["Category1"] = "Movimentações";
+	ViewData["PageIcon"] = "fa-regular fa-truck-fast";
+}
+
+@section HeadBlock {
+}
+
+<style>
+	.fundo-cinza {
+		background-color: #2F4F4F;
+		color: aliceblue;
+	}
+
+	.label {
+		color: white;
+	}
+</style>
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<!-- Adiciona espaçamento superior -->
+				<div class="pt-4">
+					<!-- Container para título e botão -->
+					<div class="d-flex justify-content-between align-items-center px-3 mb-3">
+						<h2 class="titulo-paginas mb-0">
+							<i class="fa-duotone fa-solid fa-conveyor-belt-boxes"></i>
+							Movimentação de Patrimônios
+						</h2>
+						<a href="./MovimentacaoPatrimonio/Upsert" class="btn btn-azul" data-ejtip="Inserir nova movimentação de patrimônio">
+							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+							Inserir Movimentação
+						</a>
+					</div>
+					<!-- Linha divisória -->
+					<div class="col-12" style="border-bottom:1px solid #325d88"></div>
+				</div>
+
+				<div class="panel-content">
+					<div class="box-body">
+						<br /><br />
+						<div class="col-12 px-3">
+							<div class="d-flex justify-content-between align-items-center">
+								<label class="fw-bold mb-0">
+									<i class="fa-duotone fa-solid fa-filter"></i>
+									Escolha os filtros desejados para visualizar as Movimentações:
+								</label>
+								<button id="btnFiltrarMovimentacoes" class="btn btn-marrom">
+									<i class="fa-duotone fa-solid fa-filter"></i>
+									Filtrar Movimentações
+								</button>
+							</div>
+						</div>
+
+						<br /><br />
+
+						<div class="col-12">
+							<div class="form-group row">
+								<div class="col-sm-3">
+									<label for="drpDataMovimentacao" class="form-label">
+										<i class="fa-duotone fa-solid fa-calendar"></i>
+										Data Movimentação
+									</label>
+									<ejs-daterangepicker id="drpDataMovimentacao" 
+										placeholder="Selecione o período" 
+										format="dd/MM/yyyy"
+										locale="pt-BR"
+										cssClass="e-outline">
+									</ejs-daterangepicker>
+								</div>
+
+								<div class="col-sm-3">
+									<label for="ddtSetorSecaoOrigem" class="form-label">
+										<i class="fa-duotone fa-solid fa-building"></i>
+										Setor/Seção Origem
+									</label>
+									<ejs-dropdowntree id="ddtSetorSecaoOrigem"
+										placeholder="Selecione Setor/Seção Origem"
+										popupHeight="300px"
+										showCheckBox="true"
+										mode="Delimiter"
+										allowFiltering="true"
+										filterBarPlaceholder="Buscar..."
+										cssClass="e-outline">
+									</ejs-dropdowntree>
+								</div>
+
+								<div class="col-sm-3">
+									<label for="ddtSetorSecaoDestino" class="form-label">
+										<i class="fa-duotone fa-solid fa-building"></i>
+										Setor/Seção Destino
+									</label>
+									<ejs-dropdowntree id="ddtSetorSecaoDestino"
+										placeholder="Selecione Setor/Seção Destino"
+										popupHeight="300px"
+										showCheckBox="true"
+										mode="Delimiter"
+										allowFiltering="true"
+										filterBarPlaceholder="Buscar..."
+										cssClass="e-outline">
+									</ejs-dropdowntree>
+								</div>
+
+								<div class="col-sm-3">
+									<label for="cmbResponsavel" class="form-label">
+										<i class="fa-duotone fa-solid fa-user"></i>
+										Responsável
+									</label>
+									<ejs-combobox id="cmbResponsavel"
+										placeholder="Selecione o Responsável"
+										allowFiltering="true"
+										filterBarPlaceholder="Buscar..."
+										cssClass="e-outline">
+									</ejs-combobox>
+								</div>
+							</div>
+						</div>
+
+						<br /><br />
+
+						<table id="tblMovimentacaoPatrimonio" class="table table-bordered table-striped" width="100%">
+							<thead>
+								<tr>
+									<th>Data Movimentação</th>
+									<th>NPR</th>
+									<th>Descrição</th>
+									<th>Setor Origem</th>
+									<th>Seção Origem</th>
+									<th>Setor Destino</th>
+									<th>Seção Destino</th>
+									<th>Responsável Movimentação</th>
+									<th>Ação</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/cadastros/movimentacaopatrimonio.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,174 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+
+@model FrotiX.Pages.Multa.UpsertTipoMultaModel
+
+@{
+	ViewData["Title"] = "Código de Trânsito Brasileiro";
+	ViewData["PageName"] = "multa_upserttipomulta";
+	ViewData["Heading"] = "<i class='fad fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Tipos de Multa</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-ballot-check";
+}
+
+<style>
+	.form-control-xs {
+		height: calc(1em + .775rem + 2px) !important;
+		padding: .125rem .25rem !important;
+		font-size: .75rem !important;
+		line-height: 1.5;
+		border-radius: .2rem;
+	}
+
+	.label {
+		margin-bottom: -5px;
+		margin-top: 10px;
+	}
+</style>
+
+<form method="post" asp-action="Upsert">
+	@Html.AntiForgeryToken()
+
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="panel-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						@if (Model.TipoMultaObj.TipoMultaId != Guid.Empty)
+						{
+							<input type="hidden" asp-for="TipoMultaObj.TipoMultaId" />
+						}
+
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="titulo-paginas">
+								<i class="fa-duotone fa-ballot-check"></i>
+								@(Model.TipoMultaObj.TipoMultaId != Guid.Empty ? "Atualizar " : "Criar ") Tipo de Multa
+							</h2>
+						</div>
+
+						<div class="col-10 pt-3">
+							<div class="row">
+								<div class="col-9">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="TipoMultaObj.Artigo"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="TipoMultaObj.Artigo"></span>
+										<input class="form-control form-control-xs" asp-for="TipoMultaObj.Artigo" data-ejtip="Artigo do Código de Trânsito" />
+									</div>
+								</div>
+								<div class="col-3">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="TipoMultaObj.Infracao"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="TipoMultaObj.Infracao"></span>
+										<select class="form-control form-control-xs" asp-for="TipoMultaObj.Infracao" data-ejtip="Gravidade da Infração">
+											<option value="">-- Infração --</option>
+											<option value="Gravíssima">Gravíssima</option>
+											<option value="Grave">Grave</option>
+											<option value="Média">Média</option>
+											<option value="Leve">Leve</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-3">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="TipoMultaObj.CodigoDenatran"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="TipoMultaObj.CodigoDenatran"></span>
+										<input id="txtDenatran" class="form-control form-control-xs" asp-for="TipoMultaObj.CodigoDenatran" data-ejtip="Código Denatran" />
+									</div>
+								</div>
+								<div class="col-3">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="TipoMultaObj.Desdobramento"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="TipoMultaObj.Desdobramento"></span>
+										<input class="form-control form-control-xs" asp-for="TipoMultaObj.Desdobramento" data-ejtip="Desdobramento da Infração" />
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-12 col-xl-10 control-section">
+									<div class="control-wrapper">
+										<div>
+											<label class="label font-weight-bold">Descrição da Multa</label>
+											<ejs-richtexteditor ejs-for="@Model.TipoMultaObj.Descricao" id="rte" toolbarClick="toolbarClick" locale="pt-BR" height="200px">
+												<e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensViagens/"></e-richtexteditor-insertimagesettings>
+											</ejs-richtexteditor>
+											<div id="errorMessage">
+												<span asp-validation-for="@Model.TipoMultaObj.Descricao"></span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<br />
+							<br />
+
+							<div class="form-group row">
+								<div class="col-9">
+									<div class="row">
+										<div class="col-6">
+											<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
+												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+												@(Model.TipoMultaObj.TipoMultaId != Guid.Empty ? "Atualizar" : "Criar")
+											</button>
+										</div>
+										<div class="col-6">
+											<a asp-page="./ListaTiposMulta" class="btn btn-vinho form-control">
+												<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+												Voltar à Lista
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/jquery.inputmask.js"></script>
+
+	<script>
+		$(document).ready(function () {
+			try {
+				$("#txtDenatran").inputmask("999-9");
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertTipoMulta.cshtml", "document.ready", error);
+			}
+		});
+
+		function toolbarClick(e) {
+			try {
+				if (e.item.id == "rte_toolbar_Image") {
+					var element = document.getElementById('rte_upload');
+					if (element && element.ej2_instances && element.ej2_instances[0]) {
+						element.ej2_instances[0].uploading = function upload(args) {
+							var tokenInput = document.getElementsByName('__RequestVerificationToken')[0];
+							if (tokenInput) {
+								args.currentRequest.setRequestHeader('XSRF-TOKEN', tokenInput.value);
+							}
+						};
+					}
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertTipoMulta.cshtml", "toolbarClick", error);
+			}
+		}
+	</script>
+}

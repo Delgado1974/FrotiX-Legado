@@ -1,0 +1,509 @@
+@page "/Administracao/gerarestatisticasviagens"  // ← Rota em minúsculas
+@model FrotiX.Pages.Administracao.GerarEstatisticasViagensModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Gerar Estatísticas de Viagens";
+    ViewData["PageName"] = "gerar_estatisticas_viagens_index";
+    ViewData["Heading"] = "<i class='fad fa-chart-line'></i> Atualização: <span class='fw-300'>Estatísticas de Viagens</span>";
+    ViewData["Category1"] = "Administração";
+    ViewData["PageIcon"] = "fal fa-chart-line";
+}
+
+@section HeadBlock {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <link rel="stylesheet" href="~/css/ajustacusto.css" />
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+
+    .label {
+        color: white;
+    }
+
+    .progress-container {
+        margin-top: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .progress-label {
+        color: #555;
+    }
+
+    .progress-percent {
+        color: #325d88;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Barra de Progresso Customizada */
+    .custom-progress-bar {
+        width: 100%;
+        height: 45px;
+        background-color: #E0E0E0;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .custom-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #325d88 0%, #4a7db3 100%);
+        width: 0%;
+        transition: width 0.5s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(50, 93, 136, 0.3);
+    }
+
+    .custom-progress-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 45px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        z-index: 10;
+    }
+
+    .progress-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .stat-card {
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #325d88;
+        line-height: 1;
+    }
+
+    #progressMessage {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+        min-height: 24px;
+        font-style: italic;
+    }
+
+    .btn-processing {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-processing::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 20px;
+        margin-top: -8px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spinner 0.8s linear infinite;
+    }
+
+</style>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="row">
+                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+                            <h2 class="text-primary">Serviços de Geração das Estatísticas de Viagens</h2>
+                            <p class="text-muted mb-3">
+                                <i class="fal fa-info-circle"></i>
+                                Esta operação irá processar e armazenar as estatísticas consolidadas de todas as viagens no sistema.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button id="btnGerarEstatisticas" class="btn fundo-azul form-control">
+                                <i class="fad fa-play-circle"></i> Iniciar Geração das Estatísticas
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Container do Progresso -->
+                    <div id="progressContainer" class="progress-container" style="display: none;">
+                        <div class="progress-info">
+                            <span id="progressLabel" class="progress-label">Preparando processamento...</span>
+                            <span id="progressPercent" class="progress-percent">0%</span>
+                        </div>
+
+                        <!-- Barra de Progresso Customizada -->
+                        <div class="custom-progress-bar">
+                            <div id="progressFill" class="custom-progress-fill"></div>
+                            <div id="progressText" class="custom-progress-text">0%</div>
+                        </div>
+
+                        <div id="progressMessage"></div>
+
+                        <!-- Cards de Estatísticas -->
+                        <div class="progress-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Total de Datas</div>
+                                <div class="stat-value" id="statTotal">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Processadas</div>
+                                <div class="stat-value" id="statProcessado">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Restantes</div>
+                                <div class="stat-value" id="statRestante">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Tempo Restante</div>
+                                <div class="stat-value" id="statTempo">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script>
+        let intervalId = null;
+        let inicioProcessamento = null;
+        let ultimoProcessado = 0;
+        let ultimoTempo = null;
+
+        $(document).ready(function () {
+            try {
+                $("#btnGerarEstatisticas").click(function () {
+                    gerarEstatisticas();
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "document.ready", error);
+            }
+        });
+
+        function gerarEstatisticas() {
+            try {
+                marcarBotaoProcessando();
+                mostrarBarraProgresso();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/viagem/GerarEstatisticasViagens",
+                    success: function (data) {
+                        try {
+                            if (data.success) {
+                                iniciarMonitoramento();
+                                AppToast.show('Verde', 'Processamento iniciado com sucesso!', 2000);
+                            } else {
+                                desmarcarBotaoProcessando();
+                                AppToast.show('Vermelho', data.message || 'Erro ao iniciar processamento', 4000);
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "gerarEstatisticas.success", error);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        try {
+                            desmarcarBotaoProcessando();
+                            console.error("Erro ao iniciar processamento:", textStatus, errorThrown);
+                            AppToast.show('Vermelho', 'Erro ao iniciar processamento das estatísticas', 4000);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "gerarEstatisticas.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "gerarEstatisticas", error);
+            }
+        }
+
+        function marcarBotaoProcessando() {
+            try {
+                const btn = $("#btnGerarEstatisticas");
+                btn.addClass("btn-processing");
+                btn.prop("disabled", true);
+                btn.html('<i class="fad fa-spinner-third fa-spin"></i> Processando...');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "marcarBotaoProcessando", error);
+            }
+        }
+
+        function desmarcarBotaoProcessando() {
+            try {
+                const btn = $("#btnGerarEstatisticas");
+                btn.removeClass("btn-processing");
+                btn.prop("disabled", false);
+                btn.html('<i class="fad fa-play-circle"></i> Iniciar Geração das Estatísticas');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "desmarcarBotaoProcessando", error);
+            }
+        }
+
+        function mostrarBarraProgresso() {
+            try {
+                $("#progressContainer").slideDown(300);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "mostrarBarraProgresso", error);
+            }
+        }
+
+        function iniciarMonitoramento() {
+            try {
+                // Limpa intervalo anterior se existir
+                if (intervalId !== null) {
+                    clearInterval(intervalId);
+                }
+
+                // Consulta o progresso a cada 500ms
+                intervalId = setInterval(() => {
+                    consultarProgresso();
+                }, 500);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "iniciarMonitoramento", error);
+            }
+        }
+
+        function consultarProgresso() {
+            try {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/viagem/ObterProgressoEstatisticas",
+                    success: function (data) {
+                        try {
+                            if (data.success && data.progresso) {
+                                atualizarProgresso(data.progresso);
+
+                                // Se concluído, para o monitoramento
+                                if (data.progresso.concluido) {
+                                    finalizarMonitoramento(data.progresso);
+                                }
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "consultarProgresso.success", error);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        try {
+                            console.error("Erro ao consultar progresso:", textStatus, errorThrown);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "consultarProgresso.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "consultarProgresso", error);
+            }
+        }
+
+        function atualizarProgresso(progresso) {
+            try {
+                // Inicializa o tempo de início se necessário
+                if (inicioProcessamento === null && progresso.processado > 0) {
+                    inicioProcessamento = new Date();
+                    ultimoProcessado = 0;
+                }
+
+                // Atualiza a barra de progresso customizada
+                $("#progressFill").css("width", progresso.percentual + "%");
+                $("#progressText").text(progresso.percentual + "%");
+
+                // Atualiza os textos
+                $("#progressLabel").text(progresso.mensagem);
+                $("#progressPercent").text(progresso.percentual + "%");
+                $("#progressMessage").text(progresso.mensagem);
+
+                // Atualiza as estatísticas
+                animarNumero("#statTotal", progresso.total);
+                animarNumero("#statProcessado", progresso.processado);
+                animarNumero("#statRestante", Math.max(0, progresso.total - progresso.processado));
+
+                // Calcula e atualiza o tempo restante
+                calcularTempoRestante(progresso);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "atualizarProgresso", error);
+            }
+        }
+
+        function calcularTempoRestante(progresso) {
+            try {
+                if (progresso.processado === 0 || progresso.total === 0 || inicioProcessamento === null) {
+                    $("#statTempo").text("--");
+                    return;
+                }
+
+                const agora = new Date();
+                const tempoDecorrido = (agora - inicioProcessamento) / 1000; // em segundos
+                const processadas = progresso.processado - ultimoProcessado;
+
+                if (processadas > 0 && tempoDecorrido > 0) {
+                    // Velocidade: datas por segundo
+                    const velocidade = progresso.processado / tempoDecorrido;
+
+                    // Tempo restante em segundos
+                    const restantes = progresso.total - progresso.processado;
+                    const segundosRestantes = restantes / velocidade;
+
+                    // Formata o tempo
+                    let textoTempo = "";
+                    if (segundosRestantes < 60) {
+                        textoTempo = Math.ceil(segundosRestantes) + "s";
+                    } else if (segundosRestantes < 3600) {
+                        const minutos = Math.ceil(segundosRestantes / 60);
+                        textoTempo = minutos + "min";
+                    } else {
+                        const horas = Math.floor(segundosRestantes / 3600);
+                        const minutos = Math.ceil((segundosRestantes % 3600) / 60);
+                        textoTempo = horas + "h " + minutos + "min";
+                    }
+
+                    $("#statTempo").text(textoTempo);
+                } else {
+                    $("#statTempo").text("Calc...");
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "calcularTempoRestante", error);
+            }
+        }
+
+        function animarNumero(seletor, valorFinal) {
+            try {
+                const elemento = $(seletor);
+                const valorAtual = parseInt(elemento.text()) || 0;
+
+                if (valorAtual !== valorFinal) {
+                    elemento.text(valorFinal);
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "animarNumero", error);
+            }
+        }
+
+        function finalizarMonitoramento(progresso) {
+            try {
+                // Para o intervalo
+                if (intervalId !== null) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+
+                // Reseta variáveis de tempo
+                inicioProcessamento = null;
+                ultimoProcessado = 0;
+                ultimoTempo = null;
+
+                // Reabilita o botão
+                desmarcarBotaoProcessando();
+
+                // Mostra mensagem de conclusão
+                if (progresso.erro) {
+                    AppToast.show('Vermelho', progresso.mensagem || "Erro durante o processamento", 4000);
+                } else {
+                    AppToast.show('Verde', progresso.mensagem || "Processamento concluído com sucesso!", 3000);
+
+                    // Anima a conclusão
+                    $("#progressFill").css("width", "100%");
+                    $("#progressText").text("100%");
+                    $("#statTempo").text("0s");
+                }
+
+                // Opcional: Limpar o progresso do cache após alguns segundos
+                setTimeout(() => {
+                    limparProgresso();
+                }, 5000);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "finalizarMonitoramento", error);
+            }
+        }
+
+        function limparProgresso() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/viagem/LimparProgressoEstatisticas",
+                    success: function (data) {
+                        try {
+                            console.log("Progresso limpo com sucesso");
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "limparProgresso.success", error);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        try {
+                            console.error("Erro ao limpar progresso:", textStatus, errorThrown);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "limparProgresso.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "limparProgresso", error);
+            }
+        }
+
+        // Limpa o intervalo quando a página é fechada
+        window.addEventListener('beforeunload', function () {
+            try {
+                if (intervalId !== null) {
+                    clearInterval(intervalId);
+                }
+            } catch (error) {
+                console.error("Erro ao limpar intervalo:", error);
+            }
+        });
+    </script>
+}

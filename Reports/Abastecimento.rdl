@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:df="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition/defaultfontfamily" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition">
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <Border>
+            <Style>None</Style>
+          </Border>
+        </Style>
+        <ReportItems>
+          <Textbox Name="AbastecimentoId1">
+            <Left>29.25pt</Left>
+            <Top>67.5pt</Top>
+            <Height>18.75pt</Height>
+            <Width>222pt</Width>
+            <Style>
+              <FontFamily>Arial</FontFamily>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=First(Fields!AbastecimentoId.Value, "Abastecimento")</Value>
+                    <Style>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>9.99998pt</FontSize>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <FontFamily>Arial</FontFamily>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+          </Textbox>
+        </ReportItems>
+        <Height>3.125in</Height>
+      </Body>
+      <Width>6.5in</Width>
+      <Page>
+        <PageFooter>
+          <Style>
+            <FontFamily>Arial</FontFamily>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+          <Height>0.72917in</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+        </PageFooter>
+        <LeftMargin>1in</LeftMargin>
+        <RightMargin>1in</RightMargin>
+        <TopMargin>1in</TopMargin>
+        <BottomMargin>1in</BottomMargin>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <Border>
+            <Style>None</Style>
+          </Border>
+        </Style>
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="FrotiX">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=VIVOBOOK-ASUS-I;Initial Catalog=Frotix;Encrypt=false;TrustServerCertificate=true;</ConnectString>
+        <IntegratedSecurity>true</IntegratedSecurity>
+      </ConnectionProperties>
+      <rd:SecurityType>Integrated</rd:SecurityType>
+      <rd:ImpersonateUser>false</rd:ImpersonateUser>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Abastecimento">
+      <Fields>
+        <Field Name="AbastecimentoId">
+          <DataField>AbastecimentoId</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="DataHora">
+          <DataField>DataHora</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="Data">
+          <DataField>Data</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Hora">
+          <DataField>Hora</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Placa">
+          <DataField>Placa</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TipoVeiculo">
+          <DataField>TipoVeiculo</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Nome">
+          <DataField>Nome</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TipoCombustivel">
+          <DataField>TipoCombustivel</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Sigla">
+          <DataField>Sigla</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Litros">
+          <DataField>Litros</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ValorUnitario">
+          <DataField>ValorUnitario</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ValorTotal">
+          <DataField>ValorTotal</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Consumo">
+          <DataField>Consumo</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ConsumoGeral">
+          <DataField>ConsumoGeral</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="KmRodado">
+          <DataField>KmRodado</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="VeiculoId">
+          <DataField>VeiculoId</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="CombustivelId">
+          <DataField>CombustivelId</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="UnidadeId">
+          <DataField>UnidadeId</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="MotoristaId">
+          <DataField>MotoristaId</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="RowNum">
+          <DataField>RowNum</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
+        <Field Name="MotoristaCondutor">
+          <DataField>MotoristaCondutor</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>FrotiX</DataSourceName>
+        <CommandType>Text</CommandType>
+        <CommandText>SELECT [dbo].[ViewAbastecimentos].[AbastecimentoId],
+[dbo].[ViewAbastecimentos].[DataHora],
+[dbo].[ViewAbastecimentos].[Data],
+[dbo].[ViewAbastecimentos].[Hora],
+[dbo].[ViewAbastecimentos].[Placa],
+[dbo].[ViewAbastecimentos].[TipoVeiculo],
+[dbo].[ViewAbastecimentos].[Nome],
+[dbo].[ViewAbastecimentos].[TipoCombustivel],
+[dbo].[ViewAbastecimentos].[Sigla],
+[dbo].[ViewAbastecimentos].[Litros],
+[dbo].[ViewAbastecimentos].[ValorUnitario],
+[dbo].[ViewAbastecimentos].[ValorTotal],
+[dbo].[ViewAbastecimentos].[Consumo],
+[dbo].[ViewAbastecimentos].[ConsumoGeral],
+[dbo].[ViewAbastecimentos].[KmRodado],
+[dbo].[ViewAbastecimentos].[VeiculoId],
+[dbo].[ViewAbastecimentos].[CombustivelId],
+[dbo].[ViewAbastecimentos].[UnidadeId],
+[dbo].[ViewAbastecimentos].[MotoristaId],
+[dbo].[ViewAbastecimentos].[RowNum],
+[dbo].[ViewAbastecimentos].[MotoristaCondutor] FROM [dbo].[ViewAbastecimentos]</CommandText>
+      </Query>
+    </DataSet>
+  </DataSets>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>4</NumberOfColumns>
+      <NumberOfRows>2</NumberOfRows>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:PageUnit>Px</rd:PageUnit>
+  <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
+</Report>

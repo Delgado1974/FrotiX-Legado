@@ -1,0 +1,228 @@
+@page
+@model object
+
+@{
+	ViewData["Title"] = "Lavadores";
+	ViewData["PageName"] = "lavador_index";
+	ViewData["Heading"] = "<i class='fad fa-car-wash'></i> Cadastros: <span class='fw-300'>Lavadores</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-car-wash";
+}
+
+@section HeadBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<style>
+		.fundo-cinza {
+			background-color: #2F4F4F;
+			color: aliceblue;
+		}
+
+		.label {
+			color: white;
+		}
+
+		.header-toolbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+		}
+
+		.fundo-cinza {
+			background-color: #2F4F4F;
+			color: aliceblue;
+		}
+
+		.label {
+			color: white;
+		}
+
+		.header-toolbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+		}
+
+		/* Remove qualquer borda dos botões de status */
+		.updateStatusLavador {
+			border: none !important;
+		}
+
+		/* Ajuste local: aproxima o conteúdo do cabeçalho */
+		#panel-1 .panel-content {
+			padding-top: 10px !important;
+		}
+
+		/* Ajustes locais de espaçamento do DataTables desta página */
+		#tblLavador_wrapper .row {
+			margin-top: .25rem;
+			margin-bottom: .5rem;
+		}
+
+		#tblLavador_wrapper .dataTables_length,
+		#tblLavador_wrapper .dt-buttons,
+		#tblLavador_wrapper .dataTables_filter {
+			margin-top: .25rem;
+			margin-bottom: .25rem;
+		}
+
+	</style>
+}
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+
+				<div class="col-12 px-3">
+					<!-- Cabeçalho com botão alinhado na horizontal -->
+					<div class="row">
+						<div class="col-12 px-3">
+							<div class="header-toolbar">
+								<h2 class="titulo-paginas">
+									<i class="fa-duotone fa-solid fa-car-wash fa-xl me-2 icon-150" "></i>
+									Listagem de Lavadores
+								</h2>
+
+								<a href="/Lavador/Upsert"
+								   class="btn btn-azul"
+								   style="width: 250px;">
+									<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Lavador
+								</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel-content">
+						<div class="box-body">
+							<br /><br />
+							<table id="tblLavador" class="table table-bordered table-striped w-100">
+								<thead>
+									<tr>
+										<th>Nome</th>
+										<th>Ponto</th>
+										<th>Celular</th>
+										<th>Contrato</th>
+										<th>Status</th>
+										<th>Ação</th>
+									</tr>
+								</thead>
+								<tbody>
+									@* Populada via JS (lavador_001.js) *@
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div> <!-- /col-12 px-3 -->
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@* -------------- Modal da Foto do Lavador -------------- *@
+<div class="modal fade" id="modalFoto" tabindex="-1" aria-labelledby="DynamicModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content">
+			<div class="modal-header modal-header-azul">
+				<h4 class="modal-title" id="DynamicModalLabel">Foto do Lavador</h4>
+			</div>
+
+			<div class="modal-body table-bordered container-fluid">
+				<img id="imgViewer"
+					 width="200"
+					 height="200"
+					 loading="lazy"
+					 alt="Foto do Lavador"
+					 style="border: 1px solid #000000; margin-top: 10px;" />
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-vinho" data-bs-dismiss="modal" aria-label="Fechar modal de foto">
+						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+						Fechar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<!-- Script específico da tela (DataTable, ações etc.) -->
+	<script src="~/js/cadastros/lavador.js" asp-append-version="true"></script>
+
+	<script>
+		// Utilitário para setar a imagem do modal com fallback (sem jQuery)
+		function setFotoLavador(base64, nomeLavador) {
+			try {
+				const img = document.getElementById('imgViewer');
+				const label = document.getElementById('DynamicModalLabel');
+
+				img.removeAttribute('src');
+
+				const temFotoValida = typeof base64 === 'string' && base64.trim() !== '' && base64 !== 'false';
+
+				if (temFotoValida) {
+					label.innerHTML = `Foto do Lavador: <b>${nomeLavador}</b>`;
+					img.setAttribute('src', `data:image/jpg;base64,${base64}`);
+				} else {
+					label.innerHTML = `Lavador sem Foto: <b>${nomeLavador}</b>`;
+					img.setAttribute('src', '/Images/barbudo.jpg'); // fallback
+				}
+
+				img.setAttribute('alt', temFotoValida ? `Foto de ${nomeLavador}` : `Foto padrío para ${nomeLavador}`);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "setFotoLavador", error);
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			try {
+				const modalEl = document.getElementById('modalFoto');
+				const bsModal = new bootstrap.Modal(modalEl, {
+					keyboard: true,
+					backdrop: 'static'
+				});
+
+				modalEl.addEventListener('show.bs.modal', function (event) {
+					try {
+						const button = event.relatedTarget;
+						const lavadorId = button?.getAttribute('data-id');
+						const tr = button?.closest('tr');
+						const nomeLavador = tr?.querySelector('td')?.textContent?.trim() ?? '';
+
+						document.getElementById('DynamicModalLabel').innerHTML = 'Carregando foto...';
+						document.getElementById('imgViewer').removeAttribute('src');
+
+						fetch(`/api/Lavador/PegaFotoModal?id=${encodeURIComponent(lavadorId)}`, { method: 'GET' })
+							.then(r => r.ok ? r.text() : Promise.reject(r))
+							.then(res => setFotoLavador(res, nomeLavador))
+							.catch(err => {
+								console.error(err);
+								setFotoLavador('', nomeLavador);
+							});
+
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.show", error);
+					}
+				});
+
+				modalEl.addEventListener('hide.bs.modal', function () {
+					try {
+						document.getElementById('imgViewer').removeAttribute('src');
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.hide", error);
+					}
+				});
+
+				// Se você precisar abrir o modal via código: bsModal.show();
+
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+}

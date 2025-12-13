@@ -1,0 +1,754 @@
+// ====================================================================
+// VALIDAÇÃO - Funções de validação de formulário
+// ====================================================================
+
+/**
+ * Classe para validação de campos
+ */
+class ValidadorAgendamento
+{
+    constructor()
+    {
+        this.erros = [];
+    }
+
+    /**
+     * Valida todos os campos do formulário
+     * param {string} viagemId - ID da viagem (opcional)
+     * returns {Promise<boolean>} true se válido
+     */
+    async validar(viagemId = null)
+    {
+        try
+        {
+            this.erros = [];
+
+            // Validar data inicial
+            if (!await this.validarDataInicial()) return false;
+
+            // Validar finalidade
+            if (!await this.validarFinalidade()) return false;
+
+            // Validar origem
+            if (!await this.validarOrigem()) return false;
+
+            // Validar destino
+            if (!await this.validarDestino()) return false;
+
+            // Validar campos de finalização (se preenchidos)
+            const algumFinalPreenchido = this.verificarCamposFinalizacao();
+            if (algumFinalPreenchido)
+            {
+                if (!await this.validarFinalizacao()) return false;
+            }
+
+            // Validações específicas de viagem
+            if (viagemId && viagemId !== "" && $("#btnConfirma").text() !== " Edita Agendamento")
+            {
+                if (!await this.validarCamposViagem()) return false;
+            }
+
+            // Validar requisitante
+            if (!await this.validarRequisitante()) return false;
+
+            // Validar ramal
+            if (!await this.validarRamal()) return false;
+
+            // Validar setor
+            if (!await this.validarSetor()) return false;
+
+            // Validar evento (se finalidade for "Evento")
+            if (!await this.validarEvento()) return false;
+
+            // Validar recorrência
+            if (window.transformandoEmViagem === false)
+            {
+                if (!await this.validarRecorrencia()) return false;
+            }
+
+            // Validar período de recorrência
+            if (!await this.validarPeriodoRecorrencia()) return false;
+
+            // Validar dias variados
+            if (!await this.validarDiasVariados()) return false;
+
+            // Validar quilometragem final
+            if (!await this.validarKmFinal()) return false;
+
+            // Validar campos de finalização completos
+            if (algumFinalPreenchido)
+            {
+                if (!await this.confirmarFinalizacao()) return false;
+            }
+
+            return true;
+
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validar", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida data inicial
+     */
+    async validarDataInicial()
+    {
+        try
+        {
+            const valDataInicial = document.getElementById("txtDataInicial").ej2_instances[0].value;
+            const lstDdataInicial = document.getElementById("txtDataInicial").ej2_instances[0];
+
+            if (!valDataInicial || !moment(valDataInicial).isValid() || valDataInicial === null)
+            {
+                lstDdataInicial.value = moment().toDate();
+                lstDdataInicial.dataBind();
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarDataInicial", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida finalidade
+     */
+    async validarFinalidade()
+    {
+        try
+        {
+            const finalidade = document.getElementById("lstFinalidade").ej2_instances[0].value;
+
+            if (finalidade === "" || finalidade === null)
+            {
+                await Alerta.Erro("Informação Ausente", "A <strong>Finalidade</strong> é obrigatória");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarFinalidade", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida origem
+     */
+    async validarOrigem()
+    {
+        try
+        {
+            const origem = document.getElementById("cmbOrigem").ej2_instances[0].value;
+
+            if (origem === "" || origem === null)
+            {
+                await Alerta.Erro("Informação Ausente", "A Origem é obrigatória");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarOrigem", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida destino
+     */
+    async validarDestino()
+    {
+        try
+        {
+            const destino = document.getElementById("cmbDestino").ej2_instances[0].value;
+
+            if (destino === "" || destino === null)
+            {
+                await Alerta.Erro("Informação Ausente", "O Destino é obrigatório");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarDestino", error);
+            return false;
+        }
+    }
+
+    /**
+     * Verifica se algum campo de finalização foi preenchido
+     */
+    verificarCamposFinalizacao()
+    {
+        try
+        {
+            const dataFinal = $("#txtDataFinal").val();
+            const horaFinal = $("#txtHoraFinal").val();
+            const combustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0].value;
+            const kmFinal = $("#txtKmFinal").val();
+
+            return dataFinal || horaFinal || combustivelFinal || kmFinal;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "verificarCamposFinalizacao", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida campos de finalização
+     */
+    async validarFinalizacao()
+    {
+        try
+        {
+            const dataFinal = $("#txtDataFinal").val();
+            const horaFinal = $("#txtHoraFinal").val();
+            const combustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0].value;
+            const kmFinal = $("#txtKmFinal").val();
+
+            const todosFinalPreenchidos = dataFinal && horaFinal && combustivelFinal && kmFinal;
+
+            if (!todosFinalPreenchidos)
+            {
+                await Alerta.Erro("Informação Incompleta", "Todos os campos de Finalização devem ser preenchidos para encerrar a viagem");
+                return false;
+            }
+
+            // Validar destino quando finalizado
+            const destino = document.getElementById("cmbDestino").ej2_instances[0].value;
+            if (destino === "" || destino === null)
+            {
+                await Alerta.Erro("Informação Ausente", "O Destino é obrigatório");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarFinalizacao", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida campos específicos de viagem
+     */
+    async validarCamposViagem()
+    {
+        try
+        {
+            // Validar ficha de vistoria
+            if ($("#txtNoFichaVistoria").val() === "" || $("#txtNoFichaVistoria").val() === null)
+            {
+                await Alerta.Erro("Informação Ausente", "O Nº da Ficha de Vistoria é obrigatório");
+                return false;
+            }
+
+            // Validar motorista
+            const lstMotorista = document.getElementById("lstMotorista").ej2_instances[0];
+            if (lstMotorista.value === null || lstMotorista.value === "")
+            {
+                await Alerta.Erro("Informação Ausente", "O Motorista é obrigatório");
+                return false;
+            }
+
+            // Validar veículo
+            const lstVeiculo = document.getElementById("lstVeiculo").ej2_instances[0];
+            if (lstVeiculo.value === null || lstVeiculo.value === "")
+            {
+                await Alerta.Erro("Informação Ausente", "O Veículo é obrigatório");
+                return false;
+            }
+
+            // Validar km
+            const kmOk = await this.validarKmInicialFinal();
+            if (!kmOk) return false;
+
+            // Validar combustível inicial
+            const ddtCombustivelInicial = document.getElementById("ddtCombustivelInicial").ej2_instances[0];
+            if (ddtCombustivelInicial.value === "" || ddtCombustivelInicial.value === null)
+            {
+                await Alerta.Erro("Informação Ausente", "O Combustível Inicial é obrigatório");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarCamposViagem", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida requisitante
+     */
+    async validarRequisitante()
+    {
+        try
+        {
+            const lstRequisitante = document.getElementById("lstRequisitante").ej2_instances[0];
+
+            if (lstRequisitante.value === "" || lstRequisitante.value === null)
+            {
+                await Alerta.Erro("Informação Ausente", "O Requisitante é obrigatório");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarRequisitante", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida ramal (VERSÃO CORRIGIDA)
+     * Agora valida o campo correto: txtRamalRequisitanteSF
+     */
+    async validarRamal()
+    {
+        try
+        {
+            // Tentar validar o componente Syncfusion primeiro
+            const ramalSFElement = document.getElementById("txtRamalRequisitanteSF");
+
+            if (ramalSFElement && ramalSFElement.ej2_instances && ramalSFElement.ej2_instances[0])
+            {
+                // É um componente Syncfusion
+                const ramalSF = ramalSFElement.ej2_instances[0];
+                const valorRamalSF = document.getElementById("txtRamalRequisitanteSF").value;
+
+                if (!valorRamalSF || valorRamalSF === "" || valorRamalSF === null)
+                {
+                    await Alerta.Erro("Informação Ausente", "O Ramal do Requisitante é obrigatório");
+                    return false;
+                }
+
+                console.log("✅ Ramal validado (Syncfusion):", valorRamalSF);
+                return true;
+            }
+
+            // Fallback: tentar validar o input HTML padrío
+            const valorRamal = $("#txtRamalRequisitante").val();
+            if (!valorRamal || valorRamal === "" || valorRamal === null)
+            {
+                await Alerta.Erro("Informação Ausente", "O Ramal do Requisitante é obrigatório");
+                return false;
+            }
+
+            console.log("✅ Ramal validado (HTML):", valorRamal);
+            return true;
+
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarRamal", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida setor (VERSÃO CORRIGIDA)
+     * Agora valida o campo correto: lstSetorRequisitanteAgendamento
+     */
+    async validarSetor()
+    {
+        try
+        {
+            // Usar o nome correto do campo
+            const lstSetorElement = document.getElementById("lstSetorRequisitanteAgendamento");
+
+            // Verificar se o elemento existe
+            if (!lstSetorElement)
+            {
+                console.error("❌ Elemento lstSetorRequisitanteAgendamento não encontrado");
+                await Alerta.Erro("Informação Ausente", "O Setor do Requisitante é obrigatório");
+                return false;
+            }
+
+            // Verificar se está visível (pode estar oculto em alguns casos)
+            const isVisible = lstSetorElement.offsetWidth > 0 && lstSetorElement.offsetHeight > 0;
+            if (!isVisible)
+            {
+                console.log("ℹ️ lstSetorRequisitanteAgendamento está oculto - pulando validação");
+                return true; // Se está oculto, não valida
+            }
+
+            // Verificar se ej2_instances existe e tem elementos
+            if (!lstSetorElement.ej2_instances || lstSetorElement.ej2_instances.length === 0)
+            {
+                console.error("❌ lstSetorRequisitanteAgendamento não está inicializado como componente EJ2");
+                await Alerta.Erro("Informação Ausente", "O Setor do Requisitante é obrigatório");
+                return false;
+            }
+
+            const lstSetor = lstSetorElement.ej2_instances[0];
+            const valorSetor = lstSetor.value;
+
+            // Validar o valor (pode ser array ou valor único)
+            if (!valorSetor ||
+                valorSetor === "" ||
+                valorSetor === null ||
+                (Array.isArray(valorSetor) && valorSetor.length === 0))
+            {
+                await Alerta.Erro("Informação Ausente", "O Setor do Requisitante é obrigatório");
+                return false;
+            }
+
+            console.log("✅ Setor validado:", valorSetor);
+            return true;
+
+        } catch (error)
+        {
+            console.error("❌ Erro em validarSetor:", error);
+            Alerta.TratamentoErroComLinha("validacao.js", "validarSetor", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida evento
+     */
+    async validarEvento()
+    {
+        try
+        {
+            const finalidade = document.getElementById("lstFinalidade").ej2_instances[0].value;
+
+            if (finalidade && finalidade[0] === "Evento")
+            {
+                const evento = document.getElementById("lstEventos").ej2_instances[0].value;
+
+                if (evento === "" || evento === null)
+                {
+                    await Alerta.Erro("Informação Ausente", "O Nome do Evento é obrigatório");
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarEvento", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida recorrência
+     */
+    async validarRecorrencia()
+    {
+        try
+        {
+            const recorrente = document.getElementById("lstRecorrente").ej2_instances[0].value;
+            const periodo = document.getElementById("lstPeriodos").ej2_instances[0].value;
+
+            if (recorrente === "S" && (!periodo || periodo === ""))
+            {
+                await Alerta.Erro("Informação Ausente", "Se o Agendamento é Recorrente, você precisa escolher o Período de Recorrência");
+                return false;
+            }
+
+            if ((periodo === "S" || periodo === "Q" || periodo === "M"))
+            {
+                const diasSelecionados = document.getElementById("lstDias").ej2_instances[0].value;
+
+                if (diasSelecionados === "" || diasSelecionados === null)
+                {
+                    await Alerta.Erro("Informação Ausente", "Se o período foi escolhido como semanal, quinzenal ou mensal, você precisa escolher os Dias da Semana");
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarRecorrencia", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida período de recorrência
+     */
+    async validarPeriodoRecorrencia()
+    {
+        try
+        {
+            const periodo = document.getElementById("lstPeriodos").ej2_instances[0].value;
+
+            if ((periodo === "D" || periodo === "S" || periodo === "Q" || periodo === "M"))
+            {
+                const dataFinal = document.getElementById("txtFinalRecorrencia").ej2_instances[0].value;
+
+                if (dataFinal === "" || dataFinal === null)
+                {
+                    await Alerta.Erro("Informação Ausente", "Se o período foi escolhido como diário, semanal, quinzenal ou mensal, você precisa escolher a Data Final");
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarPeriodoRecorrencia", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida dias variados
+     */
+    async validarDiasVariados()
+    {
+        try
+        {
+            const periodo = document.getElementById("lstPeriodos").ej2_instances[0].value;
+
+            if (periodo === "V")
+            {
+                // Verificar se o calendário existe e está disponível
+                const calendarElement = document.getElementById("calDatasSelecionadas");
+
+                if (!calendarElement || !calendarElement.ej2_instances || !calendarElement.ej2_instances[0])
+                {
+                    // Calendário não disponível (provavelmente está editando agendamento existente)
+                    // Neste caso, a validação não se aplica pois os dias já estão definidos
+                    console.log("ℹ️ Calendário não disponível - pulando validação de dias variados");
+                    return true;
+                }
+
+                const calendarObj = calendarElement.ej2_instances[0];
+                const selectedDates = calendarObj.values;
+
+                if (!selectedDates || selectedDates.length === 0)
+                {
+                    await Alerta.Erro("Informação Ausente", "Se o período foi escolhido como Dias Variados, você precisa escolher ao menos um dia no Calendário");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarDiasVariados", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida km inicial vs final
+     */
+    async validarKmInicialFinal()
+    {
+        try
+        {
+            const kmInicial = $("#txtKmInicial").val();
+            const kmFinal = $("#txtKmFinal").val();
+
+            if (!kmInicial || !kmFinal) return true;
+
+            const ini = parseFloat(kmInicial.replace(",", "."));
+            const fim = parseFloat(kmFinal.replace(",", "."));
+
+            if (fim < ini)
+            {
+                await Alerta.Erro("Erro", "A quilometragem final deve ser maior que a inicial.");
+                return false;
+            }
+
+            const diff = fim - ini;
+            if (diff > 100)
+            {
+                const confirmacao = await Alerta.Confirmar(
+                    "Atenção",
+                    "A quilometragem <strong>final</strong> excede em 100km a <strong>inicial</strong>. Tem certeza?",
+                    "Tenho certeza! 💪🏼",
+                    "Me enganei! 😟"
+                );
+
+                if (!confirmacao)
+                {
+                    $("#txtKmFinal").val("");
+                    $("#txtKmFinal").focus();
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarKmInicialFinal", error);
+            return false;
+        }
+    }
+
+    /**
+     * Valida km final
+     */
+    async validarKmFinal()
+    {
+        try
+        {
+            const kmFinal = $("#txtKmFinal").val();
+
+            if (kmFinal && parseFloat(kmFinal) <= 0)
+            {
+                await Alerta.Erro("Informação Incorreta", "A Quilometragem Final deve ser maior que zero");
+                return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "validarKmFinal", error);
+            return false;
+        }
+    }
+
+    /**
+     * Confirma finalização da viagem
+     */
+    async confirmarFinalizacao()
+    {
+        try
+        {
+            const dataFinal = $("#txtDataFinal").val();
+            const horaFinal = $("#txtHoraFinal").val();
+            const combustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0].value;
+            const kmFinal = $("#txtKmFinal").val();
+
+            const todosFinalPreenchidos = dataFinal && horaFinal && combustivelFinal && kmFinal;
+
+            if (todosFinalPreenchidos)
+            {
+                const confirmacao = await Alerta.Confirmar(
+                    "Confirmar Fechamento",
+                    'Você está criando a viagem como "Realizada". Deseja continuar?',
+                    "Sim, criar!",
+                    "Cancelar"
+                );
+
+                if (!confirmacao) return false;
+            }
+
+            return true;
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("validacao.js", "confirmarFinalizacao", error);
+            return false;
+        }
+    }
+}
+
+// Instância global
+window.ValidadorAgendamento = new ValidadorAgendamento();
+
+/**
+ * Função legacy de validação (mantida para compatibilidade)
+ */
+window.ValidaCampos = async function (viagemId)
+{
+    try
+    {
+        return await window.ValidadorAgendamento.validar(viagemId);
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("validacao.js", "ValidaCampos", error);
+        return false;
+    }
+};
+
+/**
+ * Validações assíncronas de datas
+ */
+window.validarDatas = async function ()
+{
+    try
+    {
+        const txtDataInicial = $("#txtDataInicial").val();
+        const txtDataFinal = $("#txtDataFinal").val();
+
+        if (!txtDataFinal || !txtDataInicial) return true;
+
+        const dtInicial = window.parseDate(txtDataInicial);
+        const dtFinal = window.parseDate(txtDataFinal);
+
+        dtInicial.setHours(0, 0, 0, 0);
+        dtFinal.setHours(0, 0, 0, 0);
+
+        const diferenca = (dtFinal - dtInicial) / (1000 * 60 * 60 * 24);
+
+        if (diferenca >= 5)
+        {
+            const confirmacao = await Alerta.Confirmar(
+                "Atenção",
+                "A Data Final está 5 dias ou mais após a Inicial. Tem certeza?",
+                "Tenho certeza! 💪🏼",
+                "Me enganei! 😟"
+            );
+
+            if (!confirmacao)
+            {
+                $("#txtDataFinal").val("");
+                $("#txtDataFinal").focus();
+                return false;
+            }
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("validacao.js", "validarDatas", error);
+        return false;
+    }
+};
+
+window.validarDatasInicialFinal = async function (DataInicial, DataFinal)
+{
+    try
+    {
+        const dtIni = window.parseDate(DataInicial);
+        const dtFim = window.parseDate(DataFinal);
+
+        if (!dtIni || !dtFim || isNaN(dtIni) || isNaN(dtFim)) return true;
+
+        const diff = (dtFim - dtIni) / (1000 * 60 * 60 * 24);
+
+        if (diff >= 5)
+        {
+            const confirmacao = await Alerta.Confirmar(
+                "Atenção",
+                "A Data Final está 5 dias ou mais após a Inicial. Tem certeza?",
+                "Tenho certeza! 💪🏼",
+                "Me enganei! 😟"
+            );
+
+            if (!confirmacao)
+            {
+                const txtDataFinalElement = document.getElementById("txtDataFinal");
+                txtDataFinalElement.value = null;
+                txtDataFinalElement.focus();
+                return false;
+            }
+        }
+
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("validacao.js", "validarDatasInicialFinal", error);
+        return false;
+    }
+};

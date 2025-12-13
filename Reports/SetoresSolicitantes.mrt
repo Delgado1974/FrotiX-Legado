@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <Frotix Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>Frotix</Alias>
+        <ConnectionStringEncrypted>9FzZz8ZM8935CE2A5RxgY9HEy4hIS5OkbF3t6MN0oLOLYLVIxkDDbUVGufTDbLH/wlbRL0VKMdVqXP3cd0RlT9xas81GA9PN4UfZzOFM9l6NcPUryEx73Q==</ConnectionStringEncrypted>
+        <Key>53d293b15bb54a4d9fc208c4ebcc4c37</Key>
+        <Name>Frotix</Name>
+      </Frotix>
+    </Databases>
+    <DataSources isList="true" count="1">
+      <SetorSolicitante Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>SetorSolicitante</Alias>
+        <Columns isList="true" count="8">
+          <value>SetorSolicitanteId,System.Int64</value>
+          <value>Nome,System.String</value>
+          <value>Sigla,System.String</value>
+          <value>Ramal,System.Int32</value>
+          <value>SetorPaiId,System.Int64</value>
+          <value>Status,System.Boolean</value>
+          <value>DataAlteracao,System.DateTime</value>
+          <value>UsuarioIdAlteracao,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Key>5baa6d7535934a219f2b9856c9e911a6</Key>
+        <Name>SetorSolicitante</Name>
+        <NameInSource>Frotix</NameInSource>
+        <Parameters isList="true" count="1">
+          <value>_x0040_pSigla,,18,100,4714fe719b5b4ed886f4e0f798f094d2</value>
+        </Parameters>
+        <SqlCommand>select * from SetorSolicitante where (Sigla = @pSigla)</SqlCommand>
+      </SetorSolicitante>
+    </DataSources>
+    <Relations isList="true" count="1">
+      <PaiFilho Ref="4" type="DataRelation" isKey="true">
+        <Active>True</Active>
+        <Alias>PaiFilho</Alias>
+        <ChildColumns isList="true" count="1">
+          <value>SetorSolicitanteId</value>
+        </ChildColumns>
+        <ChildSource isRef="3" />
+        <Dictionary isRef="1" />
+        <Name>PaiFilho</Name>
+        <NameInSource>PaiFilho</NameInSource>
+        <ParentColumns isList="true" count="1">
+          <value>SetorPaiId</value>
+        </ParentColumns>
+        <ParentSource isRef="3" />
+      </PaiFilho>
+    </Relations>
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="0" />
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <Key>ce9a4b99333644e2a69e73b104ad2e41</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="5" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="1">
+        <HierarchicalBand1 Ref="6" type="Stimulsoft.Report.Components.StiHierarchicalBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,0.4,19,0.8</ClientRectangle>
+          <Components isList="true" count="3">
+            <Text1 Ref="7" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>16.8,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{SetorSolicitante.SetorSolicitanteId}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text1>
+            <Text2 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.2,14,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{SetorSolicitante.Nome}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text2>
+            <Text3 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>14.6,0.2,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{SetorSolicitante.Sigla}</Text>
+              <TextBrush>Black</TextBrush>
+            </Text3>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName>PaiFilho</DataRelationName>
+          <DataSourceName>SetorSolicitante</DataSourceName>
+          <Expressions isList="true" count="0" />
+          <Filters isList="true" count="0" />
+          <KeyDataColumn>SetorSolicitanteId</KeyDataColumn>
+          <MasterKeyDataColumn>SetorPaiId</MasterKeyDataColumn>
+          <Name>HierarchicalBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <PrintOnAllPages>True</PrintOnAllPages>
+          <Sort isList="true" count="2">
+            <value>ASC</value>
+            <value>Nome</value>
+          </Sort>
+        </HierarchicalBand1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="0" />
+      <Guid>3adbffc593c245d4a48437d808a60a88</Guid>
+      <Margins>1,1,1,1</Margins>
+      <Name>Page1</Name>
+      <PageHeight>29.7</PageHeight>
+      <PageWidth>21</PageWidth>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>5/20/2024 12:00:05 PM</ReportChanged>
+  <ReportCreated>9/27/2021 1:22:14 PM</ReportCreated>
+  <ReportFile>C:\Frotix\Projeto FrotiX - Net8\Reports\SetoresSolicitantes.mrt</ReportFile>
+  <ReportGuid>e4c4bac577cc4f91af092bc5be660cf2</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2023.1.1.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

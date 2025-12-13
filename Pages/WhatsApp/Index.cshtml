@@ -1,0 +1,71 @@
+@page
+@model FrotiX.Pages.WhatsApp.IndexModel
+@{
+    ViewData["Title"] = "WhatsApp - FrotiX";
+}
+
+<div class="container mt-3">
+    <div class="header-toolbar">
+        <h1 class="titulo-paginas">
+            <i class="fa-duotone fa-brands fa-whatsapp"></i> WhatsApp (Evolution API)
+        </h1>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Sessão</label>
+                    <input id="waSession" class="form-control" value="@Model.DefaultSession" />
+                </div>
+                <div class="col-md-8">
+                    <button id="btnStart" class="btn btn-verde" data-ejtip="Inicia a sessão e libera QR">
+                        <i class="fa-solid fa-play icon-space"></i>Iniciar Sessão
+                    </button>
+                    <button id="btnStatus" class="btn btn-azul" data-ejtip="Checar status">
+                        <i class="fa-solid fa-signal icon-space"></i>Status
+                    </button>
+                </div>
+            </div>
+
+            <div class="row mt-3 g-3">
+                <div class="col-md-6">
+                    <div class="border p-3 rounded">
+                        <h5>QR Code</h5>
+                        <div id="qrBox" class="text-center">
+                            <img id="qrImg" alt="QR" style="max-width:320px;display:none;border:1px solid #ccc;border-radius:8px;" />
+                            <div id="qrMsg" class="text-muted">Clique em "Iniciar Sessão" e depois "Status".</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border p-3 rounded">
+                        <h5>Enviar Mensagem</h5>
+                        <div class="mb-2">
+                            <label class="form-label">Telefone (E.164)</label>
+                            <input id="waPhone" class="form-control" placeholder="5511999998888" />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Mensagem</label>
+                            <textarea id="waText" class="form-control" rows="3" placeholder="Olá do FrotiX!"></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button id="btnSendText" class="btn btn-verde"><i class="fa-solid fa-paper-plane-top icon-space"></i>Enviar texto</button>
+                            <label class="btn btn-azul mb-0">
+                                <input id="waFile" type="file" accept="image/*,application/pdf,video/*,audio/*" hidden />
+                                <i class="fa-solid fa-file-arrow-up icon-space"></i> Escolher arquivo
+                            </label>
+                            <button id="btnSendMedia" class="btn btn-vinho"><i class="fa-solid fa-share-from-square icon-space"></i>Enviar mídia</button>
+                        </div>
+                        <div id="fileName" class="small text-muted mt-2"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script src="~/js/whatsapp.js"></script>
+}

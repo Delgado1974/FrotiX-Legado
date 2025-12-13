@@ -1,0 +1,278 @@
+(function ()
+{
+    "use strict";
+
+    var dataTable;
+
+    $(document).ready(function ()
+    {
+        try
+        {
+            loadList();
+
+            // Evento de exclusão de veículo
+            $(document).on("click", ".btn-delete", function ()
+            {
+                try
+                {
+                    var id = $(this).data("id");
+
+                    Alerta.Confirmar(
+                        "Confirmar Exclusão",
+                        "Você tem certeza que deseja apagar este veículo? Não será possível recuperar os dados eliminados!",
+                        "Sim, excluir",
+                        "Cancelar"
+                    ).then(function (confirmed)
+                    {
+                        try
+                        {
+                            if (confirmed)
+                            {
+                                var dataToPost = JSON.stringify({ VeiculoId: id });
+                                var url = "/api/Veiculo/Delete";
+
+                                $.ajax({
+                                    url: url,
+                                    type: "POST",
+                                    data: dataToPost,
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (data)
+                                    {
+                                        try
+                                        {
+                                            if (data.success)
+                                            {
+                                                AppToast.show(data.message || "Veículo excluído com sucesso.", 'Verde', 2000);
+                                                if (dataTable)
+                                                {
+                                                    dataTable.ajax.reload();
+                                                }
+                                            } else
+                                            {
+                                                AppToast.show(data.message || "Erro ao excluir veículo.", 'Vermelho', 2000);
+                                            }
+                                        } catch (error)
+                                        {
+                                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.ajax.success", error);
+                                        }
+                                    },
+                                    error: function (err)
+                                    {
+                                        try
+                                        {
+                                            console.error(err);
+                                            AppToast.show("Algo deu errado ao excluir o veículo.", 'Vermelho', 2000);
+                                        } catch (error)
+                                        {
+                                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.ajax.error", error);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.confirmar.then", error);
+                        }
+                    });
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.click", error);
+                }
+            });
+
+            // Evento de atualização de status do veículo
+            $(document).on("click", ".updateStatusVeiculo", function ()
+            {
+                try
+                {
+                    var url = $(this).data("url");
+                    var currentElement = $(this);
+
+                    $.get(url, function (data)
+                    {
+                        try
+                        {
+                            if (data.success)
+                            {
+                                AppToast.show("Status alterado com sucesso!", 'Verde', 2000);
+                                var text = "Ativo";
+
+                                if (data.type == 1)
+                                {
+                                    text = "Inativo";
+                                    currentElement.removeClass("btn-verde").addClass("fundo-cinza");
+                                } else
+                                {
+                                    currentElement.removeClass("fundo-cinza").addClass("btn-verde");
+                                }
+
+                                currentElement.text(text);
+                            } else
+                            {
+                                AppToast.show("Não foi possível alterar o status.", 'Vermelho', 2000);
+                            }
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "updateStatusVeiculo.get.success", error);
+                        }
+                    }).fail(function ()
+                    {
+                        try
+                        {
+                            AppToast.show("Erro ao alterar o status do veículo.", 'Vermelho', 2000);
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "updateStatusVeiculo.get.fail", error);
+                        }
+                    });
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("veiculo_index_001.js", "updateStatusVeiculo.click", error);
+                }
+            });
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "document.ready", error);
+        }
+    });
+
+    function loadList()
+    {
+        try
+        {
+            dataTable = $("#tblVeiculo").DataTable({
+                columnDefs: [
+                    {
+                        targets: 0, // Placa
+                        className: "text-center",
+                        width: "9%"
+                    },
+                    {
+                        targets: 1, // Marca/Modelo
+                        className: "text-left",
+                        width: "17%"
+                    },
+                    {
+                        targets: 2, // Contrato
+                        className: "text-left",
+                        width: "35%"
+                    },
+                    {
+                        targets: 3, // Sigla
+                        className: "text-center",
+                        width: "5%",
+                        defaultContent: ""
+                    },
+                    {
+                        targets: 4, // Combustível
+                        className: "text-center",
+                        width: "5%"
+                    },
+                    {
+                        targets: 5, // Consumo
+                        className: "text-right",
+                        width: "3%"
+                    },
+                    {
+                        targets: 6, // Quilometragem
+                        className: "text-right",
+                        width: "3%"
+                    },
+                    {
+                        targets: 7, // Reserva
+                        className: "text-center",
+                        width: "5%"
+                    },
+                    {
+                        targets: 8, // Status
+                        className: "text-center",
+                        width: "7%"
+                    },
+                    {
+                        targets: 9, // Ação
+                        className: "text-center",
+                        width: "8%"
+                    }
+                ],
+                responsive: true,
+                ajax: {
+                    url: "/api/veiculo",
+                    type: "GET",
+                    datatype: "json"
+                },
+                columns: [
+                    { data: "placa" },
+                    { data: "marcaModelo" },
+                    { data: "origemVeiculo" },
+                    { data: "sigla" },
+                    { data: "descricao" },
+                    { data: "consumo" },
+                    { data: "quilometragem" },
+                    { data: "veiculoReserva" },
+                    {
+                        data: "status",
+                        render: function (data, type, row, meta)
+                        {
+                            try
+                            {
+                                if (data)
+                                {
+                                    return '<a href="javascript:void(0)" class="updateStatusVeiculo btn btn-verde text-white" data-url="/api/Veiculo/updateStatusVeiculo?Id=' +
+                                        row.veiculoId +
+                                        '" data-ejtip="Desativar veículo" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">Ativo</a>';
+                                } else
+                                {
+                                    return '<a href="javascript:void(0)" class="updateStatusVeiculo btn fundo-cinza text-white text-bold" data-url="/api/Veiculo/updateStatusVeiculo?Id=' +
+                                        row.veiculoId +
+                                        '" data-ejtip="Ativar veículo" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">Inativo</a>';
+                                }
+                            } catch (error)
+                            {
+                                Alerta.TratamentoErroComLinha("veiculo_index_001.js", "status.render", error);
+                                return "";
+                            }
+                        }
+                    },
+                    {
+                        data: "veiculoId",
+                        render: function (data)
+                        {
+                            try
+                            {
+                                return `<div class="text-center">
+                                    <a href="/Veiculo/Upsert?id=${data}" 
+                                       class="btn btn-azul text-white" 
+                                       data-ejtip="Editar veículo" 
+                                       aria-label="Editar veículo" 
+                                       style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
+                                        <i class="far fa-edit"></i> 
+                                    </a>
+                                    <a class="btn-delete btn btn-vinho text-white" 
+                                       data-ejtip="Excluir veículo" 
+                                       aria-label="Excluir veículo" 
+                                       style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" 
+                                       data-id='${data}'>
+                                        <i class="far fa-trash-alt"></i>
+                                    </a>
+                                </div>`;
+                            } catch (error)
+                            {
+                                Alerta.TratamentoErroComLinha("veiculo_index_001.js", "veiculoId.render", error);
+                                return "";
+                            }
+                        }
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                    emptyTable: "Sem Dados para Exibição"
+                },
+                width: "100%"
+            });
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "loadList", error);
+        }
+    }
+})();

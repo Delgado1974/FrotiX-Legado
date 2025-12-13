@@ -1,0 +1,150 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Secao.UpsertModel
+
+@{
+	ViewData["Title"] = "Seção Patrimonial";
+	ViewData["PageName"] = "secaopatrimonial_upsert";
+	ViewData["Heading"] = "<i class='fa-duotone fa-solid fa-shop'></i> Cadastros: <span class='fw-300'>Seção Patrimonial</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fa-regular fa-shop";
+}
+
+<style>
+	.form-control-xs {
+		height: calc(1em + .775rem + 2px) !important;
+		padding: .125rem .25rem !important;
+		font-size: .75rem !important;
+		line-height: 1.5;
+		border-radius: .2rem;
+	}
+
+	.label {
+		margin-bottom: -5px;
+		margin-top: 10px;
+	}
+
+	input[type=checkbox] {
+		vertical-align: middle;
+		position: relative;
+		bottom: 1px;
+	}
+
+	.escondido {
+		display: none;
+	}
+
+	.espacofundo {
+		padding-bottom: 20px;
+	}
+</style>
+
+@section HeadBlock {
+	<link rel="stylesheet" href="~/css/dropify.min.css" />
+}
+
+@{
+	var secaoId = Model.SecaoObj?.SecaoId.ToString() ?? "00000000-0000-0000-0000-000000000000";
+}
+
+<form id="FormsSecao" method="post" asp-action="Upsert" enctype="multipart/form-data">
+	<div class="row espacofundo">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div id="painelfundo" class="panel-container show espacofundo">
+					<div class="panel-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						<div id="divSecaoIdEmpty" data-secaoid="@secaoId"></div>
+
+						@if (Model.SecaoObj.SecaoId != Guid.Empty)
+						{
+							<input type="hidden" name="SecaoObj.SecaoId" value="@Model.SecaoObj.SecaoId" />
+						}
+
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="titulo-paginas">
+								<i class="fa-duotone fa-solid fa-warehouse-full"></i>
+								&nbsp;@(Model.SecaoObj.SetorId != Guid.Empty ? "Atualizar " : "Criar ")Seção Patrimonial
+							</h2>
+						</div>
+
+						<div class="col-12 pt-3">
+							<div class="row">
+								<div class="col-4">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="SecaoObj.NomeSecao">Nome da Seção Patrimonial</label>
+										<span class="text-danger font-weight-light" asp-validation-for="SecaoObj.NomeSecao"></span>
+										<input class="form-control form-control-sm" asp-for="SecaoObj.NomeSecao" />
+									</div>
+								</div>
+
+								<div class="col-4">
+									<label class="label font-weight-bold">Setor Patrimonial</label>
+									<ejs-combobox id="cmbSetor" placeholder="Selecione um Setor" allowFiltering="true"
+												  filterType="Contains" popupHeight="200px" width="100%" showClearButton="true"
+												  ejs-for="SecaoObj.SetorId" name="SecaoObj.SetorId">
+										<e-combobox-fields text="text" value="value"></e-combobox-fields>
+									</ejs-combobox>
+								</div>
+							</div>
+
+							<br />
+
+							<div class="row">
+								<div class="col-4">
+									<div class="form-group">
+										<label class="label font-weight-bold">
+											<input type="checkbox" class="form-check-input" asp-for="SecaoObj.Status" id="chkStatus" />
+											Status (Ativa/Inativa)
+										</label>
+									</div>
+								</div>
+							</div>
+
+							<br />
+							<br />
+							<div class="form-group row">
+								<div class="col-12">
+									<div class="row float-left">
+										<div class="col-6 float-left">
+											@if (Model.SecaoObj.SecaoId != Guid.Empty)
+											{
+												<button method="post" asp-page-handler="Edit" asp-route-id=@Model.SecaoObj.SecaoId class="btn btn-azul form-control" style="width:300px" data-ejtip="Atualizar os dados da seção patrimonial">
+													<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+													&nbsp;&nbsp;Atualizar
+												</button>
+											}
+											else
+											{
+												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" style="width:300px" data-ejtip="Criar nova seção patrimonial">
+													<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+													&nbsp;&nbsp;Criar
+												</button>
+											}
+										</div>
+										<div class="col-6 float-right">
+											<a asp-page="./Index" class="btn btn-vinho form-control" style="width:300px" data-ejtip="Voltar para a lista de seções patrimoniais">
+												<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+												&nbsp;&nbsp;Voltar à Lista
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/dropify.min.js"></script>
+	<script src="~/js/cadastros/secao_patrimonial.js" asp-append-version="true"></script>
+}

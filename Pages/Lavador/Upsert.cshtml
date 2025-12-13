@@ -1,0 +1,352 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Lavador.UpsertModel
+
+@{
+	ViewData["Title"] = "Lavadores";
+	ViewData["PageName"] = "Lavador_upsert";
+	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Lavadores</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-user-tie";
+}
+
+@section HeadBlock {
+	<link rel="stylesheet" href="~/css/dropify.min.css" />
+}
+
+<style>
+	.form-control-xs {
+		height: calc(1em + .775rem + 2px) !important;
+		padding: .125rem .25rem !important;
+		font-size: .75rem !important;
+		line-height: 1.5;
+		border-radius: .2rem;
+	}
+
+	.label {
+		margin-bottom: -5px;
+		margin-top: 10px;
+	}
+
+	input[type=checkbox] {
+		vertical-align: middle;
+		position: relative;
+		bottom: 1px;
+	}
+
+	.escondido {
+		display: none;
+	}
+
+	.espacofundo {
+		padding-bottom: 20px;
+	}
+
+	/* ===== crescer 20% apenas neste form (wrapper .fx-grow-20v) ===== */
+	.fx-grow-20v .form-control-xs {
+		height: calc((1em + .775rem + 2px) * 1.2) !important;
+		padding-top: calc(.125rem * 1.2) !important;
+		padding-bottom: calc(.125rem * 1.2) !important;
+		line-height: 1.5;
+	}
+
+	.fx-grow-20v .form-control:not(.form-control-xs),
+	.fx-grow-20v .form-select {
+		padding-top: calc(.375rem * 1.2) !important;
+		padding-bottom: calc(.375rem * 1.2) !important;
+	}
+
+	.fx-grow-20v .btn {
+		padding-top: calc(.375rem * 1.2) !important;
+		padding-bottom: calc(.375rem * 1.2) !important;
+	}
+
+	.fx-grow-20v .form-check-input {
+		width: 1.2em;
+		height: 1.2em;
+	}
+
+	.icon-150 {
+		font-size: 1.5em !important;
+		line-height: 1;
+		transform-origin: left center;
+	}
+</style>
+
+<form method="post" enctype="multipart/form-data" class="fx-grow-20v">
+	@Html.AntiForgeryToken()
+
+	<div class="row espacofundo">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div id="painelfundo" class="panel-container show espacofundo">
+					<div class="panel-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						@if (Model.LavadorObj.Lavador.LavadorId != Guid.Empty)
+						{
+							<input type="hidden" asp-for="LavadorObj.Lavador.LavadorId" />
+						}
+						<input type="hidden" asp-for="LavadorObj.Lavador.UsuarioIdAlteracao" />
+
+						<!-- Cabeçalho -->
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="titulo-paginas d-flex align-items-center pb-3">
+								<i class="fa-duotone fa-solid fa-car-wash fa-xl me-2 icon-150" aria-hidden="true"></i>
+								@(Model.LavadorObj.Lavador.LavadorId != Guid.Empty ? "Atualizar " : "Criar ") Lavador
+							</h2>
+						</div>
+
+						<div class="col-12 pt-3">
+							<!-- Linha 1: Nome, CPF, Data Nascimento, Celular01, Celular02 -->
+							<div class="row">
+								<div class="col-4">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Nome"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Nome"></span>
+										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Nome" />
+									</div>
+								</div>
+
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.CPF"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.CPF"></span>
+										<input class="form-control form-control-xs"
+											   asp-for="LavadorObj.Lavador.CPF"
+											   inputmode="numeric"
+											   oninput="mascara(this)" />
+									</div>
+								</div>
+
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.DataNascimento"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.DataNascimento"></span>
+										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.DataNascimento" type="date" />
+									</div>
+								</div>
+
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Celular01"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Celular01"></span>
+										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Celular01" />
+									</div>
+								</div>
+
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Celular02"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Celular02"></span>
+										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Celular02" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Linha 2: Data Ingresso -->
+							<div class="row">
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.DataIngresso"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.DataIngresso"></span>
+										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.DataIngresso" type="date" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Linha 3: Ponto, Contrato, Foto -->
+							<div class="row">
+								<div class="col-2">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Ponto"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Ponto"></span>
+										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Ponto" />
+									</div>
+
+									<!-- Checkbox Ativo/Inativo abaixo de Ponto -->
+									<div class="form-group mt-2">
+										<div class="form-check">
+											<input type="checkbox"
+												   class="form-check-input"
+												   asp-for="LavadorObj.Lavador.Status"
+												   id="chkStatus" />
+											<label class="form-check-label font-weight-bold" for="chkStatus">Ativo/Inativo</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-3">
+									<div class="form-group">
+										<label id="lblcontrato" class="label font-weight-bold" asp-for="LavadorObj.Lavador.ContratoId"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.ContratoId"></span>
+										@Html.DropDownListFor(m => m.LavadorObj.Lavador.ContratoId,
+										Model.LavadorObj.ContratoList,
+																				"-- Selecione um Contrato --",
+																				new { @class = "form-control form-control-xs" , @Name = "lstcontratos" })
+									</div>
+								</div>
+							</div>
+
+							<!-- Linha 4: Foto -->
+							<div class="row justify-content-end">
+								<div class="col-auto">
+									<label class="label font-weight-bold">Foto</label>
+									<input class="form-control"
+										   id="txtFile"
+										   type="file"
+										   accept="image/*"
+										   style="width:300px;"
+										   asp-for="FotoUpload" />
+								</div>
+							</div>
+
+							<div class="row justify-content-end mt-3">
+								<div class="col-auto">
+									<img id="imgViewer"
+										 width="200"
+										 style="border:1px solid #000000; margin-top:10px;"
+										 alt="Pré-visualização da foto do lavador" />
+								</div>
+							</div>
+
+							<!-- Linha 5: Info de Alteração -->
+							@if (Model.LavadorObj.Lavador.LavadorId != Guid.Empty)
+							{
+								<div class="row mt-3">
+									<div class="col-12">
+										<label class="font-weight-light">
+	                                            Alterado/Incluído por @Model.LavadorObj.NomeUsuarioAlteracao
+		                                            em @(Model.LavadorObj.Lavador.DataAlteracao != null ? Model.LavadorObj.Lavador.DataAlteracao.Value.ToString("dd/MM/yy") : "")
+		                                            às @(Model.LavadorObj.Lavador.DataAlteracao != null ? Model.LavadorObj.Lavador.DataAlteracao.Value.ToString("HH:mm") : "")
+										</label>
+									</div>
+								</div>
+							}
+
+							<!-- Linha 6: Botões -->
+							<div class="form-group row mt-2">
+								<div class="col-12">
+									<div class="d-flex gap-2">
+										@if (Model.LavadorObj.Lavador.LavadorId != Guid.Empty)
+										{
+											<button type="submit"
+													asp-page-handler="Edit"
+													asp-route-id="@Model.LavadorObj.Lavador.LavadorId"
+													class="btn btn-azul form-control"
+													style="width:200px"
+													data-ejtip="Atualizar dados do lavador">
+												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Atualizar
+											</button>
+										}
+										else
+										{
+											<button type="submit"
+													asp-page-handler="Submit"
+													class="btn btn-azul form-control"
+													style="width:200px"
+													data-ejtip="Criar novo lavador">
+												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
+											</button>
+										}
+										<a asp-page="./Index" class="btn btn-vinho form-control" style="width:200px" data-ejtip="Voltar para a lista de lavadores">
+											<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+										</a>
+									</div>
+								</div>
+							</div>
+						</div> <!-- /.col-12 pt-3 -->
+					</div> <!-- /.panel-content -->
+				</div> <!-- /#painelfundo -->
+			</div> <!-- /#panel-1 -->
+		</div> <!-- /.col-xl-12 -->
+	</div> <!-- /.row espacofundo -->
+</form>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/dropify.min.js"></script>
+
+	<script>
+		// --------- Máscara CPF ---------
+		function mascara(i) {
+			try {
+				var v = i.value || "";
+				v = v.replace(/\D/g, "");
+
+				if (v.length > 11) v = v.substring(0, 11);
+
+				if (v.length > 9) {
+					v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+				} else if (v.length > 6) {
+					v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+				} else if (v.length > 3) {
+					v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+				}
+
+				i.value = v;
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Upsert.cshtml", "mascara", error);
+			}
+		}
+
+		// --------- Preview da Foto + ajuste do painel ---------
+		$("#txtFile").on("change", function (event) {
+			try {
+				var files = event.target.files;
+				if (files && files[0]) {
+					$("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+				}
+				$("#painelfundo").css({ "padding-bottom": "200px" });
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtFile.change", error);
+			}
+		});
+
+		// --------- Inicialização ---------
+		$(document).ready(function () {
+			try {
+				const lavadorId = '@Model.LavadorObj.Lavador.LavadorId';
+				const idVazio = '00000000-0000-0000-0000-000000000000';
+
+				if (lavadorId && lavadorId !== idVazio) {
+					// Edição: carrega foto do backend
+					$.ajax({
+						type: "GET",
+						url: "/api/Lavador/PegaFoto",
+						data: { id: lavadorId },
+						dataType: "json",
+						success: function (data) {
+							try {
+								if (data && data.foto) {
+									$('#imgViewer').attr('src', "data:image/jpg;base64," + data.foto);
+								} else {
+									$('#imgViewer').attr('src', "/Images/barbudo.jpg");
+								}
+							} catch (error) {
+								Alerta.TratamentoErroComLinha("Upsert.cshtml", "ajax.success", error);
+							}
+						},
+						error: function (xhr) {
+							try {
+								console.warn('Erro ao carregar foto:', xhr);
+								$('#imgViewer').attr('src', "/Images/barbudo.jpg");
+							} catch (error) {
+								Alerta.TratamentoErroComLinha("Upsert.cshtml", "ajax.error", error);
+							}
+						}
+					});
+				} else {
+					// Inserção: foto padrío + marca Status como ativo
+					$('#imgViewer').attr('src', "/Images/barbudo.jpg");
+					$('#chkStatus').prop('checked', true).trigger('change');
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Upsert.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+}

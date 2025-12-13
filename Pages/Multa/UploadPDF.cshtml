@@ -1,0 +1,131 @@
+@page
+@model FrotiX.Pages.Multa.UploadPDFModel
+@using Syncfusion.EJ2
+
+@{
+	ViewData["Title"] = "Upload de PDF";
+	ViewData["PageName"] = "multa_uploadpdf";
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@Html.AntiForgeryToken()
+
+<style>
+	.e-upload {
+		width: 100%;
+		max-width: 500px;
+	}
+
+	.e-pv-toolbar {
+		border-radius: .25rem;
+	}
+
+	#txtArquivo {
+		max-width: 420px;
+		margin: 10px 0;
+	}
+</style>
+
+<h2>Upload de PDF</h2>
+
+<div class="row">
+	<div class="col-md-8">
+		<ejs-uploader id="uploaderPDF"
+					  multiple="false"
+					  autoUpload="true"
+					  allowedExtensions=".pdf"
+					  success="onUploadSuccess"
+					  failure="onUploadFailure"
+					  removing="onFileRemoving">
+			<e-uploader-asyncsettings saveUrl="/Multa/UploadPDF?handler=Save"
+									  removeUrl="/Multa/UploadPDF?handler=Remove">
+			</e-uploader-asyncsettings>
+		</ejs-uploader>
+
+		<input type="text" id="txtArquivo" class="form-control" placeholder="nome do arquivo..." readonly />
+
+		<div id="pdfViewerContainer" style="margin-top: 20px;">
+			<ejs-pdfviewer id="pdfviewer"
+						   style="height:600px;width:100%;display:none;"
+						   serviceUrl="/api/MultaPdfViewer">
+			</ejs-pdfviewer>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script>
+		function onUploadSuccess(args) {
+			try {
+				if (args.operation === 'upload') {
+					const file = args.file;
+					if (file && file.name) {
+						$("#txtArquivo").val(file.name);
+
+						// Carrega o PDF no viewer
+						const pdfPath = "/Upload/" + encodeURIComponent(file.name);
+						const pdfViewer = document.getElementById('pdfviewer').ej2_instances[0];
+
+						if (pdfViewer) {
+							pdfViewer.load(pdfPath, null);
+							$("#pdfviewer").show();
+						}
+
+                        AppToast.show("Verde", "Upload concluído com sucesso!", 2000);
+					}
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "onUploadSuccess", error);
+			}
+		}
+
+		function onUploadFailure(args) {
+			try {
+                AppToast.show("Vermelho", "Falha no upload do arquivo!", 3000);
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "onUploadFailure", error);
+			}
+		}
+
+		function onFileRemoving(args) {
+			try {
+				$("#txtArquivo").val('');
+				$("#pdfviewer").hide();
+
+				const pdfViewer = document.getElementById('pdfviewer').ej2_instances[0];
+				if (pdfViewer) {
+					pdfViewer.unload();
+				}
+
+                AppToast.show("Amarelo", "Arquivo removido.", 2000);
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "onFileRemoving", error);
+			}
+		}
+
+		// Adiciona token anti-CSRF aos uploads
+		document.addEventListener('DOMContentLoaded', function () {
+			try {
+				const uploader = document.getElementById('uploaderPDF');
+				if (uploader && uploader.ej2_instances && uploader.ej2_instances[0]) {
+					uploader.ej2_instances[0].uploading = function (args) {
+						const token = document.getElementsByName('__RequestVerificationToken')[0];
+						if (token) {
+							args.currentRequest.setRequestHeader('RequestVerificationToken', token.value);
+						}
+					};
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "DOMContentLoaded", error);
+			}
+		});
+	</script>
+}

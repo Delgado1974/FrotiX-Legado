@@ -1,0 +1,322 @@
+@page
+@model FrotiX.Pages.Manutencao.GlosasModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Syncfusion.EJ2
+
+@section HeadBlock {
+	<link rel="stylesheet" href="~/css/glosa.css" />
+}
+
+<style>
+	.row-glosa-positiva {
+		background: rgba(255,99,132,.08) !important;
+	}
+</style>
+
+@{
+	ViewData["Title"] = "Manutenção";
+	ViewData["PageName"] = "manutencao_glosas";
+	ViewData["Heading"] = "<i class='fa-duotone fa-hand-scissors'></i> Manutenção: <span class='fw-300'>Controle de Glosas</span>";
+	ViewData["Category1"] = "Manutenção";
+	ViewData["PageIcon"] = "fa-duotone fa-hand-scissors";
+}
+
+<div class="container-fluid px-3 py-3">
+	<!-- CARD: Filtros -->
+	<div class="card card-royal shadow-sm mb-3">
+		<div class="card-header d-flex align-items-center">
+			<div class="fw-semibold"><i class="fa-duotone fa-filter-list"></i> Filtros</div>
+		</div>
+
+		<div class="card-body">
+			<div class="row g-3 align-items-end">
+				<div class="col-lg-4 col-md-6">
+					<label class="form-label">Contrato</label>
+					<ejs-dropdownlist id="ContratoId"
+									  locale="pt-BR"
+									  dataSource="@Model.ContratoList"
+									  placeholder="Selecione um contrato"
+									  allowFiltering="true"
+									  popupHeight="300px">
+						<e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+					</ejs-dropdownlist>
+				</div>
+
+				<div class="col-lg-2 col-md-3">
+					<label class="form-label">Ano</label>
+					<ejs-dropdownlist id="Ano"
+									  locale="pt-BR"
+									  dataSource="@Model.Anos"
+									  value="@Model.AnoSelecionado"
+									  placeholder="Ano">
+					</ejs-dropdownlist>
+				</div>
+
+				<div class="col-lg-2 col-md-3">
+					<label class="form-label">Mês</label>
+					<ejs-dropdownlist id="Mes"
+									  locale="pt-BR"
+									  dataSource="@Model.Meses"
+									  value="@Model.MesSelecionado"
+									  placeholder="Mês">
+						<e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+					</ejs-dropdownlist>
+				</div>
+
+				<!-- Botões na mesma linha dos combos -->
+				<div class="col-lg-4 col-md-12 d-flex justify-content-end gap-2">
+					<ejs-button id="btnFiltrar" cssClass="btn-filtrar-royal" iconCss="fa-duotone fa-filter" content="Filtrar" data-ejtip="Aplicar Filtros"></ejs-button>
+					<ejs-button id="btnExportExcel" cssClass="btn-export-royal" iconCss="fa-duotone fa-file-excel" content="Exportar Excel" data-ejtip="Exportar para Excel"></ejs-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- CARD: Resumo -->
+	<div class="card card-royal shadow-sm mb-4">
+		<div class="card-header fw-semibold">
+			<i class="fa-duotone fa-calculator"></i> Consolidação para Glosa
+		</div>
+
+		<div class="card-body p-2">
+			<div id="gridResumo"></div>
+
+			<div class="card-footer d-flex flex-wrap gap-2">
+				<div class="chip-total">
+					<span class="chip-label"><i class="fa-duotone fa-sack-dollar"></i> Total</span>
+					<span id="tot-resumo-total" class="chip-value">R$ 0,00</span>
+				</div>
+				<div class="chip-total chip-glosa">
+					<span class="chip-label"><i class="fa-duotone fa-scissors"></i> Glosa</span>
+					<span id="tot-resumo-glosa" class="chip-value">R$ 0,00</span>
+				</div>
+				<div class="chip-total chip-ateste">
+					<span class="chip-label"><i class="fa-duotone fa-badge-check"></i> Ateste</span>
+					<span id="tot-resumo-ateste" class="chip-value">R$ 0,00</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- CARD: Detalhes -->
+	<div class="card card-royal shadow-sm mb-4">
+		<div class="card-header fw-semibold">
+			<i class="fa-duotone fa-clipboard-list-check"></i> Itens Individuais (Dias de Atraso)
+		</div>
+
+		<div class="card-body p-2">
+			<ejs-grid id="gridDetalhes"
+					  height="200"
+					  locale="pt-BR"
+					  allowPaging="true"
+					  allowSorting="true"
+					  allowResizing="true"
+					  gridLines="Both"
+					  enableStickyHeader="true">
+				<e-grid-pagesettings pageSize="20"></e-grid-pagesettings>
+				<e-data-manager url="/glosa/detalhes" adaptor="WebApiAdaptor" crossDomain="true"></e-data-manager>
+				<e-grid-columns>
+					<e-grid-column field="numItem" headerText="# Item" width="110" textAlign="Right"></e-grid-column>
+					<e-grid-column field="descricao" headerText="Descrição" width="260" clipMode="EllipsisWithTooltip"></e-grid-column>
+					<e-grid-column field="placa" headerText="Placa" width="120" textAlign="Center"></e-grid-column>
+					<e-grid-column field="dataSolicitacao" headerText="Solicitação" width="120" textAlign="Center"></e-grid-column>
+					<e-grid-column field="dataDisponibilidade" headerText="Disponível" width="130" textAlign="Center"></e-grid-column>
+					<e-grid-column field="dataRecolhimento" headerText="Recolhimento" width="130" textAlign="Center"></e-grid-column>
+					<e-grid-column field="dataDevolucao" headerText="Retorno" width="120" textAlign="Center"></e-grid-column>
+					<e-grid-column field="diasGlosa" headerText="Dias de Glosa" width="130" textAlign="Right"></e-grid-column>
+				</e-grid-columns>
+				<e-grid-aggregates>
+					<e-grid-aggregate-rows>
+						<e-grid-aggregate-columns field="diasGlosa" type="Sum" footerTemplate="Total de dias: ${Sum}"></e-grid-aggregate-columns>
+					</e-grid-aggregate-rows>
+				</e-grid-aggregates>
+			</ejs-grid>
+
+			<div class="card-footer d-flex flex-wrap gap-2">
+				<div class="chip-total chip-days">
+					<span class="chip-label"><i class="fa-duotone fa-calendar-clock"></i> Total de dias</span>
+					<span id="tot-detalhes-dias" class="chip-value">0</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script id="tmplGlosa" type="text/x-template">
+	${if(data.glosa && data.glosa != 0)}
+		${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.glosa)}
+	${else}
+		-
+	${/if}
+</script>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<!-- Renderizador dos scripts EJ2 -->
+	<ejs-scripts></ejs-scripts>
+
+	<script>
+		/** Handler GLOBAL do dataBound – robusto */
+		window.onResumoDataBound = function (args) {
+			try {
+				const grid = this || document.getElementById('gridResumo')?.ej2_instances?.[0];
+				if (!grid || !grid.getRows) return;
+
+				const rows = grid.getRows() || [];
+				if (!rows || rows.length === 0) return;
+
+				const idx = grid.getColumnIndexByField('glosa');
+				Array.from(rows).forEach(function (tr) {
+					const td = tr && tr.cells ? tr.cells[idx] : null;
+					const raw = (td && td.innerText ? td.innerText : '').trim();
+					const num = parseFloat(raw.replace(/\./g, '').replace(',', '.').replace(/[^0-9.\-]/g, ''));
+					if (!isNaN(num) && num > 0) tr.classList.add('row-glosa-positiva'); else tr.classList.remove('row-glosa-positiva');
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Glosas.cshtml", "onResumoDataBound", error);
+			}
+		};
+
+		/** Handler GLOBAL do created – apenas conecta eventos, sem chamar dataBound manualmente */
+		window.onGridCreated = function () {
+			try {
+				this.dataBound = window.onResumoDataBound;
+				this.dataBind();
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Glosas.cshtml", "onGridCreated", error);
+			}
+		};
+
+		document.addEventListener('DOMContentLoaded', function () {
+			try {
+				// --- Grid Resumo criado via JS ---
+				const grid = new ejs.grids.Grid({
+					height: 260,
+					allowPaging: true,
+					allowSorting: true,
+					gridLines: 'Both',
+					locale: 'pt-BR',
+					dataSource: new ejs.data.DataManager({
+						url: '/glosa/resumo',
+						adaptor: new ejs.data.WebApiAdaptor(),
+						crossDomain: true
+					}),
+					columns: [
+						{ field: 'numItem', headerText: '# Item', width: 110, textAlign: 'Right' },
+						{ field: 'descricao', headerText: 'Descrição', width: 260, clipMode: 'EllipsisWithTooltip' },
+						{ field: 'quantidade', headerText: 'Qtd', width: 90, textAlign: 'Right' },
+						{ field: 'valorUnitario', headerText: 'Vlr Unit', width: 120, textAlign: 'Right', format: 'C2' },
+						{ field: 'precoDiario', headerText: 'Preço Diário', width: 120, textAlign: 'Right', format: 'C2' },
+						{ field: 'precoTotalMensal', headerText: 'Preço Total Mensal', width: 160, textAlign: 'Right', format: 'C2' },
+						{ field: 'glosa', headerText: 'Glosa', width: 120, textAlign: 'Right', template: '#tmplGlosa' },
+						{ field: 'valorParaAteste', headerText: 'Valor para Ateste', width: 160, textAlign: 'Right', format: 'C2' }
+					],
+					created: function () {
+						if (typeof window.onGridCreated === 'function') {
+							window.onGridCreated.call(this);
+						}
+					}
+				});
+				grid.appendTo('#gridResumo');
+
+				// --- Helpers / atalhos ---
+				const $ej = (id) => document.getElementById(id)?.ej2_instances?.[0];
+				const toCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
+				const getArrayFromData = (payload) => {
+					if (Array.isArray(payload)) return payload;
+					if (payload && Array.isArray(payload.result)) return payload.result;
+					if (payload && payload.result && Array.isArray(payload.result.result)) return payload.result.result;
+					return [];
+				};
+
+				function buildQuery() {
+					try {
+						const contratoId = $ej('ContratoId')?.value;
+						const ano = $ej('Ano')?.value;
+						const mes = $ej('Mes')?.value;
+
+						return new ej.data.Query()
+							.addParams('contratoId', contratoId || '')
+							.addParams('ano', ano || '')
+							.addParams('mes', mes || '');
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Glosas.cshtml", "buildQuery", error);
+						return new ej.data.Query();
+					}
+				}
+
+				function applyQuery() {
+					try {
+						const query = buildQuery();
+						const gridResumo = $ej('gridResumo');
+						const gridDetalhe = $ej('gridDetalhes');
+						if (gridResumo) { gridResumo.query = query; gridResumo.refresh(); }
+						if (gridDetalhe) { gridDetalhe.query = query; gridDetalhe.refresh(); }
+						updateCardTotals();
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Glosas.cshtml", "applyQuery", error);
+					}
+				}
+
+				// Botões (agora 100% após DOM pronto)
+				const btnFiltrar = document.getElementById('btnFiltrar');
+				if (btnFiltrar) {
+					btnFiltrar.addEventListener('click', function () {
+						try {
+							applyQuery();
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Glosas.cshtml", "btnFiltrar.click", error);
+						}
+					});
+				}
+
+				const btnExport = document.getElementById('btnExportExcel');
+				if (btnExport) {
+					btnExport.addEventListener('click', function () {
+						try {
+							const contratoId = $ej('ContratoId')?.value || '';
+							const ano = $ej('Ano')?.value || '';
+							const mes = $ej('Mes')?.value || '';
+							const url = `/glosa/export?contratoId=${encodeURIComponent(contratoId)}&ano=${encodeURIComponent(ano)}&mes=${encodeURIComponent(mes)}`;
+							window.location.href = url;
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Glosas.cshtml", "btnExportExcel.click", error);
+						}
+					});
+				}
+
+				async function updateCardTotals() {
+					try {
+						const contratoId = $ej('ContratoId')?.value || '';
+						const ano = $ej('Ano')?.value || '';
+						const mes = $ej('Mes')?.value || '';
+						if (!contratoId || !ano || !mes) return;
+
+						const qs = new URLSearchParams({ contratoId, ano, mes });
+						const [rResumo, rDetalhes] = await Promise.all([
+							fetch(`/glosa/resumo?${qs}`),
+							fetch(`/glosa/detalhes?${qs}`)
+						]);
+
+						const resumo = getArrayFromData(await rResumo.json());
+						const detalhes = getArrayFromData(await rDetalhes.json());
+
+						const sum = (arr, sel) => arr.reduce((a, b) => a + (Number(sel(b)) || 0), 0);
+
+						document.getElementById('tot-resumo-total').textContent = toCurrency(sum(resumo, x => x.precoTotalMensal));
+						document.getElementById('tot-resumo-glosa').textContent = toCurrency(sum(resumo, x => x.glosa));
+						document.getElementById('tot-resumo-ateste').textContent = toCurrency(sum(resumo, x => x.valorParaAteste));
+						document.getElementById('tot-detalhes-dias').textContent = String(sum(detalhes, x => x.diasGlosa));
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Glosas.cshtml", "updateCardTotals", error);
+					}
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Glosas.cshtml", "DOMContentLoaded", error);
+			}
+		});
+	</script>
+}

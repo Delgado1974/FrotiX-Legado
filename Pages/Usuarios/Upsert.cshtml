@@ -1,0 +1,420 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Usuarios.UpsertModel
+
+@{
+    ViewData["Title"] = "Usuários";
+    ViewData["PageName"] = "Usuarios_upsert";
+    ViewData["Heading"] = "<i class='fa-duotone fa-users'></i> Cadastros: <span class='fw-300'>Usuários</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-duotone fa-users";
+
+    var isEdicao = Model.UsuarioObj?.AspNetUsers?.Id != null;
+    var statusChecked = Model.UsuarioObj?.AspNetUsers?.Status == true;
+    var detentorChecked = Model.UsuarioObj?.AspNetUsers?.DetentorCargaPatrimonial == true;
+    var fotoBase64 = Model.UsuarioObj?.AspNetUsers?.Foto != null 
+        ? Convert.ToBase64String(Model.UsuarioObj.AspNetUsers.Foto) 
+        : null;
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dropify.min.css" asp-append-version="true" />
+
+    <style>
+        .form-control-sm {
+            height: calc(1.5em + .5rem + 2px);
+            padding: .25rem .5rem;
+            font-size: .875rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+        }
+
+        .label-ftx {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Checkbox Switch Estilizado */
+        .ftx-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            gap: 0.75rem;
+        }
+
+        .ftx-switch input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .ftx-switch-slider {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+            border-radius: 26px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ftx-switch-slider::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .ftx-switch input:checked + .ftx-switch-slider {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .ftx-switch input:checked + .ftx-switch-slider::before {
+            transform: translateX(24px);
+        }
+
+        .ftx-switch-label {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .ftx-switch:hover .ftx-switch-slider {
+            box-shadow: 0 0 8px rgba(0,0,0,0.15);
+        }
+
+        /* Área de Foto */
+        .foto-container {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(180deg, #f8f9fa, #fff);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .foto-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #3D5771;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 1rem;
+        }
+
+        .foto-placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            border: 4px dashed #cbd5e1;
+        }
+
+        .foto-placeholder i {
+            font-size: 4rem;
+            color: #94a3b8;
+        }
+
+        /* Dropify Customizado */
+        .dropify-wrapper {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .dropify-wrapper:hover {
+            border-color: #3D5771;
+            background: #f1f5f9;
+        }
+
+        .dropify-wrapper .dropify-message span.file-icon {
+            font-size: 40px;
+            color: #3D5771;
+        }
+    </style>
+}
+
+<form method="post" asp-action="Upsert" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel ftx-card-styled">
+                <div class="panel-container show">
+
+                    <!-- Header Padrão FrotiX -->
+                    <div class="ftx-card-header d-flex justify-content-between align-items-center">
+                        <h2 class="titulo-paginas mb-0">
+                            <i class="fa-duotone fa-user-pen"></i>
+                            @(isEdicao ? "Editar" : "Criar") Usuário
+                        </h2>
+                        <a asp-page="./Index" class="btn btn-vinho" data-ejtip="Voltar para lista de usuários">
+                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+                        </a>
+                    </div>
+
+                    <div class="panel-content">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        @if (isEdicao)
+                        {
+                            <input type="hidden" asp-for="UsuarioObj.AspNetUsers.Id" />
+                        }
+
+                        <div class="row">
+                            <!-- Coluna dos Dados -->
+                            <div class="col-md-8">
+                                <div class="row g-3">
+                                    <!-- Ponto -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ponto">Ponto</label>
+                                            <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ponto"></span>
+                                            <input id="txtPonto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ponto" placeholder="Ex: p_12345" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Nome Completo -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.NomeCompleto">Nome Completo</label>
+                                            <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.NomeCompleto"></span>
+                                            <input class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Ramal -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ramal">Ramal</label>
+                                            <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ramal"></span>
+                                            <input class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="1234" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Login (UserName) -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.UserName">Login</label>
+                                            <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.UserName"></span>
+                                            <input id="txtUserName" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.UserName" disabled style="background-color: #e9ecef;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-3" />
+
+                                <!-- Checkboxes com Switch Estilizado -->
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <label class="ftx-switch">
+                                            <input type="hidden" name="UsuarioObj.AspNetUsers.Status" value="false" />
+                                            <input type="checkbox" 
+                                                   id="chkStatus" 
+                                                   name="UsuarioObj.AspNetUsers.Status" 
+                                                   value="true" 
+                                                   @(statusChecked ? "checked" : "") />
+                                            <span class="ftx-switch-slider"></span>
+                                            <span class="ftx-switch-label">Status (Ativo/Inativo)</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="col-md-7">
+                                        <label class="ftx-switch">
+                                            <input type="hidden" name="UsuarioObj.AspNetUsers.DetentorCargaPatrimonial" value="false" />
+                                            <input type="checkbox" 
+                                                   id="chkDetentorCarga" 
+                                                   name="UsuarioObj.AspNetUsers.DetentorCargaPatrimonial" 
+                                                   value="true" 
+                                                   @(detentorChecked ? "checked" : "") />
+                                            <span class="ftx-switch-slider"></span>
+                                            <span class="ftx-switch-label">Detentor de Carga Patrimonial</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna da Foto (à direita) -->
+                            <div class="col-md-4">
+                                <div class="foto-container">
+                                    <h6 class="label-ftx mb-3">
+                                        <i class="fa-duotone fa-camera me-1"></i> Foto do Usuário
+                                    </h6>
+
+                                    @if (fotoBase64 != null)
+                                    {
+                                        <img src="data:image/jpeg;base64,@fotoBase64" 
+                                             class="foto-preview" 
+                                             alt="Foto atual" 
+                                             id="imgPreview" />
+                                    }
+                                    else
+                                    {
+                                        <div class="foto-placeholder" id="divPlaceholder">
+                                            <i class="fa-duotone fa-user"></i>
+                                        </div>
+                                        <img src="" class="foto-preview d-none" id="imgPreview" alt="Preview" />
+                                    }
+
+                                    <input type="file" 
+                                           id="inputFoto" 
+                                           name="FotoUpload" 
+                                           class="dropify" 
+                                           data-allowed-file-extensions="jpg jpeg png gif"
+                                           data-max-file-size="2M"
+                                           data-default-file="@(fotoBase64 != null ? $"data:image/jpeg;base64,{fotoBase64}" : "")"
+                                           data-show-remove="true" />
+
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                        JPG, PNG ou GIF. Máx 2MB.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Botões de Ação -->
+                        <div class="d-flex gap-2">
+                            @if (isEdicao)
+                            {
+                                <button type="submit" 
+                                        asp-page-handler="Edit" 
+                                        asp-route-id="@Model.UsuarioObj.AspNetUsers.Id" 
+                                        class="btn btn-azul" 
+                                        data-ejtip="Atualizar dados do usuário">
+                                    <i class="fa-duotone fa-floppy-disk icon-space"></i> Atualizar
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" 
+                                        asp-page-handler="Submit" 
+                                        class="btn btn-fundo-laranja" 
+                                        data-ejtip="Criar novo usuário">
+                                    <i class="fa-duotone fa-user-plus icon-space icon-pulse"></i> Criar Usuário
+                                </button>
+                            }
+
+                            <a asp-page="./Index" class="btn btn-vinho" data-ejtip="Cancelar e voltar">
+                                <i class="fa-solid fa-xmark icon-space"></i> Cancelar
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section ScriptsBlock {
+    <script src="~/js/dropify.min.js" asp-append-version="true"></script>
+
+    <script>
+        (function () {
+            "use strict";
+
+            try {
+                // Inicializa Dropify
+                $('.dropify').dropify({
+                    messages: {
+                        'default': 'Arraste ou clique para selecionar',
+                        'replace': 'Arraste ou clique para substituir',
+                        'remove': 'Remover',
+                        'error': 'Erro no upload'
+                    },
+                    error: {
+                        'fileSize': 'Arquivo muito grande (máx 2MB)',
+                        'fileExtension': 'Tipo não permitido (use JPG, PNG ou GIF)'
+                    }
+                });
+
+                // Preview da foto
+                const inputFoto = document.getElementById('inputFoto');
+                const imgPreview = document.getElementById('imgPreview');
+                const divPlaceholder = document.getElementById('divPlaceholder');
+
+                if (inputFoto) {
+                    inputFoto.addEventListener('change', function (e) {
+                        try {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = function (evt) {
+                                    try {
+                                        if (imgPreview) {
+                                            imgPreview.src = evt.target.result;
+                                            imgPreview.classList.remove('d-none');
+                                        }
+                                        if (divPlaceholder) {
+                                            divPlaceholder.classList.add('d-none');
+                                        }
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "reader.onload", error);
+                                    }
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "inputFoto.change", error);
+                        }
+                    });
+                }
+
+                // Auto-preenche login baseado no ponto
+                const txtPonto = document.getElementById('txtPonto');
+                const txtUserName = document.getElementById('txtUserName');
+
+                if (txtPonto && txtUserName) {
+                    txtPonto.addEventListener('blur', function () {
+                        try {
+                            let valor = txtPonto.value.trim();
+
+                            if (valor && !valor.toLowerCase().startsWith('p_')) {
+                                valor = 'p_' + valor;
+                            }
+
+                            txtUserName.value = valor;
+                            txtPonto.value = valor;
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.blur", error);
+                        }
+                    });
+
+                    txtPonto.addEventListener('input', function () {
+                        try {
+                            let valor = txtPonto.value.trim();
+
+                            if (valor && !valor.toLowerCase().startsWith('p_')) {
+                                txtUserName.value = 'p_' + valor;
+                            } else {
+                                txtUserName.value = valor;
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.input", error);
+                        }
+                    });
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "script.init", error);
+            }
+        })();
+    </script>
+}

@@ -1,0 +1,1542 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using FrotiX.Pages.Multa
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+    @functions{
+        public void OnGet()
+        {
+            FrotiX.Pages.Multa.ListaMultaModel.Initialize(_unitOfWork);
+            ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+            ViewData["lstUnidade"]   = new ListaUnidades(_unitOfWork).UnidadesList();
+            ViewData["lstMudança"]   = new ListaMudancas(_unitOfWork).MudançasList();
+        }
+    }
+}
+
+@{
+    ViewData["Title"]    = "Lotação de Motoristas";
+    ViewData["PageName"] = "unidade_lotacaomotoristas";
+    ViewData["Heading"]  = "<i class='fad fa-pen-to-square'></i> Unidades: <span class='fw-300'>Lotação de Motoristas</span>";
+    ViewData["Category1"] = "Lotação";
+    ViewData["PageIcon"] = "fad fa-pen-to-square";
+}
+
+@section HeadBlock {
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+    </script>
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+
+    .btn-fundo-laranja {
+        background-color: #D2691E;
+        color: white;
+    }
+
+    .fundo-verde {
+        background-color: #6C7665;
+        color: white;
+    }
+
+    h3:after {
+        content: ' ';
+        display: block;
+        border: 2px solid #d0d0d0;
+        border-radius: 4px;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+        -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    }
+
+    .img {
+        width: 100%;
+    }
+
+    .modal-dialog {
+        max-width: 50%;
+        height: 100%;
+        margin: 0 auto !important;
+    }
+
+    .btn_margem {
+        margin: 2px;
+    }
+
+    #divDisable {
+        padding: 5px 10px;
+        background-color: #777;
+        width: 150px;
+        margin-bottom: 20px;
+    }
+
+    .disabledDiv {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+
+    .esconde-div {
+        display: none;
+    }
+
+    p {
+        margin: 20px;
+        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        font-weight: bold;
+    }
+
+    input {
+        margin: 0 12px 0 0;
+        vertical-align: middle;
+        position: relative;
+        top: -1px;
+    }
+</style>
+
+<script>
+    var defaultRTE;
+
+    function onCreate() {
+        try {
+            defaultRTE = this;
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "onCreate", error);
+        }
+    }
+
+    var motoristaId = "";
+
+    function onMotoristaChange() {
+        try {
+            var motoristas = document.getElementById('lstMotorista').ej2_instances[0];
+            if (motoristas && motoristas.value) {
+                motoristaId = motoristas.value;
+                ListaTblLotacoes(motoristaId);
+            } else {
+                var dataTableLotacao = $('#tblLotacao').DataTable();
+                dataTableLotacao.destroy();
+                $('#tblLotacao tbody').empty();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "onMotoristaChange", error);
+        }
+    }
+</script>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+                <div class="panel-content float-right">
+                    <button type="button" class="btn btn-azul" id="btn-inicialotacao" data-bs-toggle="modal" data-bs-target="#modalIniciaLotacao" data-ejtip="Inicia a Lotação!" style="cursor:pointer;">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                        Inicia a Lotação de um Motorista
+                    </button>
+                </div>
+
+                <div class="panel-content">
+                    <div class="box-body">
+                        <br /><br />
+                        <div class="col-12 px-3">
+                            <h2 class="text-primary">
+                                Escolha o Motorista para visualizar seu Histórico de Lotações:
+                            </h2>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-5">
+                                <ejs-combobox id="lstMotorista"
+                                              placeholder="Selecione um Motorista"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMotorista"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true"
+                                              change="onMotoristaChange"
+                                              close="onMotoristaChange">
+                                    <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <br />
+
+                        <div id="divLotacoes">
+                            <table id="tblLotacao" class="table table-bordered table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Nome da Unidade</th>
+                                        <th>Data Início</th>
+                                        <th>Data Fim</th>
+                                        <th>Lotado</th>
+                                        <th>Motivo</th>
+                                        <th>Ação</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <br />
+        <div id="divPenalidades"></div>
+    </div>
+</div>
+
+@* ----------------- Modal de Alocação do Motorista ----------------- *@
+@* ================================================================== *@
+<div class="modal fade" id="modalIniciaLotacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header modal-header-terracota">
+                <h3 class="modal-title" id="h3Titulo">Lota o Motorista em uma Unidade</h3>
+            </div>
+
+            <div class="modal-body">
+                <form id="frmLotacao">
+
+                    <div class="row" id="divMotorista">
+                        <div class="form-group row">
+                            <div class="col-9">
+                                <ejs-combobox id="lstMotoristaLotacao"
+                                              placeholder="Selecione um Motorista"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMotorista"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-9">
+                                <ejs-combobox id="lstUnidadeLotacao"
+                                              placeholder="Selecione uma Unidade"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstUnidade"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-9">
+                                <ejs-combobox id="lstMotivoLotacao"
+                                              placeholder="Selecione um Motivo para a Mudança de Lotação"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMudança"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="MudancaId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data de Início</label>
+                                    <input id="txtDataInicio" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data Fim</label>
+                                    <input id="txtDataFim" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-check-label font-weight-bold" for="chkLotado">
+                                        O Motorista encontra-se atualmente lotado nesta Unidade?
+                                    </label>
+                                    <input class="form-check-input" type="checkbox" id="chkLotado">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br />
+                </form>
+
+                <div class="modal-footer">
+                    <button id="btnLotaMotorista" class="btn btn-azul form-control" type="submit" value="SUBMIT">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                        Lota o Motorista
+                    </button>
+                    <button id="btnFecharLotacao" type="button" class="btn btn-vinho form-control" data-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@* --------------- Modal de Edição da Alocação do Motorista --------------- *@
+@* ======================================================================== *@
+<div class="modal fade" id="modalEditaLotacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header modal-header-azul">
+                <h3 class="modal-title" id="h3Titulo">Edita a Lotação do Motorista</h3>
+            </div>
+
+            <div class="modal-body">
+                <form id="frmEditaLotacao">
+                    <input type="hidden" id="txtIdEdita" />
+
+                    <div class="row" id="divEditaLotacao">
+
+                        <div class="form-group row" id="divMotoristaEdicao">
+                            <div class="col-9">
+                                <ejs-combobox id="lstMotoristaEditaLotacao"
+                                              placeholder="Selecione um Motorista"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMotorista"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-9">
+                                <ejs-combobox id="lstUnidadeEditaLotacao"
+                                              placeholder="Selecione uma Unidade"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstUnidade"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-9">
+                                <ejs-combobox id="lstEditaMotivo"
+                                              placeholder="Selecione um Motivo para a Mudança de Lotação"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMudança"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="MudancaId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data de Início</label>
+                                    <input id="txtDataInicioEdicao" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data Fim</label>
+                                    <input id="txtDataFimEdicao" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Limpa a Data Fim</label>
+                                    <br />
+                                    <a class="btn btn-vinho btn-xs btn-icon text-white" data-ejtip="Apagar a Data Fim!" style="cursor:pointer;" onclick="ApagaDataFim()">
+                                        <i class="far fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <p>
+                                        <label>
+                                            <input type="checkbox" id="chkLotadoEdicao" />
+                                            O Motorista encontra-se atualmente lotado nesta Unidade?
+                                        </label>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <br />
+                </form>
+
+                <div class="modal-footer">
+                    <button id="btnEditaLotacao" class="btn btn-azul form-control" type="submit" value="SUBMIT">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                        Edita a Lotação
+                    </button>
+                    <button id="btnFecharLotacaoEdicao" type="button" class="btn btn-vinho form-control" data-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ------------ Modal de Finalização da Alocação do Motorista ------------ *@
+@* ======================================================================= *@
+<div class="modal fade" id="modalFinalizaLotacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header modal-header-azul">
+                <h3 class="modal-title" id="h3Titulo">Finaliza a Lotação do Motorista Nesta Unidade</h3>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="txtIdFinaliza" />
+
+                <div class="row" id="divFinalizaLotacao">
+
+                    <div class="form-group row" id="divMotoristaFinalizacao">
+                        <div class="col-9">
+                            <ejs-combobox id="lstMotoristaFinalizaLotacao"
+                                          placeholder="Selecione um Motorista"
+                                          allowFiltering="true"
+                                          filterType="Contains"
+                                          dataSource="@ViewData["lstMotorista"]"
+                                          popupHeight="250px"
+                                          width="100%"
+                                          showClearButton="true">
+                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                            </ejs-combobox>
+                        </div>
+                    </div>
+
+                    <div class="form-group row" id="divUnidade">
+                        <div class="col-9">
+                            <ejs-combobox id="lstUnidadeLotacaoAtual"
+                                          placeholder="Selecione uma Unidade"
+                                          allowFiltering="true"
+                                          filterType="Contains"
+                                          dataSource="@ViewData["lstUnidade"]"
+                                          popupHeight="250px"
+                                          width="100%"
+                                          showClearButton="true">
+                                <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                            </ejs-combobox>
+                        </div>
+                    </div>
+
+                    <div class="col-9">
+                        <label class="font-weight-bold">Define o Motivo para o fim da Lotação do Motorista</label>
+                        <select class="form-control form-control-xs" id="lstUnidadeNovoMotivo">
+                            <option value="">-- Selecione uma opção --</option>
+                            <option value="Férias">Férias</option>
+                            <option value="Cobertura">Cobertura</option>
+                            <option value="Retorno">Retorno</option>
+                            <option value="Devolução">Devolução</option>
+                            <option value="À Pedido">À Pedido</option>
+                            <option value="Lotação Inicial">Lotação Inicial</option>
+                            <option value="Desligamento">Desligamento</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4" id="divDataInicio">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Data de Início</label>
+                                <input id="txtDataInicioFinaliza" class="form-control form-control-xs" type="date" />
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="label font-weight-bold">Data Fim</label>
+                                <input id="txtDataFimFinaliza" class="form-control form-control-xs" type="date" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row" id="divNovaLotacao">
+                            <div class="col-9">
+                                <label class="font-weight-bold">Define a nova Lotação do Motorista (se necessário)</label>
+                                <ejs-combobox id="lstUnidadeNovaLotacao"
+                                              placeholder="Selecione uma Unidade"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstUnidade"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+
+                            <div class="col-6 form-group">
+                                <label class="label font-weight-bold">Data de Início (se necessário)</label>
+                                <input id="txtDataInicioNovoMotivo" class="form-control form-control-xs" type="date" />
+                            </div>
+                        </div>
+
+                        <div class="col-12 row esconde-div" id="divCobertura">
+                            <label class="font-weight-bold">Define o Motorista de Cobertura das Férias</label>
+
+                            <ejs-combobox id="lstUnidadeMotoristaCobertura"
+                                          placeholder="Selecione o Motorista da Cobertura"
+                                          allowFiltering="true"
+                                          filterType="Contains"
+                                          dataSource="@ViewData["lstMotorista"]"
+                                          popupHeight="450px"
+                                          width="100%"
+                                          showClearButton="true">
+                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                            </ejs-combobox>
+
+                            <div class="row">
+                                <div class="col-7" id="divDataInicioCobertura">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Data de Início da Cobertura</label>
+                                        <input id="txtDataInicioCobertura" class="form-control form-control-xs" type="date" />
+                                    </div>
+                                </div>
+
+                                <div class="col-7">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Data Fim Cobertura</label>
+                                        <input id="txtDataFimCobertura" class="form-control form-control-xs" type="date" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <br />
+
+                <div class="modal-footer">
+                    <button id="btnRemoveMotoristaLotacao" class="btn btn-azul form-control" onclick="FinalizaLotacao()">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                        Remove o Motorista
+                    </button>
+                    <button id="btnFecharLotacaoFinalizacao" type="button" class="btn btn-vinho form-control" data-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+    </script>
+
+    <script>
+        function ListaTblLotacoes(motoristaId) {
+            try {
+                $('#divLotacoes').LoadingScript('method_12', {
+                    'background_image': 'img/loading7.png',
+                    'main_width': 200,
+                    'animation_speed': 10,
+                    'additional_style': '',
+                    'after_element': false
+                });
+
+                var dataTableLotacao = $('#tblLotacao').DataTable();
+                dataTableLotacao.destroy();
+                $('#tblLotacao tbody').empty();
+
+                if (DataTable.datetime) {
+                    DataTable.datetime('DD/MM/YYYY');
+                }
+
+                dataTableLotacao = $('#tblLotacao').DataTable({
+                    select: {
+                        style: 'multi',
+                        selector: 'td:first-child'
+                    },
+                    autoWidth: false,
+                    dom: 'Bfrtip',
+                    lengthMenu: [
+                        [10, 25, 50, -1],
+                        ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']
+                    ],
+                    buttons: ['pageLength', 'copy', 'excel', 'pdf', 'print'],
+                    order: [],
+                    columnDefs: [
+                        { targets: 0, className: "text-left",   width: "40%" },
+                        { targets: 1, className: "text-center", width: "5%"  },
+                        { targets: 2, className: "text-center", width: "5%"  },
+                        { targets: 3, className: "text-center", width: "12%" },
+                        {
+                            targets: 4, className: "text-left", width: "12%",
+                            render: function (data, type, full) {
+                                return `<div class="text-center">
+                                            <a data-ejtip="&#9762; (${full.motoristaCoberturaId})" style="cursor:pointer;" data-id='${data}'>
+                                                ${full.motivo}
+                                            </a>
+                                        </div>`;
+                            }
+                        },
+                        { targets: 5, className: "text-center", width: "12%" },
+                        { targets: 6, className: "text-center", width: "1%", visible: false },
+                        { targets: 7, className: "text-center", width: "1%", visible: false },
+                        { targets: 8, className: "text-center", width: "1%", visible: false }
+                    ],
+                    responsive: true,
+                    ajax: {
+                        url: "/api/unidade/listalotacao",
+                        type: "GET",
+                        data: { motoristaId: motoristaId },
+                        datatype: "json"
+                    },
+                    columns: [
+                        { data: "unidade" },
+                        { data: "dataInicial" },
+                        { data: "dataFim" },
+                        {
+                            data: "lotado",
+                            render: function (data) {
+                                if (data) {
+                                    return '<a href="javascript:void(0)" class="updateStatusVeiculo btn btn-verde btn-xs text-white text-bold" style="padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">Lotado</a>';
+                                }
+                                return '<a href="javascript:void(0)" class="updateStatusVeiculo btn btn-xs fundo-cinza text-white text-bold" style="padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">Removido</a>';
+                            }
+                        },
+                        { data: "motivo" },
+                        {
+                            data: "lotacaoMotoristaId",
+                            render: function (data, type, full) {
+                                return `<div class="text-center">
+                                            <a class="btn btn_margem btn-editalotacao btn-azul btn-xs text-white" data-bs-toggle="modal" data-bs-target="#modalEditaLotacao" data-ejtip="Edita a Lotação!" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
+                                                <i class="far fa-edit"></i>
+                                            </a>
+                                            <a class="btn btn_margem btn-finalizalotacao btn-vinho btn-xs text-white btn-fundo-laranja" data-bs-toggle="modal" data-bs-target="#modalFinalizaLotacao" data-ejtip="Finaliza a Lotação!" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
+                                                <i class="fa-regular fa-rotate-exclamation"></i>
+                                            </a>
+                                            <a class="btn btn_margem btn-apagar btn-vinho btn-xs text-white" data-ejtip="Apagar a Lotação!" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
+                                                <i class="far fa-trash-alt"></i>
+                                            </a>
+                                        </div>`;
+                            }
+                        },
+                        { data: "unidadeId" },
+                        { data: "lotacaoMotoristaId" },
+                        { data: "lotado" }
+                    ],
+                    language: {
+                        emptyTable: "Nenhum registro encontrado",
+                        info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                        infoFiltered: "(Filtrados de _MAX_ registros)",
+                        infoThousands: ".",
+                        loadingRecords: "Carregando...",
+                        processing: "Processando...",
+                        zeroRecords: "Nenhum registro encontrado",
+                        search: "Pesquisar",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                            first: "Primeiro",
+                            last: "Último"
+                        },
+                        aria: {
+                            sortAscending: ": Ordenar colunas de forma ascendente",
+                            sortDescending: ": Ordenar colunas de forma descendente"
+                        },
+                        select: {
+                            rows: {
+                                "_": " %d linhas selecionadas ",
+                                "1": "  1 linha selecionada "
+                            },
+                            cells: {
+                                "1": " 1 célula selecionada",
+                                "_": " %d células selecionadas"
+                            },
+                            columns: {
+                                "1": " 1 coluna selecionada",
+                                "_": " %d colunas selecionadas"
+                            }
+                        },
+                        buttons: {
+                            copySuccess: {
+                                "1": "Uma linha copiada com sucesso",
+                                "_": "%d linhas copiadas com sucesso"
+                            },
+                            collection: "Coleção  <span class=\"ui-button-icon-primary ui-icon ui-icon-triangle-1-s\"></span>",
+                            colvis: "Visibilidade da Coluna",
+                            colvisRestore: "Restaurar Visibilidade",
+                            copy: "Copiar",
+                            copyKeys: "Pressione ctrl ou ⌘ + C para copiar os dados da tabela para a área de transferência. Para cancelar, clique nesta mensagem ou pressione Esc.",
+                            copyTitle: "Copiar para a Área de Transferência",
+                            csv: "CSV",
+                            excel: "Excel",
+                            pageLength: {
+                                "-1": "Mostrar todos os registros",
+                                "_": "Mostrar %d registros"
+                            },
+                            pdf: "PDF",
+                            print: "Imprimir"
+                        },
+                        autoFill: {
+                            cancel: "Cancelar",
+                            fill: "Preencher todas as células com",
+                            fillHorizontal: "Preencher células horizontalmente",
+                            fillVertical: "Preencher células verticalmente"
+                        },
+                        lengthMenu: "Exibir _MENU_ resultados por página",
+                        searchBuilder: {
+                            add: "Adicionar Condição",
+                            button: {
+                                "0": "Construtor de Pesquisa",
+                                "_": "Construtor de Pesquisa (%d)"
+                            },
+                            clearAll: "Limpar Tudo",
+                            condition: "Condição",
+                            conditions: {
+                                date: {
+                                    after: "Depois",
+                                    before: "Antes",
+                                    between: "Entre",
+                                    empty: "Vazio",
+                                    equals: "Igual",
+                                    not: "Não",
+                                    notBetween: "Não Entre",
+                                    notEmpty: "Não Vazio"
+                                },
+                                number: {
+                                    between: "Entre",
+                                    empty: "Vazio",
+                                    equals: "Igual",
+                                    gt: "Maior Que",
+                                    gte: "Maior ou Igual a",
+                                    lt: "Menor Que",
+                                    lte: "Menor ou Igual a",
+                                    not: "Não",
+                                    notBetween: "Não Entre",
+                                    notEmpty: "Não Vazio"
+                                },
+                                string: {
+                                    contains: "Contém",
+                                    empty: "Vazio",
+                                    endsWith: "Termina Com",
+                                    equals: "Igual",
+                                    not: "Não",
+                                    notEmpty: "Não Vazio",
+                                    startsWith: "Começa Com"
+                                },
+                                array: {
+                                    contains: "Contém",
+                                    empty: "Vazio",
+                                    equals: "Igual à",
+                                    not: "Não",
+                                    notEmpty: "Não vazio",
+                                    without: "Não possui"
+                                }
+                            },
+                            data: "Data",
+                            deleteTitle: "Excluir regra de filtragem",
+                            logicAnd: "E",
+                            logicOr: "Ou",
+                            title: {
+                                "0": "Construtor de Pesquisa",
+                                "_": "Construtor de Pesquisa (%d)"
+                            },
+                            value: "Valor",
+                            leftTitle: "Critérios Externos",
+                            rightTitle: "Critérios Internos"
+                        },
+                        searchPanes: {
+                            clearMessage: "Limpar Tudo",
+                            collapse: {
+                                "0": "Painéis de Pesquisa",
+                                "_": "Painéis de Pesquisa (%d)"
+                            },
+                            count: "{total}",
+                            countFiltered: "{shown} ({total})",
+                            emptyPanes: "Nenhum Painel de Pesquisa",
+                            loadMessage: "Carregando Painéis de Pesquisa...",
+                            title: "Filtros Ativos"
+                        },
+                        thousands: ".",
+                        datetime: {
+                            previous: "Anterior",
+                            next: "Próximo",
+                            hours: "Hora",
+                            minutes: "Minuto",
+                            seconds: "Segundo",
+                            amPm: ["am", "pm"],
+                            unknown: "-",
+                            months: {
+                                "0": "Janeiro",
+                                "1": "Fevereiro",
+                                "2": "Março",
+                                "3": "Abril",
+                                "4": "Maio",
+                                "5": "Junho",
+                                "6": "Julho",
+                                "7": "Agosto",
+                                "8": "Setembro",
+                                "9": "Outubro",
+                                "10": "Novembro",
+                                "11": "Dezembro"
+                            },
+                            weekdays: [
+                                "Domingo",
+                                "Segunda-feira",
+                                "Terça-feira",
+                                "Quarta-feira",
+                                "Quinta-feira",
+                                "Sexta-feira",
+                                "Sábado"
+                            ]
+                        },
+                        editor: {
+                            close: "Fechar",
+                            create: { button: "Novo", submit: "Criar", title: "Criar novo registro" },
+                            edit:   { button: "Editar", submit: "Atualizar", title: "Editar registro" },
+                            error:  { system: "Ocorreu um erro no sistema." },
+                            multi: {
+                                noMulti: "Essa entrada pode ser editada individualmente, mas não como parte do grupo",
+                                restore: "Desfazer alterações",
+                                title: "Múltiplos valores",
+                                info: "Os itens selecionados contêm valores diferentes para esta entrada."
+                            },
+                            remove: {
+                                button: "Remover",
+                                confirm: { "_": "Tem certeza que quer deletar %d linhas?", "1": "Tem certeza que quer deletar 1 linha?" },
+                                submit: "Remover",
+                                title: "Remover registro"
+                            }
+                        },
+                        decimal: ","
+                    },
+                    width: "100%"
+                });
+
+                $('#divLotacoes').LoadingScript('destroy');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "ListaTblLotacoes", error);
+            }
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            try {
+                function sah1(el) {
+                    try {
+                        el.disabled = el.disabled ? false : true;
+                    } catch (E) { }
+                    if (el.childNodes && el.childNodes.length > 0) {
+                        for (var x = 0; x < el.childNodes.length; x++) {
+                            sah1(el.childNodes[x]);
+                        }
+                    }
+                }
+
+                $("#lstUnidadeNovoMotivo").change(function () {
+                    try {
+                        if ($("#lstUnidadeNovoMotivo").val() === "Férias") {
+                            document.getElementById("divCobertura").classList.remove("esconde-div");
+                            document.getElementById("divNovaLotacao").classList.add("esconde-div");
+                        } else {
+                            document.getElementById("divCobertura").classList.add("esconde-div");
+                            document.getElementById("divNovaLotacao").classList.remove("esconde-div");
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "lstUnidadeNovoMotivo.change", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "document.ready", error);
+            }
+        });
+
+        $("#btnFecharLotacao").click(function () {
+            try {
+                $("div").removeClass("modal-backdrop");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btnFecharLotacao.click", error);
+            }
+        });
+
+        $("#btnFecharLotacaoEdicao").click(function () {
+            try {
+                $("div").removeClass("modal-backdrop");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btnFecharLotacaoEdicao.click", error);
+            }
+        });
+
+        $("#btnFecharLotacaoFinalizacao").click(function () {
+            try {
+                $("div").removeClass("modal-backdrop");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btnFecharLotacaoFinalizacao.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '.btn-apagar', function () {
+            try {
+                var id = $(this).data('id');
+
+                Alerta.Confirmar(
+                    "Confirmar Exclusão",
+                    "Você tem certeza que deseja apagar esta Lotação? Não será possível recuperar os dados eliminados!",
+                    "Sim, excluir",
+                    "Cancelar"
+                ).then(function (confirmed) {
+                    try {
+                        if (confirmed) {
+                            $.ajax({
+                                url: '/api/Unidade/DeleteLotacao',
+                                type: "GET",
+                                data: { 'Id': id },
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function (data) {
+                                    try {
+                                        if (data.success) {
+                                            AppToast.show(data.message, 'Verde', 2000);
+                                            ListaTblLotacoes(data.motoristaId);
+                                        } else {
+                                            AppToast.show(data.message, 'Vermelho', 2000);
+                                        }
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "DeleteLotacao.success", error);
+                                    }
+                                },
+                                error: function (err) {
+                                    try {
+                                        console.log(err);
+                                        AppToast.show('Ocorreu um erro ao excluir a lotação', 'Vermelho', 2000);
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "DeleteLotacao.error", error);
+                                    }
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btn-apagar.confirmar.then", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btn-apagar.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        $('#modalIniciaLotacao').on('shown.bs.modal', function () {
+            try {
+                document.getElementById('lstMotoristaLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstUnidadeLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstMotivoLotacao').ej2_instances[0].value = null;
+                document.getElementById("txtDataInicio").value = "";
+                document.getElementById("txtDataFim").value = "";
+                document.getElementById("chkLotado").checked = true;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "modalIniciaLotacao.shown", error);
+            }
+        }).on("hide.bs.modal", function () {
+            try {
+                document.getElementById('lstMotoristaLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstUnidadeLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstMotivoLotacao').ej2_instances[0].value = null;
+                document.getElementById("txtDataInicio").value = "";
+                document.getElementById("txtDataFim").value = "";
+                document.getElementById("chkLotado").checked = false;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "modalIniciaLotacao.hide", error);
+            }
+        });
+    </script>
+
+    <script>
+        function moeda(a, e, r, t) {
+            try {
+                let n = "", h = 0, j = 0, u = 0, tamanho2 = 0, l = "", ajd2 = "",
+                    o = window.Event ? t.which : t.keyCode;
+
+                if (o === 13 || o === 8) return true;
+
+                n = String.fromCharCode(o);
+                if ("0123456789".indexOf(n) === -1) return false;
+
+                u = a.value.length;
+                for (h = 0; h < u && ("0" === a.value.charAt(h) || a.value.charAt(h) === r); h++) { }
+                for (l = ""; h < u; h++) {
+                    if ("0123456789".indexOf(a.value.charAt(h)) !== -1) l += a.value.charAt(h);
+                }
+
+                l += n;
+                u = l.length;
+
+                if (u === 0) a.value = "";
+                if (u === 1) a.value = "0" + r + "0" + l;
+                if (u === 2) a.value = "0" + r + l;
+
+                if (u > 2) {
+                    ajd2 = "";
+                    j = 0;
+                    for (h = u - 3; h >= 0; h--) {
+                        if (j === 3) { ajd2 += e; j = 0; }
+                        ajd2 += l.charAt(h);
+                        j++;
+                    }
+                    a.value = "";
+                    tamanho2 = ajd2.length;
+                    for (h = tamanho2 - 1; h >= 0; h--) {
+                        a.value += ajd2.charAt(h);
+                    }
+                    a.value += r + l.substr(u - 2, u);
+                }
+                return false;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "moeda", error);
+            }
+        }
+    </script>
+
+    <script>
+        $("#btnLotaMotorista").click(function (event) {
+            try {
+                $('#divMotorista').LoadingScript('method_12', {
+                    'background_image': 'img/loading7.png',
+                    'main_width': 200,
+                    'animation_speed': 10,
+                    'additional_style': '',
+                    'after_element': false
+                });
+
+                event.preventDefault();
+
+                var motoristaIdLocal = document.getElementById('lstMotoristaLotacao').ej2_instances[0].value;
+                var unidadeId        = document.getElementById('lstUnidadeLotacao').ej2_instances[0].value;
+                var motivo           = document.getElementById('lstMotivoLotacao').ej2_instances[0].value;
+
+                if (!motoristaIdLocal) {
+                    Alerta.Erro("Informação Ausente", "O Nome do Motorista é Obrigatório", "OK");
+                    $('#divMotorista').LoadingScript('destroy');
+                    return;
+                }
+                if (!unidadeId) {
+                    Alerta.Erro("Informação Ausente", "O Nome da Unidade é Obrigatório", "OK");
+                    $('#divMotorista').LoadingScript('destroy');
+                    return;
+                }
+                if (!motivo) {
+                    Alerta.Erro("Informação Ausente", "O Motivo da Lotação é Obrigatório", "OK");
+                    $('#divMotorista').LoadingScript('destroy');
+                    return;
+                }
+                if (!document.getElementById("txtDataInicio").value) {
+                    Alerta.Erro("Informação Ausente", "A Data de Início é obrigatória", "OK");
+                    $('#divMotorista').LoadingScript('destroy');
+                    return;
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Unidade/LotaMotorista",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        MotoristaId: motoristaIdLocal,
+                        UnidadeId: unidadeId,
+                        DataInicio: $('#txtDataInicio').val(),
+                        DataFim: $('#txtDataFim').val(),
+                        Lotado: document.getElementById("chkLotado").checked,
+                        Motivo: motivo
+                    },
+                    success: function (data) {
+                        try {
+                            AppToast.show(data.message, 'Verde', 2000);
+                            let IdLotacaoAtual = data.lotacaoId;
+
+                            $.ajax({
+                                type: "GET",
+                                url: "api/Unidade/RemoveLotacoes",
+                                data: { MotoristaId: motoristaIdLocal, lotacaoAtualId: IdLotacaoAtual },
+                                success: function () {
+                                    try {
+                                        AppToast.show("Função de remoção de lotações antigas executada com sucesso", 'Verde', 2000);
+                                        $("#modalIniciaLotacao").hide();
+                                        document.getElementById('lstMotoristaLotacao').ej2_instances[0].value = motoristaIdLocal;
+                                        ListaTblLotacoes(motoristaIdLocal);
+                                        $("div").removeClass("modal-backdrop");
+                                        $('#divMotorista').LoadingScript('destroy');
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "RemoveLotacoes.success", error);
+                                    }
+                                },
+                                error: function () {
+                                    try {
+                                        AppToast.show("Erro ao executar a remoção de lotações antigas", 'Vermelho', 2000);
+                                        $('#divMotorista').LoadingScript('destroy');
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "RemoveLotacoes.error", error);
+                                    }
+                                }
+                            });
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "LotaMotorista.success", error);
+                        }
+                    },
+                    error: function (data) {
+                        try {
+                            AppToast.show('Erro ao lotar motorista', 'Vermelho', 2000);
+                            console.log(data);
+                            $('#divMotorista').LoadingScript('destroy');
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "LotaMotorista.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btnLotaMotorista.click", error);
+            }
+        });
+
+        $('#divMotorista').LoadingScript('destroy');
+    </script>
+
+    <script>
+        var table = $('#tblLotacao').DataTable();
+        var linhaSelecionada = 0;
+
+        $("#tblLotacao tbody").on("click", "tr", (e) => {
+            try {
+                linhaSelecionada = e.currentTarget._DT_RowIndex;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "tblLotacao.tbody.click", error);
+            }
+        });
+
+        $("#btnEditaLotacao").click(function (event) {
+            try {
+                $('#divEditaLotacao').LoadingScript('method_12', {
+                    'background_image': 'img/loading7.png',
+                    'main_width': 200,
+                    'animation_speed': 10,
+                    'additional_style': '',
+                    'after_element': false
+                });
+
+                event.preventDefault();
+
+                var lotacaoId      = $('#txtIdEdita').val();
+                var motoristaIdLoc = document.getElementById('lstMotoristaEditaLotacao').ej2_instances[0].value;
+                var unidadeNovaId  = document.getElementById('lstUnidadeEditaLotacao').ej2_instances[0].value;
+                var motivoNovoId   = document.getElementById('lstEditaMotivo').ej2_instances[0].value;
+
+                if (!unidadeNovaId) {
+                    Alerta.Erro("Informação Ausente", "O Nome da Unidade é Obrigatório", "OK");
+                    $('#divEditaLotacao').LoadingScript('destroy');
+                    return;
+                }
+                if (!motivoNovoId) {
+                    Alerta.Erro("Informação Ausente", "O Motivo de Mudança de Lotação é obrigatório", "OK");
+                    $('#divEditaLotacao').LoadingScript('destroy');
+                    return;
+                }
+                if (!document.getElementById("txtDataInicioEdicao").value) {
+                    Alerta.Erro("Informação Ausente", "A Data de Início é obrigatória", "OK");
+                    $('#divEditaLotacao').LoadingScript('destroy');
+                    return;
+                }
+
+                if (document.getElementById("chkLotadoEdicao").checked === true) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/Unidade/RemoveLotacoes",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: { MotoristaId: motoristaIdLoc },
+                        success: function () { },
+                        error: function (data) {
+                            try {
+                                AppToast.show('Erro ao remover lotações', 'Vermelho', 2000);
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "RemoveLotacoes.error", error);
+                            }
+                        }
+                    });
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Unidade/EditaLotacao",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        LotacaoId: lotacaoId,
+                        MotoristaId: motoristaIdLoc,
+                        UnidadeId: unidadeNovaId,
+                        DataInicio: $('#txtDataInicioEdicao').val(),
+                        DataFim: $('#txtDataFimEdicao').val(),
+                        Lotado: document.getElementById("chkLotadoEdicao").checked,
+                        Motivo: motivoNovoId
+                    },
+                    success: function (data) {
+                        try {
+                            AppToast.show(data.message, 'Verde', 2000);
+                            $("#modalEditaLotacao").hide();
+                            document.getElementById('lstMotoristaLotacao').ej2_instances[0].value = motoristaIdLoc;
+                            ListaTblLotacoes(motoristaIdLoc);
+                            $("div").removeClass("modal-backdrop");
+                            $('#divEditaLotacao').LoadingScript('destroy');
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "EditaLotacao.success", error);
+                        }
+                    },
+                    error: function (data) {
+                        try {
+                            AppToast.show('Erro ao editar lotação', 'Vermelho', 2000);
+                            console.log(data);
+                            $('#divEditaLotacao').LoadingScript('destroy');
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "EditaLotacao.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "btnEditaLotacao.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        function ApagaDataFim() {
+            try {
+                document.getElementById('txtDataFimEdicao').value = "";
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "ApagaDataFim", error);
+            }
+        }
+
+        function FinalizaLotacao() {
+            try {
+                var dataTableLotacao = $('#tblLotacao').DataTable();
+                var data = dataTableLotacao.row(linhaSelecionada).data();
+
+                var unidadeId          = data['unidadeId'];
+                var unidadeAtualId     = data['unidadeId'];
+                var motivoLotacaoAtual = document.getElementById('lstUnidadeNovoMotivo').value;
+
+                var lotacaoId               = $('#txtIdFinaliza').val();
+                var motoristaIdLocal        = document.getElementById('lstMotoristaFinalizaLotacao').ej2_instances[0].value;
+                var unidadeNovaId           = document.getElementById('lstUnidadeNovaLotacao').ej2_instances[0].value;
+                var motoristaCoberturaId    = document.getElementById('lstUnidadeMotoristaCobertura').ej2_instances[0].value;
+
+                if (!document.getElementById("txtDataFimFinaliza").value) {
+                    Alerta.Erro("Informação Ausente", "A Data de Fim da Antiga Lotação é obrigatória", "OK");
+                    return;
+                }
+
+                if (unidadeNovaId && motivoLotacaoAtual !== "Férias") {
+                    if (!$('#txtDataInicioNovoMotivo').val()) {
+                        Alerta.Erro("Informação Ausente", "A data de início da nova lotação é obrigatória", "OK");
+                        return;
+                    }
+                }
+
+                if (motivoLotacaoAtual !== "Férias") {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/Unidade/AtualizaMotoristaLotacaoAtual",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: {
+                            MotoristaId: motoristaIdLocal,
+                            UnidadeAtualId: unidadeAtualId,
+                            UnidadeNovaId: unidadeNovaId,
+                            DataFimLotacaoAnterior: document.getElementById("txtDataFimFinaliza").value,
+                            DataInicioNovoMotivo: $('#txtDataInicioNovoMotivo').val(),
+                            MotivoLotacaoAtual: motivoLotacaoAtual
+                        },
+                        success: function (data) {
+                            try {
+                                AppToast.show(data.message, 'Verde', 2000);
+                                $("#modalFinalizaLotacao").hide();
+                                document.getElementById('lstMotoristaLotacao').ej2_instances[0].value = motoristaIdLocal;
+                                ListaTblLotacoes(motoristaIdLocal);
+                                $("div").removeClass("modal-backdrop");
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "AtualizaMotoristaLotacaoAtual.success", error);
+                            }
+                        },
+                        error: function (data) {
+                            try {
+                                AppToast.show('Erro ao finalizar lotação', 'Vermelho', 2000);
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "AtualizaMotoristaLotacaoAtual.error", error);
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                if (motivoLotacaoAtual === "Férias") {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/Unidade/AlocaMotoristaCobertura",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: {
+                            MotoristaId: motoristaIdLocal,
+                            MotoristaCoberturaId: motoristaCoberturaId,
+                            DataInicioLotacao: $('#txtDataFimFinaliza').val(),
+                            DataFimLotacao: $('#txtDataFimFinaliza').val(),
+                            DataInicioCobertura: $('#txtDataInicioCobertura').val(),
+                            DataFimCobertura: $('#txtDataFimCobertura').val(),
+                            UnidadeId: unidadeId
+                        },
+                        success: function (data) {
+                            try {
+                                AppToast.show(data.message, 'Verde', 2000);
+                                $("#modalFinalizaLotacao").hide();
+                                document.getElementById('lstMotoristaLotacao').ej2_instances[0].value = motoristaIdLocal;
+                                ListaTblLotacoes(motoristaIdLocal);
+                                $("div").removeClass("modal-backdrop");
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "AlocaMotoristaCobertura.success", error);
+                            }
+                        },
+                        error: function (data) {
+                            try {
+                                AppToast.show('Erro ao alocar cobertura', 'Vermelho', 2000);
+                                console.log(data);
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "AlocaMotoristaCobertura.error", error);
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "FinalizaLotacao", error);
+            }
+        }
+    </script>
+
+    <script>
+        var table = $('#tblLotacao').DataTable();
+        var linhaSelecionada = 0;
+
+        $("#tblLotacao tbody").on("click", "tr", (e) => {
+            try {
+                linhaSelecionada = e.currentTarget._DT_RowIndex;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "tblLotacao.tbody.click.2", error);
+            }
+        });
+
+        $('#modalEditaLotacao').on('shown.bs.modal', function () {
+            try {
+                var dataTableLotacao = $('#tblLotacao').DataTable();
+                var data = dataTableLotacao.row(linhaSelecionada).data();
+
+                var unidadeId          = data['unidadeId'];
+                var lotacaoMotoristaId = data['lotacaoMotoristaId'];
+                var motivo             = data['motivo'];
+
+                function sah1(el) {
+                    try { el.disabled = el.disabled ? false : true; } catch (E) { }
+                    if (el.childNodes && el.childNodes.length > 0) {
+                        for (var x = 0; x < el.childNodes.length; x++) {
+                            sah1(el.childNodes[x]);
+                        }
+                    }
+                }
+
+                $("#divMotoristaEdicao").attr("disabled", "disabled").off('click');
+                var x1 = $("#divMotoristaEdicao").hasClass("divDisable");
+                (x1 === true) ? $("#divMotoristaEdicao").removeClass("disabledDiv") : $("#divMotoristaEdicao").addClass("disabledDiv");
+                sah1(document.getElementById("divMotoristaEdicao"));
+
+                $('#txtIdEdita').val(lotacaoMotoristaId);
+                $('#btnEditaLotacao').attr("data-id", lotacaoMotoristaId);
+
+                document.getElementById('lstMotoristaEditaLotacao').ej2_instances[0].value = motoristaId;
+                document.getElementById('lstUnidadeEditaLotacao').ej2_instances[0].value  = unidadeId;
+                document.getElementById('lstEditaMotivo').ej2_instances[0].value         = motivo;
+
+                if (data['dataInicial']) {
+                    var di = data['dataInicial'].split("/");
+                    var dataInicio = `${di[2]}-${di[1]}-${di[0]}`;
+                    $('#txtDataInicioEdicao').val(dataInicio);
+                }
+
+                if (data['dataFim']) {
+                    var df = data['dataFim'].split("/");
+                    var dataFim = `${df[2]}-${df[1]}-${df[0]}`;
+                    $('#txtDataFimEdicao').val(dataFim);
+                }
+
+                document.getElementById("chkLotadoEdicao").checked = !!data['lotado'];
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "modalEditaLotacao.shown", error);
+            }
+        }).on("hide.bs.modal", function () {
+            try {
+                $('#txtIdEdita').val("");
+                document.getElementById('lstMotoristaEditaLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstUnidadeNovaLotacao').ej2_instances[0].value    = null;
+                document.getElementById('lstEditaMotivo').ej2_instances[0].value          = null;
+                $('#txtDataInicioEdicao').val("");
+                $('#txtDataFimEdicao').val("");
+                document.getElementById("chkLotadoEdicao").checked = false;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "modalEditaLotacao.hide", error);
+            }
+        });
+    </script>
+
+    <script>
+        var table = $('#tblLotacao').DataTable();
+        var linhaSelecionada = 0;
+
+        $("#tblLotacao tbody").on("click", "tr", (e) => {
+            try {
+                linhaSelecionada = e.currentTarget._DT_RowIndex;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "tblLotacao.tbody.click.3", error);
+            }
+        });
+
+        $('#modalFinalizaLotacao').on('shown.bs.modal', function () {
+            try {
+                function sah1(el) {
+                    try { el.disabled = el.disabled ? false : true; } catch (E) { }
+                    if (el.childNodes && el.childNodes.length > 0) {
+                        for (var x = 0; x < el.childNodes.length; x++) {
+                            sah1(el.childNodes[x]);
+                        }
+                    }
+                }
+
+                $("#divMotoristaFinalizacao").attr("disabled", "disabled").off('click');
+                var x1 = $("#divMotoristaFinalizacao").hasClass("divDisable");
+                (x1 === true) ? $("#divMotoristaFinalizacao").removeClass("disabledDiv") : $("#divMotoristaFinalizacao").addClass("disabledDiv");
+                sah1(document.getElementById("divMotoristaFinalizacao"));
+
+                var x2 = $("#divUnidade").hasClass("divDisable");
+                (x2 === true) ? $("#divUnidade").removeClass("disabledDiv") : $("#divUnidade").addClass("disabledDiv");
+                sah1(document.getElementById("divUnidade"));
+
+                var dataTableLotacao = $('#tblLotacao').DataTable();
+                var data = dataTableLotacao.row(linhaSelecionada).data();
+
+                motoristaId = document.getElementById('lstMotorista').ej2_instances[0].value;
+                var unidadeId          = data['unidadeId'];
+                var lotacaoMotoristaId = data['lotacaoMotoristaId'];
+                var motivo             = data['motivo'];
+
+                $('#txtIdFinaliza').val(lotacaoMotoristaId);
+                $('#btnFecharLotacaoFinalizacao').attr("data-id", lotacaoMotoristaId);
+
+                document.getElementById('lstMotoristaFinalizaLotacao').ej2_instances[0].value = motoristaId;
+                document.getElementById('lstUnidadeLotacaoAtual').ej2_instances[0].value     = unidadeId;
+                document.getElementById("lstUnidadeNovoMotivo").value = motivo;
+                document.getElementById('txtDataInicioNovoMotivo').value = "";
+
+                if (data['dataInicial']) {
+                    var di = data['dataInicial'].split("/");
+                    var dataInicio = `${di[2]}-${di[1]}-${di[0]}`;
+                    $('#txtDataInicioFinaliza').val(dataInicio);
+                }
+
+                document.getElementById('txtDataFimFinaliza').value = "";
+                document.getElementById("chkLotadoEdicao").checked  = !!data['lotado'];
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "modalFinalizaLotacao.shown", error);
+            }
+        }).on("hide.bs.modal", function () {
+            try {
+                $('#txtIdFinaliza').val("");
+                document.getElementById('lstMotoristaFinalizaLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstUnidadeLotacaoAtual').ej2_instances[0].value     = null;
+                document.getElementById("lstUnidadeNovoMotivo").value = null;
+                $('#lstUnidadeMotoristaCobertura').val("");
+                $('#txtDataInicioFinaliza').val("");
+                $('#txtDataFimFinaliza').val("");
+                $('#txtDataInicioCobertura').val("");
+                $('#txtDataFimCobertura').val("");
+                document.getElementById("chkLotadoEdicao").checked = false;
+                document.getElementById('lstUnidadeNovaLotacao').ej2_instances[0].value = null;
+                $('#txtDataInicioNovoMotivo').val("");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("LotacaoMotoristas.cshtml", "modalFinalizaLotacao.hide", error);
+            }
+        });
+    </script>
+}
+

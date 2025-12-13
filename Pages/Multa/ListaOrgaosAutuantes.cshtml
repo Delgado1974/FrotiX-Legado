@@ -1,0 +1,219 @@
+@page
+@model FrotiX.Pages.Multa.ListaOrgaosAutuantesModel
+
+@{
+	ViewData["Title"] = "Órgãos Autuantes";
+	ViewData["PageName"] = "multa_listaorgaosautuantes";
+	ViewData["Heading"] = "<i class='fad fa-monument'></i>&nbsp;Cadastros: <span class='fw-300'>Órgãos Autuantes</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fad fa-monument";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-orgao-azul: #3D5771;
+			--ftx-orgao-azul-hover: #2d4559;
+		}
+
+		/* ====== OVERRIDE HEADER ====== */
+		.ftx-card-header .ftx-card-title {
+			font-family: 'Outfit', sans-serif !important;
+			font-weight: 900 !important;
+			color: #fff !important;
+		}
+
+		.ftx-card-header .ftx-card-title i {
+			color: #fff !important;
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: rgba(255,255,255,0.7) !important;
+		}
+
+		/* ====== TABELA ====== */
+		#tblOrgaoAutuante {
+			font-size: 0.85rem;
+		}
+
+		#tblOrgaoAutuante thead {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+		}
+
+		#tblOrgaoAutuante thead th {
+			color: #fff !important;
+			font-weight: 600;
+			font-size: 0.80rem;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			padding: 0.75rem 0.625rem;
+			text-align: center;
+			border: none !important;
+			vertical-align: middle !important;
+		}
+
+		#tblOrgaoAutuante tbody tr {
+			transition: background-color 0.15s ease;
+		}
+
+		#tblOrgaoAutuante tbody tr:hover {
+			background-color: rgba(50, 93, 136, 0.06) !important;
+		}
+
+		#tblOrgaoAutuante tbody td {
+			padding: 0.625rem;
+			vertical-align: middle !important;
+			border-color: rgba(0,0,0,0.05) !important;
+		}
+
+		/* ====== BOTÕES DE AÇÃO NA TABELA - COM GLOW FROTIX ====== */
+		.ftx-btn-icon {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: .375rem !important;
+			border: none !important;
+			color: #fff !important;
+			font-size: 0.85rem;
+			cursor: pointer;
+			transition: all .3s ease, transform .2s ease !important;
+			position: relative;
+			overflow: hidden;
+			margin: 1px !important;
+		}
+
+		.ftx-btn-icon:hover:not([aria-disabled="true"]) {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		.ftx-btn-icon:active:not([aria-disabled="true"]),
+		.ftx-btn-icon:focus:not([aria-disabled="true"]) {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		.ftx-btn-icon i {
+			font-size: var(--ftx-action-icon, 0.90rem);
+			line-height: 1;
+			color: #fff !important;
+		}
+
+		/* Editar - Azul com GLOW */
+		.ftx-btn-editar {
+			background-color: #3D5771 !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-editar:hover:not([aria-disabled="true"]) {
+			background-color: #2d4559 !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+		.ftx-btn-editar:active, .ftx-btn-editar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* Apagar - Vinho com GLOW */
+		.ftx-btn-apagar {
+			background-color: #722f37 !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-apagar:hover:not([aria-disabled="true"]) {
+			background-color: #5a252c !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+		.ftx-btn-apagar:active, .ftx-btn-apagar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		/* ====== DATATABLE CONTROLS ====== */
+		.dataTables_wrapper .dataTables_filter input {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.25rem 0.5rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_length select {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.15rem 0.35rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_info,
+		.dataTables_wrapper .dataTables_paginate,
+		.dataTables_wrapper .dataTables_length label,
+		.dataTables_wrapper .dataTables_filter label {
+			font-size: 0.80rem;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+		}
+	</style>
+}
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel ftx-card-styled">
+			<div class="panel-container show">
+
+				<!-- Header Padrão FrotiX -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-monument"></i>
+						Cadastros: Órgãos Autuantes
+					</h2>
+					<a href="/Multa/UpsertOrgaoAutuante" class="btn btn-fundo-laranja" data-ejtip="Adicionar novo órgão autuante">
+						<i class="fa-duotone fa-plus icon-space"></i>
+						Adicionar Órgão
+					</a>
+				</div>
+
+				<!-- Tabela -->
+				<div class="panel-content">
+					<div id="divOrgaos">
+						<table id="tblOrgaoAutuante" class="table table-bordered table-striped" width="100%">
+							<thead>
+								<tr>
+									<th>Sigla</th>
+									<th>Nome</th>
+									<th>Ação</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/cadastros/orgaoautuante.js" asp-append-version="true"></script>
+}

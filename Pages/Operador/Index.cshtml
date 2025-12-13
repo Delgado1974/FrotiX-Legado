@@ -1,0 +1,190 @@
+@page
+@model FrotiX.Models.Operador
+
+@{
+	ViewData["Title"] = "Operadores";
+	ViewData["PageName"] = "operador_index";
+	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Operadores</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fal fa-user-tie";
+}
+ 
+@section HeadBlock {
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+    .label { color: white; }
+
+    /* Ajuste local: aproxima o conteúdo do cabeçalho */
+    #panel-1 .panel-content {
+        padding-top: 10px !important;
+    }
+
+    /* Ajustes locais de espaçamento do DataTables desta página */
+    #tblOperador_wrapper .row {
+        margin-top: .25rem;
+        margin-bottom: .5rem;
+    }
+    #tblOperador_wrapper .dataTables_length,
+    #tblOperador_wrapper .dt-buttons,
+    #tblOperador_wrapper .dataTables_filter {
+        margin-top: .25rem;
+        margin-bottom: .25rem;
+    }
+</style>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+
+                <!-- Cabeçalho (usa .header-toolbar e .titulo-paginas do CSS GLOBAL) -->
+                <div class="col-12 px-3">
+                    <div class="header-toolbar">
+                        <h2 class="titulo-paginas">
+                            <i class="fa-duotone fa-user-headset" aria-hidden="true"></i>
+                            Listagem de Operadores
+                        </h2>
+
+                        <a href="/Operador/Upsert"
+                           class="btn btn-azul form-control flex-shrink-0"
+                           style="width: 250px;"
+                           data-ejtip="Adicionar novo operador ao sistema">
+                            <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Operador
+                        </a>
+                    </div>
+                </div>
+
+                <div class="panel-content">
+                    <div class="box-body">
+                       <table id="tblOperador" class="table table-bordered table-striped mt-2 ftx-table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Ponto</th>
+                                    <th>Celular</th>
+                                    <th>Contrato</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* preenchido via JS *@
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@* -------------- Modal da Foto do Operador -------------- *@
+@* ======================================================= *@
+<div class="modal fade" id="modalFoto">
+	<div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div class="modal-header modal-header-azul">
+				<h4 class="modal-title" id="DynamicModalLabel">Foto do Operador</h4>
+			</div>
+			<div class="modal-body table-bordered container-fluid">
+				<img id="imgViewer" alt="Foto do Operador" width="200" height="200" style="border: 1px solid #000000; margin-top: 10px;" />
+				<div class="modal-footer">
+					<button type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal">
+						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+						Fechar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/cadastros/operador.js" asp-append-version="true"></script>
+
+	<script>
+		$(document).ready(function () {
+			try {
+				// Configura a Exibição do Modal de Foto
+				const modalEl = document.getElementById("modalFoto");
+
+				if (modalEl) {
+					// Bootstrap 5
+					modalEl.addEventListener("show.bs.modal", function (event) {
+						try {
+							var button = event.relatedTarget;
+							var operadorId = button.getAttribute("data-id");
+
+							console.log(operadorId);
+
+							var id = operadorId;
+							var label = document.getElementById("DynamicModalLabel");
+							label.innerHTML = "";
+
+							$.ajaxSetup({ async: false });
+
+							$.ajax({
+								type: "get",
+								url: "/api/Operador/PegaFotoModal",
+								data: { id: id },
+								success: function (res) {
+									try {
+										var operador = $(button).closest("tr").find("td:eq(0)").text();
+										console.log(operador);
+
+										var label = document.getElementById("DynamicModalLabel");
+										$("#imgViewer").removeAttr("src");
+
+										if (res === false) {
+											label.innerHTML = ("Operador sem Foto: <b>" + operador + "</b>");
+											$("#imgViewer").attr("src", "/Images/barbudo.jpg");
+										} else {
+											label.innerHTML = ("Foto do Operador: <b>" + operador + "</b>");
+											$("#imgViewer").attr("src", "data:image/jpg;base64," + res);
+										}
+									}
+									catch (error) {
+										Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.show.ajax.success", error);
+									}
+								},
+								error: function (err) {
+									try {
+										console.error("Erro ao carregar foto:", err);
+										Alerta.Erro("Erro ao Carregar", "Não foi possível carregar a foto do operador.", "OK");
+									}
+									catch (error) {
+										Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.show.ajax.error", error);
+									}
+								}
+							});
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.show.bs.modal", error);
+						}
+					});
+
+					modalEl.addEventListener("hide.bs.modal", function () {
+						try {
+							$("#imgViewer").removeAttr("src");
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.hide.bs.modal", error);
+						}
+					});
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "document.ready", error);
+			}
+		});
+	</script>
+}

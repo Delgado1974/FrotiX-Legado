@@ -1,0 +1,1489 @@
+/* ========================================================
+   MODAL VIAGENS - CSS CONSOLIDADO FINAL
+   Versão única sem conflitos ou duplicações
+   Data: 2025-01-22
+   ======================================================== */
+
+/* ============================================
+   1. CONFIGURAÇÕES GLOBAIS E TIPOGRAFIA
+   ============================================ */
+body {
+    font-family: "Poppins", sans-serif;
+}
+
+.modal-body {
+    font-size: 0.875rem;
+    overflow-y: auto;
+    overflow-x: hidden !important;
+}
+
+.card-body {
+    overflow-x: hidden !important;
+}
+
+/* ============================================
+   2. FORM CONTROLS BASE
+   ============================================ */
+.form-control {
+    height: 38px;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .2rem;
+    padding: .25rem .5rem;
+}
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        outline: none;
+        z-index: 5;
+        position: relative;
+    }
+
+    .form-control.e-input {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        padding: .375rem .75rem;
+    }
+
+input[readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.form-label {
+    margin-bottom: 0.375rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.label {
+    display: inline-block;
+    margin-bottom: .5rem;
+    font-weight: bold;
+    line-height: 1.25;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+/* ============================================
+   3. SYNCFUSION - ALTURA PADríO 38px
+   ============================================ */
+.e-input-group.e-control-wrapper {
+    min-height: 38px !important;
+    height: 38px !important;
+    font-size: 0.875rem;
+}
+
+/* ComboBox e DropDownList */
+.e-combobox.e-input-group,
+.e-dropdownlist.e-input-group,
+.e-combobox.e-control-wrapper,
+.e-dropdownlist.e-control-wrapper {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+}
+
+.e-combobox .e-input,
+.e-dropdownlist .e-input {
+    height: 36px !important;
+    padding: 0 8px !important;
+    line-height: 36px !important;
+}
+
+.e-control-wrapper.e-combobox,
+.e-control-wrapper.e-dropdownlist {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+/* DropDownTree */
+.e-dropdowntree.e-control {
+    min-height: 38px !important;
+    height: 38px !important;
+}
+
+.e-dropdowntree .e-input {
+    height: 36px !important;
+    padding: 0 8px !important;
+    line-height: 36px !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.e-dropdowntree .e-ddt-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    box-sizing: border-box !important;
+}
+
+    .e-dropdowntree .e-ddt-wrapper.e-input-focus {
+        border-color: #86b7fe !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+
+/* Garantir fechamento do dropdown tree */
+.e-dropdowntree .e-ddt {
+    height: 38px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.e-dropdowntree.e-input-group,
+.e-dropdowntree.e-control-wrapper {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+}
+
+.e-ddt-wrapper {
+    margin-bottom: 0 !important;
+}
+
+/* DatePicker e TimePicker */
+.e-date-wrapper.e-control-wrapper,
+.e-datepicker.e-control-wrapper,
+.e-timepicker.e-control-wrapper {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+.e-date-wrapper .e-input,
+.e-datepicker .e-input,
+.e-timepicker .e-input {
+    height: 36px !important;
+    padding: 0 8px !important;
+    line-height: 36px !important;
+}
+
+.e-datepicker .e-input-group-icon,
+.e-timepicker .e-input-group-icon {
+    height: 38px !important;
+    line-height: 38px !important;
+    width: 38px !important;
+    font-size: 16px !important;
+}
+
+/* MultiSelect - ALTURA PADríO 38px */
+.e-multiselect.e-input-group,
+.e-multiselect.e-control-wrapper,
+.e-multi-select-wrapper {
+    min-height: 38px !important;
+    height: 38px !important;
+    max-height: 38px !important;
+}
+
+.e-multiselect .e-chips-collection,
+.e-multiselect .e-delim-values {
+    max-height: 36px !important;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* NumericTextBox */
+.e-numerictextbox.e-control-wrapper {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+/* Popup */
+.e-popup {
+    z-index: 1055 !important;
+    position: absolute !important;
+    overflow: visible !important;
+}
+
+.dropdown-wrapper {
+    position: relative;
+    overflow: visible !important;
+    z-index: 1060;
+}
+
+/* Container pai do lstFinalidade - garantir overflow visível */
+.d-flex.flex-column.ml-2 {
+    overflow: visible !important;
+}
+
+.d-flex.flex-column.ml-2 > .dropdown-wrapper {
+    overflow: visible !important;
+}
+
+/* Foco em componentes Syncfusion */
+.e-input-group:focus-within,
+.e-input-group.e-input-focus,
+.e-float-input:focus-within,
+.e-float-input.e-input-focus,
+.e-control-wrapper:focus-within,
+.e-ddl:focus-within,
+.e-dropdownbase:focus-within,
+.e-datepicker:focus-within,
+.e-timepicker:focus-within,
+.e-dropdownlist:focus-within,
+.e-combobox:focus-within,
+.e-multiselect:focus-within {
+    border-color: #80bdff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15) !important;
+    outline: none !important;
+    z-index: 5 !important;
+    position: relative !important;
+}
+
+/* ============================================
+   4. INPUT GROUPS
+   ============================================ */
+.input-group {
+    display: flex;
+    align-items: center;
+    height: 38px !important;
+}
+
+    .input-group .form-control {
+        flex: 1;
+    }
+
+    .input-group .btn {
+        height: 38px !important;
+        min-height: 38px !important;
+        margin-left: .5rem;
+        padding: 0.375rem 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .input-group > * {
+        margin-bottom: 0 !important;
+    }
+
+/* ============================================
+   5. BOtão REQUISITANTE
+   ============================================ */
+#btnRequisitante {
+    height: 38px !important;
+    min-height: 38px !important;
+    min-width: 42px;
+    padding: 0 12px !important;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+    #btnRequisitante i {
+        pointer-events: none;
+    }
+
+/* ============================================
+   6. ACCORDION REQUISITANTE
+   ============================================ */
+.accordion-container-requisitante {
+    margin-top: 10px;
+    display: none !important; /* Invisível por padrão - só aparece em modo edição variada */
+    width: 100%;
+    position: relative;
+    z-index: 999;
+    max-width: 700px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    border-radius: 5px;
+    display: none;
+}
+
+    .accordion-container-requisitante .form-group {
+        margin-bottom: 1rem;
+    }
+
+        .accordion-container-requisitante .form-group label {
+            display: block;
+            margin-bottom: .5rem;
+            font-weight: bold;
+        }
+
+.acc-borda.e-accordion {
+    border: 1px solid #325d88;
+    border-radius: .5rem;
+    overflow: hidden;
+}
+
+/* ============================================
+   7. SECTION CARDS
+   ============================================ */
+.section-card {
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.section-card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.25rem;
+    font-weight: bold;
+    color: #5a5c69;
+}
+
+.section-card-body {
+    padding: 1.25rem;
+    overflow: visible !important;
+}
+
+.field-icon {
+    color: #4e73df;
+    margin-left: 0.25rem;
+    font-size: 1.25em;
+    cursor: pointer;
+}
+
+/* ============================================
+   8. CARD DE EVENTO
+   ============================================ */
+#cardEvento {
+    border-left: 4px solid #0d6efd;
+    transition: all 0.3s ease;
+}
+
+    #cardEvento .card-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    }
+
+    #cardEvento .accordion-button:not(.collapsed) {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+    }
+
+/* ============================================
+   9. CARD DE RELAtÓRIO
+   ============================================ */
+#cardRelatorio {
+    transition: all 0.3s ease;
+}
+
+    #cardRelatorio.show {
+        display: block !important;
+    }
+
+#ReportContainerAgenda {
+    min-height: 850px;
+    background-color: #f8f9fa;
+}
+
+#reportViewerAgenda {
+    width: 100%;
+    height: 800px;
+    min-height: 800px;
+}
+
+#divRelatorioViagem {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+    #divRelatorioViagem .card {
+        box-shadow: 0 0.125rem 0.5rem rgba(0, 123, 255, 0.15);
+        border: 2px solid rgba(0, 123, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    #divRelatorioViagem .card-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+/* ============================================
+   10. RICH TEXT EDITOR
+   ============================================ */
+#rteDescricao .e-richtexteditor {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+#rteRelatorio .e-richtexteditor {
+    border: none;
+    background-color: white;
+}
+
+.e-richtexteditor .e-rte-toolbar {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* ============================================
+   11. USER LABELS
+   ============================================ */
+#lblUsuarioAgendamento,
+#lblUsuarioCriacao,
+#lblUsuarioFinalizacao,
+#lblUsuarioCancelamento {
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+    #lblUsuarioAgendamento:hover,
+    #lblUsuarioCriacao:hover,
+    #lblUsuarioFinalizacao:hover,
+    #lblUsuarioCancelamento:hover {
+        background-color: #e9ecef;
+        transform: translateX(3px);
+    }
+
+    #lblUsuarioAgendamento i,
+    #lblUsuarioCriacao i,
+    #lblUsuarioFinalizacao i,
+    #lblUsuarioCancelamento i {
+        font-size: 1.3em;
+        margin-right: 10px;
+    }
+
+#lblUsuarioAgendamento {
+    border-left-color: #C2410C;
+}
+
+#lblUsuarioCriacao {
+    border-left-color: #1e3a8a;
+}
+
+#lblUsuarioFinalizacao {
+    border-left-color: #155724;
+}
+
+#lblUsuarioCancelamento {
+    border-left-color: #8B0000;
+}
+
+    #lblUsuarioAgendamento:empty,
+    #lblUsuarioCriacao:empty,
+    #lblUsuarioFinalizacao:empty,
+    #lblUsuarioCancelamento:empty {
+        display: none !important;
+    }
+
+/* ============================================
+   12. BOTÕES
+   ============================================ */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.765rem;
+    line-height: 1.5;
+}
+
+.btn:hover,
+.btn:focus,
+.btn:active {
+    background: inherit !important;
+    color: inherit !important;
+}
+
+button i {
+    margin-right: 8px;
+}
+
+.btn-nfs {
+    background: #7B3F00 !important;
+    color: #fff !important;
+    cursor: pointer;
+}
+
+#divBotoes .btn {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#btnViagem {
+    background: #D2691E;
+    color: #fff;
+}
+
+    #btnViagem:hover,
+    #btnViagem:focus,
+    #btnViagem:active {
+        background: #EDA565 !important;
+        color: #fff !important;
+    }
+
+#btnConfirma {
+    background: #0d6efd;
+    color: #fff;
+}
+
+    #btnConfirma:hover,
+    #btnConfirma:focus,
+    #btnConfirma:active {
+        background: #339af0 !important;
+        color: #fff !important;
+    }
+
+#btnApaga,
+#btnCancela {
+    background: #dc3545;
+    color: #fff;
+}
+
+    #btnApaga:hover,
+    #btnApaga:focus,
+    #btnApaga:active,
+    #btnCancela:hover,
+    #btnCancela:focus,
+    #btnCancela:active {
+        background: #F08080 !important;
+        color: #fff !important;
+    }
+
+#btnFecha {
+    background: #828E7B;
+    color: #fff;
+}
+
+    #btnFecha:hover,
+    #btnFecha:focus,
+    #btnFecha:active {
+        background: #BEC8B4 !important;
+        color: #fff !important;
+    }
+
+.remove-btn {
+    background: red;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 1.5em;
+    height: 1.5em;
+}
+
+    .remove-btn:hover {
+        background: darkred;
+    }
+
+/* ============================================
+   13. DROPDOWN MOTORISTA COM FOTO
+   ============================================ */
+#lstMotorista_popup .e-dropdownbase .e-list-item,
+.lstMotorista_popup .e-dropdownbase .e-list-item {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    transition: background-color 0.3s;
+}
+
+    #lstMotorista_popup .e-dropdownbase .e-list-item img,
+    .lstMotorista_popup .e-dropdownbase .e-list-item img {
+        height: 45px;
+        width: 45px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin-right: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    #lstMotorista_popup .e-dropdownbase .e-list-item:hover,
+    .lstMotorista_popup .e-dropdownbase .e-list-item:hover {
+        background: #f0f8ff;
+    }
+
+        #lstMotorista_popup .e-dropdownbase .e-list-item:hover img {
+            transform: scale(1.2);
+        }
+
+/* Centralização do conteúdo nos ComboBox com imagem */
+/* IMPORTANTE: Esconder TODOS os SELECT hidden gerados pelo Syncfusion */
+select.e-ddl-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Wrappers visuais dos ComboBox */
+.e-input-group.e-control-wrapper.e-ddl,
+.e-input-group.e-control-wrapper.e-combobox {
+    display: flex !important;
+    align-items: center !important;
+    height: 38px !important;
+}
+
+/* SPAN que mostra o valor selecionado */
+.e-input-group .e-input-value {
+    display: flex !important;
+    align-items: center !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    flex: 1 !important;
+}
+
+/* Imagem dentro do valor selecionado (para motorista, etc) */
+.e-input-group .e-input-value img {
+    vertical-align: middle !important;
+    margin: 0 8px 0 0 !important;
+    height: 28px !important;
+    width: 28px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+}
+
+/* ============================================
+   14. TOOLTIPS
+   ============================================ */
+.e-tooltip-wrap,
+.e-tooltip-wrap.custom-orange-tooltip,
+.e-tooltip-wrap.tooltip-laranja,
+.ftx-ej-tooltip.e-tooltip-wrap {
+    background-color: orange !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 8px 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    z-index: 1085 !important;
+}
+
+    .e-tooltip-wrap .e-tip-content {
+        color: #fff !important;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .e-tooltip-wrap .e-arrow-tip-inner {
+        background: orange !important;
+    }
+
+.tooltip {
+    font-size: 0.875rem;
+}
+
+.tooltip-inner {
+    max-width: 300px;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+/* ============================================
+   15. MODAL E DIALOG
+   ============================================ */
+#modalViagens {
+    z-index: 1050 !important;
+}
+
+.modal-dialog.custom-modal-lg {
+    max-width: 1200px;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.custom-dialog-style .e-dlg-header {
+    background: #007bff;
+    color: #fff;
+}
+
+.custom-dialog-style .e-dlg-content {
+    background: #f9f9f9;
+}
+
+.custom-dialog-style .e-primary {
+    background: #28a745;
+    color: #fff;
+}
+
+/* ============================================
+   16. SWEETALERT
+   ============================================ */
+.swal2-container {
+    z-index: 9999 !important;
+    position: fixed !important;
+}
+
+/* ============================================
+   17. FULLCALENDAR
+   ============================================ */
+.fc .fc-spinner,
+#agenda .fc .fc-spinner,
+#agenda .e-spinner-pane,
+#agenda .e-spin-overlay,
+#agenda .e-spin-show {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* ============================================
+   18. RECORRÊNCIA - CONFIGURAÇÃO ÚNICA
+   ============================================ */
+
+/* Label lstRecorrente inline */
+label[for="lstRecorrente"] {
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+/* Esconder Data Final por padrío */
+#divFinalRecorrencia {
+    display: none !important;
+}
+
+/* Badge contador de dias */
+.badge-contador-dias {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff8c00;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Badge contador de datas */
+#badgeContadorDatas.badge-contador-datas {
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px !important;
+    min-height: 35px !important;
+    position: absolute !important;
+    top: 10px;
+    right: 10px;
+    border-radius: 50% !important;
+    background-color: #FF8C00 !important;
+    color: white !important;
+    border: 2px solid white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    z-index: 1000 !important;
+    transition: all 0.3s ease !important;
+}
+
+#badgeContadorDatas:hover {
+    transform: scale(1.15) !important;
+}
+
+.badge-pulse {
+    animation: badgePulse 0.3s ease-in-out !important;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* Calendário */
+#calendarContainer {
+    position: relative !important;
+    width: 100% !important;
+    clear: both;
+    margin-top: 1rem;
+    overflow: visible !important;
+}
+
+#calDatasSelecionadas {
+    width: 100% !important;
+    max-width: 400px;
+}
+
+.e-calendar {
+    font-family: "Poppins", sans-serif;
+}
+
+/* ============================================
+   19. LISTBOX E CALENDÁRIO
+   ============================================ */
+.normal-item {
+    padding: .5rem;
+    background: #fff;
+    color: #000;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+}
+
+    .normal-item:hover .item-text {
+        color: darkred;
+        font-weight: bold;
+        font-size: .9rem;
+    }
+
+/* ============================================
+   20. UTILITY CLASSES
+   ============================================ */
+.ml-2 {
+    margin-left: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.text-danger {
+    font-weight: bold;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.esconde-diveventos {
+    display: none;
+}
+
+/* ============================================
+   21. CORES DE FUNDO
+   ============================================ */
+.fundo-ebony {
+    background-color: #828E7B;
+    color: #fff;
+}
+
+.fundo-cinza {
+    background-color: #2F4F4F;
+    color: aliceblue;
+}
+
+.fundo-laranja {
+    background-color: #D2691E;
+    color: #fff;
+}
+
+/* ============================================
+   22. RESPONSIVIDADE
+   ============================================ */
+@media (max-width: 768px) {
+    .col-md-6,
+    .col-md-4,
+    .col-md-3,
+    .col-md-2 {
+        margin-bottom: 1rem;
+    }
+
+    .input-group {
+        flex-direction: column;
+        height: auto !important;
+    }
+
+        .input-group .btn {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+}
+
+@media (max-width: 576px) {
+    .card-body,
+    .section-card-body {
+        padding: 1rem;
+    }
+
+    .form-label {
+        font-size: 0.875rem;
+    }
+}
+
+/* ============================================
+   23. OVERFLOW E Z-INDEX
+   ============================================ */
+#modalViagens .section-card-body,
+#modalViagens .form-group,
+#modalViagens .row {
+    overflow: visible !important;
+}
+
+/* Garantir que nada corte bordas de foco */
+#modalViagens * {
+    clip-path: none !important;
+}
+
+/* ============================================
+   24. CORREÇÕES ESPECÍFICAS LSTFINALIDADE
+   ============================================ */
+
+/* LSTFINALIDADE - Força borda inferior visível */
+#lstFinalidade,
+#lstFinalidade.e-dropdowntree,
+#lstFinalidade.e-control {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#lstFinalidade .e-ddt-wrapper,
+#lstFinalidade_wrapper,
+#lstFinalidade + .e-ddt-wrapper {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#lstFinalidade .e-ddt-wrapper.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* DDTSETORREQUISITANTE - Força borda inferior visível */
+#ddtSetorRequisitante,
+#ddtSetorRequisitante.e-dropdowntree,
+#ddtSetorRequisitante.e-control {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#ddtSetorRequisitante .e-ddt-wrapper,
+#ddtSetorRequisitante_wrapper,
+#ddtSetorRequisitante + .e-ddt-wrapper {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#ddtSetorRequisitante .e-ddt-wrapper.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* LSTSETORREQUISITANTEAGENDAMENTO - Força borda inferior visível */
+#lstSetorRequisitanteAgendamento,
+#lstSetorRequisitanteAgendamento.e-dropdowntree,
+#lstSetorRequisitanteAgendamento.e-control {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#lstSetorRequisitanteAgendamento .e-ddt-wrapper,
+#lstSetorRequisitanteAgendamento_wrapper,
+#lstSetorRequisitanteAgendamento + .e-ddt-wrapper {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#lstSetorRequisitanteAgendamento .e-ddt-wrapper.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* DDTCOMBUSTIVELINICIAL - Força borda inferior visível */
+#ddtCombustivelInicial,
+#ddtCombustivelInicial.e-dropdowntree,
+#ddtCombustivelInicial.e-control {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#ddtCombustivelInicial .e-ddt-wrapper,
+#ddtCombustivelInicial_wrapper,
+#ddtCombustivelInicial + .e-ddt-wrapper {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#ddtCombustivelInicial .e-ddt-wrapper.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* DDTCOMBUSTIVELFINAL - Força borda inferior visível */
+#ddtCombustivelFinal,
+#ddtCombustivelFinal.e-dropdowntree,
+#ddtCombustivelFinal.e-control {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#ddtCombustivelFinal .e-ddt-wrapper,
+#ddtCombustivelFinal_wrapper,
+#ddtCombustivelFinal + .e-ddt-wrapper {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#ddtCombustivelFinal .e-ddt-wrapper.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* ============================================
+   25. USER LABELS - CORES DAS BORDAS LATERAIS
+   ============================================ */
+
+/* Estilo base dos cards de label */
+#lblUsuarioAgendamento,
+#lblUsuarioCriacao,
+#lblUsuarioFinalizacao,
+#lblUsuarioCancelamento {
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    border-left: 4px solid transparent;  /* 👈 Define borda lateral de 4px */
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+/* Efeito hover */
+#lblUsuarioAgendamento:hover,
+#lblUsuarioCriacao:hover,
+#lblUsuarioFinalizacao:hover,
+#lblUsuarioCancelamento:hover {
+    background-color: #e9ecef;
+    transform: translateX(3px);
+}
+
+/* Ícones */
+#lblUsuarioAgendamento i,
+#lblUsuarioCriacao i,
+#lblUsuarioFinalizacao i,
+#lblUsuarioCancelamento i {
+    font-size: 1.3em;
+    margin-right: 10px;
+}
+
+/* 🎨 CORES DAS BORDAS LATERAIS - AQUI É A MÁGICA! */
+
+#lblUsuarioAgendamento {
+    border-left-color: #C2410C; /* 🟠 Laranja/Vermelho Alaranjado */
+}
+
+#lblUsuarioCriacao {
+    border-left-color: #1e3a8a; /* 🔵 Azul Escuro */
+}
+
+#lblUsuarioFinalizacao {
+    border-left-color: #155724; /* 🟢 Verde Escuro */
+}
+
+#lblUsuarioCancelamento {
+    border-left-color: #8B0000; /* 🔴 Vermelho Vinho */
+}
+
+/* ============================================
+   TÍTULO DO MODAL - Letra Encorpada e Ícone
+   ============================================ */
+
+/* Container do título */
+#modalViagens .modal-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Título do modal - Letra encorpada e robusta */
+#modalViagens .modal-header .modal-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 1.5rem !important;          /* 24px - Tamanho grande */
+    font-weight: 700 !important;           /* Bold/Negrito - Letra encorpada */
+    line-height: 1.2 !important;
+    color: #212529 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-grow: 1;
+}
+
+/* Ícone FontAwesome Duotone no título */
+#modalViagens .modal-header .modal-title i {
+    font-size: 2rem !important;            /* Ícone maior que o texto */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+/* Remove qualquer estilo conflitante */
+#modalViagens .modal-header .modal-title * {
+    vertical-align: middle;
+}
+
+/* ============================================
+   26. BOTÕES PADRÃO DO SISTEMA - NOVO EVENTO
+   ============================================ */
+
+/* Botão Confirmar/Salvar (Azul) */
+.btn-azul {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #fff !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-azul:hover,
+    .btn-azul:focus {
+        background-color: #0b5ed7 !important;
+        border-color: #0a58ca !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .btn-azul:active {
+        background-color: #0a58ca !important;
+        border-color: #0a53be !important;
+        color: #fff !important;
+    }
+
+    .btn-azul i {
+        margin-right: 0.5rem;
+    }
+
+/* Botão Fechar/Cancelar (Vinho) */
+.btn-vinho {
+    background-color: #8B0000 !important;
+    border-color: #8B0000 !important;
+    color: #fff !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-vinho:hover,
+    .btn-vinho:focus {
+        background-color: #A52A2A !important;
+        border-color: #A52A2A !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(139, 0, 0, 0.25);
+    }
+
+    .btn-vinho:active {
+        background-color: #8B0000 !important;
+        border-color: #7B0000 !important;
+        color: #fff !important;
+    }
+
+    .btn-vinho i {
+        margin-right: 0.5rem;
+    }
+
+/* ============================================
+   27. CORREÇÕES ESPECÍFICAS NOVO EVENTO
+   ============================================ */
+
+/* LSTREQUISITANTEEVENTO - Força borda inferior visível */
+#lstRequisitanteEvento,
+#lstRequisitanteEvento.e-dropdowntree,
+#lstRequisitanteEvento.e-control,
+#lstRequisitanteEvento.e-combobox {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#lstRequisitanteEvento .e-ddt-wrapper,
+#lstRequisitanteEvento_wrapper,
+#lstRequisitanteEvento + .e-ddt-wrapper,
+#lstRequisitanteEvento.e-input-group {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#lstRequisitanteEvento .e-ddt-wrapper.e-input-focus,
+#lstRequisitanteEvento.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* LSTSETORREQUISITANTEEVENTO - Força borda inferior visível */
+#lstSetorRequisitanteEvento,
+#lstSetorRequisitanteEvento.e-dropdowntree,
+#lstSetorRequisitanteEvento.e-control {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    overflow: visible !important;
+}
+
+#lstSetorRequisitanteEvento .e-ddt-wrapper,
+#lstSetorRequisitanteEvento_wrapper,
+#lstSetorRequisitanteEvento + .e-ddt-wrapper {
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+#lstSetorRequisitanteEvento .e-ddt-wrapper.e-input-focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Header “suave” no tom do primary (similar ao print) */
+.card-header-soft-primary {
+    /* usa a var do Bootstrap 5.3 se existir, senão cai no fallback */
+    background-color: var(--bs-primary-bg-subtle, #d7e7ff);
+    color: var(--bs-primary, #0d6efd);
+    border-bottom: 1px solid rgba(13,110,253,.15);
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
+    /* garante o azul do ícone/texto dentro do header */
+    .card-header-soft-primary .text-primary {
+        color: var(--bs-primary, #0d6efd) !important;
+    }
+
+    .card-header-soft-primary .fa,
+    .card-header-soft-primary .fas,
+    .card-header-soft-primary .far,
+    .card-header-soft-primary .fal,
+    .card-header-soft-primary .fa-solid {
+        color: var(--bs-primary, #0d6efd);
+    }
+
+/* bordas superiores suavemente arredondadas para casar com o card */
+.card .card-header.card-header-soft-primary:first-child {
+    border-top-left-radius: .375rem;
+    border-top-right-radius: .375rem;
+}
+
+/* ============================================
+   28. PROTEÇÃO CONTRA COLAPSO DO ACCORDION
+   ============================================ */
+
+/* Força acordeon requisitante aberto a permanecer aberto */
+#accordionRequisitante:not([style*="display: none"]) {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+#sectionCadastroRequisitante:not([style*="display: none"]) {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Remove classes de colapso do Bootstrap que podem interferir */
+#sectionCadastroRequisitante.collapse,
+#sectionCadastroRequisitante.collapsing {
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Garante que transitions não afetem o height quando visível */
+#sectionCadastroRequisitante[style*="display: block"] {
+    transition: none !important;
+}
+
+#accordionRequisitante[style*="display: block"] {
+    transition: none !important;
+}
+
+
+/* ============================================
+   29. LISTBOX DATAS VARIADAS E BADGE
+   ============================================ */
+
+/* Container da listbox */
+#listboxDatasVariadasContainer {
+    position: relative;
+    margin-top: 10px;
+    display: none !important; /* Invisível por padrão - só aparece em modo edição variada */
+}
+
+/* Listbox de datas variadas - largura 40%, altura maior para 5 linhas */
+#lstDatasVariadas {
+    width: 40% !important;
+    height: auto !important;
+    max-height: 200px !important; /* Aumentado para acomodar 5 linhas */
+    min-height: 180px !important; /* Garantir altura mínima */
+    font-size: 0.875rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    overflow-y: auto;
+}
+
+/* Opções da listbox */
+#lstDatasVariadas option {
+    padding: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#lstDatasVariadas option:last-child {
+    border-bottom: none;
+}
+
+/* Data do agendamento atual - destaque em vermelho */
+#lstDatasVariadas option.data-agendamento-atual {
+    color: #dc3545 !important;
+    font-weight: bold !important;
+    background-color: #fff5f5;
+}
+
+/* Badge contador de datas variadas - ajustado para posição correta */
+#badgeContadorDatasVariadas {
+    position: absolute;
+    top: 12px;  /* Descido 20px mais para baixo */
+    right: calc(60% - 20px);  /* Ajustado para ficar no canto da listbox 40% */
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #FF8C00;
+    color: white;
+    border: 2px solid white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: 'Poppins', Arial, sans-serif;
+    line-height: 20px;  /* Centraliza verticalmente */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 999999;
+    transition: all 0.3s ease;
+    cursor: default;
+    text-align: center;
+}
+
+#badgeContadorDatasVariadas:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.5);
+}
+
+/* Labels de seção - ocultar quando necessário */
+#lblDatasSelecionadasCalendario {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+#lblDatasVariadasListbox {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Label "Selecione as Datas" do calendário */
+#lblSelecioneAsDatas {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Quando em modo de EDIÇÃO de recorrência variada */
+.modo-edicao-variada #lblDatasSelecionadasCalendario {
+    display: none !important;
+}
+
+.modo-edicao-variada #lblSelecioneAsDatas {
+    display: none !important;
+}
+
+.modo-edicao-variada #calendarContainer {
+    display: none !important;
+}
+
+.modo-edicao-variada #listboxDatasVariadasContainer {
+    display: block !important;
+}
+
+/* Quando em modo de CRIAÇÃO de recorrência variada */
+.modo-criacao-variada #lblDatasVariadasListbox {
+    display: none !important;
+}
+
+.modo-criacao-variada #listboxDatasVariadasContainer {
+    display: none !important;
+}
+
+.modo-criacao-variada #calendarContainer {
+    display: block !important;
+}
+
+/* Garantir que listbox não apareça em novo agendamento */
+body:not(.modo-edicao-variada) #listboxDatasVariadasContainer {
+    display: none !important;
+}

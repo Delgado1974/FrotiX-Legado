@@ -1,0 +1,275 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Multa.UpsertOrgaoAutuanteModel
+
+@{
+	var isEdit = Model.OrgaoAutuanteObj.OrgaoAutuanteId != Guid.Empty;
+	ViewData["Title"] = "Órgãos Autuantes";
+	ViewData["PageName"] = "multa_upsertorgaoautuante";
+	ViewData["Heading"] = "<i class='fad fa-monument'></i>&nbsp;Cadastros: <span class='fw-300'>Órgãos Autuantes</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fad fa-monument";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-orgao-azul: #3D5771;
+			--ftx-orgao-azul-hover: #2d4559;
+			--ftx-orgao-vinho: #722f37;
+			--ftx-orgao-vinho-hover: #5a252c;
+		}
+
+		/* ====== OVERRIDE HEADER ====== */
+		.ftx-card-header .ftx-card-title {
+			font-family: 'Outfit', sans-serif !important;
+			font-weight: 900 !important;
+			color: #fff !important;
+		}
+
+		.ftx-card-header .ftx-card-title i {
+			color: #fff !important;
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: rgba(255,255,255,0.7) !important;
+		}
+
+		/* ====== FORMULÁRIO ====== */
+		.ftx-form-content {
+			padding: 1.5rem;
+		}
+
+		.ftx-form-section {
+			margin-bottom: 1.5rem;
+		}
+
+		.ftx-form-section-title {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #64748b;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 1rem;
+			padding-bottom: 0.5rem;
+			border-bottom: 1px solid #e2e8f0;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-form-section-title i {
+			color: var(--ftx-orgao-azul);
+		}
+
+		/* ====== INPUTS ====== */
+		.form-control-xs {
+			height: calc(1em + .775rem + 2px) !important;
+			padding: .125rem .5rem !important;
+			font-size: .85rem !important;
+			line-height: 1.5;
+			border-radius: .375rem;
+			border: 1px solid #cbd5e1;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		.form-control-xs:focus {
+			border-color: var(--ftx-orgao-azul);
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15);
+		}
+
+		.label {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 0.35rem;
+		}
+
+		/* ====== BOTÕES COM GLOW FROTIX ====== */
+		.ftx-btn-submit {
+			background-color: var(--ftx-orgao-azul) !important;
+			color: #fff !important;
+			border: none !important;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+			width: 100%;
+		}
+
+		.ftx-btn-submit:hover {
+			background-color: var(--ftx-orgao-azul-hover) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+
+		.ftx-btn-submit:active, .ftx-btn-submit:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		.ftx-btn-voltar {
+			background-color: var(--ftx-orgao-vinho) !important;
+			color: #fff !important;
+			border: none !important;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+			width: 100%;
+			text-decoration: none;
+		}
+
+		.ftx-btn-voltar:hover {
+			background-color: var(--ftx-orgao-vinho-hover) !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+
+		.ftx-btn-voltar:active, .ftx-btn-voltar:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		/* ====== ÁREA DE BOTÕES ====== */
+		.ftx-form-actions {
+			display: flex;
+			gap: 1rem;
+			margin-top: 2rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid #e2e8f0;
+		}
+
+		.ftx-form-actions > div {
+			flex: 1;
+			max-width: 200px;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+
+			.ftx-form-actions {
+				flex-direction: column;
+			}
+
+			.ftx-form-actions > div {
+				max-width: 100%;
+			}
+		}
+	</style>
+}
+
+<form method="post" asp-action="Upsert">
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel ftx-card-styled">
+				<div class="panel-container show">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-monument"></i>
+							@(isEdit ? "Editar" : "Novo") Órgão Autuante
+						</h2>
+					</div>
+
+					<!-- Conteúdo do Formulário -->
+					<div class="ftx-form-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						@if (isEdit)
+						{
+							<input type="hidden" asp-for="OrgaoAutuanteObj.OrgaoAutuanteId" />
+						}
+
+						<!-- Seção: Dados do Órgão -->
+						<div class="ftx-form-section">
+							<div class="ftx-form-section-title">
+								<i class="fa-duotone fa-building-columns"></i>
+								Dados do Órgão
+							</div>
+
+							<div class="row">
+								<div class="col-12 col-sm-3 col-md-2">
+									<div class="form-group">
+										<label class="label" asp-for="OrgaoAutuanteObj.Sigla"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="OrgaoAutuanteObj.Sigla"></span>
+										<input class="form-control form-control-xs" 
+											   asp-for="OrgaoAutuanteObj.Sigla" 
+											   placeholder="Ex: DETRAN"
+											   data-ejtip="Sigla do Órgão Autuante" />
+									</div>
+								</div>
+								<div class="col-12 col-sm-9 col-md-6">
+									<div class="form-group">
+										<label class="label" asp-for="OrgaoAutuanteObj.Nome"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="OrgaoAutuanteObj.Nome"></span>
+										<input class="form-control form-control-xs" 
+											   asp-for="OrgaoAutuanteObj.Nome" 
+											   placeholder="Ex: Departamento de Trânsito"
+											   data-ejtip="Nome Completo do Órgão Autuante" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Botões de Ação -->
+						<div class="ftx-form-actions">
+							<div>
+								<button type="submit" asp-page-handler="Submit" class="ftx-btn-submit" data-ejtip="@(isEdit ? "Salvar alterações" : "Cadastrar órgão")">
+									<i class="fa-duotone fa-floppy-disk"></i>
+									@(isEdit ? "Atualizar" : "Cadastrar")
+								</button>
+							</div>
+							<div>
+								<a asp-page="./ListaOrgaosAutuantes" class="ftx-btn-voltar" data-ejtip="Voltar para a lista">
+									<i class="fa-duotone fa-rotate-left"></i>
+									Voltar à Lista
+								</a>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+}

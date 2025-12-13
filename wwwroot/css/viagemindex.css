@@ -1,0 +1,79 @@
+/* ========================================================================== */
+/* SPINNER DE FINALIZAÇÃO - CSS */
+/* ========================================================================== */
+
+/* Overlay escuro que cobre toda a tela */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    backdrop-filter: blur(3px);
+}
+
+/* Container do spinner centralizado */
+.spinner-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    min-width: 300px;
+}
+
+    /* Spinner Bootstrap customizado */
+    .spinner-container .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.3em;
+        margin-bottom: 15px;
+    }
+
+/* Texto do spinner */
+.spinner-text {
+    color: #333;
+    margin-top: 10px;
+}
+
+    .spinner-text strong {
+        font-size: 18px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .spinner-text p {
+        font-size: 14px;
+        color: #666;
+    }
+
+/* Animação suave ao mostrar/esconder */
+#spinnerFinalizacao {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Desabilitar interações durante loading */
+body.loading {
+    pointer-events: none;
+}
+
+    body.loading #spinnerFinalizacao {
+        pointer-events: all;
+    }

@@ -1,0 +1,63 @@
+@page
+@model FrotiX.Areas.Identity.Pages.ConfirmarSenha.ConfirmarSenhaModel
+@{
+    ViewData["Title"] = "FrotiX | Confirmar Email";
+    Layout = Layout = "_ConfirmacaoLayout";
+}
+<div class="login-content">
+
+    <div class="form-login-error">
+        <h3>Login Inválido</h3>
+        <p id="error_msg"></p>
+    </div>
+
+    <form method="post" autocomplete="off">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="entypo-key"></i>
+                </div>
+                <input name="Password" asp-for="@Model.Password" type="password" class="form-control" placeholder="Senha" autocomplete="off" data-validate="required" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="entypo-key"></i>
+                </div>
+                <input name="ConfirmacaoPassword" asp-for="@Model.ConfirmacaoPassword" type="password" class="form-control" placeholder="Confirmação de Senha" autocomplete="off" data-validate="required" />
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-azul btn-block btn-login">
+                <i class="entypo-login"></i>
+                Confirmar Senha e Logar no Sistema
+            </button>
+        </div>
+
+
+    </form>
+
+
+    <!--<div class="login-bottom-links">
+
+        <a href="~/Identity/Account/ForgotPassword" class="link">
+            <i class="fa-duotone fa-user-pilot-tie fa-lg"></i>
+            &nbsp;&nbsp;&nbsp;Esqueceu sua senha?
+        </a>-->
+        @*<a href="/Register/Index" class="link">Registrar</a>*@
+
+        <!--<br />
+    </div>
+
+    <div class="text-center">
+        <a asp-page="ForgotPassword" class="opacity-90">Esqueceu sua senha?</a>
+    </div>-->
+
+</div>
+

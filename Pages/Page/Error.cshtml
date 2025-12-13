@@ -1,0 +1,369 @@
+@page "/Error"
+@model ErrorModel
+@{
+Layout = null;
+ViewData["Title"] = "Erro - FrotiX";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="FrotiX - Gestão de Transportes" />
+    <meta name="author" content="FrotiX" />
+
+    <link rel="icon" href="~/Neon/images/favicon.ico">
+    <title>FrotiX | Erro</title>
+
+    <link rel="stylesheet" href="~/Neon/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css">
+    <link rel="stylesheet" href="~/Neon/css/font-icons/entypo/css/entypo.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
+    <link rel="stylesheet" href="~/Neon/css/bootstrap.css">
+    <link rel="stylesheet" href="~/Neon/css/neon-core.css">
+    <link rel="stylesheet" href="~/Neon/css/neon-theme.css">
+    <link rel="stylesheet" href="~/Neon/css/neon-forms.css">
+    <link rel="stylesheet" href="~/Neon/css/custom.css">
+    <link href="~/lib/fontawesome-pro/css/all.css" rel="stylesheet" />
+
+    <script src="~/Neon/js/jquery-1.11.3.min.js"></script>
+
+    <style>
+        .error-page {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+        }
+
+        .error-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 40px 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .error-content {
+            padding: 60px 0;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .error-code {
+            font-size: 150px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
+            line-height: 1;
+            animation: glow 2s infinite alternate;
+        }
+
+        .error-title {
+            font-size: 36px;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .error-description {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .error-actions {
+            margin-top: 40px;
+        }
+
+        .btn-error {
+            display: inline-block;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+            .btn-error:hover {
+                background: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.5);
+                color: #ffffff;
+                text-decoration: none;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-error.primary {
+                background: #3498db;
+                color: #ffffff;
+                border-color: #3498db;
+            }
+
+                .btn-error.primary:hover {
+                    background: #2980b9;
+                    color: #ffffff;
+                    border-color: #2980b9;
+                }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo img, .logo canvas {
+            max-width: 400px;
+            height: auto;
+            filter: brightness(1.1) contrast(1.1);
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s infinite ease-in-out;
+        }
+
+            .floating-element:nth-child(1) {
+                top: 20%;
+                left: 10%;
+                animation-delay: 0s;
+            }
+
+            .floating-element:nth-child(2) {
+                top: 60%;
+                right: 15%;
+                animation-delay: 2s;
+            }
+
+            .floating-element:nth-child(3) {
+                bottom: 20%;
+                left: 20%;
+                animation-delay: 4s;
+            }
+
+            .floating-element:nth-child(4) {
+                top: 40%;
+                right: 30%;
+                animation-delay: 1s;
+            }
+
+        @@keyframes glow {
+            0% {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            }
+
+            100% {
+                text-shadow: 0 0 50px rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.1;
+            }
+
+            33% {
+                transform: translateY(-30px) rotate(120deg);
+                opacity: 0.2;
+            }
+
+            66% {
+                transform: translateY(15px) rotate(240deg);
+                opacity: 0.05;
+            }
+        }
+
+        .error-icon {
+            font-size: 80px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .error-code {
+                font-size: 100px;
+            }
+
+            .error-title {
+                font-size: 28px;
+            }
+
+            .error-description {
+                font-size: 16px;
+                padding: 0 20px;
+            }
+
+            .btn-error {
+                display: block;
+                margin: 10px 20px;
+            }
+
+            .logo-container img,
+            .logo-container canvas {
+                max-width: 280px;
+            }
+        }
+    </style>
+</head>
+<body class="page-body error-page">
+    <script type="text/javascript">var baseurl = '';</script>
+
+    <div class="floating-elements">
+        <i class="floating-element fas fa-truck" style="font-size: 60px;"></i>
+        <i class="floating-element fas fa-route" style="font-size: 40px;"></i>
+        <i class="floating-element fas fa-tools" style="font-size: 50px;"></i>
+        <i class="floating-element fas fa-user-hard-hat" style="font-size: 45px;"></i>
+    </div>
+
+    <div class="error-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <div class="logo-container">
+                        <a href="/" class="logo">
+                            <img id="logoOriginal" src="~/Images/LogotipoCompletoFrotiXRoxoFundoTransparenteEstreita.png" alt="Logo FrotiX" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <div class="error-icon">
+                        <i class="@Model.ErrorIcon"></i>
+                    </div>
+
+                    <div class="error-code">@Model.StatusCode</div>
+
+                    <h1 class="error-title">@Model.ErrorTitle</h1>
+
+                    <p class="error-description">@Model.ErrorMessage</p>
+
+                    <div class="error-actions">
+                        <a href="/" class="btn-error primary">
+                            <i class="fas fa-home"></i> Voltar ao Início
+                        </a>
+                        <a href="javascript:history.back()" class="btn-error">
+                            <i class="fas fa-arrow-left"></i> Página Anterior
+                        </a>
+                        @if (Model.ShowLoginButton)
+                        {
+                        <a href="/Account/Login" class="btn-error">
+                            <i class="fas fa-sign-in-alt"></i> Fazer Login
+                        </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para redimensionar logo -->
+    <script>
+        function trimTransparentPNG(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            let top = null, bottom = null, left = null, right = null;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const alpha = pixels[(y * w + x) * 4 + 3];
+                    if (alpha > 0) {
+                        if (top === null) top = y;
+                        bottom = y;
+                        if (left === null || x < left) left = x;
+                        if (right === null || x > right) right = x;
+                    }
+                }
+            }
+
+            const trimmedWidth = right - left + 1;
+            const trimmedHeight = bottom - top + 1;
+            const trimmedData = ctx.getImageData(left, top, trimmedWidth, trimmedHeight);
+
+            const resultCanvas = document.createElement('canvas');
+            resultCanvas.width = trimmedWidth;
+            resultCanvas.height = trimmedHeight;
+            resultCanvas.getContext('2d').putImageData(trimmedData, 0, 0);
+
+            return resultCanvas;
+        }
+
+        window.addEventListener('load', () => {
+            const img = document.getElementById('logoOriginal');
+            const proxyImg = new Image();
+
+            proxyImg.onload = () => {
+                const targetWidth = 400;
+                const trimmed = trimTransparentPNG(proxyImg);
+                const aspectRatio = trimmed.height / trimmed.width;
+                const targetHeight = Math.round(targetWidth * aspectRatio);
+
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = targetWidth;
+                finalCanvas.height = targetHeight;
+                finalCanvas.getContext('2d').drawImage(trimmed, 0, 0, targetWidth, targetHeight);
+
+                img.replaceWith(finalCanvas);
+            };
+
+            proxyImg.src = img.src;
+        });
+    </script>
+
+    <!-- Scripts do Neon -->
+    <script src="~/Neon/js/gsap/TweenMax.min.js"></script>
+    <script src="~/Neon/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js"></script>
+    <script src="~/Neon/js/bootstrap.js"></script>
+    <script src="~/Neon/js/joinable.js"></script>
+    <script src="~/Neon/js/resizeable.js"></script>
+    <script src="~/Neon/js/neon-api.js"></script>
+    <script src="~/Neon/js/neon-custom.js"></script>
+</body>
+</html>

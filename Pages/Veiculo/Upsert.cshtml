@@ -1,0 +1,374 @@
+@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model FrotiX.Pages.Veiculo.UpsertModel
+
+@{
+    ViewData["Title"] = "Veículos";
+    ViewData["PageName"] = "veiculo_upsert";
+    ViewData["Heading"] = "<i class='fad fa-car-bus'></i> Cadastros: <span class='fw-300'>Veículos</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-regular fa-car-bus";
+}
+
+<style>
+    /* Estilos mínimos - NÃO interferir com Syncfusion */
+    .form-control-xs {
+        min-height: 2.25rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .row + .row {
+        margin-top: 0.5rem;
+    }
+</style>
+
+<form method="post">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
+                        {
+                            <input type="hidden" asp-for="VeiculoObj.Veiculo.VeiculoId" />
+                        }
+                        <input type="hidden" asp-for="VeiculoObj.Veiculo.UsuarioIdAlteracao" />
+
+                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+                            <h2 class="titulo-paginas d-flex align-items-center pb-3">
+                                <i class="fa-duotone fa-solid fa-car-bus fa-xl me-2 icon-150" aria-hidden="true"></i>
+                                @(Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty ? "Atualizar " : "Criar ") Veículo
+                            </h2>
+                        </div>
+
+                        <div class="col-12 pt-3">
+                            <!-- LINHA 1: Marca, Modelo, Placa, Quilometragem -->
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.MarcaId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.MarcaId"></span>
+                                        @Html.DropDownListFor(
+                                            m => m.VeiculoObj.Veiculo.MarcaId,
+                                            Model.VeiculoObj.MarcaList,
+                                            "-- Selecione uma Marca --",
+                                            new { @class = "form-control form-control-xs", @id = "listamarca" }
+                                        )
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.ModeloId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ModeloId"></span>
+                                        @Html.Hidden("Veiculo_ModeloId", Model.VeiculoObj.Veiculo.ModeloId)
+                                        <select id="ModeloId" name="VeiculoObj.Veiculo.ModeloId" class="form-control form-control-xs">
+                                            <option value="">-- Selecione um Modelo --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.Placa"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Placa"></span>
+                                        <input id="txtPlaca" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Placa" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.Quilometragem"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Quilometragem"></span>
+                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Quilometragem" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.Consumo"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Consumo"></span>
+                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Consumo" readonly />
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- LINHA 2: Renavam, PlacaVinculada, PlacaBronze, AnoFabricacao, AnoModelo -->
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.Renavam"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Renavam"></span>
+                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Renavam" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.PlacaVinculada"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.PlacaVinculada"></span>
+                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.PlacaVinculada" />
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.PlacaBronzeId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.PlacaBronzeId"></span>
+                                        @Html.DropDownListFor(
+                                            m => m.VeiculoObj.Veiculo.PlacaBronzeId,
+                                            Model.VeiculoObj.PlacaBronzeList,
+                                            "-- Selecione uma Placa de Bronze --",
+                                            new { @class = "form-control form-control-xs" }
+                                        )
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.AnoFabricacao"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AnoFabricacao"></span>
+                                        <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.AnoFabricacao">
+                                            <option value="">-- Ano --</option>
+                                            @for (int ano = 2026; ano >= 2003; ano--)
+                                            {
+                                                <option value="@ano">@ano</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.AnoModelo"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AnoModelo"></span>
+                                        <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.AnoModelo">
+                                            <option value="">-- Ano --</option>
+                                            @for (int ano = 2026; ano >= 2003; ano--)
+                                            {
+                                                <option value="@ano">@ano</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LINHA 3: Unidade, Combustivel, Categoria, DataIngresso -->
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.UnidadeId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.UnidadeId"></span>
+                                        @Html.DropDownListFor(
+                                            m => m.VeiculoObj.Veiculo.UnidadeId,
+                                            Model.VeiculoObj.UnidadeList,
+                                            "-- Selecione uma Unidade --",
+                                            new { @class = "form-control form-control-xs" }
+                                        )
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.CombustivelId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.CombustivelId"></span>
+                                        @Html.DropDownListFor(
+                                            m => m.VeiculoObj.Veiculo.CombustivelId,
+                                            Model.VeiculoObj.CombustivelList,
+                                            "-- Combustível --",
+                                            new { @class = "form-control form-control-xs" }
+                                        )
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.Categoria"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Categoria"></span>
+                                        <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Categoria">
+                                            <option value="">-- Categoria --</option>
+                                            <option value="Ônibus">Ônibus</option>
+                                            <option value="Coletivos Pequenos">Coletivos Pequenos</option>
+                                            <option value="Carga Leve">Carga Leve</option>
+                                            <option value="Carga Pesada">Carga Pesada</option>
+                                            <option value="Passeio">Passeio</option>
+                                            <option value="Mesa">Mesa</option>
+                                            <option value="Ambulância">Ambulância</option>
+                                            <option value="Depol">Depol</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label asp-for="VeiculoObj.Veiculo.DataIngresso"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.DataIngresso"></span>
+                                        <input id="txtDataChegada" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.DataIngresso" type="date" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LINHA 4: Contrato, Ata, ItemVeiculo, Patrimônio -->
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label id="lblcontrato" asp-for="VeiculoObj.Veiculo.ContratoId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ContratoId"></span>
+                                        @Html.DropDownListFor(
+                                            m => m.VeiculoObj.Veiculo.ContratoId,
+                                            Model.VeiculoObj.ContratoList,
+                                            "-- Selecione um Contrato --",
+                                            new { @class = "form-control form-control-xs", @id = "lstcontratos" }
+                                        )
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label id="lblata" asp-for="VeiculoObj.Veiculo.AtaId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AtaId"></span>
+                                        @Html.DropDownListFor(
+                                            m => m.VeiculoObj.Veiculo.AtaId,
+                                            Model.VeiculoObj.AtaList,
+                                            "-- Selecione uma Ata --",
+                                            new { @class = "form-control form-control-xs", @id = "lstatas" }
+                                        )
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label id="lblItemContrato" asp-for="VeiculoObj.Veiculo.ItemVeiculoId"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoId"></span>
+                                        @Html.Hidden("Veiculo_ItemId", Model.VeiculoObj.Veiculo.ItemVeiculoId)
+                                        <select id="lstItemVeiculo" name="VeiculoObj.Veiculo.ItemVeiculoId" class="form-control form-control-xs">
+                                            <option value="">-- Selecione um Item Contratual --</option>
+                                        </select>
+
+                                        <label id="lblItemAta" asp-for="VeiculoObj.Veiculo.ItemVeiculoAtaId" style="display:none;"></label>
+                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoAtaId"></span>
+                                        @Html.Hidden("Veiculo_ItemAtaId", Model.VeiculoObj.Veiculo.ItemVeiculoAtaId)
+                                        <select id="lstItemVeiculoAta" name="VeiculoObj.Veiculo.ItemVeiculoAtaId" class="form-control form-control-xs" style="display:none;">
+                                            <option value="">-- Selecione um Item da Ata --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group" id="divPatrimonio" style="display: none;">
+                                        <label asp-for="VeiculoObj.Veiculo.Patrimonio"></label>
+                                        <input id="txtPatrimonio" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Patrimonio" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
+                            {
+                                <div class="row">
+                                    <div class="col-12 text-right">
+                                        <a href="/Veiculo/UploadCRLV?id=@Model.VeiculoObj.Veiculo.VeiculoId"
+                                           class="btn btn-info">
+                                            <i class="fal fa-file-alt"></i> Upload do CRLV Digitalizado
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- LINHA 5: Checkboxes - TODOS NA MESMA LINHA -->
+                            <div class="row" style="margin-top: 1.5rem; border-top: 1px solid #dee2e6; padding-top: 1rem;">
+                                <div class="col-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="chkVeiculoProprio" asp-for="VeiculoObj.Veiculo.VeiculoProprio" />
+                                        <label class="form-check-label" for="chkVeiculoProprio">
+                                            Veículo Próprio
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="chkStatus" asp-for="VeiculoObj.Veiculo.Status" />
+                                        <label class="form-check-label" for="chkStatus">
+                                            Ativo/Inativo
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="chkReserva" asp-for="VeiculoObj.Veiculo.Reserva" />
+                                        <label class="form-check-label" for="chkReserva">
+                                            Veículo Reserva
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="chkEconomildo" asp-for="VeiculoObj.Veiculo.Economildo" />
+                                        <label class="form-check-label" for="chkEconomildo">
+                                            Veículo de Economildo
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
+                            {
+                                <div class="row" style="margin-top: 1rem;">
+                                    <div class="col-12">
+                                        <small class="text-muted">
+                                            Alterado/Incluído por @Model.VeiculoObj.NomeUsuarioAlteracao
+                                            em @Model.VeiculoObj.Veiculo.DataAlteracao?.ToString("dd/MM/yy")
+                                            às @Model.VeiculoObj.Veiculo.DataAlteracao?.ToString("HH:mm")
+                                        </small>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- BOTÕES -->
+                            <div class="row" style="margin-top: 2rem;">
+                                <div class="col-6">
+                                    @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
+                                    {
+                                        <button type="submit"
+                                                asp-page-handler="Edit"
+                                                asp-route-id="@Model.VeiculoObj.Veiculo.VeiculoId"
+                                                class="btn btn-azul btn-block">
+                                            <i class="fa-duotone fa-file-plus"></i> Atualizar
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit"
+                                                asp-page-handler="Submit"
+                                                class="btn btn-azul btn-block">
+                                            <i class="fa-duotone fa-file-plus"></i> Criar
+                                        </button>
+                                    }
+                                </div>
+                                <div class="col-6">
+                                    <a asp-page="./Index" class="btn btn-vinho btn-block">
+                                        <i class="fa-solid fa-rotate-left"></i> Voltar à Lista
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section ScriptsBlock {
+    <script src="~/js/cadastros/veiculo_upsert.js" asp-append-version="true"></script>
+}

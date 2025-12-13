@@ -1,0 +1,101 @@
+@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Syncfusion.EJ2
+
+@{
+ViewData["Title"] = "Lotação de Motoristas por Unidade Administrativa";
+ViewData["PageName"] = "taxileg_pbitaxileg";
+ViewData["Heading"] = "<i class='fa-duotone fa-user-tie'></i> Gráficos: <span class='fw-300'>Lotação de Motoristas por Unidade Administrativa</span>";
+ViewData["Category1"] = "Gráficos";
+ViewData["PageIcon"] = "fa-duotone fa-taxi";
+}
+
+@section HeadBlock {
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    .btn-largura {
+        width: 100px;
+        height: 100px;
+    }
+
+    /* Wrapper responsivo para o Power BI */
+    .pbi-embed {
+        position: relative;
+        width: 100%;
+        /* Proporção ~ 16:9 */
+        padding-top: 56.25%;
+        background: #f7f7f9;
+        border-radius: .25rem;
+        overflow: hidden;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,.05);
+    }
+
+        .pbi-embed iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+</style>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+                <div id="divPainel" class="panel-content">
+                    <div class="pbi-embed" aria-label="Relatório Power BI - Lotação de Motoristas por Unidade Administrativa">
+                        <iframe title="Frotix Atualizado - Relatório de Lotações dos Motoristas"
+                                src="https://app.powerbi.com/view?r=eyJrIjoiZTBhNjhjMzUtZjA4ZS00ZTA5LTk0NTgtZWMwZTQ3NTI4ZmM5IiwidCI6ImIwNmM0MGIzLWM5MGItNGYwYS1hNWVjLTlkZTRmMGQzMTEzMCJ9"
+                                allowfullscreen="true"
+                                loading="lazy">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+<script>
+    // Evita submit acidental com Enter em inputs (se adicionados futuramente)
+    (function () {
+        try {
+            document.addEventListener('keydown', function (e) {
+                const tag = (e.target?.tagName || '').toLowerCase();
+                if (e.key === 'Enter' && ['input', 'select', 'textarea', 'button'].includes(tag)) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        } catch (error) {
+            if (window.Alerta?.TratamentoErroComLinha) {
+                Alerta.TratamentoErroComLinha("PBILotacaoMotorista.cshtml", "keydownPreventEnter", error);
+            } else {
+                console.error(Exception error);
+            }
+        }
+    })();
+</script>
+}

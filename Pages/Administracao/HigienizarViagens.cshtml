@@ -1,0 +1,359 @@
+@page
+@model FrotiX.Pages.Administracao.HigienizarViagensModel
+@{
+	ViewData["Title"] = "Higienizar Origens/Destinos das Viagens";
+	ViewData["PageName"] = "higienizarviagens_index";
+	ViewData["Heading"] = "<i class='fas fa-broom'></i> Administração: <span class='fw-300'>Higienizar Origens/Destinos da Viagem</span>";
+	ViewData["Category1"] = "Administração";
+	ViewData["PageIcon"] = "fas fa-broom";
+
+}
+
+<style>
+	.section-row {
+		display: flex;
+		align-items: flex-start;
+		margin-bottom: 30px;
+		gap: 20px;
+	}
+
+	.transfer-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		margin-top: 60px;
+	}
+
+		.transfer-buttons button {
+			padding: 10px;
+			font-size: 1rem;
+			background-color: #007bff;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+	.right-panel {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: 100%;
+		position: relative;
+	}
+
+	.input-group {
+		display: flex;
+		gap: 10px;
+	}
+
+		.input-group input {
+			padding: 8px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			flex: 1;
+		}
+
+		.input-group button {
+			padding: 8px 16px;
+			background-color: #28a745;
+			color: white;
+			font-weight: bold;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+	.badge-contador {
+		position: absolute;
+		top: -10px;
+		right: -10px;
+		z-index: 10;
+		padding: 6px 10px;
+		font-size: 0.9rem;
+		font-weight: bold;
+		border-radius: 50%;
+		display: none;
+		animation: none;
+	}
+
+
+	.badge-contador {
+		position: absolute;
+		top: -10px;
+		right: -10px;
+		width: 24px;
+		height: 24px;
+		line-height: 24px;
+		text-align: center;
+		font-size: 0.85rem;
+		font-weight: bold;
+		border-radius: 50%;
+		background-color: #ff8800;
+		color: white;
+		display: none;
+		box-shadow: 0 0 0 2px white;
+	}
+
+	.ejs-container,
+	.e-listbox {
+		width: 100% !important;
+	}
+
+	.e-list-item {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 100%;
+	}
+
+	.e-custom-listbox {
+		border: 1px solid #ccc;
+		background-color: #fff;
+		padding: 0.5rem;
+	}
+
+	.e-badge-orange {
+		background-color: #ffa726;
+		color: white;
+	}
+
+	.e-badge-warning {
+		background-color: #ffa726 !important;
+		color: white !important;
+	}
+
+	.e-badge {
+		border-radius: 12px !important; /* ou 999px para deixar tipo "pílula" */
+		padding: 0.35em 0.75em;
+		font-size: 0.85em;
+	}
+
+	.e-badge-rounded {
+		border-radius: 999px !important;
+		padding: 0.3em 0.75em;
+		font-size: 0.85em;
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		height: 24px;
+		min-width: 28px;
+		line-height: 1;
+	}
+
+	.e-list-item.entering {
+		animation: fadeSlideIn 0.4s ease;
+	}
+
+	.e-list-item.highlighted {
+		animation: highlight 1s ease;
+	}
+
+	/* foco animado no input */
+	.input-group input:focus {
+		border-color: #28a745;
+		box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+		transition: all 0.3s ease-in-out;
+	}
+
+	/* Remove barra de rolagem horizontal de todos os ejs-listbox */
+	.e-listbox .e-list-parent.e-ul {
+		overflow-x: hidden !important;
+	}
+
+	/* Força quebra de linha nos itens */
+	.e-listbox .e-list-item {
+		white-space: normal !important;
+		word-break: break-word;
+		max-width: 95%;
+	}
+
+	/* (Opcional) Define largura mínima para todos */
+	.e-listbox {
+		min-width: 250px; /* ajuste conforme seu layout */
+		width: 100%;
+	}
+
+	.e-badge.e-badge-modern {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		min-width: 2.1em !important;
+		height: 2.1em !important;
+		font-size: 1.15em !important;
+		font-weight: bold !important;
+		padding: 0 0.7em !important;
+		border-radius: 1.2em !important;
+		background: linear-gradient(90deg, #4f8cff 50%, #275dc9 100%) !important;
+		color: #fff !important;
+		box-shadow: 0 2px 10px #0002 !important;
+		border: none !important;
+		position: relative !important;
+		top: 0.1em !important;
+		letter-spacing: 0.03em !important;
+	}
+
+		.e-badge.e-badge-modern.e-badge-modern-warning {
+			background: linear-gradient(90deg, #ffb347 50%, #ff8800 100%) !important;
+			color: #fffbe8 !important;
+		}
+
+	#loading-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: rgba(0,0,0,0.25);
+		z-index: 99999;
+		display: none;
+		justify-content: center;
+		align-items: center;
+	}
+
+		#loading-overlay .spinner {
+			border: 6px solid #f3f3f3;
+			border-top: 6px solid #007bff;
+			border-radius: 50%;
+			width: 60px;
+			height: 60px;
+			animation: spin 1s linear infinite;
+		}
+</style>
+
+@section HeadBlock {
+
+}
+
+
+<div class="row">
+	<div class="col-xl-12">
+		<div id="panel-1" class="panel">
+			<div class="panel-container show">
+				<div class="panel-content">
+
+					<div class="row">
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="text-primary">Higienizar Origens/Destinos da Viagem</h2>
+						</div>
+					</div>
+
+					<!-- ORIGEM -->
+					<div class="card p-3 mb-4">
+						<h4 class="mb-3">
+							Origem
+							<span id="badgeOrigens" class="e-badge e-badge-modern">
+								@Model.OrigensDistintas?.Count
+							</span>
+						</h4>
+						<div class="row">
+							<div class="col-md-5">
+
+								<ejs-listbox id="listOrigens"
+											 dataSource="@Model.OrigensDistintas"
+											 allowFiltering="true"
+											 scope="origens"
+											 height="350px"
+											 cssClass="e-custom-listbox w-100"
+											 filterBarPlaceholder="Filtrar...">
+								</ejs-listbox>
+
+								@*                                 <ejs-listbox id="listOrigens" dataSource="@Model.OrigensDistintas" allowDragAndDrop="true"
+                                             scope="origens" height="250px" cssClass="e-custom-listbox w-100">
+                                </ejs-listbox>
+                 *@                            </div>
+
+							<div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+								<button class="e-btn mb-2 w-100" type="button" onclick="moverSelecionados('listOrigens', 'listOrigensSelecionadas')">→</button>
+								<button class="e-btn w-100" type="button" onclick="moverSelecionados('listOrigensSelecionadas', 'listOrigens')">←</button>
+							</div>
+
+							<div class="col-md-5">
+								<h5>
+									Origens Selecionadas
+									<span id="badgeOrigensSelecionadas" class="e-badge e-badge-modern e-badge-modern-warning">
+										<span class="badge-icon">📥</span><span class="badge-num">@Model.OrigensParaCorrigir?.Count</span>
+									</span>
+								</h5>
+
+								<ejs-listbox id="listOrigensSelecionadas"
+											 dataSource="@Model.OrigensParaCorrigir"
+											 allowFiltering="true"
+											 scope="origens"
+											 height="250px"
+											 cssClass="e-custom-listbox w-100"
+											 filterBarPlaceholder="Filtrar...">
+								</ejs-listbox>
+
+								<div class="input-group mt-3">
+									<input type="text" id="txtNovaOrigem" class="form-control" placeholder="Novo valor de origem..." />
+									<button id="btnGravarOrigem" class="btn btn-verde" type="button">Gravar</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- DESTINO -->
+					<div class="card p-3">
+						<h4 class="mb-3">
+							Destino
+							<span id="badgeDestinos" class="e-badge e-badge-modern">
+								@Model.DestinosDistintos?.Count
+							</span>
+						</h4>
+						<div class="row">
+							<div class="col-md-5">
+
+								<ejs-listbox id="listDestinos"
+											 dataSource="@Model.DestinosDistintos"
+											 allowFiltering="true"
+											 scope="origens"
+											 height="350px"
+											 cssClass="e-custom-listbox w-100"
+											 filterBarPlaceholder="Filtrar...">
+								</ejs-listbox>
+
+							</div>
+
+							<div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+								<button class="e-btn mb-2 w-100" type="button" onclick="moverSelecionados('listDestinos', 'listDestinosSelecionados')">→</button>
+								<button class="e-btn w-100" type="button" onclick="moverSelecionados('listDestinosSelecionados', 'listDestinos')">←</button>
+							</div>
+
+							<div class="col-md-5">
+								<h5>
+									Destinos Selecionados
+									<span id="badgeDestinosSelecionados" class="e-badge e-badge-modern e-badge-modern-warning">
+										<span class="badge-icon">📥</span><span class="badge-num">@Model.DestinosParaCorrigir?.Count</span>
+									</span>
+								</h5>
+
+								<ejs-listbox id="listDestinosSelecionados"
+											 dataSource="@Model.DestinosParaCorrigir"
+											 allowFiltering="true"
+											 scope="origens"
+											 height="250px"
+											 cssClass="e-custom-listbox w-100"
+											 filterBarPlaceholder="Filtrar...">
+								</ejs-listbox>
+
+								<div class="input-group mt-3">
+									<input type="text" id="txtNovoDestino" class="form-control" placeholder="Novo valor de destino..." />
+									<button id="btnGravarDestino" class="btn btn-verde" type="button">Gravar</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="loading-overlay">
+	<div class="spinner"></div>
+</div>
+
+@section ScriptsBlock {
+	<script src="~/js/higienizarviagens_054.js"></script>
+}

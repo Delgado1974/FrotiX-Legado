@@ -1,0 +1,46 @@
+
+@using System.Text.Json
+@using FrotiX.Models
+
+@{
+	var toastJson = TempData["ToastMessages"] as string;
+	List<ToastMessage> messages = null;
+
+	if (!string.IsNullOrEmpty(toastJson))
+	{
+		try
+		{
+			messages = JsonSerializer.Deserialize<List<ToastMessage>>(toastJson);
+		}
+		catch { }
+	}
+}
+
+@if (messages != null && messages.Any())
+{
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Aguarda o AppToast estar disponível
+			if (typeof AppToast !== 'undefined' && AppToast.show) {
+				@foreach (var toast in messages)
+				{
+						// Escapa caracteres especiais no texto
+						var textoEscapado = toast.Texto
+								.Replace("\\" , "\\\\")
+								.Replace("'" , "\\'")
+								.Replace("\"" , "\\\"")
+								.Replace("\n" , "\\n")
+								.Replace("\r" , "\\r");
+
+						<text>
+							setTimeout(function() {
+								AppToast.show('@toast.Cor', '@Html.Raw(textoEscapado)', @toast.Duracao);
+							}, @(messages.IndexOf(toast) * 300));
+						</text>
+				}
+			} else {
+				console.error('AppToast não está definido. Verifique se o global-toast.js foi carregado.');
+			}
+		});
+	</script>
+}

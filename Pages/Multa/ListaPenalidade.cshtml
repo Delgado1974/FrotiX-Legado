@@ -1,0 +1,1973 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc;
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+	@functions {
+		public void OnGet()
+		{
+			FrotiX.Pages.Multa.ListaMultaModel.Initialize(_unitOfWork);
+
+			ViewData["dataOrgaoAutuante"] = new ListaOrgaoAutuanteMulta(_unitOfWork).OrgaoAutuanteList();
+			ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+			ViewData["lstVeiculos"] = new ListaVeiculos(_unitOfWork).VeiculosList();
+			ViewData["lstTipoMulta"] = new ListaTipoMulta(_unitOfWork).TipoMultaList();
+			ViewData["lstStatus"] = new ListaStatusPenalidade(_unitOfWork).StatusList();
+		}
+	}
+}
+
+@model FrotiX.Models.Multa
+
+@{
+	ViewData["Title"] = "Multas";
+	ViewData["PageName"] = "multa_listapenalidade";
+	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Multas: <span class='fw-300'>Penalidades</span>";
+	ViewData["Category1"] = "Penalidade";
+	ViewData["PageIcon"] = "fad fa-pen-to-square";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-penalidade-laranja: #D2691E;
+			--ftx-penalidade-laranja-hover: #E07020;
+			--ftx-penalidade-chocolate: #7B3F00;
+			--ftx-penalidade-terracota: #A0522D;
+			--ftx-penalidade-dinheiro: #2E8B57;
+			--ftx-penalidade-dinheiro-dark: #236B43;
+		}
+
+		/* ====== OVERRIDE HEADER ====== */
+		.ftx-card-header .ftx-card-title {
+			font-family: 'Outfit', sans-serif !important;
+			font-weight: 900 !important;
+			color: #fff !important;
+		}
+
+		.ftx-card-header .ftx-card-title i {
+			color: #fff !important;
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: rgba(255,255,255,0.7) !important;
+		}
+
+		.ftx-card-header .btn-header-orange {
+			background: linear-gradient(135deg, var(--ftx-penalidade-laranja) 0%, var(--ftx-penalidade-laranja-hover) 100%) !important;
+			color: #fff !important;
+			border: none !important;
+		}
+
+		.ftx-card-header .btn-header-orange:hover {
+			background: linear-gradient(135deg, var(--ftx-penalidade-laranja-hover) 0%, var(--ftx-penalidade-laranja) 100%) !important;
+			color: #fff !important;
+		}
+
+		/* ====== ÁREA DE FILTROS ====== */
+		.ftx-penalidade-filters {
+			padding: 1.25rem 1.5rem;
+			background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+			border-bottom: 1px solid #e2e8f0;
+		}
+
+		.ftx-penalidade-filters-title {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #64748b;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-penalidade-filters-title i {
+			color: var(--ftx-penalidade-terracota);
+		}
+
+		.ftx-penalidade-filters-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 1rem;
+			align-items: end;
+		}
+
+		.ftx-penalidade-filter-group {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.ftx-penalidade-filter-group label {
+			font-size: 0.75rem;
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 0.35rem;
+		}
+
+		/* Botão de Filtrar - COM GLOW AZUL */
+		.btn-filtrar-penalidade {
+			background-color: #3D5771 !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			cursor: pointer;
+			height: 38px;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+
+		.btn-filtrar-penalidade:hover {
+			background-color: #2d4559 !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+			color: #fff !important;
+		}
+
+		.btn-filtrar-penalidade:active, .btn-filtrar-penalidade:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* ====== COMBOBOX SYNCFUSION ====== */
+		.ftx-penalidade-filter-group .e-control-wrapper {
+			height: 38px !important;
+		}
+
+		.ftx-penalidade-filter-group .e-input-group {
+			border-radius: 6px !important;
+		}
+
+		/* ====== TABELA ====== */
+		#tblMulta {
+			font-size: 0.82rem;
+		}
+
+		#tblMulta thead {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+		}
+
+		#tblMulta thead th {
+			color: #fff !important;
+			font-weight: 600;
+			font-size: 0.78rem;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			padding: 0.75rem 0.625rem;
+			text-align: center;
+			border: none !important;
+			vertical-align: middle !important;
+		}
+
+		#tblMulta tbody tr {
+			transition: background-color 0.15s ease;
+		}
+
+		#tblMulta tbody tr:hover {
+			background-color: rgba(50, 93, 136, 0.06) !important;
+		}
+
+		#tblMulta tbody td {
+			padding: 0.625rem;
+			vertical-align: middle !important;
+			border-color: rgba(0,0,0,0.05) !important;
+		}
+
+		/* ====== BADGES DE STATUS FrotiX ====== */
+		.ftx-badge-status {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			padding: 0.2rem 0.55rem;
+			border-radius: 1rem;
+			font-size: 0.72rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			white-space: nowrap;
+		}
+
+		.ftx-badge-status i {
+			font-size: 0.7rem;
+			color: #fff !important;
+		}
+
+		/* Pago - Verde */
+		.ftx-badge-pago {
+			background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(21, 128, 61, 0.3);
+		}
+
+		/* Pendente - Âmbar */
+		.ftx-badge-pendente {
+			background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3);
+		}
+
+		/* À Enviar Secle - Azul */
+		.ftx-badge-secle {
+			background: linear-gradient(135deg, #4a89c5 0%, #3a6fa0 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(74, 137, 197, 0.3);
+		}
+
+		/* Enviada Secle - Azul Escuro */
+		.ftx-badge-enviada {
+			background: linear-gradient(135deg, #3D5771 0%, #2d4559 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(61, 87, 113, 0.3);
+		}
+
+		/* Paga (Infrator) - Verde Escuro */
+		.ftx-badge-infrator {
+			background: linear-gradient(135deg, #2E8B57 0%, #236B43 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(46, 139, 87, 0.3);
+		}
+
+		/* Default - Cinza */
+		.ftx-badge-default {
+			background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+			color: #fff;
+			box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+		}
+
+		/* ====== BOTÕES DE AÇÃO NA TABELA - COM GLOW FROTIX ====== */
+		.ftx-btn-icon {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: .375rem !important;
+			border: none !important;
+			color: #fff !important;
+			font-size: 0.85rem;
+			cursor: pointer;
+			transition: all .3s ease, transform .2s ease !important;
+			position: relative;
+			overflow: hidden;
+			margin: 1px !important;
+		}
+
+		.ftx-btn-icon:hover:not([aria-disabled="true"]) {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		.ftx-btn-icon:active:not([aria-disabled="true"]),
+		.ftx-btn-icon:focus:not([aria-disabled="true"]) {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		.ftx-btn-icon[aria-disabled="true"] {
+			opacity: 0.35;
+			cursor: not-allowed;
+			pointer-events: none;
+			box-shadow: none !important;
+		}
+
+		.ftx-btn-icon i {
+			font-size: var(--ftx-action-icon, 0.90rem);
+			line-height: 1;
+			color: #fff !important;
+		}
+
+		/* Editar - Azul com GLOW */
+		.ftx-btn-editar {
+			background-color: #3D5771 !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-editar:hover:not([aria-disabled="true"]) {
+			background-color: #2d4559 !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+		.ftx-btn-editar:active, .ftx-btn-editar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* Pagamento - Laranja com GLOW */
+		.ftx-btn-pagamento {
+			background-color: #D2691E !important;
+			box-shadow: 0 0 8px rgba(210, 105, 30, 0.5), 0 2px 4px rgba(210, 105, 30, 0.3) !important;
+		}
+		.ftx-btn-pagamento:hover:not([aria-disabled="true"]) {
+			background-color: #b35a18 !important;
+			box-shadow: 0 0 20px rgba(210, 105, 30, 0.8), 0 6px 12px rgba(210, 105, 30, 0.5) !important;
+		}
+		.ftx-btn-pagamento:active, .ftx-btn-pagamento:focus {
+			box-shadow: 0 0 0 0.2rem rgba(210, 105, 30, 0.35) !important;
+		}
+
+		/* Apagar - Vinho com GLOW */
+		.ftx-btn-apagar {
+			background-color: #722f37 !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-apagar:hover:not([aria-disabled="true"]) {
+			background-color: #5a252c !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+		.ftx-btn-apagar:active, .ftx-btn-apagar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		/* PDF Penalidade - Preto com GLOW */
+		.ftx-btn-pdf {
+			background-color: #1e1e1e !important;
+			box-shadow: 0 0 8px rgba(30, 30, 30, 0.5), 0 2px 4px rgba(30, 30, 30, 0.3) !important;
+		}
+		.ftx-btn-pdf:hover:not([aria-disabled="true"]) {
+			background-color: #333333 !important;
+			box-shadow: 0 0 20px rgba(30, 30, 30, 0.8), 0 6px 12px rgba(30, 30, 30, 0.5) !important;
+		}
+		.ftx-btn-pdf:active, .ftx-btn-pdf:focus {
+			box-shadow: 0 0 0 0.2rem rgba(30, 30, 30, 0.25) !important;
+		}
+
+		/* PDF Desabilitado */
+		.ftx-btn-pdf-disabled {
+			background-color: #999 !important;
+			box-shadow: none !important;
+			cursor: not-allowed !important;
+			opacity: 0.5;
+		}
+
+		/* Comprovante - Verde com GLOW */
+		.ftx-btn-comprovante {
+			background-color: #2E8B57 !important;
+			box-shadow: 0 0 8px rgba(46, 139, 87, 0.5), 0 2px 4px rgba(46, 139, 87, 0.3) !important;
+		}
+		.ftx-btn-comprovante:hover:not([aria-disabled="true"]) {
+			background-color: #236B43 !important;
+			box-shadow: 0 0 20px rgba(46, 139, 87, 0.8), 0 6px 12px rgba(46, 139, 87, 0.5) !important;
+		}
+		.ftx-btn-comprovante:active, .ftx-btn-comprovante:focus {
+			box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.25) !important;
+		}
+
+		/* Comprovante Desabilitado */
+		.ftx-btn-comprovante-disabled {
+			background-color: #999 !important;
+			box-shadow: none !important;
+			cursor: not-allowed !important;
+			opacity: 0.5;
+		}
+
+		/* ====== DATATABLE CONTROLS ====== */
+		.dataTables_wrapper .dataTables_filter input {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.25rem 0.5rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_length select {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.15rem 0.35rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_info,
+		.dataTables_wrapper .dataTables_paginate,
+		.dataTables_wrapper .dataTables_length label,
+		.dataTables_wrapper .dataTables_filter label {
+			font-size: 0.80rem;
+		}
+
+		.dt-buttons .dt-button {
+			font-size: 0.78rem !important;
+			padding: 0.25rem 0.45rem !important;
+			line-height: 1.1 !important;
+			border-radius: 6px !important;
+		}
+
+		/* ====== ESTILOS DOS MODAIS ====== */
+		/* Modal PDF Genérico */
+		#modalPDF .modal-dialog {
+			max-width: 800px;
+		}
+
+		#modalPDF .modal-header {
+			background: linear-gradient(180deg, var(--ftx-penalidade-terracota) 0%, #8B4513 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalPDF .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalPDF .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalPDF .modal-body {
+			padding: 0;
+		}
+
+		#modalPDF .modal-footer {
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* Modal Registrar Pagamento */
+		#modalRegistraPagamento .modal-dialog {
+			max-width: 700px;
+		}
+
+		#modalRegistraPagamento .modal-header {
+			background: linear-gradient(180deg, var(--ftx-penalidade-dinheiro) 0%, var(--ftx-penalidade-dinheiro-dark) 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalRegistraPagamento .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalRegistraPagamento .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalRegistraPagamento .modal-body {
+			padding: 1.25rem;
+			background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+		}
+
+		#modalRegistraPagamento .modal-footer {
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* Modal Exibir Notificação de Penalidade (PDF) */
+		#modalExibePDFPenalidade .modal-dialog {
+			max-width: 900px;
+		}
+
+		#modalExibePDFPenalidade .modal-header {
+			background: linear-gradient(180deg, var(--ftx-penalidade-terracota) 0%, #8B4513 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalExibePDFPenalidade .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalExibePDFPenalidade .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalExibePDFPenalidade .modal-body {
+			padding: 0;
+		}
+
+		#modalExibePDFPenalidade .modal-footer {
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* Modal Exibir Comprovante de Pagamento (PDF) */
+		#modalExibeComprovante .modal-dialog {
+			max-width: 900px;
+		}
+
+		#modalExibeComprovante .modal-header {
+			background: linear-gradient(180deg, var(--ftx-penalidade-dinheiro) 0%, var(--ftx-penalidade-dinheiro-dark) 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalExibeComprovante .modal-header .modal-title {
+			color: #fff !important;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		#modalExibeComprovante .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		#modalExibeComprovante .modal-body {
+			padding: 0;
+		}
+
+		#modalExibeComprovante .modal-footer {
+			border-top: 1px solid rgba(0,0,0,0.08);
+			padding: 0.875rem 1.25rem;
+			background: #f8f9fa;
+			gap: 0.5rem;
+		}
+
+		/* ====== BOTÕES DOS MODAIS - COM GLOW FROTIX ====== */
+		.btn-modal-fechar {
+			background-color: #722f37 !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+
+		.btn-modal-fechar:hover {
+			background-color: #5a252c !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+
+		.btn-modal-fechar:active, .btn-modal-fechar:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		.btn-modal-confirmar {
+			background-color: #3D5771 !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+
+		.btn-modal-confirmar:hover {
+			background-color: #2d4559 !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+
+		.btn-modal-confirmar:active, .btn-modal-confirmar:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		.btn-modal-pagar {
+			background-color: #2E8B57 !important;
+			color: #fff !important;
+			border: none;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(46, 139, 87, 0.5), 0 2px 4px rgba(46, 139, 87, 0.3) !important;
+		}
+
+		.btn-modal-pagar:hover {
+			background-color: #236B43 !important;
+			color: #fff !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(46, 139, 87, 0.8), 0 6px 12px rgba(46, 139, 87, 0.5) !important;
+		}
+
+		.btn-modal-pagar:active, .btn-modal-pagar:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.25) !important;
+		}
+
+		.btn-modal-pagar:disabled {
+			opacity: 0.65;
+			cursor: not-allowed;
+			box-shadow: none !important;
+			animation: none !important;
+		}
+
+		/* Spinner dentro de botão */
+		.btn .spinner-border {
+			width: 1rem;
+			height: 1rem;
+			border-width: 2px;
+		}
+
+		/* ====== CARD INFO NO MODAL ====== */
+		.ftx-info-card {
+			background: linear-gradient(135deg, rgba(61, 87, 113, 0.08) 0%, rgba(61, 87, 113, 0.04) 100%);
+			border: 1px solid rgba(61, 87, 113, 0.15);
+			border-radius: 8px;
+			padding: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.ftx-info-card-title {
+			font-size: 0.75rem;
+			font-weight: 600;
+			color: #64748b;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 0.5rem;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 992px) {
+			.ftx-penalidade-filters-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+
+			.ftx-penalidade-filters-grid {
+				grid-template-columns: 1fr;
+			}
+
+			#modalRegistraPagamento .modal-dialog,
+			#modalExibePDFPenalidade .modal-dialog,
+			#modalExibeComprovante .modal-dialog,
+			#modalPDF .modal-dialog {
+				max-width: 95%;
+				margin: 1rem auto;
+			}
+		}
+	</style>
+}
+
+<form>
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel ftx-card-styled">
+				<div class="panel-container show">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-messages-dollar"></i>
+							Multas: Lista de Penalidades
+						</h2>
+						<a href="/Multa/UpsertPenalidade" class="btn btn-header-orange" data-ejtip="Adicionar nova penalidade">
+							<i class="fa-duotone fa-plus me-2"></i>
+							Adicionar Penalidade
+						</a>
+					</div>
+
+					<!-- Área de Filtros -->
+					<div class="ftx-penalidade-filters">
+						<div class="ftx-penalidade-filters-title">
+							<i class="fa-duotone fa-filter"></i>
+							Filtros de Pesquisa
+						</div>
+
+						<div class="ftx-penalidade-filters-grid">
+							<!-- Órgão -->
+							<div class="ftx-penalidade-filter-group">
+								<label>Órgão Autuante</label>
+								<ejs-combobox id="lstOrgao"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["dataOrgaoAutuante"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Infração -->
+							<div class="ftx-penalidade-filter-group">
+								<label>Infração</label>
+								<ejs-combobox id="lstTiposMulta"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstTipoMulta"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Veículo -->
+							<div class="ftx-penalidade-filter-group">
+								<label>Veículo</label>
+								<ejs-combobox id="lstVeiculos"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstVeiculos"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Motorista -->
+							<div class="ftx-penalidade-filter-group">
+								<label>Motorista</label>
+								<ejs-combobox id="lstMotorista"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstMotorista"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Status -->
+							<div class="ftx-penalidade-filter-group">
+								<label>Status</label>
+								<ejs-combobox id="lstStatus"
+											  placeholder="Selecione..."
+											  allowFiltering="true" filterType="Contains"
+											  dataSource="@ViewData["lstStatus"]"
+											  popupHeight="250px" width="100%" showClearButton="true">
+									<e-combobox-fields text="Status" value="StatusId"></e-combobox-fields>
+								</ejs-combobox>
+							</div>
+
+							<!-- Botão Filtrar -->
+							<div class="ftx-penalidade-filter-group">
+								<label>&nbsp;</label>
+								<button type="button" id="btnFiltro" name="btnFiltro"
+										class="btn-filtrar-penalidade"
+										data-ejtip="Filtrar as Penalidades"
+										onclick="ListaTblPenalidades()">
+									<i class="fa-duotone fa-magnifying-glass"></i>
+									Filtrar
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Tabela de Penalidades -->
+					<div class="panel-content">
+						<div id="divPenalidades">
+							<table id="tblMulta" class="table table-bordered table-striped" width="100%">
+								<thead>
+									<tr>
+										<th></th>
+										<th>Nº Infração</th>
+										<th>Data</th>
+										<th>Hora</th>
+										<th>Motorista</th>
+										<th>Veículo</th>
+										<th>Órgão</th>
+										<th>Infração</th>
+										<th>Local</th>
+										<th>Data Pagamento</th>
+										<th>Valor Pago</th>
+										<th>(R$) Pós Vencimento</th>
+										<th>Processo eDoc</th>
+										<th>Ação</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@* ============================================================== *@
+@* Modal PDF Genérico (Ficha de Vistoria)                         *@
+@* ============================================================== *@
+<div class="modal fade" id="modalPDF" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-file-pdf"></i>
+					Ficha de Vistoria
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<div id="pdfViewer" style="height: 600px;">
+					<ejs-pdfviewer id="pdfViewerControl"
+								   style="height:100%"
+								   serviceUrl="/api/PdfViewer"
+								   documentPath=""
+								   enableToolbar="true"
+								   enableNavigationToolbar="true"
+								   enableThumbnail="true"
+								   zoomMode="FitToWidth">
+					</ejs-pdfviewer>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn-modal-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-rotate-left"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* ============================================================== *@
+@* Modal – Registrar Pagamento                                    *@
+@* ============================================================== *@
+<div class="modal fade" id="modalRegistraPagamento" tabindex="-1" aria-labelledby="h3Titulo" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-md">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h4 class="modal-title" id="h3Titulo">
+					<i class="fa-duotone fa-money-bill-wave"></i>
+					Registrar Pagamento da Infração
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+
+			<div class="modal-body">
+				<form id="frmStatus">
+					<input type="hidden" id="txtId" />
+					<input type="hidden" id="txtEmpenhoMultaId" />
+
+					<div class="row">
+						<div class="col-4">
+							<div class="form-group">
+								<label class="label font-weight-bold">Data de Pagamento</label>
+								<input id="txtDataPagamento" class="form-control form-control-xs" type="date" />
+							</div>
+						</div>
+
+						<div class="col-4">
+							<div class="form-group">
+								<label class="label font-weight-bold">Valor Pago</label>
+								<input id="txtValorPago" class="form-control form-control-xs" style="text-align:right;"
+									   onkeypress="return moeda(this,'.',',',event)" />
+							</div>
+						</div>
+
+						<div class="col-4">
+							<div class="form-group">
+								<label class="label font-weight-bold">Forma de Pagamento</label>
+								<select id="lstPagamento" class="form-control form-control-xs">
+									<option value="">--- Escolha ---</option>
+									<option value="Defin">Via Defin</option>
+									<option value="Direto">Direto pelo Infrator</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<br />
+
+					<div class="control-wrapper">
+						<div id="divPDF">
+							<label class="label font-weight-bold">Upload do Comprovante de Pagamento (PDF)</label>
+							<ejs-uploader id="pdfComprovante"
+										  asyncSettings="@(new Syncfusion.EJ2.Inputs.UploaderAsyncSettings {
+											  SaveUrl = "/Multa/ListaPenalidade?handler=SavePDF",
+											  RemoveUrl = "/Multa/ListaPenalidade?handler=RemovePDF"
+										  })"
+										  allowedExtensions=".pdf"
+										  success="onUploadSuccess"
+										  failure="onUploadError">
+							</ejs-uploader>
+
+							<div id="PDFContainer" style="margin-top: 15px;">
+								<div id="ComprovantePDFViewerContainer" style="height: 400px; display:none;">
+									<ejs-pdfviewer id="ComprovantePDFViewer"
+												   serviceUrl="/api/PdfViewer"
+												   style="height:100%;">
+									</ejs-pdfviewer>
+								</div>
+							</div>
+
+							<input id="txtComprovantePDF" class="form-control form-control-xs" style="display:none" />
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button id="btnPagamento" class="btn-modal-pagar" type="button" data-ejtip="Confirmar pagamento">
+					<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+					<i class="fa-duotone fa-check"></i>
+					<span class="btn-text">Registrar Pagamento</span>
+				</button>
+				<button id="btnFechar" type="button" class="btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-duotone fa-rotate-left"></i>
+					Fechar
+				</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@* ============================================================== *@
+@* Modal: Exibir Notificação de Penalidade (PDF)                  *@
+@* ============================================================== *@
+<div class="modal fade" id="modalExibePDFPenalidade" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-file-lines"></i>
+					Notificação de Penalidade
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<div id="pdfViewerPenalidade" style="height: 600px; width: 100%;">
+					<ejs-pdfviewer id="pdfViewerPenalidadeControl"
+								   style="height:100%; width:100%;"
+								   serviceUrl="/api/MultaPdfViewer"
+								   documentPath=""
+								   enableToolbar="true"
+								   enableNavigationToolbar="true"
+								   enableThumbnail="true"
+								   zoomMode="FitToWidth">
+					</ejs-pdfviewer>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="btnFecharExibePDFPenalidade" type="button" class="btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-duotone fa-rotate-left"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* ============================================================== *@
+@* Modal: Exibir Comprovante de Pagamento (PDF)                   *@
+@* ============================================================== *@
+<div class="modal fade" id="modalExibeComprovante" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-receipt"></i>
+					Comprovante de Pagamento
+				</h4>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<div id="pdfViewerComprovante" style="height: 600px; width: 100%;">
+					<ejs-pdfviewer id="pdfViewerComprovanteControl"
+								   style="height:100%; width:100%;"
+								   serviceUrl="/api/MultaPdfViewer"
+								   documentPath=""
+								   enableToolbar="true"
+								   enableNavigationToolbar="true"
+								   enableThumbnail="true"
+								   zoomMode="FitToWidth">
+					</ejs-pdfviewer>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="btnFecharExibeComprovante" type="button" class="btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
+					<i class="fa-duotone fa-rotate-left"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<!-- DataTables -->
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+	<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+	<script>
+		var URLapi = "/api/multa/listamultas";
+
+		$(document).ready(function () {
+			try {
+				ListaTodasPenalidades();
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "document.ready", error);
+			}
+		});
+
+		$("#btnFechar").click(function () {
+			try {
+				$("div").removeClass("modal-backdrop");
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "#btnFechar.click", error);
+			}
+		});
+
+		function ListaTodasPenalidades() {
+			try {
+				const statusCmb = document.getElementById('lstStatus')?.ej2_instances?.[0];
+				const statusId = (!statusCmb || !statusCmb.value) ? "Pendentes" : "Todas";
+				URLapi = "/api/multa/listamultas";
+				ListaTblPenalidades();
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "ListaTodasPenalidades", error);
+			}
+		}
+	</script>
+
+	<script>
+		// ====================================================================
+		// FUNÇÃO: RENDERIZAR BADGE DE STATUS
+		// ====================================================================
+		function renderStatusBadge(status) {
+			try {
+				if (!status) return '<span class="ftx-badge-status ftx-badge-default"><i class="fa-duotone fa-circle-question"></i> N/D</span>';
+
+				const statusLower = status.toLowerCase().trim();
+
+				// Pago
+				if (statusLower.includes('pago') && !statusLower.includes('infrator')) {
+					return `<span class="ftx-badge-status ftx-badge-pago"><i class="fa-duotone fa-circle-check"></i> ${status}</span>`;
+				}
+
+				// Paga (Infrator)
+				if (statusLower.includes('infrator')) {
+					return `<span class="ftx-badge-status ftx-badge-infrator"><i class="fa-duotone fa-user-check"></i> ${status}</span>`;
+				}
+
+				// À Enviar Secle
+				if (statusLower.includes('enviar')) {
+					return `<span class="ftx-badge-status ftx-badge-secle"><i class="fa-duotone fa-paper-plane"></i> ${status}</span>`;
+				}
+
+				// Enviada Secle
+				if (statusLower.includes('enviada')) {
+					return `<span class="ftx-badge-status ftx-badge-enviada"><i class="fa-duotone fa-check-double"></i> ${status}</span>`;
+				}
+
+				// Pendente
+				if (statusLower.includes('pendente')) {
+					return `<span class="ftx-badge-status ftx-badge-pendente"><i class="fa-duotone fa-clock"></i> ${status}</span>`;
+				}
+
+				// Default
+				return `<span class="ftx-badge-status ftx-badge-default"><i class="fa-duotone fa-circle-question"></i> ${status}</span>`;
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "renderStatusBadge", error);
+				return status || '';
+			}
+		}
+
+		// ====================================================================
+		// FUNÇÃO: LISTAR PENALIDADES NA TABELA
+		// ====================================================================
+		function ListaTblPenalidades() {
+			try {
+				if ($('#divPenalidades').LoadingScript) {
+					$('#divPenalidades').LoadingScript('method_12', {
+						background_image: 'img/loading7.png',
+						main_width: 200,
+						animation_speed: 10,
+						additional_style: '',
+						after_element: false
+					});
+				}
+
+				let veiculoId = "", tipoMultaId = "", motoristaId = "", orgaoAutuanteId = "", statusId = "";
+
+				const veiculos = document.getElementById('lstVeiculos')?.ej2_instances?.[0];
+				const tipos = document.getElementById('lstTiposMulta')?.ej2_instances?.[0];
+				const motoristas = document.getElementById('lstMotorista')?.ej2_instances?.[0];
+				const orgaos = document.getElementById('lstOrgao')?.ej2_instances?.[0];
+				const status = document.getElementById('lstStatus')?.ej2_instances?.[0];
+
+				if (veiculos && veiculos.value != null) veiculoId = veiculos.value;
+				if (tipos && (tipos.value != null || tipos.value === '')) tipoMultaId = tipos.value;
+				if (motoristas && motoristas.value != null) motoristaId = motoristas.value;
+				if (orgaos && orgaos.value != null) orgaoAutuanteId = orgaos.value;
+				if (status && status.value != null) statusId = status.value;
+
+				if ($.fn.DataTable.isDataTable('#tblMulta')) {
+					$('#tblMulta').DataTable().destroy();
+				}
+				$('#tblMulta tbody').empty();
+
+				console.log("Chamada Lista Penalidades – URLapi:", URLapi);
+
+				$('#tblMulta').DataTable({
+                    order: [],
+                    ordering: false,
+					select: { style: 'multi', selector: 'td:first-child' },
+					autoWidth: false,
+					dom: 'Bfrtip',
+					lengthMenu: [[10, 25, 50, -1], ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']],
+
+					buttons: [
+						'pageLength', 'copy', 'excel',
+						{
+							extend: 'pdfHtml5',
+							orientation: 'landscape',
+							pageSize: 'LEGAL',
+							text: 'Imprime Relatório para Secle',
+							action: function (e, dt) {
+								const count = dt.rows({ selected: true }).count();
+								console.log('Linhas selecionadas:', count);
+							}
+						}
+					],
+
+					columnDefs: [
+						{
+							targets: 0,
+							render: function () {
+								return '<input type="checkbox" class="editor-active">';
+							},
+							className: "dt-body-center",
+							orderable: false,
+							searchable: false,
+							width: "1%"
+						},
+						{
+							targets: 1,
+							className: "text-center",
+							width: "3%",
+							render: function (data, type, full) {
+								return `<div class="text-center">
+									<a data-ejtip="Observação: ${full.observacao}" style="cursor:pointer;" data-id="${data}">
+										${full.numInfracao}
+									</a>
+								</div>`;
+							}
+						},
+						{ targets: 2, className: "text-center", width: "3%" },
+						{ targets: 3, className: "text-center", width: "3%" },
+						{
+							targets: 4,
+							className: "text-left",
+							width: "8%",
+							render: function (data, type, full) {
+								return `<div class="text-center">
+									<a data-ejtip="Telefone: ${full.telefone}" style="cursor:pointer;" data-id="${data}">
+										${full.nome}
+									</a>
+								</div>`;
+							}
+						},
+						{ targets: 5, className: "text-center", width: "3%" },
+						{ targets: 6, className: "text-left", width: "5%" },
+						{
+							targets: 7,
+							className: "text-left",
+							width: "8%",
+							render: function (data, type, full) {
+								return `<div class="text-center">
+									<a data-ejtip="Descrição: ${full.descricao}" style="cursor:pointer;" data-id="${data}">
+										${full.artigo}
+									</a>
+								</div>`;
+							}
+						},
+						{ targets: 8, className: "text-left", width: "20%" },
+						{
+							targets: 9,
+							className: "text-center",
+							width: "3%",
+							render: function (data, type, full) {
+								return `<div class="text-center">
+									<a data-ejtip="Data Original de Vencimento: ${full.vencimento}" style="cursor:pointer;" data-id="${data}">
+										${full.dataPagamento}
+									</a>
+								</div>`;
+							}
+						},
+						{
+							targets: 10,
+							className: "text-right",
+							width: "6%",
+							render: function (data, type, full) {
+								return `<div class="text-center">
+									<a data-ejtip="Valor Original de Pagamento: ${full.valorAteVencimento}" style="cursor:pointer;" data-id="${data}">
+										${full.valorPago}
+									</a>
+								</div>`;
+							}
+						},
+						{ targets: 11, className: "text-right", width: "5%" },
+						{ targets: 12, className: "text-center", width: "5%" },
+						{
+							// Coluna de Ações com botões estilizados
+							targets: 13,
+							className: "text-center",
+							width: "12%",
+							render: function (data, type, full) {
+								const hasPenalidadePDF = full.penalidadePDF && full.penalidadePDF !== '';
+								const hasComprovantePDF = full.comprovantePDF && full.comprovantePDF !== '';
+
+								return `<div class="text-center" style="white-space: nowrap;">
+									<a href="/Multa/UpsertPenalidade?id=${data}"
+									   class="ftx-btn-icon ftx-btn-editar"
+									   data-ejtip="Editar a Penalidade">
+										<i class="fa-duotone fa-pen-to-square"></i>
+									</a>
+									<a class="ftx-btn-icon ftx-btn-pagamento btn-pagamento"
+									   data-ejtip="${full.tooltip}"
+									   data-bs-toggle="modal"
+									   data-bs-target="#modalRegistraPagamento"
+									   data-id="${data}" ${full.habilitado}>
+										<i class="fa-duotone fa-dollar-sign"></i>
+									</a>
+									<a class="ftx-btn-icon ftx-btn-apagar btn-apagar"
+									   data-ejtip="Apagar a Penalidade"
+									   data-id="${data}">
+										<i class="fa-duotone fa-trash-can"></i>
+									</a>
+									<a class="ftx-btn-icon ftx-btn-pdf btn-exibe-penalidade ${!hasPenalidadePDF ? 'ftx-btn-pdf-disabled' : ''}"
+									   data-id="${data}" 
+									   data-penalidadepdf="${full.penalidadePDF || ''}"
+									   data-ejtip="Exibe a Notificação de Penalidade"
+									   ${!hasPenalidadePDF ? 'aria-disabled="true"' : ''}>
+										<i class="fa-duotone fa-file-lines"></i>
+									</a>
+									<a class="ftx-btn-icon ftx-btn-comprovante btn-exibe-comprovante ${!hasComprovantePDF ? 'ftx-btn-comprovante-disabled' : ''}"
+									   data-id="${data}" 
+									   data-comprovantepdf="${full.comprovantePDF || ''}"
+									   data-ejtip="Exibe o Comprovante de Pagamento"
+									   ${!hasComprovantePDF ? 'aria-disabled="true"' : ''}>
+										<i class="fa-duotone fa-receipt"></i>
+									</a>
+								</div>`;
+							}
+						},
+						{
+							targets: 14,
+							className: "text-center",
+							width: "1%",
+							render: function (data, type, row, meta) {
+								return meta.row + meta.settings._iDisplayStart + 1;
+							}
+						}
+					],
+
+					responsive: true,
+					ajax: {
+						url: URLapi,
+						type: "GET",
+						data: {
+							fase: "Penalidade",
+							veiculo: veiculoId,
+							orgao: orgaoAutuanteId,
+							motorista: motoristaId,
+							infracao: tipoMultaId,
+							status: statusId
+						},
+						datatype: "json"
+					},
+
+					columns: [
+						{ data: null },
+						{ data: "numInfracao" },
+						{ data: "data" },
+						{ data: "hora" },
+						{ data: "nome" },
+						{ data: "placa" },
+						{ data: "sigla" },
+						{ data: "artigo" },
+						{ data: "localizacao" },
+						{ data: "dataPagamento" },
+						{ data: "valorPago" },
+						{ data: "valorPosVencimento" },
+						{ data: "processoEDoc" },
+						{ data: "multaId" },
+						{ data: "multaId" }
+					],
+
+					language: {
+						url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+						emptyTable: "Nenhum registro encontrado",
+						select: {
+							rows: { "_": " %d linhas selecionadas ", "1": " 1 linha selecionada " }
+						}
+					},
+					width: "100%"
+				});
+
+				if ($('#divPenalidades').LoadingScript) {
+					$('#divPenalidades').LoadingScript('destroy');
+				}
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "ListaTblPenalidades", error);
+			}
+		}
+	</script>
+
+	<script>
+		$(document).on('click', '.btn-apagar', function () {
+			try {
+				const id = $(this).data('id');
+
+				Alerta.Confirmar(
+					"Você tem certeza que deseja apagar esta Penalidade?",
+					"Não será possível recuperar os dados eliminados!",
+					"Excluir",
+					"Cancelar"
+				).then(function (confirmed) {
+					try {
+						if (!confirmed) return;
+
+						$.ajax({
+							url: '/api/Multa/Delete',
+							type: "POST",
+							data: JSON.stringify({ MultaId: id }),
+							contentType: "application/json; charset=utf-8",
+							dataType: "json",
+							success: function (data) {
+								try {
+									if (data.success) {
+										AppToast.show('Verde', data.message, 2000);
+										ListaTodasPenalidades();
+									}
+									else {
+										AppToast.show('Vermelho', data.message, 3000);
+									}
+								}
+								catch (error) {
+									Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-apagar.success", error);
+								}
+							},
+							error: function (err) {
+								try {
+									console.error('Erro ao excluir:', err);
+									AppToast.show('Vermelho', 'Erro ao excluir a penalidade', 3000);
+								}
+								catch (error) {
+									Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-apagar.error", error);
+								}
+							}
+						});
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-apagar.confirmar", error);
+					}
+				});
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-apagar.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		$('#modalRegistraPagamento').on('shown.bs.modal', function (event) {
+			try {
+				const pdfViewer = document.getElementById('ComprovantePDFViewer')?.ej2_instances?.[0];
+				if (pdfViewer) {
+					pdfViewer.unload();
+					document.getElementById('ComprovantePDFViewerContainer').style.display = 'none';
+				}
+
+				const uploader = document.getElementById("pdfComprovante")?.ej2_instances?.[0];
+				if (uploader) {
+					uploader.clearAll();
+				}
+
+				const button = $(event.relatedTarget);
+				const multaId = button.data("id");
+				$('#txtId').val(multaId);
+
+				$.ajax({
+					type: "GET",
+					url: "/api/Multa/PegaValor",
+					dataType: "json",
+					data: { Id: multaId },
+					success: function (data) {
+						try {
+							if (data && data.valor != null) {
+								$('#txtValorPago').val(Number(data.valor).toLocaleString('pt-br'));
+							}
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "PegaValor.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.error('Erro ao buscar valor:', err);
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "PegaValor.error", error);
+						}
+					}
+				});
+
+				$.ajax({
+					type: "GET",
+					url: "/api/Multa/PegaEmpenhoMultaId",
+					dataType: "json",
+					data: { Id: multaId },
+					success: function (data) {
+						try {
+							$('#txtEmpenhoMultaId').val(data.empenhoMultaId || "");
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "PegaEmpenho.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.error('Erro ao buscar empenho:', err);
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "PegaEmpenho.error", error);
+						}
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "modalRegistraPagamento.shown", error);
+			}
+		}).on("hide.bs.modal", function () {
+			try {
+				document.getElementById("lstPagamento").value = "";
+				document.getElementById("txtComprovantePDF").value = "";
+				document.getElementById("txtDataPagamento").value = "";
+
+				const uploader = document.getElementById("pdfComprovante")?.ej2_instances?.[0];
+				if (uploader) {
+					uploader.clearAll();
+				}
+
+				const pdfViewer = document.getElementById('ComprovantePDFViewer')?.ej2_instances?.[0];
+				if (pdfViewer) {
+					pdfViewer.unload();
+					document.getElementById('ComprovantePDFViewerContainer').style.display = 'none';
+				}
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "modalRegistraPagamento.hide", error);
+			}
+		});
+	</script>
+
+	<script>
+		function moeda(a, e, r, t) {
+			try {
+				let n = "", h = 0, j = 0, u = 0, tamanho2 = 0, ajd2 = "", l = "";
+				const o = window.Event ? t.which : t.keyCode;
+
+				if (o === 13 || o === 8) return true;
+
+				n = String.fromCharCode(o);
+				if ("0123456789".indexOf(n) === -1) return false;
+
+				u = a.value.length;
+				for (h = 0; h < u && ("0" === a.value.charAt(h) || a.value.charAt(h) === r); h++);
+
+				for (l = ""; h < u; h++) {
+					if ("0123456789".indexOf(a.value.charAt(h)) !== -1) {
+						l += a.value.charAt(h);
+					}
+				}
+
+				l += n;
+				u = l.length;
+
+				if (u === 0) a.value = "";
+				if (u === 1) a.value = "0" + r + "0" + l;
+				if (u === 2) a.value = "0" + r + l;
+
+				if (u > 2) {
+					ajd2 = "";
+					j = 0;
+					for (h = u - 3; h >= 0; h--) {
+						if (j === 3) {
+							ajd2 += e;
+							j = 0;
+						}
+						ajd2 += l.charAt(h);
+						j++;
+					}
+					a.value = "";
+					tamanho2 = ajd2.length;
+					for (h = tamanho2 - 1; h >= 0; h--) {
+						a.value += ajd2.charAt(h);
+					}
+					a.value += r + l.substr(u - 2, u);
+				}
+
+				return false;
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "moeda", error);
+				return false;
+			}
+		}
+	</script>
+
+	<script>
+		function onUploadSuccess(args) {
+			try {
+				if (!args || !args.file) return;
+
+				const nomeLimpo = TiraAcento(args.file.name);
+				$("#txtComprovantePDF").val(nomeLimpo);
+
+				const pdfViewer = document.getElementById('ComprovantePDFViewer')?.ej2_instances?.[0];
+
+				if (pdfViewer) {
+					const pdfPath = "/DadosEditaveis/Multas/" + nomeLimpo;
+					document.getElementById('ComprovantePDFViewerContainer').style.display = 'block';
+					pdfViewer.load(pdfPath, null);
+					AppToast.show('Verde', 'Comprovante carregado com sucesso', 2000);
+				}
+				else {
+					console.error('PDFViewer não encontrado');
+				}
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onUploadSuccess", error);
+			}
+		}
+
+		function onUploadError(args) {
+			try {
+				console.error('Erro no upload:', args);
+				AppToast.show('Vermelho', 'Erro ao fazer upload do arquivo', 3000);
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onUploadError", error);
+			}
+		}
+
+		function TiraAcento(input) {
+			try {
+				const accentMap = {
+					'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+					'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+					'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+					'ã': 'a', 'õ': 'o', 'ç': 'c',
+					'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+					'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+					'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
+					'Ã': 'A', 'Õ': 'O', 'Ç': 'C'
+				};
+
+				let result = '';
+				for (let i = 0; i < input.length; i++) {
+					const ch = input.charAt(i);
+					result += (accentMap[ch] || ch);
+				}
+
+				return result.replace(/\s/g, '_').toUpperCase();
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "TiraAcento", error);
+				return input;
+			}
+		}
+	</script>
+
+	<script>
+		// ====================================================================
+		// EVENT HANDLER: BOTÃO REGISTRAR PAGAMENTO - COM SPINNER
+		// ====================================================================
+		$("#btnPagamento").click(function (event) {
+			try {
+				event.preventDefault();
+
+				const btn = $(this);
+				const spinner = btn.find('.spinner-border');
+				const icon = btn.find('i');
+				const btnText = btn.find('.btn-text');
+
+				const multaId = $("#txtId").val();
+				const empenhomultaId = $("#txtEmpenhoMultaId").val();
+				const lstPagamento = document.getElementById("lstPagamento");
+
+				if (!$("#txtDataPagamento").val()) {
+					Alerta.Erro("Informação Ausente", "A Data de Pagamento é obrigatória", "Ok");
+					return;
+				}
+
+				if (!$("#txtValorPago").val() || $("#txtValorPago").val() === "0") {
+					Alerta.Erro("Informação Ausente", "O Valor Pago é obrigatório", "Ok");
+					return;
+				}
+
+				if (!lstPagamento.value) {
+					Alerta.Erro("Informação Ausente", "A Forma de Pagamento é obrigatória", "Ok");
+					return;
+				}
+
+				// Ativa spinner
+				spinner.removeClass('d-none');
+				icon.addClass('d-none');
+				btnText.text('Registrando...');
+				btn.prop('disabled', true);
+
+				const Status = (lstPagamento.value === "Defin") ? "À Enviar Secle" : "Paga (Infrator)";
+
+				let ValorPago = $('#txtValorPago').val().replaceAll(".", "");
+				ValorPago = ValorPago.replaceAll(",", ".");
+
+				$.ajax({
+					type: "GET",
+					url: "/api/Multa/RegistraPagamento",
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					data: {
+						MultaId: multaId,
+						DataPagamento: $('#txtDataPagamento').val(),
+						ValorPago: ValorPago,
+						Status: Status,
+						FormaPagamento: lstPagamento.value,
+						ComprovantePDF: $('#txtComprovantePDF').val(),
+						EmpenhoMultaId: empenhomultaId
+					},
+					success: function (data) {
+						try {
+							AppToast.show('Verde', data.message || 'Pagamento registrado com sucesso', 2000);
+							$('#modalRegistraPagamento').modal('hide');
+							$('div').removeClass('modal-backdrop');
+							ListaTblPenalidades();
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "RegistraPagamento.success", error);
+						}
+						finally {
+							spinner.addClass('d-none');
+							icon.removeClass('d-none');
+							btnText.text('Registrar Pagamento');
+							btn.prop('disabled', false);
+						}
+					},
+					error: function (data) {
+						try {
+							console.error('Erro ao registrar pagamento:', data);
+							AppToast.show('Vermelho', 'Erro ao registrar pagamento', 3000);
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "RegistraPagamento.error", error);
+						}
+						finally {
+							spinner.addClass('d-none');
+							icon.removeClass('d-none');
+							btnText.text('Registrar Pagamento');
+							btn.prop('disabled', false);
+						}
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "#btnPagamento.click", error);
+			}
+		});
+	</script>
+
+	<script>
+		// ====================================================================
+		// EVENT HANDLER: BOTÃO EXIBIR NOTIFICAÇÃO DE PENALIDADE
+		// ====================================================================
+		$(document).on('click', '.btn-exibe-penalidade', function (e)
+		{
+			try
+			{
+				e.preventDefault();
+				
+				const penalidadePDF = $(this).data('penalidadepdf');
+				
+				console.log('🔍 Clique em btn-exibe-penalidade, penalidadePDF:', penalidadePDF);
+				
+				if (!penalidadePDF || penalidadePDF === '')
+				{
+					Alerta.Warning(
+						'PDF não disponível',
+						'Esta penalidade não possui PDF anexado.',
+						'OK'
+					);
+					return;
+				}
+				
+				// Abre o modal e carrega o PDF
+				exibirPDFPenalidade(penalidadePDF);
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-exibe-penalidade.click", error);
+			}
+		});
+
+		// ====================================================================
+		// EVENT HANDLER: BOTÃO EXIBIR COMPROVANTE DE PAGAMENTO
+		// ====================================================================
+		$(document).on('click', '.btn-exibe-comprovante', function (e)
+		{
+			try
+			{
+				e.preventDefault();
+				
+				const comprovantePDF = $(this).data('comprovantepdf');
+				
+				console.log('🔍 Clique em btn-exibe-comprovante, comprovantePDF:', comprovantePDF);
+				
+				if (!comprovantePDF || comprovantePDF === '')
+				{
+					Alerta.Warning(
+						'PDF não disponível',
+						'Esta penalidade não possui comprovante de pagamento anexado.',
+						'OK'
+					);
+					return;
+				}
+				
+				// Abre o modal e carrega o PDF
+				exibirComprovantePDF(comprovantePDF);
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-exibe-comprovante.click", error);
+			}
+		});
+
+		// ====================================================================
+		// FUNÇÃO: EXIBIR PDF DE PENALIDADE NO MODAL
+		// ====================================================================
+		function exibirPDFPenalidade(nomeArquivo)
+		{
+			try
+			{
+				if (!nomeArquivo || nomeArquivo === '')
+				{
+					console.error('Nome do arquivo PDF inválido');
+					return;
+				}
+				
+				// Abre o modal primeiro
+				$('#modalExibePDFPenalidade').modal('show');
+				
+				// Aguarda o modal ser renderizado antes de carregar o PDF
+				setTimeout(function() {
+					try {
+						// Obtém a instância do PDF Viewer
+						const viewerElement = document.getElementById('pdfViewerPenalidadeControl');
+						if (!viewerElement)
+						{
+							console.error('PDF Viewer de Penalidade não encontrado');
+							return;
+						}
+						
+						const pdfViewer = viewerElement.ej2_instances?.[0];
+						if (!pdfViewer)
+						{
+							console.error('Instância do PDF Viewer não encontrada');
+							return;
+						}
+						
+						// Ajusta o zoom quando o documento carregar
+						pdfViewer.documentLoad = function() {
+							try {
+								// Define zoom para ajustar à largura
+								setTimeout(function() {
+									pdfViewer.magnificationModule.fitToWidth();
+									console.log('✅ Zoom ajustado para FitToWidth');
+								}, 100);
+							} catch (err) {
+								console.warn('⚠️ Não foi possível ajustar zoom automaticamente:', err);
+							}
+						};
+						
+						// Carrega o PDF
+						pdfViewer.documentPath = nomeArquivo;
+						pdfViewer.dataBind();
+						pdfViewer.load(nomeArquivo, null);
+						
+						console.log('✅ PDF de Penalidade carregado:', nomeArquivo);
+					} catch (err) {
+						console.error('❌ Erro ao carregar PDF:', err);
+						Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "exibirPDFPenalidade.timeout", err);
+					}
+				}, 500);
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "exibirPDFPenalidade", error);
+			}
+		}
+
+		// ====================================================================
+		// FUNÇÃO: EXIBIR COMPROVANTE DE PAGAMENTO NO MODAL
+		// ====================================================================
+		function exibirComprovantePDF(nomeArquivo)
+		{
+			try
+			{
+				if (!nomeArquivo || nomeArquivo === '')
+				{
+					console.error('Nome do arquivo PDF inválido');
+					return;
+				}
+				
+				// Abre o modal primeiro
+				$('#modalExibeComprovante').modal('show');
+				
+				// Aguarda o modal ser renderizado antes de carregar o PDF
+				setTimeout(function() {
+					try {
+						// Obtém a instância do PDF Viewer
+						const viewerElement = document.getElementById('pdfViewerComprovanteControl');
+						if (!viewerElement)
+						{
+							console.error('PDF Viewer de Comprovante não encontrado');
+							return;
+						}
+						
+						const pdfViewer = viewerElement.ej2_instances?.[0];
+						if (!pdfViewer)
+						{
+							console.error('Instância do PDF Viewer não encontrada');
+							return;
+						}
+						
+						// Ajusta o zoom quando o documento carregar
+						pdfViewer.documentLoad = function() {
+							try {
+								// Define zoom para ajustar à largura
+								setTimeout(function() {
+									pdfViewer.magnificationModule.fitToWidth();
+									console.log('✅ Zoom ajustado para FitToWidth');
+								}, 100);
+							} catch (err) {
+								console.warn('⚠️ Não foi possível ajustar zoom automaticamente:', err);
+							}
+						};
+						
+						// Carrega o PDF
+						pdfViewer.documentPath = nomeArquivo;
+						pdfViewer.dataBind();
+						pdfViewer.load(nomeArquivo, null);
+						
+						console.log('✅ Comprovante PDF carregado:', nomeArquivo);
+					} catch (err) {
+						console.error('❌ Erro ao carregar PDF:', err);
+						Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "exibirComprovantePDF.timeout", err);
+					}
+				}, 500);
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "exibirComprovantePDF", error);
+			}
+		}
+
+		// ====================================================================
+		// EVENT HANDLER: LIMPAR PDF AO FECHAR MODAL PENALIDADE
+		// ====================================================================
+		$('#modalExibePDFPenalidade').on('hidden.bs.modal', function ()
+		{
+			try
+			{
+				const pdfViewer = document.getElementById('pdfViewerPenalidadeControl')?.ej2_instances?.[0];
+				if (pdfViewer)
+				{
+					pdfViewer.unload();
+				}
+				console.log('✅ Modal Penalidade fechado e viewer limpo');
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "modalExibePDFPenalidade.hidden", error);
+			}
+		});
+
+		// ====================================================================
+		// EVENT HANDLER: LIMPAR PDF AO FECHAR MODAL COMPROVANTE
+		// ====================================================================
+		$('#modalExibeComprovante').on('hidden.bs.modal', function ()
+		{
+			try
+			{
+				const pdfViewer = document.getElementById('pdfViewerComprovanteControl')?.ej2_instances?.[0];
+				if (pdfViewer)
+				{
+					pdfViewer.unload();
+				}
+				console.log('✅ Modal Comprovante fechado e viewer limpo');
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "modalExibeComprovante.hidden", error);
+			}
+		});
+	</script>
+}

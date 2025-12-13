@@ -1,0 +1,539 @@
+@page
+@model FrotiX.Pages.Administracao.CalculaCustoViagensTotalModel
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Calcula Custos das Viagens";
+    ViewData["PageName"] = "calcula_custo_viagens_index";
+    ViewData["Heading"] = "<i class='fad fa-calculator'></i> Atualização: <span class='fw-300'>Custos das Viagens</span>";
+    ViewData["Category1"] = "Administração";
+    ViewData["PageIcon"] = "fal fa-calculator";
+}
+
+@section HeadBlock {
+    <link rel="stylesheet" href="~/css/ajustacusto.css" asp-append-version="true" />
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+
+    .label {
+        color: white;
+    }
+
+    .progress-container {
+        margin-top: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .progress-label {
+        color: #555;
+    }
+
+    .progress-percent {
+        color: #325d88;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Barra de Progresso Customizada */
+    .custom-progress-bar {
+        width: 100%;
+        height: 45px;
+        background-color: #E0E0E0;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .custom-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #325d88 0%, #4a7db3 100%);
+        width: 0%;
+        transition: width 0.5s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(50, 93, 136, 0.3);
+    }
+
+    .custom-progress-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 45px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        z-index: 10;
+    }
+
+    .progress-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .stat-card {
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #325d88;
+        line-height: 1;
+    }
+
+    #progressMessage {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+        min-height: 24px;
+        font-style: italic;
+    }
+
+    .btn-processing {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-processing::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 20px;
+        margin-top: -8px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spinner 0.8s linear infinite;
+    }
+
+    @@keyframes spinner {
+        to { transform: rotate(360deg); }
+    }
+
+    .success-icon {
+        font-size: 64px;
+        color: #28a745;
+        text-align: center;
+        margin: 20px 0;
+        animation: successPulse 1s ease-in-out;
+    }
+
+    @@keyframes successPulse {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #325d88;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    .info-box i {
+        color: #325d88;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="row">
+                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+                            <h2 class="text-primary">Cálculo Otimizado de Custos das Viagens</h2>
+                            <p class="text-muted mb-3">
+                                <i class="fal fa-info-circle"></i>
+                                Esta operação irá recalcular os custos de todas as viagens realizadas no sistema usando processamento em batch otimizado.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="info-box">
+                                <i class="fad fa-lightbulb"></i>
+                                <strong>Otimização Implementada:</strong>
+                                Este processo carrega todos os dados necessários uma única vez em memória e processa as viagens em lotes de 500 registros.
+                                Tempo estimado: <strong>5-15 minutos</strong> para 53.000 viagens (vs. 111 horas do método anterior).
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button id="btnCalculaCustoViagens" class="btn fundo-azul form-control">
+                                <i class="fad fa-play-circle"></i> Iniciar Cálculo dos Custos (Batch Otimizado)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Container do Progresso -->
+                    <div id="progressContainer" class="progress-container" style="display: none;">
+                        <div class="progress-info">
+                            <span id="progressLabel" class="progress-label">Preparando processamento...</span>
+                            <span id="progressPercent" class="progress-percent">0%</span>
+                        </div>
+
+                        <!-- Barra de Progresso Customizada -->
+                        <div class="custom-progress-bar">
+                            <div id="progressFill" class="custom-progress-fill"></div>
+                            <div id="progressText" class="custom-progress-text">Processando...</div>
+                        </div>
+
+                        <div id="progressMessage"></div>
+
+                        <!-- Cards de Estatísticas -->
+                        <div class="progress-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Total de Viagens</div>
+                                <div class="stat-value" id="statTotal">--</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Processadas</div>
+                                <div class="stat-value" id="statProcessado">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Tempo Decorrido</div>
+                                <div class="stat-value" id="statTempo">--</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Status</div>
+                                <div class="stat-value" id="statStatus" style="font-size: 20px;">Aguardando</div>
+                            </div>
+                        </div>
+
+                        <!-- Ícone de Sucesso (hidden inicialmente) -->
+                        <div id="successIcon" class="success-icon" style="display: none;">
+                            <i class="fad fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script src="~/js/Toasts/AppToast.js" asp-append-version="true"></script>
+
+    <script>
+        let inicioProcessamento = null;
+        let intervalTimerId = null;
+        let intervalProgressoId = null; // Para polling do progresso
+
+        $(document).ready(function () {
+            try {
+                $("#btnCalculaCustoViagens").on("click", function () {
+                    iniciarCalculoCustos();
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "document.ready", error);
+            }
+        });
+
+        // ========================================
+        // FUNÇÕES PRINCIPAIS
+        // ========================================
+
+        function iniciarCalculoCustos() {
+            try {
+                marcarBotaoProcessando();
+                mostrarBarraProgresso();
+
+                // Inicia contador de tempo
+                inicioProcessamento = new Date();
+                iniciarContagemTempo();
+
+                // Atualiza interface
+                $("#progressLabel").text("Iniciando processamento...");
+                $("#progressMessage").text("Preparando dados...");
+                $("#progressFill").css("width", "0%");
+                $("#progressText").text("0%");
+                $("#statStatus").text("⟳ Iniciando");
+                $("#statTotal").text("--");
+
+                // Inicia polling do progresso
+                iniciarMonitoramentoProgresso();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/viagem/ExecutarCalculoCustoBatch",
+                    timeout: 1800000, // 30 minutos timeout
+                    success: function (data) {
+                        try {
+                            pararMonitoramentoProgresso();
+                            pararContagemTempo();
+
+                            if (data.success) {
+                                // Força atualização final para 100%
+                                atualizarInterface(data.totalViagens, data.totalViagens, data.message, 100);
+
+                                // Mostra ícone de sucesso
+                                $("#successIcon").fadeIn(500);
+
+                                AppToast.show('Verde', data.message, 5000);
+                            } else {
+                                atualizarErro(data.message);
+                                AppToast.show('Vermelho', data.message || 'Erro ao processar', 4000);
+                            }
+
+                            desmarcarBotaoProcessando();
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "iniciarCalculoCustos.success", error);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        try {
+                            pararMonitoramentoProgresso();
+                            pararContagemTempo();
+                            desmarcarBotaoProcessando();
+
+                            let mensagemErro = 'Erro ao processar: ' + (errorThrown || textStatus);
+                            if (textStatus === 'timeout') {
+                                mensagemErro = 'Timeout: O processamento excedeu o tempo limite. Verifique o servidor.';
+                            }
+
+                            atualizarErro(mensagemErro);
+                            AppToast.show('Vermelho', mensagemErro, 5000);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "iniciarCalculoCustos.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "iniciarCalculoCustos", error);
+            }
+        }
+
+        function iniciarMonitoramentoProgresso() {
+            try {
+                // Limpa intervalo anterior se existir
+                if (intervalProgressoId !== null) {
+                    clearInterval(intervalProgressoId);
+                }
+
+                // Consulta o progresso a cada 500ms
+                intervalProgressoId = setInterval(() => {
+                    consultarProgresso();
+                }, 500);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "iniciarMonitoramentoProgresso", error);
+            }
+        }
+
+        function pararMonitoramentoProgresso() {
+            try {
+                if (intervalProgressoId !== null) {
+                    clearInterval(intervalProgressoId);
+                    intervalProgressoId = null;
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "pararMonitoramentoProgresso", error);
+            }
+        }
+
+        function consultarProgresso() {
+            try {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/viagem/ObterProgressoCalculoCustoBatch",
+                    success: function (data) {
+                        try {
+                            if (data.success && data.progresso) {
+                                const p = data.progresso;
+
+                                // Atualiza interface se houver progresso real
+                                if (p.total > 0) {
+                                    atualizarInterface(p.processado, p.total, p.mensagem, p.percentual);
+                                }
+
+                                // Se concluído pelo servidor, para monitoramento
+                                if (p.concluido) {
+                                    pararMonitoramentoProgresso();
+
+                                    if (p.erro) {
+                                        atualizarErro(p.erro);
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "consultarProgresso.success", error);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        // Ignora erros de consulta de progresso (não crítico)
+                        console.log("Erro ao consultar progresso (ignorado):", textStatus);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "consultarProgresso", error);
+            }
+        }
+
+        function atualizarInterface(processado, total, mensagem, percentual) {
+            try {
+                // Atualiza barra de progresso
+                $("#progressFill").css("width", percentual + "%");
+                $("#progressText").text(percentual + "%");
+                $("#progressPercent").text(percentual + "%");
+
+                // Atualiza labels
+                $("#progressLabel").text(mensagem);
+                $("#progressMessage").text(mensagem);
+
+                // Atualiza estatísticas
+                $("#statTotal").text(total.toLocaleString('pt-BR'));
+                $("#statProcessado").text(processado.toLocaleString('pt-BR'));
+
+                if (percentual >= 100) {
+                    $("#statStatus").text("✓ OK");
+                    $("#progressText").text("✓ Concluído!");
+                } else {
+                    $("#statStatus").text("⟳ Processando");
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "atualizarInterface", error);
+            }
+        }
+
+        function atualizarErro(mensagem) {
+            try {
+                $("#progressFill").css("width", "0%");
+                $("#progressText").text("✗ Erro");
+                $("#progressLabel").text("Erro no processamento");
+                $("#progressMessage").text(mensagem);
+                $("#statStatus").text("✗ Erro");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "atualizarErro", error);
+            }
+        }
+
+        function marcarBotaoProcessando() {
+            try {
+                $("#btnCalculaCustoViagens")
+                    .addClass("btn-processing")
+                    .prop("disabled", true)
+                    .html('<i class="fad fa-spinner-third fa-spin"></i> Processando...');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "marcarBotaoProcessando", error);
+            }
+        }
+
+        function desmarcarBotaoProcessando() {
+            try {
+                $("#btnCalculaCustoViagens")
+                    .removeClass("btn-processing")
+                    .prop("disabled", false)
+                    .html('<i class="fad fa-play-circle"></i> Iniciar Cálculo dos Custos (Batch Otimizado)');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "desmarcarBotaoProcessando", error);
+            }
+        }
+
+        function mostrarBarraProgresso() {
+            try {
+                $("#progressContainer").slideDown(300);
+                $("#successIcon").hide();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "mostrarBarraProgresso", error);
+            }
+        }
+
+        function iniciarContagemTempo() {
+            try {
+                // Atualiza o tempo decorrido a cada segundo
+                intervalTimerId = setInterval(() => {
+                    if (inicioProcessamento) {
+                        const agora = new Date();
+                        const segundosDecorridos = Math.floor((agora - inicioProcessamento) / 1000);
+
+                        let textoTempo = "";
+                        if (segundosDecorridos < 60) {
+                            textoTempo = segundosDecorridos + "s";
+                        } else {
+                            const minutos = Math.floor(segundosDecorridos / 60);
+                            const segundos = segundosDecorridos % 60;
+                            textoTempo = minutos + "m " + segundos + "s";
+                        }
+
+                        $("#statTempo").text(textoTempo);
+                    }
+                }, 1000);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "iniciarContagemTempo", error);
+            }
+        }
+
+        function pararContagemTempo() {
+            try {
+                if (intervalTimerId) {
+                    clearInterval(intervalTimerId);
+                    intervalTimerId = null;
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "pararContagemTempo", error);
+            }
+        }
+
+        // Limpa os intervalos quando a página é fechada
+        window.addEventListener('beforeunload', function () {
+            try {
+                pararContagemTempo();
+                pararMonitoramentoProgresso();
+            } catch (error) {
+                console.error("Erro ao limpar intervalos:", error);
+            }
+        });
+    </script>
+}

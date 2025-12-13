@@ -1,0 +1,20 @@
+/**
+ *
+ * Apply Here your Custom CSS
+ *
+*/
+
+tr {
+	color: #373e4a !important;
+}
+
+th {
+	color: #ffffff !important;
+	background-color: #34486d !important;
+}
+.dataTables_wrapper > div label {
+	color: #373e4a !important;
+}
+.dataTables_wrapper > div.dataTables_info {
+	color: #373e4a !important;
+}

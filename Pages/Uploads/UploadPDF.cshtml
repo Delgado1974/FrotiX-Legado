@@ -1,0 +1,143 @@
+@page
+@model FrotiX.Pages.Uploads.UploadPDFModel
+
+@using Kendo.Mvc.UI
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@Html.AntiForgeryToken()
+
+@{
+	ViewData["Title"] = "Upload de Notificação (PDF)";
+	ViewData["PageName"] = "uploads_uploadpdf";
+	ViewData["Heading"] = "<i class='fa-duotone fa-file-pdf'></i> Uploads: <span class='fw-300'>Upload de Notificação (PDF)</span>";
+	ViewData["Category1"] = "Uploads";
+	ViewData["PageIcon"] = "fa-duotone fa-file-pdf";
+}
+
+@section HeadBlock {
+	<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.412/styles/kendo.default-v2.min.css" />
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="https://kendo.cdn.telerik.com/2022.1.412/js/kendo.all.min.js"></script>
+	<script src="https://kendo.cdn.telerik.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+	<script>
+		window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+	</script>
+}
+
+<h1>Upload de Notificação (PDF)</h1>
+
+<div class="row">
+	<div class="col-12 col-md-6">
+		<input type="file" name="files" id="pdf" accept=".pdf" />
+	</div>
+	<div class="col-12 col-md-6" style="margin-top:8px;">
+		<input type="text" id="txtArquivo" class="form-control" placeholder="Nenhum arquivo selecionado" readonly />
+	</div>
+</div>
+
+<br />
+
+<div id="pdfViewer"></div>
+
+@section ScriptsBlock {
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script>
+		kendo.ui.Upload.fn._supportsDrop = function () {
+			try {
+				return false;
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "_supportsDrop", error);
+			}
+		};
+
+		$(function () {
+			try {
+				$("#pdf").kendoUpload({
+					async: {
+						saveUrl: "/Multa/UploadPDF?handler=Save",
+						removeUrl: "/Multa/UploadPDF?handler=Remove",
+						autoUpload: true
+					},
+					multiple: false,
+					localization: {
+						select: "Selecione a Notificação de Autuação...",
+						headerStatusUploaded: "Arquivo carregado",
+						headerStatusUploading: "Enviando...",
+						uploadSelectedFiles: "Enviar",
+						dropFilesHere: "Arraste o arquivo aqui para enviar",
+						invalidFileExtension: "Tipo de arquivo inválido. Selecione um PDF."
+					},
+					validation: {
+						allowedExtensions: [".pdf"]
+					},
+					upload: function (e) {
+						try {
+							e.data = e.data || {};
+							e.data.__RequestVerificationToken = $('input[name="__RequestVerificationToken"]').val();
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "upload.event", error);
+						}
+					},
+					success: onSuccess,
+					error: function (e) {
+						try {
+                            AppToast.show("Vermelho", "Falha no upload do PDF.", 2000);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "error.event", error);
+						}
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "kendoUpload.init", error);
+			}
+		});
+
+		function onSuccess(e) {
+			try {
+				if (e.operation !== "upload" || !e.files || !e.files.length) return;
+
+				const file = e.files[0];
+				const nome = file && file.name ? file.name : "";
+
+				if (!nome) return;
+
+				$("#txtArquivo").val(nome);
+
+				const $viewer = $("#pdfViewer");
+				const instanciaAnterior = $viewer.data("kendoPDFViewer");
+				if (instanciaAnterior) {
+					try {
+						instanciaAnterior.destroy();
+					} catch (destroyError) {
+						console.log("Erro ao destruir viewer anterior:", destroyError);
+					}
+					$viewer.empty();
+				}
+
+				$viewer.kendoPDFViewer({
+					pdfjsProcessing: {
+						file: "/Upload/" + nome
+					},
+					width: "100%",
+					height: 700,
+					toolbar: {
+						items: [
+							"pager", "zoom", "zoomIn", "zoomOut", "toggleSelection", "search", "download", "print"
+						]
+					},
+					messages: {
+						defaultFileName: nome
+					}
+				});
+
+                AppToast.show("Verde", "PDF carregado com sucesso!", 2000);
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UploadPDF.cshtml", "onSuccess", error);
+			}
+		}
+	</script>
+}

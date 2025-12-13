@@ -1,0 +1,155 @@
+
+@if (Settings.Features.AppHeader)
+{
+    <header class="page-header" style="background-color: #3D5771 " role="banner">
+        <partial name="_Logo" />
+
+        @* Navegação quando em janela/mobile *@
+        <div class="hidden-lg-up">
+            <a href="#" class="header-btn btn press-scale-down" data-action="toggle" data-class="mobile-nav-on">
+                <i class="ni ni-menu"></i>
+            </a>
+        </div>
+
+
+        <div class="ml-auto d-flex">           
+            @* Home *@
+            <div>
+                <a href="/intel/analyticsdashboard" class="header-icon d-flex align-items-center justify-content-center ml-2" title="P&aacute;gina Inicial">
+                    <i class="fa-regular fa-home"></i>
+                </a>
+            </div>
+
+            @* Agenda *@
+            <div>
+                <a href="/agenda/index" class="header-icon d-flex align-items-center justify-content-center ml-2" title="Agenda">
+                    <i class="fa-regular fa-calendar-alt"></i>
+                </a>
+            </div>
+
+            @* Requisições *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Requisi&ccedil;&otilde;es">
+                    <i class="fa-regular fa-clipboard"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/setorsolicitante/index">Setores Solicitantes</a>
+                    <a class="dropdown-item" href="/requisitante/index">Requisitantes</a>
+                </div>
+            </div>
+            
+            @* Viagens *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Viagens">
+                    <i class="fa-regular fa-briefcase-clock"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/viagens/upsert">Insere Nova Viagem</a>
+                    <a class="dropdown-item" href="/viagens/index">Controle de Viagens</a>
+                    <a class="dropdown-item" href="/viagens/listaeventos">Gerencia Eventos</a>
+                    <a class="dropdown-item" href="/viagens/fluxopassageiros">Inserir Fichas MOB</a>
+                    <a class="dropdown-item" href="/viagens/gestaofluxo">Gest&atilde;o Fichas MOB</a>
+                </div>
+            </div>
+
+            @* Manutenção *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Manuten&ccedil;&atilde;o">
+                    <i class="fa-regular fa-car-wrench"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/ocorrencia/ocorrencias">Ocorr&ecirc;ncias</a>
+                    <a class="dropdown-item" href="/manutencao/listamanutencao">Registro de Manuten&ccedil;&atilde;o</a>
+                    <a class="dropdown-item" href="/authorization/roles">Relat&oacute;rio de Glosa</a>
+                    <a class="dropdown-item" href="/manutencao/controlelavagem">Controle de Lavagens</a>
+                    <a class="dropdown-item" href="/manutencao/pbilavagem">Gr&aacute;ficos Gerenciais</a>
+                </div>
+            </div>
+
+            @* Abastecimento *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Abastecimento">
+                    <i class="fa-regular fa-gas-pump"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/abastecimento/index">Abastecimentos</a>
+                    <a class="dropdown-item" href="/abastecimento/importacao">Importa&ccedil;&atilde;o de Dados</a>
+                    <a class="dropdown-item" href="/abastecimento/registracupons">Registro de Cupons</a>
+                    <a class="dropdown-item" href="/abastecimento/pbi">Graficos Gerenciais</a>
+                </div>
+            </div>
+
+            @* Contratos *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Contratos">
+                    <i class="fa-regular fa-folders"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/contrato/index">Rela&ccedil;&atilde;o de Contratos</a>
+                    <a class="dropdown-item" href="/ataregistroprecos/index">Atas de Registro de Pre&ccedil;os</a>
+                    <a class="dropdown-item" href="/contrato/RepactuacaoContrato">Repactua&ccedil;&atilde;o de Contratos</a>
+                    <a class="dropdown-item" href="/empenho/index">Cadastro de Empenhos</a>
+                    <a class="dropdown-item" href="/notafiscal/index">Entrada de Notas Fiscais</a>
+                    <a class="dropdown-item" href="/contrato/itenscontrato">Itens dos Contratos</a>
+                    <a class="dropdown-item" href="/fornecedor/index">Cadastro de Fornecedores</a>
+                </div>
+            </div>
+
+            @* Multas *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Multas">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/multa/upsertautuacao">Nova Autua&ccedil;&atilde;o</a>
+                    <a class="dropdown-item" href="/multa/listaautuacao">Gest&atilde;o de Autua&ccedil;&atilde;o</a>
+                    <a class="dropdown-item" href="/multa/listapenalidade">Gest&atilde;o de Penalidades</a>
+                    <a class="dropdown-item" href="/multa/listaorgaosautuantes">&Oacute;rg&atilde;os Autuantes</a>
+                    <a class="dropdown-item" href="/multa/listaempenhosmulta">Empenhos</a>
+                    <a class="dropdown-item" href="/multa/listatiposmulta">Infra&ccedil;&otilde;es de Tr&acirc;nsito</a>
+                </div>
+            </div>
+
+            @* Cadastros *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Gest&atilde;o de Cadastros">
+                    <i class="fal fa-map-marker-alt"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/motorista/index">Cadastro de Motoristas</a>
+                    <a class="dropdown-item" href="/operador/index">Cadastro de Operadores</a>
+                    <a class="dropdown-item" href="/lavador/index">Cadastro de Lavadores</a>
+                    <a class="dropdown-item" href="/veiculo/index">Cadastro de Ve&iacute;culos</a>
+                </div>
+            </div>
+
+            @* TaxiLeg *@
+            <div class="dropdown">
+                <a class="header-icon d-flex align-items-center justify-content-center ml-2" id="dropdownMenuButton" data-toggle="dropdown" title="Taxileg" style="margin-right: 20px">
+                    <i class="fal fa-taxi"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/taxileg/importacao">Importa&ccedil;&atilde;o de Viagens Realizadas</a>
+                    <a class="dropdown-item" href="/taxileg/canceladas">Importa&ccedil;&atilde;o de Viagens Canceladas</a>
+                    <a class="dropdown-item" href="/taxileg/PBITaxiLeg">Graficos Gerenciais</a>
+                </div>
+            </div>
+
+			<partial name="_AlertasSino" />
+
+            @*Icone Pessoal*@
+            <div>
+                <a href="#" data-toggle="dropdown" title="@(Settings.Theme.Email)" class="header-icon d-flex align-items-center justify-content-center ml-5">
+                    <img src="~/Images/barbudo.jpg" class="profile-image rounded-circle" alt="@(Settings.Theme.User)">
+                </a>
+                <div class="dropdown-menu dropdown-menu-animated dropdown-lg">
+                    <partial name="_DropdownMenu" />
+                </div>
+            </div>
+        </div>
+    </header>
+}
+
+<script>
+    $("#dropdownMenuButton").click();
+</script>

@@ -1,0 +1,886 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using FrotiX.Pages.Multa
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc
+
+@inject IUnitOfWork _unitOfWork
+
+@{
+    @functions {
+        public void OnGet()
+        {
+            FrotiX.Pages.Multa.ListaMultaModel.Initialize(_unitOfWork);
+            ViewData["lstCategoria"] = new ListaCategoria(_unitOfWork).CategoriasList();
+            ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+            ViewData["lstUnidade"] = new ListaUnidades(_unitOfWork).UnidadesList();
+        }
+    }
+}
+
+@{
+    ViewData["Title"] = "Lotação por Categorias";
+    ViewData["PageName"] = "unidade_visualizalotacoes";
+    ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Unidades: <span class='fw-300'>Lotações por Categoria</span>";
+    ViewData["Category1"] = "Lotação";
+    ViewData["PageIcon"] = "fad fa-pen-to-square";
+}
+
+@section HeadBlock {
+    <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js';
+    </script>
+}
+
+<style>
+    .fundo-cinza {
+        background-color: #2F4F4F;
+        color: aliceblue;
+    }
+
+    .btn-fundo-laranja {
+        background-color: #D2691E;
+        color: white;
+    }
+
+    .fundo-verde {
+        background-color: #6C7665;
+        color: white;
+    }
+
+    h3:after {
+        content: ' ';
+        display: block;
+        border: 2px solid #d0d0d0;
+        border-radius: 4px;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    }
+
+    .img {
+        width: 100%;
+    }
+
+    .modal-dialog {
+        max-width: 50%;
+        height: 100%;
+        margin: 0 auto !important;
+    }
+
+    .btn_margem {
+        margin: 2px;
+    }
+
+    #divDisable {
+        padding: 5px 10px;
+        background-color: #777;
+        width: 150px;
+        margin-bottom: 20px;
+    }
+
+    .disabledDiv {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+</style>
+
+<script>
+    let categoriaId = null;
+
+    function onCreate() {
+        try {
+            // Função onCreate do RichTextEditor - não precisa fazer nada aqui
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "onCreate", error);
+        }
+    }
+
+    function onCategoriaChange() {
+        try {
+            const categorias = document.getElementById('lstCategorias').ej2_instances[0];
+            if (categorias.value) {
+                categoriaId = categorias.value;
+                ListaTblLotacoes(categoriaId);
+            } else {
+                const dt = $('#tblLotacao').DataTable();
+                dt.destroy();
+                $('#tblLotacao tbody').empty();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "onCategoriaChange", error);
+        }
+    }
+</script>
+
+<form>
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="box-body">
+                            <br /><br />
+                            <div class="col-12 px-3">
+                                <h2 class="text-primary">
+                                    Escolha a Categoria para visualizar suas Lotações:
+                                </h2>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-5">
+                                    <ejs-combobox id="lstCategorias"
+                                                  placeholder="Selecione uma Categoria"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  dataSource="@ViewData["lstCategoria"]"
+                                                  popupHeight="250px"
+                                                  width="100%"
+                                                  showClearButton="true"
+                                                  change="onCategoriaChange"
+                                                  close="onCategoriaChange">
+                                        <e-combobox-fields text="Categoria" value="CategoriaId"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div id="divLotacoes">
+                                <table id="tblLotacao" class="table table-bordered table-striped" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Categoria</th>
+                                            <th>Nome da Unidade</th>
+                                            <th>Motorista</th>
+                                            <th>Data Início</th>
+                                            <th>Ação</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+</form>
+
+@* ---------------- Modal: Edita Lotação ---------------- *@
+<div class="modal fade" id="modalEditaLotacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h3 class="modal-title" id="h3Titulo">Edita a Lotação do Motorista</h3>
+            </div>
+            <div class="modal-body">
+                <form id="frmEditaLotacao">
+                    <input type="hidden" id="txtIdEdita" />
+                    <div class="row">
+                        <div class="form-group row">
+                            <div class="col-5">
+                                <ejs-combobox id="lstMotoristaEditaLotacao"
+                                              placeholder="Selecione um Motorista"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMotorista"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-5">
+                                <ejs-combobox id="lstUnidadeEditaLotacao"
+                                              placeholder="Selecione uma Unidade"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstUnidade"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data de Início</label>
+                                    <input id="txtDataInicioEdicao" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data Fim</label>
+                                    <input id="txtDataFimEdicao" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-check-label font-weight-bold" for="chkLotadoEdicao">
+                                        O Motorista encontra-se atualmente lotado nesta Unidade?
+                                    </label>
+                                    <input class="form-check-input" type="checkbox" id="chkLotadoEdicao" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                </form>
+                <div class="modal-footer">
+                    <button id="btnEditaLotacao" class="btn btn-azul form-control" type="submit" value="SUBMIT">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                        Edita a Lotação
+                    </button>
+                    <button id="btnFecharLotacaoEdicao" type="button" class="btn btn-vinho form-control" data-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ---------------- Modal: Finaliza Lotação ---------------- *@
+<div class="modal fade" id="modalFinalizaLotacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h3 class="modal-title" id="h3Titulo">Finaliza a Lotação do Motorista Nesta Unidade</h3>
+            </div>
+            <div class="modal-body">
+                <form id="frmFinalizaLotacao">
+                    <input type="hidden" id="txtIdFinaliza" />
+                    <div class="row">
+                        <div class="form-group row" id="divMotoristaFinalizacao">
+                            <div class="col-5">
+                                <ejs-combobox id="lstMotoristaFinalizaLotacao"
+                                              placeholder="Selecione um Motorista"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstMotorista"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+                        <div class="form-group row" id="divUnidadeFinalizacao">
+                            <div class="col-5">
+                                <ejs-combobox id="lstUnidadeFinalizaLotacao"
+                                              placeholder="Selecione uma Unidade"
+                                              allowFiltering="true"
+                                              filterType="Contains"
+                                              dataSource="@ViewData["lstUnidade"]"
+                                              popupHeight="250px"
+                                              width="100%"
+                                              showClearButton="true">
+                                    <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4" id="divDataInicioFinaliza">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data de Início</label>
+                                    <input id="txtDataInicioFinaliza" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Data Fim</label>
+                                    <input id="txtDataFimFinaliza" class="form-control form-control-xs" type="date" />
+                                </div>
+                            </div>
+                            <br />
+                            <br />
+                            <div class="form-group row">
+                                <div class="col-5">
+                                    <label class="font-weight-bold">Define a nova Lotação do Motorista</label>
+                                    <ejs-combobox id="lstUnidadeNovaLotacao"
+                                                  placeholder="Selecione uma Unidade"
+                                                  allowFiltering="true"
+                                                  filterType="Contains"
+                                                  dataSource="@ViewData["lstUnidade"]"
+                                                  popupHeight="250px"
+                                                  width="100%"
+                                                  showClearButton="true">
+                                        <e-combobox-fields text="Descricao" value="UnidadeId"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Data de Início</label>
+                                        <input id="txtDataInicioNova" class="form-control form-control-xs" type="date" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                </form>
+                <div class="modal-footer">
+                    <button id="btnFinalizaLotacao" class="btn btn-azul form-control" type="submit" value="SUBMIT">
+                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+                        Remove o Motorista
+                    </button>
+                    <button id="btnFecharLotacaoFinalizacao" type="button" class="btn btn-vinho form-control" data-dismiss="modal">
+                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            try {
+                ListaTblLotacoes(null);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "document.ready", error);
+            }
+        });
+
+        $("#btnFecharLotacaoFinalizacao, #btnFecharLotacaoEdicao").click(function () {
+            try {
+                $("div").removeClass("modal-backdrop");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "btnFecharModal.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        function ListaTblLotacoes(categoriaIdParam) {
+            try {
+                $('#divLotacoes').LoadingScript('method_12', {
+                    'background_image': 'img/loading7.png',
+                    'main_width': 200,
+                    'animation_speed': 10,
+                    'additional_style': '',
+                    'after_element': false
+                });
+
+                if ($.fn.DataTable.isDataTable('#tblLotacao')) {
+                    const old = $('#tblLotacao').DataTable();
+                    old.destroy();
+                }
+                $('#tblLotacao tbody').empty();
+
+                if (DataTable.datetime) {
+                    DataTable.datetime('DD/MM/YYYY');
+                }
+
+                $('#tblLotacao').DataTable({
+                    select: { style: 'multi', selector: 'td:first-child' },
+                    autoWidth: false,
+                    dom: 'Bfrtip',
+                    lengthMenu: [
+                        [10, 25, 50, -1],
+                        ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']
+                    ],
+                    buttons: ['pageLength', 'copy', 'excel', 'pdf', 'print'],
+                    order: [],
+                    columnDefs: [
+                        { targets: 0, className: "text-left",   width: "10%" },
+                        { targets: 1, className: "text-left",   width: "40%" },
+                        { targets: 2, className: "text-left",   width: "20%" },
+                        { targets: 3, className: "text-center", width: "10%" },
+                        { targets: 4, className: "text-center", width: "8%"  },
+                        { targets: 5, className: "text-center", width: "0%", visible: false },
+                        { targets: 6, className: "text-center", width: "0%", visible: false },
+                        { targets: 7, className: "text-center", width: "0%", visible: false },
+                        { targets: 8, className: "text-center", width: "0%", visible: false }
+                    ],
+                    responsive: true,
+                    ajax: {
+                        url: "/api/unidade/listalotacoes",
+                        type: "GET",
+                        data: { categoriaId: categoriaIdParam },
+                        datatype: "json"
+                    },
+                    columns: [
+                        { data: "nomeCategoria" },
+                        { data: "unidade" },
+                        { data: "motorista" },
+                        { data: "dataInicio" },
+                        {
+                            data: "lotacaoMotoristaId",
+                            render: function (data) {
+                                return `<div class="text-center">
+                                    <a class="btn btn_margem btn-editalotacao btn-azul btn-xs text-white" data-bs-toggle="modal" data-bs-target="#modalEditaLotacao" data-ejtip="Edita a Lotação!" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
+                                        <i class="far fa-edit"></i>
+                                    </a>
+                                    <a class="btn btn_margem btn-finalizalotacao btn-xs text-white btn-fundo-laranja" data-bs-toggle="modal" data-bs-target="#modalFinalizaLotacao" data-ejtip="Finaliza a Lotação!" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
+                                        <i class="fa-regular fa-rotate-exclamation"></i>
+                                    </a>
+                                    <a class="btn btn_margem btn-apagar btn-vinho btn-xs text-white" data-ejtip="Apagar a Lotação!" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
+                                        <i class="far fa-trash-alt"></i>
+                                    </a>
+                                </div>`;
+                            }
+                        },
+                        { data: "lotacaoMotoristaId" },
+                        { data: "motoristaId" },
+                        { data: "unidadeId" },
+                        { data: "lotado" }
+                    ],
+                    language: {
+                        emptyTable: "Nenhum registro encontrado",
+                        info: "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                        infoFiltered: "(Filtrados de _MAX_ registros)",
+                        infoThousands: ".",
+                        loadingRecords: "Carregando...",
+                        processing: "Processando...",
+                        zeroRecords: "Nenhum registro encontrado",
+                        search: "Pesquisar",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                            first: "Primeiro",
+                            last: "Último"
+                        },
+                        aria: {
+                            sortAscending: ": Ordenar colunas de forma ascendente",
+                            sortDescending: ": Ordenar colunas de forma descendente"
+                        },
+                        select: {
+                            rows: { "_": " %d linhas selecionadas ", "1": "  1 linha selecionada " },
+                            cells: { "1": " 1 célula selecionada", "_": " %d células selecionadas" },
+                            columns: { "1": " 1 coluna selecionada", "_": " %d colunas selecionadas" }
+                        },
+                        buttons: {
+                            copySuccess: { "1": "Uma linha copiada com sucesso", "_": "%d linhas copiadas com sucesso" },
+                            collection: "Coleção",
+                            colvis: "Visibilidade da Coluna",
+                            colvisRestore: "Restaurar Visibilidade",
+                            copy: "Copiar",
+                            copyKeys: "Pressione ctrl ou ⌘ + C para copiar os dados da tabela. Para cancelar, clique aqui ou pressione Esc.",
+                            copyTitle: "Copiar para a Área de Transferência",
+                            csv: "CSV",
+                            excel: "Excel",
+                            pageLength: { "-1": "Mostrar todos os registros", "_": "Mostrar %d registros" },
+                            pdf: "PDF",
+                            print: "Imprimir"
+                        },
+                        autoFill: {
+                            cancel: "Cancelar",
+                            fill: "Preencher todas as células com",
+                            fillHorizontal: "Preencher células horizontalmente",
+                            fillVertical: "Preencher células verticalmente"
+                        },
+                        lengthMenu: "Exibir _MENU_ resultados por página",
+                        searchBuilder: {
+                            add: "Adicionar Condição",
+                            button: { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+                            clearAll: "Limpar Tudo",
+                            condition: "Condição",
+                            conditions: {
+                                date: {
+                                    after: "Depois", before: "Antes", between: "Entre", empty: "Vazio",
+                                    equals: "Igual", not: "Não", notBetween: "Não Entre", notEmpty: "Não Vazio"
+                                },
+                                number: {
+                                    between: "Entre", empty: "Vazio", equals: "Igual", gt: "Maior Que",
+                                    gte: "Maior ou Igual a", lt: "Menor Que", lte: "Menor ou Igual a",
+                                    not: "Não", notBetween: "Não Entre", notEmpty: "Não Vazio"
+                                },
+                                string: {
+                                    contains: "Contém", empty: "Vazio", endsWith: "Termina Com", equals: "Igual",
+                                    not: "Não", notEmpty: "Não Vazio", startsWith: "Começa Com"
+                                },
+                                array: {
+                                    contains: "Contém", empty: "Vazio", equals: "Igual à", not: "Não",
+                                    notEmpty: "Não vazio", without: "Não possui"
+                                }
+                            },
+                            data: "Data",
+                            deleteTitle: "Excluir regra de filtragem",
+                            logicAnd: "E",
+                            logicOr: "Ou",
+                            title: { "0": "Construtor de Pesquisa", "_": "Construtor de Pesquisa (%d)" },
+                            value: "Valor",
+                            leftTitle: "Critérios Externos",
+                            rightTitle: "Critérios Internos"
+                        },
+                        searchPanes: {
+                            clearMessage: "Limpar Tudo",
+                            collapse: { "0": "Painéis de Pesquisa", "_": "Painéis de Pesquisa (%d)" },
+                            count: "{total}",
+                            countFiltered: "{shown} ({total})",
+                            emptyPanes: "Nenhum Painel de Pesquisa",
+                            loadMessage: "Carregando Painéis de Pesquisa...",
+                            title: "Filtros Ativos"
+                        },
+                        thousands: ".",
+                        datetime: {
+                            previous: "Anterior",
+                            next: "Próximo",
+                            hours: "Hora",
+                            minutes: "Minuto",
+                            seconds: "Segundo",
+                            amPm: ["am", "pm"],
+                            unknown: "-",
+                            months: {
+                                "0": "Janeiro", "1": "Fevereiro", "2": "Março", "3": "Abril",
+                                "4": "Maio", "5": "Junho", "6": "Julho", "7": "Agosto",
+                                "8": "Setembro", "9": "Outubro", "10": "Novembro", "11": "Dezembro"
+                            },
+                            weekdays: [
+                                "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+                                "Quinta-feira", "Sexta-feira", "Sábado"
+                            ]
+                        },
+                        editor: {
+                            close: "Fechar",
+                            create: { button: "Novo", submit: "Criar", title: "Criar novo registro" },
+                            edit:   { button: "Editar", submit: "Atualizar", title: "Editar registro" },
+                            error:  { system: "Ocorreu um erro no sistema." },
+                            multi:  {
+                                noMulti: "Essa entrada pode ser editada individualmente, mas não em grupo",
+                                restore: "Desfazer alterações",
+                                title: "Múltiplos valores",
+                                info: "Os itens selecionados contêm valores diferentes para esta entrada."
+                            },
+                            remove: {
+                                button: "Remover",
+                                confirm: { "_": "Tem certeza que quer deletar %d linhas?", "1": "Tem certeza que quer deletar 1 linha?" },
+                                submit: "Remover",
+                                title: "Remover registro"
+                            }
+                        },
+                        decimal: ","
+                    },
+                    width: "100%"
+                });
+
+                $('#divLotacoes').LoadingScript('destroy');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "ListaTblLotacoes", error);
+            }
+        }
+    </script>
+
+    <script>
+        $(document).on('click', '.btn-apagar', function () {
+            try {
+                const id = $(this).data('id');
+                const catAtual = document.getElementById('lstCategorias').ej2_instances[0].value;
+
+                Alerta.Confirmar(
+                    "Confirmar Exclusão",
+                    "Você tem certeza que deseja apagar esta Lotação? Não será possível recuperar os dados eliminados!",
+                    "Sim, excluir",
+                    "Cancelar"
+                ).then(function (confirmed) {
+                    try {
+                        if (confirmed) {
+                            $.ajax({
+                                url: '/api/Unidade/DeleteLotacao',
+                                type: "GET",
+                                data: { Id: id },
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function (data) {
+                                    try {
+                                        if (data.success) {
+                                            AppToast.show(data.message, 'Verde', 2000);
+                                            ListaTblLotacoes(catAtual);
+                                        } else {
+                                            AppToast.show(data.message, 'Vermelho', 2000);
+                                        }
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "DeleteLotacao.success", error);
+                                    }
+                                },
+                                error: function (err) {
+                                    try {
+                                        console.log(err);
+                                        AppToast.show('Ocorreu um erro ao excluir a lotação', 'Vermelho', 2000);
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "DeleteLotacao.error", error);
+                                    }
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "btn-apagar.confirmar.then", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "btn-apagar.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        let linhaSelecionada = -1;
+        $(document).on("click", "#tblLotacao tbody tr", function () {
+            try {
+                linhaSelecionada = $('#tblLotacao').DataTable().row(this).index();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "tblLotacao.tbody.click", error);
+            }
+        });
+
+        $("#btnEditaLotacao").click(function (event) {
+            try {
+                event.preventDefault();
+
+                const catAtual      = document.getElementById('lstCategorias').ej2_instances[0].value;
+                const lotacaoId     = $('#txtIdEdita').val();
+                const motorista     = document.getElementById('lstMotoristaEditaLotacao').ej2_instances[0].value;
+                const unidadeNovaId = document.getElementById('lstUnidadeEditaLotacao').ej2_instances[0].value;
+
+                if (!motorista) {
+                    Alerta.Erro("Informação Ausente", "O Nome do Motorista é Obrigatório", "OK");
+                    return;
+                }
+                if (!unidadeNovaId) {
+                    Alerta.Erro("Informação Ausente", "O Nome da Unidade é Obrigatório", "OK");
+                    return;
+                }
+                if (!document.getElementById("txtDataInicioEdicao").value) {
+                    Alerta.Erro("Informação Ausente", "A Data de Início é obrigatória", "OK");
+                    return;
+                }
+
+                if (document.getElementById("chkLotadoEdicao").checked === true) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/Unidade/RemoveLotacoes",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: { MotoristaId: motorista }
+                    });
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Unidade/EditaLotacao",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        LotacaoId: lotacaoId,
+                        MotoristaId: motorista,
+                        UnidadeId: unidadeNovaId,
+                        DataInicio: $('#txtDataInicioEdicao').val(),
+                        DataFim: $('#txtDataFimEdicao').val(),
+                        Lotado: document.getElementById("chkLotadoEdicao").checked
+                    },
+                    success: function (data) {
+                        try {
+                            AppToast.show(data.message, 'Verde', 2000);
+                            $("#modalEditaLotacao").hide();
+                            ListaTblLotacoes(catAtual);
+                            $("div").removeClass("modal-backdrop");
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "EditaLotacao.success", error);
+                        }
+                    },
+                    error: function (data) {
+                        try {
+                            AppToast.show('Erro ao editar lotação', 'Vermelho', 2000);
+                            console.log(data);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "EditaLotacao.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "btnEditaLotacao.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        $("#btnFinalizaLotacao").click(function (event) {
+            try {
+                event.preventDefault();
+
+                const catAtual      = document.getElementById('lstCategorias').ej2_instances[0].value;
+                const lotacaoId     = $('#txtIdFinaliza').val();
+                const motorista     = document.getElementById('lstMotoristaFinalizaLotacao').ej2_instances[0].value;
+                const unidadeNovaId = document.getElementById('lstUnidadeNovaLotacao').ej2_instances[0].value;
+
+                if (!$('#txtDataFimFinaliza').val()) {
+                    Alerta.Erro("Informação Ausente", "A Data de Fim da Lotação é obrigatória", "OK");
+                    return;
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Unidade/RemoveLotacoes",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: { MotoristaId: motorista }
+                });
+
+                $.ajax({
+                    type: "GET",
+                    url: "/api/Unidade/RemoveMotorista",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: {
+                        LotacaoId: lotacaoId,
+                        MotoristaId: motorista,
+                        UnidadeNovaId: unidadeNovaId,
+                        DataInicioNova: $('#txtDataInicioNova').val(),
+                        DataFimFinaliza: $('#txtDataFimFinaliza').val()
+                    },
+                    success: function (data) {
+                        try {
+                            AppToast.show(data.message, 'Verde', 2000);
+                            $("#modalFinalizaLotacao").hide();
+                            ListaTblLotacoes(catAtual);
+                            $("div").removeClass("modal-backdrop");
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "RemoveMotorista.success", error);
+                        }
+                    },
+                    error: function (data) {
+                        try {
+                            AppToast.show('Erro ao finalizar lotação', 'Vermelho', 2000);
+                            console.log(data);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "RemoveMotorista.error", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "btnFinalizaLotacao.click", error);
+            }
+        });
+    </script>
+
+    <script>
+        $('#modalEditaLotacao').on('shown.bs.modal', function () {
+            try {
+                const dt   = $('#tblLotacao').DataTable();
+                const data = dt.row(linhaSelecionada).data();
+                if (!data) return;
+
+                const unidadeId          = data['unidadeId'];
+                const lotacaoMotoristaId = data['lotacaoMotoristaId'];
+                const motoristaId        = data['motoristaId'];
+
+                $('#txtIdEdita').val(lotacaoMotoristaId);
+                $('#btnEditaLotacao').attr("data-id", lotacaoMotoristaId);
+
+                document.getElementById('lstMotoristaEditaLotacao').ej2_instances[0].value = motoristaId;
+                document.getElementById('lstUnidadeEditaLotacao').ej2_instances[0].value  = unidadeId;
+
+                if (data['dataInicio']) {
+                    const di = data['dataInicio'].split("/");
+                    $('#txtDataInicioEdicao').val(`${di[2]}-${di[1]}-${di[0]}`);
+                } else {
+                    $('#txtDataInicioEdicao').val("");
+                }
+
+                if (data['dataFim']) {
+                    const df = data['dataFim'].split("/");
+                    $('#txtDataFimEdicao').val(`${df[2]}-${df[1]}-${df[0]}`);
+                } else {
+                    $('#txtDataFimEdicao').val("");
+                }
+
+                document.getElementById("chkLotadoEdicao").checked = !!data['lotado'];
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "modalEditaLotacao.shown", error);
+            }
+        }).on("hide.bs.modal", function () {
+            try {
+                $('#txtIdEdita').val("");
+                document.getElementById('lstMotoristaEditaLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstUnidadeEditaLotacao').ej2_instances[0].value  = null;
+                $('#txtDataInicioEdicao').val("");
+                $('#txtDataFimEdicao').val("");
+                document.getElementById("chkLotadoEdicao").checked = false;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "modalEditaLotacao.hide", error);
+            }
+        });
+
+        $('#modalFinalizaLotacao').on('shown.bs.modal', function () {
+            try {
+                const dt   = $('#tblLotacao').DataTable();
+                const data = dt.row(linhaSelecionada).data();
+                if (!data) return;
+
+                const motoristaId        = data['motoristaId'];
+                const unidadeId          = data['unidadeId'];
+                const lotacaoMotoristaId = data['lotacaoMotoristaId'];
+
+                function toggleDisabled(el) {
+                    try { el.disabled = !el.disabled; } catch { }
+                    if (el.childNodes && el.childNodes.length > 0) {
+                        for (let x = 0; x < el.childNodes.length; x++) toggleDisabled(el.childNodes[x]);
+                    }
+                }
+                $("#divMotoristaFinalizacao").attr("disabled", "disabled").off('click');
+                $("#divUnidadeFinalizacao").attr("disabled", "disabled").off('click');
+                $("#divDataInicioFinaliza").attr("disabled", "disabled").off('click');
+                $("#divMotoristaFinalizacao, #divUnidadeFinalizacao, #divDataInicioFinaliza").addClass("disabledDiv");
+                toggleDisabled(document.getElementById("divMotoristaFinalizacao"));
+                toggleDisabled(document.getElementById("divUnidadeFinalizacao"));
+                toggleDisabled(document.getElementById("divDataInicioFinaliza"));
+
+                $('#txtIdFinaliza').val(lotacaoMotoristaId);
+                $('#btnFinalizaLotacao').attr("data-id", lotacaoMotoristaId);
+
+                document.getElementById('lstMotoristaFinalizaLotacao').ej2_instances[0].value = motoristaId;
+                document.getElementById('lstUnidadeFinalizaLotacao').ej2_instances[0].value   = unidadeId;
+
+                if (data['dataInicio']) {
+                    const di = data['dataInicio'].split("/");
+                    $('#txtDataInicioFinaliza').val(`${di[2]}-${di[1]}-${di[0]}`);
+                } else {
+                    $('#txtDataInicioFinaliza').val("");
+                }
+
+                $('#txtDataFimFinaliza').val("");
+                $('#txtDataInicioNova').val("");
+                document.getElementById('lstUnidadeNovaLotacao').ej2_instances[0].value = null;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "modalFinalizaLotacao.shown", error);
+            }
+        }).on("hide.bs.modal", function () {
+            try {
+                $('#txtIdFinaliza').val("");
+                document.getElementById('lstMotoristaFinalizaLotacao').ej2_instances[0].value = null;
+                document.getElementById('lstUnidadeFinalizaLotacao').ej2_instances[0].value   = null;
+                $('#txtDataInicioFinaliza').val("");
+                $('#txtDataFimFinaliza').val("");
+                document.getElementById('lstUnidadeNovaLotacao').ej2_instances[0].value = null;
+                $('#txtDataInicioNova').val("");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("VisualizaLotacoes.cshtml", "modalFinalizaLotacao.hide", error);
+            }
+        });
+    </script>
+}
+

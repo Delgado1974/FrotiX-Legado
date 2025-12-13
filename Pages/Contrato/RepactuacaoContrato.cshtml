@@ -1,0 +1,1020 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Contrato.UpsertModel
+
+@{
+    ViewData["Title"] = "Contratos";
+    ViewData["PageName"] = "contrato_RepactuacaoContrato";
+    ViewData["Heading"] = "<i class='fa-duotone fa-handshake-simple'></i> Cadastros: <span class='fw-300'>Repactuação Contratos</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "<i class='fa-duotone fa-handshake-simple'></i>";
+}
+
+<style>
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .25rem !important;
+        font-size: .75rem !important;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
+
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+    }
+
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+    }
+
+    escondido {
+        visibility: hidden;
+    }
+
+    .input-icons i {
+        position: absolute;
+    }
+
+    .input-icons {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .icon {
+        padding: 10px;
+        min-width: 40px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .disable-element {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+
+    .wrapper {
+        cursor: not-allowed;
+    }
+
+    .e-grid * {
+        font-size: 12px !important;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: auto auto;
+    }
+
+    .listbox-container {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    label, select {
+        margin: 0;
+        padding: 0;
+    }
+
+    label {
+        margin-right: 10px;
+    }
+
+    .hidden-element {
+        display: none;
+    }
+
+    .show-element {
+        display: block;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .box {
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+    }
+
+    .left-div {
+        float: left;
+        width: 50%;
+    }
+
+    .right-div {
+        float: left;
+        width: 50%;
+    }
+</style>
+
+@section HeadBlock {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" />
+}
+
+<form>
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
+                    <div class="panel-content">
+
+                        <div class="grid-container box" style="border-bottom:1px solid #325d88">
+                            <select id="lstContratos" class="form-control listbox-container col-6">
+                                <option value="">-- Selecione um Contrato --</option>
+                            </select>
+
+                            <div>
+                                <div class="form-group">
+                                    <label class="label font-weight-bold" style="padding:0;margin-top:0;">Tipo de Contrato</label>
+                                    <input id="txtTipoContrato" class="form-control form-control-xs" type="text" disabled style="padding:0;margin-bottom:35px;" />
+                                </div>
+                            </div>
+
+                            <div id="divTblRepactuacoes" class="hidden">
+                                <table id="tblRepactuacoes" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Descricao</th>
+                                            <th>(R$) Anual</th>
+                                            <th>(R$) Mensal</th>
+                                            <th>Vigência</th>
+                                            <th>Prorrogação</th>
+                                            <th>Ação</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <button id="btnNovaRepactuacao" type="button" class="btn btn-azul form-control hidden" style="padding:0;margin-top:10px;">
+                                <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Insere Nova Repactuação
+                            </button>
+                        </div>
+
+                        <input id="txtRepactuacaoId" class="form-control form-control-xs" type="text" disabled hidden />
+                        <input id="txtRepactuacaoTerceirizacaoId" class="form-control form-control-xs" type="text" disabled hidden />
+                        <input id="txtRepactuacaoServicosId" class="form-control form-control-xs" type="text" disabled hidden />
+                        <input id="chkCancelaExclusaoLinha" type="checkbox" class="form-check-input" hidden />
+
+                        <div class="col-12 pt-3" id="divDadosRepactuacao" style="display:none;">
+                            <div class="row">
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Data Repactuação</label>
+                                        <input id="txtDataRepactuacao" class="form-control form-control-xs" type="date" />
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold" id="lblValorContrato">Novo Valor do Contrato</label>
+                                        <input id="txtValor" class="form-control form-control-xs" data-inputmask="'alias': 'currency'"
+                                               style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Vigência</label>
+                                        <select id="lstVigencia" class="form-control form-control-xs">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <label class="label font-weight-bold">Nº Prorrogação</label>
+                                        <span class="text-danger"></span>
+                                        <select id="lstProrrogacao" class="form-control form-control-xs">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-9">
+                                <div class="form-group">
+                                    <label class="label font-weight-bold">Descrição</label>
+                                    <input id="txtDescricao" class="form-control form-control-xs" type="text" style="padding:0;margin-bottom:20px;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="divRepactuacaoTerceirizacao" style="display:none;">
+                            <div id="divTerceirizacao" class="col-5">
+                                <div class="row"><label class="label font-weight-bold">Valores Mensais Unitários</label></div>
+
+                                <div class="row">
+                                    <label id="lblencarregados" class="label font-weight-bold">
+                                        <input id="chkencarregados" type="checkbox" class="form-check-input" />
+                                        Encarregados (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <input id="txtCustoMensalEncarregados" disabled class="form-control form-control-xs"
+                                                       data-inputmask="'alias': 'currency'" style="text-align:right;"
+                                                       onKeyPress="return(moeda(this,'.',',',event))" />
+                                            </div>
+                                            <div class="col-2">
+                                                <input id="txtQtdEncarregados" disabled class="form-control form-control-xs" style="text-align:right;" />
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div class="row">
+                                    <label id="lbloperadores" class="label font-weight-bold">
+                                        <input id="chkoperadores" type="checkbox" class="form-check-input" />
+                                        Operadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <input id="txtCustoMensalOperadores" disabled class="form-control form-control-xs"
+                                                       data-inputmask="'alias': 'currency'" style="text-align:right;"
+                                                       onKeyPress="return(moeda(this,'.',',',event))" />
+                                            </div>
+                                            <div class="col-2">
+                                                <input id="txtQtdOperadores" disabled class="form-control form-control-xs" style="text-align:right;" />
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div class="row">
+                                    <label id="lblmotoristas" class="label font-weight-bold">
+                                        <input id="chkmotoristas" type="checkbox" class="form-check-input" />
+                                        Motoristas (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <input id="txtCustoMensalMotoristas" disabled class="form-control form-control-xs"
+                                                       data-inputmask="'alias': 'currency'" style="text-align:right;"
+                                                       onKeyPress="return(moeda(this,'.',',',event))" />
+                                            </div>
+                                            <div class="col-2">
+                                                <input id="txtQtdMotoristas" disabled class="form-control form-control-xs" style="text-align:right;" />
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div class="row">
+                                    <label id="lbllavadores" class="label font-weight-bold">
+                                        <input id="chklavadores" type="checkbox" class="form-check-input" />
+                                        Lavadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <input id="txtCustoMensalLavadores" disabled class="form-control form-control-xs"
+                                                       data-inputmask="'alias': 'currency'" style="text-align:right;"
+                                                       onKeyPress="return(moeda(this,'.',',',event))" />
+                                            </div>
+                                            <div class="col-2">
+                                                <input id="txtQtdLavadores" disabled class="form-control form-control-xs" style="text-align:right;" />
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="divRepactuacaoLocacao" class="row" style="display:none;">
+                            <div>
+                                @{
+                                    List<object> cols = new List<object>();
+                                    cols.Add(new { field = "numItem", direction = "Ascending" });
+
+                                    List<object> commands = new List<object>();
+                                    commands.Add(new { type = "Edit", buttonOption = new { iconCss = "e-icons e-edit", cssClass = "e-flat" } });
+                                    commands.Add(new { type = "Delete", buttonOption = new { iconCss = "e-icons e-delete", cssClass = "e-flat" } });
+                                }
+                                <ejs-grid id="grdVeiculos"
+                                          toolbar="@(new List<string>() { "Add", "Update", "Delete", "Cancel" })"
+                                          GridLines="Both" QueryCellInfo="calculate" allowSorting="true"
+                                          actionComplete="actionComplete" actionBegin="ActionBeginHandler">
+                                    <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" newRowPosition="Bottom"></e-grid-editSettings>
+                                    <e-grid-sortsettings columns="cols"></e-grid-sortsettings>
+                                    <e-grid-columns>
+                                        <e-grid-column field="numItem" headerText="Item" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="valUnitario" headerText="Valor Unitário" textAlign="Right" width="30" allowEditing="true"></e-grid-column>
+                                        <e-grid-column field="valTotal" headerText="Valor Total" width="30" textAlign="Right" allowEditing="false"></e-grid-column>
+                                        <e-grid-column field="repactuacaoContratoId" headerText="RepactuaçãoContratoID" width="30" textAlign="Right" allowEditing="false" visible="false"></e-grid-column>
+                                        <e-grid-column field="ExisteVeiculo" headerText="ExisteVeiculo" width="30" textAlign="Right" allowEditing="false" visible="false"></e-grid-column>
+                                        <e-grid-column field="itemVeiculoId" headerText="itemVeiculoId" width="30" textAlign="Right" allowEditing="false" visible="false"></e-grid-column>
+                                    </e-grid-columns>
+                                </ejs-grid>
+                            </div>
+
+                            <div class="form-group row hidden">
+                                <ejs-listbox id="lstItensExcluidos"></ejs-listbox>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-3">
+                                    <label class="label font-weight-bold">Total Geral</label>
+                                    <input id="txtTotal" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align:right;" disabled />
+                                </div>
+                                <div class="col-3" style="padding:0;margin-top:22px;">
+                                    <button id="btnAtualizaTotal" type="button" class="btn btn-azul form-control">
+                                        <i class="fa-duotone fa-arrows-rotate icon-space"></i> Atualizar Total Após Edição
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+
+                        <div class="form-group row hidden" id="divBotoes">
+                            <div class="col-9">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button id="btnRepactuaContrato" type="button" class="btn btn-azul form-control" style="padding:0;margin-left:10px;">
+                                            <i class="fa-duotone fa-file-check icon-space icon-pulse"></i> Repactua Contrato
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button id="btnCancelaInsercao" type="button" class="btn btn-vinho form-control" style="padding:0;margin-bottom:10px;">
+                                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row hidden" id="divBotaoAtualizaRepactuacao">
+                            <div class="col-9">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button id="btnAtualizaRepactuacao" type="button" class="btn btn-azul form-control" style="padding:0;margin-bottom:10px;margin-left:10px;">
+                                            <i class="fa-duotone fa-file-check icon-space icon-pulse"></i> Atualiza Repactuacao
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button id="btnCancelaAtualizacao" type="button" class="btn btn-vinho form-control" style="padding:0;margin-bottom:10px;">
+                                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section ScriptsBlock {
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+    <script>
+        function moeda(a, e, r, t) {
+            try {
+                let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
+                    o = window.Event ? t.which : t.keyCode;
+                if (13 == o || 8 == o) return !0;
+                if (n = String.fromCharCode(o), -1 == "0123456789".indexOf(n)) return !1;
+                for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
+                for (l = ""; h < u; h++)
+                    -1 != "0123456789".indexOf(a.value.charAt(h)) && (l += a.value.charAt(h));
+                if (l += n, 0 == (u = l.length) && (a.value = ""),
+                    1 == u && (a.value = "0" + r + "0" + l),
+                    2 == u && (a.value = "0" + r + l),
+                    u > 2) {
+                    for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--)
+                        3 == j && (ajd2 += e, j = 0),
+                        ajd2 += l.charAt(h), j++;
+                    for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--)
+                        a.value += ajd2.charAt(h);
+                    a.value += r + l.substr(u - 2, u)
+                }
+                return !1
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "moeda", error);
+            }
+        }
+    </script>
+
+    <script>
+        function actionComplete(args) {
+            try {
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "actionComplete", error);
+            }
+        }
+
+        function calculate(args) {
+            try {
+                if (args === undefined) return;
+
+                var valUnitario = args.data.valUnitario;
+                var quantidade = args.data.quantidade;
+
+                valUnitario = (valUnitario).toString().replace('R$ ', '').replace('.', '').replace(',', '.');
+
+                var valortotal = valUnitario * quantidade;
+
+                if (args.column.headerText == "Valor Unitário") {
+                    $(args.cell).text(formatCurrencyToBRL(valUnitario));
+                }
+                if (args.column.headerText == "Valor Total") {
+                    $(args.cell).text(formatCurrencyToBRL(valortotal));
+                }
+
+                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                var getRows = gridObj.getRows();
+                var valortotalgrid = 0;
+
+                for (var i = 0; i < getRows.length; i++) {
+                    if (gridObj.getRows()[i].cells[2] === undefined) { return; }
+                    var qtd = gridObj.getRows()[i].cells[2].innerHTML;
+                    var val = gridObj.getRows()[i].cells[3].innerHTML;
+
+                    val = (val).toString().replace('R$&nbsp;', '').replace('R$ ', '').replace('.', '').replace(',', '.');
+                    valortotalgrid = valortotalgrid + (val * qtd);
+                }
+
+                var valortotalgeral = valortotal + valortotalgrid;
+                valortotalgeral = formatCurrencyToBRL(valortotalgeral);
+                $("#txtTotal").val(valortotalgeral);
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "calculate", error);
+            }
+        }
+
+        document.getElementById("btnNovaRepactuacao").addEventListener("click", function (event) {
+            try {
+                event.preventDefault();
+
+                editaRepactuacao = false;
+
+                document.getElementById("divDadosRepactuacao").style.display = "block";
+
+                $("#divRepactuacaoTerceirizacao").css("display", "none");
+                $("#divRepactuacaoLocacao").css("display", "none");
+
+                if ($("#txtTipoContrato").val() === "Terceirização") {
+                    $("#divRepactuacaoTerceirizacao").css("display", "block");
+                }
+
+                if ($("#txtTipoContrato").val() === "Locação") {
+                    $("#divRepactuacaoLocacao").css("display", "block");
+
+                    contratoId = document.getElementById("lstContratos").value;
+
+                    $.ajax({
+                        url: '/api/Contrato/UltimaRepactuacao',
+                        type: "GET",
+                        data: { contratoId: contratoId },
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (objRepactuacaoContratoId) {
+                            try {
+                                repactuacaoContratoId = objRepactuacaoContratoId;
+
+                                var grid = document.getElementById('grdVeiculos').ej2_instances[0];
+
+                                $.ajax({
+                                    url: 'api/Contrato/RecuperaItensUltimaRepactuacao',
+                                    type: "GET",
+                                    data: { repactuacaoContratoId: repactuacaoContratoId },
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (res) {
+                                        try {
+                                            console.log(res);
+                                            objItens = res;
+                                            grid.dataSource = objItens;
+
+                                            var valortotal = 0;
+                                            for (var i = 0; i < objItens.length; i++) {
+                                                valortotal += (objItens[i].valUnitario * objItens[i].quantidade);
+                                            }
+                                            $("#txtTotal").val(valortotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                        } catch (error) {
+                                            Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "RecuperaItens.success", error);
+                                        }
+                                    },
+                                    error: function (err) {
+                                        Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "RecuperaItens.error", err);
+                                    }
+                                });
+
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "UltimaRepactuacao.success", error);
+                            }
+                        },
+                        error: function (err) {
+                            Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "UltimaRepactuacao.error", err);
+                        }
+                    });
+                }
+
+                $("#btnNovaRepactuacao").css("display", "none");
+                $("#divBotoes").css("display", "block");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btnNovaRepactuacao.click", error);
+            }
+        });
+
+        $(document).on('click', '.btn-delete', function () {
+            try {
+                var Id = $(this).data('id');
+
+                Alerta.Confirmar(
+                    "Confirmar Exclusão",
+                    "Você tem certeza que deseja apagar esta Repactuação?",
+                    "Sim, excluir",
+                    "Cancelar"
+                ).then((confirmed) => {
+                    try {
+                        if (confirmed) {
+                            $.ajax({
+                                url: '/api/Contrato/ApagaRepactuacao',
+                                type: "GET",
+                                data: { Id: Id },
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function (data) {
+                                    try {
+                                        if (data.success) {
+                                            AppToast.show(data.message, 'Verde');
+                                            location.reload();
+                                        } else {
+                                            AppToast.show(data.message, 'Vermelho');
+                                        }
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "ApagaRepactuacao.success", error);
+                                    }
+                                },
+                                error: function (err) {
+                                    Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "ApagaRepactuacao.error", err);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "delete.confirmar", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btn-delete.click", error);
+            }
+        });
+
+        $(document).on('click', '.btn-editar', function () {
+            try {
+                editaRepactuacao = true;
+
+                $("#divRepactuacaoTerceirizacao").css("display", "none");
+                $("#divRepactuacaoLocacao").css("display", "none");
+                document.getElementById("divDadosRepactuacao").style.display = "block";
+
+                var Id = $(this).data('id');
+                RepactuacaoContratoId = Id;
+
+                $("#txtRepactuacaoId").val(Id);
+
+                var dataTableRepactuacao = $('#tblRepactuacoes').DataTable();
+                var row = $(this).closest('tr');
+                var data = dataTableRepactuacao.row(row).data();
+
+                var DataRepactuacao = brDateToISO(data['dataFormatada']);
+                $("#txtDataRepactuacao").val(DataRepactuacao);
+
+                var ValorRepactuacao = data['valor'];
+                if (ValorRepactuacao != null) {
+                    $("#txtValor").val(ValorRepactuacao.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                }
+                $("#lstVigencia").val(data['vigencia']);
+                $("#lstProrrogacao").val(data['prorrogacao']);
+                $("#txtDescricao").val(data['descricao']);
+
+                $("#divBotaoAtualizaRepactuacao").css("display", "block");
+                $("#btnNovaRepactuacao").css("display", "none");
+                $("#divRepactuacaoTerceirizacao").css("display", "none");
+                $("#divRepactuacaoLocacao").css("display", "none");
+                document.getElementById("lblValorContrato").innerHTML = "Valor da Repactuação (R$)";
+
+                if ($("#txtTipoContrato").val() === "Terceirização") {
+                    $("#divRepactuacaoTerceirizacao").css("display", "block");
+
+                    $.ajax({
+                        type: "GET",
+                        url: 'api/Contrato/RecuperaRepactuacaoTerceirizacao',
+                        data: { RepactuacaoContratoId: Id },
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (objRepactuacaoTerceirizacao) {
+                            try {
+                                $("#txtRepactuacaoTerceirizacaoId").val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.repactuacaoTerceirizacaoId);
+
+                                if (objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdEncarregados) {
+                                    document.getElementById("chkencarregados").checked = true;
+                                    $("#txtCustoMensalEncarregados").removeAttr("disabled")
+                                        .val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.valorEncarregado.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                    $("#txtQtdEncarregados").removeAttr("disabled").val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdEncarregados);
+                                } else {
+                                    document.getElementById("chkencarregados").checked = false;
+                                    $("#txtCustoMensalEncarregados").attr("disabled", "true").val("");
+                                    $("#txtQtdEncarregados").attr("disabled", "true").val("");
+                                }
+
+                                if (objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdOperadores) {
+                                    document.getElementById("chkoperadores").checked = true;
+                                    $("#txtCustoMensalOperadores").removeAttr("disabled")
+                                        .val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.valorOperador.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                    $("#txtQtdOperadores").removeAttr("disabled").val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdOperadores);
+                                } else {
+                                    document.getElementById("chkoperadores").checked = false;
+                                    $("#txtCustoMensalOperadores").attr("disabled", "true").val("");
+                                    $("#txtQtdOperadores").attr("disabled", "true").val("");
+                                }
+
+                                if (objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdMotoristas) {
+                                    document.getElementById("chkmotoristas").checked = true;
+                                    $("#txtCustoMensalMotoristas").removeAttr("disabled")
+                                        .val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.valorMotorista.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                    $("#txtQtdMotoristas").removeAttr("disabled").val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdMotoristas);
+                                } else {
+                                    document.getElementById("chkmotoristas").checked = false;
+                                    $("#txtCustoMensalMotoristas").attr("disabled", "true").val("");
+                                    $("#txtQtdMotoristas").attr("disabled", "true").val("");
+                                }
+
+                                if (objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdLavadores) {
+                                    document.getElementById("chklavadores").checked = true;
+                                    $("#txtCustoMensalLavadores").removeAttr("disabled")
+                                        .val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.valorLavador.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                    $("#txtQtdLavadores").removeAttr("disabled").val(objRepactuacaoTerceirizacao.objRepactuacaoTerceirizacao.qtdLavadores);
+                                } else {
+                                    document.getElementById("chklavadores").checked = false;
+                                    $("#txtCustoMensalLavadores").attr("disabled", "true").val("");
+                                    $("#txtQtdLavadores").attr("disabled", "true").val("");
+                                }
+
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "RecuperaTerceirizacao.success", error);
+                            }
+                        },
+                        error: function (err) {
+                            Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "RecuperaTerceirizacao.error", err);
+                        }
+                    });
+                }
+
+                if ($("#txtTipoContrato").val() === "Locação") {
+                    $("#divRepactuacaoLocacao").css("display", "block");
+
+                    var grid = document.getElementById('grdVeiculos').ej2_instances[0];
+
+                    $.ajax({
+                        url: 'api/Contrato/ListaItensRepactuacao',
+                        type: "GET",
+                        data: { RepactuacaoContratoId: RepactuacaoContratoId },
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (res) {
+                            try {
+                                console.log(res);
+                                objItens = res;
+                                grid.dataSource = objItens;
+
+                                var valortotal = 0;
+                                for (var i = 0; i < objItens.length; i++) {
+                                    valortotal += (objItens[i].valUnitario * objItens[i].quantidade);
+                                }
+                                $("#txtTotal").val(valortotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "ListaItens.success", error);
+                            }
+                        },
+                        error: function (err) {
+                            Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "ListaItens.error", err);
+                        }
+                    });
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btn-editar.click", error);
+            }
+        });
+
+        const btnAtualizaRepactuacao = document.getElementById("btnAtualizaRepactuacao");
+        btnAtualizaRepactuacao.addEventListener("click", async function (event) {
+            try {
+                event.preventDefault();
+
+                if (ValidaDados() === false) { return; }
+
+                var atualizaContrato = false;
+                var RepactuacaoContratoId = $("#txtRepactuacaoId").val();
+
+                const willUpdate = await Alerta.Confirmar(
+                    "Atualizar Valores no Contrato",
+                    "Você gostaria de Atualizar estes valores também no Contrato?",
+                    "Sim, atualizar",
+                    "Não"
+                );
+
+                atualizaContrato = !!willUpdate;
+
+                var valorcontrato = $('#txtValor').val().replace('R$ ', '').replace(/\./g, '').replace(',', '.');
+                var valorencarregado = $('#txtCustoMensalEncarregados').val().replace(/\./g, '').replace(',', '.');
+                var valoroperador = $('#txtCustoMensalOperadores').val().replace(/\./g, '').replace(',', '.');
+                var valormotorista = $('#txtCustoMensalMotoristas').val().replace(/\./g, '').replace(',', '.');
+                var valorlavador = $('#txtCustoMensalLavadores').val().replace(/\./g, '').replace(',', '.');
+
+                var objRepactuacao = JSON.stringify({
+                    "RepactuacaoContratoId": RepactuacaoContratoId,
+                    "ContratoId": document.getElementById("lstContratos").value,
+                    "DataRepactuacao": $('#txtDataRepactuacao').val(),
+                    "Valor": valorcontrato,
+                    "Descricao": $('#txtDescricao').val(),
+                    "Vigencia": document.getElementById("lstVigencia").value,
+                    "Prorrogacao": document.getElementById("lstProrrogacao").value,
+                    "AtualizaContrato": atualizaContrato
+                });
+
+                $.ajax({
+                    type: "post",
+                    url: "api/Contrato/AtualizaRepactuacao",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: objRepactuacao,
+                    success: function (data) {
+                        try {
+                            var RepactuacaoId = data.data;
+
+                            if ($('#txtTipoContrato').val() === "Terceirização") {
+                                var objRepactuacaoTerceirizacao = JSON.stringify({
+                                    "RepactuacaoTerceirizacaoId": $("#txtRepactuacaoTerceirizacaoId").val(),
+                                    "RepactuacaoContratoId": RepactuacaoId,
+                                    "DataRepactuacao": $('#txtDataRepactuacao').val(),
+                                    "ValorEncarregado": valorencarregado,
+                                    "QtdEncarregados": document.getElementById("txtQtdEncarregados").value,
+                                    "ValorOperador": valoroperador,
+                                    "QtdOPeradores": document.getElementById("txtQtdOperadores").value,
+                                    "ValorMotorista": valormotorista,
+                                    "QtdMotoristas": document.getElementById("txtQtdMotoristas").value,
+                                    "ValorLavador": valorlavador,
+                                    "QtdLavadores": document.getElementById("txtQtdLavadores").value
+                                });
+
+                                $.ajax({
+                                    type: "post",
+                                    url: "api/Contrato/AtualizaRepactuacaoTerceirizacao",
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    data: objRepactuacaoTerceirizacao,
+                                    success: function () {
+										AppToast.show("Repactuação Atualizada com Sucesso!", 'Verde');
+                                        location.replace("/intel/analyticsdashboard");
+                                    }
+                                });
+                            }
+
+                            if ($('#txtTipoContrato').val() === "Serviços") {
+                                var objRepactuacaoServicos = JSON.stringify({
+                                    "RepactuacaoServicosId": $("#txtRepactuacaoServicosId").val(),
+                                    "RepactuacaoContratoId": RepactuacaoId,
+                                    "DataRepactuacao": $('#txtDataRepactuacao').val(),
+                                    "Valor": valorcontrato
+                                });
+
+                                $.ajax({
+                                    type: "post",
+                                    url: "api/Contrato/AtualizaRepactuacaoServicos",
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    data: objRepactuacaoServicos,
+                                    success: function () {
+                                        AppToast.show("Repactuação Atualizada com Sucesso!", 'Verde');
+                                        location.replace("/intel/analyticsdashboard");
+                                    }
+                                });
+                            }
+
+                            if ($('#txtTipoContrato').val() === "Locação") {
+
+                                var listObj = document.getElementById('lstItensExcluidos').ej2_instances[0];
+                                var listBoxItems = listObj.getItems();
+
+                                listBoxItems.forEach(function (item) {
+                                    var itemVeiculoId = item.innerText;
+                                    var objItemContrato = JSON.stringify({ "ItemVeiculoId": itemVeiculoId });
+
+                                    $.ajax({
+                                        type: "post",
+                                        url: "api/Contrato/ApagaItemContrato",
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        data: objItemContrato
+                                    });
+                                });
+
+                                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                                var getRows = gridObj.getRows();
+
+                                for (var i = 0; i < getRows.length; i++) {
+                                    var val = (gridObj.getRows()[i].cells[3].innerHTML)
+                                        .toString().replace('R$&nbsp;', '').replace('R$ ', '')
+                                        .replace(/\./g, '').replace(',', '.');
+
+                                    if (gridObj.getRows()[i].cells[7].innerHTML === "") {
+                                        itemVeiculoId = "00000000-0000-0000-0000-000000000000";
+                                    } else {
+                                        itemVeiculoId = gridObj.getRows()[i].cells[7].innerHTML;
+                                    }
+
+                                    var objItemContrato = JSON.stringify({
+                                        "NumItem": gridObj.getRows()[i].cells[0].innerHTML,
+                                        "Descricao": gridObj.getRows()[i].cells[1].innerHTML,
+                                        "Quantidade": gridObj.getRows()[i].cells[2].innerHTML,
+                                        "valorUnitario": val,
+                                        "RepactuacaoContratoId": RepactuacaoId,
+                                        "ItemVeiculoId": itemVeiculoId
+                                    });
+
+                                    $.ajax({
+                                        type: "post",
+                                        url: "api/Contrato/AtualizaItemContrato",
+                                        contentType: "application/json; charset=utf-8",
+                                        dataType: "json",
+                                        data: objItemContrato,
+                                        success: function () {
+											AppToast.show("Repactuação Atualizada com Sucesso!", 'Verde');
+                                            location.replace("/intel/analyticsdashboard");
+                                        }
+                                    });
+                                }
+                            }
+
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "AtualizaRepactuacao.success", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btnAtualizaRepactuacao.click", error);
+            }
+        });
+
+        var btnAtualiza = document.getElementById("btnAtualizaTotal");
+        btnAtualiza.addEventListener("click", function (event) {
+            try {
+                event.preventDefault();
+                AtualizaTotal();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btnAtualizaTotal.click", error);
+            }
+        });
+
+        function AtualizaTotal() {
+            try {
+                var gridObj = document.getElementById('grdVeiculos').ej2_instances[0];
+                var getRows = gridObj.getRows();
+                var valortotalgrid = 0;
+
+                for (var i = 0; i < getRows.length; i++) {
+                    if (gridObj.getRows()[i].cells[2] === undefined) { return; }
+
+                    var qtd = gridObj.getRows()[i].cells[2].innerHTML;
+                    var val = gridObj.getRows()[i].cells[3].innerHTML;
+
+                    val = (val).toString().replace('R$&nbsp;', '').replace('R$ ', '').replace('.', '').replace(',', '.');
+
+                    valortotalgrid = valortotalgrid + (val.replace(',', '.') * qtd);
+                }
+
+                var valortotalgeral = valortotalgrid;
+                valortotalgeral = formatCurrencyToBRL(valortotalgeral);
+                if ($.isNumeric(valortotalgrid)) {
+                    $("#txtTotal").val(valortotalgeral);
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "AtualizaTotal", error);
+            }
+        }
+
+        $("#btnCancelaInsercao").click(function (event) {
+            try {
+                event.preventDefault();
+                $("#btnNovaRepactuacao").css("display", "block");
+                document.getElementById("divBotaoAtualizaRepactuacao").style.display = "none";
+                document.getElementById("divDadosRepactuacao").style.display = "none";
+                document.getElementById("divRepactuacaoTerceirizacao").style.display = "none";
+                document.getElementById("divRepactuacaoLocacao").style.display = "none";
+                $("#divBotoes").css("display", "none");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btnCancelaInsercao.click", error);
+            }
+        });
+
+        $("#btnCancelaAtualizacao").click(function (event) {
+            try {
+                event.preventDefault();
+                $("#btnNovaRepactuacao").css("display", "block");
+                document.getElementById("divBotaoAtualizaRepactuacao").style.display = "none";
+                document.getElementById("divDadosRepactuacao").style.display = "none";
+                document.getElementById("divRepactuacaoTerceirizacao").style.display = "none";
+                document.getElementById("divRepactuacaoLocacao").style.display = "none";
+                $("#divBotoes").css("display", "none");
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "btnCancelaAtualizacao.click", error);
+            }
+        });
+
+        function formatCurrencyToBRL(amount) {
+            try {
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "formatCurrencyToBRL", error);
+            }
+        }
+
+        function brDateToISO(brDate) {
+            try {
+                if (!brDate) return '';
+                var parts = brDate.split('/');
+                if (parts.length === 3) {
+                    return parts[2] + '-' + parts[1] + '-' + parts[0];
+                }
+                return brDate;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "brDateToISO", error);
+            }
+        }
+
+        async function ActionBeginHandler(args) {
+            try {
+                if (editaRepactuacao === false) {
+                    return;
+                }
+
+                if (args.requestType === "delete") {
+
+                    if (args.data[0].existeVeiculo === null || args.data[0].existeVeiculo === undefined) {
+                        args.cancel = false;
+
+                        var listboxObj = document.getElementById('lstItensExcluidos').ej2_instances[0];
+                        listboxObj.addItems(args.data[0].itemVeiculoId);
+                    } else {
+                        Alerta.Erro(
+                            "Impossível Excluir",
+                            "Existe ao menos um Veículo Associado a este Item!"
+                        );
+                        args.cancel = true;
+                    }
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "ActionBeginHandler", error);
+            }
+        }
+
+        function ValidaDados() {
+            try {
+                return true;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "ValidaDados", error);
+                return false;
+            }
+        }
+    </script>
+}

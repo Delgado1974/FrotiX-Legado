@@ -1,0 +1,1136 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.Multa.UpsertEmpenhosMultaModel
+
+@{
+	var isEdit = Model.EmpenhoMultaObj.EmpenhoMulta.EmpenhoMultaId != Guid.Empty;
+	var empenhoId = Model.EmpenhoMultaObj.EmpenhoMulta.EmpenhoMultaId.ToString();
+	ViewData["Title"] = "Empenhos dos Órgãos Autuantes";
+	ViewData["PageName"] = "multa_empenhosmulta";
+	ViewData["Heading"] = "<i class='fad fa-money-check-alt'></i>&nbsp;Cadastros: <span class='fw-300'>Empenhos dos Órgãos Autuantes</span>";
+	ViewData["Category1"] = "Multas";
+	ViewData["PageIcon"] = "fad fa-money-check-alt";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-empenho-azul: #3D5771;
+			--ftx-empenho-azul-hover: #2d4559;
+			--ftx-empenho-vinho: #722f37;
+			--ftx-empenho-vinho-hover: #5a252c;
+			--ftx-empenho-verde: #2E8B57;
+			--ftx-empenho-verde-hover: #236B43;
+			--ftx-empenho-roxo: #7c3aed;
+			--ftx-empenho-roxo-hover: #6d28d9;
+		}
+
+		/* ====== FORMULÁRIO ====== */
+		.ftx-form-content {
+			padding: 1.5rem;
+		}
+
+		.ftx-form-section {
+			margin-bottom: 1.5rem;
+		}
+
+		.ftx-form-section-title {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #64748b;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 1rem;
+			padding-bottom: 0.5rem;
+			border-bottom: 1px solid #e2e8f0;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-form-section-title i {
+			color: var(--ftx-empenho-azul);
+		}
+
+		/* ====== INPUTS ====== */
+		.form-control-xs {
+			height: calc(1em + .775rem + 2px) !important;
+			padding: .125rem .5rem !important;
+			font-size: .85rem !important;
+			line-height: 1.5;
+			border-radius: .375rem;
+			border: 1px solid #cbd5e1;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		.form-control-xs:focus {
+			border-color: var(--ftx-empenho-azul);
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15);
+		}
+
+		.ftx-form-label {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 0.35rem;
+		}
+
+		/* ====== TABELAS ====== */
+		#tblAporte thead, #tblanulacao thead, #tblMultas thead {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+		}
+
+		#tblAporte thead th, #tblanulacao thead th, #tblMultas thead th {
+			color: #fff !important;
+			font-weight: 600;
+			font-size: 0.75rem;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			padding: 0.75rem 0.5rem;
+			text-align: center;
+			border: none !important;
+			vertical-align: middle !important;
+		}
+
+		#tblAporte tbody tr:hover, #tblanulacao tbody tr:hover, #tblMultas tbody tr:hover {
+			background-color: rgba(50, 93, 136, 0.06) !important;
+		}
+
+		.ftx-table-title {
+			font-size: 1rem;
+			font-weight: 700;
+			color: var(--ftx-empenho-azul);
+			margin-bottom: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-table-title span {
+			color: var(--ftx-empenho-verde);
+		}
+
+		#TituloAnulacoes span {
+			color: var(--ftx-empenho-vinho) !important;
+		}
+
+		/* ====== BOTÕES DE AÇÃO NA TABELA - COM GLOW FROTIX ====== */
+		.ftx-btn-icon {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: .375rem !important;
+			border: none !important;
+			color: #fff !important;
+			font-size: 0.85rem;
+			cursor: pointer;
+			transition: all .3s ease, transform .2s ease !important;
+			position: relative;
+			overflow: hidden;
+			margin: 1px !important;
+		}
+
+		.ftx-btn-icon:hover:not([aria-disabled="true"]) {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		.ftx-btn-icon i {
+			font-size: 0.90rem;
+			line-height: 1;
+			color: #fff !important;
+		}
+
+		/* Editar - Azul com GLOW */
+		.ftx-btn-editar {
+			background-color: var(--ftx-empenho-azul) !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-editar:hover { box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important; }
+
+		/* Apagar - Vinho com GLOW */
+		.ftx-btn-apagar {
+			background-color: var(--ftx-empenho-vinho) !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-apagar:hover { box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important; }
+
+		/* Ver Multas - Roxo com GLOW */
+		.ftx-btn-multas {
+			background-color: var(--ftx-empenho-roxo) !important;
+			box-shadow: 0 0 8px rgba(124, 58, 237, 0.5), 0 2px 4px rgba(124, 58, 237, 0.3) !important;
+		}
+		.ftx-btn-multas:hover { box-shadow: 0 0 20px rgba(124, 58, 237, 0.8), 0 6px 12px rgba(124, 58, 237, 0.5) !important; }
+
+		/* ====== BOTÕES PRINCIPAIS COM GLOW ====== */
+		.ftx-btn-submit {
+			background-color: var(--ftx-empenho-azul) !important;
+			color: #fff !important;
+			border: none !important;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+			width: 100%;
+		}
+		.ftx-btn-submit:hover {
+			background-color: var(--ftx-empenho-azul-hover) !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+			color: #fff !important;
+		}
+
+		.ftx-btn-voltar {
+			background-color: var(--ftx-empenho-vinho) !important;
+			color: #fff !important;
+			border: none !important;
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+			width: 100%;
+			text-decoration: none;
+		}
+		.ftx-btn-voltar:hover {
+			background-color: var(--ftx-empenho-vinho-hover) !important;
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+			color: #fff !important;
+		}
+
+		/* ====== MODAIS FrotiX ====== */
+		.ftx-modal-header {
+			background: linear-gradient(135deg, var(--ftx-empenho-azul) 0%, var(--ftx-empenho-azul-hover) 100%);
+			color: #fff;
+			padding: 1rem 1.25rem;
+			border-bottom: none;
+			border-radius: 0.5rem 0.5rem 0 0;
+		}
+
+		.ftx-modal-header .modal-title {
+			font-family: 'Outfit', sans-serif;
+			font-weight: 700;
+			font-size: 1.1rem;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.ftx-modal-body {
+			padding: 1.5rem;
+		}
+
+		.ftx-modal-footer {
+			padding: 1rem 1.5rem;
+			border-top: 1px solid #e2e8f0;
+			display: flex;
+			gap: 0.75rem;
+			justify-content: flex-end;
+		}
+
+		/* ====== BOTÕES DOS MODAIS COM GLOW ====== */
+		.ftx-btn-modal {
+			padding: 0.5rem 1.25rem;
+			border-radius: .375rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			border: none !important;
+			color: #fff !important;
+			transition: all .3s ease, transform .2s ease !important;
+			min-width: 120px;
+		}
+		.ftx-btn-modal:hover {
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			color: #fff !important;
+		}
+
+		.ftx-btn-confirmar {
+			background-color: var(--ftx-empenho-azul) !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-confirmar:hover { box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important; }
+
+		.ftx-btn-fechar {
+			background-color: var(--ftx-empenho-vinho) !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-fechar:hover { box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important; }
+
+		/* ====== ÁREAS DE TABELAS ====== */
+		.ftx-tables-section {
+			display: flex;
+			gap: 1.5rem;
+			margin-top: 2rem;
+			padding-top: 1.5rem;
+			border-top: 1px solid #e2e8f0;
+		}
+
+		.ftx-table-card {
+			flex: 1;
+			background: #f8fafc;
+			border: 1px solid #e2e8f0;
+			border-radius: 0.5rem;
+			padding: 1rem;
+		}
+
+		/* ====== BOTÕES DE AÇÃO ====== */
+		.ftx-form-actions {
+			display: flex;
+			gap: 1rem;
+			margin-top: 2rem;
+		}
+
+		.ftx-form-actions > div {
+			flex: 1;
+			max-width: 200px;
+		}
+
+		/* ====== CHECKBOX ESTILIZADO ====== */
+		.ftx-checkbox-wrapper {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin-top: 1rem;
+		}
+
+		.ftx-checkbox-wrapper input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			accent-color: var(--ftx-empenho-azul);
+		}
+
+		.ftx-checkbox-wrapper label {
+			font-size: 0.85rem;
+			font-weight: 500;
+			color: #374151;
+			margin: 0;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 992px) {
+			.ftx-tables-section {
+				flex-direction: column;
+			}
+		}
+	</style>
+}
+
+<form method="post" asp-action="Upsert">
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel ftx-card-styled">
+				<div class="panel-container show">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-money-check-dollar"></i>
+							@(isEdit ? "Editar" : "Novo") Empenho do Órgão Autuante
+						</h2>
+					</div>
+
+					<!-- Conteúdo do Formulário -->
+					<div class="ftx-form-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						@if (isEdit)
+						{
+							<input type="hidden" asp-for="EmpenhoMultaObj.EmpenhoMulta.EmpenhoMultaId" />
+						}
+
+						<!-- Seção: Dados do Empenho -->
+						<div class="ftx-form-section">
+							<div class="ftx-form-section-title">
+								<i class="fa-duotone fa-building-columns"></i>
+								Dados do Empenho
+							</div>
+
+							<div class="row">
+								<div class="col-12 col-md-5">
+									<div class="form-group">
+										<label class="ftx-form-label" asp-for="EmpenhoMultaObj.EmpenhoMulta.OrgaoAutuanteId">Órgão Autuante</label>
+										@Html.DropDownListFor(
+											m => m.EmpenhoMultaObj.EmpenhoMulta.OrgaoAutuanteId,
+											Model.EmpenhoMultaObj.OrgaoList,
+											"-- Selecione um Órgão --",
+											new { @class = "form-control form-control-xs", @id = "listaorgao" })
+									</div>
+								</div>
+								<div class="col-12 col-md-3">
+									<div class="form-group">
+										<label class="ftx-form-label" asp-for="EmpenhoMultaObj.EmpenhoMulta.NotaEmpenho">Nota de Empenho</label>
+										<span class="text-danger font-weight-light" asp-validation-for="EmpenhoMultaObj.EmpenhoMulta.NotaEmpenho"></span>
+										<input class="form-control form-control-xs" 
+											   asp-for="EmpenhoMultaObj.EmpenhoMulta.NotaEmpenho" 
+											   placeholder="000000000000"
+											   data-ejtip="Número da Nota de Empenho (12 dígitos)" />
+									</div>
+								</div>
+								<div class="col-6 col-md-2">
+									<div class="form-group">
+										<label class="ftx-form-label" asp-for="EmpenhoMultaObj.EmpenhoMulta.AnoVigencia">Vigência</label>
+										<select class="form-control form-control-xs" asp-for="EmpenhoMultaObj.EmpenhoMulta.AnoVigencia" data-ejtip="Ano de Vigência">
+											<option value="">-- Ano --</option>
+											<option value="2025">2025</option>
+											<option value="2024">2024</option>
+											<option value="2023">2023</option>
+											<option value="2022">2022</option>
+											<option value="2021">2021</option>
+											<option value="2020">2020</option>
+											<option value="2019">2019</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="row mt-3">
+								<div class="col-6 col-md-2">
+									<div class="form-group">
+										<label class="ftx-form-label" asp-for="EmpenhoMultaObj.EmpenhoMulta.SaldoInicial">Saldo Inicial</label>
+										<input id="txtSaldoInicial" class="form-control form-control-xs" 
+											   style="text-align: right;" 
+											   asp-for="EmpenhoMultaObj.EmpenhoMulta.SaldoInicial" 
+											   onKeyPress="return(moeda(this,'.',',',event))" 
+											   placeholder="0,00"
+											   data-ejtip="Saldo Inicial do Empenho" />
+									</div>
+								</div>
+								<div class="col-6 col-md-2">
+									<div class="form-group">
+										<label class="ftx-form-label" asp-for="EmpenhoMultaObj.EmpenhoMulta.SaldoAtual">Saldo Atual</label>
+										<input id="txtSaldoAtual" disabled class="form-control form-control-xs" 
+											   style="text-align: right; background-color: #e9ecef;" 
+											   asp-for="EmpenhoMultaObj.EmpenhoMulta.SaldoAtual" 
+											   data-ejtip="Saldo Atual do Empenho" />
+									</div>
+								</div>
+								@if (isEdit)
+								{
+									<div class="col-6 col-md-2">
+										<div class="form-group">
+											<label class="ftx-form-label">Multas Pagas</label>
+											<input id="txtSaldoMultas" disabled class="form-control form-control-xs" 
+												   style="text-align: right; background-color: #e9ecef;" 
+												   data-ejtip="Total de Multas Pagas com este Empenho" />
+										</div>
+									</div>
+									<div class="col-6 col-md-2 d-flex align-items-end">
+										<a class="ftx-btn-icon ftx-btn-multas btn-ver-multas-empenho" 
+										   style="margin-bottom: 0.5rem;"
+										   data-id="@empenhoId" 
+										   data-ejtip="Ver Multas do Empenho">
+											<i class="fa-duotone fa-file-invoice-dollar"></i>
+										</a>
+									</div>
+								}
+							</div>
+
+							<!-- Checkbox Status -->
+							<div class="ftx-checkbox-wrapper">
+								<input id="chkStatus" type="checkbox" asp-for="EmpenhoMultaObj.EmpenhoMulta.Status" />
+								<label for="chkStatus">Empenho Ativo</label>
+							</div>
+						</div>
+
+						<!-- Botões de Ação -->
+						<div class="ftx-form-actions">
+							<div>
+								<button type="submit" asp-page-handler="Submit" class="ftx-btn-submit" data-ejtip="@(isEdit ? "Salvar alterações" : "Cadastrar empenho")">
+									<i class="fa-duotone fa-floppy-disk"></i>
+									@(isEdit ? "Atualizar" : "Cadastrar")
+								</button>
+							</div>
+							<div>
+								<a asp-page="./ListaEmpenhosMulta" class="ftx-btn-voltar" data-ejtip="Voltar para a lista">
+									<i class="fa-duotone fa-rotate-left"></i>
+									Voltar à Lista
+								</a>
+							</div>
+						</div>
+
+						<!-- Tabelas de Aportes e Anulações (apenas em edição) -->
+						@if (isEdit)
+						{
+							<div class="ftx-tables-section">
+								<!-- Tabela de Aportes -->
+								<div class="ftx-table-card">
+									<h4 id="TituloAportes" class="ftx-table-title">
+										<i class="fa-duotone fa-circle-plus"></i>
+										Aportes/Reforços ao Empenho
+									</h4>
+									<table id="tblAporte" class="table table-bordered table-striped" width="100%">
+										<thead>
+											<tr>
+												<th>Data</th>
+												<th>Descrição</th>
+												<th>Valor</th>
+												<th>Ação</th>
+												<th>Id</th>
+												<th>Original</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+
+								<!-- Tabela de Anulações -->
+								<div class="ftx-table-card">
+									<h4 id="TituloAnulacoes" class="ftx-table-title">
+										<i class="fa-duotone fa-circle-minus"></i>
+										Anulações do Empenho
+									</h4>
+									<table id="tblanulacao" class="table table-bordered table-striped" width="100%">
+										<thead>
+											<tr>
+												<th>Data</th>
+												<th>Descrição</th>
+												<th>Valor</th>
+												<th>Ação</th>
+												<th>Id</th>
+												<th>Original</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+						}
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<!-- ====== MODAL MULTAS ====== -->
+<div class="modal fade" id="modalMultas" data-bs-backdrop="static" data-bs-keyboard="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<div class="ftx-modal-header">
+				<h4 class="modal-title">
+					<i class="fa-duotone fa-file-invoice-dollar"></i>
+					Multas Pagas com este Empenho
+				</h4>
+			</div>
+			<div class="ftx-modal-body">
+				<table id="tblMultas" class="table table-bordered table-striped" width="100%">
+					<thead>
+						<tr>
+							<th>Data</th>
+							<th>Nº Infração</th>
+							<th>Local</th>
+							<th>Data Pagamento</th>
+							<th>Valor Pago</th>
+							<th>Ação</th>
+							<th>MultaId</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+			<div class="ftx-modal-footer">
+				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ====== MODAL EDITAR APORTE ====== -->
+<div class="modal fade" id="modalAporte" data-bs-backdrop="static" data-bs-keyboard="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="ftx-modal-header">
+				<h4 class="modal-title" id="lblTituloAporte">
+					<i class="fa-duotone fa-circle-plus"></i>
+					Editar Aporte
+				</h4>
+			</div>
+			<div class="ftx-modal-body">
+				<input type="hidden" id="txtEmpenhoMultaId" />
+				<input type="hidden" id="txtMovimentacaoIdAporte" />
+				<div class="row">
+					<div class="col-12 col-md-5">
+						<div class="form-group">
+							<label class="ftx-form-label">Data do Aporte</label>
+							<input id="txtDataAporte" class="form-control form-control-xs" type="date" />
+						</div>
+					</div>
+					<div class="col-12 col-md-7">
+						<div class="form-group">
+							<label class="ftx-form-label">Descrição</label>
+							<input id="txtDescricaoAporte" class="form-control form-control-xs" placeholder="Descrição do aporte" />
+						</div>
+					</div>
+				</div>
+				<div class="row mt-3">
+					<div class="col-12 col-md-4">
+						<div class="form-group">
+							<label class="ftx-form-label">Valor do Aporte</label>
+							<input id="txtValorAporte" class="form-control form-control-xs" style="text-align: right;" placeholder="0,00" onKeyPress="return(moeda(this,'.',',',event))" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ftx-modal-footer">
+				<button id="btnAportar" class="ftx-btn-modal ftx-btn-confirmar" type="button">
+					<i class="fa-duotone fa-floppy-disk"></i>
+					Salvar Aporte
+				</button>
+				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ====== MODAL EDITAR ANULAÇÃO ====== -->
+<div class="modal fade" id="modalanulacao" data-bs-backdrop="static" data-bs-keyboard="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="ftx-modal-header">
+				<h4 class="modal-title" id="lblTituloAnulacao">
+					<i class="fa-duotone fa-circle-minus"></i>
+					Editar Anulação
+				</h4>
+			</div>
+			<div class="ftx-modal-body">
+				<input type="hidden" id="txtEmpenhoId" />
+				<input type="hidden" id="txtMovimentacaoIdAnulacao" />
+				<div class="row">
+					<div class="col-12 col-md-5">
+						<div class="form-group">
+							<label class="ftx-form-label">Data da Anulação</label>
+							<input id="txtDataanulacao" class="form-control form-control-xs" type="date" />
+						</div>
+					</div>
+					<div class="col-12 col-md-7">
+						<div class="form-group">
+							<label class="ftx-form-label">Descrição</label>
+							<input id="txtDescricaoanulacao" class="form-control form-control-xs" placeholder="Descrição da anulação" />
+						</div>
+					</div>
+				</div>
+				<div class="row mt-3">
+					<div class="col-12 col-md-4">
+						<div class="form-group">
+							<label class="ftx-form-label">Valor da Anulação</label>
+							<input id="txtValoranulacao" class="form-control form-control-xs" style="text-align: right;" placeholder="0,00" onKeyPress="return(moeda(this,'.',',',event))" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ftx-modal-footer">
+				<button id="btnAnular" class="ftx-btn-modal ftx-btn-confirmar" type="button">
+					<i class="fa-duotone fa-floppy-disk"></i>
+					Salvar Anulação
+				</button>
+				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-xmark"></i>
+					Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+	<script src="~/js/formplugins/select2/select2.bundle.js" asp-append-version="true"></script>
+	<script src="~/js/cadastros/aporte_001.js" asp-append-version="true"></script>
+	<script src="~/js/cadastros/anulacao_001.js" asp-append-version="true"></script>
+
+	<script>
+		var AporteTable;
+		var anulacaoTable;
+		var empenhoMultaId = '@Model.EmpenhoMultaObj.EmpenhoMulta.EmpenhoMultaId';
+
+		$(document).ready(function () {
+			try {
+				// Se é novo empenho, marca como ativo por padrão
+				if (empenhoMultaId === '00000000-0000-0000-0000-000000000000') {
+					document.getElementById("chkStatus").checked = true;
+				}
+				else {
+					// Carregar saldo de multas
+					$.ajax({
+						type: "get",
+						url: "/api/Multa/SaldoMultas",
+						contentType: "application/json; charset=utf-8",
+						dataType: "json",
+						data: { Id: empenhoMultaId },
+						success: function (data) {
+							try {
+								$('#txtSaldoMultas').val(Number(data.saldomultas).toLocaleString('pt-BR', { style: "currency", currency: "BRL" }));
+
+								var saldoinicial = $('#txtSaldoInicial').val().replace(",", ".");
+								saldoinicial = Number(saldoinicial);
+								$('#txtSaldoInicial').val(saldoinicial.toLocaleString('pt-BR', { style: "currency", currency: "BRL" }));
+
+								var saldofinal = $('#txtSaldoAtual').val().replace(",", ".");
+								saldofinal = Number(saldofinal);
+								$('#txtSaldoAtual').val(saldofinal.toLocaleString('pt-BR', { style: "currency", currency: "BRL" }));
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "SaldoMultas.success", error);
+							}
+						},
+						error: function (error) {
+							Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "SaldoMultas.error", error);
+						}
+					});
+
+					// Carregar DataTable de Aportes
+					AporteTable = $('#tblAporte').DataTable({
+						lengthChange: false,
+						searching: false,
+						bSort: false,
+						columnDefs: [
+							{ targets: 0, className: "text-center", width: "15%" },
+							{ targets: 1, className: "text-left", width: "40%" },
+							{ targets: 2, className: "text-right", width: "15%" },
+							{ targets: 3, className: "text-center", width: "15%" },
+							{ targets: 4, className: "text-center", visible: false },
+							{ targets: 5, className: "text-center", visible: false }
+						],
+						responsive: true,
+						ajax: {
+							url: "/api/multa/listaaporte",
+							type: "GET",
+							datatype: "json",
+							data: { Id: empenhoMultaId }
+						},
+						columns: [
+							{ data: "dataFormatada" },
+							{ data: "descricao" },
+							{ data: "valorFormatado" },
+							{
+								data: "movimentacaoId",
+								render: function (data) {
+									try {
+										return `<div class="text-center" style="white-space: nowrap;">
+											<a class="ftx-btn-icon ftx-btn-editar btn-editar-aporte" data-id="${data}" data-ejtip="Editar Aporte">
+												<i class="fa-duotone fa-pen-to-square"></i>
+											</a>
+											<a class="ftx-btn-icon ftx-btn-apagar btn-deleteaporte" data-context="empenhoMulta" data-id="${data}" data-ejtip="Excluir Aporte">
+												<i class="fa-duotone fa-trash-can"></i>
+											</a>
+										</div>`;
+									}
+									catch (error) {
+										Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "render.aporte", error);
+										return '';
+									}
+								}
+							},
+							{ data: "movimentacaoId" },
+							{ data: "valorOriginal" }
+						],
+						language: {
+							url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+							emptyTable: "Nenhum aporte cadastrado"
+						},
+						footerCallback: function (row, data, start, end, display) {
+							try {
+								var total = this.api().column(5).data().reduce(function (a, b) {
+									return parseInt(a) + parseInt(b);
+								}, 0);
+								var soma = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+								$("#TituloAportes").html('<i class="fa-duotone fa-circle-plus"></i> Aportes/Reforços: <span>' + soma + '</span>');
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "AporteTable.footerCallback", error);
+							}
+						}
+					});
+
+					// Carregar DataTable de Anulações
+					anulacaoTable = $('#tblanulacao').DataTable({
+						lengthChange: false,
+						searching: false,
+						bSort: false,
+						columnDefs: [
+							{ targets: 0, className: "text-center", width: "15%" },
+							{ targets: 1, className: "text-left", width: "40%" },
+							{ targets: 2, className: "text-right", width: "15%", createdCell: function (td) { $(td).css('color', '#722f37'); } },
+							{ targets: 3, className: "text-center", width: "15%" },
+							{ targets: 4, className: "text-center", visible: false },
+							{ targets: 5, className: "text-center", visible: false }
+						],
+						responsive: true,
+						ajax: {
+							url: "/api/multa/listaanulacao",
+							type: "GET",
+							data: { Id: empenhoMultaId },
+							datatype: "json"
+						},
+						columns: [
+							{ data: "dataFormatada" },
+							{ data: "descricao" },
+							{ data: "valorFormatado" },
+							{
+								data: "movimentacaoId",
+								render: function (data) {
+									try {
+										return `<div class="text-center" style="white-space: nowrap;">
+											<a class="ftx-btn-icon ftx-btn-editar btn-editar-anulacao" data-id="${data}" data-ejtip="Editar Anulação">
+												<i class="fa-duotone fa-pen-to-square"></i>
+											</a>
+											<a class="ftx-btn-icon ftx-btn-apagar btn-deleteanulacao" data-context="empenhoMulta" data-id="${data}" data-ejtip="Excluir Anulação">
+												<i class="fa-duotone fa-trash-can"></i>
+											</a>
+										</div>`;
+									}
+									catch (error) {
+										Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "render.anulacao", error);
+										return '';
+									}
+								}
+							},
+							{ data: "movimentacaoId" },
+							{ data: "valorOriginal" }
+						],
+						language: {
+							url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+							emptyTable: "Nenhuma anulação cadastrada"
+						},
+						footerCallback: function (row, data, start, end, display) {
+							try {
+								var total = this.api().column(5).data().reduce(function (a, b) {
+									return parseInt(a) + parseInt(b);
+								}, 0);
+								var soma = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+								$("#TituloAnulacoes").html('<i class="fa-duotone fa-circle-minus"></i> Anulações: <span>' + soma + '</span>');
+							}
+							catch (error) {
+								Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "anulacaoTable.footerCallback", error);
+							}
+						}
+					});
+				}
+
+				// ====== ABRIR MODAL MULTAS DO EMPENHO ======
+				$(document).on("click", ".btn-ver-multas-empenho", function (e) {
+					try {
+						e.preventDefault();
+						var id = $(this).data("id");
+
+						if ($.fn.DataTable.isDataTable('#tblMultas')) {
+							$('#tblMultas').DataTable().destroy();
+						}
+						$('#tblMultas tbody').empty();
+
+						$('#tblMultas').DataTable({
+							columnDefs: [
+								{ targets: 0, className: "text-center", width: "10%" },
+								{ targets: 1, className: "text-center", width: "10%" },
+								{ targets: 2, className: "text-left", width: "35%" },
+								{ targets: 3, className: "text-center", width: "12%" },
+								{ targets: 4, className: "text-right", width: "10%" },
+								{ targets: 5, className: "text-center", width: "15%" },
+								{ targets: 6, className: "text-center", visible: false }
+							],
+							responsive: true,
+							ajax: {
+								url: "/api/multa/multaempenhopagas",
+								data: { id: id },
+								type: "GET",
+								datatype: "json"
+							},
+							columns: [
+								{ data: "dataFormatada" },
+								{ data: "numInfracao" },
+								{ data: "localizacao" },
+								{ data: "dataPagamentoFormatada" },
+								{ data: "valorPago" },
+								{
+									data: "multaId",
+									render: function (data) {
+										try {
+											return `<div class="text-center" style="white-space: nowrap;">
+												<a href="/Multa/UpsertPenalidade?id=${data}" class="ftx-btn-icon ftx-btn-editar" data-ejtip="Editar Multa">
+													<i class="fa-duotone fa-pen-to-square"></i>
+												</a>
+												<a class="ftx-btn-icon ftx-btn-apagar btn-delete-multa" data-id="${data}" data-ejtip="Excluir Multa">
+													<i class="fa-duotone fa-trash-can"></i>
+												</a>
+											</div>`;
+										}
+										catch (error) {
+											Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "render.multas", error);
+											return '';
+										}
+									}
+								},
+								{ data: "multaId" }
+							],
+							language: {
+								url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+								emptyTable: "Nenhuma multa paga com este empenho"
+							}
+						});
+
+						var modal = new bootstrap.Modal(document.getElementById('modalMultas'));
+						modal.show();
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btn-ver-multas-empenho.click", error);
+					}
+				});
+
+				// ====== ABRIR MODAL EDITAR APORTE ======
+				$(document).on("click", ".btn-editar-aporte", function (e) {
+					try {
+						e.preventDefault();
+						var movimentacaoId = $(this).data("id");
+						var row = $(this).closest("tr");
+						var dataAporte = row.find("td:eq(0)").text();
+						var descricaoAporte = row.find("td:eq(1)").text();
+						var valorAporte = row.find("td:eq(2)").text();
+
+						// Converter data DD/MM/YYYY para YYYY-MM-DD
+						var parts = dataAporte.split('/');
+						if (parts.length === 3) {
+							dataAporte = parts[2] + "-" + parts[1] + "-" + parts[0];
+						}
+
+						$('#txtDataAporte').val(dataAporte);
+						$('#txtDescricaoAporte').val(descricaoAporte);
+						$('#txtValorAporte').val(valorAporte);
+						$('#txtMovimentacaoIdAporte').val(movimentacaoId);
+						$('#lblTituloAporte').html('<i class="fa-duotone fa-circle-plus"></i> Editar Aporte');
+
+						var modal = new bootstrap.Modal(document.getElementById('modalAporte'));
+						modal.show();
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btn-editar-aporte.click", error);
+					}
+				});
+
+				// ====== ABRIR MODAL EDITAR ANULAÇÃO ======
+				$(document).on("click", ".btn-editar-anulacao", function (e) {
+					try {
+						e.preventDefault();
+						var movimentacaoId = $(this).data("id");
+						var row = $(this).closest("tr");
+						var dataAnulacao = row.find("td:eq(0)").text();
+						var descricaoAnulacao = row.find("td:eq(1)").text();
+						var valorAnulacao = row.find("td:eq(2)").text();
+
+						// Converter data DD/MM/YYYY para YYYY-MM-DD
+						var parts = dataAnulacao.split('/');
+						if (parts.length === 3) {
+							dataAnulacao = parts[2] + "-" + parts[1] + "-" + parts[0];
+						}
+
+						$('#txtDataanulacao').val(dataAnulacao);
+						$('#txtDescricaoanulacao').val(descricaoAnulacao);
+						$('#txtValoranulacao').val(valorAnulacao);
+						$('#txtMovimentacaoIdAnulacao').val(movimentacaoId);
+						$('#lblTituloAnulacao').html('<i class="fa-duotone fa-circle-minus"></i> Editar Anulação');
+
+						var modal = new bootstrap.Modal(document.getElementById('modalanulacao'));
+						modal.show();
+					}
+					catch (error) {
+						Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btn-editar-anulacao.click", error);
+					}
+				});
+
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "document.ready", error);
+			}
+		});
+
+		// ====== BOTÃO SALVAR APORTE (MODAL) ======
+		$("#btnAportar").click(function (e) {
+			try {
+				e.preventDefault();
+
+				if ($("#txtDataAporte").val() === "") {
+					Alerta.Erro("Atenção", "A data do Aporte é obrigatória!", "Fechar");
+					return;
+				}
+				if ($("#txtDescricaoAporte").val() === "") {
+					Alerta.Erro("Atenção", "A descrição do Aporte é obrigatória!", "Fechar");
+					return;
+				}
+				if ($("#txtValorAporte").val() === "") {
+					Alerta.Erro("Atenção", "O valor do Aporte é obrigatório!", "Fechar");
+					return;
+				}
+
+				var valorAporte = $("#txtValorAporte").val().replace(/\./g, "").replace("R$", "").trim();
+
+				var objAporte = JSON.stringify({
+					EmpenhoMultaId: empenhoMultaId,
+					MovimentacaoId: $('#txtMovimentacaoIdAporte').val(),
+					Descricao: $('#txtDescricaoAporte').val(),
+					Valor: valorAporte,
+					DataMovimentacao: $('#txtDataAporte').val(),
+					TipoMovimentacao: "A"
+				});
+
+				$.ajax({
+					type: "post",
+					url: "/api/Multa/EditarAporte",
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					data: objAporte,
+					success: function (data) {
+						try {
+							AppToast.show('Verde', data.message, 2000);
+							var modal = bootstrap.Modal.getInstance(document.getElementById('modalAporte'));
+							if (modal) modal.hide();
+							location.reload();
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btnAportar.success", error);
+						}
+					},
+					error: function (data) {
+						Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btnAportar.error", data);
+					}
+				});
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btnAportar.click", error);
+			}
+		});
+
+		// ====== BOTÃO SALVAR ANULAÇÃO (MODAL) ======
+		$("#btnAnular").click(function (e) {
+			try {
+				e.preventDefault();
+
+				if ($("#txtDataanulacao").val() === "") {
+					Alerta.Erro("Atenção", "A data da anulação é obrigatória!", "Fechar");
+					return;
+				}
+				if ($("#txtDescricaoanulacao").val() === "") {
+					Alerta.Erro("Atenção", "A descrição da anulação é obrigatória!", "Fechar");
+					return;
+				}
+				if ($("#txtValoranulacao").val() === "") {
+					Alerta.Erro("Atenção", "O valor da anulação é obrigatório!", "Fechar");
+					return;
+				}
+
+				var valorAnulacao = $("#txtValoranulacao").val().replace(/\./g, "").replace("R$", "").trim();
+
+				var objAnulacao = JSON.stringify({
+					EmpenhoMultaId: empenhoMultaId,
+					MovimentacaoId: $('#txtMovimentacaoIdAnulacao').val(),
+					Descricao: $('#txtDescricaoanulacao').val(),
+					Valor: valorAnulacao,
+					DataMovimentacao: $('#txtDataanulacao').val(),
+					TipoMovimentacao: "G"
+				});
+
+				$.ajax({
+					type: "post",
+					url: "/api/Multa/EditarAnulacao",
+					contentType: "application/json; charset=utf-8",
+					dataType: "json",
+					data: objAnulacao,
+					success: function (data) {
+						try {
+							AppToast.show('Verde', data.message, 2000);
+							var modal = bootstrap.Modal.getInstance(document.getElementById('modalanulacao'));
+							if (modal) modal.hide();
+							location.reload();
+						}
+						catch (error) {
+							Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btnAnular.success", error);
+						}
+					},
+					error: function (data) {
+						Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btnAnular.error", data);
+					}
+				});
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "btnAnular.click", error);
+			}
+		});
+
+		// ====== MÁSCARA DE MOEDA ======
+		function moeda(a, e, r, t) {
+			try {
+				let n = "", h = 0, j = 0, u = 0, tamanho2 = 0, ajd2 = "", l = "";
+				const o = window.Event ? t.which : t.keyCode;
+				if (o === 13 || o === 8) return true;
+				n = String.fromCharCode(o);
+				if ("0123456789".indexOf(n) === -1) return false;
+
+				u = a.value.length;
+				for (h = 0; h < u && ("0" === a.value.charAt(h) || a.value.charAt(h) === r); h++);
+				for (l = ""; h < u; h++) if ("0123456789".indexOf(a.value.charAt(h)) !== -1) l += a.value.charAt(h);
+				l += n; u = l.length;
+
+				if (u === 0) a.value = "";
+				if (u === 1) a.value = "0" + r + "0" + l;
+				if (u === 2) a.value = "0" + r + l;
+
+				if (u > 2) {
+					ajd2 = ""; j = 0;
+					for (h = u - 3; h >= 0; h--) {
+						if (j === 3) { ajd2 += e; j = 0; }
+						ajd2 += l.charAt(h); j++;
+					}
+					a.value = ""; tamanho2 = ajd2.length;
+					for (h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
+					a.value += r + l.substr(u - 2, u);
+				}
+				return false;
+			}
+			catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertEmpenhosMulta.cshtml", "moeda", error);
+			}
+		}
+	</script>
+}

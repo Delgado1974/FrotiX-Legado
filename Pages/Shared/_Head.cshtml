@@ -1,0 +1,105 @@
+<meta charset="utf-8">
+<title>
+	@if (ViewBag.Title?.Length > 0)
+	{
+		<text>@ViewData["Title"] - @ViewData["Category1"] - @Settings.App v@(Settings.Version)</text>
+	}
+	else
+	{
+		@Settings.App
+	}
+</title>
+<base href="~/" />
+<meta name="description" content="@ViewBag.Title">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, minimal-ui">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="msapplication-tap-highlight" content="no">
+
+@* Jquery Mais Atualizado *@
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<link id="vendorsbundle" rel="stylesheet" media="screen, print" href="~/css/vendors.bundle.css">
+<link id="appbundle" rel="stylesheet" media="screen, print" href="~/css/app.bundle.css">
+<link id="mytheme" rel="stylesheet" media="screen, print" href="~/css/themes/cust-theme-15.css">
+<link id="myskin" rel="stylesheet" media="screen, print" href="~/css/skins/skin-master.css">
+<link rel="stylesheet" media="screen, print" href="~/css/site.css">
+
+@* Fonte para o SweetAlert de Erro Não Tratado *@
+<link href="https://fonts.googleapis.com/css2?family=Rowdies:wght@700&display=swap" rel="stylesheet">
+
+@* <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script> *@
+
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+
+<!-- Syncfusion ASP.NET Core controls scripts -->
+<link rel="stylesheet" href="~/css/site.css" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/bootstrap5.css" rel="stylesheet" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/ej2-base/styles/bootstrap5.css" rel="stylesheet" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/ej2-buttons/styles/bootstrap5.css" rel="stylesheet" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/ej2-inputs/styles/bootstrap5.css" rel="stylesheet" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/ej2-popups/styles/bootstrap5.css" rel="stylesheet" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet" />
+<link href="https://cdn.syncfusion.com/ej2/31.1.22/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet" />
+
+@*Data Tables CSS*@
+@*===============*@
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.0/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/scroller/2.0.6/css/scroller.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.4.0/css/select.dataTables.min.css">
+@*===============*@
+
+@*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />*@
+@* <link rel="stylesheet" href="https://unpkg.com/microtip/microtip.css" /> *@
+<link rel="stylesheet" href="~/css/datatablespinner.css" />
+<link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css" />
+
+<!-- Sweet Alert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.9.0/dist/sweetalert2.all.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.9.0/dist/sweetalert2.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-tooltipster@3.3.0/css/tooltipster.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
+<!-- Bootstrap Datepicker CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<link href="https://cdn.syncfusion.com/ej2/27.1.51/ej2-base/styles/bootstrap5.css" rel="stylesheet" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Google Font - Poppins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+
+<!-- Estilos Particulares de Páginas do FrotiX -->
+<link rel="stylesheet" href="~/css/frotix.css" asp-append-version="true" />
+
+<!-- Estilos Particulares do Sistema de Alerta -->
+<link rel="stylesheet" href="~/css/alertassino.css" asp-append-version="true" />
+
+<partial name="_Favicon" />
+
+<!-- Bootstrap 5.3.8 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+
+<!-- Kendo UI CSS -->
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/12.0.1/bootstrap/bootstrap-main.css" />
+
+<!-- Google Fonts - Outfit Black -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap" rel="stylesheet">

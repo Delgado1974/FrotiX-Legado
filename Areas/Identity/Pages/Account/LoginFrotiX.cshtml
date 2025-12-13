@@ -1,0 +1,91 @@
+@page
+@model FrotiX.Areas.Identity.Pages.Account.LoginFrotiX
+@{
+    ViewData["Title"] = "FrotiX | Login";
+    Layout = Layout = "_LoginLayout";
+}
+
+<style>
+    .forgot-password-link {
+        margin-top: 200px; /* Ajuste o valor conforme necessário */
+    }
+</style>
+
+<div class="login-content">
+
+    <div class="form-login-error">
+        <h3>Login Inválido</h3>
+        <p id="error_msg"></p>
+    </div>
+
+    <form method="post" id="form_login" autocomplete="off">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="entypo-user"></i>
+                </div>
+                <input name="Ponto" asp-for="Input.Ponto" class="form-control" placeholder="Insira seu ponto" autocomplete="off" data-validate="required"/>
+                @*<input type="text" class="form-control" name="Ponto" id="Ponto" placeholder="Insira seu ponto" autocomplete="off" />*@
+            </div>
+
+        </div>
+
+        <div class="form-group">
+
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="entypo-key"></i>
+                </div>
+                <input name="Password" asp-for="Input.Password" type="password" class="form-control" placeholder="Senha" autocomplete="off" data-validate="required"/>
+                @*<input type="password" class="form-control" name="Password" id="Password" placeholder="Senha" autocomplete="off" />*@
+            </div>
+
+        </div>
+
+        <button class="login-button">
+            <div class="brushed-effect"></div>
+            <div class="button-text">
+                <svg class="login-icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M8 14c0-2.21 1.79-4 4-4s4 1.79 4 4v6H8v-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M8 16v2M16 16v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <ellipse cx="12" cy="21" rx="8" ry="1.5" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.6" />
+                </svg>
+                Entrar no Sistema
+            </div>
+        </button>
+
+
+    </form>
+
+
+    <div class="login-bottom-links">
+
+        <a href="extra-forgot-password.html" class="forgot-password-link">
+            <div class="link-text">
+                <svg class="pilot-icon" viewBox="0 0 24 24">
+                    <!-- Quepe/Chapéu -->
+                    <path d="M6 8c0-1 2-3 6-3s6 2 6 3l-1 1H7l-1-1z" fill="currentColor" opacity="0.3" />
+                    <path d="M6 8c0-1 2-3 6-3s6 2 6 3" stroke="currentColor" stroke-width="1.5" fill="none" />
+                    <!-- Emblema no quepe -->
+                    <rect x="10.5" y="6.5" width="3" height="1.5" rx="0.5" fill="currentColor" opacity="0.6" />
+                    <!-- Cabeça -->
+                    <circle cx="12" cy="11" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+                    <!-- Corpo/Uniforme -->
+                    <path d="M8.5 15c0-1.5 1.5-3 3.5-3s3.5 1.5 3.5 3v5H8.5v-5z" fill="currentColor" opacity="0.2" />
+                    <path d="M8.5 15c0-1.5 1.5-3 3.5-3s3.5 1.5 3.5 3v5H8.5v-5z" fill="none" stroke="currentColor" stroke-width="1.5" />
+                    <!-- Gravata -->
+                    <path d="M12 14v4" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M11.2 14.5l1.6 0M11.4 16l1.2 0" stroke="currentColor" stroke-width="0.8" />
+                </svg>
+                Esqueceu sua senha?
+            </div>
+        </a>        @*<a href="/Register/Index" class="link">Registrar</a>*@
+
+        <br />
+    </div>
+
+</div>
+

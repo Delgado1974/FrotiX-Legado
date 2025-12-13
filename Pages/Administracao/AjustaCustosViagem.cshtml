@@ -1,0 +1,387 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using FrotiX.Helpers
+@using Syncfusion.EJ2
+@using Stimulsoft.Report.Mvc;
+
+@inject IUnitOfWork _unitOfWork
+
+@functions {
+	public void OnGet()
+	{
+		FrotiX.Pages.Viagens.IndexModel.Initialize(_unitOfWork);
+		ViewData["dataCombustivel"] = new ListaNivelCombustivel(_unitOfWork).NivelCombustivelList();
+
+		ViewData["lstMotorista"] = new ListaMotorista(_unitOfWork).MotoristaList();
+		ViewData["lstVeiculos"] = new ListaVeiculos(_unitOfWork).VeiculosList();
+		ViewData["lstSetor"] = new ListaSetores(_unitOfWork).SetoresList();
+		ViewData["lstStatus"] = new ListaStatus(_unitOfWork).StatusList();
+		ViewData["lstRequisitante"] = new ListaRequisitante(_unitOfWork).RequisitantesList();
+
+		ViewData["lstFinalidade"] = new ListaFinalidade(_unitOfWork).FinalidadesList();
+		ViewData["lstEvento"] = new ListaEvento(_unitOfWork).EventosList();
+	}
+}
+
+@model FrotiX.Models.ViewCustosViagem
+
+@{
+	ViewData["Title"] = "Ajuste nos Dados das Viagens";
+	ViewData["PageName"] = "ajustacustosviagem_index";
+	ViewData["Heading"] = "<i class='fa-duotone fa-sliders'></i> Administração: <span class='fw-300'>Ajuste nos Dados das Viagens</span>";
+	ViewData["Category1"] = "Administração";
+	ViewData["PageIcon"] = "fa-duotone fa-sliders";
+}
+
+@section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+	
+	<style>
+		/* ===== ESTILOS DO MODAL AJUSTA CUSTOS ===== */
+		#modalAjustaCustos .modal-dialog {
+			max-width: 800px;
+		}
+
+		#modalAjustaCustos .modal-header {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalAjustaCustos .modal-header .modal-title {
+			color: #fff !important;
+		}
+
+		#modalAjustaCustos .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		/* Padronizar altura dos inputs HTML com Syncfusion */
+		#modalAjustaCustos .form-control {
+			height: 30px;
+			padding: 4px 8px;
+			font-size: 13px;
+		}
+
+		#modalAjustaCustos input[type="date"],
+		#modalAjustaCustos input[type="time"],
+		#modalAjustaCustos input[type="number"],
+		#modalAjustaCustos input[type="text"] {
+			height: 30px;
+			padding: 4px 8px;
+			font-size: 13px;
+		}
+
+		/* ===== ESTILOS DO MODAL FICHA ===== */
+		#modalFicha .modal-dialog {
+			max-width: 600px;
+		}
+
+		#modalFicha .modal-header {
+			background: linear-gradient(180deg, #A0522D 0%, #8B4513 100%);
+			border-bottom: none;
+			padding: 1rem 1.5rem;
+		}
+
+		#modalFicha .modal-header .modal-title {
+			color: #fff !important;
+		}
+
+		#modalFicha .modal-header .modal-title i {
+			color: #fff !important;
+		}
+
+		.img-ficha {
+			width: 100%;
+			border: 1px solid #dee2e6;
+			border-radius: 8px;
+			margin-top: 10px;
+			height: auto;
+		}
+
+		/* ===== LABELS DOS FORMS ===== */
+		.label-ftx {
+			font-weight: 600;
+			color: #2d3748;
+			margin-bottom: 0.5rem;
+			font-size: 0.875rem;
+		}
+
+		/* ===== ESCONDE DIV EVENTOS ===== */
+		.esconde-diveventos {
+			display: none;
+		}
+
+		/* ===== AJUSTES RESPONSIVOS ===== */
+		@@media (max-width: 768px) {
+			#modalAjustaCustos .modal-dialog,
+			#modalFicha .modal-dialog {
+				max-width: 95%;
+				margin: 1rem auto;
+			}
+		}
+	</style>
+}
+
+<script>
+	function FinalidadeChange() {
+		try {
+			var finalidadeCb = document.getElementById('lstFinalidadeAlterada').ej2_instances[0];
+			var eventoDdt = document.getElementById('lstEvento').ej2_instances[0];
+
+			if (finalidadeCb && eventoDdt) {
+				if (finalidadeCb.value === 'Evento') {
+					eventoDdt.enabled = true;
+					$(".esconde-diveventos").show();
+				} else {
+					eventoDdt.enabled = false;
+					eventoDdt.value = null;
+					$(".esconde-diveventos").hide();
+				}
+			}
+		} catch (error) {
+			Alerta.TratamentoErroComLinha("AjustaCustosViagem.cshtml", "FinalidadeChange", error);
+		}
+	}
+</script>
+
+@if (TempData["ErroJs"] != null)
+{
+	<script>
+		@Html.Raw(TempData["ErroJs"])
+	</script>
+}
+
+<form method="post" asp-action="Index" onkeypress='stopEnterSubmitting(window.event)' enctype="multipart/form-data">
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel ftx-card-styled">
+				<div class="panel-container show">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-sliders"></i>
+							Administração: Ajuste nos Dados das Viagens
+						</h2>
+					</div>
+
+					<div class="panel-content">
+						<div class="box-body">
+							<div class="col-12 px-3 mb-3">
+								<h5 class="text-muted">
+									<i class="fa-duotone fa-info-circle me-2"></i>
+									Selecione uma viagem para ajustar os dados
+								</h5>
+							</div>
+
+							<div id="divViagens">
+								<table id="tblViagem" class="table table-bordered table-striped table-hover ftx-table" width="100%">
+									<thead>
+										<tr>
+											<th>Vistoria</th>
+											<th>Data Inicial</th>
+											<th>Data Final</th>
+											<th>Hora Inicio</th>
+											<th>Hora Fim</th>
+											<th>Finalidade</th>
+											<th>Motorista</th>
+											<th>Veiculo</th>
+											<th>Km Inicial</th>
+											<th>Km Final</th>
+											<th>Ação</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@* ================ Modal Ajusta Custos ================ *@
+<div class="modal fade" id="modalAjustaCustos" tabindex="-1" aria-labelledby="h3Titulo" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="h3Titulo">
+					<i class="fa-duotone fa-pen-to-square"></i>
+					Editar a Viagem
+				</h3>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body">
+				<form id="frmViagem">
+					<input type="hidden" id="txtId" />
+
+					<div class="row">
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Nº da Ficha de Vistoria </label>
+								<input id="txtNoFichaVistoria" class="form-control form-control-xs" />
+							</div>
+						</div>
+						<div class="col-9">
+							<div class="row">
+								<div class="col-6">
+									<div class="form-group">
+										<label class="label font-weight-bold">Finalidade da Viagem</label>
+										<ejs-combobox id="lstFinalidadeAlterada" placeholder="Selecione uma Finalidade" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstFinalidade"]" popupHeight="250px" width="100%" showClearButton="true" change="FinalidadeChange">
+											<e-combobox-fields text="Descricao" value="FinalidadeId"></e-combobox-fields>
+										</ejs-combobox>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="form-group">
+										<label class="label font-weight-bold">Nome do Evento</label>
+										<ejs-dropdowntree id="lstEvento" placeholder="Selecione um Evento..." showCheckBox="false" allowMultiSelection="false" allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar..." popupHeight="200px">
+											<e-dropdowntree-fields dataSource="@ViewData["lstEvento"]" value="EventoId" text="Evento"></e-dropdowntree-fields>
+										</ejs-dropdowntree>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Data Inicial</label>
+								<input id="txtDataInicial" class="form-control form-control-xs" type="date" />
+							</div>
+						</div>
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Hora Inicial</label>
+								<input id="txtHoraInicial" class="form-control form-control-xs" type="time" />
+							</div>
+						</div>
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Km Inicial</label>
+								<input id="txtKmInicial" class="form-control form-control-xs" type="number" />
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Data Final</label>
+								<input id="txtDataFinal" class="form-control form-control-xs" type="date" />
+							</div>
+						</div>
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Hora Final</label>
+								<input id="txtHoraFinal" class="form-control form-control-xs" type="time" />
+							</div>
+						</div>
+						<div class="col-3">
+							<div class="form-group">
+								<label class="label font-weight-bold">Km Final</label>
+								<input id="txtKmFinal" class="form-control form-control-xs" type="number" />
+							</div>
+						</div>
+					</div>
+					<br />
+					<div class="row">
+						<div class="col-6">
+							<label class="label font-weight-bold">Motorista</label>
+							<ejs-combobox id="lstMotoristaAlterado" placeholder="Selecione um Motorista" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstMotorista"]" popupHeight="250px" width="100%" showClearButton="true">
+								<e-combobox-fields text="Nome" value="MotoristaId"></e-combobox-fields>
+							</ejs-combobox>
+						</div>
+						<div class="col-6">
+							<label class="label font-weight-bold">Veículo</label>
+							<ejs-combobox id="lstVeiculoAlterado" placeholder="Selecione um Veículo" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstVeiculos"]" popupHeight="250px" width="100%" showClearButton="true">
+								<e-combobox-fields text="Descricao" value="VeiculoId"></e-combobox-fields>
+							</ejs-combobox>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-5">
+							<label class="label font-weight-bold">Solicitante</label>
+							<ejs-combobox id="lstRequisitanteAlterado" placeholder="Selecione um Solicitante" allowFiltering="true" filterType="Contains" dataSource="@ViewData["lstRequisitante"]" popupHeight="250px" width="100%" showClearButton="true">
+								<e-combobox-fields text="Requisitante" value="RequisitanteId"></e-combobox-fields>
+							</ejs-combobox>
+						</div>
+						<div class="col-2">
+							<label class="label font-weight-bold">Ramal</label>
+							<input id="txtRamalRequisitante" class="form-control" type="text" maxlength="20" />
+						</div>
+						<div class="col-5">
+							<label class="label font-weight-bold">Setor Solicitante</label>
+							<ejs-dropdowntree id="lstSetorSolicitanteAlterado" placeholder="Selecione um Setor" sortOrder="Ascending" showCheckBox="false" allowMultiSelection="false" allowFiltering="true" filterType="Contains" filterBarPlaceholder="Procurar...">
+								<e-dropdowntree-fields dataSource="@ViewData["lstSetor"]" value="SetorSolicitanteId" text="Nome" parentValue="SetorPaiId" hasChildren="HasChild"></e-dropdowntree-fields>
+							</ejs-dropdowntree>
+						</div>
+					</div>
+
+					<br />
+				</form>
+				<div class="modal-footer">
+					<button id="btnAjustarViagem" class="btn btn-azul">
+						<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+						<i class="fa-duotone fa-floppy-disk icon-space"></i>
+						<span class="btn-text">Ajustar Viagem</span>
+					</button>
+					<button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+						<i class="fa-solid fa-xmark icon-space"></i>
+						Fechar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* ================ Modal Ficha de Vistoria ================ *@
+<div class="modal fade" id="modalFicha" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="true" aria-labelledby="DynamicModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="DynamicModalLabel">
+					<i class="fa-duotone fa-file-image"></i>
+					Ficha de Vistoria
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+			</div>
+			<div class="modal-body text-center">
+				<input type="hidden" id="txtViagemId" />
+				<img id="imgViewer" class="img-ficha" src="" alt="Ficha de Vistoria" />
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-fundo-laranja" data-bs-dismiss="modal">
+					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* ================ Modal Loading ================ *@
+<div class="modal fade" id="modalLoading" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-sm">
+		<div class="modal-content">
+			<div class="modal-body text-center py-4">
+				<div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+					<span class="visually-hidden">Carregando...</span>
+				</div>
+				<p id="txtLoadingMessage" class="mb-0 fw-bold text-secondary">Carregando Dados de Viagens...</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section ScriptsBlock {
+	<script src="~/js/cadastros/atualizacustosviagem.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,151 @@
+@page
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model FrotiX.Pages.PlacaBronze.UpsertModel
+
+@{
+	ViewData["Title"] = "Placas de Bronze";
+	ViewData["PageName"] = "placabronze_index";
+	ViewData["Heading"] = "<i class='fad fa-file-certificate'></i> Cadastros: <span class='fw-300'>Placas de Bronze</span>";
+	ViewData["Category1"] = "Cadastros";
+	ViewData["PageIcon"] = "fa-regular fa-file-certificate";
+}
+
+@{
+	Guid veiculo_id = Model.PlacaBronzeObj.VeiculoId;
+}
+
+<style>
+	.form-control-xs {
+		height: calc(1em + .775rem + 2px) !important;
+		padding: .125rem .25rem !important;
+		font-size: .75rem !important;
+		line-height: 1.5;
+		border-radius: .2rem;
+	}
+
+	.label {
+		margin-bottom: -5px;
+		margin-top: 10px;
+	}
+</style>
+
+@section HeadBlock {
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+}
+
+<form method="post" asp-action="Upsert">
+	<div class="row">
+		<div class="col-xl-12">
+			<div id="panel-1" class="panel">
+				<div class="panel-container show">
+					<div class="panel-content">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+						@if (Model.PlacaBronzeObj.PlacaBronze.PlacaBronzeId != Guid.Empty)
+						{
+							<input type="hidden" asp-for="PlacaBronzeObj.PlacaBronze.PlacaBronzeId" />
+							veiculo_id = Model.PlacaBronzeObj.VeiculoId;
+						}
+
+						<!-- Cabeçalho -->
+						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
+							<h2 class="titulo-paginas d-flex align-items-center pb-3">
+								<i class="fa-duotone fa-solid fa-rectangle-history-circle-plus fa-xl me-2 icon-150" aria-hidden="true"></i>
+								@(Model.PlacaBronzeObj.PlacaBronze.PlacaBronzeId != Guid.Empty ? "Atualizar " : "Criar ") Placa de Bronze
+							</h2>
+						</div>
+
+						<div class="col-8 pt-3">
+							<!-- Descrição da Placa -->
+							<div class="row">
+								<div class="col-12">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="PlacaBronzeObj.PlacaBronze.DescricaoPlaca"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="PlacaBronzeObj.PlacaBronze.DescricaoPlaca"></span>
+										<input class="form-control form-control-xs" asp-for="PlacaBronzeObj.PlacaBronze.DescricaoPlaca" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Veículo Associado -->
+							<div class="row">
+								<div class="col-12">
+									<div class="form-group">
+										<label class="label font-weight-bold" asp-for="PlacaBronzeObj.VeiculoId"></label>
+										<span class="text-danger font-weight-light" asp-validation-for="PlacaBronzeObj.VeiculoId"></span>
+										<select id="VeiculoLista" class="form-control form-control-xs" asp-for="PlacaBronzeObj.VeiculoId">
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<!-- Status (com espaçamento aumentado) -->
+							<div class="row mt-4">
+								<div class="col-12">
+									<div class="form-group">
+										<span class="text-danger font-weight-light" asp-validation-for="PlacaBronzeObj.PlacaBronze.Status"></span>
+										<div class="form-check">
+											<input type="checkbox" class="form-check-input" asp-for="PlacaBronzeObj.PlacaBronze.Status" id="statusCheckbox" />
+											<label class="form-check-label font-weight-bold" for="statusCheckbox" asp-for="PlacaBronzeObj.PlacaBronze.Status"></label>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Botões -->
+							<div class="form-group row mt-4">
+								<div class="col-9">
+									<div class="row">
+										<div class="col-6">
+											<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
+												<i class="far fa-save me-2"></i>
+												@(Model.PlacaBronzeObj.PlacaBronze.PlacaBronzeId != Guid.Empty ? "Atualizar" : "Criar")
+											</button>
+										</div>
+										<div class="col-6">
+											<a asp-page="./Index" class="btn btn-vinho form-control">
+												<i class="far fa-arrow-left me-2"></i>
+												Voltar à Lista
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section ScriptsBlock
+{
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+	<script>
+		$.ajax({
+			type: "GET",
+			url: "/PlacaBronze/Upsert?handler=VeiculoData",
+			data: {},
+			success: function (data) {
+				var s = '<option value="">-- Selecione um Veículo (opcional) --</option>';
+				for (var i = 0; i < data.length; i++) {
+					s += '<option value="' + data[i]["value"] + '">' + data[i]["text"] + '</option>';
+				}
+				$("#VeiculoLista").html(s);
+
+				if ("@veiculo_id" == "00000000-0000-0000-0000-000000000000") {
+					$("#VeiculoLista").val("");
+				} else {
+					$("#VeiculoLista").val("@veiculo_id");
+				}
+			},
+			error: function (data) {
+				var s = '<option value="">-- Selecione um Veículo (opcional) --</option>';
+				$("#VeiculoLista").html(s);
+			}
+		});
+	</script>
+}

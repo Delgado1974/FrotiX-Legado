@@ -1,0 +1,210 @@
+@page
+@model FrotiX.Pages.Usuarios.IndexModel
+
+@{
+    ViewData["Title"] = "Gestão de Usuários";
+    ViewData["PageName"] = "usuarios_index";
+    ViewData["Heading"] = "<i class='fa-duotone fa-users'></i> Cadastros: <span class='fw-300'>Usuários</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fa-duotone fa-users";
+}
+
+@section HeadBlock {
+    <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+    <style>
+        /* ===== MODAL CONTROLE DE ACESSO ===== */
+        #modalControleAcesso .modal-dialog {
+            max-width: 900px;
+        }
+
+        #modalControleAcesso .modal-header {
+            background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+            border-bottom: none;
+            padding: 1rem 1.5rem;
+        }
+
+        #modalControleAcesso .modal-header .modal-title {
+            color: #fff !important;
+        }
+
+        #modalControleAcesso .modal-header .modal-title i {
+            color: #fff !important;
+        }
+
+        /* ===== MODAL FOTO ===== */
+        #modalFoto .modal-dialog {
+            max-width: 500px;
+        }
+
+        #modalFoto .modal-header {
+            background: linear-gradient(180deg, #2F4F4F 0%, #1a3030 100%);
+            border-bottom: none;
+            padding: 1rem 1.5rem;
+        }
+
+        #modalFoto .modal-header .modal-title {
+            color: #fff !important;
+        }
+
+        #modalFoto .modal-header .modal-title i {
+            color: #fff !important;
+        }
+
+        .img-foto-usuario {
+            width: 100%;
+            max-width: 300px;
+            border: 3px solid #dee2e6;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .no-foto-placeholder {
+            width: 200px;
+            height: 200px;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #f8f9fa, #fff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .no-foto-placeholder i {
+            color: #adb5bd;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-foto-placeholder p {
+            color: #6c757d;
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @@media (max-width: 768px) {
+            #modalControleAcesso .modal-dialog,
+            #modalFoto .modal-dialog {
+                max-width: 95%;
+                margin: 1rem auto;
+            }
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel ftx-card-styled">
+            <div class="panel-container show">
+
+                <!-- Header Padrão FrotiX com Botão à Direita -->
+                <div class="ftx-card-header d-flex justify-content-between align-items-center">
+                    <h2 class="titulo-paginas mb-0">
+                        <i class="fa-duotone fa-users"></i>
+                        Cadastros: Gestão de Usuários
+                    </h2>
+                    <a href="/Usuarios/Upsert" class="btn btn-fundo-laranja" data-ejtip="Adicionar novo usuário ao sistema">
+                        <i class="fa-duotone fa-user-plus icon-space icon-pulse"></i> Adicionar Usuário
+                    </a>
+                </div>
+
+                <div class="panel-content">
+                    <div class="box-body">
+                        <div class="col-12 px-3 mb-3">
+                            <h5 class="text-muted">
+                                <i class="fa-duotone fa-info-circle me-2"></i>
+                                Gerencie os usuários do sistema e seus acessos
+                            </h5>
+                        </div>
+
+                        <table id="tblUsuario" class="table table-bordered table-striped table-hover ftx-table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Ponto</th>
+                                    <th>Detentor Carga</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ================ Modal Controle de Acesso ================ *@
+<div class="modal fade" id="modalControleAcesso" tabindex="-1" aria-labelledby="tituloControleAcesso" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="tituloControleAcesso">
+                    <i class="fa-duotone fa-shield-keyhole"></i>
+                    Gestão de Recursos do Usuário
+                </h3>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtUsuarioIdRecurso" />
+
+                <div class="alert alert-info mb-3">
+                    <i class="fa-duotone fa-circle-info me-2"></i>
+                    <strong id="txtNomeUsuarioRecurso"></strong> - Clique nos botões para conceder ou remover acesso aos recursos.
+                </div>
+
+                <table id="tblRecursos" class="table table-bordered table-striped table-hover ftx-table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Nome do Recurso</th>
+                            <th class="text-center" style="width: 130px;">Status do Acesso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark icon-space"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ================ Modal Foto do Usuário ================ *@
+<div class="modal fade" id="modalFoto" tabindex="-1" aria-labelledby="tituloFoto" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloFoto">
+                    <i class="fa-duotone fa-id-badge"></i>
+                    Foto do Usuário
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-center">
+                <h6 id="txtNomeUsuarioFoto" class="text-muted mb-3"></h6>
+                <div id="divFotoContainer">
+                    <!-- Foto ou placeholder será inserido via JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark icon-space"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script src="~/js/cadastros/usuario-index.js" asp-append-version="true"></script>
+}
