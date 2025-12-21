@@ -18,6 +18,54 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
 }
 
 <style>
+    /* ======== ANIMAÇÃO SUAVE DO HEADER ======== */
+    @@keyframes headerGradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* ======== CORREÇÃO DO HEADER DO CARD ======== */
+    .ftx-card-header {
+        background: linear-gradient(135deg, #325d88 0%, #2a4d73 25%, #3d6f9e 50%, #2a4d73 75%, #325d88 100%);
+        background-size: 400% 400%;
+        animation: headerGradientShift 8s ease infinite;
+    }
+
+    /* ======== CORREÇÃO DA FONTE DO TÍTULO ======== */
+    .ftx-card-header .titulo-paginas {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: 1.925rem !important;
+        color: #ffffff !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .ftx-card-header .titulo-paginas i {
+        --fa-primary-color: #ffffff;
+        --fa-secondary-color: rgba(255, 255, 255, 0.7);
+        font-size: 2.2rem !important;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+    }
+
+    /* ======== OUTLINE BRANCO NO BOTÃO VOLTAR DO HEADER ======== */
+    .ftx-card-header .btn-vinho {
+        outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+        outline-offset: 1px;
+        transition: all 0.2s ease;
+    }
+
+    .ftx-card-header .btn-vinho:hover {
+        outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+        outline-offset: 2px;
+    }
+
     /* ========================================
            ESTILOS OTIMIZADOS PARA BOOTSTRAP 5
            + COMPONENTES SYNCFUSION
@@ -538,7 +586,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
                         </h2>
                         <div class="ftx-card-actions">
                             <a asp-page="./ListaEventos" class="btn btn-vinho">
-                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                                <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
                                 Voltar à Lista
                             </a>
                         </div>
@@ -715,8 +763,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
                                 id="btnSalvarEvento"
                                 value="Submit"
                                 asp-page-handler="Submit"
-                                class="btn btn-azul w-100"
-                                data-ejtip="@(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar Evento" : "Criar Evento")">
+                                class="btn btn-azul w-100">
                             <span class="btn-content">
                                 <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
                                 @(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar" : "Salvar") Evento
@@ -729,9 +776,8 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
                     </div>
                     <div class="col-12 col-md-3">
                         <a asp-page="./ListaEventos"
-                           class="btn btn-vinho w-100"
-                           data-ejtip="Voltar para a Lista de Eventos">
-                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                           class="btn btn-vinho w-100">
+                            <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
                             Voltar à Lista
                         </a>
                     </div>
@@ -893,11 +939,83 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
     // ==========================================
     $(document).ready(function() {
         try {
+            // ==========================================
+            // VALIDAÇÃO: Data Final >= Data Inicial
+            // ==========================================
+            function validarDatas() {
+                try {
+                    const dataInicial = $('#txtDataInicialEvento').val();
+                    const dataFinal = $('#txtDataFinalEvento').val();
+                    
+                    if (dataInicial && dataFinal) {
+                        const dtInicial = new Date(dataInicial);
+                        const dtFinal = new Date(dataFinal);
+                        
+                        if (dtFinal < dtInicial) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('UpsertEvento.cshtml', 'validarDatas', error);
+                    return true;
+                }
+            }
+
+            // Validação ao mudar Data Final
+            $('#txtDataFinalEvento').on('change', function() {
+                try {
+                    const dataInicial = $('#txtDataInicialEvento').val();
+                    const dataFinal = $(this).val();
+                    
+                    if (dataInicial && dataFinal) {
+                        const dtInicial = new Date(dataInicial);
+                        const dtFinal = new Date(dataFinal);
+                        
+                        if (dtFinal < dtInicial) {
+                            AppToast.show('Vermelho', 'Data Final não pode ser menor que a Data Inicial!', 3000);
+                            $(this).val('');
+                            $(this).focus();
+                        }
+                    }
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('UpsertEvento.cshtml', 'txtDataFinalEvento.change', error);
+                }
+            });
+
+            // Validação ao mudar Data Inicial (caso já tenha Data Final preenchida)
+            $('#txtDataInicialEvento').on('change', function() {
+                try {
+                    const dataInicial = $(this).val();
+                    const dataFinal = $('#txtDataFinalEvento').val();
+                    
+                    if (dataInicial && dataFinal) {
+                        const dtInicial = new Date(dataInicial);
+                        const dtFinal = new Date(dataFinal);
+                        
+                        if (dtFinal < dtInicial) {
+                            AppToast.show('Amarelo', 'Atenção: Data Final foi limpa pois era menor que a nova Data Inicial.', 3000);
+                            $('#txtDataFinalEvento').val('');
+                        }
+                    }
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('UpsertEvento.cshtml', 'txtDataInicialEvento.change', error);
+                }
+            });
+
             // Intercepta o submit do formulário
             $('form').on('submit', function(e) {
                 try {
                     const btn = $('#btnSalvarEvento');
                     const form = $(this);
+                    
+                    // Validação de datas antes de enviar
+                    if (!validarDatas()) {
+                        e.preventDefault();
+                        AppToast.show('Vermelho', 'Data Final não pode ser menor que a Data Inicial!', 3000);
+                        $('#txtDataFinalEvento').focus();
+                        return false;
+                    }
                     
                     // Verifica se o formulário é válido
                     if (form[0].checkValidity && !form[0].checkValidity()) {

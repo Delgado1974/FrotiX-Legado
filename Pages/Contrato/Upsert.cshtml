@@ -9,10 +9,659 @@
     ViewData["Heading"] = "<i class='fa-duotone fa-folders'></i> Cadastros: <span class='fw-300'>Contratos</span>";
     ViewData["Category1"] = "Cadastros";
     ViewData["PageIcon"] = "fa-regular fa-folders";
+
+    var isEdit = Model.ContratoObj.Contrato.ContratoId != Guid.Empty;
+    var tituloCard = isEdit ? "Atualizar Contrato" : "Novo Contrato";
 }
 
-<script>
+<style>
+    /* ===== CARD FROTIX - CONTRATOS ===== */
+    /* Header usa o padrão global .ftx-card-header do frotix.css */
 
+    .ftx-card-contrato {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        background: #fff;
+        margin-bottom: 1.5rem;
+    }
+
+    .ftx-card-contrato .ftx-card-body {
+        padding: 1.5rem;
+        background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+    }
+
+    /* ===== SEÇÕES DO FORMULÁRIO ===== */
+    .ftx-form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(50, 93, 136, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .ftx-form-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #325d88;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(50, 93, 136, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ftx-form-section-title i {
+        font-size: 1.1rem;
+        --fa-primary-color: #325d88;
+        --fa-secondary-color: #6b9bc3;
+        --fa-secondary-opacity: 0.7;
+    }
+
+    /* ===== LABELS E INPUTS ===== */
+    .label {
+        margin-bottom: -5px;
+        margin-top: 10px;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.85rem;
+    }
+
+    .form-control-xs {
+        height: calc(1em + .775rem + 2px) !important;
+        padding: .125rem .5rem !important;
+        font-size: .85rem !important;
+        line-height: 1.5;
+        border-radius: .35rem;
+        border: 1px solid #cbd5e0;
+        transition: all 0.2s ease;
+    }
+
+    .form-control-xs:focus {
+        border-color: #325d88;
+        box-shadow: 0 0 0 3px rgba(50, 93, 136, 0.15);
+    }
+
+    /* ===== CHECKBOX ESTILIZADO ===== */
+    input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: 1px;
+        accent-color: #325d88;
+    }
+
+    /* ===== BOTÕES DE AÇÃO ===== */
+    .ftx-btn-action {
+        border-radius: 8px;
+        padding: 0.65rem 1.5rem;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        min-height: 44px;
+    }
+
+    .ftx-btn-action i {
+        font-size: 1rem;
+    }
+
+    .ftx-btn-action.btn-azul {
+        background: linear-gradient(135deg, #325d88 0%, #3d6f9e 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(50, 93, 136, 0.3);
+    }
+
+    .ftx-btn-action.btn-azul:hover {
+        background: linear-gradient(135deg, #2a4f75 0%, #325d88 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(50, 93, 136, 0.4);
+    }
+
+    .ftx-btn-action.btn-vinho {
+        background: linear-gradient(135deg, #722F37 0%, #8B3A44 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(114, 47, 55, 0.3);
+    }
+
+    .ftx-btn-action.btn-vinho:hover {
+        background: linear-gradient(135deg, #5a252c 0%, #722F37 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(114, 47, 55, 0.4);
+    }
+
+    /* Gap para flex containers */
+    .gap-2 {
+        gap: 0.75rem !important;
+    }
+
+    /* Seção de Ações (última seção) */
+    .ftx-form-section:last-of-type {
+        background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+        border: 1px solid rgba(50, 93, 136, 0.15);
+        margin-bottom: 0;
+    }
+
+    /* ===== GRID SYNCFUSION ===== */
+    .e-grid * { font-size: 12px !important; }
+    .disable-element { pointer-events: none; opacity: 0.4; }
+    .wrapper { cursor: not-allowed; }
+
+    /* Grid dentro das seções */
+    .ftx-form-section .e-grid {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ftx-form-section .e-grid .e-toolbar {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    /* Seção de Veículos quando visível */
+    #divVeiculosAdd.ftx-form-section,
+    #divVeiculosEdit.ftx-form-section {
+        margin-top: 0;
+    }
+
+    /* Linha do Total e botão Atualizar */
+    #divVeiculosAdd .row.mt-3,
+    #divVeiculosEdit .row.mt-3 {
+        align-items: flex-end;
+        margin-top: 1rem !important;
+    }
+
+    /* ===== TERCEIRIZAÇÃO SECTION ===== */
+    .ftx-terceirizacao-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+        border-radius: 10px;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ftx-terceirizacao-card label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    /* ===== RESPONSIVIDADE ===== */
+    @@media (max-width: 768px) {
+        .ftx-card-contrato .ftx-card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+
+@section HeadBlock {
+}
+
+<form method="post" asp-action="Upsert">
+    <div class="row">
+        <div class="col-xl-12">
+            <!-- Card FrotiX -->
+            <div class="ftx-card-contrato">
+                <!-- Header do Card - Usa padrão global ftx-card-header -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-file-contract"></i>
+                        @tituloCard
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a asp-page="./Index" class="btn-header-orange">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Voltar à Lista
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Body do Card -->
+                <div class="ftx-card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @if (isEdit)
+                    {
+                        <input type="hidden" asp-for="ContratoObj.Contrato.ContratoId" />
+                    }
+
+                    <!-- Seção: Identificação do Contrato -->
+                    <div class="ftx-form-section">
+                        <div class="ftx-form-section-title">
+                            <i class="fa-duotone fa-id-card"></i>
+                            Identificação do Contrato
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.AnoContrato"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.AnoContrato"></span>
+                                    <input id="txtAno" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.AnoContrato" placeholder="Ex: 2024" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.NumeroContrato"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.NumeroContrato"></span>
+                                    <input id="txtNumeroContrato" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.NumeroContrato" placeholder="Ex: 001" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.NumeroProcesso"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.NumeroProcesso"></span>
+                                    <input id="txtNumeroProcesso" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.NumeroProcesso" placeholder="Ex: 12345" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.AnoProcesso"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.AnoProcesso"></span>
+                                    <input id="txtAnoProcesso" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.AnoProcesso" placeholder="Ex: 2024" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.Vigencia"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Vigencia"></span>
+                                    <select id="lstVigencia" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Vigencia">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.Prorrogacao"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Prorrogacao"></span>
+                                    <select id="lstProrrogacao" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Prorrogacao">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Fornecedor e Objeto -->
+                    <div class="ftx-form-section">
+                        <div class="ftx-form-section-title">
+                            <i class="fa-duotone fa-building"></i>
+                            Fornecedor e Objeto
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.FornecedorId"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.FornecedorId"></span>
+                                    @Html.DropDownListFor(m => m.ContratoObj.Contrato.FornecedorId,
+                                        Model.ContratoObj.FornecedorList,
+                                        "- Selecione um Fornecedor -",
+                                        new { @class = "form-control form-control-xs", @Name = "lstFornecedor" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.Objeto"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Objeto"></span>
+                                    <input id="lstObjeto" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Objeto" placeholder="Descrição do objeto do contrato" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Detalhes do Contrato -->
+                    <div class="ftx-form-section">
+                        <div class="ftx-form-section-title">
+                            <i class="fa-duotone fa-calendar-lines-pen"></i>
+                            Detalhes do Contrato
+                        </div>
+                        <div class="row">
+                            <div id="divTipoContrato" class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.TipoContrato"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.TipoContrato"></span>
+                                    <select id="lstTipoContrato" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.TipoContrato">
+                                        <option value="">-- Tipo Contrato --</option>
+                                        <option value="Serviços">Serviços</option>
+                                        <option value="Terceirização">Terceirização</option>
+                                        <option value="Locação">Locação</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.DataInicio"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.DataInicio"></span>
+                                    <input id="txtDataInicio" class="form-control form-control-xs" type="date" asp-for="ContratoObj.Contrato.DataInicio" />
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" asp-for="ContratoObj.Contrato.DataFim"></label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.DataFim"></span>
+                                    <input id="txtDataFim" class="form-control form-control-xs" type="date" asp-for="ContratoObj.Contrato.DataFim" />
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label class="label" id="lblValor">Valor (R$)</label>
+                                    <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Valor"></span>
+                                    <input id="valor" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.Valor" onKeyPress="return(moeda(this,'.',',',event))" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Repactuações (exibido apenas em edição) -->
+                        <div id="divListaRepactuacoes" class="row mt-3" style="display:none">
+                            <div class="col-md-6">
+                                <label class="label">Selecione uma Repactuação para ver os Itens</label>
+                                <select id="lstRepactuacao" name="lstRepactuacao" class="form-control form-control-xs">
+                                    <option value="">-- Selecione uma Repactuação --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Terceirização (condicional) -->
+                    <div id="divTerceirizacao" class="ftx-form-section" style="display:none">
+                        <div class="ftx-form-section-title">
+                            <i class="fa-duotone fa-users-gear"></i>
+                            Configuração de Terceirização
+                        </div>
+                        <div class="row">
+                            <!-- Encarregados -->
+                            <div class="col-md-3">
+                                <div class="ftx-terceirizacao-card">
+                                    @if (!isEdit)
+                                    {
+                                        <label id="lblencarregados" class="label">
+                                            <div>
+                                                <input id="chkencarregados" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoEncarregados" />
+                                                <strong>Encarregados</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input id="CustoMensalEncarregados" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalEncarregado" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input id="txtQtdEncarregados" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeEncarregado" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                    else if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização")
+                                    {
+                                        <label id="lblencarregados" class="label">
+                                            <div>
+                                                <input disabled id="chkencarregados" type="checkbox" class="form-check-input" />
+                                                <strong>Encarregados</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input disabled id="CustoMensalEncarregados" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input disabled id="txtQtdEncarregados" class="form-control form-control-xs" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Operadores -->
+                            <div class="col-md-3">
+                                <div class="ftx-terceirizacao-card">
+                                    @if (!isEdit)
+                                    {
+                                        <label id="lbloperadores" class="label">
+                                            <div>
+                                                <input disabled id="chkoperadores" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoOperadores" />
+                                                <strong>Operadores</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input id="CustoMensalOperadores" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalOperador" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input id="txtQtdOperadores" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeOperador" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                    else if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização")
+                                    {
+                                        <label id="lbloperadores" class="label">
+                                            <div>
+                                                <input disabled id="chkoperadores" type="checkbox" class="form-check-input" />
+                                                <strong>Operadores</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input disabled id="CustoMensalOperadores" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input disabled id="txtQtdOperadores" class="form-control form-control-xs" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Motoristas -->
+                            <div class="col-md-3">
+                                <div class="ftx-terceirizacao-card">
+                                    @if (!isEdit)
+                                    {
+                                        <label id="lblmotoristas" class="label">
+                                            <div>
+                                                <input disabled id="chkmotoristas" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoMotoristas" />
+                                                <strong>Motoristas</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input disabled id="CustoMensalMotoristas" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalMotorista" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input disabled id="txtQtdMotoristas" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeMotorista" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                    else if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização")
+                                    {
+                                        <label id="lblmotoristas" class="label">
+                                            <div>
+                                                <input disabled id="chkmotoristas" type="checkbox" class="form-check-input" />
+                                                <strong>Motoristas</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input disabled id="CustoMensalMotoristas" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input disabled id="txtQtdMotoristas" class="form-control form-control-xs" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Lavadores -->
+                            <div class="col-md-3">
+                                <div class="ftx-terceirizacao-card">
+                                    @if (!isEdit)
+                                    {
+                                        <label id="lbllavadores" class="label">
+                                            <div>
+                                                <input id="chklavadores" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoLavadores" />
+                                                <strong>Lavadores</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input id="CustoMensalLavadores" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalLavador" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input id="txtQtdLavadores" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeLavador" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                    else if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização")
+                                    {
+                                        <label id="lbllavadores" class="label">
+                                            <div>
+                                                <input disabled id="chklavadores" type="checkbox" class="form-check-input" />
+                                                <strong>Lavadores</strong>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-8">
+                                                    <small class="text-muted">Custo Mensal (R$)</small>
+                                                    <input disabled id="CustoMensalLavadores" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted">Qtd.</small>
+                                                    <input disabled id="txtQtdLavadores" class="form-control form-control-xs" style="text-align: right;" />
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Veículos (Locação - Novo) -->
+                    <div id="divVeiculosAdd" class="ftx-form-section" style="display:none">
+                        <div class="ftx-form-section-title">
+                            <i class="fa-duotone fa-cars"></i>
+                            Veículos do Contrato
+                        </div>
+                        @{
+                            List<object> cols = new List<object>();
+                            cols.Add(new { field = "numitem", direction = "Ascending" });
+                        }
+                        <ejs-grid id="grdVeiculos" toolbar="@(new List<string>() { "Add", "Update", "Delete", "Cancel" })" GridLines="Both" QueryCellInfo="calculate" allowSorting="true">
+                            <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" newRowPosition="Bottom"></e-grid-editSettings>
+                            <e-grid-sortsettings columns="cols"></e-grid-sortsettings>
+                            <e-grid-columns>
+                                <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
+                                <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150" allowEditing="true"></e-grid-column>
+                                <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
+                                <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" allowEditing="true" format="N2"></e-grid-column>
+                                <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" allowEditing="false" format="N2"></e-grid-column>
+                            </e-grid-columns>
+                        </ejs-grid>
+                        <div class="row mt-3 align-items-end">
+                            <div class="col-md-3 col-sm-6">
+                                <label class="label">Total Geral</label>
+                                <input id="txtTotal" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <button id="btnAtualizaTotal" type="button" class="btn ftx-btn-action btn-azul">
+                                    <i class="fa-duotone fa-arrows-rotate"></i> Atualizar Total
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Veículos (Locação - Edição) -->
+                    <div id="divVeiculosEdit" class="ftx-form-section" style="display:none">
+                        <div class="ftx-form-section-title">
+                            <i class="fa-duotone fa-cars"></i>
+                            Veículos do Contrato
+                        </div>
+                        <ejs-grid id="grdVeiculos2" allowPaging="false" GridLines="Both">
+                            <e-grid-columns>
+                                <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20"></e-grid-column>
+                                <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150"></e-grid-column>
+                                <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" format="N0"></e-grid-column>
+                                <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" format="N2"></e-grid-column>
+                                <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" format="N2"></e-grid-column>
+                            </e-grid-columns>
+                        </ejs-grid>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label class="label">Total Geral</label>
+                                <input id="txtTotalEdit" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Status e Ações -->
+                    <div class="ftx-form-section">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 col-sm-12 mb-2 mb-md-0">
+                                <label class="label d-flex align-items-center gap-2 mb-0">
+                                    <input id="chkAtivo" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.Status" style="width: 18px; height: 18px; margin: 0;" />
+                                    <span style="font-size: 0.95rem;">Contrato Ativo</span>
+                                </label>
+                            </div>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                    @if (isEdit)
+                                    {
+                                        <button id="btnEdita" type="button" asp-page-handler="Edit" asp-route-id="@Model.ContratoObj.Contrato.ContratoId" class="btn ftx-btn-action btn-azul">
+                                            <i class="fa-duotone fa-file-check icon-pulse"></i> Atualizar
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button id="btnAdiciona" type="button" value="Submit" asp-page-handler="Submit" class="btn ftx-btn-action btn-azul">
+                                            <i class="fa-duotone fa-file-plus icon-pulse"></i> Criar Contrato
+                                        </button>
+                                    }
+                                    <a asp-page="./Index" class="btn ftx-btn-action btn-vinho">
+                                        <i class="fa-solid fa-rotate-left icon-rotate-left"></i> Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
     function calculate(args) {
         try {
             if (args === undefined) return;
@@ -52,455 +701,7 @@
             Alerta.TratamentoErroComLinha("Upsert.cshtml", "calculate", error);
         }
     }
-
 </script>
-
-<style>
-    .form-control-xs {
-        height: calc(1em + .775rem + 2px) !important;
-        padding: .125rem .25rem !important;
-        font-size: .75rem !important;
-        line-height: 1.5;
-        border-radius: .2rem;
-    }
-
-    .label {
-        margin-bottom: -5px;
-        margin-top: 10px;
-    }
-
-    input[type=checkbox] {
-        vertical-align: middle;
-        position: relative;
-        bottom: 1px;
-    }
-
-    escondido {
-        visibility: hidden;
-    }
-
-    .input-icons i { position: absolute; }
-
-    .input-icons {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    .icon { padding: 10px; min-width: 40px; }
-
-    .input-field { width: 100%; padding: 10px; text-align: center; }
-
-    .disable-element { pointer-events: none; opacity: 0.4; }
-
-    .wrapper { cursor: not-allowed; }
-
-    .e-grid * { font-size: 12px !important; }
-</style>
-
-@section HeadBlock {
-}
-
-<form method="post" asp-action="Upsert">
-    <div class="row">
-        <div class="col-xl-12">
-            <div id="panel-1" class="panel">
-                <div class="panel-container show">
-                    <div class="panel-content">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        @if (Model.ContratoObj.Contrato.ContratoId != Guid.Empty)
-                        {
-                            <input type="hidden" asp-for="ContratoObj.Contrato.ContratoId" />
-                        }
-
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="text-primary">
-                                @(Model.ContratoObj.Contrato.ContratoId != Guid.Empty ? "Atualizar " : "Criar ") Contrato
-                            </h2>
-                        </div>
-
-                        <div class="col-12 pt-3">
-
-                            <div class="row">
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.AnoContrato"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.AnoContrato"></span>
-                                        <input id="txtAno" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.AnoContrato" />
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.NumeroContrato"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.NumeroContrato"></span>
-                                        <input id="txtNumeroContrato" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.NumeroContrato" />
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.NumeroProcesso"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.NumeroProcesso"></span>
-                                        <input id="txtNumeroProcesso" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.NumeroProcesso" />
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.AnoProcesso"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.AnoProcesso"></span>
-                                        <input id="txtAnoProcesso" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.AnoProcesso" />
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.Vigencia"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Vigencia"></span>
-                                        <select id="lstVigencia" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Vigencia">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.Prorrogacao"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Prorrogacao"></span>
-                                        <select id="lstProrrogacao" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Prorrogacao">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.FornecedorId"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.FornecedorId"></span>
-                                        @Html.DropDownListFor(m => m.ContratoObj.Contrato.FornecedorId,
-                                            Model.ContratoObj.FornecedorList,
-                                            "- Selecione um Fornecedor -",
-                                            new { @class = "form-control form-control-xs", @Name = "lstFornecedor" })
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.Objeto"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Objeto"></span>
-                                        <input id="lstObjeto" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.Objeto" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div id="divTipoContrato" class="col-3">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.TipoContrato"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.TipoContrato"></span>
-                                        <select id="lstTipoContrato" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.TipoContrato">
-                                            <option value="">-- Tipo Contrato --</option>
-                                            <option value="Serviços">Serviços</option>
-                                            <option value="Terceirização">Terceirização</option>
-                                            <option value="Locação">Locação</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.DataInicio"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.DataInicio"></span>
-                                        <input id="txtDataInicio" class="form-control form-control-xs" type="date" asp-for="ContratoObj.Contrato.DataInicio" />
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" asp-for="ContratoObj.Contrato.DataFim"></label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.DataFim"></span>
-                                        <input id="txtDataFim" class="form-control form-control-xs" type="date" asp-for="ContratoObj.Contrato.DataFim" />
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold" id="lblValor">Valor (R$)</label>
-                                        <span class="text-danger" asp-validation-for="ContratoObj.Contrato.Valor"></span>
-                                        <input id="valor" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.Valor" onKeyPress="return(moeda(this,'.',',',event))" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="divListaRepactuacoes" class="row" style="display:none">
-                                <div class="col-6">
-                                    <label class="label font-weight-bold">Selecione uma Repactuação para ver os Itens</label>
-                                    <span class="text-danger font-weight-light"></span>
-                                    <select id="lstRepactuacao" name="lstRepactuacao" class="form-control form-control-xs">
-                                        <option value="">-- Selecione uma Repactuação --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <br />
-                            <br />
-                            <div id="divTerceirizacao" class="col-9" style="display:none">
-                                <label class="label font-weight-bold">Valores Mensais Unitários</label>
-
-                                <div>
-                                    <div class="form-group">
-                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
-                                        {
-                                            <label id="lblencarregados" class="label font-weight-bold">
-                                                <input id="chkencarregados" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoEncarregados" />
-                                                Encarregados (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <input id="CustoMensalEncarregados" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalEncarregado" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <input id="txtQtdEncarregados" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeEncarregado" style="text-align: right;" />
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        }
-                                        else
-                                        {
-                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
-                                            {
-                                                <label id="lblencarregados" class="label font-weight-bold">
-                                                    <input disabled id="chkencarregados" type="checkbox" class="form-check-input" />
-                                                    Encarregados (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <input disabled id="CustoMensalEncarregados" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                        </div>
-                                                        <div class="col-3">
-                                                            <input disabled id="txtQtdEncarregados" class="form-control form-control-xs" style="text-align: right;" />
-                                                        </div>
-                                                    </div>
-                                                </label>
-                                            }
-                                        }
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="form-group">
-                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
-                                        {
-                                            <label id="lbloperadores" class="label font-weight-bold">
-                                                <input id="chkoperadores" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoOperadores" />
-                                                Operadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <input id="CustoMensalOperadores" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalOperador" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <input id="txtQtdOperadores" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeOperador" style="text-align: right;" />
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        }
-                                        else
-                                        {
-                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
-                                            {
-                                                <label id="lbloperadores" class="label font-weight-bold">
-                                                    <input disabled id="chkoperadores" type="checkbox" class="form-check-input" />
-                                                    Operadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <input disabled id="CustoMensalOperadores" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                        </div>
-                                                        <div class="col-3">
-                                                            <input disabled id="txtQtdOperadores" class="form-control form-control-xs" style="text-align: right;" />
-                                                        </div>
-                                                    </div>
-                                                </label>
-                                            }
-                                        }
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="form-group">
-                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
-                                        {
-                                            <label id="lblmotoristas" class="label font-weight-bold">
-                                                <input disabled id="chkmotoristas" type="checkbox" class="form-check-input" />
-                                                Motoristas (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <input disabled id="CustoMensalMotoristas" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalMotorista" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <input disabled id="txtQtdMotoristas" class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeMotorista" style="text-align: right;" />
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        }
-                                        else
-                                        {
-                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
-                                            {
-                                                <label id="lblmotoristas" class="label font-weight-bold">
-                                                    <input disabled id="chkmotoristas" type="checkbox" class="form-check-input" />
-                                                    Motoristas (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <input disabled id="CustoMensalMotoristas" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                        </div>
-                                                        <div class="col-3">
-                                                            <input disabled id="txtQtdMotoristas" class="form-control form-control-xs" style="text-align: right;" />
-                                                        </div>
-                                                    </div>
-                                                </label>
-                                            }
-                                        }
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="form-group">
-                                        @if (Model.ContratoObj.Contrato.ContratoId == Guid.Empty)
-                                        {
-                                            <label id="lbllavadores" class="label font-weight-bold">
-                                                <input id="chklavadores" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.ContratoLavadores" />
-                                                Lavadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <input id="CustoMensalLavadores" disabled class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" asp-for="ContratoObj.Contrato.CustoMensalLavador" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <input id="txtQtdLavadores" disabled class="form-control form-control-xs" asp-for="ContratoObj.Contrato.QuantidadeLavador" style="text-align: right;" />
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        }
-                                        else
-                                        {
-                                            if (Model.ContratoObj.Contrato.TipoContrato == "Terceirização" || Model.ContratoObj.Contrato.TipoContrato == "Terceiriza&#xE7;&#xE3;o")
-                                            {
-                                                <label id="lbllavadores" class="label font-weight-bold">
-                                                    <input disabled id="chklavadores" type="checkbox" class="form-check-input" />
-                                                    Lavadores (R$)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qtd.
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <input disabled id="CustoMensalLavadores" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onKeyPress="return(moeda(this,'.',',',event))" />
-                                                        </div>
-                                                        <div class="col-3">
-                                                            <input disabled id="txtQtdLavadores" class="form-control form-control-xs" style="text-align: right;" />
-                                                        </div>
-                                                    </div>
-                                                </label>
-                                            }
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="divVeiculosAdd" class="row" style="display:none">
-                                @{
-                                    List<object> cols = new List<object>();
-                                    cols.Add(new { field = "numitem", direction = "Ascending" });
-                                }
-                                @{
-                                <ejs-grid id="grdVeiculos" toolbar="@(new List<string>() { "Add", "Update", "Delete", "Cancel" })" GridLines="Both" QueryCellInfo="calculate" allowSorting="true">
-                                    <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" newRowPosition="Bottom"></e-grid-editSettings>
-                                    <e-grid-sortsettings columns="cols"></e-grid-sortsettings>
-                                    <e-grid-columns>
-                                        <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20" allowEditing="true"></e-grid-column>
-                                        <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150" allowEditing="true"></e-grid-column>
-                                        <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" allowEditing="true"></e-grid-column>
-                                        <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" allowEditing="true" format="N2"></e-grid-column>
-                                        <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" allowEditing="false" format="N2"></e-grid-column>
-                                    </e-grid-columns>
-                                </ejs-grid>
-                                }
-                                <div class="row">
-                                    <div class="col-3">
-                                        <label class="label font-weight-bold">Total Geral</label>
-                                        <input id="txtTotal" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
-                                    </div>
-                                    <div class="col-3" style="padding:0px;margin-top:22px;">
-                                        <button id="btnAtualizaTotal" type="button" class="btn btn-azul form-control">
-                                            <i class="fa-duotone fa-arrows-rotate icon-space"></i> Atualizar Total Após Edição
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="divVeiculosEdit" class="row" style="display:none">
-                                <div>
-                                    <ejs-grid id="grdVeiculos2" allowPaging="false" GridLines="Both">
-                                        <e-grid-columns>
-                                            <e-grid-column field="numitem" headerText="Item" textAlign="Center" width="20"></e-grid-column>
-                                            <e-grid-column field="descricao" headerText="Descrição do Veículo" textAlign="Left" width="150"></e-grid-column>
-                                            <e-grid-column field="quantidade" headerText="Quantidade" textAlign="Center" width="30" format="N0"></e-grid-column>
-                                            <e-grid-column field="valorunitario" headerText="Valor Unitário" textAlign="Right" width="30" format="N2"></e-grid-column>
-                                            <e-grid-column field="valortotal" headerText="Valor Total" width="30" textAlign="Right" format="N2"></e-grid-column>
-                                        </e-grid-columns>
-                                    </ejs-grid>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold">Total Geral</label>
-                                        <input id="txtTotalEdit" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" disabled />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <br />
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold">
-                                            <input id="chkAtivo" type="checkbox" class="form-check-input" asp-for="ContratoObj.Contrato.Status" />
-                                            Ativo/Inativo
-                                        </label>
-                                    </div>
-                                    <br />
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-9">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            @if (Model.ContratoObj.Contrato.ContratoId != Guid.Empty)
-                                            {
-                                            <button id="btnEdita" type="button" asp-page-handler="Edit" asp-route-id="@Model.ContratoObj.Contrato.ContratoId" class="btn btn-azul form-control" data-ejtip="Atualizar Contrato">
-                                                <i class="fa-duotone fa-file-check icon-space icon-pulse"></i> Atualizar
-                                            </button>
-                                            }
-                                            else
-                                            {
-                                            <button id="btnAdiciona" type="button" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" data-ejtip="Criar Novo Contrato">
-                                                <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
-                                            </button>
-                                            }
-                                        </div>
-                                        <div class="col-6">
-                                            <a asp-page="./Index" class="btn btn-vinho form-control" data-ejtip="Voltar para a Lista de Contratos">
-                                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
 
 @section ScriptsBlock {
 
@@ -508,7 +709,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <script>
-        Number.prototype.format = function(n, x, s, c) {
+        Number.prototype.format = function (n, x, s, c) {
             try {
                 var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
                     num = this.toFixed(Math.max(0, ~~n));
@@ -522,7 +723,7 @@
             try {
                 if (v == null) return 0;
                 if (typeof v === 'number') return v;
-                v = (v + '').replace(/\s/g,'').replace(/\./g, '').replace(',', '.').replace('R$', '').replace('R$&nbsp;', '');
+                v = (v + '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.').replace('R$', '').replace('R$&nbsp;', '');
                 var n = parseFloat(v);
                 return isNaN(n) ? 0 : n;
             } catch (error) {
@@ -625,9 +826,9 @@
 
                         if (this.value === 'Locação') {
                             if (isEdit) {
-                                document.getElementById("divVeiculosEdit").style.display = "initial";
+                                document.getElementById("divVeiculosEdit").style.display = "block";
                             } else {
-                                document.getElementById("divVeiculosAdd").style.display = "initial";
+                                document.getElementById("divVeiculosAdd").style.display = "block";
                             }
                         }
                     } catch (error) {
@@ -834,9 +1035,9 @@
 
                     if (document.getElementById("lstTipoContrato").value === "Terceirização") {
                         valorencarregado = brToFloat($('#CustoMensalEncarregados').val());
-                        valoroperador   = brToFloat($('#CustoMensalOperadores').val());
-                        valormotorista  = brToFloat($('#CustoMensalMotoristas').val());
-                        valorlavador    = brToFloat($('#CustoMensalLavadores').val());
+                        valoroperador = brToFloat($('#CustoMensalOperadores').val());
+                        valormotorista = brToFloat($('#CustoMensalMotoristas').val());
+                        valorlavador = brToFloat($('#CustoMensalLavadores').val());
                     }
 
                     var objContrato = JSON.stringify({
@@ -963,9 +1164,9 @@
 
                     if (document.getElementById("lstTipoContrato").value === "Terceirização") {
                         valorencarregado = brToFloat($('#CustoMensalEncarregados').val());
-                        valoroperador   = brToFloat($('#CustoMensalOperadores').val());
-                        valormotorista  = brToFloat($('#CustoMensalMotoristas').val());
-                        valorlavador    = brToFloat($('#CustoMensalLavadores').val());
+                        valoroperador = brToFloat($('#CustoMensalOperadores').val());
+                        valormotorista = brToFloat($('#CustoMensalMotoristas').val());
+                        valorlavador = brToFloat($('#CustoMensalLavadores').val());
                     }
 
                     var objContrato = JSON.stringify({
@@ -1006,14 +1207,14 @@
                         success: function () {
                             try {
                                 location.replace("/contrato");
-								AppToast.show('Verde', "Contrato Atualizado com Sucesso!" );
+                                AppToast.show('Verde', "Contrato Atualizado com Sucesso!");
                             } catch (error) {
                                 Alerta.TratamentoErroComLinha("Upsert.cshtml", "EditaContrato.success", error);
                             }
                         },
                         error: function (data) {
                             try {
-                                AppToast.show('Vermelho', data.message );
+                                AppToast.show('Vermelho', data.message);
                                 console.log(data);
                             } catch (error) {
                                 Alerta.TratamentoErroComLinha("Upsert.cshtml", "EditaContrato.error", error);

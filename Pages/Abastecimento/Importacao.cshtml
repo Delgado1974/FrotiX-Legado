@@ -176,7 +176,7 @@
 
         /* ===== LISTA DE ERROS ===== */
         .lista-erros-ftx {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -184,10 +184,25 @@
             border: none;
             border-bottom: 1px solid #f1f5f9;
             padding: 0.75rem;
+            transition: all 0.3s ease;
         }
 
         .lista-erros-ftx .list-group-item:last-child {
             border-bottom: none;
+        }
+
+        .lista-erros-ftx .list-group-item.corrigido {
+            animation: fadeOutSlide 0.4s ease forwards;
+        }
+
+        @@keyframes fadeOutSlide {
+            to {
+                opacity: 0;
+                max-height: 0;
+                padding: 0;
+                margin: 0;
+                overflow: hidden;
+            }
         }
 
         .erro-icon-circle {
@@ -201,6 +216,155 @@
             color: #ef4444;
             flex-shrink: 0;
         }
+
+        /* Badge de tipo de erro */
+        .badge-tipo-erro {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-tipo-erro.badge-erro {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .badge-tipo-erro.badge-corrigivel {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* Card de sugestão de correção */
+        .sugestao-correcao {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .sugestao-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sugestao-header i {
+            color: #059669;
+            font-size: 1rem;
+        }
+
+        .sugestao-header span {
+            font-weight: 600;
+            color: #065f46;
+            font-size: 0.85rem;
+        }
+
+        .sugestao-valores {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sugestao-valor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            min-width: 80px;
+        }
+
+        .sugestao-valor.valor-errado {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #fecaca;
+        }
+
+        .sugestao-valor.valor-errado .valor-numero {
+            color: #dc2626;
+            text-decoration: line-through;
+        }
+
+        .sugestao-valor.valor-correto {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid #86efac;
+        }
+
+        .sugestao-valor.valor-correto .valor-numero {
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        .sugestao-valor .valor-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.3px;
+        }
+
+        .sugestao-valor .valor-numero {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .sugestao-seta {
+            color: #22c55e;
+            font-size: 1.25rem;
+        }
+
+        .sugestao-justificativa {
+            font-size: 0.75rem;
+            color: #475569;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid #a7f3d0;
+        }
+
+        .btn-aplicar-correcao {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border: none;
+            color: white;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-aplicar-correcao:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-aplicar-correcao:active {
+            transform: translateY(0);
+        }
+
+        .btn-aplicar-correcao i {
+            font-size: 0.9rem;
+        }
+
+        .btn-aplicar-correcao.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Stat card para linhas corrigíveis */
+        .stat-card-ftx.stat-corrigivel .stat-icon { color: #059669; }
+        .stat-card-ftx.stat-corrigivel .stat-valor { color: #059669; }
 
         /* ===== TABELA IMPORTADOS ===== */
         .tabela-importados-container {
@@ -258,6 +422,140 @@
             font-size: 0.85rem;
             color: #6c757d;
             margin-top: 0.25rem;
+        }
+
+        /* ===== CARD RESUMO PLANILHA ===== */
+        .resumo-planilha-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 500px;
+            margin: 0 auto;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .resumo-header {
+            background: linear-gradient(135deg, #3D5771 0%, #5a7a9a 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .resumo-header i {
+            font-size: 1.1rem;
+        }
+
+        .resumo-body {
+            padding: 1rem;
+        }
+
+        .resumo-periodo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+
+        .resumo-periodo-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resumo-periodo-item i {
+            font-size: 1.5rem;
+        }
+
+        .resumo-periodo-item small {
+            display: block;
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .resumo-periodo-item strong {
+            display: block;
+            font-size: 1rem;
+            color: #1e293b;
+        }
+
+        .resumo-periodo-seta {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .resumo-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 0.5rem;
+        }
+
+        .resumo-stat {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            min-width: 70px;
+        }
+
+        .resumo-stat-valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .resumo-stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+        }
+
+        .resumo-stat-total {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .resumo-stat-total .resumo-stat-valor {
+            color: #3b82f6;
+        }
+
+        .resumo-stat-gasolina {
+            background: rgba(34, 197, 94, 0.1);
+        }
+        .resumo-stat-gasolina .resumo-stat-valor {
+            color: #22c55e;
+        }
+
+        .resumo-stat-diesel {
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .resumo-stat-diesel .resumo-stat-valor {
+            color: #f59e0b;
+        }
+
+        .resumo-stat-outros {
+            background: rgba(107, 114, 128, 0.1);
+        }
+        .resumo-stat-outros .resumo-stat-valor {
+            color: #6b7280;
         }
     </style>
 }
@@ -359,15 +657,63 @@
                                         <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
                                             <span class="visually-hidden">Processando...</span>
                                         </div>
-                                        <h5 class="text-primary">Processando planilha...</h5>
-                                        <p class="text-muted mb-0">Aguarde enquanto validamos os dados</p>
+                                        <h5 class="text-primary mb-1" id="progressEtapa">Iniciando importação...</h5>
+                                        <p class="text-muted mb-3" id="progressDetail">Preparando...</p>
                                         
                                         <div class="ftx-progress-container">
                                             <div class="ftx-progress-bar">
                                                 <div class="ftx-progress-fill" id="progressFill" style="width: 0%"></div>
                                             </div>
                                             <div class="ftx-progress-text" id="progressText">0%</div>
-                                            <div class="ftx-progress-detail" id="progressDetail">Iniciando...</div>
+                                        </div>
+
+                                        <!-- Card de Resumo da Planilha (aparece após análise) -->
+                                        <div id="resumoPlanilha" class="d-none mt-4">
+                                            <div class="resumo-planilha-card">
+                                                <div class="resumo-header">
+                                                    <i class="fa-duotone fa-file-spreadsheet"></i>
+                                                    <span>Resumo da Planilha</span>
+                                                </div>
+                                                <div class="resumo-body">
+                                                    <div class="resumo-periodo">
+                                                        <div class="resumo-periodo-item">
+                                                            <i class="fa-duotone fa-calendar-arrow-down text-success"></i>
+                                                            <div>
+                                                                <small>Data Inicial</small>
+                                                                <strong id="resumoDataInicial">--/--/----</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="resumo-periodo-seta">
+                                                            <i class="fa-solid fa-arrow-right"></i>
+                                                        </div>
+                                                        <div class="resumo-periodo-item">
+                                                            <i class="fa-duotone fa-calendar-arrow-up text-danger"></i>
+                                                            <div>
+                                                                <small>Data Final</small>
+                                                                <strong id="resumoDataFinal">--/--/----</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="resumo-stats">
+                                                        <div class="resumo-stat resumo-stat-total">
+                                                            <div class="resumo-stat-valor" id="resumoTotal">0</div>
+                                                            <div class="resumo-stat-label">Total</div>
+                                                        </div>
+                                                        <div class="resumo-stat resumo-stat-gasolina">
+                                                            <div class="resumo-stat-valor" id="resumoGasolina">0</div>
+                                                            <div class="resumo-stat-label">Gasolina</div>
+                                                        </div>
+                                                        <div class="resumo-stat resumo-stat-diesel">
+                                                            <div class="resumo-stat-valor" id="resumoDiesel">0</div>
+                                                            <div class="resumo-stat-label">Diesel</div>
+                                                        </div>
+                                                        <div class="resumo-stat resumo-stat-outros">
+                                                            <div class="resumo-stat-valor" id="resumoOutros">0</div>
+                                                            <div class="resumo-stat-label">Outros</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -471,12 +817,12 @@
                                             </div>
                                         </div>
 
-                                        <!-- Botão Download Erros -->
+                                        <!-- Botão Acessar Pendências -->
                                         <div class="d-grid gap-2 mb-4">
-                                            <button type="button" id="btnDownloadErrosParcial" class="btn btn-vinho btn-lg">
-                                                <i class="fa-duotone fa-download me-2"></i>
-                                                Baixar Planilha com Erros para Correção
-                                            </button>
+                                            <a href="/Abastecimento/Pendencias" class="btn btn-warning btn-lg">
+                                                <i class="fa-duotone fa-clipboard-list-check me-2"></i>
+                                                Acessar Pendências para Correção
+                                            </a>
                                         </div>
 
                                         <!-- Lista de Erros -->
@@ -524,12 +870,12 @@
                                             </div>
                                         </div>
 
-                                        <!-- Botão Download Erros -->
+                                        <!-- Botão Acessar Pendências -->
                                         <div class="d-grid gap-2 mb-4">
-                                            <button type="button" id="btnDownloadErros" class="btn btn-vinho btn-lg">
-                                                <i class="fa-duotone fa-download me-2"></i>
-                                                Baixar Planilha com Erros para Correção
-                                            </button>
+                                            <a href="/Abastecimento/Pendencias" class="btn btn-warning btn-lg">
+                                                <i class="fa-duotone fa-clipboard-list-check me-2"></i>
+                                                Acessar Pendências para Correção
+                                            </a>
                                         </div>
 
                                         <!-- Lista de Erros -->
@@ -575,11 +921,19 @@
             // Elementos da barra de progresso
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
+            const progressEtapa = document.getElementById('progressEtapa');
             const progressDetail = document.getElementById('progressDetail');
 
+            // Elementos do resumo da planilha
+            const resumoPlanilha = document.getElementById('resumoPlanilha');
+            const resumoDataInicial = document.getElementById('resumoDataInicial');
+            const resumoDataFinal = document.getElementById('resumoDataFinal');
+            const resumoTotal = document.getElementById('resumoTotal');
+            const resumoGasolina = document.getElementById('resumoGasolina');
+            const resumoDiesel = document.getElementById('resumoDiesel');
+            const resumoOutros = document.getElementById('resumoOutros');
+
             let arquivoAtual = null;
-            let arquivoErrosBase64 = null;
-            let nomeArquivoErros = null;
 
             // ===== SIGNALR =====
             let hubConnection = null;
@@ -601,12 +955,17 @@
                     // Evento: Receber progresso
                     hubConnection.on("ProgressoImportacao", (progresso) => {
                         try {
-                            atualizarProgresso(progresso.porcentagem, progresso.detalhe);
+                            // Atualizar etapa (título) e progresso
+                            atualizarProgresso(progresso.porcentagem, progresso.etapa, progresso.detalhe);
 
-                            // Se tem info de linhas, mostrar detalhes
-                            if (progresso.totalLinhas > 0) {
-                                const detalheLinha = `${progresso.detalhe} (${progresso.linhaAtual}/${progresso.totalLinhas})`;
-                                progressDetail.textContent = detalheLinha;
+                            // Se tem info de linhas, mostrar detalhes com contagem
+                            if (progresso.totalLinhas > 0 && !progresso.resumoDisponivel) {
+                                progressDetail.textContent = `${progresso.detalhe} (${progresso.linhaAtual}/${progresso.totalLinhas})`;
+                            }
+
+                            // Se recebeu resumo da planilha, exibir card
+                            if (progresso.resumoDisponivel) {
+                                mostrarResumoPlanilha(progresso);
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha('Importacao.cshtml', 'ProgressoImportacao', error);
@@ -620,6 +979,28 @@
                 } catch (error) {
                     console.error("Erro ao conectar SignalR:", error);
                     // Continua funcionando sem SignalR (fallback para progresso simulado)
+                }
+            }
+
+            function mostrarResumoPlanilha(progresso) {
+                try {
+                    resumoDataInicial.textContent = progresso.dataInicial || '--/--/----';
+                    resumoDataFinal.textContent = progresso.dataFinal || '--/--/----';
+                    resumoTotal.textContent = progresso.totalRegistros || 0;
+                    resumoGasolina.textContent = progresso.registrosGasolina || 0;
+                    resumoDiesel.textContent = progresso.registrosDiesel || 0;
+                    resumoOutros.textContent = progresso.registrosOutros || 0;
+                    resumoPlanilha.classList.remove('d-none');
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'mostrarResumoPlanilha', error);
+                }
+            }
+
+            function ocultarResumoPlanilha() {
+                try {
+                    resumoPlanilha.classList.add('d-none');
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'ocultarResumoPlanilha', error);
                 }
             }
 
@@ -663,19 +1044,196 @@
                     btnRemoverArquivo.addEventListener('click', removerArquivo);
                     btnImportar.addEventListener('click', importar);
 
-                    document.getElementById('btnDownloadErros').addEventListener('click', downloadArquivoErros);
-                    document.getElementById('btnDownloadErrosParcial').addEventListener('click', downloadArquivoErros);
-
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'configurarEventos', error);
                 }
             }
 
-            function atualizarProgresso(pct, detalhe) {
+            // Cria HTML para um item de erro (com ou sem sugestão de correção)
+            function criarItemErro(erro, index) {
+                try {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item';
+                    item.id = `erro-item-${index}`;
+
+                    // Badge: vermelho para erro, verde para corrigível
+                    const badgeClass = erro.corrigivel ? 'badge-corrigivel' : 'badge-erro';
+                    const badgeText = erro.corrigivel ? 'sugestão' : erro.tipo;
+
+                    let html = `
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="erro-icon-circle">
+                                <i class="fa-solid ${erro.icone}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="text-danger">Linha ${erro.linhaArquivoErros} (original: ${erro.linhaOriginal})</strong>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge-tipo-erro badge-erro">${erro.tipo}</span>
+                                        ${erro.corrigivel ? '<span class="badge-tipo-erro badge-corrigivel"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>sugestão</span>' : ''}
+                                    </div>
+                                </div>
+                                <p class="mb-0 text-muted small">${erro.descricao}</p>
+                                <div class="mt-1">
+                                    <small class="text-muted">
+                                        <strong>Placa:</strong> ${erro.placa || '-'} | 
+                                        <strong>Aut:</strong> ${erro.autorizacao || '-'} |
+                                        <strong>KM Ant:</strong> ${erro.kmAnterior?.toLocaleString('pt-BR') || '-'} |
+                                        <strong>KM:</strong> ${erro.km?.toLocaleString('pt-BR') || '-'}
+                                    </small>
+                                </div>
+                    `;
+
+                    // Se tem sugestão de correção
+                    if (erro.corrigivel) {
+                        const campoLabel = erro.campoCorrecao === 'KmAnterior' ? 'KM Anterior' : 'KM Atual';
+                        
+                        html += `
+                                <div class="sugestao-correcao">
+                                    <div class="sugestao-header">
+                                        <i class="fa-duotone fa-lightbulb-on"></i>
+                                        <span>Sugestão de Correção: ${campoLabel}</span>
+                                    </div>
+                                    <div class="sugestao-valores">
+                                        <div class="sugestao-valor valor-errado">
+                                            <span class="valor-label">Atual (errado)</span>
+                                            <span class="valor-numero">${erro.valorAtual?.toLocaleString('pt-BR')}</span>
+                                        </div>
+                                        <i class="fa-solid fa-arrow-right sugestao-seta"></i>
+                                        <div class="sugestao-valor valor-correto">
+                                            <span class="valor-label">Sugerido</span>
+                                            <span class="valor-numero">${erro.valorSugerido?.toLocaleString('pt-BR')}</span>
+                                        </div>
+                                    </div>
+                                    <div class="sugestao-justificativa">
+                                        ${erro.justificativaSugestao}
+                                    </div>
+                                    <button type="button" class="btn-aplicar-correcao" onclick="aplicarCorrecao(${index}, this)">
+                                        <i class="fa-solid fa-check"></i>
+                                        Aplicar e Importar
+                                    </button>
+                                </div>
+                        `;
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+
+                    item.innerHTML = html;
+                    return item;
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'criarItemErro', error);
+                    return null;
+                }
+            }
+
+            // Armazena os erros para referência na correção
+            let errosAtuais = [];
+
+            // Aplica correção sugerida via API
+            async function aplicarCorrecao(index, btnElement) {
+                try {
+                    const erro = errosAtuais[index];
+                    if (!erro || !erro.corrigivel) {
+                        AppToast.show('Vermelho', 'Erro não disponível para correção', 4000);
+                        return;
+                    }
+
+                    // Desabilitar botão
+                    btnElement.classList.add('loading');
+                    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aplicando...';
+
+                    const response = await fetch('/api/Abastecimento/AplicarCorrecao', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            autorizacao: erro.autorizacao,
+                            placa: erro.placa,
+                            kmAnterior: erro.kmAnterior,
+                            km: erro.km,
+                            litros: erro.litros,
+                            veiculoId: erro.veiculoId,
+                            motoristaId: erro.motoristaId,
+                            combustivelId: erro.combustivelId,
+                            dataHora: erro.dataHora,
+                            valorUnitario: erro.valorUnitario,
+                            campoCorrecao: erro.campoCorrecao,
+                            valorCorrigido: erro.valorSugerido
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        AppToast.show('Verde', result.message, 5000);
+                        
+                        // Animar e remover item da lista
+                        const item = document.getElementById(`erro-item-${index}`);
+                        if (item) {
+                            item.classList.add('corrigido');
+                            setTimeout(() => item.remove(), 400);
+                        }
+
+                        // Atualizar contadores
+                        atualizarContadoresAposCorrecao();
+
+                    } else {
+                        AppToast.show('Vermelho', result.message || 'Erro ao aplicar correção', 5000);
+                        btnElement.classList.remove('loading');
+                        btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Aplicar e Importar';
+                    }
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'aplicarCorrecao', error);
+                    AppToast.show('Vermelho', 'Erro ao aplicar correção', 4000);
+                    btnElement.classList.remove('loading');
+                    btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Aplicar e Importar';
+                }
+            }
+
+            // Atualiza contadores após correção bem-sucedida
+            function atualizarContadoresAposCorrecao() {
+                try {
+                    // Parcial
+                    const statImportadosParcial = document.getElementById('statImportadosParcial');
+                    const statErrosParcial = document.getElementById('statErrosParcial');
+                    if (statImportadosParcial && !statImportadosParcial.closest('.d-none')) {
+                        statImportadosParcial.textContent = parseInt(statImportadosParcial.textContent || 0) + 1;
+                        statErrosParcial.textContent = Math.max(0, parseInt(statErrosParcial.textContent || 0) - 1);
+                    }
+
+                    // Erro total
+                    const statErros = document.getElementById('statErros');
+                    const statImportadosErro = document.getElementById('statImportadosErro');
+                    if (statErros && !statErros.closest('.d-none')) {
+                        statErros.textContent = Math.max(0, parseInt(statErros.textContent || 0) - 1);
+                        if (statImportadosErro) {
+                            statImportadosErro.textContent = parseInt(statImportadosErro.textContent || 0) + 1;
+                        }
+                    }
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarContadoresAposCorrecao', error);
+                }
+            }
+
+            // Faz aplicarCorrecao disponível globalmente
+            window.aplicarCorrecao = aplicarCorrecao;
+
+            function atualizarProgresso(pct, etapa, detalhe) {
                 try {
                     const porcentagem = Math.min(Math.round(pct), 100);
                     progressFill.style.width = porcentagem + '%';
                     progressText.textContent = porcentagem + '%';
+                    
+                    // Atualizar título da etapa
+                    if (etapa) {
+                        progressEtapa.textContent = etapa;
+                    }
+                    
+                    // Atualizar detalhe
                     if (detalhe) {
                         progressDetail.textContent = detalhe;
                     }
@@ -731,7 +1289,8 @@
             async function importar() {
                 try {
                     mostrarEstado('loading');
-                    atualizarProgresso(0, 'Iniciando importação...');
+                    ocultarResumoPlanilha(); // Resetar resumo para nova importação
+                    atualizarProgresso(0, 'Iniciando importação...', 'Preparando envio do arquivo...');
 
                     const formData = new FormData();
                     formData.append('arquivo', arquivoAtual);
@@ -747,9 +1306,6 @@
                     });
 
                     const result = await response.json();
-
-                    arquivoErrosBase64 = result.arquivoErros;
-                    nomeArquivoErros = result.nomeArquivoErros;
 
                     // Pequeno delay para garantir que a barra chegou em 100%
                     await new Promise(resolve => setTimeout(resolve, 300));
@@ -853,29 +1409,23 @@
                     const listaErros = document.getElementById('listaErrosParcial');
                     listaErros.innerHTML = '';
 
-                    if (result.erros && result.erros.length > 0) {
-                        result.erros.forEach(erro => {
-                            const item = document.createElement('div');
-                            item.className = 'list-group-item';
-                            item.innerHTML = `
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="erro-icon-circle">
-                                        <i class="fa-solid ${erro.icone}"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <strong class="text-danger">Linha ${erro.linhaArquivoErros} (original: ${erro.linhaOriginal})</strong>
-                                            <span class="badge bg-danger">${erro.tipo}</span>
-                                        </div>
-                                        <p class="mb-0 text-muted small">${erro.descricao}</p>
-                                    </div>
-                                </div>
-                            `;
-                            listaErros.appendChild(item);
+                    // Armazenar erros para referência na correção
+                    errosAtuais = result.erros || [];
+
+                    if (errosAtuais.length > 0) {
+                        errosAtuais.forEach((erro, index) => {
+                            const item = criarItemErro(erro, index);
+                            if (item) listaErros.appendChild(item);
                         });
                     }
 
-                    AppToast.show('Amarelo', `${result.linhasImportadas} importados, ${result.linhasComErro} com erro`, 5000);
+                    // Mostrar quantidade corrigível se houver
+                    const corrigiveis = errosAtuais.filter(e => e.corrigivel).length;
+                    if (corrigiveis > 0) {
+                        AppToast.show('Amarelo', `${result.linhasImportadas} importados, ${result.linhasComErro} pendência(s) gerada(s). Acesse a tela de Pendências.`, 6000);
+                    } else {
+                        AppToast.show('Amarelo', `${result.linhasImportadas} importados, ${result.linhasComErro} pendência(s) gerada(s)`, 5000);
+                    }
                     removerArquivo();
 
                 } catch (error) {
@@ -895,63 +1445,26 @@
                     const listaErros = document.getElementById('listaErros');
                     listaErros.innerHTML = '';
 
-                    if (result.erros && result.erros.length > 0) {
-                        result.erros.forEach(erro => {
-                            const item = document.createElement('div');
-                            item.className = 'list-group-item';
-                            item.innerHTML = `
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="erro-icon-circle">
-                                        <i class="fa-solid ${erro.icone}"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <strong class="text-danger">Linha ${erro.linhaArquivoErros} (original: ${erro.linhaOriginal})</strong>
-                                            <span class="badge bg-danger">${erro.tipo}</span>
-                                        </div>
-                                        <p class="mb-0 text-muted small">${erro.descricao}</p>
-                                    </div>
-                                </div>
-                            `;
-                            listaErros.appendChild(item);
+                    // Armazenar erros para referência na correção
+                    errosAtuais = result.erros || [];
+
+                    if (errosAtuais.length > 0) {
+                        errosAtuais.forEach((erro, index) => {
+                            const item = criarItemErro(erro, index);
+                            if (item) listaErros.appendChild(item);
                         });
                     }
 
-                    AppToast.show('Vermelho', 'Nenhum registro importado. Corrija os erros.', 5000);
+                    // Mostrar quantidade corrigível se houver
+                    const corrigiveis = errosAtuais.filter(e => e.corrigivel).length;
+                    if (corrigiveis > 0) {
+                        AppToast.show('Vermelho', `Nenhum registro importado. ${result.linhasComErro} pendência(s) gerada(s). Acesse a tela de Pendências.`, 6000);
+                    } else {
+                        AppToast.show('Vermelho', `Nenhum registro importado. ${result.linhasComErro} pendência(s) gerada(s).`, 5000);
+                    }
 
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'mostrarErro', error);
-                }
-            }
-
-            function downloadArquivoErros() {
-                try {
-                    if (!arquivoErrosBase64 || !nomeArquivoErros) {
-                        AppToast.show('Amarelo', 'Arquivo de erros não disponível', 4000);
-                        return;
-                    }
-
-                    const byteCharacters = atob(arquivoErrosBase64);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = nomeArquivoErros;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-
-                    AppToast.show('Verde', 'Arquivo baixado com sucesso', 3000);
-
-                } catch (error) {
-                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'downloadArquivoErros', error);
-                    AppToast.show('Vermelho', 'Erro ao baixar arquivo', 5000);
                 }
             }
 

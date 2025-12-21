@@ -726,6 +726,25 @@ window.enviarAgendamento = async function (agendamento)
             return;
         }
 
+        // VALIDAÇÃO: Data Final não pode ser superior à data atual
+        if (agendamento.DataFinal)
+        {
+            const dataFinalDate = new Date(agendamento.DataFinal + "T00:00:00");
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            if (dataFinalDate > hoje)
+            {
+                // Limpar campo Data Final no modal
+                const txtDataFinal = document.getElementById("txtDataFinal")?.ej2_instances?.[0];
+                if (txtDataFinal)
+                {
+                    txtDataFinal.value = null;
+                }
+                AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+                return { success: false, message: "Data Final inválida" };
+            }
+        }
+
         window.isSubmitting = true;
         $("#btnConfirma").prop("disabled", true);
 
@@ -2047,6 +2066,71 @@ $(function ()
     console.log("ðŸŽ¬ [ModalViagem] ===== DOCUMENTO PRONTO =====");
     console.log("ðŸŽ¬ [ModalViagem] Inicializando eventos de relatório...");
     inicializarEventosRelatorioModal();
+
+    // VALIDAÇÃO: Data Final não pode ser superior à data atual
+    // Configura evento blur para o DatePicker txtDataFinal
+    const configurarValidacaoDataFinal = function ()
+    {
+        try
+        {
+            const txtDataFinal = document.getElementById("txtDataFinal");
+            if (txtDataFinal && txtDataFinal.ej2_instances && txtDataFinal.ej2_instances[0])
+            {
+                const datePicker = txtDataFinal.ej2_instances[0];
+                
+                // Adiciona evento blur se ainda não existir
+                if (!datePicker._dataFinalValidacaoConfigurada)
+                {
+                    const blurOriginal = datePicker.blur;
+                    datePicker.blur = function (args)
+                    {
+                        try
+                        {
+                            // Chama evento original se existir
+                            if (blurOriginal && typeof blurOriginal === "function")
+                            {
+                                blurOriginal.call(this, args);
+                            }
+
+                            // Validação de Data Final
+                            if (datePicker.value)
+                            {
+                                const dataFinal = new Date(datePicker.value);
+                                dataFinal.setHours(0, 0, 0, 0);
+                                const hoje = new Date();
+                                hoje.setHours(0, 0, 0, 0);
+
+                                if (dataFinal > hoje)
+                                {
+                                    datePicker.value = null;
+                                    AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+                                }
+                            }
+                        }
+                        catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("modal-viagem.js", "txtDataFinal.blur", error);
+                        }
+                    };
+                    datePicker._dataFinalValidacaoConfigurada = true;
+                    console.log("✅ [ModalViagem] Validação de Data Final configurada (blur)");
+                }
+            }
+        }
+        catch (error)
+        {
+            Alerta.TratamentoErroComLinha("modal-viagem.js", "configurarValidacaoDataFinal", error);
+        }
+    };
+
+    // Configura quando o modal da viagem abrir (componente pode não existir ainda)
+    $(document).on("shown.bs.modal", "#ModalViagem", function ()
+    {
+        setTimeout(configurarValidacaoDataFinal, 100);
+    });
+
+    // Tenta configurar imediatamente também (caso o componente já exista)
+    setTimeout(configurarValidacaoDataFinal, 500);
 });
 
 // ====================================================================

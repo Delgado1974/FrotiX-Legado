@@ -1,3 +1,4 @@
+using FrotiX.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -44,6 +45,7 @@ namespace FrotiX.Repository.IRepository
         {
             get;
         }
+        IRepository<AbastecimentoPendente> AbastecimentoPendente { get; }
 
         ICustoMensalItensContratoRepository CustoMensalItensContrato
         {

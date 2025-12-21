@@ -270,7 +270,9 @@ namespace FrotiX.Models
         public string? Status { get; set; }
         public bool? StatusAgendamento { get; set; }
         public string? StatusCartaoAbastecimento { get; set; }
+        public string? StatusCartaoAbastecimentoFinal { get; set; }
         public string? StatusDocumento { get; set; }
+        public string? StatusDocumentoFinal { get; set; }
 
         public bool? Sunday { get; set; }
         public bool? Thursday { get; set; }
@@ -291,6 +293,29 @@ namespace FrotiX.Models
 
         public bool? Wednesday { get; set; }
 
+        // ===== CINTA E TABLET (TODOS BIT/BOOL) =====
+        [Display(Name = "Cinta Entregue")]
+        public bool? CintaEntregue { get; set; }
+
+        [Display(Name = "Cinta Devolvida")]
+        public bool? CintaDevolvida { get; set; }
+
+        [Display(Name = "Tablet Entregue")]
+        public bool? TabletEntregue { get; set; }
+
+        [Display(Name = "Tablet Devolvido")]
+        public bool? TabletDevolvido { get; set; }
+
+        // ===== VISTORIADORES =====
+        [Display(Name = "Vistoriador Inicial")]
+        public string? VistoriadorInicialId { get; set; }
+
+        [Display(Name = "Vistoriador Final")]
+        public string? VistoriadorFinalId { get; set; }
+
+        public string? Rubrica { get; set; }
+        public string? RubricaFinal { get; set; }
+
         // ================================================================
         // CAMPOS DE NORMALIZAÇÃO (Dashboard Administração)
         // ================================================================
@@ -304,9 +329,15 @@ namespace FrotiX.Models
         /// <summary>
         /// Tipo de normalização aplicada (DATA_INVERTIDA, KM_INVERTIDO, KM_ESTIMADO_ABASTECIMENTO, etc.)
         /// </summary>
-        [StringLength(50)]
+        [StringLength(500)]
         [Display(Name = "Tipo de Normalização")]
         public string? TipoNormalizacao { get; set; }
+
+        /// <summary>
+        /// Data em que a normalização foi aplicada
+        /// </summary>
+        [Display(Name = "Data da Normalização")]
+        public DateTime? DataNormalizacao { get; set; }
 
         /// <summary>
         /// KM Rodado após normalização (quando aplicável)
@@ -325,6 +356,36 @@ namespace FrotiX.Models
         /// </summary>
         [Display(Name = "Data Final Normalizada")]
         public DateTime? DataFinalNormalizada { get; set; }
+
+        /// <summary>
+        /// Hora de início normalizada (TIME no SQL Server)
+        /// </summary>
+        [Display(Name = "Hora Início Normalizada")]
+        public TimeSpan? HoraInicioNormalizada { get; set; }
+
+        /// <summary>
+        /// Hora fim normalizada (TIME no SQL Server)
+        /// </summary>
+        [Display(Name = "Hora Fim Normalizada")]
+        public TimeSpan? HoraFimNormalizada { get; set; }
+
+        /// <summary>
+        /// Minutos calculados após normalização
+        /// </summary>
+        [Display(Name = "Minutos Normalizado")]
+        public int? MinutosNormalizado { get; set; }
+
+        /// <summary>
+        /// KM Inicial após normalização
+        /// </summary>
+        [Display(Name = "Km Inicial Normalizado")]
+        public int? KmInicialNormalizado { get; set; }
+
+        /// <summary>
+        /// KM Final após normalização
+        /// </summary>
+        [Display(Name = "Km Final Normalizado")]
+        public int? KmFinalNormalizado { get; set; }
 
         // ================================================================
 

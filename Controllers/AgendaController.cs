@@ -188,6 +188,16 @@ namespace FrotiX.Controllers
                 }
                 var currentUserID = currentUser.FindFirst(ClaimTypes.NameIdentifier).Value;
 
+                // VALIDAÇÃO: Data Final não pode ser superior à data atual
+                if (viagem.DataFinal.HasValue && viagem.DataFinal.Value.Date > DateTime.Today)
+                {
+                    return BadRequest(new
+                    {
+                        success = false ,
+                        message = "A Data Final não pode ser superior à data atual."
+                    });
+                }
+
                 // Normalizar campos de dias da semana - converter null para false
                 viagem.Monday = viagem.Monday ?? false;
                 viagem.Tuesday = viagem.Tuesday ?? false;

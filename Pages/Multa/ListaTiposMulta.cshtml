@@ -1,200 +1,202 @@
 @page
-@model FrotiX.Models.PlacaBronze
+@model FrotiX.Pages.Multa.ListaTiposMultaModel
 
 @{
-	ViewData["Title"] = "Infrações";
-	ViewData["PageName"] = "multa_tiposmulta";
-	ViewData["Heading"] = "<i class='fad fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Infrações</span>";
-	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fal fa-ballot-check";
+    ViewData["Title"] = "Infrações";
+    ViewData["PageName"] = "multa_tiposmulta";
+    ViewData["Heading"] = "<i class='fad fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Infrações</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fal fa-ballot-check";
 }
 
 @Html.AntiForgeryToken()
 
-<style>
-	.fundo-cinza {
-		background-color: #2F4F4F;
-		color: #f0f8ff;
-	}
-
-	.label {
-		color: #fff;
-	}
-
-	.btn-acao {
-		margin: 2px;
-	}
-</style>
-
 <div class="row">
-	<div class="col-xl-12">
-		<div id="panel-1" class="panel">
-			<div class="panel-container show">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
 
-				<div class="panel-content float-right">
-					<a href="/Multa/UpsertTipoMulta" class="btn btn-info">
-						<i class="fal fa-ballot-check"></i>&nbsp; Adicionar Infração
-					</a>
-				</div>
+                <!-- HEADER PADRÃO FROTIX -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fad fa-list-check"></i>
+                        Infrações de Trânsito
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/Multa/UpsertTipoMulta" class="btn btn-header-orange">
+                            <i class="fad fa-plus-circle"></i>
+                            Nova Infração
+                        </a>
+                    </div>
+                </div>
 
-				<div class="panel-content">
-					<div class="box-body">
-						<br /><br />
-						<table id="tblTipoMulta" class="table table-bordered table-striped nowrap" style="width:100%">
-							<thead>
-								<tr>
-									<th>Artigo/Parágrafo/Índice</th>
-									<th>Código Denatran</th>
-									<th>Descrição</th>
-									<th>Infração</th>
-									<th style="min-width:120px">Ação</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-					</div>
-				</div>
+                <!-- CONTEÚDO -->
+                <div class="panel-content">
+                    <div class="box-body">
+                        <table id="tblTipoMulta" class="table table-bordered table-striped nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Artigo/Parágrafo/Índice</th>
+                                    <th>Código Denatran</th>
+                                    <th>Descrição</th>
+                                    <th>Infração</th>
+                                    <th style="min-width:100px">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
 
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section ScriptsBlock {
+    <script asp-append-version="true">
+        let dataTable;
 
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        $(document).ready(function () {
+            try {
+                loadList();
 
-	<script>
-		let dataTable;
+                $(document).on('click', '.btn-delete', function () {
+                    try {
+                        const id = $(this).data('id');
 
-		$(document).ready(function () {
-			try {
-				loadList();
+                        Alerta.Confirmar(
+                            "Confirmar Exclusão",
+                            "Você tem certeza que deseja apagar esta infração? Não será possível recuperar os dados eliminados!",
+                            "Excluir",
+                            "Cancelar"
+                        ).then(function (confirmed) {
+                            try {
+                                if (!confirmed) return;
 
-				$(document).on('click', '.btn-delete', function () {
-					try {
-						const id = $(this).data('id');
+                                const token = document.getElementsByName('__RequestVerificationToken')[0]?.value || '';
 
-						Alerta.Confirmar(
-							"Confirmar Exclusão",
-							"Você tem certeza que deseja apagar este tipo de multa? Não será possível recuperar os dados eliminados!",
-							"Excluir",
-							"Cancelar"
-						).then(function (confirmed) {
-							try {
-								if (!confirmed) return;
+                                $.ajax({
+                                    url: '/api/Multa/DeleteTipoMulta',
+                                    type: "POST",
+                                    data: JSON.stringify({ TipoMultaId: id }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    beforeSend: function (xhr) {
+                                        try {
+                                            if (token) xhr.setRequestHeader('RequestVerificationToken', token);
+                                        } catch (error) {
+                                            Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.ajax.beforeSend", error);
+                                        }
+                                    },
+                                    success: function (data) {
+                                        try {
+                                            if (data?.success) {
+                                                AppToast.show('Verde', data.message || "Excluído com sucesso.", 2000);
+                                                dataTable.ajax.reload(null, false);
+                                            } else {
+                                                AppToast.show('Vermelho', data?.message || "Falha ao excluir.", 2000);
+                                            }
+                                        } catch (error) {
+                                            Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.ajax.success", error);
+                                        }
+                                    },
+                                    error: function (err) {
+                                        try {
+                                            Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.ajax.error", err);
+                                            AppToast.show('Vermelho', "Erro inesperado ao excluir.", 2000);
+                                        } catch (error) {
+                                            Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.ajax.error.catch", error);
+                                        }
+                                    }
+                                });
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.confirmar.then", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.click", error);
+                    }
+                });
 
-								const token = document.getElementsByName('__RequestVerificationToken')[0]?.value || '';
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "document.ready", error);
+            }
+        });
 
-								$.ajax({
-									url: '/api/Multa/DeleteTipoMulta',
-									type: "POST",
-									data: JSON.stringify({ TipoMultaId: id }),
-									contentType: "application/json; charset=utf-8",
-									dataType: "json",
-									beforeSend: function (xhr) {
-										if (token) xhr.setRequestHeader('RequestVerificationToken', token);
-									},
-									success: function (data) {
-										try {
-											if (data?.success) {
-												AppToast.show('Verde', data.message || "Excluído com sucesso.", 2000);
-												dataTable.ajax.reload(null, false);
-											} else {
-												AppToast.show('Vermelho', data?.message || "Falha ao excluir.", 2000);
-											}
-										}
-										catch (error) {
-											Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.ajax.success", error);
-										}
-									},
-									error: function (err) {
-										Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.ajax.error", err);
-										AppToast.show('Vermelho', "Erro inesperado ao excluir.", 2000);
-									}
-								});
-							}
-							catch (error) {
-								Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.confirmar.then", error);
-							}
-						});
-					}
-					catch (error) {
-						Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "btn-delete.click", error);
-					}
-				});
+        function loadList() {
+            try {
+                if ($.fn.DataTable.isDataTable('#tblTipoMulta')) {
+                    dataTable.destroy();
+                    $('#tblTipoMulta tbody').empty();
+                }
 
-			}
-			catch (error) {
-				Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "document.ready", error);
-			}
-		});
+                dataTable = $('#tblTipoMulta').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    dom: 'Bfrtip',
+                    lengthMenu: [[10, 25, 50, -1], ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']],
+                    buttons: [
+                        'pageLength',
+                        'excel',
+                        {
+                            extend: 'pdfHtml5',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            text: 'PDF'
+                        }
+                    ],
+                    order: [[0, 'asc']],
+                    columnDefs: [
+                        { targets: 0, className: "text-left", width: "18%" },
+                        { targets: 1, className: "text-left", width: "12%" },
+                        { targets: 2, className: "text-left", width: "48%" },
+                        { targets: 3, className: "text-center", width: "10%" },
+                        { targets: 4, className: "text-center", width: "12%" }
+                    ],
+                    ajax: {
+                        url: "/api/Multa/PegaTipoMulta",
+                        type: "GET",
+                        dataType: "json"
+                    },
+                    columns: [
+                        { "data": "artigo" },
+                        { "data": "denatran" },
+                        { "data": "descricao" },
+                        { "data": "infracao" },
+                        {
+                            "data": "tipoMultaId",
+                            "render": function (data) {
+                                try {
+                                    const edit = `<a href="/Multa/UpsertTipoMulta?id=${data}" 
+                                                     class="btn btn-sm btn-azul text-white btn-icon-28" 
+                                                     data-ejtip="Editar Infração">
+                                                     <i class="fad fa-edit"></i>
+                                                  </a>`;
+                                    const del = `<button type="button" 
+                                                         class="btn btn-sm btn-vinho text-white btn-icon-28 btn-delete" 
+                                                         data-id="${data}" 
+                                                         data-ejtip="Excluir Infração">
+                                                         <i class="fad fa-trash-alt"></i>
+                                                 </button>`;
+                                    return `<div class="d-flex justify-content-center gap-1">${edit}${del}</div>`;
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "columns.render", error);
+                                    return '';
+                                }
+                            }
+                        }
+                    ],
+                    language: {
+                        url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                        emptyTable: "Sem Dados para Exibição"
+                    },
+                    width: "100%"
+                });
 
-		function loadList() {
-			try {
-				if ($.fn.DataTable.isDataTable('#tblTipoMulta')) {
-					dataTable.destroy();
-					$('#tblTipoMulta tbody').empty();
-				}
-
-				dataTable = $('#tblTipoMulta').DataTable({
-					responsive: true,
-					autoWidth: false,
-					dom: 'Bfrtip',
-					lengthMenu: [[10, 25, 50, -1], ['10 linhas', '25 linhas', '50 linhas', 'Todas as Linhas']],
-					buttons: [
-						'pageLength',
-						'excel',
-						{
-							extend: 'pdfHtml5',
-							orientation: 'landscape',
-							pageSize: 'LEGAL',
-							text: 'PDF'
-						}
-					],
-					order: [[0, 'asc']],
-					columnDefs: [
-						{ targets: 0, className: "text-left", width: "18%" },
-						{ targets: 1, className: "text-left", width: "12%" },
-						{ targets: 2, className: "text-left", width: "48%" },
-						{ targets: 3, className: "text-center", width: "10%" },
-						{ targets: 4, className: "text-center", width: "12%" }
-					],
-					ajax: {
-						url: "/api/Multa/PegaTipoMulta",
-						type: "GET",
-						dataType: "json"
-					},
-					columns: [
-						{ "data": "artigo" },
-						{ "data": "denatran" },
-						{ "data": "descricao" },
-						{ "data": "infracao" },
-						{
-							"data": "tipoMultaId",
-							"render": function (data) {
-								const edit = `<a href="/Multa/UpsertTipoMulta?id=${data}" class="btn btn-sm btn-azul text-white btn-acao" data-ejtip="Editar Infração" style="padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-												<i class="far fa-edit"></i>
-											  </a>`;
-								const del = `<button type="button" class="btn btn-sm btn-vinho text-white btn-acao btn-delete" data-id="${data}" data-ejtip="Excluir Infração" style="padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-												<i class="far fa-trash-alt"></i>
-											 </button>`;
-								return `<div class="text-center">${edit}${del}</div>`;
-							}
-						}
-					],
-					language: {
-						url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-						emptyTable: "Sem Dados para Exibição"
-					},
-					width: "100%"
-				});
-
-			}
-			catch (error) {
-				Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "loadList", error);
-			}
-		}
-	</script>
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("ListaTiposMulta.cshtml", "loadList", error);
+            }
+        }
+    </script>
 }

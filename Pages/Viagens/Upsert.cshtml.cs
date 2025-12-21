@@ -116,6 +116,12 @@ namespace FrotiX.Pages.Viagens
             get; set;
         }
 
+        [BindProperty]
+        public string OcorrenciasJson
+        {
+            get; set;
+        }
+
         public static void ConvertContentTo(HtmlNode node , TextWriter outText)
         {
             try
@@ -1006,6 +1012,13 @@ namespace FrotiX.Pages.Viagens
                 _unitOfWork.Viagem.Update(ViagemObj.Viagem);
                 _unitOfWork.Save();
 
+                // Processar novas ocorrências (se houver)
+                int ocorrenciasCriadas = ProcessarOcorrencias(
+                    ViagemObj.Viagem.ViagemId,
+                    ViagemObj.Viagem.VeiculoId,
+                    ViagemObj.Viagem.MotoristaId
+                );
+
                 if (ViagemObj.Viagem.Status == "Realizada")
                 {
                     await _estatisticaService.AtualizarEstatisticasDiaAsync(ViagemObj.Viagem.DataInicial.Value);
@@ -1013,12 +1026,19 @@ namespace FrotiX.Pages.Viagens
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
+                    var mensagem = "Viagem atualizada com sucesso!";
+                    if (ocorrenciasCriadas > 0)
+                    {
+                        mensagem += $" ({ocorrenciasCriadas} ocorrência(s) registrada(s))";
+                    }
+                    
                     return new JsonResult(
                     new
                     {
                         success = true ,
-                        message = "Viagem atualizada com sucesso!" ,
+                        message = mensagem ,
                         redirectUrl = "/Viagens" ,
+                        ocorrenciasCriadas = ocorrenciasCriadas
                     }
                     );
                 }
@@ -1188,6 +1208,13 @@ namespace FrotiX.Pages.Viagens
                 _unitOfWork.Viagem.Add(ViagemObj.Viagem);
                 _unitOfWork.Save();
 
+                // Processar ocorrências (se houver)
+                int ocorrenciasCriadas = ProcessarOcorrencias(
+                    ViagemObj.Viagem.ViagemId,
+                    ViagemObj.Viagem.VeiculoId,
+                    ViagemObj.Viagem.MotoristaId
+                );
+
                 if (ViagemObj.Viagem.Status == "Realizada")
                 {
                     await _estatisticaService.AtualizarEstatisticasDiaAsync(ViagemObj.Viagem.DataInicial.Value);
@@ -1195,12 +1222,19 @@ namespace FrotiX.Pages.Viagens
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
+                    var mensagem = "Viagem criada com sucesso!";
+                    if (ocorrenciasCriadas > 0)
+                    {
+                        mensagem += $" ({ocorrenciasCriadas} ocorrência(s) registrada(s))";
+                    }
+                    
                     return new JsonResult(
                     new
                     {
                         success = true ,
-                        message = "Viagem criada com sucesso!" ,
+                        message = mensagem ,
                         redirectUrl = "/Viagens" ,
+                        ocorrenciasCriadas = ocorrenciasCriadas
                     }
                     );
                 }
@@ -1755,6 +1789,77 @@ namespace FrotiX.Pages.Viagens
                 Alerta.TratamentoErroComLinha("Upsert.cshtml.cs" , "SetViewModel" , error);
                 return;
             }
+        }
+
+        /// <summary>
+        /// Processa e salva as ocorrências da viagem a partir do JSON recebido do formulário
+        /// </summary>
+        private int ProcessarOcorrencias(Guid viagemId, Guid? veiculoId, Guid? motoristaId)
+        {
+            int ocorrenciasCriadas = 0;
+            
+            try
+            {
+                if (string.IsNullOrWhiteSpace(OcorrenciasJson))
+                {
+                    return 0;
+                }
+
+                var ocorrencias = JsonSerializer.Deserialize<List<OcorrenciaUpsertDto>>(
+                    OcorrenciasJson,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                if (ocorrencias == null || !ocorrencias.Any())
+                {
+                    return 0;
+                }
+
+                foreach (var oc in ocorrencias)
+                {
+                    // Só cria se tiver resumo preenchido
+                    if (!string.IsNullOrWhiteSpace(oc.Resumo))
+                    {
+                        var ocorrencia = new OcorrenciaViagem
+                        {
+                            OcorrenciaViagemId = Guid.NewGuid(),
+                            ViagemId = viagemId,
+                            VeiculoId = veiculoId ?? Guid.Empty,
+                            MotoristaId = motoristaId,
+                            Resumo = oc.Resumo ?? "",
+                            Descricao = oc.Descricao ?? "",
+                            ImagemOcorrencia = oc.ImagemOcorrencia ?? "",
+                            Status = "Aberta",
+                            DataCriacao = DateTime.Now,
+                            UsuarioCriacao = usuarioCorrenteNome ?? ""
+                        };
+                        
+                        _unitOfWork.OcorrenciaViagem.Add(ocorrencia);
+                        ocorrenciasCriadas++;
+                    }
+                }
+
+                if (ocorrenciasCriadas > 0)
+                {
+                    _unitOfWork.Save();
+                }
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml.cs", "ProcessarOcorrencias", error);
+            }
+
+            return ocorrenciasCriadas;
+        }
+
+        /// <summary>
+        /// DTO para deserializar ocorrências do JSON
+        /// </summary>
+        public class OcorrenciaUpsertDto
+        {
+            public string Resumo { get; set; }
+            public string Descricao { get; set; }
+            public string ImagemOcorrencia { get; set; }
         }
 
         public class ViagemDescricaoInput

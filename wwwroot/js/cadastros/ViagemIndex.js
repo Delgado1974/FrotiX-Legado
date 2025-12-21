@@ -1098,6 +1098,18 @@ $("#txtDataFinal").focusout(function ()
 
         if (!inicio.isValid() || !fim.isValid()) return;
 
+        // VALIDAÇÃO: Data Final não pode ser superior à data atual
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        if (dataFinal > hoje)
+        {
+            $("#txtDataFinal").val("");
+            $("#txtDuracao").val("");
+            $("#txtDataFinal").focus();
+            AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+            return;
+        }
+
         if (dataFinal < dataInicial)
         {
             $("#txtDataFinal").val("");
@@ -1573,7 +1585,7 @@ function ListaTodasViagens()
                     pageSize: "LEGAL"
                 }
             ],
-            order: [[0, "desc"]],
+            order: [], // Ordenação feita no servidor
             columnDefs: [
                 { targets: 0, className: "text-center", width: "3%" },
                 { targets: 1, className: "text-center", width: "3%" },
@@ -1902,6 +1914,19 @@ $("#btnFinalizarViagem").click(async function (e)
             return;
         }
 
+        // VALIDAÇÃO: Data Final não pode ser superior à data atual
+        const dataFinalParsed = parseDataBR(DataFinal);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        if (dataFinalParsed > hoje)
+        {
+            console.log("❌ Data Final superior a hoje - parando execução");
+            $("#txtDataFinal").val("");
+            $("#txtDataFinal").focus();
+            AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+            return;
+        }
+
         // VALIDAÇÃO 2: Validação Assíncrona de Datas
         console.log("🔵 [3/8] Validando datas...");
         const datasOk = await validarDatasSimples();
@@ -2045,6 +2070,21 @@ $("#btnFinalizarViagem").click(async function (e)
                 esconderSpinnerFinalizacao();
 
                 console.log("✅ AJAX: Resposta recebida com sucesso!", data);
+
+                // VERIFICAR SE A OPERAÇÃO FOI BEM SUCEDIDA
+                if (data.success === false)
+                {
+                    console.log("❌ Operação falhou:", data.message);
+                    AppToast.show("Amarelo", data.message || "Erro ao finalizar viagem", 4000);
+                    
+                    // Se for erro de Data Final, limpar o campo e manter foco
+                    if (data.message && data.message.includes("Data Final"))
+                    {
+                        $("#txtDataFinal").val("");
+                        $("#txtDataFinal").focus();
+                    }
+                    return;
+                }
 
                 // ✅ Ocorrências agora são salvas junto com a viagem no backend
                 if (data.ocorrenciasCriadas > 0) {

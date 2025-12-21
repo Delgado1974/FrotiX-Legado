@@ -14,6 +14,8 @@ namespace FrotiX.Data
             Database.SetCommandTimeout(9000);
         }
 
+        public DbSet<AbastecimentoPendente> AbastecimentoPendente { get; set; }
+
         public DbSet<Abastecimento> Abastecimento
         {
             get; set;

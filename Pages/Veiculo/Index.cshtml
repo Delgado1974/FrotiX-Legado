@@ -1,70 +1,148 @@
 @page
-@model FrotiX.Models.Veiculo
+
+@model FrotiX.Pages.Veiculo.IndexModel
 
 @{
-	ViewData["Title"] = "Veículos";
-	ViewData["PageName"] = "veiculo_index";
-	ViewData["Heading"] = "<i class='fad fa-car-bus'></i> Cadastros: <span class='fw-300'>Veículos</span>";
-	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-regular fa-car-bus";
+    ViewData["Title"] = "Veículos";
+    ViewData["PageName"] = "veiculo_index";
+    ViewData["Heading"] = "<i class='fad fa-car'></i> Cadastros: <span class='fw-300'>Veículos</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fal fa-car";
 }
 
 @section HeadBlock {
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .ftx-card-actions {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ====== BOTÃO ADICIONAR LARANJA (SEM DEGRADÊ) ====== */
+        .ftx-card-header .btn-add {
+            background: #e67333;
+            color: #fff !important;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(230, 115, 51, 0.3);
+        }
+
+        .ftx-card-header .btn-add:hover {
+            background: #ff8c42;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(230, 115, 51, 0.4);
+            color: #fff !important;
+        }
+
+        .ftx-card-header .btn-add i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
 }
 
-<style>
-	.fundo-cinza {
-		background-color: #2F4F4F;
-		color: aliceblue;
-	}
-
-	.label {
-		color: white;
-	}
-</style>
-
 <div class="row">
-	<div class="col-xl-12">
-		<div id="panel-1" class="panel">
-			<div class="panel-container show">
-				<div class="panel-content float-right">
-					<a href="/Veiculo/Upsert" class="btn btn-azul" aria-label="Adicionar Veículo" data-ejtip="Adicionar novo veículo ao sistema">
-						<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Veículo
-					</a>
-				</div>
-				<div class="panel-content">
-					<div class="box-body">
-						<br /><br />
-						<table id="tblVeiculo" class="table table-bordered table-striped" width="100%">
-							<thead>
-								<tr>
-									<th>Placa</th>
-									<th>Marca</th>
-									<th>Contrato/Fornecedor</th>
-									<th>Unidade</th>
-									<th>Combustível</th>
-									<th>Consumo</th>
-									<th>Km</th>
-									<th>Reserva</th>
-									<th>Status</th>
-									<th>Ação</th>
-								</tr>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="col-xl-12">
+        <div class="panel">
+            <div class="panel-container show">
+
+                <!-- HEADER AZUL PADRÃO FROTIX -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-car"></i>
+                        Gestão de Veículos
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/Veiculo/Upsert" class="btn btn-add">
+                            <i class="fa-duotone fa-plus"></i> Adicionar Veículo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CONTEÚDO -->
+                <div class="panel-content">
+                    <div class="box-body">
+
+                        <!-- DATATABLE -->
+                        <div id="divVeiculos">
+                            <table id="tblVeiculo" class="table table-bordered table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Placa</th>
+                                        <th>Marca/Modelo</th>
+                                        <th>Contrato</th>
+                                        <th>Sigla</th>
+                                        <th>Combustível</th>
+                                        <th>Consumo</th>
+                                        <th>Km</th>
+                                        <th>Reserva</th>
+                                        <th>Status</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section ScriptsBlock {
-
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-	<script src="~/js/cadastros/veiculo_index.js" asp-append-version="true"></script>
-
+    <script src="~/js/cadastros/veiculo_index.js" asp-append-version="true"></script>
 }

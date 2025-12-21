@@ -9,7 +9,7 @@ namespace FrotiX.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [IgnoreAntiforgeryToken]
-    public class EmpenhoController :Controller
+    public class EmpenhoController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -21,12 +21,12 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "EmpenhoController" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "EmpenhoController", error);
             }
         }
 
         [HttpGet]
-        public IActionResult Get(Guid Id , string instrumento)
+        public IActionResult Get(Guid Id, string instrumento)
         {
             try
             {
@@ -37,16 +37,16 @@ namespace FrotiX.Controllers
                         where ve.ContratoId == Id
                         select new
                         {
-                            ve.EmpenhoId ,
-                            ve.NotaEmpenho ,
-                            VigenciaInicialFormatada = ve.VigenciaInicial?.ToString("dd/MM/yyyy") ,
-                            VigenciaFinalFormatada = ve.VigenciaFinal?.ToString("dd/MM/yyyy") ,
-                            SaldoInicialFormatado = ve.SaldoInicial?.ToString("C") ,
-                            SaldoFinalFormatado = ve.SaldoFinal?.ToString("C") ,
-                            SaldoMovimentacaoFormatado = ve.SaldoMovimentacao?.ToString("C") ,
+                            ve.EmpenhoId,
+                            ve.NotaEmpenho,
+                            VigenciaInicialFormatada = ve.VigenciaInicial?.ToString("dd/MM/yyyy"),
+                            VigenciaFinalFormatada = ve.VigenciaFinal?.ToString("dd/MM/yyyy"),
+                            SaldoInicialFormatado = ve.SaldoInicial?.ToString("C"),
+                            SaldoFinalFormatado = ve.SaldoFinal?.ToString("C"),
+                            SaldoMovimentacaoFormatado = ve.SaldoMovimentacao?.ToString("C"),
                             SaldoNFFormatado = ve.Movimentacoes != 0
                                 ? (ve.SaldoNotas / ve.Movimentacoes)?.ToString("C")
-                                : ve.SaldoNotas?.ToString("C") ,
+                                : ve.SaldoNotas?.ToString("C"),
                         }
                     ).ToList();
                     return Json(new
@@ -61,15 +61,15 @@ namespace FrotiX.Controllers
                         where ve.AtaId == Id
                         select new
                         {
-                            ve.EmpenhoId ,
-                            ve.NotaEmpenho ,
-                            ve.AnoVigencia ,
-                            SaldoInicialFormatado = ve.SaldoInicial?.ToString("C") ,
-                            SaldoFinalFormatado = ve.SaldoFinal?.ToString("C") ,
-                            SaldoMovimentacaoFormatado = ve.SaldoMovimentacao?.ToString("C") ,
+                            ve.EmpenhoId,
+                            ve.NotaEmpenho,
+                            ve.AnoVigencia,
+                            SaldoInicialFormatado = ve.SaldoInicial?.ToString("C"),
+                            SaldoFinalFormatado = ve.SaldoFinal?.ToString("C"),
+                            SaldoMovimentacaoFormatado = ve.SaldoMovimentacao?.ToString("C"),
                             SaldoNFFormatado = ve.Movimentacoes != 0
                                 ? (ve.SaldoNotas / ve.Movimentacoes)?.ToString("C")
-                                : ve.SaldoNotas?.ToString("C") ,
+                                : ve.SaldoNotas?.ToString("C"),
                         }
                     ).ToList();
                     return Json(new
@@ -80,7 +80,7 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "Get" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "Get", error);
                 return StatusCode(500);
             }
         }
@@ -106,8 +106,8 @@ namespace FrotiX.Controllers
                             return Json(
                                 new
                                 {
-                                    success = false ,
-                                    message = "Existem notas associadas a esse empenho" ,
+                                    success = false,
+                                    message = "Existem notas associadas a esse empenho",
                                 }
                             );
                         }
@@ -115,13 +115,13 @@ namespace FrotiX.Controllers
                         var movimentacao = _unitOfWork.MovimentacaoEmpenho.GetFirstOrDefault(u =>
                             u.EmpenhoId == model.EmpenhoId
                         );
-                        if (notas != null)
+                        if (movimentacao != null)
                         {
                             return Json(
                                 new
                                 {
-                                    success = false ,
-                                    message = "Existem movimentações associadas a esse empenho" ,
+                                    success = false,
+                                    message = "Existem movimentações associadas a esse empenho",
                                 }
                             );
                         }
@@ -131,7 +131,7 @@ namespace FrotiX.Controllers
                         return Json(
                             new
                             {
-                                success = true ,
+                                success = true,
                                 message = "Empenho removido com sucesso"
                             }
                         );
@@ -139,18 +139,19 @@ namespace FrotiX.Controllers
                 }
                 return Json(new
                 {
-                    success = false ,
+                    success = false,
                     message = "Erro ao apagar Empenho"
                 });
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "Delete" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "Delete", error);
                 return StatusCode(500);
             }
         }
 
         [Route("Aporte")]
+        [HttpPost]
         [Consumes("application/json")]
         public IActionResult Aporte([FromBody] MovimentacaoEmpenho movimentacao)
         {
@@ -170,20 +171,21 @@ namespace FrotiX.Controllers
                 return Json(
                     new
                     {
-                        success = true ,
-                        message = "Aporte realizado com sucesso" ,
-                        type = 0 ,
+                        success = true,
+                        message = "Aporte realizado com sucesso",
+                        type = 0,
                     }
                 );
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "Aporte" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "Aporte", error);
                 return StatusCode(500);
             }
         }
 
         [Route("EditarAporte")]
+        [HttpPost]
         [Consumes("application/json")]
         public IActionResult EditarAporte([FromBody] MovimentacaoEmpenho movimentacao)
         {
@@ -209,20 +211,21 @@ namespace FrotiX.Controllers
                 return Json(
                     new
                     {
-                        success = true ,
-                        message = "Aporte editado com sucesso" ,
-                        type = 0 ,
+                        success = true,
+                        message = "Aporte editado com sucesso",
+                        type = 0,
                     }
                 );
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "EditarAporte" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "EditarAporte", error);
                 return StatusCode(500);
             }
         }
 
         [Route("EditarAnulacao")]
+        [HttpPost]
         [Consumes("application/json")]
         public IActionResult EditarAnulacao([FromBody] MovimentacaoEmpenho movimentacao)
         {
@@ -248,15 +251,15 @@ namespace FrotiX.Controllers
                 return Json(
                     new
                     {
-                        success = true ,
-                        message = "Anulação editada com sucesso" ,
-                        type = 0 ,
+                        success = true,
+                        message = "Anulação editada com sucesso",
+                        type = 0,
                     }
                 );
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "EditarAnulacao" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "EditarAnulacao", error);
                 return StatusCode(500);
             }
         }
@@ -293,7 +296,7 @@ namespace FrotiX.Controllers
                         return Json(
                             new
                             {
-                                success = true ,
+                                success = true,
                                 message = "Movimentação removida com sucesso"
                             }
                         );
@@ -328,7 +331,7 @@ namespace FrotiX.Controllers
                         return Json(
                             new
                             {
-                                success = true ,
+                                success = true,
                                 message = "Movimentação removida com sucesso"
                             }
                         );
@@ -336,18 +339,19 @@ namespace FrotiX.Controllers
                 }
                 return Json(new
                 {
-                    success = false ,
+                    success = false,
                     message = "Erro ao apagar Movimentação"
                 });
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "DeleteMovimentacao" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "DeleteMovimentacao", error);
                 return StatusCode(500);
             }
         }
 
         [Route("Anulacao")]
+        [HttpPost]
         [Consumes("application/json")]
         public IActionResult Anulacao([FromBody] MovimentacaoEmpenho movimentacao)
         {
@@ -367,20 +371,21 @@ namespace FrotiX.Controllers
                 return Json(
                     new
                     {
-                        success = true ,
-                        message = "Anulação realizada com sucesso" ,
-                        type = 0 ,
+                        success = true,
+                        message = "Anulação realizada com sucesso",
+                        type = 0,
                     }
                 );
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "Anulacao" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "Anulacao", error);
                 return StatusCode(500);
             }
         }
 
         [Route("ListaAporte")]
+        [HttpGet]
         public IActionResult ListaAporte(Guid Id)
         {
             try
@@ -392,11 +397,11 @@ namespace FrotiX.Controllers
                     where p.EmpenhoId == Id
                     select new
                     {
-                        p.MovimentacaoId ,
-                        DataFormatada = p.DataMovimentacao?.ToString("dd/MM/yyyy") ,
-                        p.Descricao ,
-                        ValorFormatado = p.Valor?.ToString("C") ,
-                        ValorOriginal = p.Valor ,
+                        p.MovimentacaoId,
+                        DataFormatada = p.DataMovimentacao?.ToString("dd/MM/yyyy"),
+                        p.Descricao,
+                        ValorFormatado = p.Valor?.ToString("C"),
+                        ValorOriginal = p.Valor,
                     }
                 ).ToList();
 
@@ -407,12 +412,13 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "ListaAporte" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "ListaAporte", error);
                 return StatusCode(500);
             }
         }
 
         [Route("ListaAnulacao")]
+        [HttpGet]
         public IActionResult ListaAnulacao(Guid Id)
         {
             try
@@ -424,11 +430,11 @@ namespace FrotiX.Controllers
                     where p.EmpenhoId == Id
                     select new
                     {
-                        p.MovimentacaoId ,
-                        DataFormatada = p.DataMovimentacao?.ToString("dd/MM/yyyy") ,
-                        p.Descricao ,
-                        ValorFormatado = p.Valor?.ToString("C") ,
-                        ValorOriginal = p.Valor ,
+                        p.MovimentacaoId,
+                        DataFormatada = p.DataMovimentacao?.ToString("dd/MM/yyyy"),
+                        p.Descricao,
+                        ValorFormatado = p.Valor?.ToString("C"),
+                        ValorOriginal = p.Valor,
                     }
                 ).ToList();
 
@@ -439,12 +445,13 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "ListaAnulacao" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "ListaAnulacao", error);
                 return StatusCode(500);
             }
         }
 
         [Route("SaldoNotas")]
+        [HttpGet]
         public IActionResult SaldoNotas(Guid Id)
         {
             try
@@ -464,111 +471,145 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "SaldoNotas" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "SaldoNotas", error);
                 return StatusCode(500);
             }
         }
 
         [Route("InsereEmpenho")]
         [HttpPost]
-        public JsonResult InsereEmpenho(Empenho empenho)
+        [Consumes("application/json")]
+        public JsonResult InsereEmpenho([FromBody] Empenho empenho)
         {
             try
             {
+                // Validação básica
+                if (empenho == null)
+                {
+                    return new JsonResult(new
+                    {
+                        success = false,
+                        message = "Dados do empenho não recebidos"
+                    });
+                }
+
+                // Verifica duplicidade
                 var existeEmpenho = _unitOfWork.Empenho.GetFirstOrDefault(u =>
-                    (u.NotaEmpenho == empenho.NotaEmpenho)
+                    u.NotaEmpenho == empenho.NotaEmpenho
                 );
-                if (existeEmpenho != null && existeEmpenho.EmpenhoId != empenho.EmpenhoId)
+                if (existeEmpenho != null)
                 {
                     return new JsonResult(
                         new
                         {
-                            success = false ,
+                            success = false,
                             message = "Já existe um empenho com esse número"
                         }
                     );
                 }
 
+                // Limpa GUIDs vazios para null
                 if (empenho.AtaId == Guid.Empty)
                 {
-                    empenho.AtaId = Guid.Empty;
+                    empenho.AtaId = null;
                 }
 
                 if (empenho.ContratoId == Guid.Empty)
                 {
-                    empenho.AtaId = Guid.Empty;
+                    empenho.ContratoId = null;
+                }
+
+                // Gera novo ID se não veio preenchido
+                if (empenho.EmpenhoId == Guid.Empty)
+                {
+                    empenho.EmpenhoId = Guid.NewGuid();
                 }
 
                 _unitOfWork.Empenho.Add(empenho);
-
                 _unitOfWork.Save();
 
                 return new JsonResult(
                     new
                     {
-                        success = true ,
-                        message = "Empenho Adicionado com Sucesso"
+                        success = true,
+                        message = "Empenho Adicionado com Sucesso",
+                        empenhoId = empenho.EmpenhoId
                     }
                 );
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "InsereEmpenho" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "InsereEmpenho", error);
                 return new JsonResult(new
                 {
-                    sucesso = false
+                    success = false,
+                    message = "Erro ao inserir empenho: " + error.Message
                 });
             }
         }
 
         [Route("EditaEmpenho")]
         [HttpPost]
-        public JsonResult EditaEmpenho(Empenho empenho)
+        [Consumes("application/json")]
+        public JsonResult EditaEmpenho([FromBody] Empenho empenho)
         {
             try
             {
+                // Validação básica
+                if (empenho == null || empenho.EmpenhoId == Guid.Empty)
+                {
+                    return new JsonResult(new
+                    {
+                        success = false,
+                        message = "Dados do empenho inválidos"
+                    });
+                }
+
+                // Verifica duplicidade (excluindo o próprio registro)
                 var existeEmpenho = _unitOfWork.Empenho.GetFirstOrDefault(u =>
-                    (u.NotaEmpenho == empenho.NotaEmpenho)
+                    u.NotaEmpenho == empenho.NotaEmpenho &&
+                    u.EmpenhoId != empenho.EmpenhoId
                 );
-                if (existeEmpenho != null && existeEmpenho.EmpenhoId != empenho.EmpenhoId)
+                if (existeEmpenho != null)
                 {
                     return new JsonResult(
                         new
                         {
-                            success = false ,
-                            message = "Já existe um empenho com esse número"
+                            success = false,
+                            message = "Já existe outro empenho com esse número"
                         }
                     );
                 }
 
+                // Limpa GUIDs vazios para null
                 if (empenho.AtaId == Guid.Empty)
                 {
-                    empenho.AtaId = Guid.Empty;
+                    empenho.AtaId = null;
                 }
 
                 if (empenho.ContratoId == Guid.Empty)
                 {
-                    empenho.ContratoId = Guid.Empty;
+                    empenho.ContratoId = null;
                 }
 
                 _unitOfWork.Empenho.Update(empenho);
-
                 _unitOfWork.Save();
 
                 return new JsonResult(
                     new
                     {
-                        success = true ,
+                        success = true,
                         message = "Empenho Alterado com Sucesso"
                     }
                 );
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("EmpenhoController.cs" , "EditaEmpenho" , error);
+                Alerta.TratamentoErroComLinha("EmpenhoController.cs", "EditaEmpenho", error);
                 return new JsonResult(new
                 {
-                    sucesso = false
+                    success = false,
+                    message = "Erro ao editar empenho: " + error.Message
                 });
             }
         }

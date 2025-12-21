@@ -1,5 +1,5 @@
 @page
-@model FrotiX.Models.Empenho
+@model FrotiX.Pages.Empenho.IndexModel
 
 @{
     ViewData["Title"] = "Empenhos";
@@ -9,97 +9,331 @@
     ViewData["PageIcon"] = "fal fa-money-check-alt";
 }
 
-@section HeadBlock { }
+@section HeadBlock {
+    <style>
+        /* Container de Filtros */
+        .ftx-filtros-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border: 1px solid rgba(50, 93, 136, 0.12);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
 
-<style>
-    .fundo-cinza {
-        background-color: #2F4F4F;
-        color: aliceblue;
-    }
-</style>
+        .ftx-filtros-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #325d88;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-filtros-title i {
+            font-size: 1.2rem;
+            --fa-primary-color: #325d88;
+            --fa-secondary-color: #7a9cc6;
+        }
+
+        .ftx-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2d4559;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .ftx-label i {
+            font-size: 0.9rem;
+            --fa-primary-color: #3D5771;
+            --fa-secondary-color: #7a9cc6;
+        }
+
+        /* DataTable Estilizado */
+        .ftx-datatable-wrapper {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .ftx-datatable-wrapper table.dataTable thead {
+            background: linear-gradient(135deg, #325d88 0%, #2a4d73 100%);
+        }
+
+        .ftx-datatable-wrapper table.dataTable thead th {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border: none !important;
+            padding: 0.875rem 0.75rem;
+        }
+
+        .ftx-datatable-wrapper table.dataTable tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .ftx-datatable-wrapper table.dataTable tbody tr:hover {
+            background-color: rgba(50, 93, 136, 0.06) !important;
+        }
+
+        .ftx-datatable-wrapper table.dataTable tbody td {
+            vertical-align: middle;
+            padding: 0.75rem;
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Paginação Estilizada */
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button {
+            border-radius: 6px !important;
+            margin: 0 2px;
+            border: none !important;
+            padding: 6px 12px !important;
+            min-width: 36px !important;
+            text-align: center !important;
+        }
+
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button.current,
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: linear-gradient(135deg, #325d88 0%, #2a4d73 100%) !important;
+            color: #ffffff !important;
+            border: none !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+        }
+
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+            background: rgba(50, 93, 136, 0.1) !important;
+            color: #325d88 !important;
+            border: none !important;
+        }
+
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button.disabled {
+            color: #adb5bd !important;
+            cursor: not-allowed !important;
+        }
+
+        /* Botões de Ação FrotiX */
+        .ftx-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        .btn-icon-28 {
+            width: var(--ftx-icon-btn);
+            height: var(--ftx-icon-btn);
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .btn-icon-28:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-icon-28 i {
+            font-size: var(--ftx-action-icon);
+        }
+
+        .btn-icon-28.btn-azul {
+            box-shadow: 0 2px 6px rgba(61, 87, 113, 0.4);
+        }
+
+        .btn-icon-28.btn-azul:hover {
+            box-shadow: 0 4px 12px rgba(61, 87, 113, 0.6);
+        }
+
+        .btn-icon-28.btn-vinho {
+            box-shadow: 0 2px 6px rgba(114, 47, 55, 0.4);
+        }
+
+        .btn-icon-28.btn-vinho:hover {
+            box-shadow: 0 4px 12px rgba(114, 47, 55, 0.6);
+        }
+
+        .btn-icon-28.btn-dark {
+            background: linear-gradient(135deg, #343a40 0%, #23272b 100%);
+            box-shadow: 0 2px 6px rgba(52, 58, 64, 0.4);
+        }
+
+        .btn-icon-28.btn-dark:hover {
+            box-shadow: 0 4px 12px rgba(52, 58, 64, 0.6);
+        }
+
+        .btn-icon-28.fundo-cinza {
+            box-shadow: 0 2px 6px rgba(47, 79, 79, 0.4);
+        }
+
+        .btn-icon-28.fundo-cinza:hover {
+            box-shadow: 0 4px 12px rgba(47, 79, 79, 0.6);
+        }
+
+        /* Modal Header Dinheiro (Verde/Ouro) */
+        .modal-header-dinheiro {
+            background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 50%, #1e5631 100%);
+            background-size: 200% 200%;
+            animation: ftxHeaderGradientShift 6s ease infinite;
+            color: #fff;
+            border-bottom: none;
+            padding: 1rem 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header-dinheiro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.08), transparent);
+            animation: ftxHeaderShine 5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .modal-header-dinheiro .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-header-dinheiro .modal-title i {
+            font-size: 1.3rem;
+            --fa-primary-color: #ffd700;
+            --fa-secondary-color: #fff;
+            animation: ftxHeaderIconPulse 2s ease-in-out infinite;
+        }
+
+        .modal-header-dinheiro .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.85;
+        }
+
+        .modal-header-dinheiro .btn-close:hover {
+            opacity: 1;
+        }
+    </style>
+}
 
 <div class="row">
     <div class="col-xl-12">
-        <div id="panel-1" class="panel">
+        <div id="panel-1" class="panel ftx-card-styled">
             <div class="panel-container show">
-                <div class="panel-content float-right">
-                    <a href="/Empenho/Upsert" class="btn btn-azul" data-ejtip="Adicionar Novo Empenho">
-                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Empenho
-                    </a>
+                <!-- ===== HEADER PADRÃO FROTIX ===== -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-file-invoice-dollar"></i>
+                        Gestão de Empenhos
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/Empenho/Upsert" class="btn btn-header-orange">
+                            <i class="fa-duotone fa-file-circle-plus icon-pulse"></i> Adicionar Empenho
+                        </a>
+                    </div>
                 </div>
 
                 <div class="panel-content">
                     <div class="box-body">
-                        <br />
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="text-primary">
-                                Escolha um Instrumento (Contrato/Ata) para visualizar seus Empenhos:
-                            </h2>
-                        </div>
-
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label class="label font-weight-bold">Contrato/Ata</label>
-                                <select id="lstInstrumento" class="form-control form-control-sm">
-                                    <option value=""> -- Selecione um Instrumento -- </option>
-                                    <option value="0">Contrato</option>
-                                    <option value="1">Ata de Registro de Preços</option>
-                                </select>
+                        <!-- ===== CONTAINER DE FILTROS ===== -->
+                        <div class="ftx-filtros-container">
+                            <div class="ftx-filtros-title">
+                                <i class="fa-duotone fa-filter-list"></i>
+                                Escolha um Instrumento para visualizar seus Empenhos
                             </div>
-                        </div>
 
-                        <div class="col-12">
-                            <div id="divContrato" class="form-group row" style="display:none">
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold">Status...</label>
-                                        <select id="lstStatusContrato" class="form-control form-control-sm">
-                                            <option value="1">Ativo</option>
-                                            <option value="0">Inativo</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-5">
-                                    <label class="label font-weight-bold">Contratos</label>
-                                    <select id="ListaContratos" name="ListaContratos" class="form-control form-control-sm">
-                                        <option value="">-- Selecione um Contrato --</option>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="ftx-label">
+                                        <i class="fa-duotone fa-file-contract"></i> Instrumento
+                                    </label>
+                                    <select id="lstInstrumento" class="form-select form-select-sm">
+                                        <option value="">-- Selecione --</option>
+                                        <option value="0">Contrato</option>
+                                        <option value="1">Ata de Registro de Preços</option>
                                     </select>
                                 </div>
-                            </div>
 
-                            <div id="divAta" class="form-group row" style="display:none">
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold">Status...</label>
-                                        <select id="lstStatusAta" class="form-control form-control-sm">
-                                            <option value="1">Ativa</option>
-                                            <option value="0">Inativa</option>
-                                        </select>
+                                <!-- Filtros de Contrato -->
+                                <div id="divContrato" class="col-md-9" style="display:none">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-toggle-on"></i> Status
+                                            </label>
+                                            <select id="lstStatusContrato" class="form-select form-select-sm">
+                                                <option value="1">Ativo</option>
+                                                <option value="0">Inativo</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-file-signature"></i> Contratos
+                                            </label>
+                                            <select id="ListaContratos" name="ListaContratos" class="form-select form-select-sm">
+                                                <option value="">-- Selecione um Contrato --</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-5">
-                                    <label class="label font-weight-bold">Atas de Registro de Preço</label>
-                                    <select id="ListaAtas" name="ListaAtas" class="form-control form-control-sm">
-                                        <option value="">-- Selecione uma Ata --</option>
-                                    </select>
+
+                                <!-- Filtros de Ata -->
+                                <div id="divAta" class="col-md-9" style="display:none">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-toggle-on"></i> Status
+                                            </label>
+                                            <select id="lstStatusAta" class="form-select form-select-sm">
+                                                <option value="1">Ativa</option>
+                                                <option value="0">Inativa</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-clipboard-list-check"></i> Atas de Registro de Preço
+                                            </label>
+                                            <select id="ListaAtas" name="ListaAtas" class="form-select form-select-sm">
+                                                <option value="">-- Selecione uma Ata --</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <br /><br />
-
-                        <div id="divEmpenho" style="display:none">
-                            <table id="tblEmpenho" class="table table-bordered table-striped" width="100%">
+                        <!-- ===== DATATABLE ===== -->
+                        <div id="divEmpenho" class="ftx-datatable-wrapper" style="display:none">
+                            <table id="tblEmpenho" class="table table-bordered table-striped w-100">
                                 <thead>
                                     <tr>
                                         <th>Nota de Empenho</th>
                                         <th>Vigência Inicial</th>
                                         <th>Vigência Final</th>
                                         <th>Saldo Inicial</th>
-                                        <th>Total de Movimentações</th>
-                                        <th>Total de Notas Fiscais</th>
+                                        <th>Total Movimentações</th>
+                                        <th>Total Notas Fiscais</th>
                                         <th>Saldo Atual</th>
-                                        <th>Ação</th>
+                                        <th>Ações</th>
                                         <th>Aporte/Anulação</th>
                                         <th>EmpenhoId</th>
                                     </tr>
@@ -115,111 +349,131 @@
     </div>
 </div>
 
-<!-- Modal Aportar -->
-<div class="modal fade" id="modalAporte">
+<!-- ===== MODAL APORTE ===== -->
+<div class="modal fade" id="modalAporte" data-bs-backdrop="static" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg" role="dialog">
         <div class="modal-content">
             <div class="modal-header modal-header-dinheiro">
-                <h4 class="modal-title" id="DynamicModalLabel">Aportar Valores ao Empenho</h4>
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-hand-holding-dollar"></i>
+                    <span id="lblTituloAporte">Aportar Valores ao Empenho</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
 
-            <div class="modal-body table-bordered">
+            <div class="modal-body">
                 <form id="frmAporte">
                     <input type="hidden" id="txtIdAporte" />
-                    <div class="row">
-                        <div class="col-5">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Data do Aporte</label>
-                                <input id="txtData" class="form-control form-control-xs" type="date" />
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-calendar-day"></i> Data do Aporte
+                            </label>
+                            <input id="txtData" class="form-control form-control-sm" type="date" />
                         </div>
-                        <div class="col-7">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Descrição</label>
-                                <input id="txtDescricao" class="form-control form-control-xs" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Valor do Aporte</label>
-                                <input id="txtValor" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align:right" onKeyPress="return(moeda(this,'.',',',event))" />
-                            </div>
+                        <div class="col-md-7">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-text"></i> Descrição
+                            </label>
+                            <input id="txtDescricao" class="form-control form-control-sm" placeholder="Descrição do aporte..." />
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button id="btnAportar" class="btn btn-azul" type="submit" value="SUBMIT">
-                            <i class="fa-duotone fa-file-check icon-space icon-pulse"></i> Aportar
-                        </button>
-                        <button type="button" class="btn btn-vinho" data-dismiss="modal">
-                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
-                        </button>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-coins"></i> Valor do Aporte
+                            </label>
+                            <input id="txtValor" class="form-control form-control-sm text-end" 
+                                   data-inputmask="'alias': 'currency'" 
+                                   onKeyPress="return(moeda(this,'.',',',event))" 
+                                   placeholder="R$ 0,00" />
+                        </div>
                     </div>
                 </form>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnAportar" class="btn btn-verde" type="button">
+                    <i class="fa-duotone fa-check-circle icon-space"></i> Confirmar Aporte
+                </button>
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark icon-space"></i> Fechar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Anulação -->
-<div class="modal fade" id="modalAnulacao">
+<!-- ===== MODAL ANULAÇÃO ===== -->
+<div class="modal fade" id="modalAnulacao" data-bs-backdrop="static" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg" role="dialog">
         <div class="modal-content">
-            <div class="modal-header modal-header-dinheiro">
-                <h4 class="modal-title" id="DynamicModalLabel">Anular Valores do Empenho</h4>
+            <div class="modal-header modal-header-vinho">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-ban"></i>
+                    <span id="lblTituloAnulacao">Anular Valores do Empenho</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
 
-            <div class="modal-body table-bordered">
+            <div class="modal-body">
                 <form id="frmAnulacao">
                     <input type="hidden" id="txtIdAnulacao" />
-                    <div class="row">
-                        <div class="col-5">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Data da Anulação</label>
-                                <input id="txtDataanulacao" class="form-control form-control-xs" type="date" />
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-calendar-day"></i> Data da Anulação
+                            </label>
+                            <input id="txtDataanulacao" class="form-control form-control-sm" type="date" />
                         </div>
-                        <div class="col-7">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Descrição</label>
-                                <input id="txtDescricaoanulacao" class="form-control form-control-xs" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Valor da Anulação</label>
-                                <input id="txtValoranulacao" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align:right" onKeyPress="return(moeda(this,'.',',',event))" />
-                            </div>
+                        <div class="col-md-7">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-text"></i> Descrição
+                            </label>
+                            <input id="txtDescricaoanulacao" class="form-control form-control-sm" placeholder="Motivo da anulação..." />
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button id="btnAnular" class="btn btn-azul" type="submit" value="SUBMIT">
-                            <i class="fa-duotone fa-file-check icon-space icon-pulse"></i> Anular
-                        </button>
-                        <button type="button" class="btn btn-vinho" data-dismiss="modal">
-                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
-                        </button>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-coins"></i> Valor da Anulação
+                            </label>
+                            <input id="txtValoranulacao" class="form-control form-control-sm text-end" 
+                                   data-inputmask="'alias': 'currency'" 
+                                   onKeyPress="return(moeda(this,'.',',',event))" 
+                                   placeholder="R$ 0,00" />
+                        </div>
                     </div>
                 </form>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnAnular" class="btn btn-vinho" type="button">
+                    <i class="fa-duotone fa-ban icon-space"></i> Confirmar Anulação
+                </button>
+                <button type="button" class="btn btn-azul" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark icon-space"></i> Fechar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Notas Fiscais -->
-<div class="modal fade" id="modalNF">
-    <div class="modal-dialog modal-lg" role="dialog">
+<!-- ===== MODAL NOTAS FISCAIS ===== -->
+<div class="modal fade" id="modalNF" data-bs-backdrop="static" data-bs-keyboard="true">
+    <div class="modal-dialog modal-xl" role="dialog">
         <div class="modal-content">
-            <div class="modal-header modal-header-dinheiro">
-                <h4 class="modal-title" id="DynamicModalLabel">Notas Fiscais do Empenho</h4>
+            <div class="modal-header modal-header-azul">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-file-invoice"></i>
+                    Notas Fiscais do Empenho
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
 
-            <div class="modal-body table-bordered">
-                <form id="frmNF">
-                    <table id="tblNotaFiscal" class="table table-bordered table-striped" width="100%">
+            <div class="modal-body">
+                <div class="ftx-datatable-wrapper">
+                    <table id="tblNotaFiscal" class="table table-bordered table-striped w-100">
                         <thead>
                             <tr>
                                 <th>Número da Nota</th>
@@ -227,49 +481,410 @@
                                 <th>Valor</th>
                                 <th>Valor de Glosa</th>
                                 <th>Motivo da Glosa</th>
-                                <th>Ação</th>
+                                <th>Ações</th>
                                 <th>ContratoId</th>
                                 <th>EmpenhoId</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-vinho" data-dismiss="modal">
-                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
-                        </button>
-                    </div>
-                </form>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark icon-space"></i> Fechar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 @section ScriptsBlock {
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
     <script src="~/js/cadastros/empenho.js" asp-append-version="true"></script>
 
     <script>
+        // ===== UTILITÁRIOS =====
         function brToNumberString(v) {
             try {
                 if (v == null) return "0";
-                return String(v).replace(/\s/g,'').replace(/\./g,'').replace(',', '.').replace('R$','').replace('&nbsp;','');
+                return String(v).replace(/\s/g, '').replace(/\./g, '').replace(',', '.').replace('R$', '').replace('&nbsp;', '');
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Index.cshtml", "brToNumberString", error);
                 return "0";
             }
         }
 
+        function moeda(a, e, r, t) {
+            try {
+                let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
+                    o = window.Event ? t.which : t.keyCode;
+                if (o == 13 || o == 8) return !0;
+                n = String.fromCharCode(o);
+                if ("0123456789".indexOf(n) == -1) return !1;
+                for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
+                for (l = ""; h < u; h++) "0123456789".indexOf(a.value.charAt(h)) != -1 && (l += a.value.charAt(h));
+                if (l += n, (u = l.length) == 0) a.value = "";
+                if (u == 1) a.value = "0" + r + "0" + l;
+                if (u == 2) a.value = "0" + r + l;
+                if (u > 2) {
+                    for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--) 3 == j && (ajd2 += e, j = 0), ajd2 += l.charAt(h), j++;
+                    for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
+                    a.value += r + l.substr(u - 2, u)
+                }
+                return !1;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Index.cshtml", "moeda", error);
+            }
+        }
+
+        // ===== INSTÂNCIAS DOS MODAIS (Bootstrap 5) =====
+        let modalAporteInstance = null;
+        let modalAnulacaoInstance = null;
+        let modalNFInstance = null;
+
+        // ===== DOCUMENT READY =====
+        $(document).ready(function () {
+            try {
+                // Inicializar instâncias dos modais
+                const modalAporteEl = document.getElementById('modalAporte');
+                const modalAnulacaoEl = document.getElementById('modalAnulacao');
+                const modalNFEl = document.getElementById('modalNF');
+
+                if (modalAporteEl) {
+                    modalAporteInstance = new bootstrap.Modal(modalAporteEl);
+                }
+
+                if (modalAnulacaoEl) {
+                    modalAnulacaoInstance = new bootstrap.Modal(modalAnulacaoEl);
+                }
+
+                // Evento delegado para botão de Aporte (criado dinamicamente pelo DataTable)
+                $(document).on('click', '.btn-aporte', function (e) {
+                    try {
+                        e.preventDefault();
+                        const empenhoId = $(this).data('id');
+                        const row = $(this).closest('tr');
+                        const notaEmpenho = row.find('td:first').text();
+
+                        $('#lblTituloAporte').html(`<b>Aportar Valor ao Empenho: ${notaEmpenho}</b>`);
+                        $('#txtIdAporte').val(empenhoId);
+                        $('#frmAporte')[0].reset();
+
+                        if (modalAporteInstance) {
+                            modalAporteInstance.show();
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "btn-aporte.click", error);
+                    }
+                });
+
+                // Evento delegado para botão de Anulação (criado dinamicamente pelo DataTable)
+                $(document).on('click', '.btn-anulacao', function (e) {
+                    try {
+                        e.preventDefault();
+                        const empenhoId = $(this).data('id');
+                        const row = $(this).closest('tr');
+                        const notaEmpenho = row.find('td:first').text();
+
+                        $('#lblTituloAnulacao').html(`<b>Anular Valor do Empenho: ${notaEmpenho}</b>`);
+                        $('#txtIdAnulacao').val(empenhoId);
+                        $('#frmAnulacao')[0].reset();
+
+                        if (modalAnulacaoInstance) {
+                            modalAnulacaoInstance.show();
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "btn-anulacao.click", error);
+                    }
+                });
+
+                if (modalNFEl) {
+                    modalNFInstance = new bootstrap.Modal(modalNFEl);
+                }
+
+                // Evento delegado para botão de Notas Fiscais (criado dinamicamente pelo DataTable)
+                $(document).on('click', '.btn-nf-modal', function (e) {
+                    try {
+                        e.preventDefault();
+                        const empenhoId = $(this).data('id');
+
+                        if ($.fn.DataTable.isDataTable('#tblNotaFiscal')) {
+                            $('#tblNotaFiscal').DataTable().destroy();
+                        }
+
+                        $('#tblNotaFiscal').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-center", width: "10%" },
+                                { targets: 1, className: "text-center", width: "10%" },
+                                { targets: 2, className: "text-end", width: "12%" },
+                                { targets: 3, className: "text-end", width: "10%" },
+                                { targets: 4, className: "text-start", width: "20%" },
+                                { targets: 5, className: "text-center", width: "10%" },
+                                { targets: 6, visible: false },
+                                { targets: 7, visible: false }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/notafiscal/nfempenhos",
+                                data: { id: empenhoId },
+                                type: "GET",
+                                datatype: "json"
+                            },
+                            columns: [
+                                { data: "numeroNF" },
+                                { data: "dataFormatada" },
+                                { data: "valorNFFormatado" },
+                                { data: "valorGlosaFormatado" },
+                                { data: "motivoGlosa" },
+                                {
+                                    data: "notaFiscalId",
+                                    render: function (data) {
+                                        return `
+                                            <div class="ftx-actions">
+                                                <a href="/NotaFiscal/Upsert?id=${data}" class="btn btn-icon-28 btn-azul text-white" data-ejtip="Editar a Nota Fiscal">
+                                                    <i class="fa-duotone fa-pen-to-square"></i>
+                                                </a>
+                                                <a class="btn btn-icon-28 btn-vinho btn-delete-nf text-white" data-ejtip="Excluir a Nota Fiscal" data-id="${data}">
+                                                    <i class="fa-duotone fa-trash-can"></i>
+                                                </a>
+                                            </div>`;
+                                    }
+                                },
+                                { data: "contratoId" },
+                                { data: "empenhoId" }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Nenhuma nota fiscal encontrada para este empenho"
+                            }
+                        });
+
+                        // Abre o modal manualmente
+                        if (modalNFInstance) {
+                            modalNFInstance.show();
+                        }
+
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "btn-nf-modal.click", error);
+                    }
+                });
+
+                // ===== EVENTOS DE FILTRO =====
+                $("#lstInstrumento").on('change', function () {
+                    try {
+                        const val = $(this).val();
+                        if (val === '0') {
+                            $("#divContrato").show();
+                            $("#divAta").hide();
+                            $('#ListaContratos').empty().append('<option value="">-- Selecione um Contrato --</option>');
+                            loadListaContratos(1);
+                        } else if (val === '1') {
+                            $("#divAta").show();
+                            $("#divContrato").hide();
+                            $('#ListaAtas').empty().append('<option value="">-- Selecione uma Ata --</option>');
+                            loadListaAtas(1);
+                        } else {
+                            $("#divAta, #divContrato, #divEmpenho").hide();
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "lstInstrumento.change", error);
+                    }
+                });
+
+                $("#lstStatusContrato").on('change', function () {
+                    try {
+                        $('#ListaContratos').empty().append('<option value="">-- Selecione um Contrato --</option>');
+                        loadListaContratos($(this).val());
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "lstStatusContrato.change", error);
+                    }
+                });
+
+                $("#lstStatusAta").on('change', function () {
+                    try {
+                        $('#ListaAtas').empty().append('<option value="">-- Selecione uma Ata --</option>');
+                        loadListaAtas($(this).val());
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "lstStatusAta.change", error);
+                    }
+                });
+
+                $("#ListaContratos").on('change', function () {
+                    try {
+                        const id = $(this).val();
+                        if (!id) {
+                            $('#divEmpenho').hide();
+                            return;
+                        }
+                        if ($.fn.DataTable.isDataTable('#tblEmpenho')) {
+                            $('#tblEmpenho').DataTable().destroy();
+                        }
+                        PreencheTabelaEmpenho(id, "contrato");
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "ListaContratos.change", error);
+                    }
+                });
+
+                $("#ListaAtas").on('change', function () {
+                    try {
+                        const id = $(this).val();
+                        if (!id) {
+                            $('#divEmpenho').hide();
+                            return;
+                        }
+                        if ($.fn.DataTable.isDataTable('#tblEmpenho')) {
+                            $('#tblEmpenho').DataTable().destroy();
+                        }
+                        PreencheTabelaEmpenho(id, "ata");
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "ListaAtas.change", error);
+                    }
+                });
+
+                // ===== FUNÇÕES DE CARGA =====
+                function loadListaContratos(status) {
+                    try {
+                        $.ajax({
+                            url: "/api/Contrato/ListaContratos",
+                            data: { id: status },
+                            type: "GET",
+                            dataType: "json",
+                            success: function (res) {
+                                try {
+                                    let option = '<option value="">-- Selecione um Contrato --</option>';
+                                    if (res && res.data && res.data.length) {
+                                        res.data.forEach(function (obj) {
+                                            option += `<option value="${obj.value}">${obj.text}</option>`;
+                                        });
+                                    }
+                                    $('#ListaContratos').empty().append(option);
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaContratos.success", error);
+                                }
+                            },
+                            error: function (err) {
+                                Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaContratos.error", err);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaContratos", error);
+                    }
+                }
+
+                function loadListaAtas(status) {
+                    try {
+                        $.ajax({
+                            url: "/api/AtaRegistroPrecos/ListaAtas",
+                            data: { id: status },
+                            type: "GET",
+                            dataType: "json",
+                            success: function (res) {
+                                try {
+                                    let option = '<option value="">-- Selecione uma Ata --</option>';
+                                    if (res && res.data && res.data.length) {
+                                        res.data.forEach(function (obj) {
+                                            option += `<option value="${obj.value}">${obj.text}</option>`;
+                                        });
+                                    }
+                                    $('#ListaAtas').empty().append(option);
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaAtas.success", error);
+                                }
+                            },
+                            error: function (err) {
+                                Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaAtas.error", err);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaAtas", error);
+                    }
+                }
+
+                function PreencheTabelaEmpenho(id, instrumento) {
+                    try {
+                        $('#divEmpenho').show();
+
+                        $('#tblEmpenho').DataTable({
+                            columnDefs: [
+                                { targets: 0, className: "text-center", width: "8%" },
+                                { targets: 1, className: "text-center", width: "8%" },
+                                { targets: 2, className: "text-center", width: "8%" },
+                                { targets: 3, className: "text-end", width: "10%" },
+                                { targets: 4, className: "text-end", width: "10%" },
+                                { targets: 5, className: "text-end", width: "10%" },
+                                { targets: 6, className: "text-end", width: "10%" },
+                                { targets: 7, className: "text-center", width: "12%" },
+                                { targets: 8, className: "text-center", width: "10%" },
+                                { targets: 9, visible: false }
+                            ],
+                            responsive: true,
+                            ajax: {
+                                url: "/api/empenho",
+                                type: "GET",
+                                datatype: "json",
+                                data: { id: id, instrumento: instrumento }
+                            },
+                            columns: [
+                                { data: "notaEmpenho" },
+                                { data: "vigenciaInicialFormatada" },
+                                { data: "vigenciaFinalFormatada" },
+                                { data: "saldoInicialFormatado" },
+                                { data: "saldoMovimentacaoFormatado" },
+                                { data: "saldoNFFormatado" },
+                                { data: "saldoFinalFormatado" },
+                                {
+                                    data: "empenhoId",
+                                    render: function (data) {
+                                        return `
+                                            <div class="ftx-actions">
+                                                <a href="/Empenho/Upsert?id=${data}" class="btn btn-icon-28 btn-azul text-white" data-ejtip="Editar o Empenho">
+                                                    <i class="fa-duotone fa-pen-to-square"></i>
+                                                </a>
+                                                <a class="btn btn-icon-28 btn-vinho btn-delete text-white" data-ejtip="Excluir o Empenho" data-id="${data}">
+                                                    <i class="fa-duotone fa-trash-can"></i>
+                                                </a>
+                                                <a class="btn btn-icon-28 fundo-cinza btn-nf-modal text-white" data-ejtip="Notas Fiscais do Empenho" data-id="${data}">
+                                                    <i class="fa-duotone fa-file-invoice"></i>
+                                                </a>
+                                            </div>`;
+                                    }
+                                },
+                                {
+                                    data: "empenhoId",
+                                    render: function (data) {
+                                        return `
+                                            <div class="ftx-actions">
+                                                <a class="btn btn-icon-28 btn-verde btn-aporte text-white" data-ejtip="Aportar Valor" data-id="${data}">
+                                                    <i class="fa-duotone fa-circle-plus"></i>
+                                                </a>
+                                                <a class="btn btn-icon-28 btn-vinho btn-anulacao text-white" data-ejtip="Anular Valor" data-id="${data}">
+                                                    <i class="fa-duotone fa-circle-minus"></i>
+                                                </a>
+                                            </div>`;
+                                    }
+                                },
+                                { data: "empenhoId" }
+                            ],
+                            language: {
+                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                                emptyTable: "Nenhum empenho encontrado para este instrumento"
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "PreencheTabelaEmpenho", error);
+                    }
+                }
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
+            }
+        });
+
+        // ===== EVENTOS DE BOTÕES =====
         $("#btnAportar").on("click", function (e) {
             try {
                 e.preventDefault();
-
-                console.log("txtDescricao:", $("#txtDescricao").val());
-                console.log("txtData:", $("#txtData").val());
-                console.log("txtValor:", $("#txtValor").val());
 
                 if (!$("#txtData").val()) {
                     Alerta.Erro("Atenção", "A data do Aporte é obrigatória!");
@@ -294,6 +909,11 @@
                     TipoMovimentacao: "A"
                 });
 
+                // Spinning: desabilita botão e troca ícone
+                const $btn = $(this);
+                const textoOriginal = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fa-duotone fa-spinner-third fa-spin icon-space"></i> Processando...');
+
                 $.ajax({
                     type: "post",
                     url: "/api/Empenho/Aporte",
@@ -302,9 +922,9 @@
                     data: objEmpenho,
                     success: function (data) {
                         try {
-                            AppToast.show('Verde', data.message );
+                            AppToast.show('Verde', data.message);
                             $('#tblEmpenho').DataTable().ajax.reload(null, false);
-                            $("#modalAporte").modal('hide');
+                            modalAporteInstance.hide();
                             $('#frmAporte')[0].reset();
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Index.cshtml", "btnAportar.success", error);
@@ -312,6 +932,10 @@
                     },
                     error: function (data) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "btnAportar.error", data);
+                    },
+                    complete: function () {
+                        // Restaura botão
+                        $btn.prop('disabled', false).html(textoOriginal);
                     }
                 });
 
@@ -323,10 +947,6 @@
         $("#btnAnular").on("click", function (e) {
             try {
                 e.preventDefault();
-
-                console.log("txtDescricaoanulacao:", $("#txtDescricaoanulacao").val());
-                console.log("txtDataanulacao:", $("#txtDataanulacao").val());
-                console.log("txtValoranulacao:", $("#txtValoranulacao").val());
 
                 if (!$("#txtDataanulacao").val()) {
                     Alerta.Erro("Atenção", "A data da anulação é obrigatória!");
@@ -351,6 +971,11 @@
                     TipoMovimentacao: "G"
                 });
 
+                // Spinning: desabilita botão e troca ícone
+                const $btn = $(this);
+                const textoOriginal = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fa-duotone fa-spinner-third fa-spin icon-space"></i> Processando...');
+
                 $.ajax({
                     type: "post",
                     url: "/api/Empenho/anulacao",
@@ -359,9 +984,9 @@
                     data: objEmpenho,
                     success: function (data) {
                         try {
-                            AppToast.show('Verde', data.message );
+                            AppToast.show('Verde', data.message);
                             $('#tblEmpenho').DataTable().ajax.reload(null, false);
-                            $("#modalAnulacao").modal('hide');
+                            modalAnulacaoInstance.hide();
                             $('#frmAnulacao')[0].reset();
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Index.cshtml", "btnAnular.success", error);
@@ -369,6 +994,10 @@
                     },
                     error: function (data) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "btnAnular.error", data);
+                    },
+                    complete: function () {
+                        // Restaura botão
+                        $btn.prop('disabled', false).html(textoOriginal);
                     }
                 });
 
@@ -376,346 +1005,50 @@
                 Alerta.TratamentoErroComLinha("Index.cshtml", "btnAnular.click", error);
             }
         });
-    </script>
 
-    <script>
-        $(document).ready(function () {
+        // ===== DELETE EMPENHO (delegado) =====
+        $(document).on("click", ".btn-delete", function () {
             try {
-                $("#modalAporte").modal({
-                    keyboard: true,
-                    backdrop: "static",
-                    show: false
-                }).on("show.bs.modal", function (event) {
+                var id = $(this).data("id");
+
+                Alerta.Confirmar(
+                    "Você tem certeza que deseja apagar este empenho?",
+                    "Não será possível recuperar os dados eliminados!",
+                    "Excluir",
+                    "Cancelar"
+                ).then((willDelete) => {
                     try {
-                        var button = $(event.relatedTarget);
-                        var empenhoId = button.data("id");
-
-                        var notaEmpenho = $(event.relatedTarget).closest("tr").find("td:eq(0)").text();
-
-                        $(this).find("#DynamicModalLabel").html($("<b>Aportar Valor ao Empenho: " + notaEmpenho + "</b>"));
-                        $('#btnAportar').attr('data-id', empenhoId);
-                        $('#txtIdAporte').val(empenhoId);
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "modalAporte.show", error);
-                    }
-                }).on("hide.bs.modal", function () {
-                    try {
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "modalAporte.hide", error);
-                    }
-                });
-
-                $("#modalAnulacao").modal({
-                    keyboard: true,
-                    backdrop: "static",
-                    show: false
-                }).on("show.bs.modal", function (event) {
-                    try {
-                        var button = $(event.relatedTarget);
-                        var empenhoId = button.data("id");
-
-                        var notaEmpenho = $(event.relatedTarget).closest("tr").find("td:eq(0)").text();
-
-                        $(this).find("#DynamicModalLabel").html($("<b>Anular Valor do Empenho: " + notaEmpenho + "</b>"));
-                        $('#btnAnular').attr('data-id', empenhoId);
-                        $('#txtIdAnulacao').val(empenhoId);
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "modalAnulacao.show", error);
-                    }
-                });
-
-                $("#modalNF").modal({
-                    keyboard: true,
-                    backdrop: "static",
-                    show: false
-                }).on("show.bs.modal", function (event) {
-                    try {
-                        var button = $(event.relatedTarget);
-                        var empenhoId = button.data("id");
-
-                        console.log("Empenho:", empenhoId);
-
-                        if ($.fn.DataTable.isDataTable('#tblNotaFiscal')) {
-                            $('#tblNotaFiscal').DataTable().destroy();
-                        }
-
-                        $('#tblNotaFiscal').DataTable({
-                            columnDefs: [
-                                { targets: 0, className: "text-center", width: "8%" },
-                                { targets: 1, className: "text-center", width: "8%" },
-                                { targets: 2, className: "text-right",  width: "10%" },
-                                { targets: 3, className: "text-right",  width: "8%" },
-                                { targets: 4, className: "text-left",   width: "15%" },
-                                { targets: 5, className: "text-center", width: "8%", visible: false },
-                                { targets: 6, className: "text-center", width: "10%", visible: false },
-                                { targets: 7, className: "text-center", width: "10%", visible: false }
-                            ],
-                            responsive: true,
-                            ajax: {
-                                url: "/api/notafiscal/nfempenhos",
-                                data: { id: empenhoId },
-                                type: "GET",
-                                datatype: "json"
-                            },
-                            columns: [
-                                { data: "numeroNF" },
-                                { data: "dataFormatada" },
-                                { data: "valorNFFormatado" },
-                                { data: "valorGlosaFormatado" },
-                                { data: "motivoGlosa" },
-                                {
-                                    data: "notaFiscalId",
-                                    render: function (data) {
-                                        return `
-                                            <div class="text-center">
-                                                <a href="/NotaFiscal/Upsert?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-                                                    <i class="far fa-edit"></i>
-                                                </a>
-                                                <a class="btn btn-delete btn-vinho text-white" data-ejtip="Excluir a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
-                                                    <i class="far fa-trash-alt"></i>
-                                                </a>
-                                            </div>`;
+                        if (willDelete) {
+                            $.ajax({
+                                url: "/api/Empenho/Delete",
+                                type: "POST",
+                                data: JSON.stringify({ EmpenhoId: id }),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function (data) {
+                                    try {
+                                        if (data.success) {
+                                            AppToast.show('Verde', data.message);
+                                            $("#tblEmpenho").DataTable().ajax.reload(null, false);
+                                        } else {
+                                            AppToast.show('Vermelho', data.message);
+                                        }
+                                    } catch (error) {
+                                        Alerta.TratamentoErroComLinha("Index.cshtml", "btn-delete.success", error);
                                     }
                                 },
-                                { data: "contratoId" },
-                                { data: "empenhoId" }
-                            ],
-                            language: {
-                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-                                emptyTable: "Sem Dados para Exibição"
-                            },
-                            width: "100%"
-                        });
-
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "modalNF.show", error);
-                    }
-                });
-
-                $("#lstInstrumento").on('change', function () {
-                    try {
-                        const val = $(this).val();
-                        if (val === '0') {
-                            $("#divContrato").show();
-                            $("#divAta").hide();
-                            $('#ListaContratos').empty();
-                            loadListaContratos(1);
-                        } else if (val === '1') {
-                            $("#divAta").show();
-                            $("#divContrato").hide();
-                            $('#ListaAtas').empty();
-                            loadListaAtas(1);
-                        } else {
-                            $("#divAta, #divContrato").hide();
-                        }
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "lstInstrumento.change", error);
-                    }
-                });
-
-                $("#lstStatusContrato").on('change', function () {
-                    try {
-                        $('#ListaContratos').empty();
-                        loadListaContratos($(this).val());
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "lstStatusContrato.change", error);
-                    }
-                });
-
-                $("#lstStatusAta").on('change', function () {
-                    try {
-                        $('#ListaAtas').empty();
-                        loadListaAtas($(this).val());
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "lstStatusAta.change", error);
-                    }
-                });
-
-                function loadListaContratos(status) {
-                    try {
-                        $.ajax({
-                            type: "get",
-                            url: "/api/Contrato/ListaContratos",
-                            data: { id: status },
-                            success: function (res) {
-                                try {
-                                    let option = '<option>-- Selecione um Contrato --</option>';
-                                    if (res && res.data && res.data.length) {
-                                        res.data.forEach(function (obj) {
-                                            option += `<option value="${obj.value}">${obj.text}</option>`;
-                                        });
-                                    }
-                                    $('#ListaContratos').empty().append(option);
-                                } catch (error) {
-                                    Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaContratos.success", error);
+                                error: function (err) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "btn-delete.error", err);
                                 }
-                            },
-                            error: function (err) {
-                                Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaContratos.error", err);
-                            }
-                        });
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaContratos", error);
-                    }
-                }
-
-                function loadListaAtas(status) {
-                    try {
-                        $.ajax({
-                            type: "get",
-                            url: "/api/AtaRegistroPrecos/ListaAtas",
-                            data: { id: status },
-                            success: function (res) {
-                                try {
-                                    let option = '<option>-- Selecione uma Ata --</option>';
-                                    if (res && res.data && res.data.length) {
-                                        res.data.forEach(function (obj) {
-                                            option += `<option value="${obj.value}">${obj.text}</option>`;
-                                        });
-                                    }
-                                    $('#ListaAtas').empty().append(option);
-                                } catch (error) {
-                                    Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaAtas.success", error);
-                                }
-                            },
-                            error: function (err) {
-                                Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaAtas.error", err);
-                            }
-                        });
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "loadListaAtas", error);
-                    }
-                }
-
-                $("#ListaContratos").on('change', function () {
-                    try {
-                        const id = $(this).val();
-                        if ($.fn.DataTable.isDataTable('#tblEmpenho')) {
-                            $('#tblEmpenho').DataTable().destroy();
+                            });
                         }
-                        PreencheTabelaEmpenho(id, "contrato");
                     } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "ListaContratos.change", error);
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "btn-delete.swal.then", error);
                     }
                 });
-
-                $("#ListaAtas").on('change', function () {
-                    try {
-                        const id = $(this).val();
-                        if ($.fn.DataTable.isDataTable('#tblEmpenho')) {
-                            $('#tblEmpenho').DataTable().destroy();
-                        }
-                        PreencheTabelaEmpenho(id, "ata");
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "ListaAtas.change", error);
-                    }
-                });
-
-                function PreencheTabelaEmpenho(id, instrumento) {
-                    try {
-                        $('#divEmpenho').show();
-
-                        $('#tblEmpenho').DataTable({
-                            columnDefs: [
-                                { targets: 0, className: "text-center", width: "5%" },
-                                { targets: 1, className: "text-center", width: "5%" },
-                                { targets: 2, className: "text-center", width: "5%" },
-                                { targets: 3, className: "text-right",  width: "8%" },
-                                { targets: 4, className: "text-right",  width: "8%" },
-                                { targets: 5, className: "text-right",  width: "8%" },
-                                { targets: 6, className: "text-right",  width: "8%" },
-                                { targets: 7, className: "text-center", width: "10%" },
-                                { targets: 8, className: "text-center", width: "10%" },
-                                { targets: 9, className: "text-center", visible: false }
-                            ],
-                            responsive: true,
-                            ajax: {
-                                url: "/api/empenho",
-                                type: "GET",
-                                datatype: "json",
-                                data: { id: id, instrumento: instrumento }
-                            },
-                            columns: [
-                                { data: "notaEmpenho" },
-                                { data: "vigenciaInicialFormatada" },
-                                { data: "vigenciaFinalFormatada" },
-                                { data: "saldoInicialFormatado" },
-                                { data: "saldoMovimentacaoFormatado" },
-                                { data: "saldoNFFormatado" },
-                                { data: "saldoFinalFormatado" },
-                                {
-                                    data: "empenhoId",
-                                    render: function (data) {
-                                        return `
-                                            <div class="text-center">
-                                                <a href="/Empenho/Upsert?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar o Empenho" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-                                                    <i class="far fa-edit"></i>
-                                                </a>
-                                                <a class="btn btn-delete btn-vinho text-white" data-ejtip="Excluir o Empenho" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
-                                                    <i class="far fa-trash-alt"></i>
-                                                </a>
-                                                <a class="btn btn-documentos btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalNF" id="rowdata" data-ejtip="Notas do Empenho" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
-                                                    <i class="fal fa-file-pdf"></i>
-                                                </a>
-                                            </div>`;
-                                    }
-                                },
-                                {
-                                    data: "empenhoId",
-                                    render: function (data) {
-                                        return `
-                                            <div class="text-center">
-                                                <a class="btn btn-aporte btn-dark text-white" data-bs-toggle="modal" data-bs-target="#modalAporte" id="rowdata" data-ejtip="Aporte ao Empenho" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}' data-backdrop="false">
-                                                    <i class="fal fa-plus-circle"></i>
-                                                </a>
-                                                <a class="btn btn-anulacao btn-vinho text-white" data-bs-toggle="modal" data-bs-target="#modalAnulacao" id="rowdata" data-ejtip="Anulação do Empenho" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}' data-backdrop="false">
-                                                    <i class="fal fa-minus-circle"></i>
-                                                </a>
-                                            </div>`;
-                                    }
-                                },
-                                { data: "empenhoId" }
-                            ],
-                            language: {
-                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-                                emptyTable: "Sem Dados para Exibição"
-                            },
-                            width: "100%"
-                        });
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "PreencheTabelaEmpenho", error);
-                    }
-                }
-
             } catch (error) {
-                Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
+                Alerta.TratamentoErroComLinha("Index.cshtml", "btn-delete.click", error);
             }
         });
     </script>
-
-    <script>
-        function moeda(a, e, r, t) {
-            try {
-                let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
-                    o = window.Event ? t.which : t.keyCode;
-                if (o == 13 || o == 8) return !0;
-                n = String.fromCharCode(o);
-                if ("0123456789".indexOf(n) == -1) return !1;
-                for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
-                for (l = ""; h < u; h++) "0123456789".indexOf(a.value.charAt(h)) != -1 && (l += a.value.charAt(h));
-                if (l += n, (u = l.length) == 0) a.value = "";
-                if (u == 1) a.value = "0" + r + "0" + l;
-                if (u == 2) a.value = "0" + r + l;
-                if (u > 2) {
-                    for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--) 3 == j && (ajd2 += e, j = 0), ajd2 += l.charAt(h), j++;
-                    for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
-                    a.value += r + l.substr(u - 2, u)
-                }
-                return !1;
-            } catch (error) {
-                Alerta.TratamentoErroComLinha("Index.cshtml", "moeda", error);
-            }
-        }
-    </script>
 }
-

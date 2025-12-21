@@ -51,5 +51,14 @@ namespace FrotiX.Hubs
         public string Detalhe { get; set; }
         public int LinhaAtual { get; set; }
         public int TotalLinhas { get; set; }
+        
+        // Resumo da planilha (enviado após leitura)
+        public bool ResumoDisponivel { get; set; }
+        public int TotalRegistros { get; set; }
+        public string DataInicial { get; set; }
+        public string DataFinal { get; set; }
+        public int RegistrosGasolina { get; set; }
+        public int RegistrosDiesel { get; set; }
+        public int RegistrosOutros { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace FrotiX.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [IgnoreAntiforgeryToken]
-    public class ViagemEventoController : Controller
+    public partial class ViagemEventoController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private IWebHostEnvironment hostingEnv;

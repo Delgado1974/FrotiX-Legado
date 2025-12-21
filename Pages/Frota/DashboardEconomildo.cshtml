@@ -564,7 +564,7 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    /* Cores do heatmap - escala de verde */
+    /* Cores do heatmap - escala de verde (viagens) */
     .eco-heatmap-0 { background: #f8fafc; color: #94a3b8; }
     .eco-heatmap-1 { background: #dcfce7; color: #166534; }
     .eco-heatmap-2 { background: #bbf7d0; color: #166534; }
@@ -572,6 +572,15 @@
     .eco-heatmap-4 { background: #4ade80; color: #ffffff; }
     .eco-heatmap-5 { background: #22c55e; color: #ffffff; }
     .eco-heatmap-6 { background: #16a34a; color: #ffffff; }
+
+    /* Cores do heatmap passageiros - escala de creme */
+    .eco-heatmap-passageiros-0 { background: #fafaf9; color: #78716c; }
+    .eco-heatmap-passageiros-1 { background: #fef3c7; color: #92400e; }
+    .eco-heatmap-passageiros-2 { background: #fde68a; color: #92400e; }
+    .eco-heatmap-passageiros-3 { background: #fcd34d; color: #78350f; }
+    .eco-heatmap-passageiros-4 { background: #fbbf24; color: #ffffff; }
+    .eco-heatmap-passageiros-5 { background: #f59e0b; color: #ffffff; }
+    .eco-heatmap-passageiros-6 { background: #d97706; color: #ffffff; }
 
     /* Legenda do heatmap */
     .eco-heatmap-legend {
@@ -674,6 +683,40 @@
         .eco-filter-select {
             flex: 1;
         }
+    }
+
+    /* ========== BOTÃO EXPORTAR PDF ========== */
+    .eco-btn-pdf {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.8;
+    }
+
+    .eco-btn-pdf:hover {
+        opacity: 1;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+    }
+
+    .eco-btn-pdf svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .eco-chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 </style>
 
@@ -829,6 +872,10 @@
                     </div>
                     Usuários por Mês
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('UsuariosMes')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-chart-container">
                 <canvas id="chartUsuariosMes"></canvas>
@@ -847,6 +894,10 @@
                     </div>
                     Usuários por Turno
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('UsuariosTurno')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-chart-container small">
                 <canvas id="chartTurno"></canvas>
@@ -879,6 +930,10 @@
                     </div>
                     Comparativo Mensal por MOB
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('ComparativoMob')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-chart-container">
                 <canvas id="chartComparativoMob"></canvas>
@@ -899,6 +954,10 @@
                     </div>
                     Usuários por Dia da Semana
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('UsuariosDiaSemana')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-chart-container">
                 <canvas id="chartDiaSemana"></canvas>
@@ -917,6 +976,10 @@
                     </div>
                     Distribuição por Horário
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('DistribuicaoHorario')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-chart-container">
                 <canvas id="chartHora"></canvas>
@@ -939,6 +1002,10 @@
                     </div>
                     Top 10 Veículos
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('TopVeiculos')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-chart-container">
                 <canvas id="chartTopVeiculos"></canvas>
@@ -959,6 +1026,10 @@
                     </div>
                     Mapa de Calor - Distribuição de Viagens (Dia x Hora)
                 </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('HeatmapViagens')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
             </div>
             <div class="eco-heatmap-container">
                 <table class="eco-heatmap-table" id="heatmapTable">
@@ -988,6 +1059,56 @@
                     <div class="eco-heatmap-legend-item eco-heatmap-6"></div>
                 </div>
                 <span class="eco-heatmap-legend-label">Mais viagens</span>
+            </div>
+        </div>
+
+        <!-- Heatmap Passageiros -->
+        <div class="eco-chart-card eco-heatmap-card">
+            <div class="eco-chart-header">
+                <div class="eco-chart-title">
+                    <div class="eco-chart-title-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    Mapa de Calor - Distribuição de Passageiros (Dia x Hora)
+                </div>
+                <button type="button" class="eco-btn-pdf" onclick="exportarPdf('HeatmapPassageiros')" title="Exportar PDF">
+                    <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
+                    PDF
+                </button>
+            </div>
+            <div class="eco-heatmap-container">
+                <table class="eco-heatmap-table" id="heatmapPassageirosTable">
+                    <thead>
+                        <tr>
+                            <th>Dia/Hora</th>
+                            <th>00</th><th>01</th><th>02</th><th>03</th><th>04</th><th>05</th>
+                            <th>06</th><th>07</th><th>08</th><th>09</th><th>10</th><th>11</th>
+                            <th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th>
+                            <th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th>
+                        </tr>
+                    </thead>
+                    <tbody id="heatmapPassageirosBody">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="eco-heatmap-legend">
+                <span class="eco-heatmap-legend-label">Menos passageiros</span>
+                <div class="eco-heatmap-legend-scale">
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-0"></div>
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-1"></div>
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-2"></div>
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-3"></div>
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-4"></div>
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-5"></div>
+                    <div class="eco-heatmap-legend-item eco-heatmap-passageiros-6"></div>
+                </div>
+                <span class="eco-heatmap-legend-label">Mais passageiros</span>
             </div>
         </div>
     </div>
@@ -1031,8 +1152,7 @@
                 document.getElementById('filtroMes').addEventListener('change', carregarDashboard);
                 document.getElementById('filtroAno').addEventListener('change', carregarDashboard);
             } catch (error) {
-                console.error('Erro ao inicializar dashboard:', error);
-                AppToast.show('Vermelho', 'Erro ao inicializar dashboard: ' + error.message, 5000);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'DOMContentLoaded', error);
             }
         });
 
@@ -1293,7 +1413,7 @@
                     }
                 });
             } catch (error) {
-                console.error('Erro ao inicializar gráficos:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'inicializarGraficos', error);
             }
         }
 
@@ -1322,14 +1442,14 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Erro ao carregar dashboard:', error);
-                        AppToast.show('Vermelho', 'Erro ao carregar dashboard', 5000);
+                        Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarDashboard fetch', error);
                     });
 
-                // Carregar Heatmap separadamente
+                // Carregar Heatmaps separadamente
                 carregarHeatmap();
+                carregarHeatmapPassageiros();
             } catch (error) {
-                console.error('Erro em carregarDashboard:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarDashboard', error);
             }
         }
 
@@ -1364,7 +1484,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao atualizar visibilidade dos cards:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarVisibilidadeCardsMob', error);
             }
         }
 
@@ -1388,7 +1508,7 @@
                 document.getElementById('mediaDiaria').textContent = formatarNumero(data.mediaDiaria);
                 document.getElementById('totalViagens').textContent = formatarNumero(data.totalViagens);
             } catch (error) {
-                console.error('Erro ao atualizar KPIs:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarKPIs', error);
             }
         }
 
@@ -1441,7 +1561,7 @@
                     chartTopVeiculos.update();
                 }
             } catch (error) {
-                console.error('Erro ao atualizar gráficos:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarGraficos', error);
             }
         }
 
@@ -1468,10 +1588,10 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Erro ao carregar heatmap:', error);
+                        Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarHeatmap fetch', error);
                     });
             } catch (error) {
-                console.error('Erro em carregarHeatmap:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarHeatmap', error);
             }
         }
 
@@ -1513,7 +1633,7 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error('Erro em renderizarHeatmap:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'renderizarHeatmap', error);
             }
         }
 
@@ -1532,46 +1652,193 @@
                 if (percentual <= 0.8) return 5;
                 return 6;
             } catch (error) {
-                console.error('Erro em calcularIntensidadeHeatmap:', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'calcularIntensidadeHeatmap', error);
                 return 0;
+            }
+        }
+
+        // ========== HEATMAP PASSAGEIROS FUNCTIONS ==========
+
+        function carregarHeatmapPassageiros() {
+            try {
+                const mob = document.getElementById('filtroMob').value;
+                const mes = document.getElementById('filtroMes').value;
+                const ano = document.getElementById('filtroAno').value;
+
+                const params = new URLSearchParams();
+                if (mob) params.append('mob', mob);
+                if (mes) params.append('mes', mes);
+                if (ano) params.append('ano', ano);
+
+                fetch(`/api/Viagem/HeatmapEconomildoPassageiros?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            renderizarHeatmapPassageiros(result.data, result.maxValor);
+                        } else {
+                            console.error('Erro ao carregar heatmap passageiros:', result.message);
+                        }
+                    })
+                    .catch(error => {
+                        Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarHeatmapPassageiros fetch', error);
+                    });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarHeatmapPassageiros', error);
+            }
+        }
+
+        function renderizarHeatmapPassageiros(dados, maxValor) {
+            try {
+                const tbody = document.getElementById('heatmapPassageirosBody');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+
+                dados.forEach(dia => {
+                    const tr = document.createElement('tr');
+
+                    // Coluna do dia da semana
+                    const tdDia = document.createElement('td');
+                    tdDia.textContent = dia.diaSemana;
+                    tr.appendChild(tdDia);
+
+                    // Colunas das horas (0-23)
+                    for (let hora = 0; hora < 24; hora++) {
+                        const td = document.createElement('td');
+                        const valor = dia.horas[hora];
+
+                        // Calcular intensidade (0-6)
+                        const intensidade = calcularIntensidadeHeatmap(valor, maxValor);
+                        td.className = `eco-heatmap-passageiros-${intensidade}`;
+
+                        // Mostrar valor apenas se > 0
+                        if (valor > 0) {
+                            td.textContent = valor;
+                        }
+
+                        // Tooltip com detalhes
+                        td.title = `${dia.diaSemana} às ${hora.toString().padStart(2, '0')}:00 - ${valor} passageiro(s)`;
+
+                        tr.appendChild(td);
+                    }
+
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'renderizarHeatmapPassageiros', error);
             }
         }
 
         // Funções auxiliares
         function formatarNumero(num) {
-            if (num === null || num === undefined) return '-';
-            return new Intl.NumberFormat('pt-BR').format(Math.round(num));
+            try {
+                if (num === null || num === undefined) return '-';
+                return new Intl.NumberFormat('pt-BR').format(Math.round(num));
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'formatarNumero', error);
+                return '-';
+            }
         }
 
         function formatarNumeroGrande(num) {
-            if (num === null || num === undefined) return '-';
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(3).replace('.', ',') + ' Mi';
+            try {
+                if (num === null || num === undefined) return '-';
+                if (num >= 1000000) {
+                    return (num / 1000000).toFixed(3).replace('.', ',') + ' Mi';
+                }
+                if (num >= 1000) {
+                    return (num / 1000).toFixed(0).replace('.', ',') + ' Mil';
+                }
+                return formatarNumero(num);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'formatarNumeroGrande', error);
+                return '-';
             }
-            if (num >= 1000) {
-                return (num / 1000).toFixed(0).replace('.', ',') + ' Mil';
-            }
-            return formatarNumero(num);
         }
 
         function formatarNumeroResumido(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(0) + 'K';
-            return num;
+            try {
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(0) + 'K';
+                return num;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'formatarNumeroResumido', error);
+                return num;
+            }
         }
 
         function createGradient(ctx, color1, color2) {
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, color1);
-            gradient.addColorStop(1, color2);
-            return gradient;
+            try {
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, color1);
+                gradient.addColorStop(1, color2);
+                return gradient;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'createGradient', error);
+                return color1;
+            }
         }
 
         function hexToRgba(hex, alpha) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            try {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'hexToRgba', error);
+                return hex;
+            }
+        }
+
+        // ========== EXPORTAR PDF - FUNÇÃO UNIFICADA ==========
+
+        async function exportarPdf(tipo) {
+            try {
+                AppToast.show('amarelo', 'Gerando PDF, aguarde...', 3000);
+
+                const mob = document.getElementById('filtroMob').value;
+                const mes = document.getElementById('filtroMes').value;
+                const ano = document.getElementById('filtroAno').value;
+
+                const params = new URLSearchParams({ tipo: tipo });
+                if (mob) params.append('mob', mob);
+                if (mes) params.append('mes', mes);
+                if (ano) params.append('ano', ano);
+
+                const response = await fetch(`/api/Relatorios/ExportarEconomildo?${params.toString()}`, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Erro ao gerar PDF');
+                }
+
+                const blob = await response.blob();
+
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let nomeArquivo = `Economildo_${tipo}.pdf`;
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="?([^";\n]+)"?/);
+                    if (match) nomeArquivo = match[1];
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nomeArquivo;
+                document.body.appendChild(a);
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                AppToast.show('verde', 'PDF gerado com sucesso!', 3000);
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'exportarPdf', error);
+            }
         }
     </script>
 }

@@ -43,18 +43,18 @@
                                         {
                                             if (data.success)
                                             {
-                                                AppToast.show(data.message || "Veículo excluído com sucesso.", 'Verde', 2000);
+                                                AppToast.show('Verde', data.message || "Veículo excluído com sucesso.", 2000);
                                                 if (dataTable)
                                                 {
                                                     dataTable.ajax.reload();
                                                 }
                                             } else
                                             {
-                                                AppToast.show(data.message || "Erro ao excluir veículo.", 'Vermelho', 2000);
+                                                AppToast.show('Vermelho', data.message || "Erro ao excluir veículo.", 2000);
                                             }
                                         } catch (error)
                                         {
-                                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.ajax.success", error);
+                                            Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.ajax.success", error);
                                         }
                                     },
                                     error: function (err)
@@ -62,22 +62,22 @@
                                         try
                                         {
                                             console.error(err);
-                                            AppToast.show("Algo deu errado ao excluir o veículo.", 'Vermelho', 2000);
+                                            AppToast.show('Vermelho', "Algo deu errado ao excluir o veículo.", 2000);
                                         } catch (error)
                                         {
-                                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.ajax.error", error);
+                                            Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.ajax.error", error);
                                         }
                                     }
                                 });
                             }
                         } catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.confirmar.then", error);
+                            Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.confirmar.then", error);
                         }
                     });
                 } catch (error)
                 {
-                    Alerta.TratamentoErroComLinha("veiculo_index_001.js", "btn-delete.click", error);
+                    Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.click", error);
                 }
             });
 
@@ -95,45 +95,45 @@
                         {
                             if (data.success)
                             {
-                                AppToast.show("Status alterado com sucesso!", 'Verde', 2000);
-                                var text = "Ativo";
+                                AppToast.show('Verde', "Status alterado com sucesso!", 2000);
 
                                 if (data.type == 1)
                                 {
-                                    text = "Inativo";
+                                    // Mudou para Inativo
                                     currentElement.removeClass("btn-verde").addClass("fundo-cinza");
+                                    currentElement.html('<i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i> Inativo');
                                 } else
                                 {
+                                    // Mudou para Ativo
                                     currentElement.removeClass("fundo-cinza").addClass("btn-verde");
+                                    currentElement.html('<i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo');
                                 }
-
-                                currentElement.text(text);
                             } else
                             {
-                                AppToast.show("Não foi possível alterar o status.", 'Vermelho', 2000);
+                                AppToast.show('Vermelho', "Não foi possível alterar o status.", 2000);
                             }
                         } catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "updateStatusVeiculo.get.success", error);
+                            Alerta.TratamentoErroComLinha("veiculo_index.js", "updateStatusVeiculo.get.success", error);
                         }
                     }).fail(function ()
                     {
                         try
                         {
-                            AppToast.show("Erro ao alterar o status do veículo.", 'Vermelho', 2000);
+                            AppToast.show('Vermelho', "Erro ao alterar o status do veículo.", 2000);
                         } catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "updateStatusVeiculo.get.fail", error);
+                            Alerta.TratamentoErroComLinha("veiculo_index.js", "updateStatusVeiculo.get.fail", error);
                         }
                     });
                 } catch (error)
                 {
-                    Alerta.TratamentoErroComLinha("veiculo_index_001.js", "updateStatusVeiculo.click", error);
+                    Alerta.TratamentoErroComLinha("veiculo_index.js", "updateStatusVeiculo.click", error);
                 }
             });
         } catch (error)
         {
-            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "document.ready", error);
+            Alerta.TratamentoErroComLinha("veiculo_index.js", "document.ready", error);
         }
     });
 
@@ -218,18 +218,26 @@
                             {
                                 if (data)
                                 {
-                                    return '<a href="javascript:void(0)" class="updateStatusVeiculo btn btn-verde text-white" data-url="/api/Veiculo/updateStatusVeiculo?Id=' +
-                                        row.veiculoId +
-                                        '" data-ejtip="Desativar veículo" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">Ativo</a>';
+                                    return `<a href="javascript:void(0)" 
+                                               class="updateStatusVeiculo btn btn-verde text-white" 
+                                               data-url="/api/Veiculo/updateStatusVeiculo?Id=${row.veiculoId}" 
+                                               data-ejtip="Desativar veículo" 
+                                               style="cursor:pointer; padding: 4px 10px; font-size: 12px; border-radius: 6px;">
+                                                <i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo
+                                            </a>`;
                                 } else
                                 {
-                                    return '<a href="javascript:void(0)" class="updateStatusVeiculo btn fundo-cinza text-white text-bold" data-url="/api/Veiculo/updateStatusVeiculo?Id=' +
-                                        row.veiculoId +
-                                        '" data-ejtip="Ativar veículo" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">Inativo</a>';
+                                    return `<a href="javascript:void(0)" 
+                                               class="updateStatusVeiculo btn fundo-cinza text-white" 
+                                               data-url="/api/Veiculo/updateStatusVeiculo?Id=${row.veiculoId}" 
+                                               data-ejtip="Ativar veículo" 
+                                               style="cursor:pointer; padding: 4px 10px; font-size: 12px; border-radius: 6px;">
+                                                <i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i> Inativo
+                                            </a>`;
                                 }
                             } catch (error)
                             {
-                                Alerta.TratamentoErroComLinha("veiculo_index_001.js", "status.render", error);
+                                Alerta.TratamentoErroComLinha("veiculo_index.js", "status.render", error);
                                 return "";
                             }
                         }
@@ -245,20 +253,20 @@
                                        class="btn btn-azul text-white" 
                                        data-ejtip="Editar veículo" 
                                        aria-label="Editar veículo" 
-                                       style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-                                        <i class="far fa-edit"></i> 
+                                       style="cursor:pointer; padding: 4px 8px; font-size: 12px; border-radius: 6px; margin: 1px;">
+                                        <i class="fa-duotone fa-pen-to-square" style="--fa-primary-color:#fff; --fa-secondary-color:#90caf9;"></i>
                                     </a>
                                     <a class="btn-delete btn btn-vinho text-white" 
                                        data-ejtip="Excluir veículo" 
                                        aria-label="Excluir veículo" 
-                                       style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" 
+                                       style="cursor:pointer; padding: 4px 8px; font-size: 12px; border-radius: 6px; margin: 1px;" 
                                        data-id='${data}'>
-                                        <i class="far fa-trash-alt"></i>
+                                        <i class="fa-duotone fa-trash-can" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i>
                                     </a>
                                 </div>`;
                             } catch (error)
                             {
-                                Alerta.TratamentoErroComLinha("veiculo_index_001.js", "veiculoId.render", error);
+                                Alerta.TratamentoErroComLinha("veiculo_index.js", "veiculoId.render", error);
                                 return "";
                             }
                         }
@@ -272,7 +280,7 @@
             });
         } catch (error)
         {
-            Alerta.TratamentoErroComLinha("veiculo_index_001.js", "loadList", error);
+            Alerta.TratamentoErroComLinha("veiculo_index.js", "loadList", error);
         }
     }
 })();

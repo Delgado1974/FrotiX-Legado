@@ -211,6 +211,31 @@ namespace FrotiX.Controllers
             }
         }
 
+        [Route("ExisteFichaParaData")]
+        public JsonResult ExisteFichaParaData(string data)
+        {
+            try
+            {
+                // Converte string para DateTime
+                if (!DateTime.TryParseExact(data , "yyyy-MM-dd" , CultureInfo.InvariantCulture , DateTimeStyles.None , out DateTime dataConvertida))
+                {
+                    return Json(false);
+                }
+
+                // Verifica se existe algum registro para essa data
+                var existeFicha = _unitOfWork.ViagensEconomildo
+                    .GetAll()
+                    .Any(v => v.Data.HasValue && v.Data.Value.Date == dataConvertida.Date);
+
+                return Json(existeFicha);
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "ExisteFichaParaData" , error);
+                return Json(false);
+            }
+        }
+
         [HttpGet]
         [Route("ObterFichaVistoria")]
         public IActionResult ObterFichaVistoria(string viagemId)
@@ -555,15 +580,25 @@ namespace FrotiX.Controllers
                 var veiculoIdParam = GetParsedId(veiculoId);
                 var eventoIdParam = GetParsedId(eventoId);
 
-                var result = _unitOfWork.ViewViagens.GetAllReduced(
+                var query = _unitOfWork.ViewViagens.GetAll(
                     filter: viagemsFilters(
                         veiculoIdParam ,
                         motoristaIdParam ,
                         dataViagem ,
                         statusId ,
                         eventoIdParam
-                    ) ,
-                    selector: x => new
+                    )
+                );
+
+                // Ordenação: NoFichaVistoria = 0 ou null primeiro (para serem preenchidos)
+                // depois por DataInicial DESC, HoraInicio DESC
+                // Registros com NoFichaVistoria > 0 vão depois, ordenados por número DESC
+                var result = query
+                    .OrderBy(x => x.NoFichaVistoria > 0 ? 1 : 0)  // 0 = sem número (primeiro), 1 = com número (depois)
+                    .ThenByDescending(x => x.DataInicial)
+                    .ThenByDescending(x => x.HoraInicio)
+                    .ThenByDescending(x => x.NoFichaVistoria)
+                    .Select(x => new
                     {
                         x.CombustivelFinal ,
                         x.CombustivelInicial ,
@@ -578,7 +613,8 @@ namespace FrotiX.Controllers
                         x.HoraInicio ,
                         x.KmFinal ,
                         x.KmInicial ,
-                        x.NoFichaVistoria ,
+                        // NoFichaVistoria = 0 retorna como "(mobile)"
+                        NoFichaVistoria = x.NoFichaVistoria > 0 ? x.NoFichaVistoria.ToString() : "(mobile)" ,
                         x.NomeMotorista ,
                         x.NomeRequisitante ,
                         x.NomeSetor ,
@@ -591,8 +627,8 @@ namespace FrotiX.Controllers
                         x.ViagemId ,
                         x.MotoristaId ,
                         x.VeiculoId ,
-                    }
-                );
+                    })
+                    .ToList();
 
                 return Json(new
                 {
@@ -755,88 +791,88 @@ namespace FrotiX.Controllers
             }
         }
 
-        /// <summary>
-        /// Lista todos os eventos COM o campo custoViagem calculado
-        /// Rota: /api/viagem/listaeventos
-        /// </summary>
-        [HttpGet]
-        [Route("ListaEventos")]
-        public IActionResult ListaEventos()
-        {
-            var swTotal = System.Diagnostics.Stopwatch.StartNew();
+        ///// <summary>
+        ///// Lista todos os eventos COM o campo custoViagem calculado
+        ///// Rota: /api/viagem/listaeventos
+        ///// </summary>
+        //[HttpGet]
+        //[Route("ListaEventos")]
+        //public IActionResult ListaEventos()
+        //{
+        //    var swTotal = System.Diagnostics.Stopwatch.StartNew();
 
-            try
-            {
-                // ✅ Usa ViewViagens.CustoViagem (mesmo cálculo do Modal)
-                // Filtra apenas viagens Realizadas
-                var custosPorEvento = _unitOfWork.ViewViagens
-                    .GetAll(filter: v => v.EventoId != null && 
-                                        v.EventoId != Guid.Empty &&
-                                        v.Status == "Realizada")
-                    .Select(v => new { v.EventoId, v.CustoViagem })
-                    .ToList()
-                    .GroupBy(v => v.EventoId)
-                    .ToDictionary(
-                        g => g.Key ?? Guid.Empty,
-                        g => g.Sum(v => v.CustoViagem ?? 0)
-                    );
+        //    try
+        //    {
+        //        // ✅ Usa ViewViagens.CustoViagem (mesmo cálculo do Modal)
+        //        // Filtra apenas viagens Realizadas
+        //        var custosPorEvento = _unitOfWork.ViewViagens
+        //            .GetAll(filter: v => v.EventoId != null &&
+        //                                v.EventoId != Guid.Empty &&
+        //                                v.Status == "Realizada")
+        //            .Select(v => new { v.EventoId , v.CustoViagem })
+        //            .ToList()
+        //            .GroupBy(v => v.EventoId)
+        //            .ToDictionary(
+        //                g => g.Key ?? Guid.Empty ,
+        //                g => g.Sum(v => v.CustoViagem ?? 0)
+        //            );
 
-                Console.WriteLine($"[ListaEventos] Custos: {swTotal.ElapsedMilliseconds}ms");
+        //        Console.WriteLine($"[ListaEventos] Custos: {swTotal.ElapsedMilliseconds}ms");
 
-                // Busca eventos com Include (traz Setor e Requisitante em 1 query só)
-                var eventos = _context.Evento
-                    .Include(e => e.SetorSolicitante)
-                    .Include(e => e.Requisitante)
-                    .ToList();
+        //        // Busca eventos com Include (traz Setor e Requisitante em 1 query só)
+        //        var eventos = _context.Evento
+        //            .Include(e => e.SetorSolicitante)
+        //            .Include(e => e.Requisitante)
+        //            .ToList();
 
-                Console.WriteLine($"[ListaEventos] Eventos: {swTotal.ElapsedMilliseconds}ms");
+        //        Console.WriteLine($"[ListaEventos] Eventos: {swTotal.ElapsedMilliseconds}ms");
 
-                // Monta resultado
-                var resultado = eventos.Select(e =>
-                {
-                    string nomeSetor = "";
-                    if (e.SetorSolicitante != null)
-                    {
-                        nomeSetor = !string.IsNullOrEmpty(e.SetorSolicitante.Sigla)
-                            ? $"{e.SetorSolicitante.Nome} ({e.SetorSolicitante.Sigla})"
-                            : e.SetorSolicitante.Nome ?? "";
-                    }
+        //        // Monta resultado
+        //        var resultado = eventos.Select(e =>
+        //        {
+        //            string nomeSetor = "";
+        //            if (e.SetorSolicitante != null)
+        //            {
+        //                nomeSetor = !string.IsNullOrEmpty(e.SetorSolicitante.Sigla)
+        //                    ? $"{e.SetorSolicitante.Nome} ({e.SetorSolicitante.Sigla})"
+        //                    : e.SetorSolicitante.Nome ?? "";
+        //            }
 
-                    custosPorEvento.TryGetValue(e.EventoId, out double custoViagem);
+        //            custosPorEvento.TryGetValue(e.EventoId , out double custoViagem);
 
-                    return new
-                    {
-                        eventoId = e.EventoId,
-                        nome = e.Nome ?? "",
-                        descricao = e.Descricao ?? "",
-                        dataInicial = e.DataInicial,
-                        dataFinal = e.DataFinal,
-                        qtdParticipantes = e.QtdParticipantes ?? 0,
-                        status = e.Status == "1" ? 1 : 0,
-                        nomeSetor = nomeSetor,
-                        nomeRequisitante = e.Requisitante?.Nome ?? "",
-                        nomeRequisitanteHTML = e.Requisitante?.Nome ?? "",
-                        custoViagem = custoViagem
-                    };
-                }).ToList();
+        //            return new
+        //            {
+        //                eventoId = e.EventoId ,
+        //                nome = e.Nome ?? "" ,
+        //                descricao = e.Descricao ?? "" ,
+        //                dataInicial = e.DataInicial ,
+        //                dataFinal = e.DataFinal ,
+        //                qtdParticipantes = e.QtdParticipantes ?? 0 ,
+        //                status = e.Status == "1" ? 1 : 0 ,
+        //                nomeSetor = nomeSetor ,
+        //                nomeRequisitante = e.Requisitante?.Nome ?? "" ,
+        //                nomeRequisitanteHTML = e.Requisitante?.Nome ?? "" ,
+        //                custoViagem = custoViagem
+        //            };
+        //        }).ToList();
 
-                swTotal.Stop();
-                Console.WriteLine($"[ListaEventos] TOTAL: {swTotal.ElapsedMilliseconds}ms - {resultado.Count} eventos");
+        //        swTotal.Stop();
+        //        Console.WriteLine($"[ListaEventos] TOTAL: {swTotal.ElapsedMilliseconds}ms - {resultado.Count} eventos");
 
-                return Json(new { data = resultado });
-            }
-            catch (Exception error)
-            {
-                swTotal.Stop();
-                Alerta.TratamentoErroComLinha("ViagemController.cs", "ListaEventos", error);
-                return Json(new
-                {
-                    success = false,
-                    message = "Erro ao listar eventos",
-                    data = new List<object>()
-                });
-            }
-        }
+        //        return Json(new { data = resultado });
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        swTotal.Stop();
+        //        Alerta.TratamentoErroComLinha("ViagemController.cs" , "ListaEventos" , error);
+        //        return Json(new
+        //        {
+        //            success = false ,
+        //            message = "Erro ao listar eventos" ,
+        //            data = new List<object>()
+        //        });
+        //    }
+        //}
 
         [Route("UpdateStatusEvento")]
         public JsonResult UpdateStatusEvento(Guid Id)
@@ -1729,6 +1765,155 @@ namespace FrotiX.Controllers
             }
         }
 
+        [Route("AdicionarViagensEconomildoLote")]
+        [Consumes("application/json")]
+        public JsonResult AdicionarViagensEconomildoLote([FromBody] List<ViagensEconomildo> viagens)
+        {
+            try
+            {
+                if (viagens == null || viagens.Count == 0)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "Nenhuma viagem foi informada."
+                    });
+                }
+
+                // Adicionar todas as viagens de uma vez
+                foreach (var viagem in viagens)
+                {
+                    _unitOfWork.ViagensEconomildo.Add(viagem);
+                }
+
+                // Salvar tudo de uma vez - evita múltiplas transações
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true ,
+                    message = $"{viagens.Count} viagem(ns) adicionada(s) com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "AdicionarViagensEconomildoLote" , error);
+                return Json(new
+                {
+                    success = false ,
+                    message = "Erro ao adicionar viagens: " + error.Message
+                });
+            }
+        }
+
+        [Route("BuscarViagemEconomildo")]
+        public JsonResult BuscarViagemEconomildo(Guid id)
+        {
+            try
+            {
+                var viagem = _unitOfWork.ViagensEconomildo.GetFirstOrDefault(
+                    v => v.ViagemEconomildoId == id
+                );
+
+                if (viagem == null)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "Viagem não encontrada."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true ,
+                    data = new
+                    {
+                        viagemEconomildoId = viagem.ViagemEconomildoId ,
+                        data = viagem.Data?.ToString("yyyy-MM-dd") ,
+                        veiculoId = viagem.VeiculoId ,
+                        motoristaId = viagem.MotoristaId ,
+                        mob = viagem.MOB ,
+                        responsavel = viagem.Responsavel ,
+                        idaVolta = viagem.IdaVolta ,
+                        horaInicio = viagem.HoraInicio ,
+                        horaFim = viagem.HoraFim ,
+                        qtdPassageiros = viagem.QtdPassageiros
+                    }
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "BuscarViagemEconomildo" , error);
+                return Json(new
+                {
+                    success = false ,
+                    message = "Erro ao buscar viagem: " + error.Message
+                });
+            }
+        }
+
+        [Route("AtualizarViagemEconomildo")]
+        [Consumes("application/json")]
+        public JsonResult AtualizarViagemEconomildo([FromBody] ViagensEconomildo viagem)
+        {
+            try
+            {
+                if (viagem == null || viagem.ViagemEconomildoId == Guid.Empty)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "Dados inválidos para atualização."
+                    });
+                }
+
+                // Busca o registro existente
+                var objFromDb = _unitOfWork.ViagensEconomildo.GetFirstOrDefault(
+                    v => v.ViagemEconomildoId == viagem.ViagemEconomildoId
+                );
+
+                if (objFromDb == null)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "Viagem não encontrada."
+                    });
+                }
+
+                // Atualiza os campos
+                objFromDb.Data = viagem.Data;
+                objFromDb.VeiculoId = viagem.VeiculoId;
+                objFromDb.MotoristaId = viagem.MotoristaId;
+                objFromDb.MOB = viagem.MOB;
+                objFromDb.Responsavel = viagem.Responsavel;
+                objFromDb.IdaVolta = viagem.IdaVolta;
+                objFromDb.HoraInicio = viagem.HoraInicio;
+                objFromDb.HoraFim = viagem.HoraFim;
+                objFromDb.QtdPassageiros = viagem.QtdPassageiros;
+
+                // Salva no banco
+                _unitOfWork.ViagensEconomildo.Update(objFromDb);
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true ,
+                    message = "Viagem atualizada com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "AtualizarViagemEconomildo" , error);
+                return Json(new
+                {
+                    success = false ,
+                    message = "Erro ao atualizar viagem: " + error.Message
+                });
+            }
+        }
+
         public byte[] GetImage(string sBase64String)
         {
             byte[] bytes = null;
@@ -2220,6 +2405,16 @@ namespace FrotiX.Controllers
         {
             try
             {
+                // VALIDAÇÃO: Data Final não pode ser superior à data atual
+                if (viagem.DataFinal.HasValue && viagem.DataFinal.Value.Date > DateTime.Today)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "A Data Final não pode ser superior à data atual."
+                    });
+                }
+
                 // 1. BUSCA A VIAGEM NO BANCO
                 var objViagem = _unitOfWork.Viagem.GetFirstOrDefault(v =>
                     v.ViagemId == viagem.ViagemId
@@ -2243,7 +2438,6 @@ namespace FrotiX.Controllers
                 objViagem.Status = "Realizada";
                 objViagem.StatusDocumento = viagem.StatusDocumento;
                 objViagem.StatusCartaoAbastecimento = viagem.StatusCartaoAbastecimento;
-
 
                 // 3. REGISTRA USUÁRIO E DATA DE FINALIZAÇÃO
                 ClaimsPrincipal currentUser = this.User;
@@ -2369,6 +2563,16 @@ namespace FrotiX.Controllers
         {
             try
             {
+                // VALIDAÇÃO: Data Final não pode ser superior à data atual
+                if (viagem.DataFinal.HasValue && viagem.DataFinal.Value.Date > DateTime.Today)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "A Data Final não pode ser superior à data atual."
+                    });
+                }
+
                 var objViagem = _unitOfWork.Viagem.GetFirstOrDefault(v =>
                     v.ViagemId == viagem.ViagemId
                 );
@@ -2540,6 +2744,224 @@ namespace FrotiX.Controllers
             {
                 Alerta.TratamentoErroComLinha("ViagemController.cs" , "ObterDocumento" , error);
                 return StatusCode(500);
+            }
+        }
+
+        // ===============================================================================
+        // INTEGRAÇÃO FROTIX MOBILE - RUBRICAS E OCORRÊNCIAS
+        // ===============================================================================
+
+        /// <summary>
+        /// Retorna os dados registrados pelo Mobile: Rubrica, RubricaFinal, Documentos/Itens e Ocorrências
+        /// </summary>
+        [HttpGet]
+        [Route("ObterDadosMobile")]
+        public IActionResult ObterDadosMobile(Guid viagemId)
+        {
+            try
+            {
+                if (viagemId == Guid.Empty)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "ID da viagem não informado"
+                    });
+                }
+
+                var viagem = _unitOfWork.Viagem.GetFirstOrDefault(v => v.ViagemId == viagemId);
+
+                if (viagem == null)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "Viagem não encontrada"
+                    });
+                }
+
+                // Rubrica e RubricaFinal são strings (podem ser base64 ou URL)
+                string rubricaInicial = null;
+                string rubricaFinal = null;
+
+                if (!string.IsNullOrWhiteSpace(viagem.Rubrica))
+                {
+                    // Se já for base64 com prefixo, usar direto; senão, adicionar prefixo
+                    rubricaInicial = viagem.Rubrica.StartsWith("data:")
+                        ? viagem.Rubrica
+                        : $"data:image/png;base64,{viagem.Rubrica}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(viagem.RubricaFinal))
+                {
+                    rubricaFinal = viagem.RubricaFinal.StartsWith("data:")
+                        ? viagem.RubricaFinal
+                        : $"data:image/png;base64,{viagem.RubricaFinal}";
+                }
+
+                // Buscar ocorrências da viagem
+                var ocorrencias = _unitOfWork.OcorrenciaViagem
+                    .GetAll(o => o.ViagemId == viagemId)
+                    .OrderByDescending(o => o.DataCriacao)
+                    .Select(o => new
+                    {
+                        o.OcorrenciaViagemId ,
+                        o.Resumo ,
+                        o.Descricao ,
+                        DataOcorrencia = o.DataCriacao.ToString("dd/MM/yyyy HH:mm") ,
+                        StatusOcorrencia = o.Status ,
+                        Solucao = o.Solucao ?? "" ,
+                        TemImagem = !string.IsNullOrWhiteSpace(o.ImagemOcorrencia) && o.ImagemOcorrencia != "semimagem.jpg" ,
+                        ImagemBase64 = !string.IsNullOrWhiteSpace(o.ImagemOcorrencia) && o.ImagemOcorrencia != "semimagem.jpg"
+                            ? (o.ImagemOcorrencia.StartsWith("data:") ? o.ImagemOcorrencia : $"data:image/jpeg;base64,{o.ImagemOcorrencia}")
+                            : null
+                    })
+                    .ToList();
+
+                return Json(new
+                {
+                    success = true ,
+                    noFichaVistoria = viagem.NoFichaVistoria ,
+                    isMobile = viagem.NoFichaVistoria == null || viagem.NoFichaVistoria == 0 ,
+                    rubricaInicial = rubricaInicial ,
+                    rubricaFinal = rubricaFinal ,
+                    temRubricaInicial = rubricaInicial != null ,
+                    temRubricaFinal = rubricaFinal != null ,
+                    // Documentos/Itens Entregues (Vistoria Inicial)
+                    statusDocumento = viagem.StatusDocumento ?? "" ,
+                    statusCartaoAbastecimento = viagem.StatusCartaoAbastecimento ?? "" ,
+                    cintaEntregue = viagem.CintaEntregue ?? false ,
+                    tabletEntregue = viagem.TabletEntregue ?? false ,
+                    // Documentos/Itens Devolvidos (Vistoria Final)
+                    statusDocumentoFinal = viagem.StatusDocumentoFinal ?? "" ,
+                    statusCartaoAbastecimentoFinal = viagem.StatusCartaoAbastecimentoFinal ?? "" ,
+                    cintaDevolvida = viagem.CintaDevolvida ?? false ,
+                    tabletDevolvido = viagem.TabletDevolvido ?? false ,
+                    // Ocorrências
+                    ocorrencias = ocorrencias ,
+                    totalOcorrencias = ocorrencias.Count
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "ObterDadosMobile" , error);
+                return Json(new
+                {
+                    success = false ,
+                    message = $"Erro ao obter dados mobile: {error.Message}"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Retorna a imagem de uma ocorrência específica
+        /// </summary>
+        [HttpGet]
+        [Route("ObterImagemOcorrencia")]
+        public IActionResult ObterImagemOcorrencia(Guid ocorrenciaId)
+        {
+            try
+            {
+                if (ocorrenciaId == Guid.Empty)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "ID da ocorrência não informado"
+                    });
+                }
+
+                var ocorrencia = _unitOfWork.OcorrenciaViagem.GetFirstOrDefault(o =>
+                    o.OcorrenciaViagemId == ocorrenciaId);
+
+                if (ocorrencia == null)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "Ocorrência não encontrada"
+                    });
+                }
+
+                if (!string.IsNullOrWhiteSpace(ocorrencia.ImagemOcorrencia) && ocorrencia.ImagemOcorrencia != "semimagem.jpg")
+                {
+                    var imagemBase64 = ocorrencia.ImagemOcorrencia.StartsWith("data:")
+                        ? ocorrencia.ImagemOcorrencia
+                        : $"data:image/jpeg;base64,{ocorrencia.ImagemOcorrencia}";
+
+                    return Json(new
+                    {
+                        success = true ,
+                        temImagem = true ,
+                        imagemBase64 = imagemBase64
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true ,
+                    temImagem = false
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "ObterImagemOcorrencia" , error);
+                return Json(new
+                {
+                    success = false ,
+                    message = $"Erro ao obter imagem: {error.Message}"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Retorna lista de ocorrências de uma viagem específica
+        /// </summary>
+        [HttpGet]
+        [Route("ObterOcorrenciasViagem")]
+        public IActionResult ObterOcorrenciasViagem(Guid viagemId)
+        {
+            try
+            {
+                if (viagemId == Guid.Empty)
+                {
+                    return Json(new
+                    {
+                        success = false ,
+                        message = "ID da viagem não informado"
+                    });
+                }
+
+                var ocorrencias = _unitOfWork.OcorrenciaViagem
+                    .GetAll(o => o.ViagemId == viagemId)
+                    .OrderByDescending(o => o.DataCriacao)
+                    .Select(o => new
+                    {
+                        o.OcorrenciaViagemId ,
+                        o.Resumo ,
+                        o.Descricao ,
+                        DataOcorrencia = o.DataCriacao.ToString("dd/MM/yyyy HH:mm") ,
+                        StatusOcorrencia = o.Status ,
+                        Solucao = o.Solucao ?? "" ,
+                        TemImagem = !string.IsNullOrWhiteSpace(o.ImagemOcorrencia) && o.ImagemOcorrencia != "semimagem.jpg"
+                    })
+                    .ToList();
+
+                return Json(new
+                {
+                    success = true ,
+                    ocorrencias = ocorrencias ,
+                    total = ocorrencias.Count
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs" , "ObterOcorrenciasViagem" , error);
+                return Json(new
+                {
+                    success = false ,
+                    message = $"Erro ao obter ocorrências: {error.Message}"
+                });
             }
         }
     }

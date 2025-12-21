@@ -1,67 +1,316 @@
 @page
-@model FrotiX.Models.Operador
+@model FrotiX.Pages.Operador.IndexModel
 
 @{
-	ViewData["Title"] = "Operadores";
-	ViewData["PageName"] = "operador_index";
-	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Operadores</span>";
-	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fal fa-user-tie";
+    ViewData["Title"]     = "Operadores";
+    ViewData["PageName"]  = "operador_index";
+    ViewData["Heading"]   = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Operadores</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"]  = "fal fa-user-tie";
 }
- 
+
 @section HeadBlock {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background-color: #3D5771;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 900 !important;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* ====== BOTÃO LARANJA COM BORDA BRANCA ====== */
+        .ftx-card-header .btn-fundo-laranja {
+            border: 2px solid rgba(255, 255, 255, 0.7) !important;
+            outline: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .ftx-card-header .btn-fundo-laranja:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ====== PANEL CONTENT ====== */
+        .panel-content {
+            padding: 1.25rem;
+            background: #f8f9fa;
+        }
+
+        /* ====== DATATABLE AJUSTES ====== */
+        #tblOperador_wrapper {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        #tblOperador thead {
+            background-color: #3D5771;
+        }
+
+        #tblOperador thead th {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 0.5rem;
+            border: none;
+            white-space: nowrap;
+        }
+
+        #tblOperador tbody td {
+            vertical-align: middle;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        #tblOperador tbody tr:hover {
+            background-color: rgba(61, 87, 113, 0.08) !important;
+        }
+
+        /* ====== BOTÕES DE AÇÃO NA TABELA ====== */
+        .ftx-btn-acoes {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+        }
+
+        /* ====== BADGES DE STATUS ====== */
+        .badge-ativo {
+            background-color: #22c55e !important;
+            color: white !important;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+            border: none;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .badge-ativo:hover {
+            background-color: #16a34a !important;
+            transform: scale(1.05);
+        }
+
+        .badge-inativo {
+            background-color: #2F4F4F !important;
+            color: aliceblue !important;
+            box-shadow: 0 0 8px rgba(47, 79, 79, 0.5);
+            border: none;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .badge-inativo:hover {
+            background-color: #1a3030 !important;
+            transform: scale(1.05);
+        }
+
+        /* ====== MODAL PADRÃO FROTIX ====== */
+        .ftx-modal .modal-content {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .ftx-modal .modal-header {
+            background-color: #3D5771;
+            padding: 1rem 1.25rem;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-modal .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .ftx-modal .modal-title {
+            color: #fff;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+            margin: 0;
+        }
+
+        .ftx-modal .modal-title i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.25rem;
+        }
+
+        .ftx-modal .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-modal .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        .ftx-modal .modal-body {
+            padding: 1.5rem;
+            background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ftx-modal .modal-footer {
+            border-top: 1px solid rgba(0,0,0,0.08);
+            padding: 1rem 1.25rem;
+            background: #f8f9fa;
+        }
+
+        .ftx-modal .modal-footer .btn {
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* ====== FOTO DO OPERADOR ====== */
+        .ftx-foto-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #3D5771;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .ftx-foto-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ====== RESPONSIVO ====== */
+        @@media (max-width: 768px) {
+            .ftx-card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .ftx-card-header .titulo-paginas {
+                font-size: 1.2rem;
+            }
+
+            .ftx-btn-acoes {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 }
-
-<style>
-    .fundo-cinza {
-        background-color: #2F4F4F;
-        color: aliceblue;
-    }
-    .label { color: white; }
-
-    /* Ajuste local: aproxima o conteúdo do cabeçalho */
-    #panel-1 .panel-content {
-        padding-top: 10px !important;
-    }
-
-    /* Ajustes locais de espaçamento do DataTables desta página */
-    #tblOperador_wrapper .row {
-        margin-top: .25rem;
-        margin-bottom: .5rem;
-    }
-    #tblOperador_wrapper .dataTables_length,
-    #tblOperador_wrapper .dt-buttons,
-    #tblOperador_wrapper .dataTables_filter {
-        margin-top: .25rem;
-        margin-bottom: .25rem;
-    }
-</style>
 
 <div class="row">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
             <div class="panel-container show">
 
-                <!-- Cabeçalho (usa .header-toolbar e .titulo-paginas do CSS GLOBAL) -->
-                <div class="col-12 px-3">
-                    <div class="header-toolbar">
-                        <h2 class="titulo-paginas">
-                            <i class="fa-duotone fa-user-headset" aria-hidden="true"></i>
-                            Listagem de Operadores
-                        </h2>
-
-                        <a href="/Operador/Upsert"
-                           class="btn btn-azul form-control flex-shrink-0"
-                           style="width: 250px;"
-                           data-ejtip="Adicionar novo operador ao sistema">
-                            <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Operador
-                        </a>
-                    </div>
+                <!-- HEADER AZUL PADRÃO FROTIX -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-user-headset"></i>
+                        Listagem de Operadores
+                    </h2>
+                    <a href="/Operador/Upsert" class="btn btn-fundo-laranja">
+                        <i class="fa-duotone fa-file-plus"></i>
+                        Adicionar Operador
+                    </a>
                 </div>
 
+                <!-- CONTEÚDO -->
                 <div class="panel-content">
-                    <div class="box-body">
-                       <table id="tblOperador" class="table table-bordered table-striped mt-2 ftx-table" width="100%">
+                    <div id="divOperadores">
+                        <table id="tblOperador" class="table table-bordered table-striped" width="100%">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
@@ -72,9 +321,7 @@
                                     <th>Ação</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @* preenchido via JS *@
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>
@@ -84,107 +331,99 @@
     </div>
 </div>
 
-@* -------------- Modal da Foto do Operador -------------- *@
-@* ======================================================= *@
-<div class="modal fade" id="modalFoto">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-			<div class="modal-header modal-header-azul">
-				<h4 class="modal-title" id="DynamicModalLabel">Foto do Operador</h4>
-			</div>
-			<div class="modal-body table-bordered container-fluid">
-				<img id="imgViewer" alt="Foto do Operador" width="200" height="200" style="border: 1px solid #000000; margin-top: 10px;" />
-				<div class="modal-footer">
-					<button type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal">
-						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
-						Fechar
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
+@* ===================== MODAL FOTO DO OPERADOR ===================== *@
+<div class="modal fade ftx-modal" id="modalFoto" tabindex="-1" aria-labelledby="modalFotoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFotoLabel">
+                    <i class="fa-duotone fa-camera-retro"></i>
+                    <span id="txtTituloFoto">Foto do Operador</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ftx-foto-container">
+                    <img id="imgViewer" src="/Images/barbudo.jpg" alt="Foto do Operador" />
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark"></i>
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section ScriptsBlock {
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/cadastros/operador.js" asp-append-version="true"></script>
 
-	<script src="~/js/cadastros/operador.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            try {
+                // Handler delegado para botão de foto
+                $(document).on('click', '.btn-foto', function(e) {
+                    try {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        var operadorId = $(this).data('id');
+                        var nomeOperador = $(this).closest('tr').find('td:eq(0)').text();
+                        
+                        // Limpar imagem anterior
+                        $('#imgViewer').attr('src', '/Images/barbudo.jpg');
+                        $('#txtTituloFoto').text('Carregando...');
+                        
+                        // Abrir modal
+                        var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalFoto'));
+                        modal.show();
+                        
+                        // Carregar foto
+                        $.ajax({
+                            type: "GET",
+                            url: "/api/Operador/PegaFotoModal",
+                            data: { id: operadorId },
+                            success: function (res) {
+                                try {
+                                    if (res === false || !res) {
+                                        $('#txtTituloFoto').html('Operador sem Foto: <b>' + nomeOperador + '</b>');
+                                        $('#imgViewer').attr('src', '/Images/barbudo.jpg');
+                                    } else {
+                                        $('#txtTituloFoto').html('Foto: <b>' + nomeOperador + '</b>');
+                                        $('#imgViewer').attr('src', 'data:image/jpg;base64,' + res);
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "PegaFotoModal.success", error);
+                                }
+                            },
+                            error: function (err) {
+                                try {
+                                    console.error("Erro ao carregar foto:", err);
+                                    $('#txtTituloFoto').text('Erro ao carregar foto');
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "PegaFotoModal.error", error);
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "btn-foto.click", error);
+                    }
+                });
 
-	<script>
-		$(document).ready(function () {
-			try {
-				// Configura a Exibição do Modal de Foto
-				const modalEl = document.getElementById("modalFoto");
-
-				if (modalEl) {
-					// Bootstrap 5
-					modalEl.addEventListener("show.bs.modal", function (event) {
-						try {
-							var button = event.relatedTarget;
-							var operadorId = button.getAttribute("data-id");
-
-							console.log(operadorId);
-
-							var id = operadorId;
-							var label = document.getElementById("DynamicModalLabel");
-							label.innerHTML = "";
-
-							$.ajaxSetup({ async: false });
-
-							$.ajax({
-								type: "get",
-								url: "/api/Operador/PegaFotoModal",
-								data: { id: id },
-								success: function (res) {
-									try {
-										var operador = $(button).closest("tr").find("td:eq(0)").text();
-										console.log(operador);
-
-										var label = document.getElementById("DynamicModalLabel");
-										$("#imgViewer").removeAttr("src");
-
-										if (res === false) {
-											label.innerHTML = ("Operador sem Foto: <b>" + operador + "</b>");
-											$("#imgViewer").attr("src", "/Images/barbudo.jpg");
-										} else {
-											label.innerHTML = ("Foto do Operador: <b>" + operador + "</b>");
-											$("#imgViewer").attr("src", "data:image/jpg;base64," + res);
-										}
-									}
-									catch (error) {
-										Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.show.ajax.success", error);
-									}
-								},
-								error: function (err) {
-									try {
-										console.error("Erro ao carregar foto:", err);
-										Alerta.Erro("Erro ao Carregar", "Não foi possível carregar a foto do operador.", "OK");
-									}
-									catch (error) {
-										Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.show.ajax.error", error);
-									}
-								}
-							});
-						}
-						catch (error) {
-							Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.show.bs.modal", error);
-						}
-					});
-
-					modalEl.addEventListener("hide.bs.modal", function () {
-						try {
-							$("#imgViewer").removeAttr("src");
-						}
-						catch (error) {
-							Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modal.hide.bs.modal", error);
-						}
-					});
-				}
-			}
-			catch (error) {
-				Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "document.ready", error);
-			}
-		});
-	</script>
+                // Limpar ao fechar modal
+                $('#modalFoto').on('hide.bs.modal', function () {
+                    try {
+                        $('#imgViewer').attr('src', '/Images/barbudo.jpg');
+                        $('#txtTituloFoto').text('Foto do Operador');
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "modalFoto.hide", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Operador/Index.cshtml", "document.ready", error);
+            }
+        });
+    </script>
 }

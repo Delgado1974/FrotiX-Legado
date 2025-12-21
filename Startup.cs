@@ -2,6 +2,7 @@ using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Extensions;
 using FrotiX.Cache;
 using FrotiX.Data;
+using FrotiX.Filters;
 using FrotiX.Hubs;
 using FrotiX.Middlewares;
 using FrotiX.Models;
@@ -30,6 +31,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using System;
 using System.Globalization;
 using System.IO.Compression;
@@ -44,7 +46,7 @@ namespace FrotiX
     {
         private readonly IWebHostEnvironment _environment;
 
-        public Startup(IConfiguration configuration , IWebHostEnvironment environment)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             try
             {
@@ -56,7 +58,7 @@ namespace FrotiX
             }
             catch (Exception ex)
             {
-                Alerta.TratamentoErroComLinha(ex , "Startup.cs" , ".ctor");
+                Alerta.TratamentoErroComLinha(ex, "Startup.cs", ".ctor");
             }
         }
 
@@ -108,7 +110,7 @@ namespace FrotiX
                 // ⭐ CORS - Configuração melhorada para Telerik Reports
                 services.AddCors(options =>
                 {
-                    options.AddPolicy("CorsPolicy" ,
+                    options.AddPolicy("CorsPolicy",
                         builder => builder
                             .AllowAnyOrigin()
                             .AllowAnyMethod()
@@ -117,13 +119,13 @@ namespace FrotiX
                 });
 
                 // Configuração do Telerik Reporting
-                services.TryAddSingleton<IReportSourceResolver , CustomReportSourceResolver>();
+                services.TryAddSingleton<IReportSourceResolver, CustomReportSourceResolver>();
                 services.TryAddSingleton<IReportServiceConfiguration>(sp =>
                     new ReportServiceConfiguration
                     {
-                        ReportingEngineConfiguration = sp.GetService<IConfiguration>() ,
-                        HostAppId = "FrotiXApp" ,
-                        Storage = new FileStorage() ,
+                        ReportingEngineConfiguration = sp.GetService<IConfiguration>(),
+                        HostAppId = "FrotiXApp",
+                        Storage = new FileStorage(),
                         ReportSourceResolver = sp.GetRequiredService<IReportSourceResolver>()
                     });
 
@@ -150,9 +152,46 @@ namespace FrotiX
                 services.AddMemoryCache();
                 services.AddHostedService<CacheWarmupService>();
 
+                // ========================================================
+                // ⭐ SISTEMA DE LOG DE ERROS - SERVIÇOS
+                // ========================================================
+                services.AddSingleton<ILogService, LogService>();
+                
+                // Filtros de exceção (devem ser Scoped para injeção de dependência)
+                services.AddScoped<GlobalExceptionFilter>();
+                services.AddScoped<AsyncExceptionFilter>();
+                services.AddScoped<PageExceptionFilter>();
+                services.AddScoped<AsyncPageExceptionFilter>();
+                // ========================================================
+
                 // ⭐ Controllers com Newtonsoft configurado corretamente
                 services.AddControllers()
                     .AddNewtonsoftJson();
+
+                // ⭐ SWAGGER - Configuração (apenas APIs)
+                services.AddEndpointsApiExplorer();
+                services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo
+                    {
+                        Title = "FrotiX API",
+                        Version = "v1",
+                        Description = "API do Sistema de Gestão de Frotas - Câmara dos Deputados"
+                    });
+
+                    // Documentar APENAS endpoints que começam com /api
+                    c.DocInclusionPredicate((docName, apiDesc) =>
+                    {
+                        if (apiDesc.RelativePath == null) return false;
+                        return apiDesc.RelativePath.StartsWith("api/", StringComparison.OrdinalIgnoreCase);
+                    });
+
+                    // Resolver conflitos de rota
+                    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+                    // Usar FullName para evitar conflitos de tipo
+                    c.CustomSchemaIds(type => type.FullName);
+                });
 
                 services.Configure<SmartSettings>(
                     Configuration.GetSection(SmartSettings.SectionName)
@@ -165,6 +204,9 @@ namespace FrotiX
                     options.MinimumSameSitePolicy = SameSiteMode.None;
                 });
 
+                // ========================================================
+                // CONFIGURAÇÕES DE BANCO DE DADOS E IDENTITY
+                // ========================================================
                 services.AddDbContext<ApplicationDbContext>(options =>
                 {
                     options
@@ -182,21 +224,21 @@ namespace FrotiX
                 });
 
                 services
-                    .AddIdentity<IdentityUser , IdentityRole>(options =>
+                    .AddIdentity<IdentityUser, IdentityRole>(options =>
                         options.SignIn.RequireConfirmedAccount = false
                     )
                     .AddRoleManager<RoleManager<IdentityRole>>()
                     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-                services.AddScoped<IUnitOfWork , UnitOfWork>();
-                services.AddScoped<ICorridasTaxiLegRepository , CorridasTaxiLegRepository>();
+                services.AddScoped<IUnitOfWork, UnitOfWork>();
+                services.AddScoped<ICorridasTaxiLegRepository, CorridasTaxiLegRepository>();
 
-                services.AddScoped<IViagemEstatisticaRepository , ViagemEstatisticaRepository>();
+                services.AddScoped<IViagemEstatisticaRepository, ViagemEstatisticaRepository>();
                 services.AddScoped<ViagemEstatisticaService>();
 
                 // Repositórios de Alertas
-                services.AddScoped<IAlertasFrotiXRepository , AlertasFrotiXRepository>();
-                services.AddScoped<IAlertasUsuarioRepository , AlertasUsuarioRepository>();
+                services.AddScoped<IAlertasFrotiXRepository, AlertasFrotiXRepository>();
+                services.AddScoped<IAlertasUsuarioRepository, AlertasUsuarioRepository>();
 
                 services.Configure<IdentityOptions>(opts =>
                 {
@@ -206,15 +248,19 @@ namespace FrotiX
                     opts.Password.RequireDigit = false;
                 });
 
-                services.AddTransient<IEmailSender , EmailSender>();
+                services.AddTransient<IEmailSender, EmailSender>();
 
-                // 🔒 Filtro global: exige usuário autenticado
+                // 🔒 Filtro global: exige usuário autenticado + Filtros de Log de Erros
                 services.AddControllersWithViews(options =>
                 {
                     var policy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
                         .Build();
                     options.Filters.Add(new AuthorizeFilter(policy));
+
+                    // ⭐ Filtros globais de exceção para log de erros (Controllers)
+                    options.Filters.Add<GlobalExceptionFilter>();
+                    options.Filters.Add<AsyncExceptionFilter>();
                 });
 
                 services
@@ -222,7 +268,7 @@ namespace FrotiX
                     .AddRazorPagesOptions(options =>
                     {
                         // raiz "/" aponta para o dashboard
-                        options.Conventions.AddPageRoute("/intel/analyticsdashboard" , "");
+                        options.Conventions.AddPageRoute("/intel/analyticsdashboard", "");
                     })
                     .AddMvcOptions(options =>
                     {
@@ -230,6 +276,10 @@ namespace FrotiX
                         options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(_ =>
                             "O campo é obrigatório."
                         );
+                        
+                        // ⭐ Filtros de exceção também para Razor Pages via MvcOptions
+                        options.Filters.Add<PageExceptionFilter>();
+                        options.Filters.Add<AsyncPageExceptionFilter>();
                     });
 
                 services.AddRazorPages().AddRazorRuntimeCompilation();
@@ -261,20 +311,20 @@ namespace FrotiX
                 });
 
                 services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
-                services.AddTransient<IMailService , MailService>();
+                services.AddTransient<IMailService, MailService>();
                 services.AddHttpContextAccessor();
-                services.AddTransient<IActionContextAccessor , ActionContextAccessor>();
-                services.AddScoped<IRazorRenderService , RazorRenderService>();
+                services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
+                services.AddScoped<IRazorRenderService, RazorRenderService>();
                 services.AddKendo();
-                services.AddScoped<INavigationModel , NavigationModel>();
-                services.AddScoped<IViagemRepository , ViagemRepository>();
+                services.AddScoped<INavigationModel, NavigationModel>();
+                services.AddScoped<IViagemRepository, ViagemRepository>();
 
                 services.AddMemoryCache();
                 services.AddScoped<MotoristaFotoService>();
                 services.AddScoped<MotoristaCache>();
-                services.AddScoped<IGlosaService , GlosaService>();
+                services.AddScoped<IGlosaService, GlosaService>();
 
-                services.AddScoped<IToastService , ToastService>();
+                services.AddScoped<IToastService, ToastService>();
 
                 // >>> Normalizador de texto habilitado (JSON cache + Azure NER auto via env + fallback)
                 services.AddTextNormalization();
@@ -286,8 +336,8 @@ namespace FrotiX
                 });
 
                 // === Providers de TempData necessários para o Alerta gravar o payload ===
-                services.AddSingleton<ITempDataProvider , CookieTempDataProvider>();
-                services.AddSingleton<ITempDataDictionaryFactory , TempDataDictionaryFactory>();
+                services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
+                services.AddSingleton<ITempDataDictionaryFactory, TempDataDictionaryFactory>();
                 // =======================================================================
 
                 services.Configure<FormOptions>(options =>
@@ -309,7 +359,7 @@ namespace FrotiX
 
                 services.Configure<EvolutionApiOptions>(Configuration.GetSection("WhatsApp"));
 
-                services.AddHttpClient<IWhatsAppService , EvolutionApiWhatsAppService>((sp , client) =>
+                services.AddHttpClient<IWhatsAppService, EvolutionApiWhatsAppService>((sp, client) =>
                 {
                     var opts = sp.GetRequiredService<IOptions<EvolutionApiOptions>>().Value;
                     if (string.IsNullOrWhiteSpace(opts.BaseUrl))
@@ -320,7 +370,7 @@ namespace FrotiX
                     if (!string.IsNullOrWhiteSpace(opts.ApiKey))
                     {
                         client.DefaultRequestHeaders.Remove("apikey");
-                        client.DefaultRequestHeaders.Add("apikey" , opts.ApiKey);
+                        client.DefaultRequestHeaders.Add("apikey", opts.ApiKey);
                     }
                     // Se seu provedor exigir Bearer:
                     // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", opts.ApiKey);
@@ -330,18 +380,26 @@ namespace FrotiX
             }
             catch (Exception ex)
             {
-                Alerta.TratamentoErroComLinha(ex , "Startup.cs" , "ConfigureServices");
+                Alerta.TratamentoErroComLinha(ex, "Startup.cs", "ConfigureServices");
             }
         }
 
         // Pipeline HTTP
         public void Configure(
-            IApplicationBuilder app ,
-            IWebHostEnvironment env ,
+            IApplicationBuilder app,
+            IWebHostEnvironment env,
             ILoggerFactory loggerFactory)
         {
             try
             {
+                // ========================================================
+                // ⭐ SISTEMA DE LOG DE ERROS - MIDDLEWARE (PRIMEIRO!)
+                // IMPORTANTE: Deve ser o PRIMEIRO middleware para capturar
+                // todos os erros, inclusive os de outros middlewares
+                // ========================================================
+                app.UseErrorLogging();
+                // ========================================================
+
                 // Configurar página de erro
                 if (env.IsDevelopment())
                 {
@@ -353,10 +411,18 @@ namespace FrotiX
                     app.UseHsts();
                 }
 
+                // ⭐ SWAGGER - Middleware (habilitado em todos os ambientes)
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FrotiX API v1");
+                    c.RoutePrefix = "swagger";
+                });
+
                 var supportedCultures = new[]
                 {
-            new CultureInfo("pt-BR"),
-        };
+                    new CultureInfo("pt-BR"),
+                };
 
                 var localizationOptions = new RequestLocalizationOptions()
                 .SetDefaultCulture("pt-BR")
@@ -365,13 +431,13 @@ namespace FrotiX
 
                 // IMPORTANTE: Configurar o AppToast
                 AppToast.Configure(
-                    app.ApplicationServices.GetRequiredService<IHttpContextAccessor>() ,
+                    app.ApplicationServices.GetRequiredService<IHttpContextAccessor>(),
                     app.ApplicationServices.GetRequiredService<ITempDataDictionaryFactory>()
                 );
                 app.UseRequestLocalization(localizationOptions);
 
                 // Para capturar erros de status code (404, 401, etc)
-                app.UseStatusCodePagesWithReExecute("/Error" , "?statusCode={0}");
+                app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 
                 // Register Syncfusion license
                 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(
@@ -413,10 +479,17 @@ namespace FrotiX
                     // *** Mapear o Hub do SignalR ***
                     endpoints.MapHub<AlertasHub>("/alertasHub");
                 });
+
+                // ========================================================
+                // ⭐ LOG: Sistema de log inicializado
+                // ========================================================
+                var logService = app.ApplicationServices.GetService<ILogService>();
+                logService?.Info("FrotiX Web inicializado com sucesso", "Startup.cs", "Configure");
+                // ========================================================
             }
             catch (Exception ex)
             {
-                Alerta.TratamentoErroComLinha(ex , "Startup.cs" , "Configure");
+                Alerta.TratamentoErroComLinha(ex, "Startup.cs", "Configure");
             }
         }
     }

@@ -9,11 +9,11 @@
 @inject IUnitOfWork _unitOfWork
 
 @{
-	ViewData["Title"] = "Gestão do Fluxo";
+	ViewData["Title"] = "Gestão das Fichas";
 	ViewData["PageName"] = "viagens_gestaofluxo";
-	ViewData["Heading"] = "<i class='fa-duotone fa-car-bus'></i> Gestão do Fluxo: <span class='fw-300'>Economildos</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-folder-open'></i> Gestão das Fichas: <span class='fw-300'>Passageiros</span>";
 	ViewData["Category1"] = "Fluxo de Passageiros";
-	ViewData["PageIcon"] = "fa-duotone fa-car-bus";
+	ViewData["PageIcon"] = "fa-duotone fa-folder-open";
 
 	// Carregamos as listas para combos:
 	var listaMotorista = new ListaMotoristasMOB(_unitOfWork).MotoristaList();
@@ -25,8 +25,154 @@
 }
 
 <style>
-	.label {
-		font-weight: bold;
+	/* Header animado com background gradiente */
+	.header-gestao {
+		position: relative;
+		background: linear-gradient(135deg, #325d88 0%, #2F4F4F 50%, #325d88 100%);
+		padding: 1.5rem 1.25rem;
+		margin: -1rem -1rem 1.5rem -1rem;
+		border-radius: 8px 8px 0 0;
+		overflow: hidden;
+		box-shadow: 0 4px 12px rgba(47, 79, 79, 0.15);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	/* Efeito de brilho animado */
+	.header-gestao::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+		animation: ftxHeaderShine 4s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	/* Título do header */
+	.header-gestao h1 {
+		font-family: 'Outfit', sans-serif;
+		font-weight: 900;
+		font-size: 2rem;
+		line-height: 1.25;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		color: #ffffff;
+		text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+		position: relative;
+		z-index: 1;
+	}
+
+	.header-gestao h1 i.fa-duotone {
+		--fa-primary-color: #ffffff;
+		--fa-secondary-color: #b8d4e8;
+		--fa-secondary-opacity: 0.7;
+		font-size: 2.4rem;
+		line-height: 1;
+		filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+	}
+
+	/* Botão laranja padrão FrotiX - SEM gradiente */
+	.btn-nova-ficha {
+		position: relative;
+		z-index: 1;
+		background-color: #f59e0b !important;
+		border: 2px solid rgba(255, 255, 255, 0.4) !important;
+		color: white !important;
+		padding: 0.75rem 1.5rem;
+		font-weight: 600;
+		font-size: 0.95rem;
+		border-radius: 8px;
+		box-shadow: 0 0 8px rgba(245, 158, 11, 0.5), 0 2px 4px rgba(245, 158, 11, 0.3) !important;
+		transition: all 0.3s ease, transform 0.2s ease !important;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		min-width: 160px;
+	}
+
+	.btn-nova-ficha:hover {
+		background-color: #d97706 !important;
+		border-color: rgba(255, 255, 255, 0.6) !important;
+		animation: buttonWiggle 0.5s ease-in-out !important;
+		box-shadow: 0 0 20px rgba(245, 158, 11, 0.8), 0 6px 12px rgba(245, 158, 11, 0.5) !important;
+		color: white !important;
+	}
+
+	.btn-nova-ficha:active,
+	.btn-nova-ficha:focus {
+		background-color: #b45309 !important;
+		border-color: rgba(255, 255, 255, 0.5) !important;
+		transform: translateY(0) scale(1) !important;
+		box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.35) !important;
+		color: white !important;
+	}
+
+	.btn-nova-ficha i {
+		font-size: 2rem;
+		line-height: 1;
+	}
+
+	.btn-nova-ficha span {
+		font-size: 0.85rem;
+		line-height: 1.2;
+		white-space: nowrap;
+	}
+
+	/* Separador de seção */
+	.secao-titulo {
+		border-bottom: 2px solid #325d88;
+		padding-bottom: 0.75rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.secao-titulo h3 {
+		font-family: 'Outfit', sans-serif;
+		font-weight: 700;
+		font-size: 1.35rem;
+		color: #325d88;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.secao-titulo h3 i {
+		font-size: 1.5rem;
+		color: #597272;
+	}
+
+	/* Igualar altura dos campos - 34px */
+	#txtData {
+		height: 34px !important;
+		padding: 0.375rem 0.75rem !important;
+		font-size: 0.875rem !important;
+	}
+
+	/* Ajustar altura dos Syncfusion para 34px */
+	.e-small.e-input-group.e-control-wrapper,
+	.e-small.e-input-group.e-control-wrapper .e-input,
+	.e-small .e-ddl.e-input-group {
+		height: 34px !important;
+		line-height: 34px !important;
+	}
+
+	.e-small.e-input-group.e-control-wrapper input.e-input {
+		height: 34px !important;
+		line-height: 1.5 !important;
+		padding: 0.375rem 0.75rem !important;
+		font-size: 0.875rem !important;
+	}
+
+	.e-small .e-input-group-icon {
+		min-height: 34px !important;
+		line-height: 34px !important;
 	}
 
 	/* Container dos botões */
@@ -34,15 +180,38 @@
 		gap: 4px;
 	}
 
-	/* Ajuste para ícones */
-	.btn-primary-custom i,
-	.btn-danger-custom i {
-		font-size: 14px;
+	/* Botões de ação do datatable - padrão FrotiX */
+	.btn-acao-dt {
+		padding: 4px 8px !important;
+		font-size: 14px !important;
+		margin: 1px !important;
+		border-radius: 4px !important;
+		transition: all 0.3s ease;
 	}
 
-	/* Tooltip nos botões */
-	button[title] {
-		cursor: pointer;
+	.btn-acao-dt:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Labels */
+	.label {
+		font-weight: bold;
+		color: #2F4F4F;
+	}
+
+	/* Cursor wait durante carregamento do DataTable */
+	.datatable-loading {
+		cursor: wait !important;
+	}
+
+	.datatable-loading * {
+		cursor: wait !important;
+	}
+
+	/* Esconder o processing padrão do DataTables */
+	.dataTables_processing {
+		display: none !important;
 	}
 </style>
 
@@ -62,7 +231,7 @@
 
 			// 2) Inicializa DataTable com serverSide e POST
 			dataTable = $('#tblFluxo').DataTable({
-				processing: true,
+				processing: false, // Desabilita o modal de processing padrão
 				serverSide: true,
 				autoWidth: false,
 				dom: 'Bfrtip',
@@ -97,10 +266,27 @@
 							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.data", error);
 						}
 					},
+					beforeSend: function() {
+						try {
+							// Adiciona cursor wait
+							$('body').addClass('datatable-loading');
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.beforeSend", error);
+						}
+					},
+					complete: function() {
+						try {
+							// Remove cursor wait
+							$('body').removeClass('datatable-loading');
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.complete", error);
+						}
+					},
 					error: function (xhr, error, thrown) {
 						try {
 							console.error('Erro no DataTable:', error);
 							AppToast.show('Vermelho', 'Erro ao carregar dados', 3000);
+							$('body').removeClass('datatable-loading');
 						} catch (err) {
 							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.error", err);
 						}
@@ -121,19 +307,17 @@
 						render: function (data) {
 							return `
 								<div class="d-flex justify-content-center gap-1">
-									<button class="btn btn-sm btn-azul"
-										data-bs-toggle="modal"
-										data-bs-target="#modalEditaRegistro"
+									<button class="btn btn-sm btn-azul btn-acao-dt btn-editar-registro"
 										data-id="${data}"
 										data-ejtip="Editar Registro"
-										style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-										<i class="far fa-edit"></i>
+										style="cursor:pointer;">
+										<i class="fa-duotone fa-pen-to-square"></i>
 									</button>
-									<button class="btn btn-sm btn-vinho btn-apagar"
+									<button class="btn btn-sm btn-vinho btn-acao-dt btn-apagar"
 										data-id="${data}"
 										data-ejtip="Apagar Registro"
-										style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-										<i class="far fa-trash-alt"></i>
+										style="cursor:pointer;">
+										<i class="fa-duotone fa-trash-can"></i>
 									</button>
 								</div>`;
 						}
@@ -156,7 +340,63 @@
 				}
 			});
 
-			// 3) Botão apagar
+			// 3) Botão editar - abre modal e carrega dados
+			$(document).on('click', '.btn-editar-registro', function (e) {
+				try {
+					e.preventDefault();
+					const viagemEconomildoId = $(this).data('id');
+					
+					// Busca os dados da viagem
+					$.ajax({
+						url: "/api/viagem/BuscarViagemEconomildo",
+						type: "GET",
+						data: { id: viagemEconomildoId },
+						success: function (response) {
+							try {
+								if (response.success && response.data) {
+									const v = response.data;
+									
+									// Preenche os campos do modal
+									$('#txtId').val(v.viagemEconomildoId);
+									$('#txtDataModal').val(v.data || '');
+									$('#txtIdaVolta').val(v.idaVolta || '');
+									$('#txtHoraInicioModal').val(v.horaInicio || '');
+									$('#txtHoraFimModal').val(v.horaFim || '');
+									$('#txtQtdModal').val(v.qtdPassageiros || '');
+									$('#txtMOBModal').val(v.mob || '');
+									$('#txtResponsavelModal').val(v.responsavel || '');
+									
+									// Preenche os comboboxes Syncfusion
+									const veiculosCombo = document.getElementById('lstVeiculosEconomildos')?.ej2_instances?.[0];
+									const motoristasCombo = document.getElementById('lstMotoristasEconomildo')?.ej2_instances?.[0];
+									
+									if (veiculosCombo) veiculosCombo.value = v.veiculoId;
+									if (motoristasCombo) motoristasCombo.value = v.motoristaId;
+									
+									// Abre o modal
+									$('#modalEditaRegistro').modal('show');
+								} else {
+									AppToast.show('Vermelho', response.message || 'Erro ao carregar dados', 3000);
+								}
+							} catch (error) {
+								Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btn-editar-registro.ajax.success", error);
+							}
+						},
+						error: function (xhr, status, error) {
+							try {
+								console.error('Erro ao buscar viagem:', error);
+								AppToast.show('Vermelho', 'Erro ao carregar dados da viagem', 3000);
+							} catch (err) {
+								Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btn-editar-registro.ajax.error", err);
+							}
+						}
+					});
+				} catch (error) {
+					Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btn-editar-registro.click", error);
+				}
+			});
+
+			// 4) Botão apagar
 			$(document).on('click', '.btn-apagar', function (e) {
 				try {
 					e.preventDefault();
@@ -218,24 +458,87 @@
 				}
 			});
 
-			// 4) Modal Editar
-			$('#modalEditaRegistro').on('shown.bs.modal', function (e) {
-				try {
-					const btn = $(e.relatedTarget);
-					const viagemEconomildoId = btn.data('id');
-					$('#txtId').val(viagemEconomildoId);
-				} catch (error) {
-					Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "modalEditaRegistro.shown", error);
-				}
-			});
-
+			// 5) Salvar edição do modal - AJAX real
 			$('#btnEditarOcorrencia').on('click', function (e) {
 				try {
 					e.preventDefault();
-					const id = $('#txtId').val();
-					// TODO: chamada para salvar edição
-					AppToast.show('Amarelo', "Salvando/atualizando 'id' = " + id, 2000);
-					$('#modalEditaRegistro').modal('hide');
+					
+					// Validações básicas
+					const data = $('#txtDataModal').val();
+					const veiculoId = document.getElementById('lstVeiculosEconomildos')?.ej2_instances?.[0]?.value;
+					const motoristaId = document.getElementById('lstMotoristasEconomildo')?.ej2_instances?.[0]?.value;
+					
+					if (!data) {
+						AppToast.show('Vermelho', 'A data é obrigatória', 2000);
+						return;
+					}
+					if (!veiculoId) {
+						AppToast.show('Vermelho', 'O veículo é obrigatório', 2000);
+						return;
+					}
+					if (!motoristaId) {
+						AppToast.show('Vermelho', 'O motorista é obrigatório', 2000);
+						return;
+					}
+					
+					// Adiciona spinner
+					const btn = document.getElementById('btnEditarOcorrencia');
+					const iconOriginal = btn.querySelector('i');
+					const iconClasses = iconOriginal.className;
+					iconOriginal.className = 'fa-solid fa-spinner fa-spin icon-space';
+					btn.disabled = true;
+
+					// Monta objeto para enviar
+					const objViagem = {
+						ViagemEconomildoId: $('#txtId').val(),
+						Data: data,
+						VeiculoId: veiculoId,
+						MotoristaId: motoristaId,
+						IdaVolta: $('#txtIdaVolta').val(),
+						HoraInicio: $('#txtHoraInicioModal').val(),
+						HoraFim: $('#txtHoraFimModal').val(),
+						QtdPassageiros: parseInt($('#txtQtdModal').val() || 0, 10),
+						MOB: $('#txtMOBModal').val(),
+						Responsavel: $('#txtResponsavelModal').val()
+					};
+
+					$.ajax({
+						url: "/api/viagem/AtualizarViagemEconomildo",
+						type: "POST",
+						contentType: "application/json; charset=utf-8",
+						dataType: "json",
+						data: JSON.stringify(objViagem),
+						success: function (data) {
+							try {
+								// Restaura botão
+								iconOriginal.className = iconClasses;
+								btn.disabled = false;
+
+								if (data.success) {
+									AppToast.show('Verde', data.message, 2000);
+									$('#modalEditaRegistro').modal('hide');
+									dataTable.ajax.reload(null, false);
+								} else {
+									AppToast.show('Vermelho', data.message, 3000);
+								}
+							} catch (error) {
+								Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btnEditarOcorrencia.ajax.success", error);
+							}
+						},
+						error: function (xhr, status, error) {
+							try {
+								// Restaura botão em caso de erro
+								iconOriginal.className = iconClasses;
+								btn.disabled = false;
+
+								console.error('Erro AJAX:', error);
+								AppToast.show('Vermelho', 'Erro ao salvar alterações.', 3000);
+							} catch (err) {
+								Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btnEditarOcorrencia.ajax.error", err);
+							}
+						}
+					});
+
 				} catch (error) {
 					Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btnEditarOcorrencia.click", error);
 				}
@@ -255,16 +558,34 @@
 		}
 	});
 
-	// 5) Aplicar filtros -> reload
+	// 6) Aplicar filtros -> reload com spinner
 	function AplicarFiltros() {
 		try {
-			if (dataTable) dataTable.ajax.reload();
+			const btn = document.getElementById('btnAplicarFiltro');
+			const iconOriginal = btn.querySelector('i');
+			const iconClasses = iconOriginal.className;
+			
+			// Adiciona spinner
+			iconOriginal.className = 'fa-solid fa-spinner fa-spin icon-space';
+			btn.disabled = true;
+
+			if (dataTable) {
+				dataTable.ajax.reload(function() {
+					try {
+						// Restaura ícone após carregar
+						iconOriginal.className = iconClasses;
+						btn.disabled = false;
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "AplicarFiltros.reload.callback", error);
+					}
+				});
+			}
 		} catch (error) {
 			Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "AplicarFiltros", error);
 		}
 	}
 
-	// 6) Limpar filtros -> zera e reload
+	// 7) Limpar filtros -> zera e reload
 	function LimparFiltros() {
 		try {
 			$('#txtData').val("");
@@ -284,24 +605,35 @@
 		<div id="panel-1" class="panel">
 			<div class="panel-container show">
 				<div class="panel-content">
+					<!-- Header Animado com Botão -->
+					<div class="header-gestao">
+						<h1>
+							<i class="fa-duotone fa-folder-open"></i>
+							Gestão das Fichas de Passageiros
+						</h1>
+						<a href="/Viagens/FluxoPassageiros" class="btn btn-nova-ficha">
+							<i class="fa-duotone fa-file-circle-plus"></i>
+							<span>Inserção de<br>Nova Ficha</span>
+						</a>
+					</div>
+
 					<div class="box-body">
-						<br /><br />
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="text-primary">
-								Escolha os filtros desejados para visualizar as Viagens:
-							</h2>
+						<div class="secao-titulo">
+							<h3>
+								<i class="fa-duotone fa-filter"></i>
+								Escolha os filtros desejados para visualizar as viagens
+							</h3>
 						</div>
 
 						<div class="col-12">
-							<div class="form-group row">
+							<div class="form-group row align-items-end">
 								<div class="col-2">
 									<label class="label">Escolha uma Data</label>
 									<input id="txtData" class="form-control form-control-xs" type="date" />
 								</div>
-							</div>
 
-							<div class="form-group row">
 								<div class="col-3">
+									<label class="label">Veículo (Economildo)</label>
 									<ejs-combobox id="lstVeiculos"
 												  placeholder="Selecione um Veículo"
 												  allowFiltering="true"
@@ -309,12 +641,14 @@
 												  dataSource="@listaVeiculos"
 												  popupHeight="250px"
 												  width="100%"
+												  cssClass="e-small"
 												  showClearButton="true">
 										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
 									</ejs-combobox>
 								</div>
 
 								<div class="col-3">
+									<label class="label">Motorista</label>
 									<ejs-combobox id="lstMotorista"
 												  placeholder="Selecione um Motorista"
 												  allowFiltering="true"
@@ -322,23 +656,26 @@
 												  dataSource="@listaMotorista"
 												  popupHeight="250px"
 												  width="100%"
+												  cssClass="e-small"
 												  showClearButton="true">
 										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
 									</ejs-combobox>
 								</div>
-							</div>
 
-							<div class="form-group row mt-2">
-								<div class="col-6 d-flex">
-									<button type="button" class="btn btn-azul mr-2" onclick="AplicarFiltros()">
-										<i class="fa fa-search icon-space"></i> Aplicar Filtros
+								<div class="col-2">
+									<button id="btnAplicarFiltro" type="button" class="btn btn-azul form-control form-control-xs" onclick="AplicarFiltros()">
+										<i class="fa-duotone fa-magnifying-glass icon-space"></i> Aplicar
 									</button>
-									<button type="button" class="btn btn-secondary" onclick="LimparFiltros()">
-										<i class="fa fa-eraser icon-space"></i> Limpar Filtros
+								</div>
+
+								<div class="col-2 text-end">
+									<button type="button" class="btn btn-secondary form-control form-control-xs" onclick="LimparFiltros()">
+										<i class="fa-duotone fa-eraser icon-space"></i> Limpar
 									</button>
 								</div>
 							</div>
-							<br /><br />
+
+							<br />
 
 							<div id="divFluxo">
 								<table id="tblFluxo" class="table table-bordered table-striped" width="100%">
@@ -364,23 +701,55 @@
 		</div> <!-- /panel -->
 	</div> <!-- /col-xl-12 -->
 </div> <!-- /row -->
-<!-- Modal EditaRegistro -->
+
+<!-- Modal EditaRegistro - Padrão FrotiX -->
 <div class="modal fade" id="modalEditaRegistro" tabindex="-1" aria-labelledby="modalEditaRegistroLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header modal-header-terracota">
-				<h3 class="modal-title" id="modalEditaRegistroLabel">Editar a Ocorrência</h3>
+				<h3 class="modal-title" id="modalEditaRegistroLabel">
+					<i class="fa-duotone fa-pen-to-square"></i> Editar Registro
+				</h3>
 				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
 				<form id="frmOcorrencia">
 					<input type="hidden" id="txtId" />
+					
 					<div class="form-group row">
-						<div class="col-3 col-sm-3">
+						<div class="col-3">
 							<label class="label">Data</label>
 							<input id="txtDataModal" class="form-control form-control-xs" type="date" />
 						</div>
-						<div class="col-4">
+						<div class="col-3">
+							<label class="label">MOB</label>
+							<select class="form-control form-control-xs" id="txtMOBModal">
+								<option value=""></option>
+								<option value="Rodoviaria">Rodoviária</option>
+								<option value="Cefor">Cefor</option>
+								<option value="PGR">PGR</option>
+							</select>
+						</div>
+						<div class="col-3">
+							<label class="label">Responsável</label>
+							<select class="form-control form-control-xs" id="txtResponsavelModal">
+								<option value=""></option>
+								<option value="Angela">Angela</option>
+								<option value="Greciane">Greciane</option>
+								<option value="Milena">Milena</option>
+							</select>
+						</div>
+						<div class="col-3">
+							<label class="label">Ida/Volta</label>
+							<select class="form-control form-control-xs" id="txtIdaVolta">
+								<option value="IDA">Ida</option>
+								<option value="VOLTA">Volta</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group row mt-2">
+						<div class="col-6">
 							<label class="label">Economildo (veículo)</label>
 							<ejs-combobox id="lstVeiculosEconomildos"
 										  allowFiltering="true"
@@ -388,11 +757,12 @@
 										  dataSource="@listaVeiculos"
 										  popupHeight="250px"
 										  width="100%"
+										  cssClass="e-small"
 										  showClearButton="true">
 								<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
 							</ejs-combobox>
 						</div>
-						<div class="col-4">
+						<div class="col-6">
 							<label class="label">Motorista</label>
 							<ejs-combobox id="lstMotoristasEconomildo"
 										  allowFiltering="true"
@@ -400,20 +770,35 @@
 										  dataSource="@listaMotorista"
 										  popupHeight="250px"
 										  width="100%"
+										  cssClass="e-small"
 										  showClearButton="true">
 								<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
 							</ejs-combobox>
 						</div>
 					</div>
-					<!-- Campos adicionais do registro podem ser inseridos aqui -->
+
+					<div class="form-group row mt-2">
+						<div class="col-4">
+							<label class="label">Hora Início</label>
+							<input id="txtHoraInicioModal" class="form-control form-control-xs" type="time" />
+						</div>
+						<div class="col-4">
+							<label class="label">Hora Fim</label>
+							<input id="txtHoraFimModal" class="form-control form-control-xs" type="time" />
+						</div>
+						<div class="col-4">
+							<label class="label">Qtd. Passageiros</label>
+							<input id="txtQtdModal" class="form-control form-control-xs" type="number" min="0" />
+						</div>
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button id="btnEditarOcorrencia" class="btn btn-azul" type="button">
-					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Editar a Ocorrência
+					<i class="fa-duotone fa-floppy-disk icon-space"></i> Salvar Alterações
 				</button>
 				<button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+					<i class="fa-solid fa-xmark icon-space"></i> Fechar
 				</button>
 			</div>
 		</div>

@@ -656,6 +656,17 @@ $("#txtDataFinal").focusout(function ()
                 return;
             }
 
+            // VALIDAÇÃO: Data Final não pode ser superior à data atual
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            if (data > hoje)
+            {
+                document.getElementById("txtDataFinal").value = "";
+                document.getElementById("txtDataFinal").focus();
+                AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+                return;
+            }
+
             const dataInicial = rawDataInicial.replace(/-/g, "/");
             const dataFinal = rawDataFinal.replace(/-/g, "/");
 
@@ -1044,6 +1055,9 @@ function calcularDuracaoViagem()
         var rawDataFinal = document.getElementById("txtDataFinal") && document.getElementById("txtDataFinal").value;
         var horaFinal = document.getElementById("txtHoraFinal") && document.getElementById("txtHoraFinal").value;
         var elDuracao = document.getElementById("txtDuracao");
+        
+        console.log("calcularDuracaoViagem - DataInicial:", rawDataInicial, "HoraInicial:", horaInicial, "DataFinal:", rawDataFinal, "HoraFinal:", horaFinal);
+        
         if (!elDuracao) return;
 
         var LIMIAR_MINUTOS = 120; // > 120 => inválido/tooltip
@@ -1052,8 +1066,10 @@ function calcularDuracaoViagem()
         if (!rawDataInicial || !horaInicial || !rawDataFinal || !horaFinal)
         {
             elDuracao.value = "";
-            FieldUX.setInvalid(elDuracao, false);
-            FieldUX.tooltipOnTransition(elDuracao, false, 1000, 'tooltipDuracao');
+            if (typeof FieldUX !== 'undefined') {
+                FieldUX.setInvalid(elDuracao, false);
+                FieldUX.tooltipOnTransition(elDuracao, false, 1000, 'tooltipDuracao');
+            }
             return;
         }
 
@@ -1062,8 +1078,10 @@ function calcularDuracaoViagem()
         if (!inicio.isValid() || !fim.isValid())
         {
             elDuracao.value = "";
-            FieldUX.setInvalid(elDuracao, false);
-            FieldUX.tooltipOnTransition(elDuracao, false, 1000, 'tooltipDuracao');
+            if (typeof FieldUX !== 'undefined') {
+                FieldUX.setInvalid(elDuracao, false);
+                FieldUX.tooltipOnTransition(elDuracao, false, 1000, 'tooltipDuracao');
+            }
             return;
         }
 
@@ -1076,10 +1094,11 @@ function calcularDuracaoViagem()
 
         // Regra Duração
         var invalid = (duracaoMinutos > LIMIAR_MINUTOS);
-        FieldUX.setInvalid(elDuracao, invalid);
-
-        // Tooltip de 1s quando ultrapassar 120 minutos
-        FieldUX.tooltipOnTransition(elDuracao, duracaoMinutos > LIMIAR_MINUTOS, 1000, 'tooltipDuracao');
+        if (typeof FieldUX !== 'undefined') {
+            FieldUX.setInvalid(elDuracao, invalid);
+            // Tooltip de 1s quando ultrapassar 120 minutos
+            FieldUX.tooltipOnTransition(elDuracao, duracaoMinutos > LIMIAR_MINUTOS, 1000, 'tooltipDuracao');
+        }
     } catch (error)
     {
         if (typeof TratamentoErroComLinha === 'function')
@@ -1188,6 +1207,8 @@ function ExibeViagem(viagem)
 {
     try
     {
+        console.log("ExibeViagem - status:", viagem.status, "viagem:", viagem);
+        
         $("#btnSubmit").hide();
 
         document.getElementById("ddtFinalidade").ej2_instances[0].value = viagem.finalidade;
@@ -1245,8 +1266,25 @@ function ExibeViagem(viagem)
                 }
             });
 
-            const rte = document.getElementById("rte").ej2_instances[0];
-            if (rte) rte.enabled = false;
+            // RTE (Kendo Editor) - desabilitar com delay para garantir que já foi inicializado
+            setTimeout(function() {
+                try {
+                    const rteElement = document.getElementById("rte");
+                    if (rteElement && rteElement.ej2_instances && rteElement.ej2_instances[0]) {
+                        rteElement.ej2_instances[0].enabled = false;
+                    }
+                    if (typeof disableEditorUpsert === 'function') {
+                        disableEditorUpsert();
+                    }
+                    // Garantir que o editor Kendo esteja desabilitado
+                    if (typeof _kendoEditorUpsert !== 'undefined' && _kendoEditorUpsert) {
+                        _kendoEditorUpsert.body.contentEditable = false;
+                        $('#rte').closest('.k-editor').addClass('k-disabled');
+                    }
+                } catch (e) {
+                    console.log("Erro ao desabilitar editor:", e);
+                }
+            }, 500);
 
             ["cmbMotorista", "cmbVeiculo", "cmbRequisitante", "cmbOrigem", "cmbDestino"].forEach(
                 (id) =>
@@ -1305,64 +1343,72 @@ function ExibeViagem(viagem)
             });
 
             document.getElementById("divSubmit").style.display = "none";
-
-            calcularDuracaoViagem();
-            calcularKmPercorrido();
         } else
         {
             $("#btnSubmit").show();
         }
+        
+        // Calcular duração e km percorrido SEMPRE ao carregar viagem
+        // Usar setTimeout maior para garantir que os campos já estejam preenchidos pelo Model Binding
+        setTimeout(function() {
+            calcularDuracaoViagem();
+            calcularKmPercorrido();
+        }, 600);
 
-        try
-        {
-            // - Definir o texto da label de Agendamento;
-            const lblAgendamento = document.getElementById("lblUsuarioAgendamento");
+        // Função auxiliar para verificar se GUID é válido
+        const isGuidValido = (guid) => {
+            return guid && guid !== "00000000-0000-0000-0000-000000000000" && guid !== "";
+        };
+        
+        // - Definir o texto da label de Agendamento;
+        const lblAgendamento = document.getElementById("lblUsuarioAgendamento");
             if (lblAgendamento)
             {
-                if (viagem.statusAgendamento || viagem.foiAgendamento)
+                const temUsuarioAgendamento = isGuidValido(viagem.usuarioIdAgendamento);
+                const dataAgendamentoValida = viagem.dataAgendamento && moment(viagem.dataAgendamento).isValid();
+                
+                if ((viagem.statusAgendamento || viagem.foiAgendamento) && temUsuarioAgendamento && dataAgendamentoValida)
                 {
-                    if (viagem.usuarioIdAgendamento != null)
-                    {
-                        lblAgendamento.style.display = "block";
-                        const DataAgendamento = moment(viagem.dataAgendamento).format("DD/MM/YYYY");
-                        const HoraAgendamento = moment(viagem.dataAgendamento).format("HH:mm");
-                        $.ajax({
-                            url: "/api/Agenda/RecuperaUsuario",
-                            type: "Get",
-                            data: { id: viagem.usuarioIdAgendamento },
-                            contentType: "application/json; charset=utf-8",
-                            dataType: "json",
-                            success: function (data)
+                    const DataAgendamento = moment(viagem.dataAgendamento).format("DD/MM/YYYY");
+                    const HoraAgendamento = moment(viagem.dataAgendamento).format("HH:mm");
+                    $.ajax({
+                        url: "/api/Agenda/RecuperaUsuario",
+                        type: "Get",
+                        data: { id: viagem.usuarioIdAgendamento },
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data)
+                        {
+                            try
                             {
-                                try
+                                let usuarioAgendamento;
+                                $.each(data, function (key, val)
                                 {
-                                    let usuarioAgendamento;
-                                    $.each(data, function (key, val)
+                                    try
                                     {
-                                        try
-                                        {
-                                            usuarioAgendamento = val;
-                                        }
-                                        catch (error)
-                                        {
-                                            Alerta.TratamentoErroComLinha(
-                                                "ViagemUpsert.js",
-                                                "callback@$.each#1",
-                                                error,
-                                            );
-                                        }
-                                    });
-                                    const lbl = document.getElementById("lblUsuarioAgendamento");
-                                    if (lbl)
+                                        usuarioAgendamento = val;
+                                    }
+                                    catch (error)
                                     {
-                                        lbl.innerHTML =
-                                            '<i class="fa-duotone fa-solid fa-user-clock"></i> ' +
-                                            "<span>Agendado por:</span> " +
-                                            usuarioAgendamento +
-                                            " em " +
-                                            DataAgendamento +
-                                            " às " +
-                                            HoraAgendamento;
+                                        Alerta.TratamentoErroComLinha(
+                                            "ViagemUpsert.js",
+                                            "callback@$.each#1",
+                                            error,
+                                        );
+                                    }
+                                });
+                                const lbl = document.getElementById("lblUsuarioAgendamento");
+                                if (lbl && usuarioAgendamento)
+                                {
+                                    lbl.innerHTML =
+                                        '<i class="fa-duotone fa-solid fa-user-clock"></i> ' +
+                                        "<span>Agendado por:</span> " +
+                                        usuarioAgendamento +
+                                        " em " +
+                                        DataAgendamento +
+                                        " às " +
+                                        HoraAgendamento;
+                                    lbl.style.display = "";
                                     }
                                 }
                                 catch (error)
@@ -1396,17 +1442,16 @@ function ExibeViagem(viagem)
                     {
                         lblAgendamento.innerHTML = "";
                     }
-                } else
-                {
-                    lblAgendamento.innerHTML = "";
-                }
             }
 
             // - Definir o texto da label de Criação;
             const lblCriacao = document.getElementById("lblUsuarioCriacao");
             if (lblCriacao)
             {
-                if (viagem.statusAgendamento === false)
+                const temUsuarioCriacao = isGuidValido(viagem.usuarioIdCriacao);
+                const dataCriacaoValida = viagem.dataCriacao && moment(viagem.dataCriacao).isValid();
+                
+                if (viagem.statusAgendamento === false && temUsuarioCriacao && dataCriacaoValida)
                 {
                     const DataCriacao = moment(viagem.dataCriacao).format("DD/MM/YYYY");
                     const HoraCriacao = moment(viagem.dataCriacao).format("HH:mm");
@@ -1437,7 +1482,7 @@ function ExibeViagem(viagem)
                                     }
                                 });
                                 const lbl = document.getElementById("lblUsuarioCriacao");
-                                if (lbl)
+                                if (lbl && usuarioCriacao)
                                 {
                                     lbl.innerHTML =
                                         '<i class="fa-sharp-duotone fa-solid fa-user-plus"></i> ' +
@@ -1447,6 +1492,7 @@ function ExibeViagem(viagem)
                                         DataCriacao +
                                         " às " +
                                         HoraCriacao;
+                                    lbl.style.display = "";
                                 }
                             }
                             catch (error)
@@ -1486,7 +1532,10 @@ function ExibeViagem(viagem)
             const lblFinalizacao = document.getElementById("lblUsuarioFinalizacao");
             if (lblFinalizacao)
             {
-                if (viagem.horaFim != null)
+                const temUsuarioFinalizacao = isGuidValido(viagem.usuarioIdFinalizacao);
+                const dataFinalizacaoValida = viagem.dataFinalizacao && moment(viagem.dataFinalizacao).isValid();
+                
+                if (viagem.horaFim != null && temUsuarioFinalizacao && dataFinalizacaoValida)
                 {
                     const DataFinalizacao = moment(viagem.dataFinalizacao).format("DD/MM/YYYY");
                     const HoraFinalizacao = moment(viagem.dataFinalizacao).format("HH:mm");
@@ -1517,7 +1566,7 @@ function ExibeViagem(viagem)
                                     }
                                 });
                                 const lbl = document.getElementById("lblUsuarioFinalizacao");
-                                if (lbl)
+                                if (lbl && usuarioFinalizacao)
                                 {
                                     lbl.innerHTML =
                                         '<i class="fa-duotone fa-solid fa-user-check"></i> ' +
@@ -1527,6 +1576,7 @@ function ExibeViagem(viagem)
                                         DataFinalizacao +
                                         " às " +
                                         HoraFinalizacao;
+                                    lbl.style.display = "";
                                 }
                             }
                             catch (error)
@@ -1566,7 +1616,10 @@ function ExibeViagem(viagem)
             const lblCancelamento = document.getElementById("lblUsuarioCancelamento");
             if (lblCancelamento)
             {
-                if (viagem.usuarioIdCancelamento != null)
+                const temUsuarioCancelamento = isGuidValido(viagem.usuarioIdCancelamento);
+                const dataCancelamentoValida = viagem.dataCancelamento && moment(viagem.dataCancelamento).isValid();
+                
+                if (temUsuarioCancelamento && dataCancelamentoValida)
                 {
                     const DataCancelamento = moment(viagem.dataCancelamento).format("DD/MM/YYYY");
                     $.ajax({
@@ -1596,7 +1649,7 @@ function ExibeViagem(viagem)
                                     }
                                 });
                                 const lbl = document.getElementById("lblUsuarioCancelamento");
-                                if (lbl)
+                                if (lbl && usuarioCancelamento)
                                 {
                                     lbl.innerHTML =
                                         '<i class="fa-duotone fa-regular fa-trash-can-xmark"></i> ' +
@@ -1604,6 +1657,7 @@ function ExibeViagem(viagem)
                                         usuarioCancelamento +
                                         " em " +
                                         DataCancelamento;
+                                    lbl.style.display = "";
                                 }
                             }
                             catch (error)
@@ -1638,12 +1692,6 @@ function ExibeViagem(viagem)
                     lblCancelamento.innerHTML = "";
                 }
             }
-        }
-        catch (error)
-        {
-            //TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem", error);
-            Alerta.TratamentoErroComLinha("agendamento_viagem.js", "ExibeViagem", error);
-        }
     }
     catch (error)
     {
@@ -2030,9 +2078,10 @@ function MotoristaValueChange()
 
                     if (viajando)
                     {
-                        Alerta.Alerta(
-                            "Motorista em Viagem",
+                        AppToast.show(
+                            "amarelo",
                             "Este motorista encontra-se em uma viagem não terminada!",
+                            5000
                         );
                     }
                 }
@@ -2064,10 +2113,16 @@ function VeiculoValueChange()
         {
             // Desabilita o botão de ocorrências quando não há veículo selecionado
             desabilitarBotaoOcorrenciasVeiculo();
+            
+            // Desabilitar seção de ocorrências da viagem
+            controlarSecaoOcorrencias(null);
             return;
         }
 
         var veiculoid = String(ddTreeObj.value);
+        
+        // Habilitar seção de ocorrências da viagem
+        controlarSecaoOcorrencias(veiculoid);
 
         $.ajax({
             url: "/Viagens/Upsert?handler=VerificaVeiculoViagem",
@@ -2083,9 +2138,10 @@ function VeiculoValueChange()
 
                     if (viajando)
                     {
-                        Alerta.Alerta(
-                            "Veículo em Viagem",
+                        AppToast.show(
+                            "amarelo",
                             "Este veículo encontra-se em uma viagem não terminada!",
+                            5000
                         );
                     }
                 }
@@ -2111,11 +2167,13 @@ function VeiculoValueChange()
                 {
                     var km = res.data;
                     document.getElementById("txtKmAtual").value = km;
+                    document.getElementById("txtKmInicial").value = km;
                     if (km === 0 || km === "0" || km === null)
                     {
-                        Alerta.Alerta(
-                            "Veículo sem Quilometragem",
+                        AppToast.show(
+                            "amarelo",
                             "Este veículo está sem Quilometragem Atual!",
+                            5000
                         );
                         document.getElementById("txtKmAtual").value = "";
                         document.getElementById("txtKmInicial").value = "";
@@ -2160,7 +2218,7 @@ $("#btnInserirEvento").click(function (e)
             $("#txtQtdPessoas").val() === ""
         )
         {
-            Alerta.Alerta("Atenção", "Todos os campos são obrigatórios!");
+            AppToast.show("amarelo", "Todos os campos são obrigatórios!", 5000);
             return;
         }
 
@@ -2169,7 +2227,7 @@ $("#btnInserirEvento").click(function (e)
 
         if (!setores.value || !requisitantes.value)
         {
-            Alerta.Alerta("Atenção", "Setor e Requisitante são obrigatórios!");
+            AppToast.show("amarelo", "Setor e Requisitante são obrigatórios!", 5000);
             return;
         }
 
@@ -2237,14 +2295,14 @@ $("#btnInserirRequisitante").click(function (e)
             $("#txtRamal").val() === ""
         )
         {
-            Alerta.Alerta("Atenção", "Ponto, Nome e Ramal são obrigatórios!");
+            AppToast.show("amarelo", "Ponto, Nome e Ramal são obrigatórios!", 5000);
             return;
         }
 
         let setores = document.getElementById("ddtSetorRequisitante").ej2_instances[0];
         if (!setores.value)
         {
-            Alerta.Alerta("Atenção", "O Setor do Requisitante é obrigatório!");
+            AppToast.show("amarelo", "O Setor do Requisitante é obrigatório!", 5000);
             return;
         }
 
@@ -2322,7 +2380,7 @@ $("#btnInserirSetor").click(function (e)
 
         if ($("#txtNomeSetor").val() === "" || $("#txtRamalSetor").val() === "")
         {
-            Alerta.Alerta("Atenção", "Nome e Ramal do Setor são obrigatórios!");
+            AppToast.show("amarelo", "Nome e Ramal do Setor são obrigatórios!", 5000);
             return;
         }
 
@@ -2479,6 +2537,21 @@ $("#btnSubmit").click(async function (event)
             document.getElementById("ddtCombustivelFinal").ej2_instances[0].value;
         const kmFinal = $("#txtKmFinal").val();
 
+        // VALIDAÇÃO: Data Final não pode ser superior à data atual
+        if (dataFinal)
+        {
+            const dataFinalDate = new Date(dataFinal + "T00:00:00");
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            if (dataFinalDate > hoje)
+            {
+                $("#txtDataFinal").val("");
+                $("#txtDataFinal").focus();
+                AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+                return;
+            }
+        }
+
         const algumFinalPreenchido = dataFinal || horaFinal || combustivelFinal || kmFinal;
         const todosFinalPreenchidos = dataFinal && horaFinal && combustivelFinal && kmFinal;
 
@@ -2624,16 +2697,34 @@ function calcularKmPercorrido()
         var elKmInicial = document.getElementById("txtKmInicial");
         var elKmFinal = document.getElementById("txtKmFinal");
         var elKmPercorrido = document.getElementById("txtKmPercorrido");
+        
+        console.log("calcularKmPercorrido - KmInicial:", elKmInicial?.value, "KmFinal:", elKmFinal?.value, "Status:", window.viagemStatus);
+        
         if (!elKmInicial || !elKmFinal || !elKmPercorrido) return;
+
+        // Só calcular Km Percorrido para viagens com status "Realizada"
+        // Para viagens Abertas/Canceladas, não faz sentido calcular
+        if (window.viagemStatus !== "Realizada")
+        {
+            elKmPercorrido.value = "";
+            if (typeof FieldUX !== 'undefined') {
+                FieldUX.setInvalid(elKmPercorrido, false);
+                FieldUX.setHigh(elKmPercorrido, false);
+                FieldUX.tooltipOnTransition(elKmPercorrido, false, 1000, 'tooltipKm');
+            }
+            return;
+        }
 
         var kmInicial = parseFloat((elKmInicial.value || '').replace(",", "."));
         var kmFinal = parseFloat((elKmFinal.value || '').replace(",", "."));
         if (isNaN(kmInicial) || isNaN(kmFinal))
         {
             elKmPercorrido.value = "";
-            FieldUX.setInvalid(elKmPercorrido, false);
-            FieldUX.setHigh(elKmPercorrido, false);
-            FieldUX.tooltipOnTransition(elKmPercorrido, false, 1000, 'tooltipKm');
+            if (typeof FieldUX !== 'undefined') {
+                FieldUX.setInvalid(elKmPercorrido, false);
+                FieldUX.setHigh(elKmPercorrido, false);
+                FieldUX.tooltipOnTransition(elKmPercorrido, false, 1000, 'tooltipKm');
+            }
             return;
         }
 
@@ -2643,11 +2734,12 @@ function calcularKmPercorrido()
         // Regras KM
         var invalid = (diff < 0 || diff > 100);
         var high = (diff >= 50 && diff < 100);
-        FieldUX.setInvalid(elKmPercorrido, invalid);
-        FieldUX.setHigh(elKmPercorrido, high);
-
-        // Tooltip de 1s quando ultrapassar 100
-        FieldUX.tooltipOnTransition(elKmPercorrido, diff > 100, 1000, 'tooltipKm');
+        if (typeof FieldUX !== 'undefined') {
+            FieldUX.setInvalid(elKmPercorrido, invalid);
+            FieldUX.setHigh(elKmPercorrido, high);
+            // Tooltip de 1s quando ultrapassar 100
+            FieldUX.tooltipOnTransition(elKmPercorrido, diff > 100, 1000, 'tooltipKm');
+        }
     } catch (error)
     {
         if (typeof TratamentoErroComLinha === 'function')
@@ -3347,34 +3439,6 @@ function renderizarTabelaOcorrenciasVeiculoUpsert(ocorrencias)
     }
 }
 
-// Clique no botão de ver imagem (Upsert)
-$(document).on('click', '.btn-ver-imagem-ocorrencia-upsert:not(.disabled)', function (e)
-{
-    try
-    {
-        e.preventDefault();
-        const imagemPath = $(this).data('imagem');
-
-        if (!imagemPath)
-        {
-            AppToast.show('Amarelo', 'Esta ocorrência não possui imagem', 3000);
-            return;
-        }
-
-        // Define a imagem no modal
-        $('#imgOcorrenciaViewerUpsert').attr('src', imagemPath).show();
-        $('#noImageOcorrenciaUpsert').hide();
-
-        // Abre o modal de imagem
-        const modalImagem = new bootstrap.Modal(document.getElementById('modalImagemOcorrenciaUpsert'));
-        modalImagem.show();
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "click.btn-ver-imagem-ocorrencia-upsert", error);
-    }
-});
-
 // Clique no botão de excluir ocorrência (Upsert)
 $(document).on('click', '.btn-excluir-ocorrencia-upsert', function (e)
 {
@@ -3665,5 +3729,1069 @@ $('#modalOcorrenciasVeiculoUpsert').on('hidden.bs.modal', function ()
     catch (error)
     {
         Alerta.TratamentoErroComLinha("ViagemUpsert.js", "modalOcorrenciasVeiculoUpsert.hidden", error);
+    }
+});
+
+// ===============================================================================
+// INTEGRAÇÃO FROTIX MOBILE - RUBRICAS E OCORRÊNCIAS
+// ===============================================================================
+
+// Variáveis globais para dados mobile
+let _dadosMobile = null;
+let _ocorrenciasViagem = [];
+
+// ===============================================================================
+// FORMATAÇÃO DE HORA HH:mm
+// ===============================================================================
+
+/**
+ * Formata um valor de hora para o formato HH:mm
+ * @param {string} valor - Valor da hora (pode ser HH:mm, HH:mm:ss, etc)
+ * @returns {string} - Hora formatada como HH:mm
+ */
+function formatarHora(valor)
+{
+    try
+    {
+        if (!valor) return '';
+        
+        // Se já está no formato correto, retorna
+        if (/^\d{2}:\d{2}$/.test(valor)) return valor;
+        
+        // Se tem segundos (HH:mm:ss), remove
+        if (/^\d{2}:\d{2}:\d{2}$/.test(valor))
+        {
+            return valor.substring(0, 5);
+        }
+        
+        // Tenta parsear como hora
+        const partes = valor.split(':');
+        if (partes.length >= 2)
+        {
+            const horas = partes[0].padStart(2, '0');
+            const minutos = partes[1].padStart(2, '0');
+            return `${horas}:${minutos}`;
+        }
+        
+        return valor;
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "formatarHora", error);
+        return valor;
+    }
+}
+
+/**
+ * Aplica formatação HH:mm nos campos de hora ao carregar a página
+ */
+function aplicarFormatacaoHoras()
+{
+    try
+    {
+        const txtHoraInicial = document.getElementById('txtHoraInicial');
+        const txtHoraFinal = document.getElementById('txtHoraFinal');
+        
+        if (txtHoraInicial && txtHoraInicial.value)
+        {
+            txtHoraInicial.value = formatarHora(txtHoraInicial.value);
+        }
+        
+        if (txtHoraFinal && txtHoraFinal.value)
+        {
+            txtHoraFinal.value = formatarHora(txtHoraFinal.value);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "aplicarFormatacaoHoras", error);
+    }
+}
+
+// ===============================================================================
+// LÓGICA NO FICHA VISTORIA (MOBILE vs WEB)
+// ===============================================================================
+
+/**
+ * Configura exibição do campo NoFichaVistoria
+ * - Se valor = 0 ou null/vazio: mostra campo texto "(mobile)"
+ * - Se valor > 0: mostra campo numérico normal
+ */
+function configurarCampoNoFichaVistoria()
+{
+    // A visibilidade dos campos é decidida pelo Razor no servidor
+    // Esta função só ajusta o wrapper do Syncfusion se necessário
+    try
+    {
+        const txtNumerico = document.getElementById('txtNoFichaVistoria');
+        const txtMobile = document.getElementById('txtNoFichaVistoriaMobile');
+        
+        if (!txtNumerico || !txtMobile) return;
+        
+        // Syncfusion cria wrapper, precisamos garantir que o wrapper tenha a mesma visibilidade
+        const wrapperNumerico = txtNumerico.closest('.e-input-group');
+        
+        if (wrapperNumerico)
+        {
+            // Sincronizar visibilidade do wrapper com o input
+            if (txtNumerico.style.display === 'none')
+            {
+                wrapperNumerico.style.display = 'none';
+            }
+            else
+            {
+                wrapperNumerico.style.display = '';
+            }
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "configurarCampoNoFichaVistoria", error);
+    }
+}
+
+// ===============================================================================
+// CARREGAR DADOS MOBILE (RUBRICAS + OCORRÊNCIAS)
+// ===============================================================================
+
+/**
+ * Carrega dados do mobile via API (apenas se a seção mobile estiver visível)
+ * A visibilidade da seção é decidida pelo Razor no servidor
+ */
+async function carregarDadosMobile()
+{
+    try
+    {
+        // Verificar se a seção mobile está visível (decidido pelo servidor/Razor)
+        const secaoMobile = document.getElementById('secaoMobile');
+        if (!secaoMobile || secaoMobile.style.display === 'none')
+        {
+            // Seção mobile não está visível, não precisa carregar dados
+            return;
+        }
+        
+        if (!window.viagemId || window.viagemId === '' || window.viagemId === '00000000-0000-0000-0000-000000000000')
+        {
+            // Nova viagem - não há dados mobile para carregar
+            return;
+        }
+        
+        const response = await fetch(`/api/Viagem/ObterDadosMobile?viagemId=${window.viagemId}`);
+        const data = await response.json();
+        
+        if (data.success && data.isMobile)
+        {
+            _dadosMobile = data;
+            
+            // Carregar rubricas
+            carregarRubricas(data);
+            
+            // Carregar documentos/itens
+            carregarDocumentosItensMobile(data);
+            
+            // Carregar ocorrências
+            carregarOcorrenciasViagem(data.ocorrencias);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "carregarDadosMobile", error);
+    }
+}
+
+/**
+ * Carrega as rubricas (inicial e final) na interface
+ */
+function carregarRubricas(data)
+{
+    try
+    {
+        // Rubrica Inicial
+        const imgRubricaInicial = document.getElementById('imgRubricaInicial');
+        const semRubricaInicial = document.getElementById('semRubricaInicial');
+        
+        if (data.temRubricaInicial && data.rubricaInicial)
+        {
+            if (imgRubricaInicial)
+            {
+                imgRubricaInicial.src = data.rubricaInicial;
+                imgRubricaInicial.style.display = 'block';
+            }
+            if (semRubricaInicial)
+            {
+                semRubricaInicial.style.display = 'none';
+            }
+        }
+        else
+        {
+            if (imgRubricaInicial)
+            {
+                imgRubricaInicial.style.display = 'none';
+            }
+            if (semRubricaInicial)
+            {
+                semRubricaInicial.style.display = 'block';
+            }
+        }
+        
+        // Rubrica Final
+        const imgRubricaFinal = document.getElementById('imgRubricaFinal');
+        const semRubricaFinal = document.getElementById('semRubricaFinal');
+        
+        if (data.temRubricaFinal && data.rubricaFinal)
+        {
+            if (imgRubricaFinal)
+            {
+                imgRubricaFinal.src = data.rubricaFinal;
+                imgRubricaFinal.style.display = 'block';
+            }
+            if (semRubricaFinal)
+            {
+                semRubricaFinal.style.display = 'none';
+            }
+        }
+        else
+        {
+            if (imgRubricaFinal)
+            {
+                imgRubricaFinal.style.display = 'none';
+            }
+            if (semRubricaFinal)
+            {
+                semRubricaFinal.style.display = 'block';
+            }
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "carregarRubricas", error);
+    }
+}
+
+/**
+ * Carrega os dados de documentos/itens entregues e devolvidos
+ */
+function carregarDocumentosItensMobile(data)
+{
+    try
+    {
+        // Documentos/Itens Entregues (Vistoria Inicial) - todos checkboxes
+        const chkStatusDocumento = document.getElementById('chkStatusDocumentoMobile');
+        const chkStatusCartao = document.getElementById('chkStatusCartaoMobile');
+        const chkCintaEntregue = document.getElementById('chkCintaEntregueMobile');
+        const chkTabletEntregue = document.getElementById('chkTabletEntregueMobile');
+        
+        // StatusDocumento: checkbox marcado se não estiver vazio
+        if (chkStatusDocumento) chkStatusDocumento.checked = !!(data.statusDocumento && data.statusDocumento.trim() !== '');
+        if (chkStatusCartao) chkStatusCartao.checked = !!(data.statusCartaoAbastecimento && data.statusCartaoAbastecimento.trim() !== '');
+        if (chkCintaEntregue) chkCintaEntregue.checked = data.cintaEntregue === true;
+        if (chkTabletEntregue) chkTabletEntregue.checked = data.tabletEntregue === true;
+        
+        // Documentos/Itens Devolvidos (Vistoria Final) - todos checkboxes
+        const chkStatusDocumentoFinal = document.getElementById('chkStatusDocumentoFinalMobile');
+        const chkStatusCartaoFinal = document.getElementById('chkStatusCartaoFinalMobile');
+        const chkCintaDevolvida = document.getElementById('chkCintaDevolvidaMobile');
+        const chkTabletDevolvido = document.getElementById('chkTabletDevolvidoMobile');
+        
+        if (chkStatusDocumentoFinal) chkStatusDocumentoFinal.checked = !!(data.statusDocumentoFinal && data.statusDocumentoFinal.trim() !== '');
+        if (chkStatusCartaoFinal) chkStatusCartaoFinal.checked = !!(data.statusCartaoAbastecimentoFinal && data.statusCartaoAbastecimentoFinal.trim() !== '');
+        if (chkCintaDevolvida) chkCintaDevolvida.checked = data.cintaDevolvida === true;
+        if (chkTabletDevolvido) chkTabletDevolvido.checked = data.tabletDevolvido === true;
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "carregarDocumentosItensMobile", error);
+    }
+}
+
+/**
+ * Carrega as ocorrências da viagem na tabela
+ */
+function carregarOcorrenciasViagem(ocorrencias)
+{
+    try
+    {
+        _ocorrenciasViagem = ocorrencias || [];
+        
+        const tbody = document.querySelector('#tblOcorrenciasViagem tbody');
+        const badge = document.getElementById('badgeOcorrenciasViagem');
+        
+        if (!tbody) return;
+        
+        // Limpar tabela
+        tbody.innerHTML = '';
+        
+        if (_ocorrenciasViagem.length === 0)
+        {
+            // Sem ocorrências
+            tbody.innerHTML = `
+                <tr id="rowSemOcorrenciasViagem">
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="fa fa-check-circle fa-2x mb-2 text-success"></i>
+                        <br />Nenhuma ocorrência registrada nesta viagem
+                    </td>
+                </tr>`;
+            
+            if (badge) badge.style.display = 'none';
+        }
+        else
+        {
+            // Tem ocorrências
+            let html = '';
+            let idx = 1;
+            
+            for (const oc of _ocorrenciasViagem)
+            {
+                const statusClass = obterClasseStatusOcorrencia(oc.statusOcorrencia);
+                const statusTexto = oc.statusOcorrencia || 'Aberta';
+                
+                html += `
+                    <tr>
+                        <td class="text-center">${idx}</td>
+                        <td title="${escapeHtmlMobile(oc.resumo || '')}">${escapeHtmlMobile(oc.resumo || '-')}</td>
+                        <td title="${escapeHtmlMobile(oc.descricao || '')}">${escapeHtmlMobile(truncarTextoMobile(oc.descricao, 50) || '-')}</td>
+                        <td class="text-center">${oc.dataOcorrencia || '-'}</td>
+                        <td class="text-center">
+                            <span class="ftx-status-badge ${statusClass}">${statusTexto}</span>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" 
+                                    class="btn-ver-ocorrencia" 
+                                    onclick="verOcorrenciaViagem('${oc.ocorrenciaViagemId}')"
+                                    title="Ver detalhes">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                idx++;
+            }
+            
+            tbody.innerHTML = html;
+            
+            // Atualizar badge
+            if (badge)
+            {
+                badge.textContent = _ocorrenciasViagem.length;
+                badge.style.display = 'inline';
+            }
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "carregarOcorrenciasViagem", error);
+    }
+}
+
+/**
+ * Retorna a classe CSS baseada no status da ocorrência
+ */
+function obterClasseStatusOcorrencia(status)
+{
+    try
+    {
+        if (!status) return 'ftx-status-aberta';
+        
+        const statusLower = status.toLowerCase();
+        
+        if (statusLower === 'baixada' || statusLower === 'resolvida' || statusLower === 'fechada')
+        {
+            return 'ftx-status-baixada';
+        }
+        else if (statusLower === 'pendente' || statusLower === 'em análise')
+        {
+            return 'ftx-status-pendente';
+        }
+        else
+        {
+            return 'ftx-status-aberta';
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "obterClasseStatusOcorrencia", error);
+        return 'ftx-status-aberta';
+    }
+}
+
+/**
+ * Trunca texto para exibição na tabela
+ */
+function truncarTextoMobile(texto, maxLength)
+{
+    try
+    {
+        if (!texto) return '';
+        if (texto.length <= maxLength) return texto;
+        return texto.substring(0, maxLength) + '...';
+    }
+    catch (error)
+    {
+        return texto || '';
+    }
+}
+
+/**
+ * Escapa HTML para evitar XSS
+ */
+function escapeHtmlMobile(text)
+{
+    try
+    {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    catch (error)
+    {
+        return text || '';
+    }
+}
+
+// ===============================================================================
+// MODAL VISUALIZAR OCORRÊNCIA DA VIAGEM
+// ===============================================================================
+
+/**
+ * Abre o modal para visualizar detalhes de uma ocorrência
+ */
+async function verOcorrenciaViagem(ocorrenciaId)
+{
+    try
+    {
+        console.log("verOcorrenciaViagem - ocorrenciaId:", ocorrenciaId);
+        console.log("verOcorrenciaViagem - _ocorrenciasViagem:", _ocorrenciasViagem);
+        console.log("verOcorrenciaViagem - ocorrenciasUpsert:", ocorrenciasUpsert);
+        
+        if (!ocorrenciaId) return;
+        
+        // Buscar ocorrência nas listas disponíveis (Mobile ou Upsert)
+        let oc = null;
+        
+        // Primeiro, tentar na lista do Mobile
+        if (_ocorrenciasViagem && _ocorrenciasViagem.length > 0)
+        {
+            oc = _ocorrenciasViagem.find(o => o.ocorrenciaViagemId === ocorrenciaId);
+        }
+        
+        // Se não encontrou, tentar na lista do Upsert
+        if (!oc && ocorrenciasUpsert && ocorrenciasUpsert.length > 0)
+        {
+            oc = ocorrenciasUpsert.find(o => o.id === ocorrenciaId);
+            // Normalizar campos se encontrou em ocorrenciasUpsert
+            if (oc)
+            {
+                oc = {
+                    ocorrenciaViagemId: oc.id,
+                    resumo: oc.resumo,
+                    descricao: oc.descricao,
+                    dataOcorrencia: oc.dataCriacao,
+                    statusOcorrencia: oc.status || 'Aberta',
+                    imagemBase64: oc.imagemBase64,
+                    temImagem: oc.imagemBase64 && oc.imagemBase64.length > 0
+                };
+            }
+        }
+        
+        console.log("verOcorrenciaViagem - oc encontrada:", oc);
+        
+        if (!oc)
+        {
+            AppToast.show('Amarelo', 'Ocorrência não encontrada', 3000);
+            return;
+        }
+        
+        // Preencher modal
+        document.getElementById('txtOcorrenciaResumo').textContent = oc.resumo || '-';
+        document.getElementById('txtOcorrenciaDescricao').textContent = oc.descricao || 'Sem descrição';
+        document.getElementById('txtOcorrenciaData').textContent = oc.dataOcorrencia || '-';
+        
+        // Status
+        const divStatus = document.getElementById('divOcorrenciaStatus');
+        const statusClass = obterClasseStatusOcorrencia(oc.statusOcorrencia);
+        divStatus.innerHTML = `<span class="ftx-status-badge ${statusClass}">${oc.statusOcorrencia || 'Aberta'}</span>`;
+        
+        // Solução (se houver)
+        const divSolucao = document.getElementById('divSolucaoOcorrencia');
+        const txtSolucao = document.getElementById('txtOcorrenciaSolucao');
+        
+        if (oc.solucao)
+        {
+            txtSolucao.textContent = oc.solucao;
+            divSolucao.style.display = 'block';
+        }
+        else
+        {
+            divSolucao.style.display = 'none';
+        }
+        
+        // Imagem
+        const imgOcorrencia = document.getElementById('imgOcorrenciaViagem');
+        const semImagem = document.getElementById('semImagemOcorrenciaViagem');
+        
+        if (oc.temImagem && oc.imagemBase64)
+        {
+            imgOcorrencia.src = oc.imagemBase64;
+            imgOcorrencia.style.display = 'block';
+            semImagem.style.display = 'none';
+        }
+        else if (oc.temImagem)
+        {
+            // Precisa buscar imagem via API
+            try
+            {
+                const resp = await fetch(`/api/Viagem/ObterImagemOcorrencia?ocorrenciaId=${ocorrenciaId}`);
+                const imgData = await resp.json();
+                
+                if (imgData.success && imgData.temImagem)
+                {
+                    imgOcorrencia.src = imgData.imagemBase64;
+                    imgOcorrencia.style.display = 'block';
+                    semImagem.style.display = 'none';
+                }
+                else
+                {
+                    imgOcorrencia.style.display = 'none';
+                    semImagem.style.display = 'block';
+                }
+            }
+            catch (e)
+            {
+                imgOcorrencia.style.display = 'none';
+                semImagem.style.display = 'block';
+            }
+        }
+        else
+        {
+            imgOcorrencia.style.display = 'none';
+            semImagem.style.display = 'block';
+        }
+        
+        // Abrir modal
+        const modal = new bootstrap.Modal(document.getElementById('modalVerOcorrenciaViagem'));
+        modal.show();
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "verOcorrenciaViagem", error);
+    }
+}
+
+// ===============================================================================
+// INICIALIZAÇÃO MOBILE
+// ===============================================================================
+
+/**
+ * Função de inicialização dos componentes mobile
+ */
+function inicializarIntegracaoMobile()
+{
+    try
+    {
+        // Definir viagemId global
+        const txtViagemId = document.getElementById('txtViagemId') || document.getElementById('txtId');
+        window.viagemId = txtViagemId ? txtViagemId.value : '';
+        
+        // Aplicar formatação de horas
+        aplicarFormatacaoHoras();
+        
+        // Configurar campo NoFichaVistoria
+        configurarCampoNoFichaVistoria();
+        
+        // Carregar dados mobile (rubricas + ocorrências) - também controla visibilidade da ficha
+        carregarDadosMobile();
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "inicializarIntegracaoMobile", error);
+    }
+}
+
+// Chamar inicialização quando DOM estiver pronto
+$(document).ready(function ()
+{
+    try
+    {
+        // Aguardar para garantir que Syncfusion TextBox já renderizou
+        setTimeout(function ()
+        {
+            inicializarIntegracaoMobile();
+        }, 500);
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "document.ready.mobile", error);
+    }
+});
+
+// ===============================================================================
+// SISTEMA DE OCORRÊNCIAS NA CRIAÇÃO/EDIÇÃO DE VIAGEM
+// ===============================================================================
+
+// Array para armazenar ocorrências em memória
+var ocorrenciasUpsert = [];
+
+/**
+ * Inicializa o sistema de ocorrências
+ */
+function inicializarSistemaOcorrencias()
+{
+    try
+    {
+        // Verificar se veículo está selecionado (para garantir estado correto na inicialização)
+        // Aguardar um pouco mais para garantir que os combos Syncfusion estejam prontos
+        setTimeout(function() {
+            verificarVeiculoParaOcorrencias();
+        }, 100);
+        
+        // Botão adicionar ocorrência
+        $('#btnAdicionarOcorrenciaUpsert').on('click', function()
+        {
+            abrirModalInserirOcorrencia();
+        });
+
+        // Preview de imagem
+        $('#fileImagemOcorrenciaUpsert').on('change', function()
+        {
+            previewImagemOcorrencia(this);
+        });
+
+        // Limpar imagem
+        $('#btnLimparImagemOcorrenciaUpsert').on('click', function()
+        {
+            limparImagemOcorrencia();
+        });
+
+        // Confirmar ocorrência
+        $('#btnConfirmarOcorrenciaUpsert').on('click', function()
+        {
+            confirmarOcorrencia();
+        });
+
+        // Delegação de eventos para botões dinâmicos
+        $(document).on('click', '.btn-remover-ocorrencia-upsert', function()
+        {
+            const index = $(this).data('index');
+            removerOcorrencia(index);
+        });
+
+        $(document).on('click', '.btn-ver-imagem-ocorrencia-upsert', function()
+        {
+            const index = $(this).data('index');
+            verImagemOcorrencia(index);
+        });
+
+        $(document).on('click', '.btn-ver-detalhes-ocorrencia-upsert', function()
+        {
+            const id = $(this).data('id');
+            if (id) {
+                verOcorrenciaViagem(id);
+            }
+        });
+
+        // Carregar ocorrências existentes se for edição
+        carregarOcorrenciasExistentes();
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "inicializarSistemaOcorrencias", error);
+    }
+}
+
+/**
+ * Verifica se há veículo selecionado e habilita/desabilita seção de ocorrências
+ */
+function verificarVeiculoParaOcorrencias()
+{
+    try
+    {
+        const cmbVeiculo = document.getElementById('cmbVeiculo');
+        if (!cmbVeiculo || !cmbVeiculo.ej2_instances || !cmbVeiculo.ej2_instances[0]) return;
+        
+        // Obter valor - pode ser string ou array
+        let veiculoId = cmbVeiculo.ej2_instances[0].value;
+        if (Array.isArray(veiculoId))
+        {
+            veiculoId = veiculoId[0];
+        }
+        
+        // Chamar função global de controle (definida no Upsert.cshtml)
+        if (typeof controlarSecaoOcorrencias === 'function')
+        {
+            controlarSecaoOcorrencias(veiculoId);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "verificarVeiculoParaOcorrencias", error);
+    }
+}
+
+/**
+ * Abre o modal para inserir nova ocorrência
+ */
+function abrirModalInserirOcorrencia()
+{
+    try
+    {
+        // Limpar campos
+        $('#txtResumoOcorrenciaUpsert').val('');
+        $('#txtDescricaoOcorrenciaUpsert').val('');
+        $('#fileImagemOcorrenciaUpsert').val('');
+        $('#previewImagemOcorrenciaUpsert').hide();
+        $('#imgPreviewOcorrenciaUpsert').attr('src', '');
+
+        // Abrir modal
+        const modal = new bootstrap.Modal(document.getElementById('modalInserirOcorrenciaUpsert'));
+        modal.show();
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "abrirModalInserirOcorrencia", error);
+    }
+}
+
+/**
+ * Preview da imagem selecionada
+ */
+function previewImagemOcorrencia(input)
+{
+    try
+    {
+        if (input.files && input.files[0])
+        {
+            const reader = new FileReader();
+            reader.onload = function(e)
+            {
+                $('#imgPreviewOcorrenciaUpsert').attr('src', e.target.result);
+                $('#previewImagemOcorrenciaUpsert').show();
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "previewImagemOcorrencia", error);
+    }
+}
+
+/**
+ * Limpa a imagem selecionada
+ */
+function limparImagemOcorrencia()
+{
+    try
+    {
+        $('#fileImagemOcorrenciaUpsert').val('');
+        $('#previewImagemOcorrenciaUpsert').hide();
+        $('#imgPreviewOcorrenciaUpsert').attr('src', '');
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "limparImagemOcorrencia", error);
+    }
+}
+
+/**
+ * Confirma e adiciona a ocorrência à lista
+ */
+function confirmarOcorrencia()
+{
+    try
+    {
+        const resumo = $('#txtResumoOcorrenciaUpsert').val().trim();
+        const descricao = $('#txtDescricaoOcorrenciaUpsert').val().trim();
+        const imgPreview = $('#imgPreviewOcorrenciaUpsert').attr('src') || '';
+
+        // Validação
+        if (!resumo)
+        {
+            AppToast.show('Amarelo', 'Informe o resumo da ocorrência', 3000);
+            $('#txtResumoOcorrenciaUpsert').focus();
+            return;
+        }
+
+        // Criar objeto da ocorrência
+        const ocorrencia = {
+            id: 'temp_' + Date.now(),
+            resumo: resumo,
+            descricao: descricao,
+            imagemBase64: imgPreview,
+            dataCriacao: new Date().toLocaleString('pt-BR')
+        };
+
+        // Adicionar ao array
+        ocorrenciasUpsert.push(ocorrencia);
+
+        // Atualizar UI
+        renderizarListaOcorrencias();
+        atualizarBadgeOcorrencias();
+        atualizarHiddenOcorrencias();
+
+        // Fechar modal
+        bootstrap.Modal.getInstance(document.getElementById('modalInserirOcorrenciaUpsert')).hide();
+
+        AppToast.show('Verde', 'Ocorrência adicionada com sucesso', 2000);
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "confirmarOcorrencia", error);
+    }
+}
+
+/**
+ * Remove uma ocorrência da lista
+ */
+function removerOcorrencia(index)
+{
+    try
+    {
+        if (index >= 0 && index < ocorrenciasUpsert.length)
+        {
+            ocorrenciasUpsert.splice(index, 1);
+            renderizarListaOcorrencias();
+            atualizarBadgeOcorrencias();
+            atualizarHiddenOcorrencias();
+            AppToast.show('Vermelho', 'Ocorrência removida', 2000);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "removerOcorrencia", error);
+    }
+}
+
+/**
+ * Abre modal para ver imagem da ocorrência
+ */
+function verImagemOcorrencia(index)
+{
+    try
+    {
+        if (index >= 0 && index < ocorrenciasUpsert.length)
+        {
+            const ocorrencia = ocorrenciasUpsert[index];
+            if (ocorrencia.imagemBase64)
+            {
+                $('#imgViewerOcorrenciaUpsert').attr('src', ocorrencia.imagemBase64);
+                const modal = new bootstrap.Modal(document.getElementById('modalVerImagemOcorrenciaUpsert'));
+                modal.show();
+            }
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "verImagemOcorrencia", error);
+    }
+}
+
+/**
+ * Renderiza a lista de ocorrências na tela
+ */
+function renderizarListaOcorrencias()
+{
+    try
+    {
+        const container = $('#listaOcorrenciasUpsert');
+        const semOcorrencias = $('#semOcorrenciasUpsert');
+
+        if (ocorrenciasUpsert.length === 0)
+        {
+            semOcorrencias.show();
+            container.find('.ocorrencia-item').remove();
+            return;
+        }
+
+        semOcorrencias.hide();
+        
+        // Limpar itens existentes
+        container.find('.ocorrencia-item').remove();
+
+        // Adicionar cada ocorrência
+        ocorrenciasUpsert.forEach((oc, index) =>
+        {
+            const temImagem = oc.imagemBase64 && oc.imagemBase64.length > 0;
+            const temId = oc.id && oc.id !== "" && oc.id !== "00000000-0000-0000-0000-000000000000";
+            const podeExcluir = !window.viagemFinalizada;
+            
+            const html = `
+                <div class="ocorrencia-item" data-index="${index}">
+                    <div class="ocorrencia-info">
+                        <div class="ocorrencia-resumo">
+                            <i class="fa-duotone fa-triangle-exclamation text-warning me-1"></i>
+                            ${escapeHtml(oc.resumo)}
+                        </div>
+                        ${oc.descricao ? `<div class="ocorrencia-descricao">${escapeHtml(oc.descricao)}</div>` : ''}
+                    </div>
+                    <div class="ocorrencia-acoes">
+                        ${temId ? `
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-ver-detalhes-ocorrencia-upsert" 
+                                    data-id="${oc.id}" data-index="${index}" title="Ver detalhes">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        ` : ''}
+                        ${temImagem ? `
+                            <button type="button" class="btn btn-sm btn-outline-info btn-ver-imagem-ocorrencia-upsert" 
+                                    data-index="${index}" title="Ver imagem">
+                                <i class="fa fa-image"></i>
+                            </button>
+                        ` : ''}
+                        ${podeExcluir ? `
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-remover-ocorrencia-upsert" 
+                                    data-index="${index}" title="Remover">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            container.append(html);
+        });
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "renderizarListaOcorrencias", error);
+    }
+}
+
+/**
+ * Atualiza o badge de quantidade de ocorrências
+ */
+function atualizarBadgeOcorrencias()
+{
+    try
+    {
+        const badge = $('#badgeOcorrenciasUpsert');
+        const qtd = ocorrenciasUpsert.length;
+
+        if (qtd > 0)
+        {
+            badge.text(qtd);
+            badge.show();
+        }
+        else
+        {
+            badge.hide();
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "atualizarBadgeOcorrencias", error);
+    }
+}
+
+/**
+ * Atualiza o campo hidden com o JSON das ocorrências
+ */
+function atualizarHiddenOcorrencias()
+{
+    try
+    {
+        const json = JSON.stringify(ocorrenciasUpsert.map(oc => ({
+            Resumo: oc.resumo,
+            Descricao: oc.descricao,
+            ImagemOcorrencia: oc.imagemBase64 || ''
+        })));
+        
+        $('#hiddenOcorrenciasJson').val(json);
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "atualizarHiddenOcorrencias", error);
+    }
+}
+
+/**
+ * Carrega ocorrências existentes (modo edição)
+ */
+function carregarOcorrenciasExistentes()
+{
+    try
+    {
+        // Tentar obter viagemId de múltiplas fontes
+        let viagemId = window.viagemId || $('#txtViagemId').val() || $('input[name="ViagemObj.Viagem.ViagemId"]').val();
+        
+        console.log("carregarOcorrenciasExistentes - viagemId:", viagemId);
+        
+        if (!viagemId || viagemId === '00000000-0000-0000-0000-000000000000')
+        {
+            console.log("Nova viagem - não carregando ocorrências");
+            return; // Nova viagem, não há ocorrências para carregar
+        }
+
+        // Usar a mesma API que carrega dados mobile
+        $.ajax({
+            url: '/api/Viagem/ObterDadosMobile',
+            type: 'GET',
+            data: { viagemId: viagemId },
+            success: function(response)
+            {
+                try
+                {
+                    console.log("ObterDadosMobile response:", response);
+                    if (response.success && response.ocorrencias && response.ocorrencias.length > 0)
+                    {
+                        ocorrenciasUpsert = response.ocorrencias.map(oc => ({
+                            id: oc.ocorrenciaViagemId,
+                            resumo: oc.resumo || '',
+                            descricao: oc.descricao || '',
+                            imagemBase64: oc.imagemBase64 || oc.imagemOcorrencia || oc.imagem || '',
+                            dataCriacao: oc.dataOcorrencia || '',
+                            status: oc.statusOcorrencia || 'Aberta',
+                            temImagem: oc.temImagem || (oc.imagemBase64 && oc.imagemBase64.length > 0) || (oc.imagemOcorrencia && oc.imagemOcorrencia.length > 0)
+                        }));
+                        
+                        console.log("ocorrenciasUpsert mapeadas:", ocorrenciasUpsert);
+
+                        renderizarListaOcorrencias();
+                        atualizarBadgeOcorrencias();
+                    }
+                }
+                catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("ViagemUpsert.js", "carregarOcorrenciasExistentes.success", error);
+                }
+            },
+            error: function(xhr, status, error)
+            {
+                console.log("Erro ao carregar ocorrências:", error, xhr.responseText);
+            }
+        });
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "carregarOcorrenciasExistentes", error);
+    }
+}
+
+/**
+ * Função auxiliar para escapar HTML
+ */
+function escapeHtml(text)
+{
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Inicializar sistema de ocorrências quando DOM estiver pronto
+$(document).ready(function()
+{
+    try
+    {
+        setTimeout(function()
+        {
+            inicializarSistemaOcorrencias();
+            
+            // Garantir que duração e km percorrido sejam calculados após carregamento
+            calcularDuracaoViagem();
+            calcularKmPercorrido();
+        }, 600);
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ViagemUpsert.js", "document.ready.ocorrencias", error);
     }
 });

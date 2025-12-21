@@ -17,6 +17,141 @@
 }
 
 <style>
+    /* ======== ANIMAÇÃO SUAVE DO HEADER ======== */
+    @@keyframes headerGradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* ======== CORREÇÃO DO HEADER DO CARD ======== */
+    .ftx-card-header {
+        background: linear-gradient(135deg, #325d88 0%, #2a4d73 25%, #3d6f9e 50%, #2a4d73 75%, #325d88 100%);
+        background-size: 400% 400%;
+        animation: headerGradientShift 8s ease infinite;
+    }
+
+    /* ======== CORREÇÃO DA FONTE DO TÍTULO ======== */
+    .ftx-card-header .titulo-paginas {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: 1.925rem !important;
+        color: #ffffff !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .ftx-card-header .titulo-paginas i {
+        --fa-primary-color: #ffffff;
+        --fa-secondary-color: rgba(255, 255, 255, 0.7);
+        font-size: 2.2rem !important;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+    }
+
+    /* ======== OUTLINE BRANCO NO BOTÃO DO HEADER ======== */
+    .ftx-card-header .btn-fundo-laranja {
+        outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+        outline-offset: 1px;
+        transition: all 0.2s ease;
+    }
+
+    .ftx-card-header .btn-fundo-laranja:hover {
+        outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+        outline-offset: 2px;
+    }
+
+    /* ======== BOTÕES DE AÇÃO - ESPAÇAMENTO VERTICAL ======== */
+    #tblEventos td:last-child .text-center {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* ======== MODAIS DE CUSTO - 20% MENORES ======== */
+    #modalCusto .modal-dialog.modal-xl {
+        max-width: 920px !important;
+    }
+
+    #modalCusto .modal-body,
+    #modalCusto .modal-header,
+    #modalCusto .modal-footer {
+        padding: 0.8rem 1rem;
+    }
+
+    #modalCusto .modal-body .h5,
+    #modalCusto .modal-body h5,
+    #modalCusto .modal-body h6 {
+        font-size: 0.9rem;
+    }
+
+    #modalCusto .stat-card,
+    #modalCusto .custo-card {
+        padding: 0.8rem;
+    }
+
+    #modalCusto .stat-icon,
+    #modalCusto .custo-icon {
+        font-size: 1.6rem;
+    }
+
+    #modalCusto .stat-valor,
+    #modalCusto .custo-valor {
+        font-size: 0.9rem;
+    }
+
+    #modalDetalhes .modal-dialog.modal-lg {
+        max-width: 640px !important;
+    }
+
+    #modalDetalhes .modal-body,
+    #modalDetalhes .modal-header,
+    #modalDetalhes .modal-footer {
+        padding: 0.8rem 1rem;
+    }
+
+    #modalDetalhes .card-body {
+        padding: 0.8rem;
+    }
+
+    #modalDetalhes h4,
+    #modalDetalhes h5,
+    #modalDetalhes h6 {
+        font-size: 0.9rem;
+    }
+
+    #modalDetalhes .fa-2x {
+        font-size: 1.6em;
+    }
+
+    #modalDetalhes .fa-3x {
+        font-size: 2.4em;
+    }
+
+    /* ======== HEADER DO MODAL DETALHES - 20% MAIS ESCURO ======== */
+    #modalDetalhes .modal-header-dinheiro {
+        background: linear-gradient(135deg, #3C6F2F 0%, #4A803B 50%, #3C6F2F 100%) !important;
+    }
+
+    /* ======== BOTÃO DETALHES - 20% MAIS SUAVE ======== */
+    #tblViagensModal .btn-detalhes-viagem,
+    .btn-detalhes-viagem.fundo-roxo {
+        background-color: #6B2FA2 !important;
+        box-shadow: 0 0 6px rgba(107,47,162,.4), 0 2px 4px rgba(107,47,162,.25) !important;
+    }
+
+    #tblViagensModal .btn-detalhes-viagem:hover,
+    .btn-detalhes-viagem.fundo-roxo:hover {
+        background-color: #5A199B !important;
+        box-shadow: 0 0 18px rgba(107,47,162,.6), 0 4px 10px rgba(107,47,162,.4) !important;
+    }
+
     /* ======== ESTILOS FrotiX - TABELA ======== */
     #tblEventos_wrapper .row {
         margin-top: .25rem;
@@ -89,7 +224,7 @@
             <div class="modal-content">
                 <div class="modal-header modal-header-dinheiro">
                     <h5 class="modal-title" id="modalCustoLabel">
-                        <i class="fa-regular fa-money-check-dollar"></i> Custo do Evento
+                        <i class="fa-duotone fa-money-check-dollar"></i> Custo do Evento
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
@@ -108,7 +243,7 @@
                     <div class="row mt-4">
                         <div class="col-12">
                             <h5 class="fs-5 mb-3">
-                                <i class="fa-solid fa-route"></i> Viagens associadas ao Evento
+                                <i class="fa-duotone fa-route"></i> Viagens associadas ao Evento
                             </h5>
                             <div class="table-responsive">
                                 <table id="tblViagensModal" class="table table-striped table-bordered table-sm w-100">
@@ -135,14 +270,14 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <h5 class="text-success mb-3">
-                                <i class="fa fa-chart-bar"></i> Estatísticas das Viagens Realizadas
+                                <i class="fa-duotone fa-chart-bar"></i> Estatísticas das Viagens Realizadas
                             </h5>
                         </div>
 
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="text-info">
-                                    <i class="fa fa-car"></i> Total de Viagens
+                                    <i class="fa-duotone fa-car"></i> Total de Viagens
                                 </label>
                                 <input type="text" id="totalViagensModal"
                                        class="form-control text-center font-weight-bold"
@@ -154,7 +289,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="text-success">
-                                    <i class="fa fa-dollar-sign"></i> Valor Total do Evento
+                                    <i class="fa-duotone fa-dollar-sign"></i> Valor Total do Evento
                                 </label>
                                 <input type="text" id="custoTotalViagensModal"
                                        class="form-control text-center font-weight-bold"
@@ -166,7 +301,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="text-warning">
-                                    <i class="fa fa-chart-line"></i> Custo Médio por Viagem
+                                    <i class="fa-duotone fa-chart-line"></i> Custo Médio por Viagem
                                 </label>
                                 <input type="text" id="custoMedioViagemModal"
                                        class="form-control text-center font-weight-bold"
@@ -178,7 +313,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
                         Fechar
                     </button>
                 </div>
@@ -293,7 +428,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                        <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                        <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
                         Fechar
                     </button>
                 </div>
@@ -405,14 +540,17 @@
                                 if (data.success) {
                                     AppToast.show('Verde', "Status alterado com sucesso!", 2000);
 
-                                    let text = 'Ativo';
                                     if (data.type === 1) {
-                                        text = 'Inativo';
-                                        $btn.removeClass('btn-verde').addClass('fundo-cinza');
-                                    } else {
+                                        // Agora está Ativo
                                         $btn.removeClass('fundo-cinza').addClass('btn-verde');
+                                        $btn.html('<i class="fa-duotone fa-circle-check me-1"></i>Ativo');
+                                        $btn.attr('data-ejtip', 'Clique para Inativar');
+                                    } else {
+                                        // Agora está Inativo
+                                        $btn.removeClass('btn-verde').addClass('fundo-cinza');
+                                        $btn.html('<i class="fa-duotone fa-circle-xmark me-1"></i>Inativo');
+                                        $btn.attr('data-ejtip', 'Clique para Ativar');
                                     }
-                                    $btn.text(text);
                                 } else {
                                     AppToast.show('Vermelho', 'Algo deu errado!', 3000);
                                 }
@@ -443,6 +581,11 @@
 
                         // Carrega os dados do evento
                         carregarDadosEvento(eventoId);
+
+                        // Mostra loading padrão FrotiX
+                        $('#loadingMessage').text('Carregando Viagens Associadas...');
+                        $('#modalLoading').addClass('show').css({'display': 'block', 'z-index': '1060'});
+                        $('body').addClass('modal-open');
 
                         // Inicializa ou recarrega a tabela de viagens
                         if (tabelaViagensModal) {
@@ -625,9 +768,19 @@
                             render: function (data, type, row) {
                                 try {
                                     if (data === 1) {
-                                        return '<span class="btn btn-verde btn-xs">Ativo</span>';
+                                        return `<a href="javascript:void(0)" 
+                                                   class="updateStatusEvento btn btn-verde btn-xs text-white" 
+                                                   data-url="/api/ViagemEvento/UpdateStatusEvento?Id=${row.eventoId}"
+                                                   data-ejtip="Clique para Inativar">
+                                                    <i class="fa-duotone fa-circle-check me-1"></i>Ativo
+                                                </a>`;
                                     } else {
-                                        return '<span class="btn fundo-cinza btn-xs">Inativo</span>';
+                                        return `<a href="javascript:void(0)" 
+                                                   class="updateStatusEvento btn fundo-cinza btn-xs text-white" 
+                                                   data-url="/api/ViagemEvento/UpdateStatusEvento?Id=${row.eventoId}"
+                                                   data-ejtip="Clique para Ativar">
+                                                    <i class="fa-duotone fa-circle-xmark me-1"></i>Inativo
+                                                </a>`;
                                     }
                                 } catch (error) {
                                     return '<span class="badge bg-secondary">-</span>';
@@ -645,17 +798,17 @@
                                         <a href="/Viagens/UpsertEvento?id=${data}"
                                            class="btn btn-azul text-white btn-icon-28"
                                            data-ejtip="Editar Evento">
-                                            <i class="fa-solid fa-pen-to-square"></i>
+                                            <i class="fa-duotone fa-pen-to-square"></i>
                                         </a>
                                         <a class="btn btn-foto text-white btn-icon-28 btn-custo-evento"
                                            data-ejtip="Ver Custo do Evento"
                                            data-id="${data}">
-                                            <i class="fa-regular fa-money-check-dollar"></i>
+                                            <i class="fa-duotone fa-money-check-dollar"></i>
                                         </a>
                                         <a class="btn btn-vinho text-white btn-icon-28 btn-apagar"
                                            data-ejtip="Apagar Evento"
                                            data-id="${data}">
-                                            <i class="fa-solid fa-trash"></i>
+                                            <i class="fa-duotone fa-trash"></i>
                                         </a>
                                     </div>`;
                                 } catch (error) {
@@ -860,7 +1013,7 @@
                     ordering: false,
                     deferRender: true,
                     responsive: true,
-                    processing: true,
+                    processing: false,
                     ajax: {
                         url: "/api/viagem/listaviagensevento",
                         type: "GET",
@@ -872,6 +1025,16 @@
                             try {
                                 console.log('Viagens carregadas:', data.responseJSON?.data?.length);
                                 carregarEstatisticasViagensModal();
+                                
+                                // Esconde loading padrão FrotiX
+                                $('#modalLoading').removeClass('show').css('display', 'none');
+                                
+                                // Garante que o backdrop do modalCusto permaneça
+                                setTimeout(function() {
+                                    if ($('#modalCusto').hasClass('show') && !$('.modal-backdrop').length) {
+                                        $('body').append('<div class="modal-backdrop fade show"></div>');
+                                    }
+                                }, 100);
                             } catch (error) {
                                 Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "tabelaViagensModal.ajax.complete", error);
                             }
@@ -879,6 +1042,17 @@
                         error: function (xhr, status, error) {
                             try {
                                 console.error('Erro ao carregar viagens:', error);
+                                
+                                // Esconde loading mesmo em caso de erro
+                                $('#modalLoading').removeClass('show').css('display', 'none');
+                                
+                                // Garante que o backdrop do modalCusto permaneça
+                                setTimeout(function() {
+                                    if ($('#modalCusto').hasClass('show') && !$('.modal-backdrop').length) {
+                                        $('body').append('<div class="modal-backdrop fade show"></div>');
+                                    }
+                                }, 100);
+                                
                                 Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "tabelaViagensModal.ajax.error", error);
                             } catch (err) {
                                 console.error('Erro no tratamento de erro:', err);

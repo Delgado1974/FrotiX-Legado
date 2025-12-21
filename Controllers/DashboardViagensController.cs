@@ -606,9 +606,13 @@ namespace FrotiX.Controllers
 
         #region Top 10 Viagens Mais Caras
 
+        /// <summary>
+        /// Retorna Top 10 viagens mais caras COM TODOS os campos necessários para o modal
+        /// CORRIGIDO: Agora retorna status, kmRodado, minutos, finalidade e custos detalhados
+        /// </summary>
         [HttpGet]
         [Route("api/DashboardViagens/ObterTop10ViagensMaisCaras")]
-        public async Task<IActionResult> ObterTop10ViagensMaisCaras(DateTime? dataInicio , DateTime? dataFim)
+        public async Task<IActionResult> ObterTop10ViagensMaisCaras(DateTime? dataInicio, DateTime? dataFim)
         {
             try
             {
@@ -618,8 +622,7 @@ namespace FrotiX.Controllers
                     dataInicio = dataFim.Value.AddDays(-30);
                 }
 
-                // Usar tabela Viagem diretamente para evitar inconsistências da View
-                // Filtrar apenas viagens REALIZADAS com KM preenchido e válido (sem outliers)
+                // Buscar viagens realizadas com KM válido
                 var viagens = await _context.Viagem
                     .Where(v => v.DataInicial >= dataInicio && v.DataInicial <= dataFim)
                     .Where(v => v.Status == "Realizada")
@@ -630,38 +633,54 @@ namespace FrotiX.Controllers
                     .Include(v => v.Veiculo)
                         .ThenInclude(vei => vei.ModeloVeiculo)
                             .ThenInclude(mod => mod.MarcaVeiculo)
-                    .Select(v => new
-                    {
-                        v.ViagemId ,
-                        v.NoFichaVistoria ,
-                        v.DataInicial ,
-                        v.DataFinal ,
-                        NomeMotorista = v.Motorista != null ? v.Motorista.Nome : "Não informado" ,
-                        DescricaoVeiculo = v.Veiculo != null && v.Veiculo.ModeloVeiculo != null && v.Veiculo.ModeloVeiculo.MarcaVeiculo != null
-                            ? "(" + v.Veiculo.Placa + ") - " + v.Veiculo.ModeloVeiculo.MarcaVeiculo.DescricaoMarca + "/" + v.Veiculo.ModeloVeiculo.DescricaoModelo
-                            : v.Veiculo != null ? v.Veiculo.Placa : "Não informado" ,
-                        CustoViagem = (v.CustoCombustivel ?? 0) + (v.CustoLavador ?? 0) + (v.CustoMotorista ?? 0) + (v.CustoOperador ?? 0) + (v.CustoVeiculo ?? 0)
-                    })
-                    .OrderByDescending(v => v.CustoViagem)
-                    .Take(10)
                     .ToListAsync();
 
-                var top10 = viagens.Select(v => new
+                // Ordenar e pegar top 10
+                var top10Viagens = viagens
+                    .OrderByDescending(v => (v.CustoCombustivel ?? 0d) + (v.CustoLavador ?? 0d) + (v.CustoMotorista ?? 0d) + (v.CustoOperador ?? 0d) + (v.CustoVeiculo ?? 0d))
+                    .Take(10)
+                    .ToList();
+
+                // Mapear para o formato de retorno
+                var top10 = top10Viagens.Select(v => new
                 {
-                    viagemId = v.ViagemId.ToString() ,
-                    noFichaVistoria = v.NoFichaVistoria?.ToString() ?? "N/A" ,
-                    dataInicial = v.DataInicial?.ToString("dd/MM/yyyy") ?? "N/A" ,
-                    dataFinal = v.DataFinal?.ToString("dd/MM/yyyy") ?? "N/A" ,
-                    motorista = v.NomeMotorista ,
-                    veiculo = v.DescricaoVeiculo ,
-                    custoTotal = Math.Round(v.CustoViagem , 2)
+                    viagemId = v.ViagemId.ToString(),
+                    noFichaVistoria = v.NoFichaVistoria?.ToString() ?? "N/A",
+                    status = v.Status ?? "-",
+                    dataInicial = v.DataInicial?.ToString("dd/MM/yyyy") ?? "N/A",
+                    dataFinal = v.DataFinal?.ToString("dd/MM/yyyy") ?? "N/A",
+                    motorista = v.Motorista != null ? v.Motorista.Nome : "Não informado",
+                    veiculo = v.Veiculo != null && v.Veiculo.ModeloVeiculo != null && v.Veiculo.ModeloVeiculo.MarcaVeiculo != null
+                        ? "(" + v.Veiculo.Placa + ") - " + v.Veiculo.ModeloVeiculo.MarcaVeiculo.DescricaoMarca + "/" + v.Veiculo.ModeloVeiculo.DescricaoModelo
+                        : v.Veiculo != null ? v.Veiculo.Placa : "Não informado",
+                    // KM Rodado calculado
+                    kmRodado = v.KmInicial.HasValue && v.KmFinal.HasValue
+                        ? v.KmFinal.Value - v.KmInicial.Value
+                        : 0m,
+                    // Minutos/Duração
+                    minutos = v.Minutos ?? 0,
+                    // Finalidade
+                    finalidade = v.Finalidade ?? "-",
+                    // Custos detalhados - acessando diretamente da entidade (double?)
+                    custoCombustivel = Math.Round(v.CustoCombustivel ?? 0d, 2),
+                    custoVeiculo = Math.Round(v.CustoVeiculo ?? 0d, 2),
+                    custoMotorista = Math.Round(v.CustoMotorista ?? 0d, 2),
+                    custoOperador = Math.Round(v.CustoOperador ?? 0d, 2),
+                    custoLavador = Math.Round(v.CustoLavador ?? 0d, 2),
+                    // Custo total
+                    custoTotal = Math.Round(
+                        (v.CustoCombustivel ?? 0d) + 
+                        (v.CustoLavador ?? 0d) + 
+                        (v.CustoMotorista ?? 0d) + 
+                        (v.CustoOperador ?? 0d) + 
+                        (v.CustoVeiculo ?? 0d), 2)
                 }).ToList();
 
-                return Json(new { success = true , data = top10 });
+                return Json(new { success = true, data = top10 });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false , message = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 

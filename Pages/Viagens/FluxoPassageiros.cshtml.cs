@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FrotiX.Pages.Viagens
 {
-    public class FluxoPassageirosModel :PageModel
+    public class FluxoPassageirosModel : PageModel
     {
         public static IUnitOfWork _unitOfWork;
 
@@ -18,7 +18,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "Initialize" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "Initialize", error);
                 return;
             }
         }
@@ -31,7 +31,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "FluxoPassageirosModel" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "FluxoPassageirosModel", error);
             }
         }
 
@@ -42,7 +42,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "OnGet" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "OnGet", error);
                 return;
             }
         }
@@ -50,14 +50,8 @@ namespace FrotiX.Pages.Viagens
 
     public class ListaEconomildos
     {
-        public string Descricao
-        {
-            get; set;
-        }
-        public Guid Id
-        {
-            get; set;
-        }
+        public string Descricao { get; set; }
+        public Guid Id { get; set; }
 
         private readonly IUnitOfWork _unitOfWork;
 
@@ -68,7 +62,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "ListaEconomildos" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "ListaEconomildos", error);
             }
         }
 
@@ -80,7 +74,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "ListaEconomildos" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "ListaEconomildos", error);
             }
         }
 
@@ -99,8 +93,8 @@ namespace FrotiX.Pages.Viagens
                         && (v.Economildo == true)
                     select new
                     {
-                        Id = v.VeiculoId ,
-                        Descricao = v.Placa + " - " + ma.DescricaoMarca + "/" + m.DescricaoModelo ,
+                        Id = v.VeiculoId,
+                        Descricao = v.Placa + " - " + ma.DescricaoMarca + "/" + m.DescricaoModelo,
                     }
                 ).OrderBy(v => v.Descricao);
 
@@ -109,8 +103,8 @@ namespace FrotiX.Pages.Viagens
                     veiculos.Add(
                         new ListaEconomildos
                         {
-                            Descricao = veiculo.Descricao ,
-                            Id = veiculo?.Id ?? Guid.Empty ,
+                            Descricao = veiculo.Descricao,
+                            Id = veiculo?.Id ?? Guid.Empty,
                         }
                     );
                 }
@@ -119,7 +113,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "VeiculosList" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "VeiculosList", error);
                 return default(List<ListaEconomildos>);
             }
         }
@@ -127,14 +121,8 @@ namespace FrotiX.Pages.Viagens
 
     public class ListaMotoristaMOB
     {
-        public string Descricao
-        {
-            get; set;
-        }
-        public Guid Id
-        {
-            get; set;
-        }
+        public string Descricao { get; set; }
+        public Guid Id { get; set; }
 
         private readonly IUnitOfWork _unitOfWork;
 
@@ -145,7 +133,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "ListaMotoristaMOB" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "ListaMotoristaMOB", error);
             }
         }
 
@@ -157,7 +145,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "ListaMotoristaMOB" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "ListaMotoristaMOB", error);
             }
         }
 
@@ -174,8 +162,8 @@ namespace FrotiX.Pages.Viagens
                     motoristas.Add(
                         new ListaMotoristaMOB
                         {
-                            Descricao = motorista.MotoristaCondutor ,
-                            Id = motorista.MotoristaId ,
+                            Descricao = motorista.MotoristaCondutor,
+                            Id = motorista.MotoristaId,
                         }
                     );
                 }
@@ -184,7 +172,7 @@ namespace FrotiX.Pages.Viagens
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs" , "MotoristaList" , error);
+                Alerta.TratamentoErroComLinha("FluxoPassageiros.cshtml.cs", "MotoristaList", error);
                 return default(List<ListaMotoristaMOB>);
             }
         }

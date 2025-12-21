@@ -4,6 +4,9 @@
    Data: 2025-01-22
    ======================================================== */
 
+/* Import fonte Outfit para títulos */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap');
+
 /* ============================================
    1. CONFIGURAÇÕES GLOBAIS E TIPOGRAFIA
    ============================================ */
@@ -1151,17 +1154,25 @@ label[for="lstRecorrente"] {
 }
 
 /* Título do modal - Letra encorpada e robusta */
-#modalViagens .modal-header .modal-title {
+#modalViagens .modal-header .modal-title,
+#modalViagens .modal-header h5.modal-title,
+#modalViagens .modal-header h5#exampleModalLabel,
+#Titulo h5.modal-title,
+#Titulo h5#exampleModalLabel,
+h5.modal-title#exampleModalLabel {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
-    font-size: 1.5rem !important;          /* 24px - Tamanho grande */
-    font-weight: 700 !important;           /* Bold/Negrito - Letra encorpada */
+    font-family: 'Outfit', sans-serif !important;  /* FONTE OUTFIT */
+    font-size: 1.75rem !important;         /* 28px - Tamanho maior */
+    font-weight: 900 !important;           /* Black - Mais encorpada */
     line-height: 1.2 !important;
-    color: #212529 !important;
+    color: #fff !important;
     margin: 0 !important;
     padding: 0 !important;
     flex-grow: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    letter-spacing: 0.5px;
 }
 
 /* Ícone FontAwesome Duotone no título */
@@ -1486,4 +1497,20 @@ label[for="lstRecorrente"] {
 /* Garantir que listbox não apareça em novo agendamento */
 body:not(.modo-edicao-variada) #listboxDatasVariadasContainer {
     display: none !important;
+}
+
+/* ============================================
+   OVERRIDE FINAL - FONTE OUTFIT NOS TÍTULOS
+   ============================================ */
+#modalViagens #Titulo h5.modal-title,
+#modalViagens #Titulo h5#exampleModalLabel,
+#modalViagens .modal-header h5.modal-title,
+.modal.fade.show #Titulo h5,
+div#modalViagens div#Titulo h5.modal-title#exampleModalLabel {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 1.75rem !important;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+    letter-spacing: 0.5px !important;
 }

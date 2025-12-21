@@ -1,6 +1,10 @@
 /* ================================================================
    GLOBAL LIMPO + GLOW FINO — versão consolidada
    ================================================================ */
+
+/* Import fonte Outfit */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -279,6 +283,184 @@ body {
     margin-right: 8px;
     display: inline-flex;
     align-items: center
+}
+
+/* ================================================================
+   FTX CARD HEADER - PADRÃO GLOBAL FROTIX
+   Uso: .ftx-card-header com .titulo-paginas e .ftx-card-actions
+   ================================================================ */
+
+/* Animação do gradiente do header */
+@keyframes ftxHeaderGradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Animação do ícone pulsante do header */
+@keyframes ftxHeaderIconPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+    50% { 
+        transform: scale(1.08); 
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+    }
+}
+
+/* Container do Header do Card */
+.ftx-card-header {
+    background: linear-gradient(135deg, #325d88 0%, #2a4d73 25%, #3d6f9e 50%, #2a4d73 75%, #325d88 100%);
+    background-size: 400% 400%;
+    animation: ftxHeaderGradientShift 8s ease infinite;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efeito de brilho sutil no header */
+.ftx-card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: ftxHeaderShine 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ftxHeaderShine {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+}
+
+/* Título do Header - Padrão FrotiX */
+.ftx-card-header .titulo-paginas,
+.ftx-card-header h2.titulo-paginas,
+.ftx-card-header .ftx-card-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 1.925rem !important;
+    color: #ffffff !important;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    letter-spacing: 0.3px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Ícone do Título - Pulsante */
+.ftx-card-header .titulo-paginas i,
+.ftx-card-header h2.titulo-paginas i,
+.ftx-card-header .ftx-card-title i {
+    font-size: 2.2rem !important;
+    --fa-primary-color: #ffffff;
+    --fa-secondary-color: rgba(255, 255, 255, 0.7);
+    --fa-secondary-opacity: 0.7;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: ftxHeaderIconPulse 2.5s ease-in-out infinite;
+}
+
+/* Container de Ações do Header */
+.ftx-card-header .ftx-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Botão Laranja do Header - Padrão FrotiX */
+.ftx-card-header .btn-header-orange,
+.btn-header-orange {
+    background: #E67E22 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(230, 126, 34, 0.35);
+}
+
+.ftx-card-header .btn-header-orange:hover,
+.btn-header-orange:hover {
+    background: #D35400 !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(230, 126, 34, 0.45);
+}
+
+.ftx-card-header .btn-header-orange:active,
+.btn-header-orange:active {
+    transform: translateY(0);
+}
+
+.ftx-card-header .btn-header-orange i,
+.btn-header-orange i {
+    font-size: 1rem;
+}
+
+/* Botão Vinho no Header com outline branco */
+.ftx-card-header .btn-vinho {
+    outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+    outline-offset: 1px;
+    transition: all 0.2s ease;
+}
+
+.ftx-card-header .btn-vinho:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.85) !important;
+    outline-offset: 2px;
+}
+
+/* Responsividade do Header */
+@media (max-width: 768px) {
+    .ftx-card-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .ftx-card-header .titulo-paginas,
+    .ftx-card-header h2.titulo-paginas,
+    .ftx-card-header .ftx-card-title {
+        font-size: 1.5rem !important;
+        justify-content: center;
+    }
+    
+    .ftx-card-header .titulo-paginas i,
+    .ftx-card-header h2.titulo-paginas i,
+    .ftx-card-header .ftx-card-title i {
+        font-size: 1.75rem !important;
+    }
+    
+    .ftx-card-header .ftx-card-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .ftx-card-header .btn-header-orange,
+    .btn-header-orange {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* ================================================================
@@ -1807,12 +1989,16 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
     }
 
 /* ================================================================
-   MODAL CUSTOS VIAGEM - Cards com ícones grandes
+/* ================================================================
+   MODAL CUSTOS VIAGEM - VERSÃO COMPACTA (80% DO TAMANHO ORIGINAL)
+   Adicionar ao final do frotix.css ou incluir como style tag na página
    ================================================================ */
+
+/* ===== CUSTO CARDS ===== */
 .custo-card {
     background: linear-gradient(145deg, #ffffff, #f8f9fa);
-    border-radius: 12px;
-    padding: 1.25rem;
+    border-radius: 10px;
+    padding: 1rem;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1826,94 +2012,94 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
 }
 
 .custo-card .custo-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
+    font-size: 2rem;
+    margin-bottom: 0.6rem;
     display: block;
 }
 
 .custo-card .custo-label {
-    font-size: 0.85rem;
+    font-size: 0.68rem;
     color: #6c757d;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.4rem;
 }
 
 .custo-card .custo-valor {
-    font-size: 1.4rem;
+    font-size: 1.12rem;
     font-weight: 700;
     color: #2d3748;
 }
 
-/* Cards de estatísticas da viagem */
+/* ===== STAT CARDS ===== */
 .stat-card {
     background: #ffffff;
-    border-radius: 10px;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 0.8rem;
     text-align: center;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     border: 1px solid #e2e8f0;
 }
 
 .stat-card .stat-icon {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
     display: block;
 }
 
 .stat-card .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     color: #718096;
     font-weight: 600;
     text-transform: uppercase;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
 }
 
 .stat-card .stat-valor {
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     font-weight: 700;
     color: #1a202c;
 }
 
-/* Seção de custos */
+/* ===== SEÇÃO DE CUSTOS ===== */
 .custos-section {
     background: #f7fafc;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-top: 1rem;
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin-top: 0.8rem;
 }
 
 .custos-section .section-title {
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: #2d3748;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .custos-section .section-title i {
-    font-size: 1.25rem;
+    font-size: 1rem;
 }
 
-/* Total destacado - Compacto */
+/* ===== CUSTO TOTAL CARD ===== */
 .custo-total-card {
     background: linear-gradient(135deg, #4B8B3B 0%, #3D7230 100%);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
     text-align: center;
     color: white;
     box-shadow: 0 3px 12px rgba(75,139,59,0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.8rem;
 }
 
 .custo-total-card .custo-icon {
-    font-size: 2rem;
+    font-size: 1.6rem;
     --fa-primary-color: #fff;
     --fa-secondary-color: #a7f3d0;
     --fa-secondary-opacity: 0.8;
@@ -1921,16 +2107,16 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
 }
 
 .custo-total-card .custo-label {
-    font-size: 0.8rem;
+    font-size: 0.64rem;
     color: rgba(255,255,255,0.9);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.15rem;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.12rem;
 }
 
 .custo-total-card .custo-valor {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: #fff;
 }
@@ -1939,7 +2125,51 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
     text-align: left;
 }
 
-/* Cores específicas para ícones nos cards */
+/* ===== AJUSTES NO MODAL ===== */
+#modalCustosViagem .modal-body {
+    padding: 1rem;
+}
+
+#modalCustosViagem .row.mb-3 {
+    margin-bottom: 0.6rem !important;
+}
+
+#modalCustosViagem .row.mb-4 {
+    margin-bottom: 0.8rem !important;
+}
+
+#modalCustosViagem .row.g-3 {
+    --bs-gutter-y: 0.6rem;
+    --bs-gutter-x: 0.6rem;
+}
+
+#modalCustosViagem .row.mt-3 {
+    margin-top: 0.6rem !important;
+}
+
+#modalCustosViagem h6.text-muted {
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem !important;
+}
+
+#modalCustosViagem h6.text-muted i {
+    font-size: 0.7rem;
+}
+
+#modalCustosViagem small.text-muted {
+    font-size: 0.68rem;
+}
+
+#modalCustosViagem .alert {
+    padding: 0.5rem 0.8rem !important;
+    font-size: 0.75rem;
+}
+
+#modalCustosViagem .alert i {
+    font-size: 1rem !important;
+}
+
+/* ===== CORES DOS ÍCONES (mantém original) ===== */
 .icon-motorista { color: #0ea5e9; --fa-primary-color: #0ea5e9; --fa-secondary-color: #7dd3fc; --fa-secondary-opacity: 0.6; }
 .icon-veiculo { color: #7c3aed; --fa-primary-color: #7c3aed; --fa-secondary-color: #c4b5fd; --fa-secondary-opacity: 0.6; }
 .icon-combustivel { color: #f59e0b; --fa-primary-color: #f59e0b; --fa-secondary-color: #fcd34d; --fa-secondary-opacity: 0.6; }
@@ -1948,6 +2178,7 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
 .icon-duracao { color: #ec4899; --fa-primary-color: #ec4899; --fa-secondary-color: #f9a8d4; --fa-secondary-opacity: 0.6; }
 .icon-km { color: #10b981; --fa-primary-color: #10b981; --fa-secondary-color: #6ee7b7; --fa-secondary-opacity: 0.6; }
 .icon-litros { color: #ef4444; --fa-primary-color: #ef4444; --fa-secondary-color: #fca5a5; --fa-secondary-opacity: 0.6; }
+.icon-consumo { color: #10b981; --fa-primary-color: #10b981; --fa-secondary-color: #86efac; --fa-secondary-opacity: 0.6; }
 .icon-consumo { color: #8b5cf6; --fa-primary-color: #8b5cf6; --fa-secondary-color: #c4b5fd; --fa-secondary-opacity: 0.6; }
 
 /* Modal Custos Viagem */
@@ -2095,12 +2326,30 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
 }
 
 /* ===== TÍTULO DO MODAL ===== */
-.modal-title {
-    font-weight: 600;
-    letter-spacing: 0.2px;
+.modal-title,
+h3.modal-title,
+#Titulo h3,
+#Titulo .modal-title,
+#modalViagens h3,
+#modalViagens .modal-title,
+.modal-header h3,
+.modal-header h5,
+.modal-header .modal-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 1.35rem;
+    letter-spacing: 0.3px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Section Card Headers com Outfit */
+.section-card-header {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600 !important;
 }
 
 .modal-title i {
@@ -2304,6 +2553,7 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
     
     .modal-title {
         font-size: 1rem;
+        font-family: 'Outfit', sans-serif !important;
     }
     
     .modal-body {

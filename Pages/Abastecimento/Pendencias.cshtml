@@ -1,0 +1,1408 @@
+@page
+
+@using FrotiX.Repository.IRepository
+@using Syncfusion.EJ2
+
+@inject IUnitOfWork _unitOfWork
+
+@functions {
+    public void OnGet()
+    {
+        FrotiX.Pages.Abastecimento.PendenciasModel.Initialize(_unitOfWork);
+        ViewData["lstVeiculos"] = new FrotiX.Pages.Abastecimento.ListaVeiculos(_unitOfWork).VeiculosList();
+        ViewData["lstCombustivel"] = new FrotiX.Pages.Abastecimento.ListaCombustivel(_unitOfWork).CombustivelList();
+        ViewData["lstMotorista"] = new FrotiX.Pages.Abastecimento.ListaMotorista(_unitOfWork).MotoristaList();
+    }
+}
+
+@model FrotiX.Pages.Abastecimento.PendenciasModel
+
+@{
+    ViewData["Title"] = "Abastecimentos Pendentes";
+    ViewData["PageName"] = "abastecimento_pendencias";
+    ViewData["Heading"] = "<i class='fad fa-gas-pump'></i> Cadastros: <span class='fw-300'>Abastecimentos Pendentes</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fal fa-gas-pump";
+}
+
+@section HeadBlock {
+    <style>
+        /* ====== CARDS DE RESUMO ====== */
+        .ftx-stat-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ftx-stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .ftx-stat-card.filtro-ativo {
+            border: 2px solid #4f46e5;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .ftx-stat-card.filtro-ativo .ftx-stat-info span {
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .ftx-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .ftx-stat-icon.total { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; }
+        .ftx-stat-icon.veiculo { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; }
+        .ftx-stat-icon.motorista { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #fff; }
+        .ftx-stat-icon.km { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #fff; }
+        .ftx-stat-icon.corrigivel { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; }
+
+        .ftx-stat-info h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .ftx-stat-info span {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* ====== BOTÕES DE AÇÃO NA TABELA ====== */
+        .acoes-pendencia .btn {
+            width: var(--ftx-icon-btn, 28px);
+            height: var(--ftx-icon-btn, 28px);
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: var(--ftx-action-icon, 0.85rem);
+        }
+
+        .btn-resolver {
+            background-color: #38A169 !important;
+            border-color: #2D7A50 !important;
+            color: #fff !important;
+            box-shadow: 0 0 6px rgba(56,161,105,.4);
+        }
+
+        .btn-resolver:hover {
+            background-color: #2D7A50 !important;
+            box-shadow: 0 0 12px rgba(56,161,105,.6);
+            color: #fff !important;
+        }
+
+        .btn-editar-pendencia {
+            background-color: #3D5771 !important;
+            border-color: #2d4559 !important;
+            color: #fff !important;
+            box-shadow: 0 0 6px rgba(61,87,113,.4);
+        }
+
+        .btn-editar-pendencia:hover {
+            background-color: #2d4559 !important;
+            box-shadow: 0 0 12px rgba(61,87,113,.6);
+            color: #fff !important;
+        }
+
+        .btn-excluir-pendencia {
+            background-color: #722f37 !important;
+            border-color: #5a252c !important;
+            color: #fff !important;
+            box-shadow: 0 0 6px rgba(114,47,55,.4);
+        }
+
+        .btn-excluir-pendencia:hover {
+            background-color: #5a252c !important;
+            box-shadow: 0 0 12px rgba(114,47,55,.6);
+            color: #fff !important;
+        }
+
+        .btn-sugestao {
+            background-color: #f59e0b !important;
+            border-color: #d97706 !important;
+            color: #fff !important;
+            box-shadow: 0 0 6px rgba(245,158,11,.4);
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        .btn-sugestao:hover {
+            background-color: #d97706 !important;
+            box-shadow: 0 0 12px rgba(245,158,11,.6);
+            color: #fff !important;
+            animation: none;
+        }
+
+        @@keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+            }
+        }
+
+        /* ====== BADGE DE PENDÊNCIA ====== */
+        .badge-pendencia {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-pendencia.veiculo { background: #fef3c7; color: #92400e; }
+        .badge-pendencia.motorista { background: #fee2e2; color: #991b1b; }
+        .badge-pendencia.km { background: #ede9fe; color: #5b21b6; }
+        .badge-pendencia.autorizacao { background: #fce7f3; color: #9d174d; }
+        .badge-pendencia.litros { background: #dbeafe; color: #1e40af; }
+        .badge-pendencia.data { background: #e0e7ff; color: #3730a3; }
+        .badge-pendencia.erro { background: #f1f5f9; color: #475569; }
+
+        /* ====== CARD SUGESTÃO ====== */
+        .card-sugestao {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .card-sugestao h6 {
+            color: #92400e;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-sugestao p {
+            color: #78350f;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ====== HEADER AÇÕES ====== */
+        .ftx-card-header .btn-add {
+            background-color: #A0522D !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 0 8px rgba(160,82,45,.5),0 2px 4px rgba(160,82,45,.3);
+        }
+
+        .ftx-card-header .btn-add:hover {
+            background-color: #8B4513 !important;
+            border-color: rgba(255,255,255,0.5) !important;
+            animation: buttonWiggle .5s ease-in-out;
+            box-shadow: 0 0 20px rgba(160,82,45,.8),0 6px 12px rgba(160,82,45,.5);
+            color: #fff !important;
+        }
+
+        .btn-excluir-todas {
+            background-color: #722f37 !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            color: #fff !important;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 0 8px rgba(114,47,55,.5),0 2px 4px rgba(114,47,55,.3);
+        }
+
+        .btn-excluir-todas:hover {
+            background-color: #5a252c !important;
+            border-color: rgba(255,255,255,0.5) !important;
+            animation: buttonWiggle .5s ease-in-out;
+            box-shadow: 0 0 20px rgba(114,47,55,.8),0 6px 12px rgba(114,47,55,.5);
+            color: #fff !important;
+        }
+
+        /* ====== RESPONSIVIDADE ====== */
+        .acoes-pendencia {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+        }
+
+        /* ====== PADRONIZAÇÃO ALTURA CONTROLES MODAL ====== */
+        #modalEditarPendencia .form-control,
+        #modalEditarPendencia .e-input-group {
+            height: 38px !important;
+            min-height: 38px !important;
+        }
+
+        #modalEditarPendencia .e-control-wrapper {
+            min-height: 38px !important;
+        }
+
+        #modalEditarPendencia .e-input-group input.e-input {
+            height: 36px !important;
+        }
+
+        /* ====== MODAL SUGESTÃO ====== */
+        .sugestao-modal-body {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .sugestao-titulo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #065f46;
+            font-weight: 600;
+        }
+
+        .sugestao-titulo i {
+            color: #059669;
+            font-size: 1.25rem;
+        }
+
+        .sugestao-valores {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sugestao-valor-box {
+            text-align: center;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            min-width: 100px;
+        }
+
+        .sugestao-valor-box.errado {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #fecaca;
+        }
+
+        .sugestao-valor-box.errado .valor-numero {
+            color: #dc2626;
+            text-decoration: line-through;
+        }
+
+        .sugestao-valor-box.correto {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid #86efac;
+        }
+
+        .sugestao-valor-box.correto .valor-numero {
+            color: #16a34a;
+        }
+
+        .sugestao-valor-box .valor-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .sugestao-valor-box .valor-numero {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .sugestao-seta {
+            color: #22c55e;
+            font-size: 1.5rem;
+        }
+
+        .sugestao-justificativa {
+            font-size: 0.85rem;
+            color: #475569;
+            font-style: italic;
+            padding: 0.75rem;
+            border-left: 3px solid #a7f3d0;
+            background: rgba(255,255,255,0.5);
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* ====== INDICADOR DE FILTRO ATIVO ====== */
+        .filtro-info {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #4338ca;
+            margin-bottom: 1rem;
+        }
+
+        .filtro-info.visivel {
+            display: flex;
+        }
+
+        .filtro-info .btn-limpar-filtro {
+            margin-left: auto;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background: #4f46e5;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filtro-info .btn-limpar-filtro:hover {
+            background: #4338ca;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="panel ftx-card-styled">
+            <div class="panel-container show">
+
+                <!-- HEADER -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-triangle-exclamation"></i>
+                        Abastecimentos Pendentes
+                    </h2>
+                    <div class="ftx-card-actions d-flex gap-2">
+                        <a href="/Abastecimento/Index" class="btn btn-add">
+                            <i class="fa-duotone fa-gas-pump"></i> Abastecimentos
+                        </a>
+                        <a href="/Abastecimento/Importacao" class="btn btn-add">
+                            <i class="fa-duotone fa-file-import"></i> Nova Importação
+                        </a>
+                        <button type="button" class="btn btn-excluir-todas" onclick="excluirTodasPendencias()">
+                            <i class="fa-duotone fa-trash-can"></i> Excluir Todas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CONTEÚDO -->
+                <div class="panel-content">
+                    <div class="box-body">
+
+                        <!-- CARDS DE RESUMO (FILTROS) -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="ftx-stat-card filtro-ativo" data-filtro="total" onclick="filtrarPorCard('total')" title="Ver todas as pendências">
+                                    <div class="ftx-stat-icon total">
+                                        <i class="fa-duotone fa-list-check"></i>
+                                    </div>
+                                    <div class="ftx-stat-info">
+                                        <h4 id="statTotal">0</h4>
+                                        <span>Total</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="ftx-stat-card" data-filtro="veiculo" onclick="filtrarPorCard('veiculo')" title="Filtrar por pendências de Veículo">
+                                    <div class="ftx-stat-icon veiculo">
+                                        <i class="fa-duotone fa-car-burst"></i>
+                                    </div>
+                                    <div class="ftx-stat-info">
+                                        <h4 id="statVeiculo">0</h4>
+                                        <span>Veículo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="ftx-stat-card" data-filtro="motorista" onclick="filtrarPorCard('motorista')" title="Filtrar por pendências de Motorista">
+                                    <div class="ftx-stat-icon motorista">
+                                        <i class="fa-duotone fa-user-xmark"></i>
+                                    </div>
+                                    <div class="ftx-stat-info">
+                                        <h4 id="statMotorista">0</h4>
+                                        <span>Motorista</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="ftx-stat-card" data-filtro="km" onclick="filtrarPorCard('km')" title="Filtrar por pendências de Quilometragem">
+                                    <div class="ftx-stat-icon km">
+                                        <i class="fa-duotone fa-gauge-high"></i>
+                                    </div>
+                                    <div class="ftx-stat-info">
+                                        <h4 id="statKm">0</h4>
+                                        <span>Quilometragem</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="ftx-stat-card" data-filtro="corrigivel" onclick="filtrarPorCard('corrigivel')" title="Filtrar pendências com correção automática">
+                                    <div class="ftx-stat-icon corrigivel">
+                                        <i class="fa-duotone fa-wand-magic-sparkles"></i>
+                                    </div>
+                                    <div class="ftx-stat-info">
+                                        <h4 id="statCorrigivel">0</h4>
+                                        <span>Corrigíveis</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- INDICADOR DE FILTRO ATIVO -->
+                        <div id="filtroInfo" class="filtro-info">
+                            <i class="fa-duotone fa-filter"></i>
+                            <span>Exibindo: <strong id="filtroNome">Todas</strong></span>
+                            <button type="button" class="btn-limpar-filtro" onclick="filtrarPorCard('total')">
+                                <i class="fa-solid fa-xmark"></i> Limpar Filtro
+                            </button>
+                        </div>
+
+                        <!-- DATATABLE -->
+                        <div id="divPendencias">
+                            <table id="tblPendencias" class="table table-bordered table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Autorização</th>
+                                        <th>Data/Hora</th>
+                                        <th>Placa</th>
+                                        <th>Motorista</th>
+                                        <th>Produto</th>
+                                        <th>Litros</th>
+                                        <th>KM Ant.</th>
+                                        <th>KM</th>
+                                        <th>Rodado</th>
+                                        <th>Pendência</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR PENDÊNCIA -->
+<div class="modal fade" id="modalEditarPendencia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fa-duotone fa-pen-to-square"></i> Editar Pendência</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmEditarPendencia">
+                    <input type="hidden" id="txtPendenciaId" />
+
+                    <!-- Alerta de Pendência -->
+                    <div class="alert alert-warning d-flex align-items-center mb-3">
+                        <i class="fa-duotone fa-triangle-exclamation me-2"></i>
+                        <span id="txtDescricaoPendencia"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Autorização QCard</label>
+                            <input type="text" class="form-control" id="txtAutorizacao" readonly />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Data/Hora</label>
+                            <input type="text" class="form-control" id="txtDataHora" readonly />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Placa Original</label>
+                            <input type="text" class="form-control" id="txtPlaca" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Veículo</label>
+                            <ejs-dropdownlist id="cmbVeiculo" dataSource="@ViewData["lstVeiculos"]"
+                                              placeholder="Selecione o Veículo" allowFiltering="true" filterType="Contains"
+                                              popupHeight="250px">
+                                <e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+                            </ejs-dropdownlist>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Motorista</label>
+                            <ejs-dropdownlist id="cmbMotorista" dataSource="@ViewData["lstMotorista"]"
+                                              placeholder="Selecione o Motorista" allowFiltering="true" filterType="Contains"
+                                              popupHeight="250px">
+                                <e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+                            </ejs-dropdownlist>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cód. Motorista QCard</label>
+                            <input type="text" class="form-control" id="txtCodMotorista" readonly />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Combustível</label>
+                            <ejs-dropdownlist id="cmbCombustivel" dataSource="@ViewData["lstCombustivel"]"
+                                              placeholder="Selecione o Combustível" allowFiltering="true" filterType="Contains"
+                                              popupHeight="250px">
+                                <e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+                            </ejs-dropdownlist>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Litros</label>
+                            <input type="number" class="form-control" id="txtLitros" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Valor Unitário</label>
+                            <input type="number" class="form-control" id="txtValorUnitario" step="0.01" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">KM Anterior</label>
+                            <input type="number" class="form-control" id="txtKmAnterior" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">KM Atual</label>
+                            <input type="number" class="form-control" id="txtKm" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">KM Rodado</label>
+                            <input type="number" class="form-control" id="txtKmRodado" readonly />
+                        </div>
+                    </div>
+
+                    <!-- Card de Sugestão -->
+                    <div id="cardSugestao" class="card-sugestao d-none">
+                        <h6><i class="fa-duotone fa-wand-magic-sparkles"></i> Sugestão de Correção</h6>
+                        <p id="txtSugestaoInfo"></p>
+                        <button type="button" class="btn btn-success btn-sm" onclick="aplicarSugestaoNoModal()">
+                            <i class="fa-duotone fa-check"></i> Aplicar Sugestão
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarPendencia" onclick="salvarPendencia()">
+                    <span class="btn-text"><i class="fa-duotone fa-floppy-disk"></i> Salvar</span>
+                    <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Salvando...</span>
+                </button>
+                <button type="button" class="btn btn-success" id="btnSalvarImportar" onclick="salvarEImportar()">
+                    <span class="btn-text"><i class="fa-duotone fa-file-import"></i> Salvar e Importar</span>
+                    <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Processando...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SUGESTÃO -->
+<div class="modal fade" id="modalSugestao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa-duotone fa-wand-magic-sparkles"></i> Correção Automática</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtSugestaoId" />
+
+                <div class="sugestao-modal-body">
+                    <div class="sugestao-titulo">
+                        <i class="fa-duotone fa-lightbulb"></i>
+                        <span id="txtSugestaoCampoLabel">Sugestão de Correção</span>
+                    </div>
+
+                    <div class="sugestao-valores">
+                        <div class="sugestao-valor-box errado">
+                            <div class="valor-label">Valor Atual</div>
+                            <div class="valor-numero" id="txtSugestaoValorAtual">-</div>
+                        </div>
+                        <div class="sugestao-seta">
+                            <i class="fa-duotone fa-arrow-right"></i>
+                        </div>
+                        <div class="sugestao-valor-box correto">
+                            <div class="valor-label">Valor Correto</div>
+                            <div class="valor-numero" id="txtSugestaoValorSugerido">-</div>
+                        </div>
+                    </div>
+
+                    <div class="sugestao-justificativa" id="txtSugestaoJustificativa">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnAplicarSugestao" onclick="confirmarAplicarSugestao()">
+                    <span class="btn-text"><i class="fa-duotone fa-check"></i> Aplicar Correção</span>
+                    <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Aplicando...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script asp-append-version="true">
+        var tblPendencias = null;
+        var pendenciaAtual = null;
+        var filtroAtivo = 'total';
+
+        $(document).ready(function () {
+            try {
+                carregarEstatisticas();
+                carregarPendencias();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "document.ready", error);
+            }
+        });
+
+        // ====== FILTRAR POR CARD ======
+        function filtrarPorCard(tipo) {
+            try {
+                filtroAtivo = tipo;
+
+                // Atualizar visual dos cards
+                $('.ftx-stat-card').removeClass('filtro-ativo');
+                $('.ftx-stat-card[data-filtro="' + tipo + '"]').addClass('filtro-ativo');
+
+                // Atualizar indicador de filtro
+                var filtroInfo = $('#filtroInfo');
+                var filtroNome = $('#filtroNome');
+
+                if (tipo === 'total') {
+                    filtroInfo.removeClass('visivel');
+                } else {
+                    filtroInfo.addClass('visivel');
+                    var nomes = {
+                        'veiculo': 'Pendências de Veículo',
+                        'motorista': 'Pendências de Motorista',
+                        'km': 'Pendências de Quilometragem',
+                        'corrigivel': 'Pendências Corrigíveis'
+                    };
+                    filtroNome.text(nomes[tipo] || tipo);
+                }
+
+                // Aplicar filtro no DataTable
+                aplicarFiltroDataTable();
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "filtrarPorCard", error);
+            }
+        }
+
+        // ====== APLICAR FILTRO NO DATATABLE ======
+        function aplicarFiltroDataTable() {
+            try {
+                if (!tblPendencias) return;
+
+                // Limpar filtros anteriores
+                $.fn.dataTable.ext.search.pop();
+
+                if (filtroAtivo !== 'total') {
+                    // Adicionar filtro customizado
+                    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+                        try {
+                            var rowData = tblPendencias.row(dataIndex).data();
+                            if (!rowData) return false;
+
+                            if (filtroAtivo === 'corrigivel') {
+                                return rowData.temSugestao === true;
+                            } else {
+                                return rowData.tipoPendencia === filtroAtivo;
+                            }
+                        } catch (error) {
+                            return true;
+                        }
+                    });
+                }
+
+                tblPendencias.draw();
+
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "aplicarFiltroDataTable", error);
+            }
+        }
+
+        // ====== CARREGAR ESTATÍSTICAS ======
+        function carregarEstatisticas() {
+            try {
+                $.ajax({
+                    url: "/api/Abastecimento/ContarPendencias",
+                    type: "GET",
+                    datatype: "json",
+                    success: function (data) {
+                        try {
+                            $("#statTotal").text(data.total);
+                            $("#statVeiculo").text(data.veiculo);
+                            $("#statMotorista").text(data.motorista);
+                            $("#statKm").text(data.km);
+                            $("#statCorrigivel").text(data.corrigiveis);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "carregarEstatisticas.success", error);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar estatísticas:", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "carregarEstatisticas", error);
+            }
+        }
+
+        // ====== CARREGAR DATATABLE ======
+        function carregarPendencias() {
+            try {
+                if (tblPendencias) {
+                    tblPendencias.destroy();
+                    $('#tblPendencias').empty();
+                }
+
+                // Limpar filtros anteriores
+                $.fn.dataTable.ext.search = [];
+
+                tblPendencias = $('#tblPendencias').DataTable({
+                    ajax: {
+                        url: "/api/Abastecimento/ListarPendencias",
+                        type: "GET",
+                        datatype: "json"
+                    },
+                    columns: [
+                        { data: "autorizacaoQCard" },
+                        { data: "dataHora" },
+                        { data: "placa" },
+                        { data: "nomeMotorista" },
+                        { data: "produto" },
+                        { data: "litros" },
+                        { data: "kmAnterior" },
+                        { data: "km" },
+                        { data: "kmRodado" },
+                        {
+                            data: null,
+                            render: function (data, type, row) {
+                                return renderBadgePendencia(row);
+                            }
+                        },
+                        {
+                            data: null,
+                            render: function (data, type, row) {
+                                return renderAcoes(row);
+                            }
+                        }
+                    ],
+                    order: [[1, 'desc']],
+                    language: {
+                        url: '/lib/DataTables/Portuguese-Brasil.json'
+                    },
+                    responsive: true,
+                    pageLength: 25,
+                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+                    initComplete: function () {
+                        // Reaplicar filtro se havia um ativo
+                        if (filtroAtivo !== 'total') {
+                            aplicarFiltroDataTable();
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "carregarPendencias", error);
+            }
+        }
+
+        // ====== RENDER BADGE PENDÊNCIA ======
+        function renderBadgePendencia(row) {
+            try {
+                var tipo = row.tipoPendencia || 'erro';
+                var icone = row.iconePendencia || 'fa-circle-xmark';
+                var descricao = row.descricaoPendencia || 'Erro desconhecido';
+
+                // Truncar descrição se muito longa
+                var descricaoTruncada = descricao.length > 50 ? descricao.substring(0, 50) + '...' : descricao;
+
+                return '<span class="badge-pendencia ' + tipo + '" title="' + descricao + '">' +
+                    '<i class="fa-duotone ' + icone + '"></i> ' + descricaoTruncada +
+                    '</span>';
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "renderBadgePendencia", error);
+                return '';
+            }
+        }
+
+        // ====== RENDER AÇÕES ======
+        function renderAcoes(row) {
+            try {
+                var html = '<div class="acoes-pendencia">';
+
+                // Botão Sugestão (se tiver)
+                if (row.temSugestao) {
+                    html += '<button type="button" class="btn btn-sugestao" onclick="aplicarSugestao(\'' + row.abastecimentoPendenteId + '\')" title="Ver e Aplicar Correção Automática">' +
+                        '<i class="fa-duotone fa-wand-magic-sparkles"></i></button>';
+                }
+
+                // Botão Editar
+                html += '<button type="button" class="btn btn-editar-pendencia" onclick="editarPendencia(\'' + row.abastecimentoPendenteId + '\')" title="Editar">' +
+                    '<i class="fa-duotone fa-pen"></i></button>';
+
+                // Botão Excluir
+                html += '<button type="button" class="btn btn-excluir-pendencia" onclick="excluirPendencia(\'' + row.abastecimentoPendenteId + '\')" title="Excluir">' +
+                    '<i class="fa-duotone fa-trash"></i></button>';
+
+                html += '</div>';
+                return html;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "renderAcoes", error);
+                return '';
+            }
+        }
+
+        // ====== APLICAR SUGESTÃO DIRETO ======
+        function aplicarSugestao(id) {
+            try {
+                // Buscar detalhes da pendência
+                $.ajax({
+                    url: "/api/Abastecimento/ObterPendencia",
+                    type: "GET",
+                    data: { id: id },
+                    success: function (response) {
+                        try {
+                            if (!response.success) {
+                                AppToast.show('Vermelho', response.message || 'Pendência não encontrada');
+                                return;
+                            }
+
+                            var data = response.data;
+                            var campoLabel = data.campoCorrecao === 'KmAnterior' ? 'KM Anterior' : 'KM Atual';
+                            var valorAtual = data.valorAtualErrado ? data.valorAtualErrado.toLocaleString('pt-BR') : '-';
+                            var valorSugerido = data.valorSugerido ? data.valorSugerido.toLocaleString('pt-BR') : '-';
+
+                            // Preencher modal
+                            $("#txtSugestaoId").val(id);
+                            $("#txtSugestaoCampoLabel").text("Sugestão de Correção: " + campoLabel);
+                            $("#txtSugestaoValorAtual").text(valorAtual);
+                            $("#txtSugestaoValorSugerido").text(valorSugerido);
+                            $("#txtSugestaoJustificativa").text(data.justificativaSugestao || '');
+
+                            // Resetar estado do botão
+                            var btn = $("#btnAplicarSugestao");
+                            btn.find(".btn-text").removeClass("d-none");
+                            btn.find(".btn-loading").addClass("d-none");
+                            btn.prop("disabled", false);
+
+                            // Abrir modal
+                            var modal = new bootstrap.Modal(document.getElementById('modalSugestao'));
+                            modal.show();
+
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "aplicarSugestao.obter.success", error);
+                        }
+                    },
+                    error: function (error) {
+                        AppToast.show('Vermelho', 'Erro ao buscar detalhes da sugestão');
+                        console.error(error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "aplicarSugestao", error);
+            }
+        }
+
+        // ====== CONFIRMAR APLICAR SUGESTÃO (do Modal) ======
+        function confirmarAplicarSugestao() {
+            try {
+                var id = $("#txtSugestaoId").val();
+                if (!id) {
+                    AppToast.show('Vermelho', 'ID da pendência não encontrado');
+                    return;
+                }
+
+                // Ativar loading no botão
+                var btn = $("#btnAplicarSugestao");
+                btn.find(".btn-text").addClass("d-none");
+                btn.find(".btn-loading").removeClass("d-none");
+                btn.prop("disabled", true);
+
+                executarAplicarSugestao(id);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "confirmarAplicarSugestao", error);
+            }
+        }
+
+        // ====== EXECUTAR APLICAR SUGESTÃO ======
+        function executarAplicarSugestao(id) {
+            try {
+                $.ajax({
+                    url: "/api/Abastecimento/AplicarSugestao",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ AbastecimentoPendenteId: id }),
+                    success: function (data) {
+                        try {
+                            // Fechar modal
+                            var modalEl = document.getElementById('modalSugestao');
+                            var modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
+
+                            if (data.success) {
+                                // Se não tem mais pendências, tentar importar automaticamente
+                                if (!data.pendenciasRestantes) {
+                                    resolverPendenciaAjax(id);
+                                } else {
+                                    AppToast.show('Verde', data.message);
+                                    tblPendencias.ajax.reload(function () {
+                                        aplicarFiltroDataTable();
+                                    }, false);
+                                    carregarEstatisticas();
+                                }
+                            } else {
+                                AppToast.show('Vermelho', data.message);
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "executarAplicarSugestao.success", error);
+                        }
+                    },
+                    error: function (error) {
+                        AppToast.show('Vermelho', 'Erro ao aplicar sugestão');
+                        console.error(error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "executarAplicarSugestao", error);
+            }
+        }
+
+        // ====== EDITAR PENDÊNCIA ======
+        function editarPendencia(id) {
+            try {
+                $.ajax({
+                    url: "/api/Abastecimento/ObterPendencia",
+                    type: "GET",
+                    data: { id: id },
+                    success: function (response) {
+                        try {
+                            if (response.success) {
+                                var data = response.data;
+                                pendenciaAtual = data;
+
+                                // Preencher formulário
+                                $("#txtPendenciaId").val(data.abastecimentoPendenteId);
+                                $("#txtAutorizacao").val(data.autorizacaoQCard);
+                                $("#txtDataHora").val(data.dataHora);
+                                $("#txtLitros").val(data.litros ? data.litros.replace(',', '.') : '');
+                                $("#txtValorUnitario").val(data.valorUnitario ? data.valorUnitario.replace(',', '.') : '');
+                                $("#txtKmAnterior").val(data.kmAnterior);
+                                $("#txtKm").val(data.km);
+                                $("#txtKmRodado").val(data.kmRodado);
+                                $("#txtPlaca").val(data.placa);
+                                $("#txtCodMotorista").val(data.codMotorista);
+                                $("#txtDescricaoPendencia").text(data.descricaoPendencia);
+
+                                // Preencher combos (limpar primeiro, depois setar)
+                                var cmbVeiculo = document.getElementById('cmbVeiculo').ej2_instances[0];
+                                var cmbMotorista = document.getElementById('cmbMotorista').ej2_instances[0];
+                                var cmbCombustivel = document.getElementById('cmbCombustivel').ej2_instances[0];
+
+                                cmbVeiculo.value = data.veiculoId || null;
+                                cmbMotorista.value = data.motoristaId || null;
+                                cmbCombustivel.value = data.combustivelId || null;
+
+                                // Mostrar/ocultar card de sugestão
+                                if (data.temSugestao) {
+                                    var campoLabel = data.campoCorrecao === 'KmAnterior' ? 'KM Anterior' : 'KM Atual';
+                                    var valorAtual = data.valorAtualErrado ? data.valorAtualErrado.toLocaleString('pt-BR') : '-';
+                                    var valorSugerido = data.valorSugerido ? data.valorSugerido.toLocaleString('pt-BR') : '-';
+                                    $("#txtSugestaoInfo").html(
+                                        "<strong>" + campoLabel + ":</strong> " + valorAtual + " → " + valorSugerido +
+                                        "<br><small>" + (data.justificativaSugestao || '') + "</small>"
+                                    );
+                                    $("#cardSugestao").removeClass('d-none');
+                                } else {
+                                    $("#cardSugestao").addClass('d-none');
+                                }
+
+                                // Abrir modal
+                                var modal = new bootstrap.Modal(document.getElementById('modalEditarPendencia'));
+                                modal.show();
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "editarPendencia.success", error);
+                        }
+                    },
+                    error: function (error) {
+                        AppToast.show('Vermelho', 'Erro ao carregar pendência');
+                        console.error(error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "editarPendencia", error);
+            }
+        }
+
+        // ====== APLICAR SUGESTÃO NO MODAL DE EDIÇÃO ======
+        function aplicarSugestaoNoModal() {
+            try {
+                if (!pendenciaAtual || !pendenciaAtual.temSugestao) return;
+
+                if (pendenciaAtual.campoCorrecao === 'KmAnterior') {
+                    $("#txtKmAnterior").val(pendenciaAtual.valorSugerido);
+                } else if (pendenciaAtual.campoCorrecao === 'Km') {
+                    $("#txtKm").val(pendenciaAtual.valorSugerido);
+                }
+
+                // Recalcular KM Rodado
+                var kmAnt = parseInt($("#txtKmAnterior").val()) || 0;
+                var kmAtual = parseInt($("#txtKm").val()) || 0;
+                $("#txtKmRodado").val(kmAtual - kmAnt);
+
+                AppToast.show('Verde', 'Sugestão aplicada no formulário');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "aplicarSugestaoNoModal", error);
+            }
+        }
+
+        // ====== SALVAR PENDÊNCIA ======
+        function salvarPendencia() {
+            try {
+                setButtonLoading("#btnSalvarPendencia", true);
+
+                var cmbVeiculo = document.getElementById('cmbVeiculo').ej2_instances[0];
+                var cmbMotorista = document.getElementById('cmbMotorista').ej2_instances[0];
+                var cmbCombustivel = document.getElementById('cmbCombustivel').ej2_instances[0];
+
+                var dados = {
+                    AbastecimentoPendenteId: $("#txtPendenciaId").val(),
+                    AutorizacaoQCard: $("#txtAutorizacao").val() || null,
+                    Placa: $("#txtPlaca").val(),
+                    CodMotorista: $("#txtCodMotorista").val() || null,
+                    DataHora: $("#txtDataHora").val(),
+                    Litros: parseFloat($("#txtLitros").val()) || null,
+                    ValorUnitario: parseFloat($("#txtValorUnitario").val()) || null,
+                    KmAnterior: parseInt($("#txtKmAnterior").val()) || null,
+                    Km: parseInt($("#txtKm").val()) || null,
+                    VeiculoId: cmbVeiculo.value,
+                    MotoristaId: cmbMotorista.value,
+                    CombustivelId: cmbCombustivel.value
+                };
+
+                $.ajax({
+                    url: "/api/Abastecimento/SalvarPendencia",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(dados),
+                    success: function (data) {
+                        try {
+                            if (data.success) {
+                                AppToast.show('Verde', data.message);
+                                var modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarPendencia'));
+                                modal.hide();
+                                tblPendencias.ajax.reload(function () {
+                                    aplicarFiltroDataTable();
+                                }, false);
+                                carregarEstatisticas();
+                            } else {
+                                AppToast.show('Vermelho', data.message);
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "salvarPendencia.success", error);
+                        }
+                    },
+                    error: function (error) {
+                        AppToast.show('Vermelho', 'Erro ao salvar pendência');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        setButtonLoading("#btnSalvarPendencia", false);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "salvarPendencia", error);
+                setButtonLoading("#btnSalvarPendencia", false);
+            }
+        }
+
+        // ====== SALVAR E IMPORTAR ======
+        function salvarEImportar() {
+            try {
+                setButtonLoading("#btnSalvarImportar", true);
+
+                var cmbVeiculo = document.getElementById('cmbVeiculo').ej2_instances[0];
+                var cmbMotorista = document.getElementById('cmbMotorista').ej2_instances[0];
+                var cmbCombustivel = document.getElementById('cmbCombustivel').ej2_instances[0];
+
+                var dados = {
+                    AbastecimentoPendenteId: $("#txtPendenciaId").val(),
+                    AutorizacaoQCard: $("#txtAutorizacao").val() || null,
+                    Placa: $("#txtPlaca").val(),
+                    CodMotorista: $("#txtCodMotorista").val() || null,
+                    DataHora: $("#txtDataHora").val(),
+                    Litros: parseFloat($("#txtLitros").val()) || null,
+                    ValorUnitario: parseFloat($("#txtValorUnitario").val()) || null,
+                    KmAnterior: parseInt($("#txtKmAnterior").val()) || null,
+                    Km: parseInt($("#txtKm").val()) || null,
+                    VeiculoId: cmbVeiculo.value,
+                    MotoristaId: cmbMotorista.value,
+                    CombustivelId: cmbCombustivel.value
+                };
+
+                $.ajax({
+                    url: "/api/Abastecimento/ResolverPendencia",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(dados),
+                    success: function (data) {
+                        try {
+                            if (data.success) {
+                                AppToast.show('Verde', data.message);
+                                var modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarPendencia'));
+                                modal.hide();
+                                tblPendencias.ajax.reload(function () {
+                                    aplicarFiltroDataTable();
+                                }, false);
+                                carregarEstatisticas();
+                            } else {
+                                AppToast.show('Vermelho', data.message);
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "salvarEImportar.success", error);
+                        }
+                    },
+                    error: function (error) {
+                        AppToast.show('Vermelho', 'Erro ao importar abastecimento');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        setButtonLoading("#btnSalvarImportar", false);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "salvarEImportar", error);
+                setButtonLoading("#btnSalvarImportar", false);
+            }
+        }
+
+        // ====== RESOLVER PENDÊNCIA VIA AJAX ======
+        function resolverPendenciaAjax(id) {
+            try {
+                $.ajax({
+                    url: "/api/Abastecimento/ObterPendencia",
+                    type: "GET",
+                    data: { id: id },
+                    success: function (response) {
+                        try {
+                            if (response.success) {
+                                var data = response.data;
+                                var dados = {
+                                    AbastecimentoPendenteId: data.abastecimentoPendenteId,
+                                    AutorizacaoQCard: data.autorizacaoQCard,
+                                    Placa: data.placa,
+                                    DataHora: data.dataHora,
+                                    Litros: parseFloat(data.litros.replace(',', '.')) || null,
+                                    ValorUnitario: parseFloat(data.valorUnitario.replace(',', '.')) || null,
+                                    KmAnterior: data.kmAnterior,
+                                    Km: data.km,
+                                    VeiculoId: data.veiculoId,
+                                    MotoristaId: data.motoristaId,
+                                    CombustivelId: data.combustivelId
+                                };
+
+                                $.ajax({
+                                    url: "/api/Abastecimento/ResolverPendencia",
+                                    type: "POST",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(dados),
+                                    success: function (result) {
+                                        if (result.success) {
+                                            AppToast.show('Verde', result.message);
+                                            tblPendencias.ajax.reload(function () {
+                                                aplicarFiltroDataTable();
+                                            }, false);
+                                            carregarEstatisticas();
+                                        } else {
+                                            AppToast.show('Vermelho', result.message);
+                                        }
+                                    },
+                                    error: function () {
+                                        AppToast.show('Vermelho', 'Erro ao importar abastecimento');
+                                    }
+                                });
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Pendencias.cshtml", "resolverPendenciaAjax.success", error);
+                        }
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "resolverPendenciaAjax", error);
+            }
+        }
+
+        // ====== EXCLUIR PENDÊNCIA ======
+        function excluirPendencia(id) {
+            try {
+                swal({
+                    title: "Excluir Pendência?",
+                    text: "Esta ação não poderá ser desfeita.",
+                    icon: "warning",
+                    buttons: {
+                        cancel: "Cancelar",
+                        confirm: {
+                            text: "Excluir",
+                            value: true,
+                            className: "btn-danger"
+                        }
+                    },
+                    dangerMode: true
+                }).then(function (confirmar) {
+                    if (confirmar) {
+                        $.ajax({
+                            url: "/api/Abastecimento/ExcluirPendencia",
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({ AbastecimentoPendenteId: id }),
+                            success: function (data) {
+                                try {
+                                    if (data.success) {
+                                        AppToast.show('Verde', data.message);
+                                        tblPendencias.ajax.reload(function () {
+                                            aplicarFiltroDataTable();
+                                        }, false);
+                                        carregarEstatisticas();
+                                    } else {
+                                        AppToast.show('Vermelho', data.message);
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Pendencias.cshtml", "excluirPendencia.success", error);
+                                }
+                            },
+                            error: function (error) {
+                                AppToast.show('Vermelho', 'Erro ao excluir pendência');
+                                console.error(error);
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "excluirPendencia", error);
+            }
+        }
+
+        // ====== EXCLUIR TODAS PENDÊNCIAS ======
+        function excluirTodasPendencias() {
+            try {
+                swal({
+                    title: "Excluir TODAS as Pendências?",
+                    text: "Esta ação excluirá permanentemente todas as pendências. Não poderá ser desfeita!",
+                    icon: "warning",
+                    buttons: {
+                        cancel: "Cancelar",
+                        confirm: {
+                            text: "Excluir Todas",
+                            value: true,
+                            className: "btn-danger"
+                        }
+                    },
+                    dangerMode: true
+                }).then(function (confirmar) {
+                    if (confirmar) {
+                        $.ajax({
+                            url: "/api/Abastecimento/ExcluirTodasPendencias",
+                            type: "POST",
+                            contentType: "application/json",
+                            success: function (data) {
+                                try {
+                                    if (data.success) {
+                                        AppToast.show('Verde', data.message);
+                                        filtrarPorCard('total'); // Resetar filtro
+                                        tblPendencias.ajax.reload(null, false);
+                                        carregarEstatisticas();
+                                    } else {
+                                        AppToast.show('Vermelho', data.message);
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Pendencias.cshtml", "excluirTodasPendencias.success", error);
+                                }
+                            },
+                            error: function (error) {
+                                AppToast.show('Vermelho', 'Erro ao excluir pendências');
+                                console.error(error);
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "excluirTodasPendencias", error);
+            }
+        }
+
+        // ====== HELPER: LOADING BUTTON ======
+        function setButtonLoading(selector, loading) {
+            try {
+                if (loading) {
+                    $(selector).prop('disabled', true);
+                    $(selector + " .btn-text").addClass('d-none');
+                    $(selector + " .btn-loading").removeClass('d-none');
+                } else {
+                    $(selector).prop('disabled', false);
+                    $(selector + " .btn-text").removeClass('d-none');
+                    $(selector + " .btn-loading").addClass('d-none');
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "setButtonLoading", error);
+            }
+        }
+
+        // ====== LIMPAR MODAL AO FECHAR ======
+        $('#modalEditarPendencia').on('hidden.bs.modal', function () {
+            try {
+                pendenciaAtual = null;
+                $("#frmEditarPendencia")[0].reset();
+
+                var cmbVeiculo = document.getElementById('cmbVeiculo').ej2_instances[0];
+                var cmbMotorista = document.getElementById('cmbMotorista').ej2_instances[0];
+                var cmbCombustivel = document.getElementById('cmbCombustivel').ej2_instances[0];
+
+                cmbVeiculo.value = null;
+                cmbMotorista.value = null;
+                cmbCombustivel.value = null;
+
+                $("#cardSugestao").addClass('d-none');
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Pendencias.cshtml", "modal.hidden", error);
+            }
+        });
+    </script>
+}

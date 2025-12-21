@@ -90,26 +90,15 @@ $(document).ready(function ()
                             if (data.type == 0)
                             {
                                 // ATIVO = VERDE
-                                currentElement.text("Ativo");
-                                currentElement.removeClass().addClass("updateStatusMotorista btn btn-xs btn-verde");
-                                currentElement.css({
-                                    'color': 'white !important',
-                                    'box-shadow': '0 0 8px rgba(34,197,94,.5) !important',
-                                    'border': 'none !important'
-                                });
+                                currentElement.html('<i class="fa-duotone fa-circle-check"></i> Ativo');
+                                currentElement.removeClass("fundo-cinza").addClass("btn-verde");
                                 currentElement.attr('data-ejtip', 'Motorista ativo - clique para inativar');
                             }
                             else
                             {
                                 // INATIVO = CINZA
-                                currentElement.text("Inativo");
-                                currentElement.removeClass().addClass("updateStatusMotorista btn btn-xs");
-                                currentElement.css({
-                                    'background-color': '#2F4F4F !important',
-                                    'color': 'aliceblue !important',
-                                    'box-shadow': '0 0 8px rgba(47,79,79,.5) !important',
-                                    'border': 'none !important'
-                                });
+                                currentElement.html('<i class="fa-duotone fa-circle-xmark"></i> Inativo');
+                                currentElement.removeClass("btn-verde").addClass("fundo-cinza");
                                 currentElement.attr('data-ejtip', 'Motorista inativo - clique para ativar');
                             }
                         }
@@ -231,20 +220,22 @@ function loadList()
                         {
                             if (data)
                             {
-                                // ATIVO = VERDE
+                                // ATIVO = btn-verde (classe padrão FrotiX com glow e wiggle)
                                 return `<a href="javascript:void(0)"
-                       class="updateStatusMotorista btn btn-xs btn-verde"
-                       style="color: white !important; box-shadow: 0 0 8px rgba(34,197,94,.5) !important; border: none !important;"
-                       data-ejtip="Motorista ativo - clique para inativar"
-                       data-url="/api/Motorista/updateStatusMotorista?Id=${row.motoristaId}">Ativo</a>`;
+                                           class="updateStatusMotorista btn btn-verde btn-xs"
+                                           data-ejtip="Motorista ativo - clique para inativar"
+                                           data-url="/api/Motorista/updateStatusMotorista?Id=${row.motoristaId}">
+                                            <i class="fa-duotone fa-circle-check"></i> Ativo
+                                        </a>`;
                             } else
                             {
-                                // INATIVO = CINZA
+                                // INATIVO = fundo-cinza (classe padrão FrotiX com glow e wiggle)
                                 return `<a href="javascript:void(0)"
-                       class="updateStatusMotorista btn btn-xs"
-                       style="background-color: #2F4F4F !important; color: aliceblue !important; box-shadow: 0 0 8px rgba(47,79,79,.5) !important; border: none !important;"
-                       data-ejtip="Motorista inativo - clique para ativar"
-                       data-url="/api/Motorista/updateStatusMotorista?Id=${row.motoristaId}">Inativo</a>`;
+                                           class="updateStatusMotorista btn fundo-cinza btn-xs"
+                                           data-ejtip="Motorista inativo - clique para ativar"
+                                           data-url="/api/Motorista/updateStatusMotorista?Id=${row.motoristaId}">
+                                            <i class="fa-duotone fa-circle-xmark"></i> Inativo
+                                        </a>`;
                             }
                         } catch (error)
                         {
@@ -259,25 +250,30 @@ function loadList()
                     {
                         try
                         {
-                            return `<div class="text-center">
-                                    <a href="/Motorista/Upsert?id=${data}"
-                                       class="btn btn-editar btn-icon-28"
-                                       data-ejtip="Editar Motorista">
-                                        <i class="fal fa-edit"></i>
-                                    </a>
-                                    <a class="btn-delete btn fundo-vermelho btn-icon-28"
-                                       data-ejtip="Excluir Motorista"
-                                       data-id="${data}">
-                                        <i class="fal fa-trash-alt"></i>
-                                    </a>
-                                    <a class="btn btn-foto btn-icon-28"
-                                       data-bs-toggle="modal"
-                                       data-bs-target="#modalFoto"
-                                       data-ejtip="Foto do Motorista"
-                                       data-id="${data}">
-                                        <i class="fal fa-camera-retro"></i>
-                                    </a>
-                                </div>`;
+                            // Botões usando classes padrão FrotiX:
+                            // - btn-editar (azul com glow)
+                            // - fundo-vermelho (vermelho com glow)
+                            // - btn-foto (cinza escuro com glow)
+                            // - btn-icon-28 (tamanho padrão)
+                            return `<div class="ftx-btn-acoes">
+                                        <a href="/Motorista/Upsert?id=${data}"
+                                           class="btn btn-editar btn-icon-28"
+                                           data-ejtip="Editar Motorista">
+                                            <i class="fa-duotone fa-pen-to-square"></i>
+                                        </a>
+                                        <a href="javascript:void(0)"
+                                           class="btn fundo-vermelho btn-icon-28 btn-delete"
+                                           data-ejtip="Excluir Motorista"
+                                           data-id="${data}">
+                                            <i class="fa-duotone fa-trash-can"></i>
+                                        </a>
+                                        <a href="javascript:void(0)"
+                                           class="btn btn-foto btn-icon-28"
+                                           data-ejtip="Foto do Motorista"
+                                           data-id="${data}">
+                                            <i class="fa-duotone fa-camera-retro"></i>
+                                        </a>
+                                    </div>`;
                         } catch (error)
                         {
                             Alerta.TratamentoErroComLinha("motorista.js", "acoes.render", error);

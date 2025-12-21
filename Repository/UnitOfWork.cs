@@ -109,6 +109,9 @@ namespace FrotiX.Repository
             // Inicialização dos repositórios do sistema de Alertas
             AlertasFrotiX = new AlertasFrotiXRepository(_db);
             AlertasUsuario = new AlertasUsuarioRepository(_db);
+
+            // Repositório genérico para Pendências de Abastecimento
+            AbastecimentoPendente = new Repository<AbastecimentoPendente>(_db);
         }
 
         // Repositórios para o sistema de Alertas
@@ -123,6 +126,11 @@ namespace FrotiX.Repository
         }
 
         public IAbastecimentoRepository Abastecimento
+        {
+            get; private set;
+        }
+
+        public IRepository<AbastecimentoPendente> AbastecimentoPendente
         {
             get; private set;
         }

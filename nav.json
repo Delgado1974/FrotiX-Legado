@@ -179,6 +179,12 @@
                     "roles": []
                 },
                 {
+                    "title": "Pendências de Abastecimento",
+                    "nomeMenu": "Pendências de Abastecimento",
+                    "href": "abastecimento_pendencias.html",
+                    "roles": []
+                },
+                {
                     "title": "Registro de Cupons",
                     "nomeMenu": "Registro de Cupons",
                     "href": "abastecimento_registracupons.html",
@@ -536,6 +542,12 @@
                     "title": "Higieniza Origens/Destinos",
                     "nomeMenu": "Higieniza Origens/Destinos",
                     "href": "administracao_higienizarviagens.html",
+                    "roles": []
+                },
+                {
+                    "title": "Log de Erros",
+                    "nomeMenu": "Log de Erros",
+                    "href": "administracao_logerros.html",
                     "roles": []
                 },
                 {

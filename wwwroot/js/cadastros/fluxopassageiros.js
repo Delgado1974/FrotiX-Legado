@@ -235,7 +235,7 @@ document.getElementById('btnInsereFicha').addEventListener('click', function (e)
         }
         if (responsavel === '')
         {
-            AppToast.show('Vermelho', 'O Responsável pelo Registro é obrigatório.', 2000);
+            AppToast.show('Vermelho', 'O Responsável é obrigatório.', 2000);
             setTimeout(function ()
             {
                 try
@@ -250,77 +250,121 @@ document.getElementById('btnInsereFicha').addEventListener('click', function (e)
             return;
         }
 
-        // Verifica existência de ficha para data/economildo
-        const veiculoId = economildo;
-        const objViagem = JSON.stringify({
-            Data: $('#txtData').val(),
-            IdaVolta: '',
-            HoraInicio: '',
-            HoraFim: '',
-            QtdPassageiros: '',
-            VeiculoId: veiculoId,
-            MOB: $('#lstMOB').val(),
-            Responsavel: $('#lstResponsavel').val()
-        });
+        // Guarda ícone original e adiciona spinner
+        const btnInsere = document.getElementById('btnInsereFicha');
+        const iconOriginal = btnInsere.querySelector('i');
+        const iconClasses = iconOriginal.className;
+        iconOriginal.className = 'fa-solid fa-spinner fa-spin icon-space';
+        btnInsere.disabled = true;
 
-        $.ajax({
-            type: "POST",
-            url: "/api/Viagem/ExisteDataEconomildo",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: objViagem,
-            success: function (data)
-            {
-                try
-                {
-                    if (data.success)
-                    {
-                        document.getElementById('divTitulo').hidden = false;
-                        document.getElementById('divInsercao').hidden = false;
-                        document.getElementById('divRegistro').hidden = false;
-                        document.getElementById('divBotao').hidden = false;
+        // Verifica se já existe ficha para essa data
+        //$.ajax({
+        //    type: "GET",
+        //    url: "/api/Viagem/ExisteFichaParaData",
+        //    data: { data: dataviagem },
+        //    success: function (res)
+        //    {
+        //        try
+        //        {
+        //            // Restaura ícone original
+        //            iconOriginal.className = iconClasses;
+        //            btnInsere.disabled = false;
 
-                        document.getElementById('txtData').disabled = true;
-                        document.getElementById('lstVeiculos').ej2_instances[0].enabled = false;
-                        document.getElementById('lstMotoristas').ej2_instances[0].enabled = false;
-                        document.getElementById('lstMOB').disabled = true;
-                        document.getElementById('lstResponsavel').disabled = true;
-                        document.getElementById('btnInsereFicha').hidden = true;
-                    }
-                    else
-                    {
-                        AppToast.show('Vermelho', 'Já existe uma Ficha inserida para esta Data!', 2000);
-                        setTimeout(function ()
-                        {
-                            try
-                            {
-                                $('#txtData').focus();
-                            }
-                            catch (error)
-                            {
-                                Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.txtData.focus2.setTimeout", error);
-                            }
-                        }, 500);
-                    }
-                }
-                catch (error)
-                {
-                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.ajax.success", error);
-                }
-            },
-            error: function (xhr, status, error)
+        //            if (res === false)
+        //            {
+        //                // Mostra os controles de inserção
+        //                document.getElementById('divTitulo').hidden = false;
+        //                document.getElementById('divInsercao').hidden = false;
+        //                document.getElementById('divRegistro').hidden = false;
+        //                document.getElementById('divBotao').hidden = false;
+
+        //                setTimeout(function ()
+        //                {
+        //                    try
+        //                    {
+        //                        $('#lstIdaVolta').focus();
+        //                    }
+        //                    catch (error)
+        //                    {
+        //                        Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.lstIdaVolta.focus.setTimeout", error);
+        //                    }
+        //                }, 500);
+
+        //                // Desabilita campos já preenchidos
+        //                document.getElementById('txtData').disabled = true;
+        //                document.getElementById('lstVeiculos').ej2_instances[0].enabled = false;
+        //                document.getElementById('lstMotoristas').ej2_instances[0].enabled = false;
+        //                document.getElementById('lstMOB').disabled = true;
+        //                document.getElementById('lstResponsavel').disabled = true;
+        //                document.getElementById('btnInsereFicha').hidden = true;
+        //            }
+        //            else
+        //            {
+        //                AppToast.show('Vermelho', 'Já existe uma Ficha inserida para esta Data!', 2000);
+        //                setTimeout(function ()
+        //                {
+        //                    try
+        //                    {
+        //                        $('#txtData').focus();
+        //                    }
+        //                    catch (error)
+        //                    {
+        //                        Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.txtData.focus2.setTimeout", error);
+        //                    }
+        //                }, 500);
+        //            }
+        //        }
+        //        catch (error)
+        //        {
+        //            // Restaura ícone em caso de erro no try
+        //            iconOriginal.className = iconClasses;
+        //            btnInsere.disabled = false;
+        //            Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.ajax.success", error);
+        //        }
+        //    },
+        //    error: function (xhr, status, error)
+        //    {
+        //        try
+        //        {
+        //            // Restaura ícone original em caso de erro AJAX
+        //            iconOriginal.className = iconClasses;
+        //            btnInsere.disabled = false;
+
+        //            console.error('Erro AJAX:', error);
+        //            AppToast.show('Vermelho', 'Um erro aconteceu ao verificar a existência da ficha.', 3000);
+        //        }
+        //        catch (err)
+        //        {
+        //            Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.ajax.error", err);
+        //        }
+        //    }
+        //});
+
+        // Mostra os controles de inserção
+        document.getElementById('divTitulo').hidden = false;
+        document.getElementById('divInsercao').hidden = false;
+        document.getElementById('divRegistro').hidden = false;
+        document.getElementById('divBotao').hidden = false;
+
+        setTimeout(function ()
+        {
+            try
             {
-                try
-                {
-                    console.error('Erro AJAX:', error);
-                    AppToast.show('Vermelho', 'Um erro aconteceu ao verificar a existência da ficha.', 3000);
-                }
-                catch (err)
-                {
-                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.ajax.error", err);
-                }
+                $('#lstIdaVolta').focus();
             }
-        });
+            catch (error)
+            {
+                Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnInsereFicha.lstIdaVolta.focus.setTimeout", error);
+            }
+        }, 500);
+
+        // Desabilita campos já preenchidos
+        document.getElementById('txtData').disabled = true;
+        document.getElementById('lstVeiculos').ej2_instances[0].enabled = false;
+        document.getElementById('lstMotoristas').ej2_instances[0].enabled = false;
+        document.getElementById('lstMOB').disabled = true;
+        document.getElementById('lstResponsavel').disabled = true;
+        document.getElementById('btnInsereFicha').hidden = true;
     }
     catch (error)
     {
@@ -367,102 +411,153 @@ document.getElementById('btnSubmite').addEventListener('click', function (e)
     {
         const veiculoId = document.getElementById('lstVeiculos').ej2_instances[0].value;
         const motoristaId = document.getElementById('lstMotoristas').ej2_instances[0].value;
+        const data = $('#txtData').val();
+        const mob = $('#lstMOB').val();
+        const responsavel = $('#lstResponsavel').val();
 
-        // Helper para enviar linhas de um grid
-        function enviarGrid(gridElId, idaOuVolta)
+        // Coletar todas as viagens em um array
+        const viagens = [];
+
+        // Coletar viagens de IDA
+        const gridIda = document.getElementById('grdIda').ej2_instances[0];
+        if (gridIda && gridIda.getRows().length > 0)
         {
-            try
+            for (let i = 0; i < gridIda.getRows().length; i++)
             {
-                const gridObj = document.getElementById(gridElId).ej2_instances[0];
-                if (!gridObj || gridObj.getRows().length === 0) return;
-
-                for (let i = 0; i < gridObj.getRows().length; i++)
+                try
                 {
-                    try
+                    const c0 = gridIda.getRows()[i].cells[0]?.innerHTML || '';
+                    const c1 = gridIda.getRows()[i].cells[1]?.innerHTML || '';
+                    const c2 = gridIda.getRows()[i].cells[2]?.innerHTML || '';
+                    if (c0 !== '')
                     {
-                        const c0 = gridObj.getRows()[i].cells[0]?.innerHTML || '';
-                        const c1 = gridObj.getRows()[i].cells[1]?.innerHTML || '';
-                        const c2 = gridObj.getRows()[i].cells[2]?.innerHTML || '';
-                        if (c0 === '') continue;
-
-                        const objViagem = JSON.stringify({
-                            Data: $('#txtData').val(),
-                            IdaVolta: idaOuVolta,
+                        viagens.push({
+                            Data: data,
+                            IdaVolta: 'IDA',
                             HoraInicio: c0,
                             HoraFim: c1,
-                            QtdPassageiros: c2,
+                            QtdPassageiros: parseInt(c2, 10),
                             VeiculoId: veiculoId,
                             MotoristaId: motoristaId,
-                            MOB: $('#lstMOB').val(),
-                            Responsavel: $('#lstResponsavel').val()
+                            MOB: mob,
+                            Responsavel: responsavel
                         });
-
-                        $.ajax({
-                            type: "POST",
-                            url: "/api/Viagem/AdicionarViagensEconomildo",
-                            contentType: "application/json; charset=utf-8",
-                            dataType: "json",
-                            data: objViagem,
-                            success: function (data)
-                            {
-                                try
-                                {
-                                    if (data.success)
-                                    {
-                                        AppToast.show('Verde', data.message, 2000);
-                                    }
-                                    else
-                                    {
-                                        AppToast.show('Vermelho', data.message, 3000);
-                                    }
-                                }
-                                catch (error)
-                                {
-                                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "enviarGrid.ajax.success", error);
-                                }
-                            },
-                            error: function (xhr, status, error)
-                            {
-                                try
-                                {
-                                    console.error('Erro AJAX:', error);
-                                    AppToast.show('Vermelho', 'Um erro aconteceu ao adicionar a viagem.', 3000);
-                                }
-                                catch (err)
-                                {
-                                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "enviarGrid.ajax.error", err);
-                                }
-                            }
-                        });
-                    }
-                    catch (error)
-                    {
-                        Alerta.TratamentoErroComLinha("fluxopassageiros.js", "enviarGrid.for", error);
                     }
                 }
-            }
-            catch (error)
-            {
-                Alerta.TratamentoErroComLinha("fluxopassageiros.js", "enviarGrid", error);
+                catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnSubmite.gridIda.for", error);
+                }
             }
         }
 
-        // Envia IDA e VOLTA
-        enviarGrid('grdIda', 'IDA');
-        enviarGrid('grdVolta', 'VOLTA');
-
-        // Limpa Tela para Inserção de Novos Registros
-        setTimeout(function ()
+        // Coletar viagens de VOLTA
+        const gridVolta = document.getElementById('grdVolta').ej2_instances[0];
+        if (gridVolta && gridVolta.getRows().length > 0)
         {
-            try
+            for (let i = 0; i < gridVolta.getRows().length; i++)
             {
-                location.reload();
+                try
+                {
+                    const c0 = gridVolta.getRows()[i].cells[0]?.innerHTML || '';
+                    const c1 = gridVolta.getRows()[i].cells[1]?.innerHTML || '';
+                    const c2 = gridVolta.getRows()[i].cells[2]?.innerHTML || '';
+                    if (c0 !== '')
+                    {
+                        viagens.push({
+                            Data: data,
+                            IdaVolta: 'VOLTA',
+                            HoraInicio: c0,
+                            HoraFim: c1,
+                            QtdPassageiros: parseInt(c2, 10),
+                            VeiculoId: veiculoId,
+                            MotoristaId: motoristaId,
+                            MOB: mob,
+                            Responsavel: responsavel
+                        });
+                    }
+                }
+                catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnSubmite.gridVolta.for", error);
+                }
             }
-            catch (error)
+        }
+
+        // Validar se há viagens para enviar
+        if (viagens.length === 0)
+        {
+            AppToast.show('Vermelho', 'Adicione pelo menos uma viagem antes de registrar.', 2000);
+            return;
+        }
+
+        // Adicionar spinner ao botão
+        const btnSubmite = document.getElementById('btnSubmite');
+        const iconOriginal = btnSubmite.querySelector('i');
+        const iconClasses = iconOriginal.className;
+        iconOriginal.className = 'fa-solid fa-spinner fa-spin icon-space';
+        btnSubmite.disabled = true;
+
+        // Enviar TODAS as viagens em uma única requisição
+        $.ajax({
+            type: "POST",
+            url: "/api/Viagem/AdicionarViagensEconomildoLote",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(viagens),
+            success: function (data)
             {
-                Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnSubmite.reload.setTimeout", error);
+                try
+                {
+                    if (data.success)
+                    {
+                        AppToast.show('Verde', data.message, 2000);
+                        setTimeout(function ()
+                        {
+                            try
+                            {
+                                // Redirecionar para GestaoFluxo
+                                window.location.href = '/Viagens/GestaoFluxo';
+                            }
+                            catch (error)
+                            {
+                                Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnSubmite.redirect.setTimeout", error);
+                            }
+                        }, 500);
+                    }
+                    else
+                    {
+                        // Restaura botão em caso de erro
+                        iconOriginal.className = iconClasses;
+                        btnSubmite.disabled = false;
+                        AppToast.show('Vermelho', data.message, 3000);
+                    }
+                }
+                catch (error)
+                {
+                    // Restaura botão em caso de erro
+                    iconOriginal.className = iconClasses;
+                    btnSubmite.disabled = false;
+                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnSubmite.ajax.success", error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                try
+                {
+                    // Restaura botão em caso de erro
+                    iconOriginal.className = iconClasses;
+                    btnSubmite.disabled = false;
+
+                    console.error('Erro AJAX:', error);
+                    AppToast.show('Vermelho', 'Um erro aconteceu ao adicionar as viagens.', 3000);
+                }
+                catch (err)
+                {
+                    Alerta.TratamentoErroComLinha("fluxopassageiros.js", "btnSubmite.ajax.error", err);
+                }
             }
-        }, 400);
+        });
     }
     catch (error)
     {
@@ -470,13 +565,13 @@ document.getElementById('btnSubmite').addEventListener('click', function (e)
     }
 });
 
-// Cancelar
+// Cancelar - redireciona para GestaoFluxo
 document.getElementById('btnCancela').addEventListener('click', function (e)
 {
     e.preventDefault();
     try
     {
-        location.reload();
+        window.location.href = '/Viagens/GestaoFluxo';
     }
     catch (error)
     {

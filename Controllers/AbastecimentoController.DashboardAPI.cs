@@ -25,7 +25,6 @@ namespace FrotiX.Controllers
             {
                 var query = _unitOfWork.ViewAbastecimentos.GetAll().AsQueryable();
 
-                // Filtros opcionais
                 if (ano.HasValue && ano > 0)
                 {
                     query = query.Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano.Value);
@@ -38,10 +37,8 @@ namespace FrotiX.Controllers
 
                 var dados = query.ToList();
 
-                // Processar dados para o dashboard
                 var resultado = new
                 {
-                    // Anos disponíveis (para filtros)
                     anosDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
                         .Where(a => a.DataHora.HasValue)
                         .Select(a => a.DataHora.Value.Year)
@@ -49,7 +46,6 @@ namespace FrotiX.Controllers
                         .OrderByDescending(a => a)
                         .ToList(),
 
-                    // Resumo por ano
                     resumoPorAno = _unitOfWork.ViewAbastecimentos.GetAll()
                         .Where(a => a.DataHora.HasValue)
                         .GroupBy(a => a.DataHora.Value.Year)
@@ -62,7 +58,6 @@ namespace FrotiX.Controllers
                         .OrderBy(r => r.ano)
                         .ToList(),
 
-                    // Média do litro por combustível
                     mediaLitro = dados
                         .Where(a => !string.IsNullOrEmpty(a.TipoCombustivel))
                         .GroupBy(a => a.TipoCombustivel)
@@ -74,7 +69,6 @@ namespace FrotiX.Controllers
                         .OrderBy(m => m.combustivel)
                         .ToList(),
 
-                    // Valor por categoria de veículo
                     valorPorCategoria = dados
                         .Where(a => !string.IsNullOrEmpty(a.TipoVeiculo))
                         .GroupBy(a => a.TipoVeiculo)
@@ -86,7 +80,6 @@ namespace FrotiX.Controllers
                         .OrderByDescending(v => v.valor)
                         .ToList(),
 
-                    // Valor do litro por mês (para gráfico de linha)
                     valorLitroPorMes = dados
                         .Where(a => a.DataHora.HasValue && !string.IsNullOrEmpty(a.TipoCombustivel))
                         .GroupBy(a => new { Mes = a.DataHora.Value.Month, Combustivel = a.TipoCombustivel })
@@ -99,7 +92,6 @@ namespace FrotiX.Controllers
                         .OrderBy(v => v.mes)
                         .ToList(),
 
-                    // Litros por mês (para gráfico de área)
                     litrosPorMes = dados
                         .Where(a => a.DataHora.HasValue)
                         .GroupBy(a => new { Mes = a.DataHora.Value.Month, Combustivel = a.TipoCombustivel ?? "Outros" })
@@ -112,7 +104,6 @@ namespace FrotiX.Controllers
                         .OrderBy(l => l.mes)
                         .ToList(),
 
-                    // Consumo (valor R$) por mês
                     consumoPorMes = dados
                         .Where(a => a.DataHora.HasValue)
                         .GroupBy(a => a.DataHora.Value.Month)
@@ -124,7 +115,6 @@ namespace FrotiX.Controllers
                         .OrderBy(c => c.mes)
                         .ToList(),
 
-                    // Totais gerais
                     totais = new
                     {
                         valorTotal = dados.Sum(a => ParseDecimal(a.ValorTotal)),
@@ -164,6 +154,42 @@ namespace FrotiX.Controllers
                 }
 
                 var dados = query.ToList();
+
+                // Buscar TODAS as categorias dos veículos (campo Categoria) usando ViewVeiculos
+                // Categorias: Ambulância, Carga Leve, Carga Pesada, Coletivos Pequenos, Depol, Mesa, Ônibus/Microônibus, Passeio
+                var todosVeiculos = _unitOfWork.ViewVeiculos.GetAll()
+                    .Where(v => !string.IsNullOrEmpty(v.Categoria))
+                    .ToList();
+                
+                var veiculosCategorias = todosVeiculos.ToDictionary(
+                    v => v.VeiculoId, 
+                    v => v.Categoria ?? "Sem Categoria"
+                );
+
+                // Agrupar abastecimentos por CATEGORIA real do veículo
+                // VeiculoId na ViewAbastecimentos é Guid (não nullable)
+                var consumoPorCategoriaReal = dados
+                    .Where(a => a.VeiculoId != Guid.Empty && veiculosCategorias.ContainsKey(a.VeiculoId))
+                    .GroupBy(a => veiculosCategorias[a.VeiculoId])
+                    .Select(g => new
+                    {
+                        categoria = g.Key,
+                        valor = g.Sum(a => ParseDecimal(a.ValorTotal))
+                    })
+                    .OrderByDescending(c => c.valor)
+                    .ToList();
+
+                // Se não encontrou categorias, adicionar os sem categoria
+                var semCategoria = dados
+                    .Where(a => a.VeiculoId == Guid.Empty || !veiculosCategorias.ContainsKey(a.VeiculoId))
+                    .Sum(a => ParseDecimal(a.ValorTotal));
+
+                if (semCategoria > 0)
+                {
+                    var lista = consumoPorCategoriaReal.ToList();
+                    lista.Add(new { categoria = "Sem Categoria", valor = semCategoria });
+                    consumoPorCategoriaReal = lista.OrderByDescending(c => c.valor).ToList();
+                }
 
                 var resultado = new
                 {
@@ -208,31 +234,36 @@ namespace FrotiX.Controllers
                         .OrderBy(l => l.dia)
                         .ToList(),
 
-                    // Valor por veículo (Top 30)
-                    valorPorVeiculo = dados
+                    // Valor por TIPO/MODELO de Veículo (TipoVeiculo da View) - TOP 15
+                    valorPorTipo = dados
                         .Where(a => !string.IsNullOrEmpty(a.TipoVeiculo))
                         .GroupBy(a => a.TipoVeiculo)
                         .Select(g => new
                         {
-                            veiculo = g.Key,
+                            tipoVeiculo = g.Key,
                             valor = g.Sum(a => ParseDecimal(a.ValorTotal))
                         })
                         .OrderByDescending(v => v.valor)
-                        .Take(30)
+                        .Take(15)
                         .ToList(),
 
-                    // Consumo por categoria
-                    consumoPorCategoria = dados
-                        .Where(a => !string.IsNullOrEmpty(a.TipoVeiculo))
-                        .GroupBy(a => a.TipoVeiculo)
+                    // Valor por PLACA individual - TOP 15
+                    valorPorPlaca = dados
+                        .Where(a => !string.IsNullOrEmpty(a.Placa))
+                        .GroupBy(a => new { a.VeiculoId, a.Placa, a.TipoVeiculo })
                         .Select(g => new
                         {
-                            categoria = g.Key,
+                            veiculoId = g.Key.VeiculoId,
+                            placa = g.Key.Placa,
+                            tipoVeiculo = g.Key.TipoVeiculo ?? "",
                             valor = g.Sum(a => ParseDecimal(a.ValorTotal))
                         })
-                        .OrderByDescending(c => c.valor)
-                        .Take(10)
-                        .ToList()
+                        .OrderByDescending(v => v.valor)
+                        .Take(15)
+                        .ToList(),
+
+                    // Consumo por CATEGORIA REAL do veículo (Ambulância, Carga Leve, etc)
+                    consumoPorCategoria = consumoPorCategoriaReal
                 };
 
                 return Ok(resultado);
@@ -265,7 +296,7 @@ namespace FrotiX.Controllers
                     query = query.Where(a => a.DataHora.Value.Month == mes.Value);
                 }
 
-                if (veiculoId.HasValue && veiculoId != Guid.Empty)
+                if (veiculoId.HasValue && veiculoId.Value != Guid.Empty)
                 {
                     query = query.Where(a => a.VeiculoId == veiculoId.Value);
                 }
@@ -277,11 +308,10 @@ namespace FrotiX.Controllers
 
                 var dados = query.ToList();
 
-                // Buscar info do veículo selecionado
                 string descricaoVeiculo = "Todos os veículos";
                 string categoriaVeiculo = "-";
 
-                if (veiculoId.HasValue && veiculoId != Guid.Empty)
+                if (veiculoId.HasValue && veiculoId.Value != Guid.Empty)
                 {
                     var veiculoInfo = dados.FirstOrDefault();
                     if (veiculoInfo != null)
@@ -298,15 +328,12 @@ namespace FrotiX.Controllers
 
                 var resultado = new
                 {
-                    // Totais
                     valorTotal = dados.Sum(a => ParseDecimal(a.ValorTotal)),
                     litrosTotal = dados.Sum(a => ParseDecimal(a.Litros)),
 
-                    // Info do veículo
                     descricaoVeiculo = descricaoVeiculo,
                     categoriaVeiculo = categoriaVeiculo,
 
-                    // Consumo mensal de litros por combustível
                     consumoMensalLitros = dados
                         .Where(a => a.DataHora.HasValue)
                         .GroupBy(a => new { Mes = a.DataHora.Value.Month, Combustivel = a.TipoCombustivel ?? "Outros" })
@@ -319,7 +346,6 @@ namespace FrotiX.Controllers
                         .OrderBy(c => c.mes)
                         .ToList(),
 
-                    // Valor mensal
                     valorMensal = dados
                         .Where(a => a.DataHora.HasValue)
                         .GroupBy(a => a.DataHora.Value.Month)
@@ -331,10 +357,10 @@ namespace FrotiX.Controllers
                         .OrderBy(v => v.mes)
                         .ToList(),
 
-                    // Lista de veículos com valores
                     veiculosComValor = _unitOfWork.ViewAbastecimentos.GetAll()
                         .Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano)
                         .Where(a => !mes.HasValue || mes <= 0 || a.DataHora.Value.Month == mes.Value)
+                        .Where(a => !string.IsNullOrEmpty(a.Placa))
                         .GroupBy(a => new { a.VeiculoId, a.Placa, a.TipoVeiculo })
                         .Select(g => new
                         {
@@ -346,7 +372,6 @@ namespace FrotiX.Controllers
                         .OrderByDescending(v => v.valor)
                         .ToList(),
 
-                    // Lista de modelos disponíveis (para filtro)
                     modelosDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
                         .Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano)
                         .Where(a => !string.IsNullOrEmpty(a.TipoVeiculo))
@@ -355,7 +380,6 @@ namespace FrotiX.Controllers
                         .OrderBy(m => m)
                         .ToList(),
 
-                    // Lista de placas disponíveis (para filtro)
                     placasDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
                         .Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano)
                         .Where(a => !string.IsNullOrEmpty(a.Placa))
@@ -378,16 +402,11 @@ namespace FrotiX.Controllers
 
         #region Helpers
 
-        /// <summary>
-        /// Converte string para decimal de forma segura
-        /// Detecta automaticamente o formato (brasileiro ou americano)
-        /// </summary>
         private static decimal ParseDecimal(string? valor)
         {
             if (string.IsNullOrEmpty(valor))
                 return 0;
 
-            // Remove R$, espaços
             var valorLimpo = valor
                 .Replace("R$", "")
                 .Replace(" ", "")
@@ -396,18 +415,12 @@ namespace FrotiX.Controllers
             if (string.IsNullOrEmpty(valorLimpo))
                 return 0;
 
-            // Detecta o formato:
-            // - Se tem vírgula, é formato brasileiro (ponto = milhar, vírgula = decimal)
-            // - Se não tem vírgula e tem ponto, o ponto é decimal (formato americano/banco)
             bool temVirgula = valorLimpo.Contains(',');
-            bool temPonto = valorLimpo.Contains('.');
 
             if (temVirgula)
             {
-                // Formato brasileiro: 1.234,56 -> 1234.56
                 valorLimpo = valorLimpo.Replace(".", "").Replace(",", ".");
             }
-            // Se só tem ponto, mantém como está (já é formato decimal)
 
             if (decimal.TryParse(valorLimpo, System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture, out decimal result))

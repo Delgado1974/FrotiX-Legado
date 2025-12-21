@@ -22,12 +22,130 @@
 @{
 	ViewData["Title"] = "Viagens";
 	ViewData["PageName"] = "viagens_fluxopassageiros";
-	ViewData["Heading"] = "<i class='fa-duotone fa-car-bus'></i> Cadastros: <span class='fw-300'>Fluxo de Passageiros dos Economildos</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-clipboard-list-check'></i> Cadastros: <span class='fw-300'>Fluxo de Passageiros dos Economildos</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-duotone fa-car-bus";
+	ViewData["PageIcon"] = "fa-duotone fa-clipboard-list-check";
 }
 
 <style>
+	/* Header animado com background gradiente */
+	.header-economildo {
+		position: relative;
+		background: linear-gradient(135deg, #325d88 0%, #2F4F4F 50%, #325d88 100%);
+		padding: 1.5rem 1.25rem;
+		margin: -1rem -1rem 1.5rem -1rem;
+		border-radius: 8px 8px 0 0;
+		overflow: hidden;
+		box-shadow: 0 4px 12px rgba(47, 79, 79, 0.15);
+	}
+
+	/* Efeito de brilho animado */
+	.header-economildo::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+		animation: ftxHeaderShine 4s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	/* Título do header */
+	.header-economildo h1 {
+		font-family: 'Outfit', sans-serif;
+		font-weight: 900;
+		font-size: 2rem;
+		line-height: 1.25;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		color: #ffffff;
+		text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+		position: relative;
+		z-index: 1;
+	}
+
+	.header-economildo h1 i.fa-duotone {
+		--fa-primary-color: #ffffff;
+		--fa-secondary-color: #b8d4e8;
+		--fa-secondary-opacity: 0.7;
+		font-size: 2.4rem;
+		line-height: 1;
+		filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+	}
+
+	/* Separador de seção */
+	.secao-titulo {
+		border-bottom: 2px solid #325d88;
+		padding-bottom: 0.75rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.secao-titulo h3 {
+		font-family: 'Outfit', sans-serif;
+		font-weight: 700;
+		font-size: 1.35rem;
+		color: #325d88;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.secao-titulo h3 i {
+		font-size: 1.5rem;
+		color: #597272;
+	}
+
+	/* Igualar altura dos campos - aumentar os nativos para 34px */
+	#txtData,
+	#lstMOB,
+	#lstResponsavel {
+		height: 34px !important;
+		padding: 0.375rem 0.75rem !important;
+		font-size: 0.875rem !important;
+	}
+
+	/* Ajustar altura dos Syncfusion para 34px também */
+	.e-small.e-input-group.e-control-wrapper,
+	.e-small.e-input-group.e-control-wrapper .e-input,
+	.e-small .e-ddl.e-input-group {
+		height: 34px !important;
+		line-height: 34px !important;
+	}
+
+	.e-small.e-input-group.e-control-wrapper input.e-input {
+		height: 34px !important;
+		line-height: 1.5 !important;
+		padding: 0.375rem 0.75rem !important;
+		font-size: 0.875rem !important;
+	}
+
+	.e-small .e-input-group-icon {
+		min-height: 34px !important;
+		line-height: 34px !important;
+	}
+
+	/* Animação de spinning para o ícone do botão */
+	.icon-pulse {
+		animation: pulseIcon 1.5s ease-in-out infinite;
+	}
+
+	@@keyframes pulseIcon {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.15);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
 	.fundo-cinza {
 		background-color: #2F4F4F;
 		color: aliceblue;
@@ -69,13 +187,21 @@
 	<div class="col-xl-12">
 		<div id="panel-1" class="panel">
 			<div class="panel-container show">
-				<br />
 				<div class="panel-content">
+					<!-- Header Animado -->
+					<div class="header-economildo">
+						<h1>
+							<i class="fa-duotone fa-clipboard-list-check"></i>
+							Inserção dos Registros dos Economildos
+						</h1>
+					</div>
+
 					<div class="box-body">
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="text-primary">
-								Escolha a Data e o respectivo Economildo para registrar suas Viagens:
-							</h2>
+						<div class="secao-titulo">
+							<h3>
+								<i class="fa-duotone fa-calendar-check"></i>
+								Escolha a Data e o respectivo Economildo para registrar suas viagens
+							</h3>
 						</div>
 
 						<div class="col-12" id="divEscolhas">
@@ -129,15 +255,13 @@
 								});
 							</script>
 
-							<div class="form-group row">
-								<div class="col-3 col-sm-3">
-									<br />
+							<div class="form-group row align-items-end">
+								<div class="col-2">
 									<label class="label font-weight-bold color-black">Escolha uma Data</label>
 									<input id="txtData" class="form-control form-control-xs" type="date" />
 								</div>
 
-								<div class="col-3 col-sm-3 col-md-3 pb-2">
-									<br />
+								<div class="col-4">
 									<label class="label font-weight-bold color-black">Placa do Economildo</label>
 									<ejs-combobox id="lstVeiculos"
 												  placeholder="Selecione um Veículo"
@@ -146,13 +270,13 @@
 												  dataSource="@ViewData["lstVeiculos"]"
 												  popupHeight="250px"
 												  width="100%"
+												  cssClass="e-small"
 												  showClearButton="true">
 										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
 									</ejs-combobox>
 								</div>
 
-								<div class="col-3 col-sm-3 col-md-3 pb-2">
-									<br />
+								<div class="col-4">
 									<label class="label font-weight-bold color-black">Motorista do Economildo</label>
 									<ejs-combobox id="lstMotoristas"
 												  placeholder="Selecione um Motorista"
@@ -161,14 +285,14 @@
 												  dataSource="@ViewData["lstMotoristas"]"
 												  popupHeight="250px"
 												  width="100%"
+												  cssClass="e-small"
 												  showClearButton="true">
 										<e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
 									</ejs-combobox>
 								</div>
 
-								<div class="col-9 col-sm-6 col-md-3 pb-2">
-									<br />
-									<label class="label font-weight-bold">Indique o MOB a ser Registrado</label>
+								<div class="col-2">
+									<label class="label font-weight-bold">Indique o MOB</label>
 									<select class="form-control form-control-xs" id="lstMOB">
 										<option value=""></option>
 										<option value="Rodoviaria">Rodoviária</option>
@@ -176,10 +300,11 @@
 										<option value="PGR">PGR</option>
 									</select>
 								</div>
+							</div>
 
-								<div class="col-9 col-sm-6 col-md-3 pb-2">
-									<br />
-									<label class="label font-weight-bold">Indique o Responsável pelo Registro</label>
+							<div class="form-group row align-items-end mt-3">
+								<div class="col-3">
+									<label class="label font-weight-bold">Responsável pelo Registro</label>
 									<select class="form-control form-control-xs" id="lstResponsavel">
 										<option value=""></option>
 										<option value="Angela">Angela</option>
@@ -188,24 +313,20 @@
 									</select>
 								</div>
 
-								<div class="col-6">
-									<br /><br />
-									<div class="row">
-										<div class="col-6">
-											<button id="btnInsereFicha" type="button" class="btn btn-azul form-control" data-ejtip="Insere Ficha de Registro">
-												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Insere Ficha
-											</button>
-										</div>
-									</div>
+								<div class="col-4">
+									<button id="btnInsereFicha" type="button" class="btn btn-azul form-control form-control-xs">
+										<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Insere Ficha
+									</button>
 								</div>
 							</div>
 						</div> <!-- /divEscolhas -->
 
 						<br />
 
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88" hidden="hidden" id="divTitulo">
-							<h3 class="text-primary">
-								Informe todas as viagens de Ida e Volta do referido Economildo:
+						<div class="secao-titulo" hidden="hidden" id="divTitulo">
+							<h3>
+								<i class="fa-duotone fa-route"></i>
+								Informe todas as viagens de Ida e Volta do referido Economildo
 							</h3>
 						</div>
 
@@ -309,12 +430,12 @@
 							<div class="col-9">
 								<div class="row">
 									<div class="col-6">
-										<button id="btnSubmite" type="button" class="btn btn-azul form-control" data-ejtip="Registrar Viagens">
+										<button id="btnSubmite" type="button" class="btn btn-azul form-control">
 											<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Registrar Viagens
 										</button>
 									</div>
 									<div class="col-6">
-										<button id="btnCancela" type="button" class="btn btn-vinho form-control" data-ejtip="Cancela Inserção">
+										<button id="btnCancela" type="button" class="btn btn-vinho form-control">
 											<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancela Inserção
 										</button>
 									</div>

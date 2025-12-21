@@ -14,6 +14,84 @@ const CORES_FROTIX = {
     rosa: '#ec4899'
 };
 
+// ========================================
+// FUNÇÃO DE FORMATAÇÃO DE NÚMEROS
+// ========================================
+
+/**
+ * Formata número com separador de milhar (ponto) e decimais (vírgula)
+ * @param {number} valor - Valor a ser formatado
+ * @param {number} casasDecimais - Número de casas decimais (padrão: 0)
+ * @returns {string} Número formatado
+ * Exemplo: formatarNumero(1234567.89, 2) => "1.234.567,89"
+ */
+function formatarNumero(valor, casasDecimais = 0)
+{
+    try
+    {
+        if (valor === null || valor === undefined || isNaN(valor))
+        {
+            return '0';
+        }
+
+        // Arredonda para o número de casas decimais
+        const valorArredondado = Number(valor).toFixed(casasDecimais);
+
+        // Separa parte inteira e decimal
+        const partes = valorArredondado.split('.');
+        const parteInteira = partes[0];
+        const parteDecimal = partes[1];
+
+        // Adiciona separador de milhar (ponto)
+        const parteInteiraFormatada = parteInteira.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+        // Retorna com vírgula como separador decimal
+        if (casasDecimais > 0 && parteDecimal)
+        {
+            return `${parteInteiraFormatada},${parteDecimal}`;
+        }
+
+        return parteInteiraFormatada;
+    } catch (error)
+    {
+        console.error('Erro ao formatar número:', error);
+        return '0';
+    }
+}
+
+/**
+ * Formata valor monetário com regra especial:
+ * - Valores < 100: exibe com 2 casas decimais (ex: R$ 99,50)
+ * - Valores >= 100: exibe sem casas decimais (ex: R$ 1.234)
+ * @param {number} valor - Valor monetário a ser formatado
+ * @returns {string} Valor formatado
+ */
+function formatarValorMonetario(valor)
+{
+    try
+    {
+        if (valor === null || valor === undefined || isNaN(valor))
+        {
+            return '0';
+        }
+
+        const valorNumerico = Number(valor);
+        
+        // Se valor < 100, mostra com 2 casas decimais
+        if (valorNumerico < 100)
+        {
+            return formatarNumero(valorNumerico, 2);
+        }
+        
+        // Se valor >= 100, mostra sem casas decimais
+        return formatarNumero(valorNumerico, 0);
+    } catch (error)
+    {
+        console.error('Erro ao formatar valor monetário:', error);
+        return '0';
+    }
+}
+
 let periodoAtual = {
     dataInicio: null,
     dataFim: null
@@ -27,6 +105,47 @@ let chartCustosPorTipo = null;
 let pdfAtualBlob = null;
 let pdfViewerInstance = null;
 
+// Variáveis para o Modal de Ajuste de Viagem (Dashboard)
+let viagemAtualId = null;
+let modalAjustaViagemDashboard = null;
+
+// ========================================
+// LOADING INICIAL DA PÁGINA
+// ========================================
+
+function mostrarLoadingInicial()
+{
+    try
+    {
+        const loadingEl = document.getElementById('loadingInicialDashboard');
+        if (loadingEl)
+        {
+            loadingEl.style.display = 'flex';
+        }
+    } catch (error)
+    {
+        console.error('Erro ao mostrar loading inicial:', error);
+    }
+}
+
+function esconderLoadingInicial()
+{
+    try
+    {
+        const loadingEl = document.getElementById('loadingInicialDashboard');
+        if (loadingEl)
+        {
+            loadingEl.style.opacity = '0';
+            setTimeout(function() {
+                loadingEl.style.display = 'none';
+            }, 300);
+        }
+    } catch (error)
+    {
+        console.error('Erro ao esconder loading inicial:', error);
+    }
+}
+
 // ========================================
 // INICIALIZAÇÃO
 // ========================================
@@ -35,6 +154,9 @@ async function inicializarDashboard()
 {
     try
     {
+        // Mostra loading inicial da página
+        mostrarLoadingInicial();
+
         // Define período padrão (últimos 30 dias)
         const hoje = new Date();
         periodoAtual.dataFim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
@@ -44,12 +166,19 @@ async function inicializarDashboard()
         // Inicializa campos de data HTML5
         inicializarCamposData();
 
+        // Inicializa modal de ajuste de viagem
+        inicializarModalAjuste();
+
         // Carrega dashboard
         await carregarDadosDashboard();
+
+        // Esconde loading inicial
+        esconderLoadingInicial();
 
         AppToast.show('Verde', 'Dashboard carregado com sucesso!', 3000);
     } catch (error)
     {
+        esconderLoadingInicial();
         Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'inicializarDashboard', error);
     }
 }
@@ -128,6 +257,8 @@ async function carregarDadosDashboard()
         mostrarLoadingGeral();
 
         // Promise.allSettled não trava se um falhar
+        // NOTA: carregarKmPorVeiculo foi REMOVIDO - usava ViagemEstatistica com dados errados
+        // Mantido apenas carregarTop10VeiculosKm que usa tabela Viagem diretamente
         const resultados = await Promise.allSettled([
             carregarEstatisticasGerais(),
             carregarViagensPorDia(),
@@ -137,7 +268,6 @@ async function carregarDadosDashboard()
             carregarCustosPorDia(),
             carregarCustosPorTipo(),
             carregarViagensPorFinalidade(),
-            carregarKmPorVeiculo(),
             carregarViagensPorRequisitante(),
             carregarViagensPorSetor(),
             carregarCustosPorMotorista(),
@@ -155,7 +285,7 @@ async function carregarDadosDashboard()
         const nomes = [
             'EstatisticasGerais', 'ViagensPorDia', 'ViagensPorStatus', 'ViagensPorMotorista',
             'ViagensPorVeiculo', 'CustosPorDia', 'CustosPorTipo', 'ViagensPorFinalidade',
-            'KmPorVeiculo', 'ViagensPorRequisitante', 'ViagensPorSetor', 'CustosPorMotorista',
+            'ViagensPorRequisitante', 'ViagensPorSetor', 'CustosPorMotorista',
             'CustosPorVeiculo', 'Top10ViagensMaisCaras', 'HeatmapViagens', 'Top10VeiculosKm',
             'CustoMedioPorFinalidade'
         ];
@@ -196,16 +326,16 @@ async function carregarEstatisticasGerais()
         {
             const data = result;
 
-            // Atualiza cards principais - SEM CENTAVOS
-            $('#statTotalViagens').text(data.totalViagens.toLocaleString('pt-BR'));
-            $('#statViagensFinalizadas').text(data.viagensFinalizadas.toLocaleString('pt-BR'));
-            $('#statCustoTotal').text('R$ ' + data.custoTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
-            $('#statCustoMedio').text('R$ ' + data.custoMedioPorViagem.toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
-            $('#statKmTotal').text(data.kmTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' km');
-            $('#statKmMedio').text(data.kmMedioPorViagem.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' km');
-            $('#statViagensEmAndamento').text(data.viagensEmAndamento.toLocaleString('pt-BR'));
-            $('#statViagensAgendadas').text(data.viagensAgendadas || 0);
-            $('#statViagensCanceladas').text(data.viagensCanceladas.toLocaleString('pt-BR'));
+            // Atualiza cards principais - COM SEPARADOR DE MILHAR
+            $('#statTotalViagens').text(formatarNumero(data.totalViagens, 0));
+            $('#statViagensFinalizadas').text(formatarNumero(data.viagensFinalizadas, 0));
+            $('#statCustoTotal').text('R$ ' + formatarValorMonetario(data.custoTotal));
+            $('#statCustoMedio').text('R$ ' + formatarValorMonetario(data.custoMedioPorViagem));
+            $('#statKmTotal').text(formatarNumero(data.kmTotal, 0) + ' km');
+            $('#statKmMedio').text(formatarNumero(data.kmMedioPorViagem, 2) + ' km');
+            $('#statViagensEmAndamento').text(formatarNumero(data.viagensEmAndamento, 0));
+            $('#statViagensAgendadas').text(formatarNumero(data.viagensAgendadas || 0, 0));
+            $('#statViagensCanceladas').text(formatarNumero(data.viagensCanceladas, 0));
 
             // Atualiza variações (se existirem dados do período anterior na API)
             if (data.periodoAnterior)
@@ -239,12 +369,12 @@ async function carregarEstatisticasGerais()
                     .addClass('variacao-neutra');
             }
 
-            // Atualiza cards de custo por tipo - SEM CENTAVOS
-            $('#statCustoCombustivel').text('R$ ' + (data.custoCombustivel || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
-            $('#statCustoVeiculo').text('R$ ' + (data.custoVeiculo || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
-            $('#statCustoMotorista').text('R$ ' + (data.custoMotorista || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
-            $('#statCustoOperador').text('R$ ' + (data.custoOperador || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
-            $('#statCustoLavador').text('R$ ' + (data.custoLavador || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
+            // Atualiza cards de custo por tipo - COM SEPARADOR DE MILHAR
+            $('#statCustoCombustivel').text('R$ ' + formatarValorMonetario(data.custoCombustivel || 0));
+            $('#statCustoVeiculo').text('R$ ' + formatarValorMonetario(data.custoVeiculo || 0));
+            $('#statCustoMotorista').text('R$ ' + formatarValorMonetario(data.custoMotorista || 0));
+            $('#statCustoOperador').text('R$ ' + formatarValorMonetario(data.custoOperador || 0));
+            $('#statCustoLavador').text('R$ ' + formatarValorMonetario(data.custoLavador || 0));
         }
     } catch (error)
     {
@@ -301,8 +431,30 @@ function renderizarGraficoViagensPorDia(dados)
                 fill: CORES_FROTIX.azul
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '350px'
@@ -372,7 +524,15 @@ function renderizarGraficoViagensPorStatus(dados)
             },
             tooltip: {
                 enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                format: '${point.x}: ${point.y} viagens',
+                template: null
+            },
+            tooltipRender: function(args) {
+                try {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error) {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             height: '350px'
         });
@@ -435,8 +595,30 @@ function renderizarGraficoViagensPorMotorista(dados)
                 fill: CORES_FROTIX.ciano
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '350px'
@@ -500,8 +682,30 @@ function renderizarGraficoViagensPorVeiculo(dados)
                 fill: CORES_FROTIX.laranja
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '350px'
@@ -552,7 +756,7 @@ function renderizarGraficoCustosPorDia(dados)
                 edgeLabelPlacement: 'Shift'
             },
             primaryYAxis: {
-                labelFormat: 'R$ {value}',
+                labelFormat: '{value}',
                 title: 'Custos (R$)',
                 minimum: 0
             },
@@ -570,8 +774,30 @@ function renderizarGraficoCustosPorDia(dados)
                 border: { width: 2, color: CORES_FROTIX.azul }
             }],
             tooltip: {
-                enable: true,
-                format: 'R$ ${point.y}'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = 'R$ ' + formatarValorMonetario(args.value);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = 'Custo Total<br/>R$ ' + formatarValorMonetario(args.point.y);
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '350px'
@@ -640,7 +866,15 @@ function renderizarGraficoCustosPorTipo(dados)
             },
             tooltip: {
                 enable: true,
-                format: '${point.x}: R$ ${point.y}'
+                format: '${point.x}: R$ ${point.y}',
+                template: null
+            },
+            tooltipRender: function(args) {
+                try {
+                    args.text = args.point.x + ': R$ ' + formatarValorMonetario(args.point.y);
+                } catch (error) {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             height: '350px'
         });
@@ -703,8 +937,30 @@ function renderizarGraficoViagensPorFinalidade(dados)
                 fill: CORES_FROTIX.verde
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '420px'
@@ -756,7 +1012,7 @@ function renderizarGraficoKmPorVeiculo(dados)
                 maximumLabelWidth: 120
             },
             primaryYAxis: {
-                labelFormat: '{value} km',
+                labelFormat: '{value}',
                 title: 'Quilometragem'
             },
             series: [{
@@ -769,8 +1025,30 @@ function renderizarGraficoKmPorVeiculo(dados)
                 fill: CORES_FROTIX.roxo
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} km'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0) + ' km';
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' km';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '420px'
@@ -797,23 +1075,37 @@ async function carregarViagensPorRequisitante()
             top: 6
         });
 
+        console.log('🔍 Carregando Top 6 Requisitantes...', {
+            dataInicio: periodoAtual.dataInicio.toISOString(),
+            dataFim: periodoAtual.dataFim.toISOString()
+        });
+
         const response = await fetch(`/api/DashboardViagens/ObterViagensPorRequisitante?${params}`);
         const result = await response.json();
 
-        if (result.success && result.data.length > 0)
+        console.log('📊 Resposta API - Top 6 Requisitantes:', result);
+
+        if (result.success && result.data && result.data.length > 0)
         {
+            console.log('✅ Renderizando gráfico com', result.data.length, 'requisitantes');
             renderizarGraficoViagensPorRequisitante(result.data);
 
             // Atualiza linha com total Ctran se existir
             if (result.viagensCtran !== undefined)
             {
-                $('#infoViagensCtranRequisitante').text(`Viagens Ctran: ${result.viagensCtran.toLocaleString('pt-BR')}`);
+                $('#infoViagensCtranRequisitante').text(`Viagens Ctran: ${formatarNumero(result.viagensCtran, 0)}`);
                 $('#footerRequisitante').removeClass('d-none');
             }
             else
             {
                 $('#footerRequisitante').addClass('d-none');
             }
+        }
+        else
+        {
+            console.warn('⚠️ Nenhum dado de requisitantes para exibir');
+            document.getElementById('chartViagensPorRequisitante').innerHTML =
+                '<div class="text-center py-5 text-muted">Nenhum dado disponível para o período selecionado</div>';
         }
     } catch (error)
     {
@@ -825,6 +1117,15 @@ function renderizarGraficoViagensPorRequisitante(dados)
 {
     try
     {
+        console.log('🎨 Renderizando gráfico de requisitantes com dados:', dados);
+
+        // Limpar gráfico anterior se existir
+        const containerElement = document.getElementById('chartViagensPorRequisitante');
+        if (containerElement && containerElement.ej2_instances && containerElement.ej2_instances.length > 0)
+        {
+            containerElement.ej2_instances[0].destroy();
+        }
+
         const chart = new ej.charts.Chart({
             primaryXAxis: {
                 valueType: 'Category',
@@ -846,11 +1147,43 @@ function renderizarGraficoViagensPorRequisitante(dados)
                 fill: CORES_FROTIX.rosa
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
-            height: '280px'
+            height: '280px',
+            loaded: function ()
+            {
+                try
+                {
+                    console.log('✅ Gráfico de Requisitantes carregado com sucesso!');
+                } catch (error)
+                {
+                    console.error('Erro no evento loaded:', error);
+                }
+            }
         });
 
         chart.appendTo('#chartViagensPorRequisitante');
@@ -884,7 +1217,7 @@ async function carregarViagensPorSetor()
             // Atualiza linha com total Ctran se existir
             if (result.viagensCtran !== undefined)
             {
-                $('#infoViagensCtranSetor').text(`Viagens Ctran: ${result.viagensCtran.toLocaleString('pt-BR')}`);
+                $('#infoViagensCtranSetor').text(`Viagens Ctran: ${formatarNumero(result.viagensCtran, 0)}`);
                 $('#footerSetor').removeClass('d-none');
             }
             else
@@ -923,8 +1256,30 @@ function renderizarGraficoViagensPorSetor(dados)
                 fill: CORES_FROTIX.amarelo
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} viagens'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' viagens';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '280px'
@@ -975,7 +1330,7 @@ function renderizarGraficoCustosPorMotorista(dados)
                 labelIntersectAction: 'Rotate45'
             },
             primaryYAxis: {
-                labelFormat: 'R$ {value}',
+                labelFormat: '{value}',
                 title: 'Custo Total (R$)'
             },
             series: [{
@@ -988,8 +1343,30 @@ function renderizarGraficoCustosPorMotorista(dados)
                 fill: CORES_FROTIX.vermelho
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: R$ ${point.y}'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = 'R$ ' + formatarValorMonetario(args.value);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': R$ ' + formatarValorMonetario(args.point.y);
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '350px'
@@ -1040,7 +1417,7 @@ function renderizarGraficoCustosPorVeiculo(dados)
                 labelIntersectAction: 'Rotate45'
             },
             primaryYAxis: {
-                labelFormat: 'R$ {value}',
+                labelFormat: '{value}',
                 title: 'Custo Total (R$)'
             },
             series: [{
@@ -1053,8 +1430,30 @@ function renderizarGraficoCustosPorVeiculo(dados)
                 fill: CORES_FROTIX.azul
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: R$ ${point.y}'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = 'R$ ' + formatarValorMonetario(args.value);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': R$ ' + formatarValorMonetario(args.point.y);
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
             height: '350px'
@@ -1096,23 +1495,34 @@ async function carregarTop10ViagensMaisCaras()
     }
 }
 
+// Armazena dados das viagens do TOP 10 para uso no modal
+let dadosTop10Viagens = [];
+
 function renderizarTabelaTop10(dados)
 {
     try
     {
+        // Armazena os dados para uso no modal
+        dadosTop10Viagens = dados;
+        
         let html = '';
 
         dados.forEach((viagem, index) =>
         {
+            // Formatar número da ficha com divisão de milhares
+            const noFichaFormatado = viagem.noFichaVistoria && viagem.noFichaVistoria !== 'N/A' 
+                ? formatarNumero(parseInt(viagem.noFichaVistoria) || 0, 0)
+                : 'N/A';
+            
             html += `
-                <tr>
+                <tr data-viagem-index="${index}" onclick="abrirModalDetalhesViagem(${index})" title="Clique para ver detalhes">
                     <td class="text-center">${index + 1}</td>
-                    <td class="text-center">${viagem.noFichaVistoria}</td>
+                    <td class="text-center">${noFichaFormatado}</td>
                     <td>${viagem.dataInicial}</td>
                     <td>${viagem.dataFinal}</td>
                     <td>${viagem.motorista}</td>
                     <td>${viagem.veiculo}</td>
-                    <td class="text-end text-success fw-bold">R$ ${viagem.custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td class="text-end text-success fw-bold">R$ ${formatarValorMonetario(viagem.custoTotal)}</td>
                 </tr>
             `;
         });
@@ -1121,6 +1531,95 @@ function renderizarTabelaTop10(dados)
     } catch (error)
     {
         Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'renderizarTabelaTop10', error);
+    }
+}
+
+/**
+ * Abre o modal com detalhes da viagem
+ * @param {number} index - Índice da viagem no array dadosTop10Viagens
+ */
+function abrirModalDetalhesViagem(index)
+{
+    try
+    {
+        const viagem = dadosTop10Viagens[index];
+        if (!viagem)
+        {
+            console.error('Viagem não encontrada no índice:', index);
+            return;
+        }
+
+        // Armazena o ID da viagem atual para uso no botão de edição
+        viagemAtualId = viagem.viagemId;
+
+        // Preencher dados da viagem
+        $('#modalNoFicha').text(viagem.noFichaVistoria || 'N/A');
+        $('#modalStatus').html(viagem.status 
+            ? `<span class="badge bg-success">${viagem.status}</span>` 
+            : '-');
+        $('#modalDataInicial').text(viagem.dataInicial || '-');
+        $('#modalDataFinal').text(viagem.dataFinal || '-');
+        $('#modalMotorista').text(viagem.motorista || '-');
+        $('#modalVeiculo').text(viagem.veiculo || '-');
+        $('#modalKmRodado').text(viagem.kmRodado 
+            ? formatarNumero(viagem.kmRodado, 0) + ' km' 
+            : '-');
+        $('#modalDuracao').text(viagem.duracao || viagem.minutos 
+            ? formatarDuracao(viagem.minutos || 0) 
+            : '-');
+        $('#modalFinalidade').text(viagem.finalidade || '-');
+
+        // Mostrar/esconder alerta de KM Rodado zero
+        const alertaKmZero = document.getElementById('alertaKmZero');
+        if (alertaKmZero)
+        {
+            if (!viagem.kmRodado || viagem.kmRodado <= 0)
+            {
+                alertaKmZero.classList.remove('d-none');
+            }
+            else
+            {
+                alertaKmZero.classList.add('d-none');
+            }
+        }
+
+        // Preencher custos
+        $('#modalCustoCombustivel').text('R$ ' + formatarValorMonetario(viagem.custoCombustivel || 0));
+        $('#modalCustoVeiculo').text('R$ ' + formatarValorMonetario(viagem.custoVeiculo || 0));
+        $('#modalCustoMotorista').text('R$ ' + formatarValorMonetario(viagem.custoMotorista || 0));
+        $('#modalCustoOperador').text('R$ ' + formatarValorMonetario(viagem.custoOperador || 0));
+        $('#modalCustoLavador').text('R$ ' + formatarValorMonetario(viagem.custoLavador || 0));
+        $('#modalCustoTotal').text('R$ ' + formatarValorMonetario(viagem.custoTotal || 0));
+
+        // Abrir modal
+        const modal = new bootstrap.Modal(document.getElementById('modalDetalhesViagem'));
+        modal.show();
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'abrirModalDetalhesViagem', error);
+    }
+}
+
+/**
+ * Formata minutos em horas e minutos (ex: 125 => "2h 05min")
+ * @param {number} minutos - Total de minutos
+ * @returns {string} Duração formatada
+ */
+function formatarDuracao(minutos)
+{
+    try
+    {
+        if (!minutos || minutos <= 0) return '-';
+        
+        const horas = Math.floor(minutos / 60);
+        const mins = minutos % 60;
+        
+        if (horas === 0) return mins + 'min';
+        if (mins === 0) return horas + 'h';
+        return horas + 'h ' + String(mins).padStart(2, '0') + 'min';
+    } catch (error)
+    {
+        return '-';
     }
 }
 
@@ -1266,7 +1765,7 @@ function renderizarTop10VeiculosKm(dados)
                 maximumLabelWidth: 80
             },
             primaryYAxis: {
-                labelFormat: '{value} km',
+                labelFormat: '{value}',
                 title: 'Quilometragem Total'
             },
             series: [{
@@ -1279,11 +1778,33 @@ function renderizarTop10VeiculosKm(dados)
                 fill: CORES_FROTIX.verde
             }],
             tooltip: {
-                enable: true,
-                format: '${point.x}: ${point.y} km'
+                enable: true
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    if (args.axis.name === 'primaryYAxis')
+                    {
+                        args.text = formatarNumero(args.value, 0) + ' km';
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    args.text = args.point.x + ': ' + formatarNumero(args.point.y, 0) + ' km';
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: { visible: false },
-            height: '380px'
+            height: '420px'
         });
 
         chart.appendTo('#chartTop10VeiculosKm');
@@ -1332,13 +1853,13 @@ function renderizarCustoMedioPorFinalidade(dados)
                 maximumLabelWidth: 120
             },
             primaryYAxis: {
-                labelFormat: 'R$ {value}',
+                labelFormat: '{value}',
                 title: 'Custo Total (R$)'
             },
             axes: [{
                 name: 'yAxisMedio',
                 opposedPosition: true,
-                labelFormat: 'R$ {value}',
+                labelFormat: '{value}',
                 title: 'Custo Médio (R$)'
             }],
             series: [
@@ -1350,7 +1871,8 @@ function renderizarCustoMedioPorFinalidade(dados)
                     name: 'Custo Total',
                     cornerRadius: { topRight: 8, bottomRight: 8 },
                     fill: CORES_FROTIX.vermelho,
-                    opacity: 0.8
+                    opacity: 0.8,
+                    tooltipMappingName: 'finalidade'
                 },
                 {
                     dataSource: dados,
@@ -1366,12 +1888,40 @@ function renderizarCustoMedioPorFinalidade(dados)
                         fill: CORES_FROTIX.azul
                     },
                     fill: CORES_FROTIX.azul,
-                    width: 3
+                    width: 3,
+                    tooltipMappingName: 'finalidade'
                 }
             ],
             tooltip: {
                 enable: true,
-                shared: true
+                shared: false
+            },
+            axisLabelRender: function (args)
+            {
+                try
+                {
+                    // Formatar labels dos eixos Y (primário e secundário)
+                    if (args.axis.name === 'primaryYAxis' || args.axis.name === 'yAxisMedio')
+                    {
+                        args.text = 'R$ ' + formatarNumero(args.value, 0);
+                    }
+                } catch (error)
+                {
+                    console.error('Erro ao formatar label:', error);
+                }
+            },
+            tooltipRender: function (args)
+            {
+                try
+                {
+                    const nomeSerie = args.series.name || '';
+                    const valor = Number(args.point.y) || 0;
+                    const categoria = args.point.x || '';
+                    args.text = '<b>' + categoria + '</b><br/>' + nomeSerie + ': R$ ' + formatarNumero(valor, 2);
+                } catch (error)
+                {
+                    console.error('Erro ao formatar tooltip:', error);
+                }
             },
             legendSettings: {
                 visible: true,
@@ -1476,35 +2026,28 @@ function atualizarDashboard()
 // LOADING
 // ========================================
 
-function mostrarLoadingGeral()
+function mostrarLoadingGeral(mensagem)
 {
     try
     {
-        const elemento = document.getElementById('loadingDashboard');
+        const elemento = document.getElementById('loadingInicialDashboard');
         if (!elemento)
         {
-            console.error('❌ Elemento #loadingDashboard não existe!');
+            console.error('❌ Elemento #loadingInicialDashboard não existe!');
             return;
         }
 
-        // Remove classe
-        elemento.classList.remove('d-none');
+        // Atualiza mensagem se fornecida
+        const textoLoading = elemento.querySelector('.loading-text');
+        if (textoLoading && mensagem)
+        {
+            textoLoading.textContent = mensagem;
+        }
 
-        // FORÇA com setAttribute (mais forte que .css())
-        elemento.setAttribute('style',
-            'display: flex !important; ' +
-            'visibility: visible !important; ' +
-            'opacity: 1 !important; ' +
-            'position: fixed !important; ' +
-            'top: 0 !important; ' +
-            'left: 0 !important; ' +
-            'right: 0 !important; ' +
-            'bottom: 0 !important; ' +
-            'z-index: 99999 !important; ' +
-            'background-color: rgba(255, 255, 255, 0.9) !important; ' +
-            'justify-content: center !important; ' +
-            'align-items: center !important;'
-        );
+        // Remove classe d-none e mostra
+        elemento.classList.remove('d-none');
+        elemento.style.display = 'flex';
+        elemento.style.opacity = '1';
     } catch (error)
     {
         Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'mostrarLoadingGeral', error);
@@ -1518,13 +2061,23 @@ function esconderLoadingGeral()
         // Pequeno delay para suavizar a transição (800ms em vez de instantâneo)
         setTimeout(() =>
         {
-            const elemento = document.getElementById('loadingDashboard');
+            const elemento = document.getElementById('loadingInicialDashboard');
             if (elemento)
             {
-                elemento.classList.add('d-none');
-                elemento.removeAttribute('style'); // Remove estilos inline forçados
+                elemento.style.opacity = '0';
+                setTimeout(() => {
+                    elemento.classList.add('d-none');
+                    elemento.style.display = 'none';
+                    
+                    // Restaura mensagem padrão
+                    const textoLoading = elemento.querySelector('.loading-text');
+                    if (textoLoading)
+                    {
+                        textoLoading.textContent = 'Carregando Dashboard';
+                    }
+                }, 300);
             }
-        }, 800);
+        }, 500);
     } catch (error)
     {
         Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'esconderLoadingGeral', error);
@@ -2162,6 +2715,359 @@ function limparPDFViewer()
 }
 
 // ========================================
+// MODAL DE AJUSTE DE VIAGEM (Dashboard)
+// ========================================
+
+function inicializarModalAjuste()
+{
+    try
+    {
+        const modalEl = document.getElementById('modalAjustaViagemDashboard');
+        if (modalEl)
+        {
+            modalAjustaViagemDashboard = new bootstrap.Modal(modalEl, {
+                keyboard: true,
+                backdrop: 'static'
+            });
+
+            // Evento do botão Ajustar Viagem
+            const btnAjustar = document.getElementById('btnAjustarViagemDashboard');
+            if (btnAjustar)
+            {
+                btnAjustar.addEventListener('click', gravarViagemDashboard);
+            }
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'inicializarModalAjuste', error);
+    }
+}
+
+/**
+ * Abre o modal de ajuste de viagem
+ * Chamado a partir do modal de detalhes do TOP 10
+ */
+function abrirModalAjusteViagem()
+{
+    try
+    {
+        if (!viagemAtualId)
+        {
+            AppToast.show('Amarelo', 'Nenhuma viagem selecionada', 3000);
+            return;
+        }
+
+        // Fecha o modal de detalhes
+        const modalDetalhes = bootstrap.Modal.getInstance(document.getElementById('modalDetalhesViagem'));
+        if (modalDetalhes)
+        {
+            modalDetalhes.hide();
+        }
+
+        // Carrega dados da viagem no modal de ajuste
+        carregarDadosViagemParaAjuste(viagemAtualId);
+
+        // Abre o modal de ajuste
+        if (modalAjustaViagemDashboard)
+        {
+            modalAjustaViagemDashboard.show();
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'abrirModalAjusteViagem', error);
+    }
+}
+
+/**
+ * Carrega os dados da viagem no modal de ajuste
+ */
+function carregarDadosViagemParaAjuste(viagemId)
+{
+    try
+    {
+        $.ajax({
+            type: 'GET',
+            url: '/api/Viagem/GetViagem/' + viagemId,
+            success: function (res)
+            {
+                try
+                {
+                    if (res && res.success && res.data)
+                    {
+                        const viagem = res.data;
+
+                        document.getElementById('txtIdDashboard').value = viagem.viagemId;
+                        document.getElementById('txtNoFichaVistoriaDashboard').value = viagem.noFichaVistoria || '';
+
+                        // Finalidade
+                        const lstFinalidade = document.getElementById('lstFinalidadeAlteradaDashboard');
+                        if (lstFinalidade && lstFinalidade.ej2_instances)
+                        {
+                            lstFinalidade.ej2_instances[0].value = viagem.finalidade || null;
+                        }
+
+                        // Evento
+                        const lstEvento = document.getElementById('lstEventoDashboard');
+                        if (lstEvento && lstEvento.ej2_instances)
+                        {
+                            if (viagem.finalidade === 'Evento' && viagem.eventoId)
+                            {
+                                lstEvento.ej2_instances[0].enabled = true;
+                                lstEvento.ej2_instances[0].value = [viagem.eventoId.toString()];
+                                $('.esconde-diveventos-dashboard').show();
+                            } else
+                            {
+                                lstEvento.ej2_instances[0].enabled = false;
+                                lstEvento.ej2_instances[0].value = null;
+                                $('.esconde-diveventos-dashboard').hide();
+                            }
+                        }
+
+                        // Datas e Horas
+                        document.getElementById('txtDataInicialDashboard').value = viagem.dataInicial || '';
+                        document.getElementById('txtHoraInicialDashboard').value = viagem.horaInicio || '';
+                        document.getElementById('txtDataFinalDashboard').value = viagem.dataFinal || '';
+                        document.getElementById('txtHoraFinalDashboard').value = viagem.horaFim || '';
+
+                        // Quilometragem
+                        document.getElementById('txtKmInicialDashboard').value = viagem.kmInicial || '';
+                        document.getElementById('txtKmFinalDashboard').value = viagem.kmFinal || '';
+
+                        // Ramal do Requisitante
+                        document.getElementById('txtRamalRequisitanteDashboard').value = viagem.ramalRequisitante || '';
+
+                        // Aguarda um pequeno delay para os combos Syncfusion carregarem os dados
+                        setTimeout(function() {
+                            try {
+                                // Motorista
+                                const lstMotorista = document.getElementById('lstMotoristaAlteradoDashboard');
+                                if (lstMotorista && lstMotorista.ej2_instances && viagem.motoristaId)
+                                {
+                                    lstMotorista.ej2_instances[0].value = viagem.motoristaId;
+                                }
+
+                                // Veículo
+                                const lstVeiculo = document.getElementById('lstVeiculoAlteradoDashboard');
+                                if (lstVeiculo && lstVeiculo.ej2_instances && viagem.veiculoId)
+                                {
+                                    lstVeiculo.ej2_instances[0].value = viagem.veiculoId;
+                                }
+
+                                // Solicitante (Requisitante)
+                                const lstRequisitante = document.getElementById('lstRequisitanteAlteradoDashboard');
+                                if (lstRequisitante && lstRequisitante.ej2_instances && viagem.requisitanteId)
+                                {
+                                    lstRequisitante.ej2_instances[0].value = viagem.requisitanteId;
+                                }
+
+                                // Setor Solicitante (DropDownTree - precisa de array)
+                                const lstSetor = document.getElementById('lstSetorSolicitanteAlteradoDashboard');
+                                if (lstSetor && lstSetor.ej2_instances && viagem.setorSolicitanteId)
+                                {
+                                    lstSetor.ej2_instances[0].value = [viagem.setorSolicitanteId];
+                                }
+                            } catch (error) {
+                                console.error('Erro ao setar valores dos combos:', error);
+                            }
+                        }, 300);
+
+                    } else
+                    {
+                        AppToast.show('Amarelo', res.message || 'Viagem não encontrada', 3000);
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'carregarDadosViagemParaAjuste.success', error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'carregarDadosViagemParaAjuste.error', error);
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'carregarDadosViagemParaAjuste', error);
+    }
+}
+
+/**
+ * Evento de mudança da finalidade no modal de ajuste
+ */
+function FinalidadeChangeDashboard()
+{
+    try
+    {
+        var finalidadeCb = document.getElementById('lstFinalidadeAlteradaDashboard').ej2_instances[0];
+        var eventoDdt = document.getElementById('lstEventoDashboard').ej2_instances[0];
+
+        if (finalidadeCb && eventoDdt)
+        {
+            if (finalidadeCb.value === 'Evento')
+            {
+                eventoDdt.enabled = true;
+                $('.esconde-diveventos-dashboard').show();
+            } else
+            {
+                eventoDdt.enabled = false;
+                eventoDdt.value = null;
+                $('.esconde-diveventos-dashboard').hide();
+            }
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'FinalidadeChangeDashboard', error);
+    }
+}
+
+/**
+ * Grava as alterações da viagem
+ */
+function gravarViagemDashboard()
+{
+    try
+    {
+        const viagemId = document.getElementById('txtIdDashboard').value;
+        const noFichaVistoria = document.getElementById('txtNoFichaVistoriaDashboard').value;
+
+        // Finalidade
+        const lstFinalidade = document.getElementById('lstFinalidadeAlteradaDashboard');
+        const finalidade = lstFinalidade && lstFinalidade.ej2_instances ? lstFinalidade.ej2_instances[0].value : null;
+
+        // Evento
+        const lstEvento = document.getElementById('lstEventoDashboard');
+        let eventoId = null;
+        if (lstEvento && lstEvento.ej2_instances)
+        {
+            const eventoValue = lstEvento.ej2_instances[0].value;
+            if (eventoValue && eventoValue.length > 0)
+            {
+                eventoId = eventoValue[0];
+            }
+        }
+
+        // Datas e Horas
+        const dataInicial = document.getElementById('txtDataInicialDashboard').value || null;
+        const horaInicial = document.getElementById('txtHoraInicialDashboard').value || null;
+        const dataFinal = document.getElementById('txtDataFinalDashboard').value || null;
+        const horaFinal = document.getElementById('txtHoraFinalDashboard').value || null;
+
+        // Km
+        const kmInicial = parseInt(document.getElementById('txtKmInicialDashboard').value) || null;
+        const kmFinal = parseInt(document.getElementById('txtKmFinalDashboard').value) || null;
+
+        // Motorista
+        const lstMotorista = document.getElementById('lstMotoristaAlteradoDashboard');
+        const motoristaId = lstMotorista && lstMotorista.ej2_instances ? lstMotorista.ej2_instances[0].value : null;
+
+        // Veículo
+        const lstVeiculo = document.getElementById('lstVeiculoAlteradoDashboard');
+        const veiculoId = lstVeiculo && lstVeiculo.ej2_instances ? lstVeiculo.ej2_instances[0].value : null;
+
+        // Setor Solicitante
+        const lstSetor = document.getElementById('lstSetorSolicitanteAlteradoDashboard');
+        let setorSolicitanteId = null;
+        if (lstSetor && lstSetor.ej2_instances)
+        {
+            const setorValue = lstSetor.ej2_instances[0].value;
+            if (setorValue && setorValue.length > 0)
+            {
+                setorSolicitanteId = setorValue[0];
+            }
+        }
+
+        // Solicitante (Requisitante)
+        const lstRequisitante = document.getElementById('lstRequisitanteAlteradoDashboard');
+        const requisitanteId = lstRequisitante && lstRequisitante.ej2_instances ? lstRequisitante.ej2_instances[0].value : null;
+
+        // Ramal do Requisitante
+        const ramalRequisitante = document.getElementById('txtRamalRequisitanteDashboard').value || null;
+
+        const dados = {
+            ViagemId: viagemId,
+            NoFichaVistoria: parseInt(noFichaVistoria) || null,
+            Finalidade: finalidade,
+            EventoId: eventoId,
+            DataInicial: dataInicial,
+            HoraInicio: horaInicial,
+            DataFinal: dataFinal,
+            HoraFim: horaFinal,
+            KmInicial: kmInicial,
+            KmFinal: kmFinal,
+            MotoristaId: motoristaId,
+            VeiculoId: veiculoId,
+            SetorSolicitanteId: setorSolicitanteId,
+            RequisitanteId: requisitanteId,
+            RamalRequisitante: ramalRequisitante
+        };
+
+        // Mostrar spinner
+        const btnAjustar = document.getElementById('btnAjustarViagemDashboard');
+        const spinner = btnAjustar.querySelector('.spinner-border');
+        const btnText = btnAjustar.querySelector('.btn-text');
+        if (spinner) spinner.classList.remove('d-none');
+        if (btnText) btnText.textContent = 'Gravando...';
+        btnAjustar.disabled = true;
+
+        $.ajax({
+            type: 'POST',
+            url: '/api/Viagem/AtualizarDadosViagemDashboard',
+            contentType: 'application/json',
+            data: JSON.stringify(dados),
+            success: function (res)
+            {
+                try
+                {
+                    // Esconder spinner do botão
+                    if (spinner) spinner.classList.add('d-none');
+                    if (btnText) btnText.textContent = 'Ajustar Viagem';
+                    btnAjustar.disabled = false;
+
+                    if (res.success)
+                    {
+                        // Fechar modal de ajustes
+                        if (modalAjustaViagemDashboard)
+                        {
+                            modalAjustaViagemDashboard.hide();
+                        }
+
+                        AppToast.show('Verde', 'Viagem atualizada com sucesso!', 3000);
+
+                        // Mostrar loading com mensagem personalizada
+                        mostrarLoadingGeral('Recalculando Custos e Atualizando Dashboard...');
+
+                        // Pequeno delay para o trigger do banco processar os custos
+                        setTimeout(function() {
+                            // Recarregar o dashboard
+                            carregarDadosDashboard();
+                        }, 500);
+                    } else
+                    {
+                        AppToast.show('Vermelho', res.message || 'Erro ao atualizar viagem', 4000);
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'gravarViagemDashboard.success', error);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                // Esconder spinner
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = 'Ajustar Viagem';
+                btnAjustar.disabled = false;
+
+                AppToast.show('Vermelho', 'Erro ao gravar: ' + error, 4000);
+                Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'gravarViagemDashboard.error', error);
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'gravarViagemDashboard', error);
+    }
+}
+
+// ========================================
 // EVENTOS
 // ========================================
 
@@ -2194,6 +3100,9 @@ $(document).ready(function ()
 
         // Limpa o PDFViewer quando o modal é fechado
         $('#modalPDFViewer').on('hidden.bs.modal', limparPDFViewer);
+
+        // Evento do botão Editar Viagem no modal de detalhes
+        $('#btnEditarViagemDashboard').on('click', abrirModalAjusteViagem);
     } catch (error)
     {
         Alerta.TratamentoErroComLinha('dashboard-viagens.js', 'document.ready', error);

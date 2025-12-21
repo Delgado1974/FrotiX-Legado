@@ -8,360 +8,728 @@
     ViewData["Heading"] = "<i class='fad fa-car-bus'></i> Cadastros: <span class='fw-300'>Veículos</span>";
     ViewData["Category1"] = "Cadastros";
     ViewData["PageIcon"] = "fa-regular fa-car-bus";
+
+    var isEdit = Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty;
+    var temCRLV = Model.VeiculoObj.Veiculo.CRLV != null && Model.VeiculoObj.Veiculo.CRLV.Length > 0;
 }
 
-<style>
-    /* Estilos mínimos - NÃO interferir com Syncfusion */
-    .form-control-xs {
-        min-height: 2.25rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.9rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .row + .row {
-        margin-top: 0.5rem;
-    }
-</style>
+@section HeadBlock {
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
 
-<form method="post">
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .ftx-card-actions {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ====== BOTÃO VOLTAR LARANJA ====== */
+        .ftx-card-header .btn-voltar {
+            background: #e67333;
+            color: #fff !important;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(230, 115, 51, 0.3);
+        }
+
+        .ftx-card-header .btn-voltar:hover {
+            background: #ff8c42;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(230, 115, 51, 0.4);
+            color: #fff !important;
+        }
+
+        .ftx-card-header .btn-voltar i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ====== CARD INTERNO DE SEÇÕES ====== */
+        .ftx-inner-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .ftx-inner-card-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+            padding: 0.875rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #3D5771;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .ftx-inner-card-header i {
+            font-size: 1.1rem;
+            --fa-primary-color: #3D5771;
+            --fa-secondary-color: #6B8CAE;
+            --fa-secondary-opacity: 0.7;
+        }
+
+        .ftx-inner-card-body {
+            padding: 1.25rem;
+            background: #fff;
+        }
+
+        /* ====== LABELS PADRÃO ====== */
+        .ftx-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #4a5568;
+            margin-bottom: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .ftx-label i {
+            font-size: 0.9rem;
+        }
+
+        /* ====== FORM CONTROLS ====== */
+        .form-control-xs {
+            min-height: 2.25rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        /* ====== CHECKBOXES ESTILIZADOS ====== */
+        .ftx-checkbox-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .ftx-checkbox-card:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .ftx-checkbox-card .form-check-input:checked ~ .form-check-label {
+            color: #2d5a87;
+            font-weight: 600;
+        }
+
+        /* ====== BOTÕES DE AÇÃO ====== */
+        .ftx-btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .ftx-btn-group .btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* ====== FOOTER INFO ====== */
+        .ftx-footer-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .ftx-footer-info i {
+            color: #a0aec0;
+        }
+
+        /* ====== UPLOAD CRLV ====== */
+        .ftx-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .ftx-upload-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #28a745;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #155724;
+            font-weight: 500;
+        }
+
+        .ftx-upload-info i {
+            color: #28a745;
+        }
+
+        .ftx-upload-info.novo-arquivo {
+            background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+            border-color: #007bff;
+            color: #004085;
+        }
+
+        .ftx-upload-info.novo-arquivo i {
+            color: #007bff;
+        }
+
+        .ftx-upload-nome {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ftx-upload-remover {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .ftx-upload-remover:hover {
+            opacity: 1;
+        }
+    </style>
+}
+
+<form method="post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-xl-12">
-            <div id="panel-1" class="panel">
+            <div class="panel">
                 <div class="panel-container show">
+
+                    <!-- HEADER AZUL PADRÃO FROTIX -->
+                    <div class="ftx-card-header">
+                        <h2 class="titulo-paginas">
+                            <i class="fa-duotone fa-car-bus"></i>
+                            @(isEdit ? "Atualizar" : "Criar") Veículo
+                        </h2>
+                        <div class="ftx-card-actions">
+                            <a href="/Veiculo/Index" class="btn btn-voltar">
+                                <i class="fa-duotone fa-arrow-left"></i> Voltar à Lista
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- CONTEÚDO -->
                     <div class="panel-content">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
+                        @if (isEdit)
                         {
                             <input type="hidden" asp-for="VeiculoObj.Veiculo.VeiculoId" />
                         }
                         <input type="hidden" asp-for="VeiculoObj.Veiculo.UsuarioIdAlteracao" />
 
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="titulo-paginas d-flex align-items-center pb-3">
-                                <i class="fa-duotone fa-solid fa-car-bus fa-xl me-2 icon-150" aria-hidden="true"></i>
-                                @(Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty ? "Atualizar " : "Criar ") Veículo
-                            </h2>
+                        <!-- SEÇÃO 1: IDENTIFICAÇÃO DO VEÍCULO -->
+                        <div class="ftx-inner-card">
+                            <div class="ftx-inner-card-header">
+                                <i class="fa-duotone fa-id-card"></i>
+                                Identificação do Veículo
+                            </div>
+                            <div class="ftx-inner-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-industry text-primary"></i>
+                                                Marca
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.MarcaId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.VeiculoObj.Veiculo.MarcaId,
+                                                Model.VeiculoObj.MarcaList,
+                                                "-- Selecione uma Marca --",
+                                                new { @class = "form-control form-control-xs", @id = "listamarca" }
+                                            )
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-car-side text-info"></i>
+                                                Modelo
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ModeloId"></span>
+                                            @Html.Hidden("Veiculo_ModeloId", Model.VeiculoObj.Veiculo.ModeloId)
+                                            <select id="ModeloId" name="VeiculoObj.Veiculo.ModeloId" class="form-control form-control-xs">
+                                                <option value="">-- Selecione um Modelo --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-rectangle-barcode text-success"></i>
+                                                Placa
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Placa"></span>
+                                            <input id="txtPlaca" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Placa" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-gauge-high text-warning"></i>
+                                                Quilometragem
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Quilometragem"></span>
+                                            <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Quilometragem" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-chart-line text-secondary"></i>
+                                                Consumo
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Consumo"></span>
+                                            <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Consumo" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-12 pt-3">
-                            <!-- LINHA 1: Marca, Modelo, Placa, Quilometragem -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.MarcaId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.MarcaId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.VeiculoObj.Veiculo.MarcaId,
-                                            Model.VeiculoObj.MarcaList,
-                                            "-- Selecione uma Marca --",
-                                            new { @class = "form-control form-control-xs", @id = "listamarca" }
-                                        )
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.ModeloId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ModeloId"></span>
-                                        @Html.Hidden("Veiculo_ModeloId", Model.VeiculoObj.Veiculo.ModeloId)
-                                        <select id="ModeloId" name="VeiculoObj.Veiculo.ModeloId" class="form-control form-control-xs">
-                                            <option value="">-- Selecione um Modelo --</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.Placa"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Placa"></span>
-                                        <input id="txtPlaca" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Placa" />
-                                    </div>
-                                </div>
-
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.Quilometragem"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Quilometragem"></span>
-                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Quilometragem" />
-                                    </div>
-                                </div>
-
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.Consumo"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Consumo"></span>
-                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Consumo" readonly />
-                                    </div>
-                                </div>
-
+                        <!-- SEÇÃO 2: DOCUMENTAÇÃO -->
+                        <div class="ftx-inner-card">
+                            <div class="ftx-inner-card-header">
+                                <i class="fa-duotone fa-file-certificate"></i>
+                                Documentação
                             </div>
-
-                            <!-- LINHA 2: Renavam, PlacaVinculada, PlacaBronze, AnoFabricacao, AnoModelo -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.Renavam"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Renavam"></span>
-                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Renavam" />
+                            <div class="ftx-inner-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-hashtag text-primary"></i>
+                                                Renavam
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Renavam"></span>
+                                            <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Renavam" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.PlacaVinculada"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.PlacaVinculada"></span>
-                                        <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.PlacaVinculada" />
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-link text-info"></i>
+                                                Placa Vinculada
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.PlacaVinculada"></span>
+                                            <input class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.PlacaVinculada" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.PlacaBronzeId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.PlacaBronzeId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.VeiculoObj.Veiculo.PlacaBronzeId,
-                                            Model.VeiculoObj.PlacaBronzeList,
-                                            "-- Selecione uma Placa de Bronze --",
-                                            new { @class = "form-control form-control-xs" }
-                                        )
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-medal text-warning"></i>
+                                                Placa de Bronze
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.PlacaBronzeId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.VeiculoObj.Veiculo.PlacaBronzeId,
+                                                Model.VeiculoObj.PlacaBronzeList,
+                                                "-- Selecione uma Placa de Bronze --",
+                                                new { @class = "form-control form-control-xs" }
+                                            )
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.AnoFabricacao"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AnoFabricacao"></span>
-                                        <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.AnoFabricacao">
-                                            <option value="">-- Ano --</option>
-                                            @for (int ano = 2026; ano >= 2003; ano--)
-                                            {
-                                                <option value="@ano">@ano</option>
-                                            }
-                                        </select>
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-calendar-alt text-success"></i>
+                                                Ano Fabricação
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AnoFabricacao"></span>
+                                            <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.AnoFabricacao">
+                                                <option value="">-- Ano --</option>
+                                                @for (int ano = 2026; ano >= 2003; ano--)
+                                                {
+                                                    <option value="@ano">@ano</option>
+                                                }
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.AnoModelo"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AnoModelo"></span>
-                                        <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.AnoModelo">
-                                            <option value="">-- Ano --</option>
-                                            @for (int ano = 2026; ano >= 2003; ano--)
-                                            {
-                                                <option value="@ano">@ano</option>
-                                            }
-                                        </select>
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-calendar-check text-secondary"></i>
+                                                Ano Modelo
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AnoModelo"></span>
+                                            <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.AnoModelo">
+                                                <option value="">-- Ano --</option>
+                                                @for (int ano = 2026; ano >= 2003; ano--)
+                                                {
+                                                    <option value="@ano">@ano</option>
+                                                }
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- LINHA 3: Unidade, Combustivel, Categoria, DataIngresso -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.UnidadeId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.UnidadeId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.VeiculoObj.Veiculo.UnidadeId,
-                                            Model.VeiculoObj.UnidadeList,
-                                            "-- Selecione uma Unidade --",
-                                            new { @class = "form-control form-control-xs" }
-                                        )
+                        <!-- SEÇÃO 3: UNIDADE E CLASSIFICAÇÃO -->
+                        <div class="ftx-inner-card">
+                            <div class="ftx-inner-card-header">
+                                <i class="fa-duotone fa-building"></i>
+                                Unidade e Classificação
+                            </div>
+                            <div class="ftx-inner-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-building text-primary"></i>
+                                                Unidade
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.UnidadeId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.VeiculoObj.Veiculo.UnidadeId,
+                                                Model.VeiculoObj.UnidadeList,
+                                                "-- Selecione uma Unidade --",
+                                                new { @class = "form-control form-control-xs" }
+                                            )
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.CombustivelId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.CombustivelId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.VeiculoObj.Veiculo.CombustivelId,
-                                            Model.VeiculoObj.CombustivelList,
-                                            "-- Combustível --",
-                                            new { @class = "form-control form-control-xs" }
-                                        )
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-gas-pump text-warning"></i>
+                                                Combustível
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.CombustivelId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.VeiculoObj.Veiculo.CombustivelId,
+                                                Model.VeiculoObj.CombustivelList,
+                                                "-- Combustível --",
+                                                new { @class = "form-control form-control-xs" }
+                                            )
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.Categoria"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Categoria"></span>
-                                        <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Categoria">
-                                            <option value="">-- Categoria --</option>
-                                            <option value="Ônibus">Ônibus</option>
-                                            <option value="Coletivos Pequenos">Coletivos Pequenos</option>
-                                            <option value="Carga Leve">Carga Leve</option>
-                                            <option value="Carga Pesada">Carga Pesada</option>
-                                            <option value="Passeio">Passeio</option>
-                                            <option value="Mesa">Mesa</option>
-                                            <option value="Ambulância">Ambulância</option>
-                                            <option value="Depol">Depol</option>
-                                        </select>
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-tags text-info"></i>
+                                                Categoria
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.Categoria"></span>
+                                            <select class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Categoria">
+                                                <option value="">-- Categoria --</option>
+                                                <option value="Ônibus">Ônibus</option>
+                                                <option value="Coletivos Pequenos">Coletivos Pequenos</option>
+                                                <option value="Carga Leve">Carga Leve</option>
+                                                <option value="Carga Pesada">Carga Pesada</option>
+                                                <option value="Passeio">Passeio</option>
+                                                <option value="Mesa">Mesa</option>
+                                                <option value="Ambulância">Ambulância</option>
+                                                <option value="Depol">Depol</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="VeiculoObj.Veiculo.DataIngresso"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.DataIngresso"></span>
-                                        <input id="txtDataChegada" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.DataIngresso" type="date" />
+                                    <div class="col-12 col-md-2">
+                                        <div class="form-group">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-calendar-day text-success"></i>
+                                                Data Ingresso
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.DataIngresso"></span>
+                                            <input id="txtDataChegada" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.DataIngresso" type="date" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- LINHA 4: Contrato, Ata, ItemVeiculo, Patrimônio -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label id="lblcontrato" asp-for="VeiculoObj.Veiculo.ContratoId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ContratoId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.VeiculoObj.Veiculo.ContratoId,
-                                            Model.VeiculoObj.ContratoList,
-                                            "-- Selecione um Contrato --",
-                                            new { @class = "form-control form-control-xs", @id = "lstcontratos" }
-                                        )
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label id="lblata" asp-for="VeiculoObj.Veiculo.AtaId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AtaId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.VeiculoObj.Veiculo.AtaId,
-                                            Model.VeiculoObj.AtaList,
-                                            "-- Selecione uma Ata --",
-                                            new { @class = "form-control form-control-xs", @id = "lstatas" }
-                                        )
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label id="lblItemContrato" asp-for="VeiculoObj.Veiculo.ItemVeiculoId"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoId"></span>
-                                        @Html.Hidden("Veiculo_ItemId", Model.VeiculoObj.Veiculo.ItemVeiculoId)
-                                        <select id="lstItemVeiculo" name="VeiculoObj.Veiculo.ItemVeiculoId" class="form-control form-control-xs">
-                                            <option value="">-- Selecione um Item Contratual --</option>
-                                        </select>
-
-                                        <label id="lblItemAta" asp-for="VeiculoObj.Veiculo.ItemVeiculoAtaId" style="display:none;"></label>
-                                        <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoAtaId"></span>
-                                        @Html.Hidden("Veiculo_ItemAtaId", Model.VeiculoObj.Veiculo.ItemVeiculoAtaId)
-                                        <select id="lstItemVeiculoAta" name="VeiculoObj.Veiculo.ItemVeiculoAtaId" class="form-control form-control-xs" style="display:none;">
-                                            <option value="">-- Selecione um Item da Ata --</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group" id="divPatrimonio" style="display: none;">
-                                        <label asp-for="VeiculoObj.Veiculo.Patrimonio"></label>
-                                        <input id="txtPatrimonio" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Patrimonio" />
-                                    </div>
-                                </div>
+                        <!-- SEÇÃO 4: ORIGEM DO VEÍCULO -->
+                        <div class="ftx-inner-card">
+                            <div class="ftx-inner-card-header">
+                                <i class="fa-duotone fa-file-contract"></i>
+                                Origem do Veículo
                             </div>
+                            <div class="ftx-inner-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label id="lblcontrato" class="ftx-label">
+                                                <i class="fa-duotone fa-file-signature text-primary"></i>
+                                                Contrato
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ContratoId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.VeiculoObj.Veiculo.ContratoId,
+                                                Model.VeiculoObj.ContratoList,
+                                                "-- Selecione um Contrato --",
+                                                new { @class = "form-control form-control-xs", @id = "lstcontratos" }
+                                            )
+                                        </div>
+                                    </div>
 
-                            @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
-                            {
-                                <div class="row">
-                                    <div class="col-12 text-right">
-                                        <a href="/Veiculo/UploadCRLV?id=@Model.VeiculoObj.Veiculo.VeiculoId"
-                                           class="btn btn-info">
-                                            <i class="fal fa-file-alt"></i> Upload do CRLV Digitalizado
-                                        </a>
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label id="lblata" class="ftx-label">
+                                                <i class="fa-duotone fa-file-alt text-info"></i>
+                                                Ata de Registro
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.AtaId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.VeiculoObj.Veiculo.AtaId,
+                                                Model.VeiculoObj.AtaList,
+                                                "-- Selecione uma Ata --",
+                                                new { @class = "form-control form-control-xs", @id = "lstatas" }
+                                            )
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group">
+                                            <label id="lblItemContrato" class="ftx-label">
+                                                <i class="fa-duotone fa-list-ol text-warning"></i>
+                                                Item Contratual
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoId"></span>
+                                            @Html.Hidden("Veiculo_ItemId", Model.VeiculoObj.Veiculo.ItemVeiculoId)
+                                            <select id="lstItemVeiculo" name="VeiculoObj.Veiculo.ItemVeiculoId" class="form-control form-control-xs">
+                                                <option value="">-- Selecione um Item Contratual --</option>
+                                            </select>
+
+                                            <label id="lblItemAta" class="ftx-label" style="display:none;">
+                                                <i class="fa-duotone fa-list-ol text-warning"></i>
+                                                Item da Ata
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoAtaId"></span>
+                                            @Html.Hidden("Veiculo_ItemAtaId", Model.VeiculoObj.Veiculo.ItemVeiculoAtaId)
+                                            <select id="lstItemVeiculoAta" name="VeiculoObj.Veiculo.ItemVeiculoAtaId" class="form-control form-control-xs" style="display:none;">
+                                                <option value="">-- Selecione um Item da Ata --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="form-group" id="divPatrimonio" style="display: none;">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-barcode text-success"></i>
+                                                Patrimônio
+                                            </label>
+                                            <input id="txtPatrimonio" class="form-control form-control-xs" asp-for="VeiculoObj.Veiculo.Patrimonio" />
+                                        </div>
                                     </div>
                                 </div>
-                            }
 
-                            <!-- LINHA 5: Checkboxes - TODOS NA MESMA LINHA -->
-                            <div class="row" style="margin-top: 1.5rem; border-top: 1px solid #dee2e6; padding-top: 1rem;">
-                                <div class="col-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="chkVeiculoProprio" asp-for="VeiculoObj.Veiculo.VeiculoProprio" />
-                                        <label class="form-check-label" for="chkVeiculoProprio">
-                                            Veículo Próprio
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="chkStatus" asp-for="VeiculoObj.Veiculo.Status" />
-                                        <label class="form-check-label" for="chkStatus">
-                                            Ativo/Inativo
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="chkReserva" asp-for="VeiculoObj.Veiculo.Reserva" />
-                                        <label class="form-check-label" for="chkReserva">
-                                            Veículo Reserva
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="chkEconomildo" asp-for="VeiculoObj.Veiculo.Economildo" />
-                                        <label class="form-check-label" for="chkEconomildo">
-                                            Veículo de Economildo
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
-                            {
-                                <div class="row" style="margin-top: 1rem;">
+                                <!-- UPLOAD CRLV -->
+                                <div class="row mt-3">
                                     <div class="col-12">
-                                        <small class="text-muted">
-                                            Alterado/Incluído por @Model.VeiculoObj.NomeUsuarioAlteracao
-                                            em @Model.VeiculoObj.Veiculo.DataAlteracao?.ToString("dd/MM/yy")
-                                            às @Model.VeiculoObj.Veiculo.DataAlteracao?.ToString("HH:mm")
-                                        </small>
-                                    </div>
-                                </div>
-                            }
+                                        <div class="ftx-upload-wrapper">
+                                            <!-- Input file oculto -->
+                                            <input type="file" 
+                                                   id="inputCRLV" 
+                                                   name="ArquivoCRLV" 
+                                                   accept=".pdf,.jpg,.jpeg,.png"
+                                                   style="display: none;" />
+                                            
+                                            <!-- Botão de upload -->
+                                            <button type="button" 
+                                                    id="btnUploadCRLV" 
+                                                    class="btn btn-fundo-laranja">
+                                                <i class="fa-duotone fa-file-upload me-1"></i> 
+                                                <span id="txtBtnCRLV">@(temCRLV ? "Substituir CRLV" : "Upload do CRLV")</span>
+                                            </button>
 
-                            <!-- BOTÕES -->
-                            <div class="row" style="margin-top: 2rem;">
-                                <div class="col-6">
-                                    @if (Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty)
-                                    {
-                                        <button type="submit"
-                                                asp-page-handler="Edit"
-                                                asp-route-id="@Model.VeiculoObj.Veiculo.VeiculoId"
-                                                class="btn btn-azul btn-block">
-                                            <i class="fa-duotone fa-file-plus"></i> Atualizar
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="submit"
-                                                asp-page-handler="Submit"
-                                                class="btn btn-azul btn-block">
-                                            <i class="fa-duotone fa-file-plus"></i> Criar
-                                        </button>
-                                    }
-                                </div>
-                                <div class="col-6">
-                                    <a asp-page="./Index" class="btn btn-vinho btn-block">
-                                        <i class="fa-solid fa-rotate-left"></i> Voltar à Lista
-                                    </a>
+                                            <!-- Indicador de arquivo existente -->
+                                            @if (temCRLV)
+                                            {
+                                                <div id="infoCRLVExistente" class="ftx-upload-info">
+                                                    <i class="fa-duotone fa-file-check"></i>
+                                                    <span>CRLV já cadastrado</span>
+                                                </div>
+                                            }
+
+                                            <!-- Indicador de novo arquivo selecionado -->
+                                            <div id="infoCRLVNovo" class="ftx-upload-info novo-arquivo" style="display: none;">
+                                                <i class="fa-duotone fa-file-arrow-up"></i>
+                                                <span id="nomeCRLVNovo" class="ftx-upload-nome"></span>
+                                                <i class="fa-duotone fa-circle-xmark ftx-upload-remover" 
+                                                   id="btnRemoverCRLV" 
+                                                   title="Remover arquivo"></i>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- SEÇÃO 5: CONFIGURAÇÕES -->
+                        <div class="ftx-inner-card">
+                            <div class="ftx-inner-card-header">
+                                <i class="fa-duotone fa-sliders"></i>
+                                Configurações
+                            </div>
+                            <div class="ftx-inner-card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-3">
+                                        <div class="ftx-checkbox-card">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="chkVeiculoProprio" asp-for="VeiculoObj.Veiculo.VeiculoProprio" />
+                                                <label class="form-check-label" for="chkVeiculoProprio">
+                                                    <i class="fa-duotone fa-house-user me-1 text-primary"></i>
+                                                    Veículo Próprio
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="ftx-checkbox-card">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="chkStatus" asp-for="VeiculoObj.Veiculo.Status" />
+                                                <label class="form-check-label" for="chkStatus">
+                                                    <i class="fa-duotone fa-toggle-on me-1 text-success"></i>
+                                                    Ativo/Inativo
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="ftx-checkbox-card">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="chkReserva" asp-for="VeiculoObj.Veiculo.Reserva" />
+                                                <label class="form-check-label" for="chkReserva">
+                                                    <i class="fa-duotone fa-car-garage me-1 text-warning"></i>
+                                                    Veículo Reserva
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="ftx-checkbox-card">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="chkEconomildo" asp-for="VeiculoObj.Veiculo.Economildo" />
+                                                <label class="form-check-label" for="chkEconomildo">
+                                                    <i class="fa-duotone fa-leaf me-1 text-info"></i>
+                                                    Veículo de Economildo
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER INFO (se edição) -->
+                        @if (isEdit)
+                        {
+                            <div class="ftx-footer-info">
+                                <i class="fa-duotone fa-clock-rotate-left me-1"></i>
+                                Alterado/Incluído por <strong>@Model.VeiculoObj.NomeUsuarioAlteracao</strong>
+                                em <strong>@Model.VeiculoObj.Veiculo.DataAlteracao?.ToString("dd/MM/yy")</strong>
+                                às <strong>@Model.VeiculoObj.Veiculo.DataAlteracao?.ToString("HH:mm")</strong>
+                            </div>
+                        }
+
+                        <!-- BOTÕES DE AÇÃO -->
+                        <div class="ftx-btn-group">
+                            @if (isEdit)
+                            {
+                                <button type="submit"
+                                        asp-page-handler="Edit"
+                                        asp-route-id="@Model.VeiculoObj.Veiculo.VeiculoId"
+                                        class="btn btn-azul">
+                                    <i class="fa-duotone fa-floppy-disk"></i> Atualizar Veículo
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit"
+                                        asp-page-handler="Submit"
+                                        class="btn btn-azul">
+                                    <i class="fa-duotone fa-plus"></i> Criar Veículo
+                                </button>
+                            }
+                            <a asp-page="./Index" class="btn btn-vinho">
+                                <i class="fa-duotone fa-xmark"></i> Cancelar
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>

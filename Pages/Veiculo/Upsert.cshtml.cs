@@ -3,6 +3,7 @@ using FrotiX.Models;
 using FrotiX.Repository.IRepository;
 using FrotiX.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -51,6 +53,12 @@ namespace FrotiX.Pages.Veiculo
         {
             get; set;
         }
+
+        /// <summary>
+        /// Arquivo CRLV para upload direto na página
+        /// </summary>
+        [BindProperty]
+        public IFormFile ArquivoCRLV { get; set; }
 
         private void SetViewModel()
         {
@@ -255,6 +263,16 @@ namespace FrotiX.Pages.Veiculo
                     return Page();
                 }
 
+                // Processa o arquivo CRLV se foi enviado
+                if (ArquivoCRLV != null && ArquivoCRLV.Length > 0)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        ArquivoCRLV.CopyTo(memoryStream);
+                        VeiculoObj.Veiculo.CRLV = memoryStream.ToArray();
+                    }
+                }
+
                 // Adiciona o veículo
                 if (VeiculoObj.Veiculo.VeiculoId == Guid.Empty)
                 {
@@ -331,8 +349,18 @@ namespace FrotiX.Pages.Veiculo
                 VeiculoObj.Veiculo.DataAlteracao = DateTime.Now;
                 VeiculoObj.Veiculo.Placa = VeiculoObj.Veiculo.Placa.ToUpper();
 
-                if (CRLVveiculo != null)
+                // Processa o arquivo CRLV se foi enviado
+                if (ArquivoCRLV != null && ArquivoCRLV.Length > 0)
                 {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        ArquivoCRLV.CopyTo(memoryStream);
+                        VeiculoObj.Veiculo.CRLV = memoryStream.ToArray();
+                    }
+                }
+                else if (CRLVveiculo != null)
+                {
+                    // Mantém o CRLV existente se não foi enviado novo arquivo
                     VeiculoObj.Veiculo.CRLV = CRLVveiculo;
                 }
 

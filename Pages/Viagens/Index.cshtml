@@ -45,6 +45,54 @@
 	   Estilos específicos da página Viagens - MODERNIZADO
 	   ============================================================ */
 
+	/* ======== ANIMAÇÃO SUAVE DO HEADER ======== */
+	@@keyframes headerGradientShift {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+
+	/* ======== CORREÇÃO DO HEADER DO CARD ======== */
+	.ftx-card-header {
+		background: linear-gradient(135deg, #325d88 0%, #2a4d73 25%, #3d6f9e 50%, #2a4d73 75%, #325d88 100%);
+		background-size: 400% 400%;
+		animation: headerGradientShift 8s ease infinite;
+	}
+
+	/* ======== CORREÇÃO DA FONTE DO TÍTULO ======== */
+	.ftx-card-header .titulo-paginas {
+		font-family: 'Outfit', sans-serif !important;
+		font-weight: 900 !important;
+		font-size: 1.925rem !important;
+		color: #ffffff !important;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+	}
+
+	.ftx-card-header .titulo-paginas i {
+		--fa-primary-color: #ffffff;
+		--fa-secondary-color: rgba(255, 255, 255, 0.7);
+		font-size: 2.2rem !important;
+		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+	}
+
+	/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER ======== */
+	.ftx-card-header .btn-fundo-laranja {
+		outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+		outline-offset: 1px;
+		transition: all 0.2s ease;
+	}
+
+	.ftx-card-header .btn-fundo-laranja:hover {
+		outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+		outline-offset: 2px;
+	}
+
 	/* Micro botão para grid de Ação */
 	.btn-xxs {
 		--bs-btn-padding-y: .15rem;

@@ -152,9 +152,11 @@ function carregarDadosViagem(viagemId) {
                             if (viagem.finalidade === "Evento" && viagem.eventoId) {
                                 lstEvento.ej2_instances[0].enabled = true;
                                 lstEvento.ej2_instances[0].value = [viagem.eventoId.toString()];
+                                $(".esconde-diveventos").show();
                             } else {
                                 lstEvento.ej2_instances[0].enabled = false;
                                 lstEvento.ej2_instances[0].value = null;
+                                $(".esconde-diveventos").hide();
                             }
                         }
 
@@ -168,32 +170,40 @@ function carregarDadosViagem(viagemId) {
                         document.getElementById("txtKmInicial").value = viagem.kmInicial || "";
                         document.getElementById("txtKmFinal").value = viagem.kmFinal || "";
 
-                        // Motorista
-                        const lstMotorista = document.getElementById("lstMotoristaAlterado");
-                        if (lstMotorista && lstMotorista.ej2_instances) {
-                            lstMotorista.ej2_instances[0].value = viagem.motoristaId || null;
-                        }
-
-                        // Veículo
-                        const lstVeiculo = document.getElementById("lstVeiculoAlterado");
-                        if (lstVeiculo && lstVeiculo.ej2_instances) {
-                            lstVeiculo.ej2_instances[0].value = viagem.veiculoId || null;
-                        }
-
-                        // Setor Solicitante
-                        const lstSetor = document.getElementById("lstSetorSolicitanteAlterado");
-                        if (lstSetor && lstSetor.ej2_instances && viagem.setorSolicitanteId) {
-                            lstSetor.ej2_instances[0].value = [viagem.setorSolicitanteId.toString()];
-                        }
-
-                        // Solicitante (Requisitante)
-                        const lstRequisitante = document.getElementById("lstRequisitanteAlterado");
-                        if (lstRequisitante && lstRequisitante.ej2_instances) {
-                            lstRequisitante.ej2_instances[0].value = viagem.requisitanteId || null;
-                        }
-
                         // Ramal do Requisitante
                         document.getElementById("txtRamalRequisitante").value = viagem.ramalRequisitante || "";
+
+                        // Aguarda um pequeno delay para os combos Syncfusion carregarem os dados
+                        setTimeout(function() {
+                            try {
+                                // Motorista
+                                const lstMotorista = document.getElementById("lstMotoristaAlterado");
+                                if (lstMotorista && lstMotorista.ej2_instances && viagem.motoristaId) {
+                                    lstMotorista.ej2_instances[0].value = viagem.motoristaId;
+                                }
+
+                                // Veículo
+                                const lstVeiculo = document.getElementById("lstVeiculoAlterado");
+                                if (lstVeiculo && lstVeiculo.ej2_instances && viagem.veiculoId) {
+                                    lstVeiculo.ej2_instances[0].value = viagem.veiculoId;
+                                }
+
+                                // Solicitante (Requisitante)
+                                const lstRequisitante = document.getElementById("lstRequisitanteAlterado");
+                                if (lstRequisitante && lstRequisitante.ej2_instances && viagem.requisitanteId) {
+                                    lstRequisitante.ej2_instances[0].value = viagem.requisitanteId;
+                                }
+
+                                // Setor Solicitante (DropDownTree - precisa de array)
+                                const lstSetor = document.getElementById("lstSetorSolicitanteAlterado");
+                                if (lstSetor && lstSetor.ej2_instances && viagem.setorSolicitanteId) {
+                                    lstSetor.ej2_instances[0].value = [viagem.setorSolicitanteId];
+                                }
+                            } catch (error) {
+                                console.error("Erro ao setar valores dos combos:", error);
+                            }
+                        }, 300);
+
                     } else {
                         AppToast.show("Amarelo", res.message || "Viagem não encontrada", 3000);
                     }
@@ -338,7 +348,7 @@ function gravarViagem() {
 
         $.ajax({
             type: "POST",
-            url: "/api/Viagem/AtualizarDadosViagem",
+            url: "/api/Viagem/AtualizarDadosViagemDashboard",
             contentType: "application/json",
             data: JSON.stringify(dados),
             success: function (res) {

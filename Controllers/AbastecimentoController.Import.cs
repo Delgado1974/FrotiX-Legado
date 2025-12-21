@@ -53,6 +53,14 @@ namespace FrotiX.Controllers
             public List<string> Erros { get; set; } = new List<string>();
 
             public bool Valido => Erros.Count == 0;
+            
+            // Campos para sugestão de correção de KM
+            public bool TemSugestao { get; set; }
+            public string CampoCorrecao { get; set; }
+            public int ValorAtualErrado { get; set; }
+            public int ValorSugerido { get; set; }
+            public string JustificativaSugestao { get; set; }
+            public double MediaConsumoVeiculo { get; set; }
         }
 
         public class ResultadoImportacao
@@ -63,10 +71,12 @@ namespace FrotiX.Controllers
             public int LinhasImportadas { get; set; }
             public int LinhasComErro { get; set; }
             public int LinhasIgnoradas { get; set; }
+            public int LinhasCorrigiveis { get; set; }
             public List<ErroImportacao> Erros { get; set; } = new List<ErroImportacao>();
             public List<LinhaImportadaDTO> LinhasImportadasLista { get; set; } = new List<LinhaImportadaDTO>();
             public string ArquivoErros { get; set; }
             public string NomeArquivoErros { get; set; }
+            public int PendenciasGeradas { get; set; }
         }
 
         public class ErroImportacao
@@ -76,6 +86,28 @@ namespace FrotiX.Controllers
             public string Tipo { get; set; }
             public string Descricao { get; set; }
             public string Icone { get; set; }
+            
+            // Campos para sugestão de correção (erros de KM)
+            public bool Corrigivel { get; set; }
+            public string CampoCorrecao { get; set; }
+            public int ValorAtual { get; set; }
+            public int ValorSugerido { get; set; }
+            public string JustificativaSugestao { get; set; }
+            
+            // Dados da linha para correção via API
+            public int Autorizacao { get; set; }
+            public string Placa { get; set; }
+            public int KmAnterior { get; set; }
+            public int Km { get; set; }
+            public int KmRodado { get; set; }
+            public double Litros { get; set; }
+            public string VeiculoId { get; set; }
+            public string MotoristaId { get; set; }
+            public string CombustivelId { get; set; }
+            public string DataHora { get; set; }
+            public double ValorUnitario { get; set; }
+            public string NomeMotorista { get; set; }
+            public string Produto { get; set; }
         }
 
         public class LinhaImportadaDTO
@@ -151,8 +183,38 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                // Não interromper a importação por erro no SignalR
                 Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "EnviarProgresso", error);
+            }
+        }
+
+        /// <summary>
+        /// Envia resumo da planilha via SignalR (após análise inicial)
+        /// </summary>
+        private async Task EnviarResumoPlnailha(string connectionId, int totalRegistros, string dataInicial, string dataFinal, 
+            int registrosGasolina, int registrosDiesel, int registrosOutros)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(connectionId) || _hubContext == null)
+                    return;
+
+                await _hubContext.Clients.Client(connectionId).SendAsync("ProgressoImportacao", new ProgressoImportacao
+                {
+                    Porcentagem = 20,
+                    Etapa = "Planilha analisada",
+                    Detalhe = $"{totalRegistros} registros de {dataInicial} a {dataFinal}",
+                    ResumoDisponivel = true,
+                    TotalRegistros = totalRegistros,
+                    DataInicial = dataInicial,
+                    DataFinal = dataFinal,
+                    RegistrosGasolina = registrosGasolina,
+                    RegistrosDiesel = registrosDiesel,
+                    RegistrosOutros = registrosOutros
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "EnviarResumoPlnailha", error);
             }
         }
 
@@ -161,10 +223,16 @@ namespace FrotiX.Controllers
         public async Task<ActionResult> ImportarNovo()
         {
             string connectionId = null;
+            string nomeArquivo = "";
 
             try
             {
-                // Obter connectionId do SignalR (enviado via form)
+                // ⭐ BLINDAGEM: Remover validação das propriedades de navegação
+                // Evita erro "The Veiculo/Motorista/Combustivel field is required" em produção
+                ModelState.Remove("Veiculo");
+                ModelState.Remove("Motorista");
+                ModelState.Remove("Combustivel");
+
                 connectionId = Request.Form["connectionId"].FirstOrDefault();
 
                 // === ETAPA 1: Verificar arquivo (0-5%) ===
@@ -180,6 +248,8 @@ namespace FrotiX.Controllers
                 }
 
                 IFormFile file = Request.Form.Files[0];
+                nomeArquivo = file.FileName;
+
                 if (file.Length == 0)
                 {
                     return Ok(new ResultadoImportacao
@@ -217,20 +287,45 @@ namespace FrotiX.Controllers
                 }
 
                 int totalLinhas = linhas.Count;
-                await EnviarProgresso(connectionId, 20, "Lendo planilha", $"{totalLinhas} linha(s) encontrada(s)", 0, totalLinhas);
+
+                // === ETAPA 2.5: Analisar planilha e enviar resumo (17-20%) ===
+                await EnviarProgresso(connectionId, 17, "Analisando planilha", "Identificando período e produtos...");
+
+                var datasValidas = linhas
+                    .Select(l => ParseDataHora(l.Data, l.Hora))
+                    .Where(d => d.HasValue)
+                    .Select(d => d.Value)
+                    .OrderBy(d => d)
+                    .ToList();
+
+                string dataInicial = datasValidas.Any() ? datasValidas.First().ToString("dd/MM/yyyy") : "N/A";
+                string dataFinal = datasValidas.Any() ? datasValidas.Last().ToString("dd/MM/yyyy") : "N/A";
+
+                int registrosGasolina = linhas.Count(l => 
+                    LimparProduto(l.Produto)?.Equals("Gasolina Comum", StringComparison.OrdinalIgnoreCase) == true);
+                int registrosDiesel = linhas.Count(l => 
+                    LimparProduto(l.Produto)?.Equals("Diesel S-10", StringComparison.OrdinalIgnoreCase) == true);
+                int registrosOutros = totalLinhas - registrosGasolina - registrosDiesel;
+
+                await EnviarResumoPlnailha(connectionId, totalLinhas, dataInicial, dataFinal, 
+                    registrosGasolina, registrosDiesel, registrosOutros);
 
                 // === ETAPA 3: Carregar dados de referência (20-25%) ===
-                await EnviarProgresso(connectionId, 22, "Carregando dados", "Buscando veículos cadastrados...");
+                await EnviarProgresso(connectionId, 21, "Carregando dados", "Buscando veículos cadastrados...");
                 var veiculos = _unitOfWork.Veiculo.GetAll().ToList();
 
-                await EnviarProgresso(connectionId, 23, "Carregando dados", "Buscando motoristas cadastrados...");
+                await EnviarProgresso(connectionId, 22, "Carregando dados", "Buscando motoristas cadastrados...");
                 var motoristas = _unitOfWork.Motorista.GetAll().ToList();
 
-                await EnviarProgresso(connectionId, 24, "Carregando dados", "Verificando autorizações existentes...");
+                await EnviarProgresso(connectionId, 23, "Carregando dados", "Verificando autorizações existentes...");
                 var autorizacoesExistentes = _unitOfWork.Abastecimento.GetAll()
                     .Where(a => a.AutorizacaoQCard.HasValue)
                     .Select(a => a.AutorizacaoQCard.Value)
                     .ToHashSet();
+
+                await EnviarProgresso(connectionId, 24, "Carregando dados", "Calculando médias de consumo...");
+                var mediasConsumo = _unitOfWork.ViewMediaConsumo.GetAll()
+                    .ToDictionary(m => m.VeiculoId, m => m.ConsumoGeral ?? 0);
 
                 await EnviarProgresso(connectionId, 25, "Carregando dados", "Dados de referência carregados");
 
@@ -242,13 +337,12 @@ namespace FrotiX.Controllers
 
                 // === ETAPA 4: Validar linhas (25-70%) ===
                 int linhaProcessada = 0;
-                int intervaloAtualizacao = Math.Max(1, totalLinhas / 50); // Atualiza a cada ~2%
+                int intervaloAtualizacao = Math.Max(1, totalLinhas / 50);
 
                 foreach (var linha in linhas)
                 {
                     linhaProcessada++;
 
-                    // Enviar progresso a cada N linhas para não sobrecarregar
                     if (linhaProcessada % intervaloAtualizacao == 0 || linhaProcessada == totalLinhas)
                     {
                         int porcentagemValidacao = 25 + (int)((linhaProcessada / (double)totalLinhas) * 45);
@@ -256,7 +350,6 @@ namespace FrotiX.Controllers
                             $"Processando linha {linhaProcessada} de {totalLinhas}...", linhaProcessada, totalLinhas);
                     }
 
-                    // Validar e parsear Data/Hora da planilha
                     var dataHoraParsed = ParseDataHora(linha.Data, linha.Hora);
                     if (dataHoraParsed.HasValue)
                     {
@@ -269,7 +362,8 @@ namespace FrotiX.Controllers
 
                     var produtoLimpo = LimparProduto(linha.Produto);
 
-                    if (mapaCombustivel.TryGetValue(produtoLimpo, out Guid combustivelId))
+                    Guid combustivelId;
+                    if (mapaCombustivel.TryGetValue(produtoLimpo, out combustivelId))
                     {
                         linha.CombustivelId = combustivelId;
                         linha.Produto = produtoLimpo;
@@ -310,14 +404,86 @@ namespace FrotiX.Controllers
                             linha.Erros.Add($"Quantidade de {linha.Quantidade:N2} litros excede o limite de 500 litros");
                         }
 
-                        if (linha.KmRodado > 1000)
+                        // Validação inteligente de quilometragem com sugestões
+                        if (linha.VeiculoId.HasValue)
                         {
-                            linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite de 1.000 km");
-                        }
+                            double mediaConsumo = 0;
+                            decimal mediaTemp;
+                            if (mediasConsumo.TryGetValue(linha.VeiculoId.Value, out mediaTemp))
+                            {
+                                mediaConsumo = (double)mediaTemp;
+                            }
+                            linha.MediaConsumoVeiculo = mediaConsumo;
 
-                        if (linha.KmRodado < 0)
+                            int kmRodadoEsperado = mediaConsumo > 0 
+                                ? (int)(linha.Quantidade * mediaConsumo) 
+                                : 150;
+
+                            if (linha.KmRodado < 0)
+                            {
+                                linha.Erros.Add($"Quilometragem negativa ({linha.KmRodado} km): Km Anterior maior que Km Atual");
+                                
+                                int kmAnteriorSugerido = linha.Km - kmRodadoEsperado;
+                                if (kmAnteriorSugerido > 0)
+                                {
+                                    linha.TemSugestao = true;
+                                    linha.CampoCorrecao = "KmAnterior";
+                                    linha.ValorAtualErrado = linha.KmAnterior;
+                                    linha.ValorSugerido = kmAnteriorSugerido;
+                                    linha.JustificativaSugestao = mediaConsumo > 0
+                                        ? $"Baseado na média de {mediaConsumo:N1} km/l do veículo, o KM Anterior deveria ser aproximadamente {kmAnteriorSugerido:N0}"
+                                        : $"Baseado em consumo padrão, o KM Anterior deveria ser aproximadamente {kmAnteriorSugerido:N0}";
+                                }
+                            }
+                            else if (linha.KmRodado > 1000)
+                            {
+                                double consumoAtual = linha.Quantidade > 0 ? linha.KmRodado / linha.Quantidade : 0;
+                                double mediaReferencia = mediaConsumo > 0 ? mediaConsumo : 10;
+                                double limiteInferior = mediaReferencia * 0.6;
+                                double limiteSuperior = mediaReferencia * 1.4;
+                                bool consumoDentroDoEsperado = consumoAtual >= limiteInferior && consumoAtual <= limiteSuperior;
+                                
+                                if (consumoDentroDoEsperado)
+                                {
+                                    // Viagem longa legítima - NÃO adiciona erro
+                                }
+                                else if (consumoAtual > limiteSuperior)
+                                {
+                                    linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite e consumo de {consumoAtual:N1} km/l está muito acima da média ({mediaReferencia:N1} km/l)");
+                                    
+                                    int kmAnteriorSugerido = linha.Km - kmRodadoEsperado;
+                                    if (kmAnteriorSugerido > 0)
+                                    {
+                                        linha.TemSugestao = true;
+                                        linha.CampoCorrecao = "KmAnterior";
+                                        linha.ValorAtualErrado = linha.KmAnterior;
+                                        linha.ValorSugerido = kmAnteriorSugerido;
+                                        linha.JustificativaSugestao = $"Consumo de {consumoAtual:N1} km/l está muito acima da média ({mediaReferencia:N1} km/l). Provável erro no KM Anterior.";
+                                    }
+                                }
+                                else
+                                {
+                                    linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite e consumo de {consumoAtual:N1} km/l está muito abaixo da média ({mediaReferencia:N1} km/l)");
+                                    
+                                    int kmSugerido = linha.KmAnterior + kmRodadoEsperado;
+                                    linha.TemSugestao = true;
+                                    linha.CampoCorrecao = "Km";
+                                    linha.ValorAtualErrado = linha.Km;
+                                    linha.ValorSugerido = kmSugerido;
+                                    linha.JustificativaSugestao = $"Consumo de {consumoAtual:N1} km/l está muito abaixo da média ({mediaReferencia:N1} km/l). Provável erro no KM Atual.";
+                                }
+                            }
+                        }
+                        else
                         {
-                            linha.Erros.Add($"Quilometragem negativa ({linha.KmRodado} km): Km Anterior maior que Km Atual");
+                            if (linha.KmRodado > 1000)
+                            {
+                                linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite de 1.000 km");
+                            }
+                            if (linha.KmRodado < 0)
+                            {
+                                linha.Erros.Add($"Quilometragem negativa ({linha.KmRodado} km): Km Anterior maior que Km Atual");
+                            }
                         }
                     }
                 }
@@ -343,23 +509,38 @@ namespace FrotiX.Controllers
                 {
                     await EnviarProgresso(connectionId, 72, "Gravando dados", $"Salvando {linhasValidas.Count} abastecimento(s)...");
 
+                    // Buscar autorizações já existentes na tabela de abastecimentos para evitar duplicatas
+                    var autorizacoesAbastecimento = _unitOfWork.Abastecimento
+                        .GetAll()
+                        .Select(a => a.AutorizacaoQCard)
+                        .Where(a => a.HasValue)
+                        .Select(a => a.Value)
+                        .ToHashSet();
+
+                    // Filtrar linhas válidas removendo duplicatas
+                    var linhasParaGravar = linhasValidas
+                        .Where(l => l.Autorizacao <= 0 || !autorizacoesAbastecimento.Contains(l.Autorizacao))
+                        .ToList();
+
+                    int linhasIgnoradasDuplicadas = linhasValidas.Count - linhasParaGravar.Count;
+
                     int linhaGravada = 0;
-                    int intervaloGravacao = Math.Max(1, linhasValidas.Count / 20);
+                    int intervaloGravacao = Math.Max(1, linhasParaGravar.Count / 20);
 
                     using (var scope = new TransactionScope(
                         TransactionScopeOption.RequiresNew,
                         new TimeSpan(0, 30, 0),
                         TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        foreach (var linha in linhasValidas)
+                        foreach (var linha in linhasParaGravar)
                         {
                             linhaGravada++;
 
-                            if (linhaGravada % intervaloGravacao == 0 || linhaGravada == linhasValidas.Count)
+                            if (linhaGravada % intervaloGravacao == 0 || linhaGravada == linhasParaGravar.Count)
                             {
-                                int porcentagemGravacao = 72 + (int)((linhaGravada / (double)linhasValidas.Count) * 15);
+                                int porcentagemGravacao = 72 + (int)((linhaGravada / (double)linhasParaGravar.Count) * 15);
                                 await EnviarProgresso(connectionId, porcentagemGravacao, "Gravando dados",
-                                    $"Salvando registro {linhaGravada} de {linhasValidas.Count}...", linhaGravada, linhasValidas.Count);
+                                    $"Salvando registro {linhaGravada} de {linhasParaGravar.Count}...", linhaGravada, linhasParaGravar.Count);
                             }
 
                             var abastecimento = new Abastecimento
@@ -424,21 +605,79 @@ namespace FrotiX.Controllers
                     }
                 }
 
-                // === ETAPA 6: Gerar arquivo de erros (90-98%) ===
-                string arquivoErrosBase64 = null;
-                string nomeArquivoErros = null;
+                // === ETAPA 6: GRAVAR PENDÊNCIAS NA TABELA (90-98%) ===
                 var erros = new List<ErroImportacao>();
+                int linhasCorrigiveis = 0;
+                int pendenciasGeradas = 0;
 
                 if (linhasComErro.Any())
                 {
-                    await EnviarProgresso(connectionId, 92, "Gerando relatório", "Preparando arquivo de erros...");
+                    await EnviarProgresso(connectionId, 92, "Salvando pendências", $"Gravando {linhasComErro.Count} pendência(s)...");
+
+                    // Buscar autorizações já existentes na tabela de pendências para evitar duplicatas
+                    var autorizacoesPendentes = _unitOfWork.AbastecimentoPendente
+                        .GetAll(p => p.Status == 0) // Apenas pendentes
+                        .Select(p => p.AutorizacaoQCard)
+                        .Where(a => a.HasValue)
+                        .Select(a => a.Value)
+                        .ToHashSet();
 
                     foreach (var linha in linhasComErro)
                     {
+                        // Ignorar se já existe pendência com mesma autorização
+                        if (linha.Autorizacao > 0 && autorizacoesPendentes.Contains(linha.Autorizacao))
+                        {
+                            continue; // Já existe, ignorar silenciosamente
+                        }
+
+                        bool linhaPossuiSugestao = linha.TemSugestao;
+                        if (linhaPossuiSugestao) linhasCorrigiveis++;
+
+                        // Determinar tipo principal do erro
+                        string tipoPrincipal = DeterminarTipoPendencia(linha.Erros);
+                        string descricaoCompleta = string.Join("; ", linha.Erros);
+
+                        // Criar registro na tabela de pendências
+                        var pendencia = new AbastecimentoPendente
+                        {
+                            AbastecimentoPendenteId = Guid.NewGuid(),
+                            AutorizacaoQCard = linha.Autorizacao,
+                            Placa = linha.Placa,
+                            CodMotorista = linha.CodMotorista,
+                            NomeMotorista = linha.NomeMotorista,
+                            Produto = linha.Produto,
+                            DataHora = linha.DataHoraParsed,
+                            KmAnterior = linha.KmAnterior,
+                            Km = linha.Km,
+                            KmRodado = linha.KmRodado,
+                            Litros = linha.Quantidade,
+                            ValorUnitario = linha.ValorUnitario,
+                            VeiculoId = linha.VeiculoId,
+                            MotoristaId = linha.MotoristaId,
+                            CombustivelId = linha.CombustivelId,
+                            DescricaoPendencia = descricaoCompleta,
+                            TipoPendencia = tipoPrincipal,
+                            TemSugestao = linha.TemSugestao,
+                            CampoCorrecao = linha.CampoCorrecao,
+                            ValorAtualErrado = linha.ValorAtualErrado,
+                            ValorSugerido = linha.ValorSugerido,
+                            JustificativaSugestao = linha.JustificativaSugestao,
+                            MediaConsumoVeiculo = linha.MediaConsumoVeiculo,
+                            DataImportacao = DateTime.Now,
+                            NumeroLinhaOriginal = linha.NumeroLinhaOriginal,
+                            ArquivoOrigem = nomeArquivo,
+                            Status = 0 // Pendente
+                        };
+
+                        _unitOfWork.AbastecimentoPendente.Add(pendencia);
+                        pendenciasGeradas++;
+
+                        // Manter lista de erros para o retorno
                         foreach (var erro in linha.Erros)
                         {
                             string tipo = "erro";
                             string icone = "fa-circle-xmark";
+                            bool erroCorrigivel = false;
 
                             if (erro.Contains("Autorização"))
                             {
@@ -464,6 +703,7 @@ namespace FrotiX.Controllers
                             {
                                 tipo = "km";
                                 icone = "fa-gauge-high";
+                                erroCorrigivel = linhaPossuiSugestao;
                             }
                             else if (erro.Contains("Data") || erro.Contains("Hora"))
                             {
@@ -477,16 +717,31 @@ namespace FrotiX.Controllers
                                 LinhaArquivoErros = linha.NumeroLinhaErro,
                                 Tipo = tipo,
                                 Descricao = erro,
-                                Icone = icone
+                                Icone = icone,
+                                Corrigivel = erroCorrigivel,
+                                CampoCorrecao = erroCorrigivel ? linha.CampoCorrecao : null,
+                                ValorAtual = erroCorrigivel ? linha.ValorAtualErrado : 0,
+                                ValorSugerido = erroCorrigivel ? linha.ValorSugerido : 0,
+                                JustificativaSugestao = erroCorrigivel ? linha.JustificativaSugestao : null,
+                                Autorizacao = linha.Autorizacao,
+                                Placa = linha.Placa,
+                                KmAnterior = linha.KmAnterior,
+                                Km = linha.Km,
+                                KmRodado = linha.KmRodado,
+                                Litros = linha.Quantidade,
+                                VeiculoId = linha.VeiculoId?.ToString(),
+                                MotoristaId = linha.MotoristaId?.ToString(),
+                                CombustivelId = linha.CombustivelId?.ToString(),
+                                DataHora = linha.DataHoraParsed?.ToString("dd/MM/yyyy HH:mm"),
+                                ValorUnitario = linha.ValorUnitario,
+                                NomeMotorista = linha.NomeMotorista,
+                                Produto = linha.Produto
                             });
                         }
                     }
 
-                    await EnviarProgresso(connectionId, 95, "Gerando relatório", "Criando planilha de erros...");
-
-                    var arquivoErros = GerarExcelErros(linhasComErro, resultadoLeitura.Mapeamento);
-                    arquivoErrosBase64 = Convert.ToBase64String(arquivoErros);
-                    nomeArquivoErros = $"Erros_Importacao_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    await EnviarProgresso(connectionId, 95, "Salvando pendências", "Gravando no banco de dados...");
+                    _unitOfWork.Save();
                 }
 
                 // === ETAPA 7: Finalizar (98-100%) ===
@@ -494,41 +749,42 @@ namespace FrotiX.Controllers
 
                 string mensagem;
                 bool sucesso;
+                int totalIgnoradas = linhasIgnoradas.Count + (linhasValidas.Count - linhasImportadas.Count);
 
-                if (linhasValidas.Any() && linhasComErro.Any())
+                if (linhasImportadas.Any() && linhasComErro.Any())
                 {
-                    mensagem = $"Importação parcial concluída! {linhasValidas.Count} abastecimento(s) importado(s), " +
-                               $"{linhasComErro.Count} linha(s) com erro. Baixe o arquivo para corrigir.";
+                    mensagem = $"Importação parcial concluída! {linhasImportadas.Count} abastecimento(s) importado(s), " +
+                               $"{pendenciasGeradas} pendência(s) gerada(s). Acesse a tela de Pendências para resolver.";
                     sucesso = true;
                 }
-                else if (linhasValidas.Any())
+                else if (linhasImportadas.Any())
                 {
-                    var msgIgnoradas = linhasIgnoradas.Count > 0
-                        ? $" ({linhasIgnoradas.Count} linha(s) com produto não reconhecido foram ignoradas)"
+                    var msgIgnoradas = totalIgnoradas > 0
+                        ? $" ({totalIgnoradas} linha(s) ignorada(s) - produto não reconhecido ou duplicada)"
                         : "";
-                    mensagem = $"Importação concluída com sucesso! {linhasValidas.Count} abastecimento(s) registrado(s).{msgIgnoradas}";
+                    mensagem = $"Importação concluída com sucesso! {linhasImportadas.Count} abastecimento(s) registrado(s).{msgIgnoradas}";
                     sucesso = true;
                 }
                 else
                 {
-                    mensagem = $"Nenhum registro importado. {linhasComErro.Count} linha(s) com erro. Baixe o arquivo para corrigir.";
+                    mensagem = $"Nenhum registro importado. {pendenciasGeradas} pendência(s) gerada(s). Acesse a tela de Pendências para resolver.";
                     sucesso = false;
                 }
 
-                await EnviarProgresso(connectionId, 100, "Concluído", sucesso ? "Importação finalizada!" : "Finalizado com erros");
+                await EnviarProgresso(connectionId, 100, "Concluído", sucesso ? "Importação finalizada!" : "Finalizado com pendências");
 
                 return Ok(new ResultadoImportacao
                 {
                     Sucesso = sucesso,
                     Mensagem = mensagem,
                     TotalLinhas = linhas.Count,
-                    LinhasImportadas = linhasValidas.Count,
+                    LinhasImportadas = linhasImportadas.Count,
                     LinhasComErro = linhasComErro.Count,
-                    LinhasIgnoradas = linhasIgnoradas.Count,
+                    LinhasIgnoradas = totalIgnoradas,
+                    LinhasCorrigiveis = linhasCorrigiveis,
                     Erros = erros.OrderBy(e => e.LinhaArquivoErros).ToList(),
                     LinhasImportadasLista = linhasImportadas,
-                    ArquivoErros = arquivoErrosBase64,
-                    NomeArquivoErros = nomeArquivoErros
+                    PendenciasGeradas = pendenciasGeradas
                 });
             }
             catch (Exception error)
@@ -540,6 +796,31 @@ namespace FrotiX.Controllers
                     Sucesso = false,
                     Mensagem = $"Erro interno ao processar importação: {error.Message}"
                 });
+            }
+        }
+
+        /// <summary>
+        /// Determina o tipo principal da pendência baseado nos erros
+        /// </summary>
+        private string DeterminarTipoPendencia(List<string> erros)
+        {
+            try
+            {
+                foreach (var erro in erros)
+                {
+                    if (erro.Contains("Autorização")) return "autorizacao";
+                    if (erro.Contains("Veículo") || erro.Contains("placa")) return "veiculo";
+                    if (erro.Contains("Motorista")) return "motorista";
+                    if (erro.Contains("Quilometragem") || erro.Contains("km")) return "km";
+                    if (erro.Contains("litros")) return "litros";
+                    if (erro.Contains("Data") || erro.Contains("Hora")) return "data";
+                }
+                return "erro";
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DeterminarTipoPendencia", error);
+                return "erro";
             }
         }
 
@@ -586,8 +867,9 @@ namespace FrotiX.Controllers
 
                 return dataParsed;
             }
-            catch
+            catch (Exception error)
             {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "ParseDataHora", error);
                 return null;
             }
         }
@@ -596,213 +878,150 @@ namespace FrotiX.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(produto)) return produto;
+                if (string.IsNullOrWhiteSpace(produto))
+                    return null;
 
                 produto = produto.Trim();
 
-                if (produto.Length > 2 && char.IsDigit(produto[0]) && char.IsDigit(produto[1]) && produto[2] == '-')
-                {
-                    produto = produto.Substring(3).Trim();
-                }
+                if (produto.Contains("Gasolina", StringComparison.OrdinalIgnoreCase))
+                    return "Gasolina Comum";
+
+                if (produto.Contains("Diesel", StringComparison.OrdinalIgnoreCase) ||
+                    produto.Contains("S-10", StringComparison.OrdinalIgnoreCase) ||
+                    produto.Contains("S10", StringComparison.OrdinalIgnoreCase))
+                    return "Diesel S-10";
 
                 return produto;
             }
-            catch
+            catch (Exception error)
             {
-                return produto;
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "LimparProduto", error);
+                return null;
             }
         }
 
-        private (bool Sucesso, string MensagemErro, List<LinhaImportacao> Linhas, MapeamentoColunas Mapeamento) LerPlanilhaDinamica(IFormFile file)
+        private class ResultadoLeituraPlanilha
+        {
+            public bool Sucesso { get; set; }
+            public string MensagemErro { get; set; }
+            public List<LinhaImportacao> Linhas { get; set; } = new List<LinhaImportacao>();
+            public MapeamentoColunas Mapeamento { get; set; }
+        }
+
+        private ResultadoLeituraPlanilha LerPlanilhaDinamica(IFormFile file)
         {
             try
             {
-                var linhas = new List<LinhaImportacao>();
-                string extensao = Path.GetExtension(file.FileName).ToLower();
-                var mapeamento = new MapeamentoColunas();
+                var resultado = new ResultadoLeituraPlanilha();
+                string sFileExtension = Path.GetExtension(file.FileName).ToLower();
 
                 using (var stream = file.OpenReadStream())
                 {
-                    ISheet sheet;
                     IWorkbook workbook;
-
-                    if (extensao == ".xls")
+                    if (sFileExtension == ".xls")
                     {
                         workbook = new HSSFWorkbook(stream);
                     }
-                    else
+                    else if (sFileExtension == ".xlsx")
                     {
                         workbook = new XSSFWorkbook(stream);
                     }
-
-                    sheet = workbook.GetSheetAt(0);
-
-                    var headerRow = sheet.GetRow(0);
-                    if (headerRow == null)
+                    else
                     {
-                        return (false, "Planilha sem cabeçalho", null, null);
+                        resultado.Sucesso = false;
+                        resultado.MensagemErro = "Formato de arquivo não suportado. Use .xls ou .xlsx";
+                        return resultado;
                     }
 
-                    for (int col = 0; col <= headerRow.LastCellNum; col++)
+                    ISheet sheet = workbook.GetSheetAt(0);
+                    if (sheet == null)
+                    {
+                        resultado.Sucesso = false;
+                        resultado.MensagemErro = "Planilha vazia ou inválida";
+                        return resultado;
+                    }
+
+                    // Mapear colunas
+                    IRow headerRow = sheet.GetRow(0);
+                    if (headerRow == null)
+                    {
+                        resultado.Sucesso = false;
+                        resultado.MensagemErro = "Cabeçalho não encontrado na planilha";
+                        return resultado;
+                    }
+
+                    var mapeamento = new MapeamentoColunas();
+
+                    for (int col = 0; col < headerRow.LastCellNum; col++)
                     {
                         var cell = headerRow.GetCell(col);
                         if (cell == null) continue;
 
-                        var header = GetCellStringValue(cell)?.Trim().ToLower();
-                        if (string.IsNullOrEmpty(header)) continue;
+                        string header = cell.ToString().Trim().ToLower();
 
-                        switch (header)
-                        {
-                            case "autorização":
-                            case "autorizacao":
-                                mapeamento.Autorizacao = col;
-                                break;
-                            case "data":
-                                mapeamento.Data = col;
-                                break;
-                            case "hora":
-                                mapeamento.Hora = col;
-                                break;
-                            case "placa":
-                                mapeamento.Placa = col;
-                                break;
-                            case "km":
-                                mapeamento.Km = col;
-                                break;
-                            case "produto":
-                                mapeamento.Produto = col;
-                                break;
-                            case "qtde":
-                                mapeamento.Quantidade = col;
-                                break;
-                            case "valor unitário":
-                            case "valor unitario":
-                                mapeamento.ValorUnitario = col;
-                                break;
-                            case "rodado":
-                                mapeamento.Rodado = col;
-                                break;
-                            case "codmotorista":
-                                mapeamento.CodMotorista = col;
-                                break;
-                            case "kmanterior":
-                                mapeamento.KmAnterior = col;
-                                break;
-                        }
+                        if (header.Contains("autori")) mapeamento.Autorizacao = col;
+                        else if (header.Contains("data") && !header.Contains("hora")) mapeamento.Data = col;
+                        else if (header.Contains("hora")) mapeamento.Hora = col;
+                        else if (header.Contains("placa")) mapeamento.Placa = col;
+                        else if (header == "km" || header.Contains("odômetro") || header.Contains("odometro")) mapeamento.Km = col;
+                        else if (header.Contains("produto") || header.Contains("combustível") || header.Contains("combustivel")) mapeamento.Produto = col;
+                        else if (header.Contains("qtde") || header.Contains("quantidade") || header.Contains("litros")) mapeamento.Quantidade = col;
+                        else if (header.Contains("unitário") || header.Contains("unitario") || header.Contains("unit")) mapeamento.ValorUnitario = col;
+                        else if (header.Contains("rodado")) mapeamento.Rodado = col;
+                        else if (header.Contains("codmotorista") || header.Contains("cód motorista") || header.Contains("cod motorista")) mapeamento.CodMotorista = col;
+                        else if (header.Contains("kmanterior") || header.Contains("km anterior")) mapeamento.KmAnterior = col;
                     }
 
                     if (!mapeamento.TodosMapeados)
                     {
-                        var faltantes = mapeamento.ColunasFaltantes();
-                        return (false, $"Colunas não encontradas na planilha: {string.Join(", ", faltantes)}", null, null);
+                        resultado.Sucesso = false;
+                        resultado.MensagemErro = $"Colunas não encontradas na planilha: {string.Join(", ", mapeamento.ColunasFaltantes())}";
+                        return resultado;
                     }
 
-                    for (int i = 1; i <= sheet.LastRowNum; i++)
-                    {
-                        var row = sheet.GetRow(i);
-                        if (row == null) continue;
+                    resultado.Mapeamento = mapeamento;
 
-                        var placaCell = row.GetCell(mapeamento.Placa);
-                        if (placaCell == null || string.IsNullOrWhiteSpace(GetCellStringValue(placaCell)))
+                    // Ler linhas de dados
+                    for (int row = 1; row <= sheet.LastRowNum; row++)
+                    {
+                        IRow dataRow = sheet.GetRow(row);
+                        if (dataRow == null) continue;
+
+                        var autorizacaoCell = dataRow.GetCell(mapeamento.Autorizacao);
+                        if (autorizacaoCell == null || string.IsNullOrWhiteSpace(autorizacaoCell.ToString()))
                             continue;
 
                         var linha = new LinhaImportacao
                         {
-                            NumeroLinhaOriginal = i + 1,
-                            Autorizacao = GetCellIntValue(row.GetCell(mapeamento.Autorizacao)),
-                            Data = GetCellStringValue(row.GetCell(mapeamento.Data))?.Trim(),
-                            Hora = GetCellStringValue(row.GetCell(mapeamento.Hora))?.Trim(),
-                            Placa = GetCellStringValue(row.GetCell(mapeamento.Placa))?.Trim().ToUpper(),
-                            Km = GetCellIntValue(row.GetCell(mapeamento.Km)),
-                            Produto = GetCellStringValue(row.GetCell(mapeamento.Produto))?.Trim(),
-                            Quantidade = GetCellDoubleValue(row.GetCell(mapeamento.Quantidade)),
-                            ValorUnitario = GetCellDoubleValue(row.GetCell(mapeamento.ValorUnitario)),
-                            KmRodado = GetCellIntValue(row.GetCell(mapeamento.Rodado)),
-                            CodMotorista = GetCellIntValue(row.GetCell(mapeamento.CodMotorista)),
-                            KmAnterior = GetCellIntValue(row.GetCell(mapeamento.KmAnterior))
+                            NumeroLinhaOriginal = row + 1,
+                            Autorizacao = GetCellIntValue(dataRow.GetCell(mapeamento.Autorizacao)),
+                            Data = GetCellStringValue(dataRow.GetCell(mapeamento.Data)),
+                            Hora = GetCellStringValue(dataRow.GetCell(mapeamento.Hora)),
+                            Placa = GetCellStringValue(dataRow.GetCell(mapeamento.Placa))?.ToUpper(),
+                            Km = GetCellIntValue(dataRow.GetCell(mapeamento.Km)),
+                            Produto = GetCellStringValue(dataRow.GetCell(mapeamento.Produto)),
+                            Quantidade = GetCellDoubleValue(dataRow.GetCell(mapeamento.Quantidade)),
+                            ValorUnitario = GetCellDoubleValue(dataRow.GetCell(mapeamento.ValorUnitario)),
+                            KmRodado = GetCellIntValue(dataRow.GetCell(mapeamento.Rodado)),
+                            CodMotorista = GetCellIntValue(dataRow.GetCell(mapeamento.CodMotorista)),
+                            KmAnterior = GetCellIntValue(dataRow.GetCell(mapeamento.KmAnterior))
                         };
 
-                        linhas.Add(linha);
+                        resultado.Linhas.Add(linha);
                     }
-                }
 
-                return (true, null, linhas, mapeamento);
+                    resultado.Sucesso = true;
+                    return resultado;
+                }
             }
             catch (Exception error)
             {
                 Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "LerPlanilhaDinamica", error);
-                return (false, $"Erro ao ler planilha: {error.Message}", null, null);
-            }
-        }
-
-        private byte[] GerarExcelErros(List<LinhaImportacao> linhasComErro, MapeamentoColunas mapeamento)
-        {
-            try
-            {
-                var workbook = new XSSFWorkbook();
-                var sheet = workbook.CreateSheet("Linhas com Erro");
-
-                var headerStyle = workbook.CreateCellStyle();
-                var headerFont = workbook.CreateFont();
-                headerFont.IsBold = true;
-                headerStyle.SetFont(headerFont);
-                headerStyle.FillForegroundColor = NPOI.HSSF.Util.HSSFColor.Grey25Percent.Index;
-                headerStyle.FillPattern = FillPattern.SolidForeground;
-
-                var erroStyle = workbook.CreateCellStyle();
-                erroStyle.FillForegroundColor = NPOI.HSSF.Util.HSSFColor.Rose.Index;
-                erroStyle.FillPattern = FillPattern.SolidForeground;
-
-                var headerRow = sheet.CreateRow(0);
-                var headers = new[] { "Linha Original", "Autorização", "Data", "Hora", "Placa", "KM",
-                                      "Produto", "Qtde", "Valor Unitário", "Rodado", "CodMotorista",
-                                      "KMAnterior", "ERROS" };
-
-                for (int i = 0; i < headers.Length; i++)
+                return new ResultadoLeituraPlanilha
                 {
-                    var cell = headerRow.CreateCell(i);
-                    cell.SetCellValue(headers[i]);
-                    cell.CellStyle = headerStyle;
-                }
-
-                int rowIndex = 1;
-                foreach (var linha in linhasComErro)
-                {
-                    var row = sheet.CreateRow(rowIndex++);
-
-                    row.CreateCell(0).SetCellValue(linha.NumeroLinhaOriginal);
-                    row.CreateCell(1).SetCellValue(linha.Autorizacao);
-                    row.CreateCell(2).SetCellValue(linha.Data ?? "");
-                    row.CreateCell(3).SetCellValue(linha.Hora ?? "");
-                    row.CreateCell(4).SetCellValue(linha.Placa ?? "");
-                    row.CreateCell(5).SetCellValue(linha.Km);
-                    row.CreateCell(6).SetCellValue(linha.Produto ?? "");
-                    row.CreateCell(7).SetCellValue(linha.Quantidade);
-                    row.CreateCell(8).SetCellValue(linha.ValorUnitario);
-                    row.CreateCell(9).SetCellValue(linha.KmRodado);
-                    row.CreateCell(10).SetCellValue(linha.CodMotorista);
-                    row.CreateCell(11).SetCellValue(linha.KmAnterior);
-
-                    var erroCell = row.CreateCell(12);
-                    erroCell.SetCellValue(string.Join(" | ", linha.Erros));
-                    erroCell.CellStyle = erroStyle;
-                }
-
-                for (int i = 0; i < headers.Length; i++)
-                {
-                    sheet.AutoSizeColumn(i);
-                }
-
-                using (var ms = new MemoryStream())
-                {
-                    workbook.Write(ms);
-                    return ms.ToArray();
-                }
-            }
-            catch (Exception error)
-            {
-                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "GerarExcelErros", error);
-                throw;
+                    Sucesso = false,
+                    MensagemErro = $"Erro ao ler planilha: {error.Message}"
+                };
             }
         }
 
@@ -812,20 +1031,34 @@ namespace FrotiX.Controllers
             {
                 if (cell == null) return null;
 
-                return cell.CellType switch
+                switch (cell.CellType)
                 {
-                    CellType.String => cell.StringCellValue,
-                    CellType.Numeric => DateUtil.IsCellDateFormatted(cell)
-                        ? cell.DateCellValue.ToString("dd/MM/yyyy")
-                        : cell.NumericCellValue.ToString(),
-                    CellType.Boolean => cell.BooleanCellValue.ToString(),
-                    CellType.Formula => cell.ToString(),
-                    _ => cell.ToString()
-                };
+                    case CellType.Numeric:
+                        if (DateUtil.IsCellDateFormatted(cell))
+                        {
+                            return cell.DateCellValue.ToString("dd/MM/yyyy");
+                        }
+                        return cell.NumericCellValue.ToString();
+                    case CellType.String:
+                        return cell.StringCellValue?.Trim();
+                    case CellType.Boolean:
+                        return cell.BooleanCellValue.ToString();
+                    case CellType.Formula:
+                        try
+                        {
+                            return cell.StringCellValue?.Trim();
+                        }
+                        catch
+                        {
+                            return cell.NumericCellValue.ToString();
+                        }
+                    default:
+                        return cell.ToString()?.Trim();
+                }
             }
             catch
             {
-                return cell?.ToString();
+                return null;
             }
         }
 
@@ -835,12 +1068,20 @@ namespace FrotiX.Controllers
             {
                 if (cell == null) return 0;
 
-                return cell.CellType switch
+                int resultado;
+                switch (cell.CellType)
                 {
-                    CellType.Numeric => (int)cell.NumericCellValue,
-                    CellType.String => int.TryParse(cell.StringCellValue, out int val) ? val : 0,
-                    _ => int.TryParse(cell.ToString(), out int val2) ? val2 : 0
-                };
+                    case CellType.Numeric:
+                        return (int)cell.NumericCellValue;
+                    case CellType.String:
+                        if (int.TryParse(cell.StringCellValue, out resultado))
+                            return resultado;
+                        return 0;
+                    default:
+                        if (int.TryParse(cell.ToString(), out resultado))
+                            return resultado;
+                        return 0;
+                }
             }
             catch
             {
@@ -854,16 +1095,20 @@ namespace FrotiX.Controllers
             {
                 if (cell == null) return 0;
 
-                return cell.CellType switch
+                double resultado;
+                switch (cell.CellType)
                 {
-                    CellType.Numeric => cell.NumericCellValue,
-                    CellType.String => double.TryParse(
-                        cell.StringCellValue.Replace(",", "."),
-                        NumberStyles.Any,
-                        CultureInfo.InvariantCulture,
-                        out double val) ? val : 0,
-                    _ => double.TryParse(cell.ToString(), out double val2) ? val2 : 0
-                };
+                    case CellType.Numeric:
+                        return cell.NumericCellValue;
+                    case CellType.String:
+                        if (double.TryParse(cell.StringCellValue.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out resultado))
+                            return resultado;
+                        return 0;
+                    default:
+                        if (double.TryParse(cell.ToString(), out resultado))
+                            return resultado;
+                        return 0;
+                }
             }
             catch
             {

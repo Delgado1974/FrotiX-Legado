@@ -17,12 +17,14 @@
                     GetModeloList(marcaId);
                 }
 
-                var contratoId = $('#VeiculoObj_Veiculo_ContratoId').val();
+                // CORRIGIDO: usar o ID correto do dropdown (#lstcontratos)
+                var contratoId = $('#lstcontratos').val();
                 if (contratoId) {
                     GetItemContratualList(contratoId);
                 }
 
-                var ataId = $('#VeiculoObj_Veiculo_AtaId').val();
+                // CORRIGIDO: usar o ID correto do dropdown (#lstatas)
+                var ataId = $('#lstatas').val();
                 if (ataId) {
                     GetItemAtaList(ataId);
                 }
@@ -63,6 +65,69 @@
 
     function setupEventListeners() {
         try {
+            // ========== UPLOAD CRLV ==========
+            // Botão dispara o input file
+            $('#btnUploadCRLV').on('click', function () {
+                try {
+                    $('#inputCRLV').click();
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("veiculo_upsert.js", "btnUploadCRLV.click", error);
+                }
+            });
+
+            // Quando selecionar arquivo
+            $('#inputCRLV').on('change', function () {
+                try {
+                    var file = this.files[0];
+                    if (file) {
+                        // Validar tamanho (max 10MB)
+                        if (file.size > 10 * 1024 * 1024) {
+                            AppToast.show('Vermelho', 'Arquivo muito grande. Máximo: 10MB', 3000);
+                            $(this).val('');
+                            return;
+                        }
+
+                        // Validar extensão
+                        var extensoesValidas = ['.pdf', '.jpg', '.jpeg', '.png'];
+                        var nomeArquivo = file.name.toLowerCase();
+                        var extensaoValida = extensoesValidas.some(function (ext) {
+                            return nomeArquivo.endsWith(ext);
+                        });
+
+                        if (!extensaoValida) {
+                            AppToast.show('Vermelho', 'Formato inválido. Use PDF, JPG ou PNG', 3000);
+                            $(this).val('');
+                            return;
+                        }
+
+                        // Mostra indicador de novo arquivo
+                        $('#nomeCRLVNovo').text(file.name);
+                        $('#infoCRLVNovo').show();
+                        $('#txtBtnCRLV').text('Substituir CRLV');
+
+                        AppToast.show('Verde', 'Arquivo selecionado: ' + file.name, 2000);
+                    }
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("veiculo_upsert.js", "inputCRLV.change", error);
+                }
+            });
+
+            // Remover arquivo selecionado
+            $('#btnRemoverCRLV').on('click', function () {
+                try {
+                    $('#inputCRLV').val('');
+                    $('#infoCRLVNovo').hide();
+                    
+                    // Se já tinha CRLV cadastrado, mantém texto "Substituir"
+                    var temCRLVExistente = $('#infoCRLVExistente').length > 0;
+                    $('#txtBtnCRLV').text(temCRLVExistente ? 'Substituir CRLV' : 'Upload do CRLV');
+                    
+                    AppToast.show('Amarelo', 'Arquivo removido', 2000);
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("veiculo_upsert.js", "btnRemoverCRLV.click", error);
+                }
+            });
+
             // Marca - carrega modelos
             $('#listamarca').on('change', function () {
                 try {

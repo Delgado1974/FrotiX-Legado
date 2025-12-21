@@ -8,294 +8,694 @@
     ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
     ViewData["Category1"] = "Cadastros";
     ViewData["PageIcon"] = "fa-regular fa-user-tie";
+
+    var isEdit = Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty;
+    var pageTitle = isEdit ? "Atualizar Motorista" : "Criar Motorista";
 }
 
-<style>
-    /* Estilos mínimos - NÃO interferir com Syncfusion */
-    .form-control-xs {
-        min-height: 2.25rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.9rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .row + .row {
-        margin-top: 0.5rem;
-    }
-</style>
+@section HeadBlock {
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background-color: #3D5771;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
 
-<form method="post" enctype="multipart/form-data">
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .ftx-card-actions {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ====== BOTÃO VOLTAR NO HEADER ====== */
+        .ftx-card-header .btn-vinho {
+            border: 2px solid rgba(255, 255, 255, 0.7) !important;
+            outline: 1px solid rgba(255, 255, 255, 0.3) !important;
+            padding: 0.4rem 0.9rem !important;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* ====== PANEL CONTENT ====== */
+        .panel-content {
+            padding: 1.25rem;
+            background: #f8f9fa;
+        }
+
+        /* ====== SEÇÕES COM CARDS LEVES ====== */
+        .ftx-section {
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .ftx-section-header {
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-section-header i {
+            --fa-primary-color: #3D5771;
+            --fa-secondary-color: #6b8ba3;
+            --fa-secondary-opacity: 0.7;
+            font-size: 0.95rem;
+        }
+
+        .ftx-section-header span {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #3D5771;
+        }
+
+        .ftx-section-body {
+            padding: 1rem;
+        }
+
+        /* ====== FORM CONTROLS ====== */
+        .form-control-xs {
+            min-height: 2.1rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control-xs:focus {
+            border-color: #3D5771;
+            box-shadow: 0 0 0 0.15rem rgba(61, 87, 113, 0.12);
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #495057;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .form-group label i {
+            --fa-primary-color: #6c757d;
+            --fa-secondary-color: #adb5bd;
+            --fa-secondary-opacity: 0.7;
+            font-size: 0.85rem;
+        }
+
+        .form-group label .text-danger {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* ====== PREVIEW DE FOTO ====== */
+        .ftx-foto-preview-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            text-align: center;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .ftx-foto-preview-container:hover {
+            border-color: #3D5771;
+        }
+
+        .ftx-foto-preview-container img {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            object-fit: cover;
+        }
+
+        .ftx-foto-preview-container .ftx-no-foto {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .ftx-foto-preview-container .ftx-no-foto i {
+            font-size: 2rem;
+            color: #adb5bd;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+
+        /* ====== CHECKBOXES EM CARDS ====== */
+        .ftx-config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .ftx-config-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .ftx-config-card:hover {
+            border-color: #3D5771;
+            background: #fff;
+        }
+
+        .ftx-config-card .form-check-input {
+            width: 1.1rem;
+            height: 1.1rem;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .ftx-config-card .form-check-input:checked {
+            background-color: #38A169;
+            border-color: #38A169;
+        }
+
+        .ftx-config-card label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #495057;
+            cursor: pointer;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .ftx-config-card label i {
+            --fa-primary-color: #6c757d;
+            --fa-secondary-color: #adb5bd;
+            font-size: 0.9rem;
+        }
+
+        /* ====== INFORMAÇÕES DE ALTERAÇÃO ====== */
+        .ftx-info-alteracao {
+            background: #e8f4fd;
+            border-left: 3px solid #3D5771;
+            border-radius: 0 6px 6px 0;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.8rem;
+            color: #2d4559;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-info-alteracao i {
+            color: #3D5771;
+        }
+
+        /* ====== ÁREA DE BOTÕES ====== */
+        .ftx-buttons-area {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .ftx-buttons-area .btn {
+            flex: 1;
+            padding: 0.85rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .ftx-buttons-area .btn i {
+            font-size: 1rem;
+        }
+
+        /* ====== SPINNER DE CONFIRMAÇÃO ====== */
+        .btn .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            border-width: 2px;
+            display: none;
+        }
+
+        .btn.is-loading .spinner-border {
+            display: inline-block;
+        }
+
+        .btn.is-loading .btn-icon {
+            display: none;
+        }
+
+        .btn.is-loading {
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        /* ====== RESPONSIVO ====== */
+        @@media (max-width: 768px) {
+            .ftx-card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .ftx-card-header .titulo-paginas {
+                font-size: 1.2rem;
+            }
+
+            .ftx-buttons-area {
+                flex-direction: column;
+            }
+
+            .ftx-config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<form method="post" enctype="multipart/form-data" id="formMotorista">
     <div class="row">
         <div class="col-xl-12">
             <div id="panel-1" class="panel">
                 <div class="panel-container show">
+
+                    <!-- HEADER AZUL PADRÃO FROTIX -->
+                    <div class="ftx-card-header">
+                        <h2 class="titulo-paginas">
+                            <i class="fa-duotone fa-user-tie"></i>
+                            @pageTitle
+                        </h2>
+                        <div class="ftx-card-actions">
+                            <a href="/Motorista" class="btn btn-vinho">
+                                <i class="fa-duotone fa-arrow-left"></i>
+                                Voltar à Lista
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- CONTEÚDO -->
                     <div class="panel-content">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        @if (Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty)
+                        @if (isEdit)
                         {
                             <input type="hidden" asp-for="MotoristaObj.Motorista.MotoristaId" />
                         }
                         <input type="hidden" asp-for="MotoristaObj.Motorista.UsuarioIdAlteracao" />
 
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="titulo-paginas d-flex align-items-center pb-3">
-                                <i class="fa-duotone fa-solid fa-user-tie fa-xl me-2 icon-150" aria-hidden="true"></i>
-                                @(Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty ? "Atualizar " : "Criar ") Motorista
-                            </h2>
+                        <!-- SEÇÃO: DADOS PESSOAIS -->
+                        <div class="ftx-section">
+                            <div class="ftx-section-header">
+                                <i class="fa-duotone fa-id-card"></i>
+                                <span>Dados Pessoais</span>
+                            </div>
+                            <div class="ftx-section-body">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-user"></i>
+                                                Nome <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Nome"></span>
+                                            <input id="txtNome" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Nome" placeholder="Nome completo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-address-card"></i>
+                                                CPF <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CPF"></span>
+                                            <input id="txtCPF" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CPF" placeholder="000.000.000-00" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-hashtag"></i>
+                                                Ponto
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Ponto"></span>
+                                            <input class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Ponto" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-credit-card"></i>
+                                                Cód. QCard
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CodMotoristaQCard"></span>
+                                            <input class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CodMotoristaQCard" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-cake-candles"></i>
+                                                Data Nascimento <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.DataNascimento"></span>
+                                            <input id="txtDataNascimento" class="form-control form-control-xs" type="date" asp-for="MotoristaObj.Motorista.DataNascimento" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-mobile"></i>
+                                                Celular 1 <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Celular01"></span>
+                                            <input id="txtCelular01" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Celular01" placeholder="(00) 00000-0000" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-mobile-screen"></i>
+                                                Celular 2
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Celular02"></span>
+                                            <input id="txtCelular02" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Celular02" placeholder="(00) 00000-0000" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-calendar-plus"></i>
+                                                Data Ingresso <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.DataIngresso"></span>
+                                            <input id="txtDataIngresso" class="form-control form-control-xs" type="date" asp-for="MotoristaObj.Motorista.DataIngresso" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-12 pt-3">
-                            <!-- LINHA 1: Nome, CPF, Ponto -->
-                            <div class="row">
-                                <div class="col-5">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.Nome">Nome <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Nome"></span>
-                                        <input id="txtNome" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Nome" />
+                        <!-- SEÇÃO: HABILITAÇÃO -->
+                        <div class="ftx-section">
+                            <div class="ftx-section-header">
+                                <i class="fa-duotone fa-id-badge"></i>
+                                <span>Habilitação (CNH)</span>
+                            </div>
+                            <div class="ftx-section-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-file-lines"></i>
+                                                Número CNH <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CNH"></span>
+                                            <input id="txtCNH" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CNH" placeholder="00000000000" />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.CPF">CPF <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CPF"></span>
-                                        <input id="txtCPF" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CPF" />
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-layer-group"></i>
+                                                Categoria <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CategoriaCNH"></span>
+                                            <input id="txtCategoriaCNH" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CategoriaCNH" placeholder="B, C, D, E" style="text-transform: uppercase;" />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.Ponto"></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Ponto"></span>
-                                        <input class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Ponto" />
-                                    </div>
-                                </div>
-
-                                <div class="col-2">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.CodMotoristaQCard"></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CodMotoristaQCard"></span>
-                                        <input class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CodMotoristaQCard" />
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-calendar-xmark"></i>
+                                                Vencimento CNH <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.DataVencimentoCNH"></span>
+                                            <input id="txtDataVencimentoCNH" class="form-control form-control-xs" type="date" asp-for="MotoristaObj.Motorista.DataVencimentoCNH" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- LINHA 2: Data Nascimento, CNH, Categoria, Data Vencimento CNH -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.DataNascimento">Data de Nascimento <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.DataNascimento"></span>
-                                        <input id="txtDataNascimento" class="form-control form-control-xs" type="date" asp-for="MotoristaObj.Motorista.DataNascimento" />
+                        <!-- SEÇÃO: VÍNCULO E CONTRATO -->
+                        <div class="ftx-section">
+                            <div class="ftx-section-header">
+                                <i class="fa-duotone fa-building"></i>
+                                <span>Vínculo e Contrato</span>
+                            </div>
+                            <div class="ftx-section-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-landmark"></i>
+                                                Unidade <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.UnidadeId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.MotoristaObj.Motorista.UnidadeId,
+                                                Model.MotoristaObj.UnidadeList,
+                                                "-- Selecione uma Unidade --",
+                                                new { @class = "form-control form-control-xs", @id = "ddlUnidade" }
+                                            )
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-steering-wheel"></i>
+                                                Tipo Condutor <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.TipoCondutor"></span>
+                                            <select id="ddlTipoCondutor" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.TipoCondutor">
+                                                <option value="">-- Selecione --</option>
+                                                <option value="Motorista">Motorista</option>
+                                                <option value="Condutor">Condutor</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="fa-duotone fa-user-clock"></i>
+                                                Efetivo / Ferista <span class="text-danger">*</span>
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.EfetivoFerista"></span>
+                                            <select id="ddlEfetivoFerista" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.EfetivoFerista">
+                                                <option value="">-- Selecione --</option>
+                                                <option value="Efetivo">Efetivo</option>
+                                                <option value="Ferista">Ferista</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.CNH">CNH <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CNH"></span>
-                                        <input id="txtCNH" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CNH" />
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.CategoriaCNH">Categoria Habilitação <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.CategoriaCNH"></span>
-                                        <input id="txtCategoriaCNH" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.CategoriaCNH" />
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.DataVencimentoCNH">Data Vencimento CNH <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.DataVencimentoCNH"></span>
-                                        <input id="txtDataVencimentoCNH" class="form-control form-control-xs" type="date" asp-for="MotoristaObj.Motorista.DataVencimentoCNH" />
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-0">
+                                            <label>
+                                                <i class="fa-duotone fa-file-contract"></i>
+                                                Contrato
+                                            </label>
+                                            <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.ContratoId"></span>
+                                            @Html.DropDownListFor(
+                                                m => m.MotoristaObj.Motorista.ContratoId,
+                                                Model.MotoristaObj.ContratoList,
+                                                "-- Selecione um Contrato --",
+                                                new { @class = "form-control form-control-xs" }
+                                            )
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- LINHA 3: Celulares -->
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.Celular01">Primeiro Celular <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Celular01"></span>
-                                        <input id="txtCelular01" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Celular01" />
-                                    </div>
-                                </div>
-
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.Celular02">Segundo Celular</label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.Celular02"></span>
-                                        <input id="txtCelular02" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.Celular02" />
-                                    </div>
-                                </div>
+                        <!-- SEÇÃO: FOTO -->
+                        <div class="ftx-section">
+                            <div class="ftx-section-header">
+                                <i class="fa-duotone fa-camera-retro"></i>
+                                <span>Foto do Motorista</span>
                             </div>
-
-                            <!-- LINHA 4: Data Ingresso, Unidade, Tipo Condutor, Efetivo/Ferista -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.DataIngresso">Data Ingresso <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.DataIngresso"></span>
-                                        <input id="txtDataIngresso" class="form-control form-control-xs" type="date" asp-for="MotoristaObj.Motorista.DataIngresso" />
+                            <div class="ftx-section-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="form-group mb-0">
+                                            <label>
+                                                <i class="fa-duotone fa-upload"></i>
+                                                Selecionar Foto
+                                            </label>
+                                            <input type="file" id="fotoUpload" name="FotoUpload" class="form-control form-control-xs" accept="image/*" />
+                                            <small class="text-muted mt-1 d-block">
+                                                Formatos: JPG, PNG, GIF (máx. 5MB)
+                                            </small>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.UnidadeId">Unidade Vinculada <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.UnidadeId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.MotoristaObj.Motorista.UnidadeId,
-                                            Model.MotoristaObj.UnidadeList,
-                                            "-- Selecione uma Unidade --",
-                                            new { @class = "form-control form-control-xs", @id = "ddlUnidade" }
-                                        )
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.TipoCondutor">Tipo Condutor <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.TipoCondutor"></span>
-                                        <select id="ddlTipoCondutor" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.TipoCondutor">
-                                            <option value="">-- Selecione o Tipo --</option>
-                                            <option value="Motorista">Motorista</option>
-                                            <option value="Condutor">Condutor</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.EfetivoFerista">Efetivo / Ferista <span class="text-danger">*</span></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.EfetivoFerista"></span>
-                                        <select id="ddlEfetivoFerista" class="form-control form-control-xs" asp-for="MotoristaObj.Motorista.EfetivoFerista">
-                                            <option value="">-- Selecione --</option>
-                                            <option value="Efetivo">Efetivo</option>
-                                            <option value="Ferista">Ferista</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- LINHA 5: Contrato -->
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label asp-for="MotoristaObj.Motorista.ContratoId"></label>
-                                        <span class="text-danger" asp-validation-for="MotoristaObj.Motorista.ContratoId"></span>
-                                        @Html.DropDownListFor(
-                                            m => m.MotoristaObj.Motorista.ContratoId,
-                                            Model.MotoristaObj.ContratoList,
-                                            "-- Selecione um Contrato --",
-                                            new { @class = "form-control form-control-xs" }
-                                        )
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- LINHA 6: Upload de Foto com Preview -->
-                            <div class="row">
-                                <div class="col-9">
-                                    <div class="form-group">
-                                        <label>Foto do Motorista</label>
-                                        <input type="file" id="fotoUpload" name="FotoUpload" class="form-control form-control-xs" accept="image/*" />
-                                        <small class="text-muted">Selecione uma foto para o motorista (formatos aceitos: JPG, PNG, GIF)</small>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label>Preview</label>
-                                        <div style="border: 2px solid #dee2e6; border-radius: 8px; padding: 10px; background-color: #f8f9fa; text-align: center; min-height: 120px; display: flex; align-items: center; justify-content: center;">
-                                            @if (Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty)
+                                    <div class="col-md-4">
+                                        <div class="ftx-foto-preview-container">
+                                            @if (isEdit)
                                             {
                                                 if (Model.MotoristaObj.Motorista.Foto != null)
                                                 {
                                                     var base64Foto = Convert.ToBase64String(Model.MotoristaObj.Motorista.Foto);
                                                     var imgSrc = $"data:image/jpeg;base64,{base64Foto}";
-                                                    <img id="imgPreview" src="@imgSrc" alt="Foto do Motorista" style="max-width: 100%; max-height: 150px; display: block; border-radius: 4px;" />
+                                                    <img id="imgPreview" src="@imgSrc" alt="Foto do Motorista" />
                                                 }
                                                 else
                                                 {
-                                                    <!-- Motorista sem foto: mostra barbudo.jpg como padrão -->
-                                                    <img id="imgPreview" src="/Images/barbudo.jpg" alt="Foto Padrão" style="max-width: 100%; max-height: 150px; display: block; border-radius: 4px;" />
+                                                    <img id="imgPreview" src="/Images/barbudo.jpg" alt="Foto Padrão" />
                                                 }
-                                                <span id="txtSemFoto" style="display: none;"></span>
+                                                <span id="txtSemFoto" class="ftx-no-foto" style="display: none;"></span>
                                             }
                                             else
                                             {
-                                                <!-- Novo motorista: barbudo.jpg será carregado via JavaScript -->
-                                                <img id="imgPreview" src="" alt="Preview da Foto" style="max-width: 100%; max-height: 150px; display: none; border-radius: 4px;" />
-                                                <span id="txtSemFoto" style="color: #6c757d; font-size: 0.85rem;">Nenhuma foto selecionada</span>
+                                                <img id="imgPreview" src="" alt="Preview" style="display: none;" />
+                                                <span id="txtSemFoto" class="ftx-no-foto">
+                                                    <i class="fa-duotone fa-image"></i>
+                                                    Sem foto
+                                                </span>
                                             }
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- LINHA 7: Checkbox Status -->
-                            <div class="row" style="margin-top: 1.5rem; border-top: 1px solid #dee2e6; padding-top: 1rem;">
-                                <div class="col-3">
-                                    <div class="form-check">
+                        <!-- SEÇÃO: CONFIGURAÇÕES -->
+                        <div class="ftx-section">
+                            <div class="ftx-section-header">
+                                <i class="fa-duotone fa-sliders"></i>
+                                <span>Configurações</span>
+                            </div>
+                            <div class="ftx-section-body">
+                                <div class="ftx-config-grid">
+                                    <div class="ftx-config-card">
                                         <input type="checkbox" class="form-check-input" id="chkStatus" asp-for="MotoristaObj.Motorista.Status" />
-                                        <label class="form-check-label" for="chkStatus">
+                                        <label for="chkStatus">
+                                            <i class="fa-duotone fa-toggle-on"></i>
                                             Ativo/Inativo
                                         </label>
                                     </div>
                                 </div>
-                            </div>
 
-                            @if (Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty)
-                            {
-                                <div class="row" style="margin-top: 1rem;">
-                                    <div class="col-12">
-                                        <small class="text-muted">
-                                            Alterado/Incluído por @Model.MotoristaObj.NomeUsuarioAlteracao
-                                            em @Model.MotoristaObj.Motorista.DataAlteracao?.ToString("dd/MM/yy")
-                                            às @Model.MotoristaObj.Motorista.DataAlteracao?.ToString("HH:mm")
-                                        </small>
+                                @if (isEdit)
+                                {
+                                    <div class="ftx-info-alteracao mt-3">
+                                        <i class="fa-duotone fa-clock-rotate-left"></i>
+                                        <span>
+                                            Alterado por <strong>@Model.MotoristaObj.NomeUsuarioAlteracao</strong>
+                                            em <strong>@Model.MotoristaObj.Motorista.DataAlteracao?.ToString("dd/MM/yyyy")</strong>
+                                            às <strong>@Model.MotoristaObj.Motorista.DataAlteracao?.ToString("HH:mm")</strong>
+                                        </span>
                                     </div>
-                                </div>
-                            }
-
-                            <!-- BOTÕES -->
-                            <div class="row" style="margin-top: 2rem;">
-                                <div class="col-6">
-                                    @if (Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty)
-                                    {
-                                        <button type="submit"
-                                                asp-page-handler="Edit"
-                                                asp-route-id="@Model.MotoristaObj.Motorista.MotoristaId"
-                                                class="btn btn-azul btn-block"
-                                                onclick="return validarFormulario();">
-                                            <i class="fa-duotone fa-file-plus"></i> Atualizar
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="submit"
-                                                asp-page-handler="Submit"
-                                                class="btn btn-azul btn-block"
-                                                onclick="return validarFormulario();">
-                                            <i class="fa-duotone fa-file-plus"></i> Criar
-                                        </button>
-                                    }
-                                </div>
-                                <div class="col-6">
-                                    <a asp-page="./Index" class="btn btn-vinho btn-block">
-                                        <i class="fa-solid fa-rotate-left"></i> Voltar à Lista
-                                    </a>
-                                </div>
+                                }
                             </div>
                         </div>
+
+                        <!-- BOTÕES -->
+                        <div class="ftx-buttons-area">
+                            @if (isEdit)
+                            {
+                                <button type="submit"
+                                        id="btnSubmit"
+                                        asp-page-handler="Edit"
+                                        asp-route-id="@Model.MotoristaObj.Motorista.MotoristaId"
+                                        class="btn btn-azul"
+                                        onclick="return validarESubmeter(this);">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <i class="fa-duotone fa-floppy-disk btn-icon"></i>
+                                    <span class="btn-text">Atualizar Motorista</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit"
+                                        id="btnSubmit"
+                                        asp-page-handler="Submit"
+                                        class="btn btn-azul"
+                                        onclick="return validarESubmeter(this);">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <i class="fa-duotone fa-plus btn-icon"></i>
+                                    <span class="btn-text">Criar Motorista</span>
+                                </button>
+                            }
+                            <a asp-page="./Index" class="btn btn-vinho">
+                                <i class="fa-duotone fa-xmark"></i>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -306,4 +706,22 @@
 @section ScriptsBlock {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="~/js/cadastros/motorista_upsert.js" asp-append-version="true"></script>
+
+    <script>
+        function validarESubmeter(btn) {
+            try {
+                if (!validarFormulario()) {
+                    return false;
+                }
+
+                $(btn).addClass('is-loading');
+                $(btn).find('.btn-text').text('Salvando...');
+
+                return true;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "validarESubmeter", error);
+                return false;
+            }
+        }
+    </script>
 }

@@ -3,12 +3,17 @@
 // ====================================================================
 
 /**
+ * Estilo inline para títulos com fonte Outfit
+ */
+const TITLE_STYLE = "font-family: 'Outfit', sans-serif; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+
+/**
  * Configuração EXATA dos ícones e títulos do modal (versão original)
  */
 window.ModalConfig = {
     NOVO_AGENDAMENTO: {
         html: `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class="fa-duotone fa-calendar-lines-pen" 
                    style="--fa-primary-color: #006400; --fa-secondary-color: #A9BA9D;"></i>
                 Criar Agendamento
@@ -18,7 +23,7 @@ window.ModalConfig = {
 
     EDITAR_AGENDAMENTO: {
         html: `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class="fa-duotone fa-calendar-lines-pen" 
                    style="--fa-primary-color: #002F6C; --fa-secondary-color: #7DA2CE;"></i>
                 Editar Agendamento
@@ -28,7 +33,7 @@ window.ModalConfig = {
 
     AGENDAMENTO_CANCELADO: {
         html: `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class="fa-duotone fa-calendar-xmark" 
                    style="--fa-primary-color: #8B0000; --fa-secondary-color: #FF4C4C;"></i>
                 Agendamento Cancelado
@@ -38,7 +43,7 @@ window.ModalConfig = {
 
     VIAGEM_ABERTA: {
         html: `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
                 Exibindo Viagem (Aberta)
             </h3>`,
@@ -47,7 +52,7 @@ window.ModalConfig = {
 
     VIAGEM_REALIZADA: {
         htmlFunc: (statusTexto = 'Realizada') => `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
                 Exibindo Viagem (${statusTexto} - 
                 <span class='btn-vinho fw-bold fst-italic'>Edição Não Permitida</span>
@@ -58,7 +63,7 @@ window.ModalConfig = {
 
     VIAGEM_CANCELADA: {
         htmlFunc: (statusTexto = 'Cancelada') => `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class='fa-duotone fa-solid fa-suitcase-rolling' aria-hidden='true'></i> 
                 Exibindo Viagem (${statusTexto} - 
                 <span class='btn-vinho fw-bold fst-italic'>Edição Não Permitida</span>
@@ -69,7 +74,7 @@ window.ModalConfig = {
 
     TRANSFORMAR_VIAGEM: {
         html: `
-            <h3 class='modal-title'>
+            <h3 class='modal-title' style="${TITLE_STYLE}">
                 <i class="fa-duotone fa-calendar-lines-pen" 
                    style="--fa-primary-color: #002F6C; --fa-secondary-color: #7DA2CE;"></i>
                 Transformar Agendamento em Viagem
@@ -124,22 +129,28 @@ window.setModalTitle = function (tipo, statusTexto = null)
 
         seletores.forEach(seletor =>
         {
-            const elemento = document.querySelector(seletor);
-            if (elemento && elemento.id !== "Titulo")
+            try
             {
-                // Se o elemento não for o "Titulo" principal, inserir dentro dele
-                if (elemento.classList.contains('modal-header'))
+                const elemento = document.querySelector(seletor);
+                if (elemento && elemento.id !== "Titulo")
                 {
-                    // Se for o header, buscar ou criar o elemento de título dentro dele
-                    let titleEl = elemento.querySelector('.modal-title, h3, h5');
-                    if (titleEl)
+                    // Se o elemento não for o "Titulo" principal, inserir dentro dele
+                    if (elemento.classList.contains('modal-header'))
                     {
-                        titleEl.innerHTML = tituloHtml.replace(/<h3[^>]*>|<\/h3>/g, '');
+                        // Se for o header, buscar ou criar o elemento de título dentro dele
+                        let titleEl = elemento.querySelector('.modal-title, h3, h5');
+                        if (titleEl)
+                        {
+                            titleEl.innerHTML = tituloHtml.replace(/<h3[^>]*>|<\/h3>/g, '');
+                        }
+                    } else
+                    {
+                        elemento.innerHTML = tituloHtml.replace(/<h3[^>]*>|<\/h3>/g, '');
                     }
-                } else
-                {
-                    elemento.innerHTML = tituloHtml.replace(/<h3[^>]*>|<\/h3>/g, '');
                 }
+            } catch (e)
+            {
+                console.warn(`Erro ao definir título em ${seletor}:`, e);
             }
         });
 

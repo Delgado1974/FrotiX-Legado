@@ -1,193 +1,391 @@
 @page
-@model FrotiX.Models.Motorista
+@model FrotiX.Pages.Motorista.IndexModel
 
 @{
-	ViewData["Title"] = "Motoristas";
-	ViewData["PageName"] = "motorista_index";
-	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
-	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fal fa-user-tie";
+    ViewData["Title"] = "Motoristas";
+    ViewData["PageName"] = "motorista_index";
+    ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fal fa-user-tie";
 }
 
 @section HeadBlock {
-	@* Inclua aqui CSS adicionais se necessário (DataTables, Toast, etc.) *@
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background-color: #3D5771;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1.75rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .ftx-card-actions {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ====== BOTÃO ADICIONAR - USA btn-fundo-laranja ====== */
+        .ftx-card-header .btn-fundo-laranja {
+            border: 2px solid rgba(255, 255, 255, 0.7) !important;
+            outline: 1px solid rgba(255, 255, 255, 0.3) !important;
+            padding: 0.625rem 1.25rem !important;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ====== PANEL CONTENT ====== */
+        .panel-content {
+            padding: 1.25rem;
+            background: #fff;
+        }
+
+        /* ====== DATATABLE AJUSTES ====== */
+        #tblMotorista_wrapper .row {
+            margin-top: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #tblMotorista thead {
+            background-color: #3D5771;
+        }
+
+        #tblMotorista thead th {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 0.5rem;
+            border: none;
+            white-space: nowrap;
+        }
+
+        #tblMotorista tbody td {
+            vertical-align: middle;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        #tblMotorista tbody tr:hover {
+            background-color: rgba(61, 87, 113, 0.08) !important;
+        }
+
+        /* ====== CENTRALIZAR BOTÕES DE AÇÃO ====== */
+        .ftx-btn-acoes {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+        }
+
+        /* ====== MODAL PADRÃO FROTIX ====== */
+        .ftx-modal .modal-content {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .ftx-modal .modal-header {
+            background-color: #3D5771;
+            padding: 1rem 1.25rem;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-modal .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .ftx-modal .modal-title {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-modal .modal-title i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.25rem;
+        }
+
+        .ftx-modal .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-modal .btn-close:hover {
+            opacity: 1;
+        }
+
+        .ftx-modal .modal-body {
+            padding: 1.5rem;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ftx-modal .modal-footer {
+            padding: 1rem 1.25rem;
+            background: #f8f9fa;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* ====== IMAGEM NO MODAL ====== */
+        .ftx-foto-container {
+            padding: 0.5rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .ftx-foto-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 400px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        /* ====== RESPONSIVO ====== */
+        @@media (max-width: 768px) {
+            .ftx-card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .ftx-card-header .titulo-paginas {
+                font-size: 1.25rem;
+            }
+
+            .ftx-btn-acoes {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 }
 
-<style>
-	.fundo-cinza {
-		background-color: #2F4F4F;
-		color: aliceblue;
-	}
-
-	.label {
-		color: white;
-	}
-
-	.imgViewer {
-		display: flex;
-		justify-content: center;
-	}
-
-	/* diminuir espaço interno do container acima da tabela */
-	#panel-1 .panel-content{
-		padding-top:10px !important;     /* ajuste fino entre header e conteúdo */
-	}
-
-	/* DataTables: compactar a faixa de controles (Show rows/Buttons/Pesquisar) */
-	#tblMotorista_wrapper .row{ 
-		margin-top:.25rem; 
-		margin-bottom:.5rem;
-	}
-	#tblMotorista_wrapper .dataTables_length,
-	#tblMotorista_wrapper .dt-buttons,
-	#tblMotorista_wrapper .dataTables_filter{
-		margin-top:.25rem;
-		margin-bottom:.25rem;
-	}
-</style>
-
 <div class="row">
-	<div class="col-xl-12">
-		<div id="panel-1" class="panel">
-			<div class="panel-container show">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
 
-				<!-- Cabeçalho com botão alinhado na horizontal -->
-				<div class="col-12 px-3">
-					<div class="header-toolbar">
-						<h2 class="titulo-paginas">
-							<i class="fa-duotone fa-user-tie" aria-hidden="true"></i>
-							Listagem de Motoristas
-						</h2>
+                <!-- HEADER AZUL PADRÃO FROTIX -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-user-tie"></i>
+                        Listagem de Motoristas
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/Motorista/Upsert"
+                           class="btn btn-fundo-laranja">
+                            <i class="fa-duotone fa-user-plus"></i>
+                            Adicionar Motorista
+                        </a>
+                    </div>
+                </div>
 
-						<a href="/Motorista/Upsert"
-						   class="btn btn-azul form-control"
-						   style="width: 250px;"
-						   data-ejtip="Adicionar novo motorista ao sistema">
-							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Motorista
-						</a>
-					</div>
-				</div>
-				<div class="panel-content">
-					<div class="box-body">
-						<table id="tblMotorista" class="table table-bordered table-striped" width="100%">
-							<thead>
-								<tr>
-									<th>Nome</th>
-									<th>Ponto</th>
-									<th>CNH</th>
-									<th>Categoria</th>
-									<th>Celular</th>
-									<th>Unidade</th>
-									<th>Contrato</th>
-									<th>Tipo</th>
-									<th>Status</th>
-									<th>Ação</th>
-								</tr>
-							</thead>
-							<tbody>
-								@* Preenchido via JS (~/js/cadastros/motorista_001.js) *@
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                <!-- CONTEÚDO -->
+                <div class="panel-content">
+                    <div class="box-body">
+                        <table id="tblMotorista" class="table table-bordered table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Ponto</th>
+                                    <th>CNH</th>
+                                    <th>Categoria</th>
+                                    <th>Celular</th>
+                                    <th>Unidade</th>
+                                    <th>Contrato</th>
+                                    <th>Tipo</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* Preenchido via JS *@
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
-@* -------------- Modal da Foto do Motorista -------------- *@
-<div class="modal fade" id="modalFoto" tabindex="-1" role="dialog" aria-labelledby="DynamicModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-md" role="document">
-		<div class="modal-content">
-			<div class="modal-header modal-header-azul">
-				<h4 class="modal-title" id="DynamicModalLabel">Foto do Motorista</h4>
-			</div>
-
-			<div class="modal-body table-bordered container-fluid">
-				<img id="imgViewer" width="300" alt="Foto do motorista" style="border: 1px solid #000000; margin-top: 10px;" />
-				<div class="modal-footer">
-					<button type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal" aria-label="Fechar">
-						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
+<!-- MODAL FOTO DO MOTORISTA - PADRÃO FROTIX -->
+<div class="modal fade ftx-modal" id="modalFoto" tabindex="-1" aria-labelledby="modalFotoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFotoLabel">
+                    <i class="fa-duotone fa-camera-retro"></i>
+                    <span id="tituloFotoMotorista">Foto do Motorista</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ftx-foto-container">
+                    <img id="imgViewer"
+                         src="/Images/barbudo.jpg"
+                         alt="Foto do motorista"
+                         class="ftx-foto-img" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark me-1"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section ScriptsBlock {
+    <script src="~/js/cadastros/motorista.js" asp-append-version="true"></script>
 
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function () {
+            try {
+                const modalFotoElement = document.getElementById('modalFoto');
 
-	<script src="~/js/cadastros/motorista.js" asp-append-version="true"></script>
+                // Verifica se o elemento existe
+                if (!modalFotoElement) {
+                    console.error("Modal #modalFoto não encontrado!");
+                    return;
+                }
 
-	<script>
-		$(document).ready(function () {
-			try {
-				const modalFotoElement = document.getElementById('modalFoto');
-				const modalFoto = new bootstrap.Modal(modalFotoElement, {
-					keyboard: true,
-					backdrop: 'static'
-				});
+                // Handler para clique no botão de foto (delegação de eventos)
+                $(document).on('click', '.btn-foto', function (e) {
+                    try {
+                        e.preventDefault();
+                        const motoristaId = $(this).data('id');
+                        const button = this;
 
-				modalFotoElement.addEventListener('show.bs.modal', function (event) {
-					try {
-						const button = event.relatedTarget;
-						const motoristaId = button.getAttribute('data-id');
+                        // Reset
+                        $("#tituloFotoMotorista").text("Carregando...");
+                        $("#imgViewer").attr("src", "/Images/barbudo.jpg");
 
-						const label = document.getElementById("DynamicModalLabel");
-						label.innerHTML = "";
+                        // Abre o modal
+                        var modal = new bootstrap.Modal(modalFotoElement);
+                        modal.show();
 
-						$("#imgViewer").attr("src", "").attr("alt", "Foto do motorista");
+                        // Busca a foto
+                        $.ajax({
+                            type: "GET",
+                            url: "/api/Motorista/PegaFotoModal",
+                            data: { id: motoristaId },
+                            success: function (res) {
+                                try {
+                                    const motoristaNome = $(button).closest("tr").find("td:eq(0)").text().trim();
+                                    const possuiFoto = (res === false || res === "false" || res === null || res === "" || typeof res === "undefined") ? false : true;
 
-						$.ajax({
-							type: "GET",
-							url: "/api/Motorista/PegaFotoModal",
-							data: { id: motoristaId },
-							success: function (res) {
-								try {
-									const motoristaNome = $(button).closest("tr").find("td:eq(0)").text().trim();
-									const possuiFoto = (res === false || res === "false" || res === null || res === "" || typeof res === "undefined") ? false : true;
+                                    if (!possuiFoto) {
+                                        $("#tituloFotoMotorista").html("Sem foto: <strong>" + motoristaNome + "</strong>");
+                                        $("#imgViewer").attr("src", "/Images/barbudo.jpg").attr("alt", "Sem foto");
+                                    } else {
+                                        $("#tituloFotoMotorista").html("<strong>" + motoristaNome + "</strong>");
+                                        $("#imgViewer").attr("src", "data:image/jpg;base64," + res).attr("alt", "Foto de " + motoristaNome);
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.ajax.success", error);
+                                }
+                            },
+                            error: function (xhr) {
+                                try {
+                                    console.error("Erro ao recuperar foto:", xhr);
+                                    const motoristaNome = $(button).closest("tr").find("td:eq(0)").text().trim();
+                                    $("#tituloFotoMotorista").html("Erro ao carregar: <strong>" + motoristaNome + "</strong>");
+                                    $("#imgViewer").attr("src", "/Images/barbudo.jpg");
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.ajax.error", error);
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "btn-foto.click", error);
+                    }
+                });
 
-									if (!possuiFoto) {
-										label.innerHTML = "Motorista sem Foto: <b>" + motoristaNome + "</b>";
-										$("#imgViewer").attr("src", "/Images/barbudo.jpg").attr("alt", "Sem foto - imagem padrío");
-									} else {
-										label.innerHTML = "Foto do Motorista: <b>" + motoristaNome + "</b>";
-										$("#imgViewer").attr("src", "data:image/jpg;base64," + res).attr("alt", "Foto de " + motoristaNome);
-									}
-								} catch (error) {
-									Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.ajax.success", error);
-								}
-							},
-							error: function (xhr) {
-								try {
-									console.error("Erro ao recuperar foto do motorista:", xhr);
-									const motoristaNome = $(button).closest("tr").find("td:eq(0)").text().trim();
-									label.innerHTML = "Não foi possível carregar a foto de: <b>" + motoristaNome + "</b>";
-									$("#imgViewer").attr("src", "/Images/barbudo.jpg").attr("alt", "Erro ao carregar - imagem padrío");
-								} catch (error) {
-									Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.ajax.error", error);
-								}
-							}
-						});
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.show.bs.modal", error);
-					}
-				});
+                // Limpa ao fechar
+                modalFotoElement.addEventListener('hidden.bs.modal', function () {
+                    try {
+                        $("#imgViewer").attr("src", "/Images/barbudo.jpg");
+                        $("#tituloFotoMotorista").text("Foto do Motorista");
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.hidden.bs.modal", error);
+                    }
+                });
 
-				modalFotoElement.addEventListener('hide.bs.modal', function () {
-					try {
-						$("#imgViewer").attr("src", "").attr("alt", "Foto do motorista");
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "modalFoto.hide.bs.modal", error);
-					}
-				});
-
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
-			}
-		});
-	</script>
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
+            }
+        });
+    </script>
 }

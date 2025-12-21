@@ -81,6 +81,11 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
    ============================================ *@
 @section HeadBlock {
 
+<!-- FONTE OUTFIT PARA TÍTULOS DOS MODAIS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="~/css/modal-viagens-consolidado.css" asp-append-version="true" />
 
 <!-- FullCalendar 6.1.15 -->
@@ -1309,12 +1314,9 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                                 <label for="rteDescricao" class="label mr-2 mb-0">Descrição da Viagem (passageiros / carga)</label>
                                                 <i class="fa-duotone fa-solid fa-typewriter field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                             </div>
-                                            <!-- RichTextEditor com suporte a imagens -->
-                                            <!-- saveUrl: Endpoint para upload de imagens -->
-                                            <!-- path: Diretório de armazenamento -->
-                                            <ejs-richtexteditor id="rteDescricao" locale="pt-BR" height="250px">
-                                                <e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" path="./DadosEditaveis/ImagensViagens/"></e-richtexteditor-insertimagesettings>
-                                            </ejs-richtexteditor>
+                                            <!-- Kendo Editor - Substitui Syncfusion RTE -->
+                                            <!-- Upload de imagens configurado em kendo-editor-helper.js -->
+                                            <textarea id="rteDescricao" name="Descricao" style="height:250px; width:100%;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -1430,6 +1432,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
        ============================================ *@
 <script src="~/js/agendamento/utils/date.utils.js" asp-append-version="true"></script>
 <script src="~/js/agendamento/utils/syncfusion.utils.js" asp-append-version="true"></script>
+<script src="~/js/agendamento/utils/kendo-editor-helper.js" asp-append-version="true"></script>
 <script src="~/js/agendamento/utils/formatters.js" asp-append-version="true"></script>
 
 @* ============================================

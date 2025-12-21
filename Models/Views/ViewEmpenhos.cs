@@ -8,10 +8,10 @@ using FrotiX.Validations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace FrotiX.Models
-    {
+{
     public class ViewEmpenhos
-        {
-
+    {
+        [Key]
         public Guid EmpenhoId { get; set; }
 
         public string? NotaEmpenho { get; set; }
@@ -34,12 +34,9 @@ namespace FrotiX.Models
 
         public int? Movimentacoes { get; set; }
 
+        // View SQL usa ISNULL para garantir GUID vazio em vez de NULL
         public Guid ContratoId { get; set; }
 
         public Guid AtaId { get; set; }
-
-
-        }
     }
-
-
+}

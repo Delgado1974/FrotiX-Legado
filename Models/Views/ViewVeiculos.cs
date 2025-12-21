@@ -79,5 +79,7 @@ namespace FrotiX.Models
 
         // Veiculo.ValorMensal - FLOAT NULL (FLOAT = double em C#)
         public double? ValorMensal { get; set; }
+
+        public string? Categoria { get; set; }
     }
 }

@@ -4,349 +4,618 @@
 @model FrotiX.Pages.Lavador.UpsertModel
 
 @{
-	ViewData["Title"] = "Lavadores";
-	ViewData["PageName"] = "Lavador_upsert";
-	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Lavadores</span>";
-	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fal fa-user-tie";
+    ViewData["Title"]     = "Lavadores";
+    ViewData["PageName"]  = "lavador_upsert";
+    ViewData["Heading"]   = "<i class='fad fa-car-wash'></i> Cadastros: <span class='fw-300'>Lavadores</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"]  = "fal fa-car-wash";
+    
+    var isEdicao = Model.LavadorObj.Lavador.LavadorId != Guid.Empty;
 }
 
 @section HeadBlock {
-	<link rel="stylesheet" href="~/css/dropify.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background-color: #3D5771;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 900 !important;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* ====== BOTÃO LARANJA COM BORDA BRANCA ====== */
+        .ftx-card-header .btn-fundo-laranja {
+            border: 2px solid rgba(255, 255, 255, 0.7) !important;
+            outline: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .ftx-card-header .btn-fundo-laranja:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ====== PANEL CONTENT ====== */
+        .panel-content {
+            padding: 1.25rem;
+            background: #f8f9fa;
+        }
+
+        /* ====== CARD LEVE ====== */
+        .ftx-card {
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .ftx-card-title {
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-card-title i {
+            --fa-primary-color: #3D5771;
+            --fa-secondary-color: #6b8ba3;
+            --fa-secondary-opacity: 0.7;
+            font-size: 0.95rem;
+        }
+
+        .ftx-card-title span {
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 0.85rem;
+            color: #3D5771;
+        }
+
+        .ftx-card-body {
+            padding: 1rem;
+        }
+
+        /* ====== CAMPOS DO FORMULÁRIO ====== */
+        .ftx-form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .ftx-form-group label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #495057;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .ftx-form-group label i {
+            --fa-primary-color: #6c757d;
+            --fa-secondary-color: #adb5bd;
+            font-size: 0.85rem;
+        }
+
+        .ftx-form-group .form-control {
+            min-height: 2.2rem;
+            padding: 0.4rem 0.65rem;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ftx-form-group .form-control:focus {
+            border-color: #3D5771;
+            box-shadow: 0 0 0 3px rgba(61, 87, 113, 0.15);
+        }
+
+        .ftx-form-group .form-select {
+            min-height: 2.2rem;
+            padding: 0.4rem 0.65rem;
+            font-size: 0.875rem;
+        }
+
+        .text-danger {
+            font-size: 0.75rem;
+        }
+
+        /* ====== CHECKBOX ESTILIZADO ====== */
+        .ftx-check-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .ftx-check-card:hover {
+            border-color: #3D5771;
+            background: #fff;
+        }
+
+        .ftx-check-card .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .ftx-check-card .form-check-input:checked {
+            background-color: #38A169;
+            border-color: #38A169;
+        }
+
+        .ftx-check-card label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #495057;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* ====== CONTAINER DE FOTO ====== */
+        .ftx-foto-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ftx-foto-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #3D5771;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            background: #f8f9fa;
+        }
+
+        .ftx-foto-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ftx-foto-upload {
+            position: relative;
+        }
+
+        .ftx-foto-upload input[type="file"] {
+            max-width: 250px;
+        }
+
+        /* ====== INFO DE ALTERAÇÃO ====== */
+        .ftx-info-alteracao {
+            background: linear-gradient(135deg, #e9ecef 0%, #f1f3f5 100%);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-info-alteracao i {
+            --fa-primary-color: #6c757d;
+            --fa-secondary-color: #adb5bd;
+        }
+
+        /* ====== BOTÕES DE AÇÃO ====== */
+        .ftx-btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .ftx-btn-group .btn {
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        /* ====== RESPONSIVO ====== */
+        @@media (max-width: 768px) {
+            .ftx-card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .ftx-card-header .titulo-paginas {
+                font-size: 1.2rem;
+            }
+
+            .ftx-btn-group {
+                width: 100%;
+            }
+
+            .ftx-btn-group .btn {
+                flex: 1;
+            }
+        }
+    </style>
 }
 
-<style>
-	.form-control-xs {
-		height: calc(1em + .775rem + 2px) !important;
-		padding: .125rem .25rem !important;
-		font-size: .75rem !important;
-		line-height: 1.5;
-		border-radius: .2rem;
-	}
+<form method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
 
-	.label {
-		margin-bottom: -5px;
-		margin-top: 10px;
-	}
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-container show">
 
-	input[type=checkbox] {
-		vertical-align: middle;
-		position: relative;
-		bottom: 1px;
-	}
+                    <!-- HEADER AZUL PADRÃO FROTIX -->
+                    <div class="ftx-card-header">
+                        <h2 class="titulo-paginas">
+                            <i class="fa-duotone fa-car-wash"></i>
+                            @(isEdicao ? "Atualizar" : "Cadastrar") Lavador
+                        </h2>
+                        <a href="/Lavador" class="btn btn-fundo-laranja">
+                            <i class="fa-duotone fa-arrow-left"></i>
+                            Voltar à Lista
+                        </a>
+                    </div>
 
-	.escondido {
-		display: none;
-	}
+                    <!-- CONTEÚDO -->
+                    <div class="panel-content">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-	.espacofundo {
-		padding-bottom: 20px;
-	}
+                        @if (isEdicao)
+                        {
+                            <input type="hidden" asp-for="LavadorObj.Lavador.LavadorId" />
+                        }
+                        <input type="hidden" asp-for="LavadorObj.Lavador.UsuarioIdAlteracao" />
 
-	/* ===== crescer 20% apenas neste form (wrapper .fx-grow-20v) ===== */
-	.fx-grow-20v .form-control-xs {
-		height: calc((1em + .775rem + 2px) * 1.2) !important;
-		padding-top: calc(.125rem * 1.2) !important;
-		padding-bottom: calc(.125rem * 1.2) !important;
-		line-height: 1.5;
-	}
+                        <div class="row">
+                            <!-- COLUNA PRINCIPAL (DADOS) -->
+                            <div class="col-lg-8">
 
-	.fx-grow-20v .form-control:not(.form-control-xs),
-	.fx-grow-20v .form-select {
-		padding-top: calc(.375rem * 1.2) !important;
-		padding-bottom: calc(.375rem * 1.2) !important;
-	}
+                                <!-- CARD: DADOS PESSOAIS -->
+                                <div class="ftx-card">
+                                    <div class="ftx-card-title">
+                                        <i class="fa-duotone fa-id-card"></i>
+                                        <span>Dados Pessoais</span>
+                                    </div>
+                                    <div class="ftx-card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-user"></i>
+                                                        Nome Completo
+                                                    </label>
+                                                    <input class="form-control" asp-for="LavadorObj.Lavador.Nome" placeholder="Nome do lavador" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.Nome"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-id-badge"></i>
+                                                        CPF
+                                                    </label>
+                                                    <input class="form-control" 
+                                                           asp-for="LavadorObj.Lavador.CPF" 
+                                                           placeholder="000.000.000-00"
+                                                           inputmode="numeric"
+                                                           oninput="mascara(this)" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.CPF"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-cake-candles"></i>
+                                                        Data de Nascimento
+                                                    </label>
+                                                    <input class="form-control" asp-for="LavadorObj.Lavador.DataNascimento" type="date" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.DataNascimento"></span>
+                                                </div>
+                                            </div>
+                                        </div>
 
-	.fx-grow-20v .btn {
-		padding-top: calc(.375rem * 1.2) !important;
-		padding-bottom: calc(.375rem * 1.2) !important;
-	}
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-mobile"></i>
+                                                        Celular 1
+                                                    </label>
+                                                    <input class="form-control" asp-for="LavadorObj.Lavador.Celular01" placeholder="(00) 00000-0000" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.Celular01"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-phone"></i>
+                                                        Celular 2
+                                                    </label>
+                                                    <input class="form-control" asp-for="LavadorObj.Lavador.Celular02" placeholder="(00) 00000-0000" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.Celular02"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-	.fx-grow-20v .form-check-input {
-		width: 1.2em;
-		height: 1.2em;
-	}
+                                <!-- CARD: DADOS PROFISSIONAIS -->
+                                <div class="ftx-card">
+                                    <div class="ftx-card-title">
+                                        <i class="fa-duotone fa-briefcase"></i>
+                                        <span>Dados Profissionais</span>
+                                    </div>
+                                    <div class="ftx-card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-hashtag"></i>
+                                                        Ponto
+                                                    </label>
+                                                    <input class="form-control" asp-for="LavadorObj.Lavador.Ponto" placeholder="p_0000" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.Ponto"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-calendar-check"></i>
+                                                        Data de Ingresso
+                                                    </label>
+                                                    <input class="form-control" asp-for="LavadorObj.Lavador.DataIngresso" type="date" />
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.DataIngresso"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="ftx-form-group">
+                                                    <label>
+                                                        <i class="fa-duotone fa-file-contract"></i>
+                                                        Contrato
+                                                    </label>
+                                                    @Html.DropDownListFor(
+                                                        m => m.LavadorObj.Lavador.ContratoId,
+                                                        Model.LavadorObj.ContratoList,
+                                                        "-- Selecione um Contrato --",
+                                                        new { @class = "form-select" }
+                                                    )
+                                                    <span class="text-danger" asp-validation-for="LavadorObj.Lavador.ContratoId"></span>
+                                                </div>
+                                            </div>
+                                        </div>
 
-	.icon-150 {
-		font-size: 1.5em !important;
-		line-height: 1;
-		transform-origin: left center;
-	}
-</style>
+                                        <div class="row mt-2">
+                                            <div class="col-md-4">
+                                                <div class="ftx-check-card">
+                                                    <input type="checkbox" 
+                                                           class="form-check-input" 
+                                                           asp-for="LavadorObj.Lavador.Status" 
+                                                           id="chkStatus" />
+                                                    <label for="chkStatus">
+                                                        <i class="fa-duotone fa-circle-check me-1"></i>
+                                                        Lavador Ativo
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-<form method="post" enctype="multipart/form-data" class="fx-grow-20v">
-	@Html.AntiForgeryToken()
+                                <!-- INFO DE ALTERAÇÃO -->
+                                @if (isEdicao)
+                                {
+                                    <div class="ftx-info-alteracao mb-3">
+                                        <i class="fa-duotone fa-clock-rotate-left"></i>
+                                        Alterado por <strong>@Model.LavadorObj.NomeUsuarioAlteracao</strong>
+                                        em @(Model.LavadorObj.Lavador.DataAlteracao?.ToString("dd/MM/yyyy") ?? "")
+                                        às @(Model.LavadorObj.Lavador.DataAlteracao?.ToString("HH:mm") ?? "")
+                                    </div>
+                                }
 
-	<div class="row espacofundo">
-		<div class="col-xl-12">
-			<div id="panel-1" class="panel">
-				<div id="painelfundo" class="panel-container show espacofundo">
-					<div class="panel-content">
-						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <!-- BOTÕES DE AÇÃO -->
+                                <div class="ftx-btn-group">
+                                    @if (isEdicao)
+                                    {
+                                        <button type="submit"
+                                                asp-page-handler="Edit"
+                                                asp-route-id="@Model.LavadorObj.Lavador.LavadorId"
+                                                class="btn btn-azul">
+                                            <i class="fa-duotone fa-floppy-disk"></i>
+                                            Atualizar
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit"
+                                                asp-page-handler="Submit"
+                                                class="btn btn-azul">
+                                            <i class="fa-duotone fa-plus"></i>
+                                            Cadastrar
+                                        </button>
+                                    }
+                                    <a asp-page="./Index" class="btn btn-vinho">
+                                        <i class="fa-duotone fa-xmark"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
 
-						@if (Model.LavadorObj.Lavador.LavadorId != Guid.Empty)
-						{
-							<input type="hidden" asp-for="LavadorObj.Lavador.LavadorId" />
-						}
-						<input type="hidden" asp-for="LavadorObj.Lavador.UsuarioIdAlteracao" />
+                            </div>
 
-						<!-- Cabeçalho -->
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="titulo-paginas d-flex align-items-center pb-3">
-								<i class="fa-duotone fa-solid fa-car-wash fa-xl me-2 icon-150" aria-hidden="true"></i>
-								@(Model.LavadorObj.Lavador.LavadorId != Guid.Empty ? "Atualizar " : "Criar ") Lavador
-							</h2>
-						</div>
+                            <!-- COLUNA LATERAL (FOTO) -->
+                            <div class="col-lg-4">
+                                <div class="ftx-card">
+                                    <div class="ftx-card-title">
+                                        <i class="fa-duotone fa-camera"></i>
+                                        <span>Foto do Lavador</span>
+                                    </div>
+                                    <div class="ftx-card-body">
+                                        <div class="ftx-foto-section">
+                                            <div class="ftx-foto-container">
+                                                <img id="imgViewer" src="/Images/barbudo.jpg" alt="Foto do Lavador" />
+                                            </div>
+                                            <div class="ftx-foto-upload">
+                                                <input class="form-control" 
+                                                       id="txtFile" 
+                                                       type="file" 
+                                                       accept="image/*" 
+                                                       asp-for="FotoUpload" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-						<div class="col-12 pt-3">
-							<!-- Linha 1: Nome, CPF, Data Nascimento, Celular01, Celular02 -->
-							<div class="row">
-								<div class="col-4">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Nome"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Nome"></span>
-										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Nome" />
-									</div>
-								</div>
+                        </div>
+                    </div>
 
-								<div class="col-2">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.CPF"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.CPF"></span>
-										<input class="form-control form-control-xs"
-											   asp-for="LavadorObj.Lavador.CPF"
-											   inputmode="numeric"
-											   oninput="mascara(this)" />
-									</div>
-								</div>
-
-								<div class="col-2">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.DataNascimento"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.DataNascimento"></span>
-										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.DataNascimento" type="date" />
-									</div>
-								</div>
-
-								<div class="col-2">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Celular01"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Celular01"></span>
-										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Celular01" />
-									</div>
-								</div>
-
-								<div class="col-2">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Celular02"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Celular02"></span>
-										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Celular02" />
-									</div>
-								</div>
-							</div>
-
-							<!-- Linha 2: Data Ingresso -->
-							<div class="row">
-								<div class="col-2">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.DataIngresso"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.DataIngresso"></span>
-										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.DataIngresso" type="date" />
-									</div>
-								</div>
-							</div>
-
-							<!-- Linha 3: Ponto, Contrato, Foto -->
-							<div class="row">
-								<div class="col-2">
-									<div class="form-group">
-										<label class="label font-weight-bold" asp-for="LavadorObj.Lavador.Ponto"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.Ponto"></span>
-										<input class="form-control form-control-xs" asp-for="LavadorObj.Lavador.Ponto" />
-									</div>
-
-									<!-- Checkbox Ativo/Inativo abaixo de Ponto -->
-									<div class="form-group mt-2">
-										<div class="form-check">
-											<input type="checkbox"
-												   class="form-check-input"
-												   asp-for="LavadorObj.Lavador.Status"
-												   id="chkStatus" />
-											<label class="form-check-label font-weight-bold" for="chkStatus">Ativo/Inativo</label>
-										</div>
-									</div>
-								</div>
-
-								<div class="col-3">
-									<div class="form-group">
-										<label id="lblcontrato" class="label font-weight-bold" asp-for="LavadorObj.Lavador.ContratoId"></label>
-										<span class="text-danger font-weight-light" asp-validation-for="LavadorObj.Lavador.ContratoId"></span>
-										@Html.DropDownListFor(m => m.LavadorObj.Lavador.ContratoId,
-										Model.LavadorObj.ContratoList,
-																				"-- Selecione um Contrato --",
-																				new { @class = "form-control form-control-xs" , @Name = "lstcontratos" })
-									</div>
-								</div>
-							</div>
-
-							<!-- Linha 4: Foto -->
-							<div class="row justify-content-end">
-								<div class="col-auto">
-									<label class="label font-weight-bold">Foto</label>
-									<input class="form-control"
-										   id="txtFile"
-										   type="file"
-										   accept="image/*"
-										   style="width:300px;"
-										   asp-for="FotoUpload" />
-								</div>
-							</div>
-
-							<div class="row justify-content-end mt-3">
-								<div class="col-auto">
-									<img id="imgViewer"
-										 width="200"
-										 style="border:1px solid #000000; margin-top:10px;"
-										 alt="Pré-visualização da foto do lavador" />
-								</div>
-							</div>
-
-							<!-- Linha 5: Info de Alteração -->
-							@if (Model.LavadorObj.Lavador.LavadorId != Guid.Empty)
-							{
-								<div class="row mt-3">
-									<div class="col-12">
-										<label class="font-weight-light">
-	                                            Alterado/Incluído por @Model.LavadorObj.NomeUsuarioAlteracao
-		                                            em @(Model.LavadorObj.Lavador.DataAlteracao != null ? Model.LavadorObj.Lavador.DataAlteracao.Value.ToString("dd/MM/yy") : "")
-		                                            às @(Model.LavadorObj.Lavador.DataAlteracao != null ? Model.LavadorObj.Lavador.DataAlteracao.Value.ToString("HH:mm") : "")
-										</label>
-									</div>
-								</div>
-							}
-
-							<!-- Linha 6: Botões -->
-							<div class="form-group row mt-2">
-								<div class="col-12">
-									<div class="d-flex gap-2">
-										@if (Model.LavadorObj.Lavador.LavadorId != Guid.Empty)
-										{
-											<button type="submit"
-													asp-page-handler="Edit"
-													asp-route-id="@Model.LavadorObj.Lavador.LavadorId"
-													class="btn btn-azul form-control"
-													style="width:200px"
-													data-ejtip="Atualizar dados do lavador">
-												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Atualizar
-											</button>
-										}
-										else
-										{
-											<button type="submit"
-													asp-page-handler="Submit"
-													class="btn btn-azul form-control"
-													style="width:200px"
-													data-ejtip="Criar novo lavador">
-												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
-											</button>
-										}
-										<a asp-page="./Index" class="btn btn-vinho form-control" style="width:200px" data-ejtip="Voltar para a lista de lavadores">
-											<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
-										</a>
-									</div>
-								</div>
-							</div>
-						</div> <!-- /.col-12 pt-3 -->
-					</div> <!-- /.panel-content -->
-				</div> <!-- /#painelfundo -->
-			</div> <!-- /#panel-1 -->
-		</div> <!-- /.col-xl-12 -->
-	</div> <!-- /.row espacofundo -->
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
 
 @section ScriptsBlock {
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+        // --------- Máscara CPF ---------
+        function mascara(i) {
+            try {
+                var v = i.value || "";
+                v = v.replace(/\D/g, "");
 
-	<script src="~/js/dropify.min.js"></script>
+                if (v.length > 11) v = v.substring(0, 11);
 
-	<script>
-		// --------- Máscara CPF ---------
-		function mascara(i) {
-			try {
-				var v = i.value || "";
-				v = v.replace(/\D/g, "");
+                if (v.length > 9) {
+                    v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+                } else if (v.length > 6) {
+                    v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+                } else if (v.length > 3) {
+                    v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+                }
 
-				if (v.length > 11) v = v.substring(0, 11);
+                i.value = v;
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "mascara", error);
+            }
+        }
 
-				if (v.length > 9) {
-					v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
-				} else if (v.length > 6) {
-					v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
-				} else if (v.length > 3) {
-					v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
-				}
+        // --------- Preview da Foto ---------
+        $("#txtFile").on("change", function (event) {
+            try {
+                var files = event.target.files;
+                if (files && files[0]) {
+                    $("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtFile.change", error);
+            }
+        });
 
-				i.value = v;
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Upsert.cshtml", "mascara", error);
-			}
-		}
+        // --------- Inicialização ---------
+        $(document).ready(function () {
+            try {
+                const lavadorId = '@Model.LavadorObj.Lavador.LavadorId';
+                const idVazio = '00000000-0000-0000-0000-000000000000';
 
-		// --------- Preview da Foto + ajuste do painel ---------
-		$("#txtFile").on("change", function (event) {
-			try {
-				var files = event.target.files;
-				if (files && files[0]) {
-					$("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
-				}
-				$("#painelfundo").css({ "padding-bottom": "200px" });
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtFile.change", error);
-			}
-		});
-
-		// --------- Inicialização ---------
-		$(document).ready(function () {
-			try {
-				const lavadorId = '@Model.LavadorObj.Lavador.LavadorId';
-				const idVazio = '00000000-0000-0000-0000-000000000000';
-
-				if (lavadorId && lavadorId !== idVazio) {
-					// Edição: carrega foto do backend
-					$.ajax({
-						type: "GET",
-						url: "/api/Lavador/PegaFoto",
-						data: { id: lavadorId },
-						dataType: "json",
-						success: function (data) {
-							try {
-								if (data && data.foto) {
-									$('#imgViewer').attr('src', "data:image/jpg;base64," + data.foto);
-								} else {
-									$('#imgViewer').attr('src', "/Images/barbudo.jpg");
-								}
-							} catch (error) {
-								Alerta.TratamentoErroComLinha("Upsert.cshtml", "ajax.success", error);
-							}
-						},
-						error: function (xhr) {
-							try {
-								console.warn('Erro ao carregar foto:', xhr);
-								$('#imgViewer').attr('src', "/Images/barbudo.jpg");
-							} catch (error) {
-								Alerta.TratamentoErroComLinha("Upsert.cshtml", "ajax.error", error);
-							}
-						}
-					});
-				} else {
-					// Inserção: foto padrío + marca Status como ativo
-					$('#imgViewer').attr('src', "/Images/barbudo.jpg");
-					$('#chkStatus').prop('checked', true).trigger('change');
-				}
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Upsert.cshtml", "document.ready", error);
-			}
-		});
-	</script>
+                if (lavadorId && lavadorId !== idVazio) {
+                    // Edição: carrega foto do backend
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/Lavador/PegaFoto",
+                        data: { id: lavadorId },
+                        success: function (data) {
+                            try {
+                                if (data && data.foto) {
+                                    $('#imgViewer').attr('src', "data:image/jpg;base64," + data.foto);
+                                } else {
+                                    $('#imgViewer').attr('src', "/Images/barbudo.jpg");
+                                }
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "PegaFoto.success", error);
+                            }
+                        },
+                        error: function (xhr) {
+                            try {
+                                console.warn('Erro ao carregar foto:', xhr);
+                                $('#imgViewer').attr('src', "/Images/barbudo.jpg");
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("Upsert.cshtml", "PegaFoto.error", error);
+                            }
+                        }
+                    });
+                } else {
+                    // Inserção: foto padrão + marca Status como ativo
+                    $('#imgViewer').attr('src', "/Images/barbudo.jpg");
+                    $('#chkStatus').prop('checked', true);
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml", "document.ready", error);
+            }
+        });
+    </script>
 }
