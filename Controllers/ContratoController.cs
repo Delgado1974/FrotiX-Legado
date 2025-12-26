@@ -13,7 +13,7 @@ namespace FrotiX.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [IgnoreAntiforgeryToken]
-    public class ContratoController :Controller
+    public partial class ContratoController :Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly FrotiXDbContext _db;
@@ -741,20 +741,20 @@ namespace FrotiX.Controllers
                 var RepactuacaoList = (
                     from r in _unitOfWork.RepactuacaoContrato.GetAll()
                     where r.ContratoId == id
-                    orderby r.DataRepactuacao descending
+                    orderby r.DataRepactuacao descending, r.Prorrogacao descending
                     select new
                     {
-                        DataFormatada = r.DataRepactuacao?.ToString("dd/MM/yy") ,
-                        r.Descricao ,
-                        r.RepactuacaoContratoId ,
-                        Valor = r.Valor?.ToString("C") ,
-                        ValorMensal = (r.Valor / 12)?.ToString("C") ,
-                        r.Vigencia ,
-                        r.Prorrogacao ,
+                        DataFormatada = r.DataRepactuacao?.ToString("dd/MM/yy"),
+                        r.Descricao,
+                        r.RepactuacaoContratoId,
+                        Valor = r.Valor?.ToString("C"),
+                        ValorMensal = (r.Valor / 12)?.ToString("C"),
+                        r.Vigencia,
+                        r.Prorrogacao,
                         Repactuacao = "("
                             + r.DataRepactuacao?.ToString("dd/MM/yy")
                             + ") "
-                            + r.Descricao ,
+                            + r.Descricao,
                     }
                 ).ToList();
 
@@ -765,7 +765,7 @@ namespace FrotiX.Controllers
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("ContratoController.cs" , "RepactuacaoList" , error);
+                Alerta.TratamentoErroComLinha("ContratoController.cs", "RepactuacaoList", error);
                 return new JsonResult(new
                 {
                     sucesso = false
@@ -967,29 +967,37 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var result = (
-                    from ivc in _unitOfWork.ItemVeiculoContrato.GetAll()
-                    where ivc.RepactuacaoContratoId == repactuacaoContratoId
-                    orderby ivc.NumItem ascending
-                    select new
+                var itens = _unitOfWork.ItemVeiculoContrato.GetAll()
+                    .Where(ivc => ivc.RepactuacaoContratoId == repactuacaoContratoId)
+                    .ToList();
+
+                var veiculosComItem = _unitOfWork.Veiculo.GetAll()
+                    .Where(v => v.ItemVeiculoId != null)
+                    .Select(v => v.ItemVeiculoId)
+                    .ToList();
+
+                var result = itens
+                    .OrderBy(ivc => ivc.NumItem)
+                    .Select(ivc => new
                     {
-                        ivc.ItemVeiculoId ,
-                        ivc.RepactuacaoContratoId ,
-                        ivc.NumItem ,
-                        ivc.Descricao ,
-                        ivc.Quantidade ,
-                        valUnitario = ivc.ValorUnitario?.ToString("C") ,
-                        valTotal = (ivc.ValorUnitario * ivc.Quantidade)?.ToString("C") ,
-                    }
-                ).ToList().OrderBy(ivc => ivc.NumItem);
+                        ivc.ItemVeiculoId,
+                        ivc.RepactuacaoContratoId,
+                        ivc.NumItem,
+                        ivc.Descricao,
+                        ivc.Quantidade,
+                        valUnitario = ivc.ValorUnitario?.ToString("C"),
+                        valTotal = (ivc.ValorUnitario * ivc.Quantidade)?.ToString("C"),
+                        ExisteVeiculo = veiculosComItem.Contains(ivc.ItemVeiculoId)
+                    })
+                    .ToList();
 
                 return Json(result);
             }
             catch (Exception error)
             {
                 Alerta.TratamentoErroComLinha(
-                    "ContratoController.cs" ,
-                    "RecuperaItensUltimaRepactuacao" ,
+                    "ContratoController.cs",
+                    "RecuperaItensUltimaRepactuacao",
                     error
                 );
                 return StatusCode(500);
@@ -1000,36 +1008,182 @@ namespace FrotiX.Controllers
         [HttpGet]
         public IActionResult ListaItensRepactuacao(Guid repactuacaoContratoId)
         {
+            return RecuperaItensUltimaRepactuacao(repactuacaoContratoId);
+        }
+
+        [Route("RecuperaRepactuacaoCompleta")]
+        [HttpGet]
+        public IActionResult RecuperaRepactuacaoCompleta(Guid repactuacaoContratoId)
+        {
             try
             {
-                var result = (
-                    from veic in _unitOfWork.ViewExisteItemContrato.GetAll()
-                    where veic.RepactuacaoContratoId == repactuacaoContratoId
-                    orderby veic.NumItem ascending
-                    select new
-                    {
-                        veic.ItemVeiculoId ,
-                        veic.RepactuacaoContratoId ,
-                        veic.NumItem ,
-                        veic.Descricao ,
-                        veic.Quantidade ,
-                        valUnitario = veic.ValUnitario?.ToString("C") ,
-                        valTotal = (veic.ValUnitario * veic.Quantidade)?.ToString("C") ,
-                        veic.ExisteVeiculo ,
-                    }
-                ).ToList().OrderBy(ivc => ivc.NumItem);
+                var repactuacao = _unitOfWork.RepactuacaoContrato.GetFirstOrDefault(
+                    r => r.RepactuacaoContratoId == repactuacaoContratoId
+                );
 
-                return Json(result);
+                if (repactuacao == null)
+                {
+                    return Json(new { success = false, message = "Repactuação não encontrada" });
+                }
+
+                var contrato = _unitOfWork.Contrato.GetFirstOrDefault(
+                    c => c.ContratoId == repactuacao.ContratoId
+                );
+
+                object dadosEspecificos = null;
+                var tipoContrato = contrato?.TipoContrato?.ToLower() ?? "";
+
+                if (tipoContrato.Contains("terceiriz"))
+                {
+                    var terceirizacao = _unitOfWork.RepactuacaoTerceirizacao.GetFirstOrDefault(
+                        t => t.RepactuacaoContratoId == repactuacaoContratoId
+                    );
+                    if (terceirizacao != null)
+                    {
+                        dadosEspecificos = new
+                        {
+                            valorEncarregado = terceirizacao.ValorEncarregado,
+                            qtdEncarregados = terceirizacao.QtdEncarregados,
+                            valorOperador = terceirizacao.ValorOperador,
+                            qtdOperadores = terceirizacao.QtdOperadores,
+                            valorMotorista = terceirizacao.ValorMotorista,
+                            qtdMotoristas = terceirizacao.QtdMotoristas,
+                            valorLavador = terceirizacao.ValorLavador,
+                            qtdLavadores = terceirizacao.QtdLavadores
+                        };
+                    }
+                }
+                else if (tipoContrato.Contains("servic"))
+                {
+                    var servicos = _unitOfWork.RepactuacaoServicos.GetFirstOrDefault(
+                        s => s.RepactuacaoContratoId == repactuacaoContratoId
+                    );
+                    if (servicos != null)
+                    {
+                        dadosEspecificos = new { valor = servicos.Valor };
+                    }
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    repactuacao = new
+                    {
+                        repactuacao.RepactuacaoContratoId,
+                        repactuacao.ContratoId,
+                        repactuacao.DataRepactuacao,
+                        repactuacao.Descricao,
+                        repactuacao.Valor,
+                        repactuacao.Vigencia,
+                        repactuacao.Prorrogacao
+                    },
+                    tipoContrato = contrato?.TipoContrato,
+                    dadosEspecificos
+                });
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha(
-                    "ContratoController.cs" ,
-                    "ListaItensRepactuacao" ,
-                    error
-                );
+                Alerta.TratamentoErroComLinha("ContratoController.cs", "RecuperaRepactuacaoCompleta", error);
                 return StatusCode(500);
             }
         }
+
+        [Route("MoverVeiculosRepactuacao")]
+        [HttpPost]
+        public IActionResult MoverVeiculosRepactuacao([FromBody] MoverVeiculosViewModel model)
+        {
+            try
+            {
+                // Buscar a nova repactuação para obter o ContratoId
+                var novaRepactuacao = _unitOfWork.RepactuacaoContrato.GetFirstOrDefault(
+                    r => r.RepactuacaoContratoId == model.NovaRepactuacaoId
+                );
+
+                if (novaRepactuacao == null)
+                {
+                    return Json(new { success = false, message = "Nova repactuação não encontrada" });
+                }
+
+                // Buscar itens da nova repactuação
+                var itensNovos = _unitOfWork.ItemVeiculoContrato.GetAll()
+                    .Where(ivc => ivc.RepactuacaoContratoId == model.NovaRepactuacaoId)
+                    .ToList();
+
+                if (!itensNovos.Any())
+                {
+                    return Json(new { success = false, message = "Não há itens na nova repactuação" });
+                }
+
+                // Buscar TODAS as repactuações do mesmo contrato (exceto a nova)
+                var repactuacoesAnteriores = _unitOfWork.RepactuacaoContrato.GetAll()
+                    .Where(r => r.ContratoId == novaRepactuacao.ContratoId && 
+                                r.RepactuacaoContratoId != model.NovaRepactuacaoId)
+                    .Select(r => r.RepactuacaoContratoId)
+                    .ToList();
+
+                // Buscar TODOS os itens de TODAS as repactuações anteriores do contrato
+                var itensAnteriores = _unitOfWork.ItemVeiculoContrato.GetAll()
+                    .Where(ivc => repactuacoesAnteriores.Contains(ivc.RepactuacaoContratoId))
+                    .ToList();
+
+                if (!itensAnteriores.Any())
+                {
+                    return Json(new { success = false, message = "Não há itens nas repactuações anteriores" });
+                }
+
+                int veiculosMovidos = 0;
+
+                // Para cada item da nova repactuação, buscar itens correspondentes (mesmo NumItem) 
+                // em TODAS as repactuações anteriores
+                foreach (var itemNovo in itensNovos)
+                {
+                    // Buscar todos os itens anteriores com mesmo NumItem
+                    var itensCorrespondentes = itensAnteriores
+                        .Where(i => i.NumItem == itemNovo.NumItem)
+                        .ToList();
+
+                    foreach (var itemAnterior in itensCorrespondentes)
+                    {
+                        // Buscar veículos que têm ItemVeiculoId do item anterior
+                        var veiculos = _unitOfWork.Veiculo.GetAll()
+                            .Where(v => v.ItemVeiculoId == itemAnterior.ItemVeiculoId)
+                            .ToList();
+
+                        foreach (var veiculo in veiculos)
+                        {
+                            veiculo.ItemVeiculoId = itemNovo.ItemVeiculoId;
+                            _unitOfWork.Veiculo.Update(veiculo);
+                            veiculosMovidos++;
+                        }
+                    }
+                }
+
+                if (veiculosMovidos > 0)
+                {
+                    _unitOfWork.Save();
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"{veiculosMovidos} veículo(s) movido(s) para a nova repactuação"
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Nenhum veículo encontrado para mover" });
+                }
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ContratoController.cs", "MoverVeiculosRepactuacao", error);
+                return StatusCode(500);
+            }
+        }
+    }
+
+    // ViewModel para mover veículos entre repactuações
+    public class MoverVeiculosViewModel
+    {
+        public Guid RepactuacaoAnteriorId { get; set; }
+        public Guid NovaRepactuacaoId { get; set; }
     }
 }

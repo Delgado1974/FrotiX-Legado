@@ -207,7 +207,21 @@
                     { data: "origemVeiculo" },
                     { data: "sigla" },
                     { data: "descricao" },
-                    { data: "consumo" },
+                    { 
+                        data: "consumo",
+                        render: function (data)
+                        {
+                            try
+                            {
+                                if (data === null || data === undefined) return "0,00";
+                                return parseFloat(data).toFixed(2).replace(".", ",");
+                            } catch (error)
+                            {
+                                Alerta.TratamentoErroComLinha("veiculo_index.js", "consumo.render", error);
+                                return "0,00";
+                            }
+                        }
+                    },
                     { data: "quilometragem" },
                     { data: "veiculoReserva" },
                     {

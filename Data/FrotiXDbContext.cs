@@ -81,6 +81,19 @@ namespace FrotiX.Data
             get; set;
         }
 
+        // ============================================================
+        // ENCARREGADO - NOVO
+        // ============================================================
+        public DbSet<Encarregado> Encarregado
+        {
+            get; set;
+        }
+
+        public DbSet<EncarregadoContrato> EncarregadoContrato
+        {
+            get; set;
+        }
+
         public DbSet<Evento> Evento
         {
             get; set;
@@ -556,6 +569,13 @@ namespace FrotiX.Data
             modelBuilder
                 .Entity<OperadorContrato>()
                 .HasKey(oc => new { oc.OperadorId , oc.ContratoId });
+
+            // ============================================================
+            // ENCARREGADO CONTRATO - NOVO (Chave Composta)
+            // ============================================================
+            modelBuilder
+                .Entity<EncarregadoContrato>()
+                .HasKey(ec => new { ec.EncarregadoId , ec.ContratoId });
 
             modelBuilder
                 .Entity<LavadorContrato>()

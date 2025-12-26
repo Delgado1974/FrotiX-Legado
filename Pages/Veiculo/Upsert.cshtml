@@ -538,12 +538,12 @@
                                                 m => m.VeiculoObj.Veiculo.ContratoId,
                                                 Model.VeiculoObj.ContratoList,
                                                 "-- Selecione um Contrato --",
-                                                new { @class = "form-control form-control-xs", @id = "lstcontratos" }
+                                                new { @class = "form-control form-control-xs", @id = "lstcontratos", @style = "width:140%;" }
                                             )
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-3" style="margin-left:100px;">
                                         <div class="form-group">
                                             <label id="lblata" class="ftx-label">
                                                 <i class="fa-duotone fa-file-alt text-info"></i>
@@ -559,7 +559,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-3" style="margin-left:40px;">
                                         <div class="form-group">
                                             <label id="lblItemContrato" class="ftx-label">
                                                 <i class="fa-duotone fa-list-ol text-warning"></i>
@@ -567,7 +567,7 @@
                                             </label>
                                             <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoId"></span>
                                             @Html.Hidden("Veiculo_ItemId", Model.VeiculoObj.Veiculo.ItemVeiculoId)
-                                            <select id="lstItemVeiculo" name="VeiculoObj.Veiculo.ItemVeiculoId" class="form-control form-control-xs">
+                                            <select id="lstItemVeiculo" name="VeiculoObj.Veiculo.ItemVeiculoId" class="form-control form-control-xs" style="width:150%;">
                                                 <option value="">-- Selecione um Item Contratual --</option>
                                             </select>
 
@@ -577,13 +577,13 @@
                                             </label>
                                             <span class="text-danger" asp-validation-for="VeiculoObj.Veiculo.ItemVeiculoAtaId"></span>
                                             @Html.Hidden("Veiculo_ItemAtaId", Model.VeiculoObj.Veiculo.ItemVeiculoAtaId)
-                                            <select id="lstItemVeiculoAta" name="VeiculoObj.Veiculo.ItemVeiculoAtaId" class="form-control form-control-xs" style="display:none;">
+                                            <select id="lstItemVeiculoAta" name="VeiculoObj.Veiculo.ItemVeiculoAtaId" class="form-control form-control-xs" style="width:150%; display:none;">
                                                 <option value="">-- Selecione um Item da Ata --</option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-3" style="margin-left:90px;">
                                         <div class="form-group" id="divPatrimonio" style="display: none;">
                                             <label class="ftx-label">
                                                 <i class="fa-duotone fa-barcode text-success"></i>

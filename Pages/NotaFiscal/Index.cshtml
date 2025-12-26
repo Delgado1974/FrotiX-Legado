@@ -1,119 +1,478 @@
 @page
-@model FrotiX.Models.NotaFiscal
+@model FrotiX.Pages.NotaFiscal.IndexModel
 
 @{
-ViewData["Title"] = "Notas Fiscais";
-ViewData["PageName"] = "notafiscal_index";
-ViewData["Heading"] = "<i class='fad fa-file-invoice-dollar'></i> Cadastros: <span class='fw-300'>Notas Fiscais</span>";
-ViewData["Category1"] = "Cadastros";
-ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
+    ViewData["Title"] = "Notas Fiscais";
+    ViewData["PageName"] = "notafiscal_index";
+    ViewData["Heading"] = "<i class='fad fa-file-invoice-dollar'></i> Cadastros: <span class='fw-300'>Notas Fiscais</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
 }
 
 @section HeadBlock {
+    <style>
+        /* ===== CONTAINER DE FILTROS ===== */
+        .ftx-filtros-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border: 1px solid rgba(50, 93, 136, 0.12);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ftx-filtros-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #325d88;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-filtros-title i {
+            font-size: 1.2rem;
+            --fa-primary-color: #325d88;
+            --fa-secondary-color: #7a9cc6;
+        }
+
+        .ftx-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2d4559;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .ftx-label i {
+            font-size: 0.9rem;
+            --fa-primary-color: #3D5771;
+            --fa-secondary-color: #7a9cc6;
+        }
+
+        /* ===== DATATABLE ESTILIZADO ===== */
+        .ftx-datatable-wrapper {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Header do DataTable - 20% mais claro que o header da página */
+        .ftx-datatable-wrapper table.dataTable thead,
+        .ftx-datatable-wrapper .dataTable thead,
+        #tblNotaFiscal thead,
+        table.dataTable thead {
+            background: linear-gradient(135deg, #4a7ba8 0%, #3d6a94 100%) !important;
+        }
+
+        .ftx-datatable-wrapper table.dataTable thead th,
+        .ftx-datatable-wrapper .dataTable thead th,
+        #tblNotaFiscal thead th,
+        table.dataTable thead th {
+            color: #fff !important;
+            font-weight: 600 !important;
+            font-size: 0.8rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border: none !important;
+            padding: 0.875rem 0.75rem !important;
+            background: transparent !important;
+        }
+
+        .ftx-datatable-wrapper table.dataTable tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .ftx-datatable-wrapper table.dataTable tbody tr:hover {
+            background-color: rgba(50, 93, 136, 0.06) !important;
+        }
+
+        .ftx-datatable-wrapper table.dataTable tbody td {
+            vertical-align: middle;
+            padding: 0.75rem;
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* ===== PAGINAÇÃO ESTILIZADA ===== */
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button {
+            border-radius: 6px !important;
+            margin: 0 2px;
+            border: none !important;
+            padding: 6px 12px !important;
+            min-width: 36px !important;
+            text-align: center !important;
+        }
+
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button.current,
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: linear-gradient(135deg, #325d88 0%, #2a4d73 100%) !important;
+            color: #ffffff !important;
+            border: none !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+        }
+
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+            background: rgba(50, 93, 136, 0.1) !important;
+            color: #325d88 !important;
+            border: none !important;
+        }
+
+        .ftx-datatable-wrapper .dataTables_paginate .paginate_button.disabled {
+            color: #adb5bd !important;
+            cursor: not-allowed !important;
+        }
+
+        /* ===== BOTÕES DE AÇÃO FROTIX ===== */
+        .ftx-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        .btn-icon-28 {
+            width: var(--ftx-icon-btn, 28px);
+            height: var(--ftx-icon-btn, 28px);
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .btn-icon-28:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-icon-28 i {
+            font-size: var(--ftx-action-icon, 0.90rem);
+        }
+
+        .btn-icon-28.btn-azul {
+            box-shadow: 0 2px 6px rgba(61, 87, 113, 0.4);
+        }
+
+        .btn-icon-28.btn-azul:hover {
+            box-shadow: 0 4px 12px rgba(61, 87, 113, 0.6);
+        }
+
+        .btn-icon-28.btn-vinho {
+            box-shadow: 0 2px 6px rgba(114, 47, 55, 0.4);
+        }
+
+        .btn-icon-28.btn-vinho:hover {
+            box-shadow: 0 4px 12px rgba(114, 47, 55, 0.6);
+        }
+
+        .btn-icon-28.btn-dark {
+            background: linear-gradient(135deg, #343a40 0%, #23272b 100%);
+            box-shadow: 0 2px 6px rgba(52, 58, 64, 0.4);
+        }
+
+        .btn-icon-28.btn-dark:hover {
+            box-shadow: 0 4px 12px rgba(52, 58, 64, 0.6);
+        }
+
+        .btn-icon-28.btn-terracota {
+            background: linear-gradient(135deg, #b45a3c 0%, #8f4830 100%);
+            box-shadow: 0 2px 6px rgba(180, 90, 60, 0.4);
+        }
+
+        .btn-icon-28.btn-terracota:hover {
+            box-shadow: 0 4px 12px rgba(180, 90, 60, 0.6);
+        }
+
+        /* ===== PADRÃO FROTIX - MODAL HEADER ===== */
+        .ftx-modal-header {
+            background: linear-gradient(135deg, #2d5a87 0%, #3a6d9e 50%, #2d5a87 100%);
+            background-size: 200% 200%;
+            animation: ftxHeaderGradientShift 6s ease infinite;
+            color: #fff;
+            border-bottom: none;
+            padding: 1rem 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            animation: ftxHeaderShine 5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .ftx-modal-header .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ftx-modal-header .modal-title i {
+            font-size: 1.3rem;
+            --fa-primary-color: #ffd700;
+            --fa-secondary-color: #fff;
+            animation: ftxHeaderIconPulse 2s ease-in-out infinite;
+        }
+
+        .ftx-modal-header .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.85;
+        }
+
+        .ftx-modal-header .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        /* ===== VARIAÇÕES DE COR DO MODAL HEADER ===== */
+        /* Terracota (Glosa, Exclusão) */
+        .ftx-modal-header-terracota {
+            background: linear-gradient(135deg, #b45a3c 0%, #c96d4e 50%, #b45a3c 100%);
+        }
+
+        /* Vinho (Alertas, Erros) */
+        .ftx-modal-header-vinho {
+            background: linear-gradient(135deg, #722f37 0%, #8b3a44 50%, #722f37 100%);
+        }
+
+        /* Verde (Sucesso, Confirmação) */
+        .ftx-modal-header-verde {
+            background: linear-gradient(135deg, #2e7d32 0%, #388e3c 50%, #2e7d32 100%);
+        }
+
+        /* Laranja (Avisos) */
+        .ftx-modal-header-laranja {
+            background: linear-gradient(135deg, #e65100 0%, #ef6c00 50%, #e65100 100%);
+        }
+
+        @@keyframes ftxHeaderGradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @@keyframes ftxHeaderShine {
+            0%, 100% { left: -100%; }
+            50% { left: 100%; }
+        }
+
+        @@keyframes ftxHeaderIconPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            }
+            50% { 
+                transform: scale(1.08); 
+                filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+            }
+        }
+
+        /* Manter compatibilidade com classe antiga */
+        .modal-header-glosa {
+            background: linear-gradient(135deg, #b45a3c 0%, #c96d4e 50%, #b45a3c 100%);
+            background-size: 200% 200%;
+            animation: ftxHeaderGradientShift 6s ease infinite;
+            color: #fff;
+            border-bottom: none;
+            padding: 1rem 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header-glosa::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            animation: ftxHeaderShine 5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .modal-header-glosa .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-header-glosa .modal-title i {
+            font-size: 1.3rem;
+            --fa-primary-color: #ffd700;
+            --fa-secondary-color: #fff;
+            animation: ftxHeaderIconPulse 2s ease-in-out infinite;
+        }
+
+        .modal-header-glosa .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.85;
+        }
+
+        .modal-header-glosa .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        /* ===== FORM CONTROL MODERNIZADO ===== */
+        .ftx-form-control {
+            height: calc(1.3em + 0.95rem + 2px) !important;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.875rem !important;
+            line-height: 1.5;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+
+        .ftx-form-control:focus {
+            border-color: #2d5a87;
+            box-shadow: 0 0 0 3px rgba(45, 90, 135, 0.15);
+            outline: none;
+        }
+
+        /* ===== BOTÃO TERRACOTA ===== */
+        .btn-terracota {
+            background: linear-gradient(135deg, #b45a3c 0%, #8f4830 100%);
+            color: #fff !important;
+            border: none;
+        }
+
+        .btn-terracota:hover {
+            background: linear-gradient(135deg, #c96d4e 0%, #a05539 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(180, 90, 60, 0.4);
+        }
+    </style>
 }
-
-<style>
-    .fundo-cinza {
-        background-color: #2F4F4F;
-        color: aliceblue;
-    }
-
-    .form-control-xs {
-        height: calc(1em + .775rem + 2px) !important;
-        padding: .125rem .25rem !important;
-        font-size: .75rem !important;
-        line-height: 1.5;
-        border-radius: .2rem;
-    }
-
-    .label {
-        margin-bottom: -5px;
-        margin-top: 10px;
-    }
-</style>
 
 <div class="row">
     <div class="col-xl-12">
-        <div id="panel-1" class="panel">
+        <div id="panel-1" class="panel ftx-card-styled">
             <div class="panel-container show">
-                <div class="panel-content float-right">
-                    <a href="/NotaFiscal/Upsert" class="btn btn-azul">
-                        <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>&nbsp; Adicionar Nota Fiscal
-                    </a>
+                <!-- ===== HEADER PADRÃO FROTIX ===== -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-file-invoice-dollar"></i>
+                        Gestão de Notas Fiscais
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/NotaFiscal/Upsert" class="btn btn-header-orange">
+                            <i class="fa-duotone fa-file-circle-plus icon-pulse"></i> Adicionar Nota Fiscal
+                        </a>
+                    </div>
                 </div>
-
-                <br /><br />
 
                 <div class="panel-content">
                     <div class="box-body">
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="text-primary">
-                                Escolha um Contrato/Empenho para visualizar suas Notas Fiscais:
-                            </h2>
-                        </div>
+                        <!-- ===== CONTAINER DE FILTROS ===== -->
+                        <div class="ftx-filtros-container">
+                            <div class="ftx-filtros-title">
+                                <i class="fa-duotone fa-filter-list"></i>
+                                Escolha um Instrumento para visualizar suas Notas Fiscais
+                            </div>
 
-                        <div class="col-12">
-                            <div class="form-group row">
-                                <div class="col-1">
-                                    <div class="form-group">
-                                        <label class="label font-weight-bold">Contrato/Ata</label>
-                                        <select id="lstInstrumento" class="form-control form-control-sm">
-                                            <option value="">-- Selecione um Instrumento --</option>
-                                            <option value="0">Contrato</option>
-                                            <option value="1">Ata de Registro de Preços</option>
-                                        </select>
-                                    </div>
+                            <div class="row g-3">
+                                <div class="col-md-2">
+                                    <label class="ftx-label">
+                                        <i class="fa-duotone fa-file-contract"></i> Instrumento
+                                    </label>
+                                    <select id="lstInstrumento" class="form-select form-select-sm">
+                                        <option value="">-- Selecione --</option>
+                                        <option value="0">Contrato</option>
+                                        <option value="1">Ata de Registro de Preços</option>
+                                    </select>
                                 </div>
 
-                                <div id="divContrato" class="form-group row">
-                                    <div class="col-2">
-                                        <div class="form-group">
-                                            <label class="label font-weight-bold">Status...</label>
-                                            <select id="lstStatusContrato" class="form-control form-control-sm">
+                                <!-- Filtros de Contrato -->
+                                <div id="divContrato" class="col-md-10" style="display:none">
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-toggle-on"></i> Status
+                                            </label>
+                                            <select id="lstStatusContrato" class="form-select form-select-sm">
                                                 <option value="1">Ativo</option>
                                                 <option value="0">Inativo</option>
                                             </select>
                                         </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="label font-weight-bold">Contratos</label>
-                                        <select id="ListaContratos" name="ListaContratos" class="form-control form-control-sm">
-                                            <option value="">-- Selecione um Contrato --</option>
-                                        </select>
+                                        <div class="col-md-5">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-file-signature"></i> Contratos
+                                            </label>
+                                            <select id="ListaContratos" name="ListaContratos" class="form-select form-select-sm">
+                                                <option value="">-- Selecione um Contrato --</option>
+                                            </select>
+                                        </div>
+                                        <div id="divEmpenhosContrato" class="col-md-5" style="display:none">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-money-check-dollar"></i> Empenhos
+                                            </label>
+                                            <select id="ListaEmpenhosContrato" name="ListaEmpenhosContrato" class="form-select form-select-sm">
+                                                <option value="">-- Selecione um Empenho --</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div id="divAta" class="form-group row">
-                                    <div class="col-2">
-                                        <div class="form-group">
-                                            <label class="label font-weight-bold">Status...</label>
-                                            <select id="lstStatusAta" class="form-control form-control-sm">
+                                <!-- Filtros de Ata -->
+                                <div id="divAta" class="col-md-10" style="display:none">
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-toggle-on"></i> Status
+                                            </label>
+                                            <select id="lstStatusAta" class="form-select form-select-sm">
                                                 <option value="1">Ativa</option>
                                                 <option value="0">Inativa</option>
                                             </select>
                                         </div>
+                                        <div class="col-md-5">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-clipboard-list-check"></i> Atas de Registro de Preço
+                                            </label>
+                                            <select id="ListaAtas" name="ListaAtas" class="form-select form-select-sm">
+                                                <option value="">-- Selecione uma Ata --</option>
+                                            </select>
+                                        </div>
+                                        <div id="divEmpenhosAta" class="col-md-5" style="display:none">
+                                            <label class="ftx-label">
+                                                <i class="fa-duotone fa-money-check-dollar"></i> Empenhos
+                                            </label>
+                                            <select id="ListaEmpenhosAta" name="ListaEmpenhosAta" class="form-select form-select-sm">
+                                                <option value="">-- Selecione um Empenho --</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-6">
-                                        <label class="label font-weight-bold">Atas de Registro de Preços</label>
-                                        <select id="ListaAtas" name="ListaAtas" class="form-control form-control-sm">
-                                            <option value="">-- Selecione uma Ata --</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-4">
-                                    <label class="label font-weight-bold">Empenhos</label>
-                                    <select id="ListaEmpenhos" name="ListaEmpenhos" class="form-control form-control-sm">
-                                        <option value="">-- Selecione um Empenho --</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>
 
-                        <br /><br />
-
-                        <div id="divNF" hidden="hidden">
-                            <table id="tblNotaFiscal" class="table table-bordered table-striped" width="100%">
+                        <!-- ===== DATATABLE ===== -->
+                        <div id="divNF" class="ftx-datatable-wrapper" style="display:none">
+                            <table id="tblNotaFiscal" class="table table-bordered table-striped w-100">
                                 <thead>
                                     <tr>
                                         <th>Número da Nota</th>
@@ -122,13 +481,12 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
                                         <th>Objeto</th>
                                         <th>Tipo NF</th>
                                         <th>Valor de Glosa</th>
-                                        <th>Ação</th>
+                                        <th>Ações</th>
                                         <th>ContratoId</th>
                                         <th>EmpenhoId</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
 
@@ -139,62 +497,96 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
     </div>
 </div>
 
-<!-- Modal Glosa -->
-<div class="modal fade" id="modalglosa">
-    <div class="modal-dialog modal-lg" role="document">
+<!-- ===== MODAL GLOSA ===== -->
+<div class="modal fade" id="modalglosa" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1">
+    <div class="modal-dialog modal-lg" role="dialog">
         <div class="modal-content">
-
-            <!-- Modal Header -->
-            <div class="modal-header modal-header-dinheiro">
-                <h4 class="modal-title" id="DynamicModalLabel">Glosar Valores da Nota</h4>
+            <div class="modal-header modal-header-glosa">
+                <h5 class="modal-title" id="DynamicModalLabel">
+                    <i class="fa-duotone fa-file-invoice-dollar"></i>
+                    <span>Glosar Valores da Nota</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
 
-            <div class="modal-body table-bordered">
+            <div class="modal-body">
                 <form id="frmglosa">
                     <input type="hidden" id="txtNotaId" />
                     <input type="hidden" id="txtNotaFiscal" />
+                    <input type="hidden" id="hdnModoGlosa" value="substituir" />
 
-                    <div class="row">
-                        <div class="col-7">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Motivo da Glosa</label>
-                                <span class="text-danger"></span>
-                                <input id="txtMotivoGlosa" class="form-control form-control-xs" />
+                    <!-- Alerta de Glosa Existente -->
+                    <div id="divGlosaExistente" class="alert alert-warning mb-3" style="display:none;">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-duotone fa-triangle-exclamation me-2 fs-4"></i>
+                            <strong>Esta nota já possui uma glosa!</strong>
+                        </div>
+                        <p class="mb-2">
+                            Valor atual da glosa: <strong id="lblGlosaAtual">R$ 0,00</strong><br>
+                            Motivo: <span id="lblMotivoAtual">-</span>
+                        </p>
+                        <hr>
+                        <p class="mb-2"><strong>O que deseja fazer com a nova glosa?</strong></p>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rdModoGlosa" id="rdSomar" value="somar">
+                                <label class="form-check-label" for="rdSomar">
+                                    <i class="fa-duotone fa-plus-circle text-success me-1"></i>
+                                    <strong>Somar</strong>&nbsp;à glosa existente
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rdModoGlosa" id="rdSubstituir" value="substituir" checked>
+                                <label class="form-check-label" for="rdSubstituir">
+                                    <i class="fa-duotone fa-arrows-rotate text-primary me-1"></i>
+                                    <strong>Substituir</strong>&nbsp;a glosa existente
+                                </label>
                             </div>
                         </div>
                     </div>
 
-                    <br />
-
-                    <div class="row">
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Valor da Glosa</label>
-                                <span class="text-danger"></span>
-                                <input id="txtValorGlosa" class="form-control form-control-xs" data-inputmask="'alias': 'currency'" style="text-align: right;" onkeypress="return(moeda(this,'.',',',event))" />
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-text"></i> Motivo da Glosa
+                            </label>
+                            <input id="txtMotivoGlosaModal" class="form-control ftx-form-control" placeholder="Informe o motivo da glosa..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="ftx-label">
+                                <i class="fa-duotone fa-coins"></i> Valor da Glosa
+                            </label>
+                            <input id="txtValorGlosaModal" 
+                                   class="form-control ftx-form-control" 
+                                   style="text-align: right; font-weight: 600; color: #722f37;" 
+                                   onkeypress="return moeda(this,'.',',',event)"
+                                   placeholder="0,00" />
                         </div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button id="btnglosar" class="btn btn-azul form-control" type="submit" value="SUBMIT">
-                            <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Glosar Nota
-                        </button>
-                        <button type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal">
-                            <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancelar
-                        </button>
+                    <!-- Preview do resultado -->
+                    <div id="divPreviewGlosa" class="mt-3 p-3 bg-light rounded" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fa-duotone fa-calculator me-2"></i> Valor final da glosa:</span>
+                            <strong id="lblPreviewGlosa" class="fs-5 text-danger">R$ 0,00</strong>
+                        </div>
                     </div>
                 </form>
             </div>
 
+            <div class="modal-footer">
+                <button id="btnglosar" class="btn btn-terracota" type="button">
+                    <i class="fa-duotone fa-file-check icon-space"></i> Glosar Nota
+                </button>
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark icon-space"></i> Cancelar
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 @section ScriptsBlock {
-
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <script src="~/js/cadastros/notafiscal.js" asp-append-version="true"></script>
 
@@ -245,39 +637,115 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
                 Alerta.TratamentoErroComLinha("Index.cshtml", "moeda", error);
             }
         }
+
+        // ===== FUNÇÃO PARA RENDERIZAR BOTÕES DE AÇÃO =====
+        function renderActionButtons(data) {
+            return `<div class="ftx-actions">
+                        <a href="/NotaFiscal/Upsert?id=${data}" 
+                           class="btn btn-icon-28 btn-azul text-white">
+                            <i class="fa-duotone fa-pen-to-square"></i>
+                        </a>
+                        <a class="btn btn-icon-28 btn-vinho btn-delete text-white" 
+                           data-id="${data}">
+                            <i class="fa-duotone fa-trash-can"></i>
+                        </a>
+                        <a class="btn btn-icon-28 btn-terracota btn-glosa text-white" 
+                           data-id="${data}">
+                            <i class="fa-duotone fa-file-invoice-dollar"></i>
+                        </a>
+                    </div>`;
+        }
+
+        // ===== CONFIGURAÇÃO DO DATATABLE =====
+        function getDataTableConfig(url, dataParam) {
+            return {
+                columnDefs: [
+                    { targets: 0, className: "text-center", width: "8%" },
+                    { targets: 1, className: "text-center", width: "10%" },
+                    { targets: 2, className: "text-end", width: "10%" },
+                    { targets: 3, className: "text-start", width: "20%" },
+                    { targets: 4, className: "text-center", width: "10%" },
+                    { targets: 5, className: "text-end", width: "10%" },
+                    { targets: 6, className: "text-center", width: "12%" },
+                    { targets: 7, className: "text-center", visible: false },
+                    { targets: 8, className: "text-center", visible: false }
+                ],
+                responsive: true,
+                ajax: {
+                    url: url,
+                    data: dataParam,
+                    type: "GET",
+                    datatype: "json"
+                },
+                columns: [
+                    { data: "numeroNF" },
+                    { data: "dataFormatada" },
+                    { data: "valorNFFormatado" },
+                    { data: "objeto" },
+                    { data: "tipoNF" },
+                    { data: "valorGlosaFormatado" },
+                    {
+                        data: "notaFiscalId",
+                        render: function (data) {
+                            return renderActionButtons(data);
+                        }
+                    },
+                    { data: "contratoId" },
+                    { data: "empenhoId" }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                    emptyTable: "Nenhuma Nota Fiscal encontrada"
+                },
+                width: "100%"
+            };
+        }
     </script>
 
     <script>
         $(document).ready(function () {
             try {
-                document.getElementById("divContrato").style.display = "none";
-                document.getElementById("divAta").style.display = "none";
+                // ===== CONTROLE DE VISIBILIDADE DOS FILTROS =====
+                $("#divContrato, #divAta, #divEmpenhosContrato, #divEmpenhosAta").hide();
 
                 $("#lstInstrumento").on("change", function () {
                     try {
-                        if ($("#lstInstrumento").val() === "0") {
-                            document.getElementById("divContrato").style.display = "block";
-                            document.getElementById("divAta").style.display = "none";
+                        const valor = $(this).val();
+                        
+                        if (valor === "0") {
+                            $("#divContrato").show();
+                            $("#divAta, #divEmpenhosContrato, #divEmpenhosAta").hide();
                             $("#ListaContratos").empty();
+                            $("#ListaEmpenhosContrato").empty().append('<option value="">-- Selecione um Empenho --</option>');
                             loadListaContratos(1);
-                        }
-
-                        if ($("#lstInstrumento").val() === "1") {
-                            document.getElementById("divAta").style.display = "block";
-                            document.getElementById("divContrato").style.display = "none";
+                        } else if (valor === "1") {
+                            $("#divAta").show();
+                            $("#divContrato, #divEmpenhosContrato, #divEmpenhosAta").hide();
                             $("#ListaAtas").empty();
+                            $("#ListaEmpenhosAta").empty().append('<option value="">-- Selecione um Empenho --</option>');
                             loadListaAtas(1);
+                        } else {
+                            $("#divContrato, #divAta, #divEmpenhosContrato, #divEmpenhosAta").hide();
                         }
+                        
+                        // Limpar e esconder tabela ao trocar instrumento
+                        resetNFTable();
+                        $("#divNF").hide();
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "lstInstrumento.change", error);
                     }
                 });
 
+                // ===== FILTROS DE STATUS =====
                 $("#lstStatusContrato").on("change", function () {
                     try {
                         var status = $(this).val();
                         $("#ListaContratos").empty();
+                        $("#ListaEmpenhosContrato").empty().append('<option value="">-- Selecione um Empenho --</option>');
+                        $("#divEmpenhosContrato").hide();
                         loadListaContratos(status);
+                        resetNFTable();
+                        $("#divNF").hide();
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "lstStatusContrato.change", error);
                     }
@@ -287,18 +755,23 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
                     try {
                         var status = $(this).val();
                         $("#ListaAtas").empty();
+                        $("#ListaEmpenhosAta").empty().append('<option value="">-- Selecione um Empenho --</option>');
+                        $("#divEmpenhosAta").hide();
                         loadListaAtas(status);
+                        resetNFTable();
+                        $("#divNF").hide();
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "lstStatusAta.change", error);
                     }
                 });
 
+                // ===== CARREGAR LISTAS =====
                 function loadListaContratos(status) {
                     try {
                         $.ajax({
                             type: "get",
-                            url: "/api/Contrato/ListaContratos",
-                            data: { id: status },
+                            url: "/api/Contrato/ListaContratosPorStatus",
+                            data: { status: status },
                             success: function (res) {
                                 try {
                                     var option = '<option value="">-- Selecione um Contrato --</option>';
@@ -325,8 +798,8 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
                     try {
                         $.ajax({
                             type: "get",
-                            url: "/api/AtaRegistroPrecos/ListaAtas",
-                            data: { id: status },
+                            url: "/api/AtaRegistroPrecos/ListaAtasPorStatus",
+                            data: { status: status },
                             success: function (res) {
                                 try {
                                     var option = '<option value="">-- Selecione uma Ata --</option>';
@@ -359,284 +832,345 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
                     }
                 }
 
+                // ===== EVENTOS DE SELEÇÃO DE CONTRATO =====
                 $("#ListaContratos").on("change", function () {
                     try {
                         var contrato = $(this).val();
-                        GetEmpenhoList(contrato);
-
-                        resetNFTable();
-                        $("#divNF").removeAttr("hidden");
-
-                        $("#tblNotaFiscal").DataTable({
-                            columnDefs: [
-                                { targets: 0, className: "text-center", width: "6%" },
-                                { targets: 1, className: "text-center", width: "7%" },
-                                { targets: 2, className: "text-right", width: "8%" },
-                                { targets: 3, className: "text-left", width: "6%" },
-                                { targets: 4, className: "text-left", width: "6%" },
-                                { targets: 5, className: "text-right", width: "6%" },
-                                { targets: 6, className: "text-center", width: "8%" },
-                                { targets: 7, className: "text-center", width: "10%", visible: false },
-                                { targets: 8, className: "text-center", width: "10%", visible: false }
-                            ],
-                            responsive: true,
-                            ajax: {
-                                url: "/api/notafiscal/nfcontratos",
-                                data: { id: contrato },
-                                type: "GET",
-                                datatype: "json"
-                            },
-                            columns: [
-                                { data: "numeroNF" },
-                                { data: "dataFormatada" },
-                                { data: "valorNFFormatado" },
-                                { data: "objeto" },
-                                { data: "tipoNF" },
-                                { data: "valorGlosaFormatado" },
-                                {
-                                    data: "notaFiscalId",
-                                    render: function (data) {
-                                        return `<div class="text-center">
-                                                    <a href="/NotaFiscal/Upsert?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-                                                        <i class="far fa-edit"></i>
-                                                    </a>
-                                                    <a class="btn btn-delete btn-vinho text-white" data-ejtip="Excluir a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
-                                                        <i class="far fa-trash-alt"></i>
-                                                    </a>
-                                                    <a class="btn btn-glosa btn-dark text-white" data-bs-toggle="modal" data-bs-target="#modalglosa" id="rowdata" data-ejtip="Glosar Nota" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
-                                                        <i class="far fa-ballot-check"></i>
-                                                    </a>
-                                                </div>`;
-                                    }
-                                },
-                                { data: "contratoId" },
-                                { data: "empenhoId" }
-                            ],
-                            language: {
-                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-                                emptyTable: "Sem Dados para Exibição"
-                            },
-                            width: "100%"
+                        
+                        if (!contrato) {
+                            $("#ListaEmpenhosContrato").empty().append('<option value="">-- Selecione um Empenho --</option>');
+                            $("#divEmpenhosContrato").hide();
+                            resetNFTable();
+                            $("#divNF").hide();
+                            return;
+                        }
+                        
+                        // Carregar lista de empenhos do contrato e mostrar div
+                        GetEmpenhoList(contrato, "#ListaEmpenhosContrato", function() {
+                            $("#divEmpenhosContrato").show();
                         });
+
+                        // Carregar notas fiscais do contrato
+                        resetNFTable();
+                        $("#divNF").show();
+
+                        $("#tblNotaFiscal").DataTable(getDataTableConfig("/api/notafiscal/nfcontratos", { id: contrato }));
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "ListaContratos.change", error);
                     }
                 });
 
+                // ===== EVENTOS DE SELEÇÃO DE ATA =====
                 $("#ListaAtas").on("change", function () {
                     try {
                         var ata = $(this).val();
-                        GetEmpenhoListAta(ata);
-
-                        resetNFTable();
-                        $("#divNF").removeAttr("hidden");
-
-                        $("#tblNotaFiscal").DataTable({
-                            columnDefs: [
-                                { targets: 0, className: "text-center", width: "6%" },
-                                { targets: 1, className: "text-center", width: "7%" },
-                                { targets: 2, className: "text-right", width: "8%" },
-                                { targets: 3, className: "text-left", width: "6%" },
-                                { targets: 4, className: "text-left", width: "6%" },
-                                { targets: 5, className: "text-right", width: "6%" },
-                                { targets: 6, className: "text-center", width: "8%" },
-                                { targets: 7, className: "text-center", width: "10%", visible: false },
-                                { targets: 8, className: "text-center", width: "10%", visible: false }
-                            ],
-                            responsive: true,
-                            ajax: {
-                                url: "/api/notafiscal/nfatas",
-                                data: { id: ata },
-                                type: "GET",
-                                datatype: "json"
-                            },
-                            columns: [
-                                { data: "numeroNF" },
-                                { data: "dataFormatada" },
-                                { data: "valorNFFormatado" },
-                                { data: "objeto" },
-                                { data: "tipoNF" },
-                                { data: "valorGlosaFormatado" },
-                                {
-                                    data: "notaFiscalId",
-                                    render: function (data) {
-                                        return `<div class="text-center">
-                                                    <a href="/NotaFiscal/Upsert?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-                                                        <i class="far fa-edit"></i>
-                                                    </a>
-                                                    <a class="btn btn-delete btn-vinho text-white" data-ejtip="Excluir a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
-                                                        <i class="far fa-trash-alt"></i>
-                                                    </a>
-                                                    <a class="btn btn-glosa btn-dark text-white" data-bs-toggle="modal" data-bs-target="#modalglosa" id="rowdata" data-ejtip="Glosar Nota" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
-                                                        <i class="far fa-ballot-check"></i>
-                                                    </a>
-                                                </div>`;
-                                    }
-                                },
-                                { data: "contratoId" },
-                                { data: "empenhoId" }
-                            ],
-                            language: {
-                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-                                emptyTable: "Sem Dados para Exibição"
-                            },
-                            width: "100%"
+                        
+                        if (!ata) {
+                            $("#ListaEmpenhosAta").empty().append('<option value="">-- Selecione um Empenho --</option>');
+                            $("#divEmpenhosAta").hide();
+                            resetNFTable();
+                            $("#divNF").hide();
+                            return;
+                        }
+                        
+                        // Carregar lista de empenhos da ata e mostrar div
+                        GetEmpenhoListAta(ata, "#ListaEmpenhosAta", function() {
+                            $("#divEmpenhosAta").show();
                         });
+
+                        // Carregar notas fiscais da ata (usar API correta)
+                        resetNFTable();
+                        $("#divNF").show();
+
+                        // Nota: se existir api/notafiscal/nfatas, usar ela. Senão, usar nfcontratos
+                        $("#tblNotaFiscal").DataTable(getDataTableConfig("/api/notafiscal/nfcontratos", { id: ata }));
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "ListaAtas.change", error);
                     }
                 });
 
-                $("#ListaEmpenhos").on("change", function () {
+                // ===== EVENTOS DE SELEÇÃO DE EMPENHO =====
+                $("#ListaEmpenhosContrato, #ListaEmpenhosAta").on("change", function () {
                     try {
                         var empenho = $(this).val();
 
+                        if (!empenho) return;
+
                         resetNFTable();
 
-                        $("#tblNotaFiscal").DataTable({
-                            columnDefs: [
-                                { targets: 0, className: "text-center", width: "6%" },
-                                { targets: 1, className: "text-center", width: "7%" },
-                                { targets: 2, className: "text-right", width: "8%" },
-                                { targets: 3, className: "text-left", width: "6%" },
-                                { targets: 4, className: "text-left", width: "6%" },
-                                { targets: 5, className: "text-right", width: "6%" },
-                                { targets: 6, className: "text-center", width: "8%" },
-                                { targets: 7, className: "text-center", width: "10%", visible: false },
-                                { targets: 8, className: "text-center", width: "10%", visible: false }
-                            ],
-                            responsive: true,
-                            ajax: {
-                                url: "/api/notafiscal/nfempenhos",
-                                data: { id: empenho },
-                                type: "GET",
-                                datatype: "json"
-                            },
-                            columns: [
-                                { data: "numeroNF" },
-                                { data: "dataFormatada" },
-                                { data: "valorNFFormatado" },
-                                { data: "objeto" },
-                                { data: "tipoNF" },
-                                { data: "valorGlosaFormatado" },
-                                {
-                                    data: "notaFiscalId",
-                                    render: function (data) {
-                                        return `<div class="text-center">
-                                                    <a href="/NotaFiscal/Upsert?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-                                                        <i class="far fa-edit"></i>
-                                                    </a>
-                                                    <a class="btn btn-delete btn-vinho text-white" data-ejtip="Excluir a Nota Fiscal" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
-                                                        <i class="far fa-trash-alt"></i>
-                                                    </a>
-                                                    <a class="btn btn-glosa btn-dark text-white" data-bs-toggle="modal" data-bs-target="#modalglosa" id="rowdata" data-ejtip="Glosar Nota" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id="${data}">
-                                                        <i class="far fa-ballot-check"></i>
-                                                    </a>
-                                                </div>`;
-                                    }
-                                },
-                                { data: "contratoId" },
-                                { data: "empenhoId" }
-                            ],
-                            language: {
-                                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-                                emptyTable: "Sem Dados para Exibição"
-                            },
-                            width: "100%"
-                        });
+                        $("#tblNotaFiscal").DataTable(getDataTableConfig("/api/notafiscal/nfempenhos", { id: empenho }));
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "ListaEmpenhos.change", error);
                     }
                 });
+
+                // ===== FUNÇÕES AUXILIARES PARA CARREGAR EMPENHOS =====
+                function GetEmpenhoList(id, targetSelect, callback) {
+                    try {
+                        $.ajax({
+                            url: "/api/NotaFiscal/EmpenhoList",
+                            method: "GET",
+                            data: { id: id },
+                            success: function (res) {
+                                try {
+                                    var option = '<option value="">-- Selecione um Empenho --</option>';
+                                    if (res != null && res.data.length) {
+                                        res.data.forEach(function (obj) {
+                                            option += '<option value="' + obj.empenhoId + '">' + obj.notaEmpenho + '</option>';
+                                        });
+                                    }
+                                    $(targetSelect).empty().append(option);
+                                    
+                                    // Executar callback se fornecido
+                                    if (typeof callback === 'function') {
+                                        callback();
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "GetEmpenhoList.success", error);
+                                }
+                            },
+                            error: function (error) {
+                                Alerta.TratamentoErroComLinha("Index.cshtml", "GetEmpenhoList.ajax", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "GetEmpenhoList", error);
+                    }
+                }
+
+                function GetEmpenhoListAta(id, targetSelect, callback) {
+                    try {
+                        $.ajax({
+                            url: "/api/NotaFiscal/EmpenhoListAta",
+                            method: "GET",
+                            data: { id: id },
+                            success: function (res) {
+                                try {
+                                    var option = '<option value="">-- Selecione um Empenho --</option>';
+                                    if (res != null && res.data.length) {
+                                        res.data.forEach(function (obj) {
+                                            option += '<option value="' + obj.empenhoId + '">' + obj.notaEmpenho + '</option>';
+                                        });
+                                    }
+                                    $(targetSelect).empty().append(option);
+                                    
+                                    // Executar callback se fornecido
+                                    if (typeof callback === 'function') {
+                                        callback();
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Index.cshtml", "GetEmpenhoListAta.success", error);
+                                }
+                            },
+                            error: function (error) {
+                                Alerta.TratamentoErroComLinha("Index.cshtml", "GetEmpenhoListAta.ajax", error);
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", "GetEmpenhoListAta", error);
+                    }
+                }
 
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
             }
         });
 
-        $(document).on("click", ".btn-glosa", function () {
+        // ===== VARIÁVEIS PARA MODAL DE GLOSA =====
+        let glosaAtualValor = 0;
+        let valorNFAtual = 0;
+
+        // ===== EVENTO CLICK NA GLOSA =====
+        $(document).on("click", ".btn-glosa", function (e) {
             try {
+                e.preventDefault();
+                
                 var id = $(this).data("id");
                 var numeroNota = $(this).closest("tr").find("td:eq(0)").text();
+                
+                // Armazenar dados
                 $("#txtNotaId").attr("data", id);
                 $("#txtNotaFiscal").attr("data", numeroNota);
+                
+                // Atualizar título do modal
+                $("#DynamicModalLabel span").html(`Glosar valores da Nota: <b>${numeroNota}</b>`);
+                $("#btnglosar").attr("data-id", id);
+                
+                // Limpar campos
+                $("#frmglosa")[0].reset();
+                $("#divGlosaExistente").hide();
+                $("#divPreviewGlosa").hide();
+                $("#rdSubstituir").prop('checked', true);
+                $("#hdnModoGlosa").val("substituir");
+                glosaAtualValor = 0;
+                valorNFAtual = 0;
+                
+                // Buscar dados de glosa existente
+                $.ajax({
+                    url: "/api/NotaFiscal/GetGlosa",
+                    method: "GET",
+                    data: { id: id },
+                    success: function(res) {
+                        try {
+                            if (res.success) {
+                                valorNFAtual = res.valorNF || 0;
+                                
+                                if (res.temGlosa) {
+                                    glosaAtualValor = res.valorGlosa;
+                                    $("#lblGlosaAtual").text("R$ " + res.valorGlosaFormatado);
+                                    $("#lblMotivoAtual").text(res.motivoGlosa || "(sem motivo informado)");
+                                    $("#divGlosaExistente").show();
+                                    $("#divPreviewGlosa").show();
+                                    atualizarPreviewGlosa();
+                                }
+                            }
+                            
+                            // Abrir modal
+                            var modalElement = document.getElementById('modalglosa');
+                            var modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Index.cshtml", ".btn-glosa.GetGlosa.success", error);
+                        }
+                    },
+                    error: function(error) {
+                        Alerta.TratamentoErroComLinha("Index.cshtml", ".btn-glosa.GetGlosa.ajax", error);
+                        
+                        // Abrir modal mesmo com erro
+                        var modalElement = document.getElementById('modalglosa');
+                        var modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                    }
+                });
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Index.cshtml", ".btn-glosa.click", error);
             }
         });
 
+        // ===== ATUALIZAR PREVIEW DA GLOSA =====
+        function atualizarPreviewGlosa() {
+            try {
+                var valorInformado = parseCurrencyBR($("#txtValorGlosaModal").val()) || 0;
+                var modo = $("input[name='rdModoGlosa']:checked").val() || "substituir";
+                
+                var valorFinal = 0;
+                if (modo === "somar") {
+                    valorFinal = glosaAtualValor + valorInformado;
+                } else {
+                    valorFinal = valorInformado;
+                }
+                
+                // Formatar valor
+                var valorFormatado = valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                $("#lblPreviewGlosa").text("R$ " + valorFormatado);
+                
+                // Destacar se exceder valor da NF
+                if (valorFinal > valorNFAtual && valorNFAtual > 0) {
+                    $("#lblPreviewGlosa").removeClass("text-danger").addClass("text-warning");
+                } else {
+                    $("#lblPreviewGlosa").removeClass("text-warning").addClass("text-danger");
+                }
+                
+                // Atualizar hidden
+                $("#hdnModoGlosa").val(modo);
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Index.cshtml", "atualizarPreviewGlosa", error);
+            }
+        }
+
+        // ===== EVENTOS PARA ATUALIZAR PREVIEW =====
+        $(document).on("keyup change", "#txtValorGlosaModal", function() {
+            try {
+                if (glosaAtualValor > 0) {
+                    $("#divPreviewGlosa").show();
+                    atualizarPreviewGlosa();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Index.cshtml", "txtValorGlosaModal.change", error);
+            }
+        });
+
+        $(document).on("change", "input[name='rdModoGlosa']", function() {
+            try {
+                atualizarPreviewGlosa();
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Index.cshtml", "rdModoGlosa.change", error);
+            }
+        });
+
+        // ===== FUNÇÃO PARA CONVERTER MOEDA BR =====
+        function parseCurrencyBR(str) {
+            try {
+                if (!str) return 0;
+                return parseFloat(
+                    String(str)
+                        .replace(/\s/g, '')
+                        .replace('R$', '')
+                        .replace(/\./g, '')
+                        .replace(',', '.')
+                );
+            } catch (error) {
+                return 0;
+            }
+        }
+
         /* ==========================================
-           Modal Glosa (Bootstrap 5)
+           Modal Glosa (Bootstrap 5) - Evento de fechamento
            ========================================== */
-        (function ()
-        {
-            try
-            {
+        (function () {
+            try {
                 const modalElement = document.getElementById('modalglosa');
-                if (!modalElement)
-                {
+                if (!modalElement) {
                     console.warn('[Index.cshtml] Elemento #modalglosa não encontrado');
                     return;
                 }
 
-                // Evento show.bs.modal
-                modalElement.addEventListener('show.bs.modal', function (event)
-                {
+                // Evento hide.bs.modal - limpar campos ao fechar
+                modalElement.addEventListener('hide.bs.modal', function () {
                     try {
-                        var button = $(event.relatedTarget);
-                        var notaId = button.data("id");
-                        var notaFiscal = button.closest("tr").find("td:eq(0)").text();
-
-                        $(this).find("#DynamicModalLabel").html($("<b>Glosar valores da Nota: " + notaFiscal + "</b>"));
-                        $("#btnglosar").attr("data-id", notaId);
-                    } catch (error) {
-                        Alerta.TratamentoErroComLinha("Index.cshtml", "on show.bs.modal", error);
-                    }
-                });
-
-                // Evento hide.bs.modal
-                modalElement.addEventListener('hide.bs.modal', function ()
-                {
-                    try {
-                        $(this).find("#modal_body").html("");
+                        $("#frmglosa")[0].reset();
                     } catch (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "on hide.bs.modal", error);
                     }
                 });
-            }
-            catch (error)
-            {
+            } catch (error) {
                 Alerta.TratamentoErroComLinha("Index.cshtml", "init@modalglosa", error);
             }
         })();
 
-        $("#btnglosar").click(function (e) {
+        // ===== BOTÃO GLOSAR =====
+        $("#btnglosar").on("click", function (e) {
             try {
                 e.preventDefault();
 
-                if ($("#txtMotivoGlosa").val() === "") {
+                if ($("#txtMotivoGlosaModal").val() === "") {
                     Alerta.Erro("Atenção", "O motivo da Glosa é obrigatório!");
                     return;
                 }
 
-                if ($("#txtValorGlosa").val() === "") {
+                if ($("#txtValorGlosaModal").val() === "") {
                     Alerta.Erro("Atenção", "O valor da Glosa é obrigatório!");
                     return;
                 }
 
-                var valorglosa = $("#txtValorGlosa").val();
-                var i = 0;
-                while ((i = valorglosa.indexOf(".", i)) !== -1) {
-                    valorglosa = valorglosa.replace(".", "");
-                }
-                valorglosa = valorglosa.replace("R$", "").trim();
+                // Converter valor para número
+                var valorglosa = parseCurrencyBR($("#txtValorGlosaModal").val());
+                
+                // Obter modo de glosa
+                var modoGlosa = $("input[name='rdModoGlosa']:checked").val() || "substituir";
 
                 var notaId = $("#txtNotaId").attr("data");
                 var payload = JSON.stringify({
                     "NotaFiscalId": notaId,
-                    "MotivoGlosa": $("#txtMotivoGlosa").val(),
-                    "ValorGlosa": valorglosa
+                    "MotivoGlosa": $("#txtMotivoGlosaModal").val(),
+                    "ValorGlosa": valorglosa,
+                    "ModoGlosa": modoGlosa
                 });
+
+                // Spinning: desabilita botão e troca ícone
+                const $btn = $(this);
+                const textoOriginal = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fa-duotone fa-spinner-third fa-spin icon-space"></i> Processando...');
 
                 $.ajax({
                     type: "post",
@@ -646,32 +1180,29 @@ ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
                     data: payload,
                     success: function (data) {
                         try {
-                            AppToast.show("Verde", data.message, 2000);
-                            if ($.fn.DataTable.isDataTable("#tblNotaFiscal")) {
-                                $("#tblNotaFiscal").DataTable().ajax.reload(null, false);
-                            }
-                            // Fecha modal via Bootstrap 5
-                            const modalElement = document.getElementById('modalglosa');
-                            if (modalElement)
-                            {
-                                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                                if (modalInstance)
-                                {
+                            if (data.success) {
+                                AppToast.show("Verde", data.message, 3000);
+                                if ($.fn.DataTable.isDataTable("#tblNotaFiscal")) {
+                                    $("#tblNotaFiscal").DataTable().ajax.reload(null, false);
+                                }
+                                // Fecha modal via Bootstrap 5
+                                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalglosa'));
+                                if (modalInstance) {
                                     modalInstance.hide();
                                 }
-                                else
-                                {
-                                    const modal = new bootstrap.Modal(modalElement);
-                                    modal.hide();
-                                }
+                            } else {
+                                AppToast.show("Vermelho", data.message, 4000);
                             }
-                            location.reload();
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Index.cshtml", "#btnglosar.ajax.success", error);
                         }
                     },
                     error: function (error) {
                         Alerta.TratamentoErroComLinha("Index.cshtml", "#btnglosar.ajax", error);
+                        AppToast.show("Vermelho", "Erro ao glosar a nota fiscal", 2000);
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false).html(textoOriginal);
                     }
                 });
             } catch (error) {

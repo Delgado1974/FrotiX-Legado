@@ -362,6 +362,12 @@
             "roles": [],
             "items": [
                 {
+                    "title": "Cadastro de Encarregados",
+                    "nomeMenu": "Cadastro de Encarregados",
+                    "href": "encarregado_index.html",
+                    "roles": []
+                },
+                {
                     "title": "Motoristas",
                     "nomeMenu": "Motoristas",
                     "roles": [],

@@ -6,6 +6,7 @@ $(document).ready(function ()
     {
         loadList();
 
+        // Evento de exclusão de requisitante
         $(document).on("click", ".btn-delete", function ()
         {
             try
@@ -54,7 +55,7 @@ $(document).ready(function ()
                                     try
                                     {
                                         console.error(err);
-                                        Alerta.Erro("Erro ao Excluir", "Ocorreu um erro ao tentar excluir o requisitante. Tente novamente.", "OK");
+                                        AppToast.show("Vermelho", "Ocorreu um erro ao tentar excluir o requisitante.", 2000);
                                     }
                                     catch (error)
                                     {
@@ -76,12 +77,14 @@ $(document).ready(function ()
             }
         });
 
-        $(document).on("click", ".updateStatusRequisitante", function ()
+        // Evento de clique no badge de status para alternar Ativo/Inativo
+        $(document).on("click", ".btn-toggle-status", function ()
         {
             try
             {
                 var url = $(this).data("url");
                 var currentElement = $(this);
+
                 $.get(url, function (data)
                 {
                     try
@@ -92,43 +95,47 @@ $(document).ready(function ()
 
                             if (data.type == 1)
                             {
-                                // INATIVO = CINZA
-                                currentElement.text("Inativo");
-                                currentElement.css({
-                                    'background-color': '#2F4F4F',
-                                    'color': 'aliceblue',
-                                    'box-shadow': '0 0 8px rgba(47,79,79,.5)',
-                                    'border': 'none'
-                                });
-                                currentElement.attr('data-ejtip', 'Requisitante inativo - clique para ativar');
+                                // Mudou para INATIVO - Cinza
+                                currentElement
+                                    .removeClass('ftx-badge-ativo')
+                                    .addClass('ftx-badge-inativo')
+                                    .attr('title', 'Clique para ativar')
+                                    .html('<i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#fff; --fa-secondary-color:#adb5bd;"></i>Inativo');
                             }
                             else 
                             {
-                                // ATIVO = VERDE
-                                currentElement.text("Ativo");
-                                currentElement.css({
-                                    'background-color': '#22c55e',
-                                    'color': 'white',
-                                    'box-shadow': '0 0 8px rgba(34,197,94,.5)',
-                                    'border': 'none'
-                                });
-                                currentElement.attr('data-ejtip', 'Requisitante ativo - clique para inativar');
+                                // Mudou para ATIVO - Verde
+                                currentElement
+                                    .removeClass('ftx-badge-inativo')
+                                    .addClass('ftx-badge-ativo')
+                                    .attr('title', 'Clique para desativar')
+                                    .html('<i class="fa-duotone fa-circle-check" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i>Ativo');
                             }
                         }
                         else 
                         {
-                            Alerta.Erro("Erro ao Alterar Status", "Ocorreu um erro ao tentar alterar o status. Tente novamente.", "OK");
+                            AppToast.show("Vermelho", "Erro ao alterar status.", 2000);
                         }
                     }
                     catch (error)
                     {
-                        Alerta.TratamentoErroComLinha("requisitante.js", "updateStatusRequisitante.get.callback", error);
+                        Alerta.TratamentoErroComLinha("requisitante.js", "btn-toggle-status.get.callback", error);
+                    }
+                }).fail(function ()
+                {
+                    try
+                    {
+                        AppToast.show("Vermelho", "Erro ao alterar status do requisitante.", 2000);
+                    }
+                    catch (error)
+                    {
+                        Alerta.TratamentoErroComLinha("requisitante.js", "btn-toggle-status.get.fail", error);
                     }
                 });
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("requisitante.js", "updateStatusRequisitante.click", error);
+                Alerta.TratamentoErroComLinha("requisitante.js", "btn-toggle-status.click", error);
             }
         });
     }
@@ -148,12 +155,12 @@ function loadList()
                 {
                     targets: 0, // Ponto
                     className: "text-center",
-                    width: "5%",
+                    width: "8%",
                 },
                 {
                     targets: 1, // Nome
                     className: "text-left",
-                    width: "20%",
+                    width: "25%",
                 },
                 {
                     targets: 2, // Ramal
@@ -163,17 +170,17 @@ function loadList()
                 {
                     targets: 3, // Setor
                     className: "text-left",
-                    width: "20%",
+                    width: "25%",
                 },
                 {
                     targets: 4, // Status
                     className: "text-center",
-                    width: "5%",
+                    width: "10%",
                 },
                 {
                     targets: 5, // Ação
                     className: "text-center",
-                    width: "5%",
+                    width: "10%",
                 },
             ],
 
@@ -189,27 +196,29 @@ function loadList()
                 { data: "ramal" },
                 { data: "nomeSetor" },
                 {
+                    // Coluna Status - Badge Padrão FrotiX CLICÁVEL
                     data: "status",
                     render: function (data, type, row, meta)
                     {
                         try
                         {
+                            var id = row.requisitanteId;
                             if (data)
                             {
-                                // ATIVO = VERDE
-                                return (
-                                    '<a href="javascript:void(0)" class="updateStatusRequisitante btn btn-xs" style="background-color: #22c55e !important; color: white !important; box-shadow: 0 0 8px rgba(34,197,94,.5) !important; border: none !important;" data-url="/api/Requisitante/updateStatusRequisitante?Id=' +
-                                    row.requisitanteId +
-                                    '" data-ejtip="Requisitante ativo - clique para inativar">Ativo</a>'
-                                );
+                                // ATIVO - Verde
+                                return '<span class="ftx-badge-status ftx-badge-ativo ftx-badge-clickable btn-toggle-status" ' +
+                                       'data-url="/api/Requisitante/updateStatusRequisitante?Id=' + id + '" ' +
+                                       'title="Clique para desativar">' +
+                                       '<i class="fa-duotone fa-circle-check" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i>' +
+                                       'Ativo</span>';
                             } else
                             {
-                                // INATIVO = CINZA
-                                return (
-                                    '<a href="javascript:void(0)" class="updateStatusRequisitante btn btn-xs" style="background-color: #2F4F4F !important; color: aliceblue !important; box-shadow: 0 0 8px rgba(47,79,79,.5) !important; border: none !important;" data-url="/api/Requisitante/updateStatusRequisitante?Id=' +
-                                    row.requisitanteId +
-                                    '" data-ejtip="Requisitante inativo - clique para ativar">Inativo</a>'
-                                );
+                                // INATIVO - Cinza
+                                return '<span class="ftx-badge-status ftx-badge-inativo ftx-badge-clickable btn-toggle-status" ' +
+                                       'data-url="/api/Requisitante/updateStatusRequisitante?Id=' + id + '" ' +
+                                       'title="Clique para ativar">' +
+                                       '<i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#fff; --fa-secondary-color:#adb5bd;"></i>' +
+                                       'Inativo</span>';
                             }
                         }
                         catch (error)
@@ -220,23 +229,24 @@ function loadList()
                     },
                 },
                 {
+                    // Coluna Ações - Botões Padrão FrotiX com ícones duotone
                     data: "requisitanteId",
                     render: function (data)
                     {
                         try
                         {
-                            return `<div class="text-center">
-                                        <a href="/Requisitante/Upsert?id=${data}" 
-                                           class="btn btn-editar btn-icon-28" 
-                                           data-ejtip="Editar requisitante">
-                                            <i class="fal fa-edit"></i>
-                                        </a>
-                                        <a class="btn btn-delete fundo-vermelho btn-icon-28" 
-                                           data-id='${data}'
-                                           data-ejtip="Excluir requisitante">
-                                            <i class="fal fa-trash-alt"></i>
-                                        </a>
-                                    </div>`;
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                       '<a href="/Requisitante/Upsert?id=' + data + '" ' +
+                                          'class="btn-acao-ftx btn-azul" ' +
+                                          'title="Editar requisitante">' +
+                                           '<i class="fa-duotone fa-pen-to-square" style="--fa-primary-color:#fff; --fa-secondary-color:#90caf9;"></i>' +
+                                       '</a>' +
+                                       '<button type="button" class="btn-acao-ftx btn-vinho btn-delete" ' +
+                                               'data-id="' + data + '" ' +
+                                               'title="Excluir requisitante">' +
+                                           '<i class="fa-duotone fa-trash-can" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i>' +
+                                       '</button>' +
+                                   '</div>';
                         }
                         catch (error)
                         {

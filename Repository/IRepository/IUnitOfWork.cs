@@ -45,6 +45,7 @@ namespace FrotiX.Repository.IRepository
         {
             get;
         }
+
         IRepository<AbastecimentoPendente> AbastecimentoPendente { get; }
 
         ICustoMensalItensContratoRepository CustoMensalItensContrato
@@ -58,6 +59,19 @@ namespace FrotiX.Repository.IRepository
         }
 
         IEmpenhoMultaRepository EmpenhoMulta
+        {
+            get;
+        }
+
+        // ============================================================
+        // ENCARREGADO - NOVO
+        // ============================================================
+        IEncarregadoRepository Encarregado
+        {
+            get;
+        }
+
+        IEncarregadoContratoRepository EncarregadoContrato
         {
             get;
         }

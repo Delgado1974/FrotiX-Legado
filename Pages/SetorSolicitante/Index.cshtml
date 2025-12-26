@@ -20,67 +20,153 @@
 }
 
 <style>
-	/* Badge de Status */
-	.badge-ativo {
-		background-color: #198754;
-		color: white;
-		padding: 0.35rem 0.75rem;
-		border-radius: 50px;
-		font-size: 0.78rem;
-		font-weight: 600;
-		display: inline-block;
+	/* ===== BADGES DE STATUS - PADRÃO FROTIX ===== */
+	.ftx-badge-status {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		padding: .35rem .75rem !important;
+		min-height: 1.65rem;
+		min-width: 5.5rem;
+		white-space: nowrap;
+		font-size: .78rem !important;
+		font-weight: 600 !important;
+		line-height: 1 !important;
+		border-radius: 9999px !important;
+		color: #fff !important;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
+		gap: 0.35rem;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
 	}
 
-	.badge-inativo {
-		background-color: #dc3545;
-		color: white;
-		padding: 0.35rem 0.75rem;
-		border-radius: 50px;
-		font-size: 0.78rem;
-		font-weight: 600;
-		display: inline-block;
+	.ftx-badge-status:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
 	}
 
-	/* Botões de ação na grid - Padrão FrotiX */
-	.btn-acao {
+	.ftx-badge-status i {
+		font-size: 0.75rem;
+	}
+
+	/* Ativo - Verde */
+	.ftx-badge-ativo {
+		background: linear-gradient(135deg, #198754 0%, #157347 100%);
+	}
+
+	/* Inativo - Cinza Escuro (baseado em btn-dark suavizado 20%) */
+	.ftx-badge-inativo {
+		background: linear-gradient(135deg, #525960 0%, #434a51 100%);
+	}
+
+	/* Badge clicável */
+	.ftx-badge-status.ftx-badge-clickable {
+		cursor: pointer;
+	}
+
+	.ftx-badge-status.ftx-badge-clickable:hover {
+		filter: brightness(1.1);
+		transform: translateY(-2px);
+	}
+
+	.ftx-badge-status.ftx-badge-clickable:active {
+		transform: translateY(0);
+	}
+
+	/* Botão com loading spinner */
+	.btn-loading {
+		position: relative;
+		pointer-events: none;
+		opacity: 0.8;
+	}
+
+	.btn-loading .btn-text {
+		visibility: hidden;
+	}
+
+	.btn-loading .btn-spinner {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	/* ===== BOTÕES DE AÇÃO - PADRÃO FROTIX ===== */
+	.btn-acao-ftx {
 		width: 32px;
 		height: 30px;
 		padding: 0 !important;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 0.30rem !important;
-		font-size: 0.85rem;
+		border-radius: 0.375rem !important;
+		font-size: 0.95rem;
 		margin: 2px;
 		border: none;
 		color: #fff !important;
-		transition: all 0.3s ease;
+		transition: all 0.3s ease, transform 0.2s ease;
 		cursor: pointer;
+		position: relative;
 	}
 
-	.btn-acao i {
+	.btn-acao-ftx i {
 		color: #fff !important;
+		transition: transform 0.2s ease;
 	}
 
-	.btn-acao-editar {
+	.btn-acao-ftx:hover i {
+		transform: scale(1.15);
+	}
+
+	/* Editar - Azul */
+	.btn-acao-ftx.btn-azul {
 		background-color: #325d88 !important;
-		box-shadow: 0 0 8px rgba(50,93,136,.4);
+		box-shadow: 0 0 8px rgba(50, 93, 136, 0.5), 0 2px 4px rgba(50, 93, 136, 0.3);
 	}
 
-	.btn-acao-editar:hover {
+	.btn-acao-ftx.btn-azul:hover {
 		background-color: #2a4d73 !important;
-		box-shadow: 0 0 15px rgba(50,93,136,.6);
-		color: #fff !important;
+		box-shadow: 0 0 20px rgba(50, 93, 136, 0.8), 0 6px 12px rgba(50, 93, 136, 0.5);
+		transform: translateY(-2px);
 	}
 
-	.btn-acao-excluir {
+	/* Excluir - Vinho */
+	.btn-acao-ftx.btn-vinho {
 		background-color: #722F37 !important;
-		box-shadow: 0 0 8px rgba(114,47,55,.4);
+		box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3);
 	}
 
-	.btn-acao-excluir:hover {
+	.btn-acao-ftx.btn-vinho:hover {
 		background-color: #5a252c !important;
-		box-shadow: 0 0 15px rgba(114,47,55,.6);
+		box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5);
+		transform: translateY(-2px);
+	}
+
+	/* ===== DATATABLE/TREEGRID HEADER - PADRÃO FROTIX (20% mais claro que ftx-card-header) ===== */
+	.e-treegrid .e-headercell,
+	.e-grid .e-headercell,
+	.e-treegrid .e-headercelldiv,
+	.table thead th {
+		background-color: #4a6fa5 !important;
+		color: #fff !important;
+		font-weight: 600 !important;
+		border-color: #3d5d8a !important;
+		text-transform: uppercase;
+		font-size: 0.85rem !important;
+		letter-spacing: 0.5px;
+	}
+
+	.e-treegrid .e-headercell:hover,
+	.e-grid .e-headercell:hover {
+		background-color: #5a7fb5 !important;
+	}
+
+	/* Ícones de ordenação Syncfusion */
+	.e-treegrid .e-sortfilterdiv .e-icon-ascending,
+	.e-treegrid .e-sortfilterdiv .e-icon-descending,
+	.e-grid .e-sortfilterdiv .e-icon-ascending,
+	.e-grid .e-sortfilterdiv .e-icon-descending {
 		color: #fff !important;
 	}
 
@@ -134,8 +220,8 @@
 						Setores Solicitantes
 					</h2>
 					<div class="ftx-card-actions">
-						<button type="button" class="btn btn-fundo-laranja" id="btnAdicionarSetor">
-							<i class="fa-duotone fa-file-plus icon-pulse me-1"></i>
+						<button type="button" class="btn btn-header-orange" id="btnAdicionarSetor">
+							<i class="fa-duotone fa-building-circle-arrow-right" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
 							Adicionar Setor
 						</button>
 					</div>
@@ -149,16 +235,6 @@
 							</div>
 						</div>
 					</div>
-				</div>
-
-				<div class="panel-content">
-					<div class="d-flex justify-content-end gap-2 pb-3 pe-3">
-						<a href="/SetorSolicitante/RelatorioSetorSolicitante" class="btn btn-dark">
-							<i class="fal fa-file-chart-line"></i>&nbsp; Relatório
-						</a>
-					</div>
-				</div>
-
 			</div>
 		</div>
 	</div>
@@ -234,10 +310,12 @@
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-xmark me-1"></i> Cancelar
+					<i class="fa-duotone fa-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i> Cancelar
 				</button>
 				<button type="button" class="btn btn-azul" id="btnSalvarSetor">
-					<i class="fa-solid fa-check me-1"></i> Salvar
+					<i class="fa-duotone fa-check me-1 btn-icon" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i>
+					<span class="btn-text">Salvar</span>
+					<i class="fa-duotone fa-spinner-third fa-spin btn-spinner" style="display:none; --fa-primary-color:#fff; --fa-secondary-color:#90caf9;"></i>
 				</button>
 			</div>
 		</div>
@@ -301,6 +379,19 @@
 						}
 					} catch (error) {
 						Alerta.TratamentoErroComLinha("Index.cshtml", "btn-excluir-setor.click", error);
+					}
+				});
+
+				// Evento de clique no badge de status para alternar Ativo/Inativo
+				$(document).on('click', '.btn-toggle-status', function () {
+					try {
+						var id = $(this).data('id');
+						var currentStatus = $(this).data('status');
+						if (id) {
+							alternarStatus(id, currentStatus, $(this));
+						}
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Index.cshtml", "btn-toggle-status.click", error);
 					}
 				});
 
@@ -402,26 +493,31 @@
 
 		function queryCellInfo(args) {
 			try {
-				// Coluna Status - Badge
+				// Coluna Status - Badge Padrão FrotiX CLICÁVEL
 				if (args.column.field === 'status') {
 					var statusVal = args.data.status;
+					var id = args.data.setorSolicitanteId;
 					if (statusVal === 1 || statusVal === true || statusVal === "1") {
-						args.cell.innerHTML = '<span class="badge-ativo">Ativo</span>';
+						args.cell.innerHTML = '<span class="ftx-badge-status ftx-badge-ativo ftx-badge-clickable btn-toggle-status" data-id="' + id + '" data-status="1" title="Clique para desativar">' +
+							'<i class="fa-duotone fa-circle-check" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i>' +
+							'Ativo</span>';
 					} else {
-						args.cell.innerHTML = '<span class="badge-inativo">Inativo</span>';
+						args.cell.innerHTML = '<span class="ftx-badge-status ftx-badge-inativo ftx-badge-clickable btn-toggle-status" data-id="' + id + '" data-status="0" title="Clique para ativar">' +
+							'<i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#fff; --fa-secondary-color:#adb5bd;"></i>' +
+							'Inativo</span>';
 					}
 				}
 
-				// Coluna Ações - Botões
+				// Coluna Ações - Botões Padrão FrotiX com ícones duotone
 				if (args.column.field === 'acoes') {
 					var id = args.data.setorSolicitanteId;
 					args.cell.innerHTML = 
 						'<div class="d-flex justify-content-center gap-1">' +
-							'<button type="button" class="btn-acao btn-acao-editar btn-editar-setor" data-id="' + id + '" title="Editar">' +
-								'<i class="far fa-edit"></i>' +
+							'<button type="button" class="btn-acao-ftx btn-azul btn-editar-setor" data-id="' + id + '" title="Editar">' +
+								'<i class="fa-duotone fa-pen-to-square" style="--fa-primary-color:#fff; --fa-secondary-color:#90caf9;"></i>' +
 							'</button>' +
-							'<button type="button" class="btn-acao btn-acao-excluir btn-excluir-setor" data-id="' + id + '" title="Excluir">' +
-								'<i class="far fa-trash-alt"></i>' +
+							'<button type="button" class="btn-acao-ftx btn-vinho btn-excluir-setor" data-id="' + id + '" title="Excluir">' +
+								'<i class="fa-duotone fa-trash-can" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i>' +
 							'</button>' +
 						'</div>';
 				}
@@ -555,6 +651,13 @@
 					Status: $('#chkStatus').is(':checked')
 				};
 
+				// Ativa loading no botão
+				var btnSalvar = $('#btnSalvarSetor');
+				btnSalvar.prop('disabled', true);
+				btnSalvar.find('.btn-icon').hide();
+				btnSalvar.find('.btn-text').css('visibility', 'hidden');
+				btnSalvar.find('.btn-spinner').show();
+
 				$.ajax({
 					url: "/api/SetorSolicitante/Upsert",
 					type: "POST",
@@ -563,6 +666,12 @@
 					dataType: "json",
 					success: function (response) {
 						try {
+							// Desativa loading
+							btnSalvar.prop('disabled', false);
+							btnSalvar.find('.btn-icon').show();
+							btnSalvar.find('.btn-text').css('visibility', 'visible');
+							btnSalvar.find('.btn-spinner').hide();
+
 							if (response.success) {
 								AppToast.show('Verde', response.message, 2000);
 								modalUpsert.hide();
@@ -576,6 +685,12 @@
 					},
 					error: function (err) {
 						try {
+							// Desativa loading
+							btnSalvar.prop('disabled', false);
+							btnSalvar.find('.btn-icon').show();
+							btnSalvar.find('.btn-text').css('visibility', 'visible');
+							btnSalvar.find('.btn-spinner').hide();
+
 							console.log(err);
 							AppToast.show('Vermelho', 'Erro ao salvar setor.', 2000);
 						} catch (error) {
@@ -585,6 +700,58 @@
 				});
 			} catch (error) {
 				Alerta.TratamentoErroComLinha("Index.cshtml", "salvarSetor", error);
+			}
+		}
+
+		function alternarStatus(id, currentStatus, element) {
+			try {
+				if (!id) return;
+
+				var novoStatus = currentStatus == 1 ? false : true;
+
+				$.ajax({
+					url: "/api/SetorSolicitante/UpdateStatus?id=" + id,
+					type: "GET",
+					dataType: "json",
+					success: function (response) {
+						try {
+							if (response.success) {
+								AppToast.show('Verde', 'Status alterado com sucesso!', 2000);
+								
+								// Atualiza o badge visualmente sem recarregar
+								if (response.novoStatus === 1 || response.novoStatus === true) {
+									element
+										.removeClass('ftx-badge-inativo')
+										.addClass('ftx-badge-ativo')
+										.data('status', 1)
+										.attr('title', 'Clique para desativar')
+										.html('<i class="fa-duotone fa-circle-check" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i>Ativo');
+								} else {
+									element
+										.removeClass('ftx-badge-ativo')
+										.addClass('ftx-badge-inativo')
+										.data('status', 0)
+										.attr('title', 'Clique para ativar')
+										.html('<i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#fff; --fa-secondary-color:#adb5bd;"></i>Inativo');
+								}
+							} else {
+								AppToast.show('Vermelho', response.message || 'Erro ao alterar status.', 2000);
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "alternarStatus.success", error);
+						}
+					},
+					error: function (err) {
+						try {
+							console.log(err);
+							AppToast.show('Vermelho', 'Erro ao alterar status do setor.', 2000);
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Index.cshtml", "alternarStatus.error", error);
+						}
+					}
+				});
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Index.cshtml", "alternarStatus", error);
 			}
 		}
 

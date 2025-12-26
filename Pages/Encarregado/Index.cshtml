@@ -1,0 +1,429 @@
+@page
+@model FrotiX.Pages.Encarregado.IndexModel
+
+@{
+    ViewData["Title"]     = "Encarregados";
+    ViewData["PageName"]  = "encarregado_index";
+    ViewData["Heading"]   = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Encarregados</span>";
+    ViewData["Category1"] = "Cadastros";
+    ViewData["PageIcon"]  = "fal fa-user-tie";
+}
+
+@section HeadBlock {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
+        .ftx-card-header {
+            background-color: #3D5771;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 900 !important;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* ====== BOTÃO LARANJA COM BORDA BRANCA ====== */
+        .ftx-card-header .btn-fundo-laranja {
+            border: 2px solid rgba(255, 255, 255, 0.7) !important;
+            outline: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .ftx-card-header .btn-fundo-laranja:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ====== PANEL CONTENT ====== */
+        .panel-content {
+            padding: 1.25rem;
+            background: #f8f9fa;
+        }
+
+        /* ====== DATATABLE AJUSTES ====== */
+        #tblEncarregado_wrapper {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        #tblEncarregado thead {
+            background-color: #3D5771;
+        }
+
+        #tblEncarregado thead th {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 0.5rem;
+            border: none;
+            white-space: nowrap;
+        }
+
+        #tblEncarregado tbody td {
+            vertical-align: middle;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        #tblEncarregado tbody tr:hover {
+            background-color: rgba(61, 87, 113, 0.08) !important;
+        }
+
+        /* ====== BOTÕES DE AÇÃO NA TABELA ====== */
+        .ftx-btn-acoes {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+        }
+
+        /* ====== BADGES DE STATUS ====== */
+        .badge-ativo {
+            background-color: #22c55e !important;
+            color: white !important;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+            border: none;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .badge-ativo:hover {
+            background-color: #16a34a !important;
+            transform: scale(1.05);
+        }
+
+        .badge-inativo {
+            background-color: #2F4F4F !important;
+            color: aliceblue !important;
+            box-shadow: 0 0 8px rgba(47, 79, 79, 0.5);
+            border: none;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .badge-inativo:hover {
+            background-color: #1a3030 !important;
+            transform: scale(1.05);
+        }
+
+        /* ====== MODAL PADRÃO FROTIX ====== */
+        .ftx-modal .modal-content {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .ftx-modal .modal-header {
+            background-color: #3D5771;
+            padding: 1rem 1.25rem;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-modal .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .ftx-modal .modal-title {
+            color: #fff;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+            margin: 0;
+        }
+
+        .ftx-modal .modal-title i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: rgba(255, 255, 255, 0.6);
+            --fa-secondary-opacity: 0.6;
+            font-size: 1.25rem;
+        }
+
+        .ftx-modal .btn-close-white {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-modal .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        .ftx-modal .modal-body {
+            padding: 1.5rem;
+            background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ftx-modal .modal-footer {
+            border-top: 1px solid rgba(0,0,0,0.08);
+            padding: 1rem 1.25rem;
+            background: #f8f9fa;
+        }
+
+        .ftx-modal .modal-footer .btn {
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* ====== FOTO DO ENCARREGADO ====== */
+        .ftx-foto-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #3D5771;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .ftx-foto-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ====== RESPONSIVO ====== */
+        @@media (max-width: 768px) {
+            .ftx-card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .ftx-card-header .titulo-paginas {
+                font-size: 1.2rem;
+            }
+
+            .ftx-btn-acoes {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-container show">
+
+                <!-- HEADER AZUL PADRÃO FROTIX -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-user-helmet-safety"></i>
+                        Listagem de Encarregados
+                    </h2>
+                    <a href="/Encarregado/Upsert" class="btn btn-fundo-laranja">
+                        <i class="fa-duotone fa-file-plus"></i>
+                        Adicionar Encarregado
+                    </a>
+                </div>
+
+                <!-- CONTEÚDO -->
+                <div class="panel-content">
+                    <div id="divEncarregados">
+                        <table id="tblEncarregado" class="table table-bordered table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Ponto</th>
+                                    <th>Celular</th>
+                                    <th>Contrato</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ===================== MODAL FOTO DO ENCARREGADO ===================== *@
+<div class="modal fade ftx-modal" id="modalFoto" tabindex="-1" aria-labelledby="modalFotoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFotoLabel">
+                    <i class="fa-duotone fa-camera-retro"></i>
+                    <span id="txtTituloFoto">Foto do Encarregado</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ftx-foto-container">
+                    <img id="imgViewer" src="/Images/barbudo.jpg" alt="Foto do Encarregado" />
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark"></i>
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script src="~/js/cadastros/encarregado.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            try {
+                // Handler delegado para botão de foto
+                $(document).on('click', '.btn-foto', function(e) {
+                    try {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        var encarregadoId = $(this).data('id');
+                        var nomeEncarregado = $(this).closest('tr').find('td:eq(0)').text();
+                        
+                        // Limpar imagem anterior
+                        $('#imgViewer').attr('src', '/Images/barbudo.jpg');
+                        $('#txtTituloFoto').text('Carregando...');
+                        
+                        // Abrir modal
+                        var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalFoto'));
+                        modal.show();
+                        
+                        // Carregar foto
+                        $.ajax({
+                            type: "GET",
+                            url: "/api/Encarregado/PegaFotoModal",
+                            data: { id: encarregadoId },
+                            success: function (res) {
+                                try {
+                                    if (res === false || !res) {
+                                        $('#txtTituloFoto').html('Encarregado sem Foto: <b>' + nomeEncarregado + '</b>');
+                                        $('#imgViewer').attr('src', '/Images/barbudo.jpg');
+                                    } else {
+                                        $('#txtTituloFoto').html('Foto: <b>' + nomeEncarregado + '</b>');
+                                        $('#imgViewer').attr('src', 'data:image/jpg;base64,' + res);
+                                    }
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Encarregado/Index.cshtml", "PegaFotoModal.success", error);
+                                }
+                            },
+                            error: function (err) {
+                                try {
+                                    console.error("Erro ao carregar foto:", err);
+                                    $('#txtTituloFoto').text('Erro ao carregar foto');
+                                } catch (error) {
+                                    Alerta.TratamentoErroComLinha("Encarregado/Index.cshtml", "PegaFotoModal.error", error);
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Encarregado/Index.cshtml", "btn-foto.click", error);
+                    }
+                });
+
+                // Limpar ao fechar modal
+                $('#modalFoto').on('hide.bs.modal', function () {
+                    try {
+                        $('#imgViewer').attr('src', '/Images/barbudo.jpg');
+                        $('#txtTituloFoto').text('Foto do Encarregado');
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Encarregado/Index.cshtml", "modalFoto.hide", error);
+                    }
+                });
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("Encarregado/Index.cshtml", "document.ready", error);
+            }
+        });
+    </script>
+}

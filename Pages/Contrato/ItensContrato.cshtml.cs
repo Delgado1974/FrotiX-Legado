@@ -1,20 +1,19 @@
 using AspNetCoreHero.ToastNotification.Abstractions;
 using FrotiX.Models;
 using FrotiX.Repository.IRepository;
+using FrotiX.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Threading.Tasks;
 
 namespace FrotiX.Pages.Contrato
 {
-    public class ItensContratoModel :PageModel
+    public class ItensContratoModel : PageModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotyfService _notyf;
 
-        public ItensContratoModel(IUnitOfWork unitOfWork , INotyfService notyf)
+        public ItensContratoModel(IUnitOfWork unitOfWork, INotyfService notyf)
         {
             try
             {
@@ -23,33 +22,25 @@ namespace FrotiX.Pages.Contrato
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha(
-                    "ItensContrato.cshtml.cs" ,
-                    "ItensContratoModel" ,
-                    error
-                );
+                Alerta.TratamentoErroComLinha("ItensContrato.cshtml.cs", "ItensContratoModel", error);
             }
         }
 
         [BindProperty]
-        public ItensContratoViewModel ItensContratoObj { get; set; } = default!;
+        public ICPageViewModel ItensContratoObj { get; set; } = default!;
 
-        public async Task OnGetAsync(string? tipoContrato = "")
+        public void OnGet()
         {
             try
             {
-                ItensContratoObj = new ItensContratoViewModel
+                ItensContratoObj = new ICPageViewModel
                 {
-                    ContratoList = await _unitOfWork
-                        .Contrato.GetDropDown(tipoContrato)
-                        .ToListAsync() ,
-                    ItensContrato = new Models.ItensContrato() ,
+                    ItensContrato = new ICPlaceholder()
                 };
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("ItensContrato.cshtml.cs" , "OnGetAsync" , error);
-                return;
+                Alerta.TratamentoErroComLinha("ItensContrato.cshtml.cs", "OnGet", error);
             }
         }
     }

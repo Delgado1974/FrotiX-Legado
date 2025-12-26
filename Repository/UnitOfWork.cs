@@ -32,6 +32,13 @@ namespace FrotiX.Repository
             Requisitante = new RequisitanteRepository(_db);
             Operador = new OperadorRepository(_db);
             OperadorContrato = new OperadorContratoRepository(_db);
+
+            // ============================================================
+            // ENCARREGADO - NOVO
+            // ============================================================
+            Encarregado = new EncarregadoRepository(_db);
+            EncarregadoContrato = new EncarregadoContratoRepository(_db);
+
             Lavador = new LavadorRepository(_db);
             LavadorContrato = new LavadorContratoRepository(_db);
             Empenho = new EmpenhoRepository(_db);
@@ -181,6 +188,19 @@ namespace FrotiX.Repository
         }
 
         public IEmpenhoMultaRepository EmpenhoMulta
+        {
+            get; private set;
+        }
+
+        // ============================================================
+        // ENCARREGADO - NOVO
+        // ============================================================
+        public IEncarregadoRepository Encarregado
+        {
+            get; private set;
+        }
+
+        public IEncarregadoContratoRepository EncarregadoContrato
         {
             get; private set;
         }

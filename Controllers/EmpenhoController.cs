@@ -157,7 +157,7 @@ namespace FrotiX.Controllers
         {
             try
             {
-                movimentacao.Valor = movimentacao.Valor / 100;
+                // Valor já vem correto do frontend (sem divisão por 100)
                 _unitOfWork.MovimentacaoEmpenho.Add(movimentacao);
 
                 var empenho = _unitOfWork.Empenho.GetFirstOrDefault(u =>
@@ -197,7 +197,7 @@ namespace FrotiX.Controllers
 
                 var valorAnterior = movimentacaoDb.Valor;
 
-                movimentacao.Valor = movimentacao.Valor / 100;
+                // Valor já vem correto do frontend (sem divisão por 100)
                 _unitOfWork.MovimentacaoEmpenho.Update(movimentacao);
 
                 var empenho = _unitOfWork.Empenho.GetFirstOrDefault(u =>
@@ -237,7 +237,7 @@ namespace FrotiX.Controllers
 
                 var valorAnterior = movimentacaoDb.Valor;
 
-                movimentacao.Valor = movimentacao.Valor / 100;
+                // Valor já vem correto do frontend (sem divisão por 100)
                 _unitOfWork.MovimentacaoEmpenho.Update(movimentacao);
 
                 var empenho = _unitOfWork.Empenho.GetFirstOrDefault(u =>
@@ -357,8 +357,10 @@ namespace FrotiX.Controllers
         {
             try
             {
-                movimentacao.Valor = (movimentacao.Valor / 100) * -1;
-                _unitOfWork.MovimentacaoEmpenho.Update(movimentacao);
+                // Valor já vem correto do frontend (sem divisão por 100)
+                // Multiplica por -1 para tornar negativo (é uma anulação/redução)
+                movimentacao.Valor = movimentacao.Valor * -1;
+                _unitOfWork.MovimentacaoEmpenho.Add(movimentacao);
 
                 var empenho = _unitOfWork.Empenho.GetFirstOrDefault(u =>
                     u.EmpenhoId == movimentacao.EmpenhoId

@@ -1,750 +1,205 @@
 @page
 
-@using FrotiX.Repository.IRepository
-@using Syncfusion.EJ2
-
-@inject IUnitOfWork _unitOfWork
-
-@model FrotiX.Models.Requisitante
+@model FrotiX.Pages.Requisitante.IndexModel
 
 @{
 	ViewData["Title"] = "Requisitantes";
 	ViewData["PageName"] = "requisitante_index";
-	ViewData["Heading"] = "<i class='fad fa-users-class'></i> Cadastros: <span class='fw-300'>Requisitantes</span>";
+	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Requisitantes</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-users-class";
+	ViewData["PageIcon"] = "fad fa-user-tie";
 }
 
 @section HeadBlock {
 }
 
 <style>
-	/* Badge de Status */
-	.badge-ativo {
-		background-color: #198754;
-		color: white;
-		padding: 0.35rem 0.75rem;
-		border-radius: 50px;
-		font-size: 0.78rem;
-		font-weight: 600;
-		display: inline-block;
+	/* ===== BADGES DE STATUS - PADRÃO FROTIX ===== */
+	.ftx-badge-status {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		padding: .35rem .75rem !important;
+		min-height: 1.65rem;
+		min-width: 5.5rem;
+		white-space: nowrap;
+		font-size: .78rem !important;
+		font-weight: 600 !important;
+		line-height: 1 !important;
+		border-radius: 9999px !important;
+		color: #fff !important;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
+		gap: 0.35rem;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
 	}
 
-	.badge-inativo {
-		background-color: #dc3545;
-		color: white;
-		padding: 0.35rem 0.75rem;
-		border-radius: 50px;
-		font-size: 0.78rem;
-		font-weight: 600;
-		display: inline-block;
+	.ftx-badge-status:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
 	}
 
-	/* Botões de ação na grid - Padrão FrotiX */
-	.btn-acao {
+	.ftx-badge-status i {
+		font-size: 0.75rem;
+	}
+
+	/* Ativo - Verde */
+	.ftx-badge-ativo {
+		background: linear-gradient(135deg, #198754 0%, #157347 100%);
+	}
+
+	/* Inativo - Cinza Escuro (baseado em btn-dark suavizado 20%) */
+	.ftx-badge-inativo {
+		background: linear-gradient(135deg, #525960 0%, #434a51 100%);
+	}
+
+	/* Badge clicável */
+	.ftx-badge-status.ftx-badge-clickable {
+		cursor: pointer;
+	}
+
+	.ftx-badge-status.ftx-badge-clickable:hover {
+		filter: brightness(1.1);
+		transform: translateY(-2px);
+	}
+
+	.ftx-badge-status.ftx-badge-clickable:active {
+		transform: translateY(0);
+	}
+
+	/* ===== BOTÕES DE AÇÃO - PADRÃO FROTIX ===== */
+	.btn-acao-ftx {
 		width: 32px;
 		height: 30px;
 		padding: 0 !important;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 0.30rem !important;
-		font-size: 0.85rem;
+		border-radius: 0.375rem !important;
+		font-size: 0.95rem;
 		margin: 2px;
 		border: none;
 		color: #fff !important;
-		transition: all 0.3s ease;
+		transition: all 0.3s ease, transform 0.2s ease;
 		cursor: pointer;
+		position: relative;
 	}
 
-	.btn-acao i {
+	.btn-acao-ftx i {
 		color: #fff !important;
+		transition: transform 0.2s ease;
 	}
 
-	.btn-acao-editar {
+	.btn-acao-ftx:hover i {
+		transform: scale(1.15);
+	}
+
+	/* Editar - Azul */
+	.btn-acao-ftx.btn-azul {
 		background-color: #325d88 !important;
-		box-shadow: 0 0 8px rgba(50,93,136,.4);
+		box-shadow: 0 0 8px rgba(50, 93, 136, 0.5), 0 2px 4px rgba(50, 93, 136, 0.3);
 	}
 
-	.btn-acao-editar:hover {
+	.btn-acao-ftx.btn-azul:hover {
 		background-color: #2a4d73 !important;
-		box-shadow: 0 0 15px rgba(50,93,136,.6);
-		color: #fff !important;
+		box-shadow: 0 0 20px rgba(50, 93, 136, 0.8), 0 6px 12px rgba(50, 93, 136, 0.5);
+		transform: translateY(-2px);
 	}
 
-	.btn-acao-excluir {
+	/* Excluir - Vinho */
+	.btn-acao-ftx.btn-vinho {
 		background-color: #722F37 !important;
-		box-shadow: 0 0 8px rgba(114,47,55,.4);
+		box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3);
 	}
 
-	.btn-acao-excluir:hover {
+	.btn-acao-ftx.btn-vinho:hover {
 		background-color: #5a252c !important;
-		box-shadow: 0 0 15px rgba(114,47,55,.6);
+		box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5);
+		transform: translateY(-2px);
+	}
+
+	/* ===== DATATABLE HEADER - PADRÃO FROTIX (20% mais claro que ftx-card-header) ===== */
+	#tblRequisitante thead th,
+	.table thead th {
+		background-color: #4a6fa5 !important;
 		color: #fff !important;
-	}
-
-	/* Modal Header Azul */
-	.modal-header-azul {
-		background: linear-gradient(135deg, #2a4d73 0%, #325d88 100%);
-		color: #fff;
-		border-radius: 0.5rem 0.5rem 0 0;
-	}
-
-	.modal-header-azul .btn-close {
-		filter: brightness(0) invert(1);
-	}
-
-	.modal-header-azul .modal-title i {
-		--fa-primary-color: #fff;
-		--fa-secondary-color: rgba(255,255,255,0.6);
-	}
-
-	/* Labels do formulário */
-	.ftx-label {
 		font-weight: 600;
-		color: #495057;
-		margin-bottom: 0.5rem;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+		border-color: #3d5d8a !important;
+		text-transform: uppercase;
+		font-size: 0.85rem;
+		letter-spacing: 0.5px;
 	}
 
-	.ftx-label i {
-		color: #325d88;
-		font-size: 0.9rem;
+	#tblRequisitante thead th:hover,
+	.table thead th:hover {
+		background-color: #5a7fb5 !important;
 	}
 
-	/* Switch de Status */
-	.form-check-input:checked {
-		background-color: #198754;
-		border-color: #198754;
+	/* Ícones de ordenação do DataTable */
+	table.dataTable thead .sorting:before,
+	table.dataTable thead .sorting:after,
+	table.dataTable thead .sorting_asc:before,
+	table.dataTable thead .sorting_asc:after,
+	table.dataTable thead .sorting_desc:before,
+	table.dataTable thead .sorting_desc:after {
+		color: rgba(255, 255, 255, 0.7) !important;
 	}
 
-	/* DropDownTree customização */
-	.e-ddt.e-outline .e-ddt-icon::before {
-		color: #325d88;
-	}
-
-	.e-ddt .e-popup .e-treeview .e-list-item.e-active > .e-fullrow {
-		background-color: #325d88;
-	}
-
-	.e-ddt .e-chip-close::before {
-		color: #722F37;
-	}
-
-	/* Ajuste largura do dropdown */
-	#ddlSetor_wrapper {
-		width: 100% !important;
+	table.dataTable thead .sorting_asc:before,
+	table.dataTable thead .sorting_desc:after {
+		color: #fff !important;
 	}
 </style>
 
 <div class="row">
 	<div class="col-xl-12">
-		<div id="panel-1" class="panel ftx-card-styled">
+		<div class="panel">
 			<div class="panel-container show">
 
-				<!-- HEADER DO CARD -->
+				<!-- HEADER DO CARD - PADRÃO FROTIX -->
 				<div class="ftx-card-header">
 					<h2 class="titulo-paginas">
-						<i class="fa-duotone fa-person-sign"></i>
-						Requisitantes
+						<i class="fa-duotone fa-user-tie"></i>
+						Gestão de Requisitantes
 					</h2>
 					<div class="ftx-card-actions">
-						<button type="button" class="btn btn-fundo-laranja" id="btnAdicionarRequisitante">
-							<i class="fa-duotone fa-file-plus icon-pulse me-1"></i>
+						<a href="/Requisitante/Upsert" class="btn btn-header-orange">
+							<i class="fa-duotone fa-user-plus" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
 							Adicionar Requisitante
-						</button>
-					</div>
-				</div>
-
-				<div class="panel-content">
-					<div class="box-body">
-						<div id="ControlRegion">
-							<div class="control-section">
-								<div id="Grid"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="panel-content">
-					<div class="d-flex justify-content-end gap-2 pb-3 pe-3">
-						<a href="/Requisitante/RelatorioRequisitante" class="btn btn-dark">
-							<i class="fal fa-file-chart-line"></i>&nbsp; Relatório
 						</a>
 					</div>
 				</div>
 
-			</div>
-		</div>
-	</div>
-</div>
+				<!-- CONTEÚDO -->
+				<div class="panel-content">
+					<div class="box-body">
 
-@*=========================================================================
-   MODAL UPSERT - CRIAR/EDITAR REQUISITANTE
-   =========================================================================*@
-<div class="modal fade" id="modalUpsert" tabindex="-1" aria-labelledby="modalUpsertLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header modal-header-azul">
-				<h5 class="modal-title d-flex align-items-center gap-2" id="modalUpsertLabel">
-					<i class="fa-duotone fa-person-sign"></i>
-					<span id="modalTitulo">Novo Requisitante</span>
-				</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-			</div>
+						<!-- DATATABLE -->
+						<div id="divRequisitantes">
+							<table id="tblRequisitante" class="table table-bordered table-striped" width="100%">
+								<thead>
+									<tr>
+										<th>Ponto</th>
+										<th>Nome</th>
+										<th>Ramal</th>
+										<th>Setor</th>
+										<th>Status</th>
+										<th>Ação</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
 
-			<div class="modal-body">
-				<input type="hidden" id="hiddenRequisitanteId" />
-
-				<!-- Ponto -->
-				<div class="mb-3">
-					<label class="ftx-label">
-						<i class="fa-duotone fa-hashtag"></i>
-						Ponto
-					</label>
-					<input type="text" id="txtPonto" class="form-control" placeholder="Número do ponto" />
-				</div>
-
-				<!-- Nome -->
-				<div class="mb-3">
-					<label class="ftx-label">
-						<i class="fa-duotone fa-user"></i>
-						Nome <span class="text-danger">*</span>
-					</label>
-					<input type="text" id="txtNome" class="form-control" placeholder="Digite o nome do requisitante" maxlength="200" />
-				</div>
-
-				<!-- Ramal -->
-				<div class="mb-3">
-					<label class="ftx-label">
-						<i class="fa-duotone fa-phone"></i>
-						Ramal
-					</label>
-					<input type="number" id="txtRamal" class="form-control" placeholder="Ex: 1234" />
-				</div>
-
-				<!-- Setor - DropDownTree Hierárquico -->
-				<div class="mb-3">
-					<label class="ftx-label">
-						<i class="fa-duotone fa-building"></i>
-						Setor
-					</label>
-					<input type="text" id="ddlSetor" />
-				</div>
-
-				<!-- Status -->
-				<div class="mb-3">
-					<label class="ftx-label">
-						<i class="fa-duotone fa-toggle-on"></i>
-						Status
-					</label>
-					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="chkStatus" checked style="width: 3rem; height: 1.5rem;">
-						<label class="form-check-label ms-2" for="chkStatus" id="lblStatus">Ativo</label>
 					</div>
 				</div>
-			</div>
-
-			<div class="modal-footer">
-				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-xmark me-1"></i> Cancelar
-				</button>
-				<button type="button" class="btn btn-azul" id="btnSalvarRequisitante">
-					<i class="fa-solid fa-check me-1"></i> Salvar
-				</button>
 			</div>
 		</div>
 	</div>
 </div>
 
 @section ScriptsBlock {
-	<script asp-append-version="true">
-		var modalUpsert = null;
-		var gridObj = null;
-		var dropdownTreeObj = null;
-
-		$(document).ready(function () {
-			try {
-				// Inicializa o modal
-				modalUpsert = new bootstrap.Modal(document.getElementById('modalUpsert'));
-
-				// Evento do switch de status
-				$('#chkStatus').on('change', function () {
-					try {
-						$('#lblStatus').text($(this).is(':checked') ? 'Ativo' : 'Inativo');
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "chkStatus.change", error);
-					}
-				});
-
-				// Botão adicionar
-				$('#btnAdicionarRequisitante').on('click', function () {
-					try {
-						abrirModalNovo();
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "btnAdicionarRequisitante.click", error);
-					}
-				});
-
-				// Botão salvar
-				$('#btnSalvarRequisitante').on('click', function () {
-					try {
-						salvarRequisitante();
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "btnSalvarRequisitante.click", error);
-					}
-				});
-
-				// Delegação de eventos para botões da grid
-				$(document).on('click', '.btn-editar-requisitante', function () {
-					try {
-						var id = $(this).data('id');
-						if (id) {
-							abrirModalEditar(id);
-						}
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "btn-editar-requisitante.click", error);
-					}
-				});
-
-				$(document).on('click', '.btn-excluir-requisitante', function () {
-					try {
-						var id = $(this).data('id');
-						if (id) {
-							excluirRequisitante(id);
-						}
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "btn-excluir-requisitante.click", error);
-					}
-				});
-
-				// Carrega dados e inicializa Grid
-				carregarRequisitantes();
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "document.ready", error);
-			}
-		});
-
-		function carregarRequisitantes() {
-			try {
-				$.ajax({
-					url: "/api/Requisitante/GetAll",
-					type: "GET",
-					dataType: "json",
-					success: function (data) {
-						try {
-							inicializarGrid(data);
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarRequisitantes.success", error);
-						}
-					},
-					error: function (err) {
-						try {
-							console.log(err);
-							AppToast.show('Vermelho', 'Erro ao carregar requisitantes.', 2000);
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarRequisitantes.error", error);
-						}
-					}
-				});
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "carregarRequisitantes", error);
-			}
-		}
-
-		function inicializarGrid(dados) {
-			try {
-				$('#Grid').empty();
-
-				gridObj = new ej.grids.Grid({
-					dataSource: dados,
-					allowPaging: true,
-					allowSorting: true,
-					allowFiltering: true,
-					enableHover: true,
-					locale: 'pt-BR',
-					toolbar: ['Search'],
-					filterSettings: { type: 'Excel' },
-					pageSettings: { pageSize: 15 },
-					sortSettings: {
-						columns: [{ field: 'nome', direction: 'Ascending' }]
-					},
-					queryCellInfo: queryCellInfo,
-					columns: [
-						{
-							field: 'requisitanteId',
-							headerText: 'ID',
-							visible: false,
-							width: 0
-						},
-						{
-							field: 'ponto',
-							headerText: 'Ponto',
-							textAlign: 'Center',
-							width: 80
-						},
-						{
-							field: 'nome',
-							headerText: 'Nome',
-							width: 200
-						},
-						{
-							field: 'ramal',
-							headerText: 'Ramal',
-							textAlign: 'Center',
-							width: 80
-						},
-						{
-							field: 'setorNome',
-							headerText: 'Setor',
-							width: 180
-						},
-						{
-							field: 'status',
-							headerText: 'Status',
-							textAlign: 'Center',
-							width: 100
-						},
-						{
-							headerText: 'Ações',
-							textAlign: 'Center',
-							width: 100,
-							field: 'acoes'
-						}
-					]
-				});
-				gridObj.appendTo('#Grid');
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "inicializarGrid", error);
-			}
-		}
-
-		function queryCellInfo(args) {
-			try {
-				// Coluna Status - Badge
-				if (args.column.field === 'status') {
-					var statusVal = args.data.status;
-					if (statusVal === 1 || statusVal === true || statusVal === "1") {
-						args.cell.innerHTML = '<span class="badge-ativo">Ativo</span>';
-					} else {
-						args.cell.innerHTML = '<span class="badge-inativo">Inativo</span>';
-					}
-				}
-
-				// Coluna Ações - Botões
-				if (args.column.field === 'acoes') {
-					var id = args.data.requisitanteId;
-					args.cell.innerHTML =
-						'<div class="d-flex justify-content-center gap-1">' +
-						'<button type="button" class="btn-acao btn-acao-editar btn-editar-requisitante" data-id="' + id + '" title="Editar">' +
-						'<i class="far fa-edit"></i>' +
-						'</button>' +
-						'<button type="button" class="btn-acao btn-acao-excluir btn-excluir-requisitante" data-id="' + id + '" title="Excluir">' +
-						'<i class="far fa-trash-alt"></i>' +
-						'</button>' +
-						'</div>';
-				}
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "queryCellInfo", error);
-			}
-		}
-
-		function carregarSetores(valorSelecionado) {
-			try {
-				$.ajax({
-					url: "/api/Requisitante/GetSetoresHierarquia",
-					type: "GET",
-					dataType: "json",
-					success: function (data) {
-						try {
-							// Destroi instância anterior se existir
-							if (dropdownTreeObj) {
-								dropdownTreeObj.destroy();
-							}
-
-							// Recria o elemento input
-							$('#ddlSetor').replaceWith('<input type="text" id="ddlSetor" />');
-
-							// Cria DropDownTree hierárquico com filtro
-							dropdownTreeObj = new ej.dropdowns.DropDownTree({
-								fields: {
-									dataSource: data,
-									value: 'id',
-									text: 'nome',
-									child: 'children',
-									hasChildren: 'hasChild'
-								},
-								placeholder: '-- Selecione um Setor --',
-								popupHeight: '300px',
-								allowFiltering: true,
-								filterBarPlaceholder: 'Buscar setor...',
-								filterType: 'Contains',
-								showClearButton: true,
-								cssClass: 'e-outline',
-								treeSettings: {
-									autoCheck: false,
-									expandOn: 'Click'
-								}
-							});
-							dropdownTreeObj.appendTo('#ddlSetor');
-
-							// Se tiver valor para selecionar (edição)
-							if (valorSelecionado && valorSelecionado !== '') {
-								setTimeout(function () {
-									dropdownTreeObj.value = [valorSelecionado];
-								}, 150);
-							}
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores.success", error);
-						}
-					},
-					error: function (err) {
-						try {
-							console.log(err);
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores.error", error);
-						}
-					}
-				});
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores", error);
-			}
-		}
-
-		function abrirModalNovo() {
-			try {
-				$('#modalTitulo').text('Novo Requisitante');
-				$('#hiddenRequisitanteId').val('');
-				$('#txtPonto').val('');
-				$('#txtNome').val('');
-				$('#txtRamal').val('');
-				$('#chkStatus').prop('checked', true);
-				$('#lblStatus').text('Ativo');
-
-				carregarSetores(null);
-				modalUpsert.show();
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalNovo", error);
-			}
-		}
-
-		function abrirModalEditar(id) {
-			try {
-				if (!id) return;
-
-				$.ajax({
-					url: "/api/Requisitante/GetById?id=" + id,
-					type: "GET",
-					dataType: "json",
-					success: function (response) {
-						try {
-							if (response.success) {
-								var requisitante = response.data;
-								$('#modalTitulo').text('Editar Requisitante');
-								$('#hiddenRequisitanteId').val(requisitante.requisitanteId);
-								$('#txtPonto').val(requisitante.ponto || '');
-								$('#txtNome').val(requisitante.nome);
-								$('#txtRamal').val(requisitante.ramal || '');
-								$('#chkStatus').prop('checked', requisitante.status);
-								$('#lblStatus').text(requisitante.status ? 'Ativo' : 'Inativo');
-
-								// Carrega setores com valor selecionado
-								carregarSetores(requisitante.setorSolicitanteId);
-
-								modalUpsert.show();
-							} else {
-								AppToast.show('Vermelho', response.message, 2000);
-							}
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalEditar.success", error);
-						}
-					},
-					error: function (err) {
-						try {
-							console.log(err);
-							AppToast.show('Vermelho', 'Erro ao carregar dados do requisitante.', 2000);
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalEditar.error", error);
-						}
-					}
-				});
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "abrirModalEditar", error);
-			}
-		}
-
-		function salvarRequisitante() {
-			try {
-				var nome = $('#txtNome').val().trim();
-				if (!nome) {
-					AppToast.show('Amarelo', 'O nome do requisitante é obrigatório.', 2000);
-					$('#txtNome').focus();
-					return;
-				}
-
-				// Pega o valor do DropDownTree
-				var setorId = '';
-				if (dropdownTreeObj && dropdownTreeObj.value && dropdownTreeObj.value.length > 0) {
-					setorId = dropdownTreeObj.value[0];
-				}
-
-				var model = {
-					RequisitanteId: $('#hiddenRequisitanteId').val() || '',
-					Ponto: $('#txtPonto').val().trim(),
-					Nome: nome,
-					Ramal: $('#txtRamal').val() ? parseInt($('#txtRamal').val()) : null,
-					SetorSolicitanteId: setorId,
-					Status: $('#chkStatus').is(':checked')
-				};
-
-				$.ajax({
-					url: "/api/Requisitante/Upsert",
-					type: "POST",
-					data: JSON.stringify(model),
-					contentType: "application/json; charset=utf-8",
-					dataType: "json",
-					success: function (response) {
-						try {
-							if (response.success) {
-								AppToast.show('Verde', response.message, 2000);
-								modalUpsert.hide();
-								location.reload();
-							} else {
-								AppToast.show('Vermelho', response.message, 2000);
-							}
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "salvarRequisitante.success", error);
-						}
-					},
-					error: function (err) {
-						try {
-							console.log(err);
-							AppToast.show('Vermelho', 'Erro ao salvar requisitante.', 2000);
-						} catch (error) {
-							Alerta.TratamentoErroComLinha("Index.cshtml", "salvarRequisitante.error", error);
-						}
-					}
-				});
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "salvarRequisitante", error);
-			}
-		}
-
-		function excluirRequisitante(id) {
-			try {
-				if (!id) return;
-
-				Alerta.Confirmar(
-					"Confirmar Exclusão",
-					"Você tem certeza que deseja apagar este requisitante? Não será possível recuperar os dados eliminados!",
-					"Excluir",
-					"Cancelar"
-				).then(function (confirmed) {
-					try {
-						if (confirmed) {
-							$.ajax({
-								url: "/api/Requisitante/Delete",
-								type: "POST",
-								data: { RequisitanteId: id },
-								dataType: "json",
-								success: function (data) {
-									try {
-										if (data.success) {
-											AppToast.show('Verde', data.message, 2000);
-											location.reload();
-										} else {
-											AppToast.show('Vermelho', data.message, 2000);
-										}
-									} catch (error) {
-										Alerta.TratamentoErroComLinha("Index.cshtml", "excluirRequisitante.ajax.success", error);
-									}
-								},
-								error: function (err) {
-									try {
-										console.log(err);
-										AppToast.show('Vermelho', 'Ocorreu um erro ao excluir o registro.', 2000);
-									} catch (error) {
-										Alerta.TratamentoErroComLinha("Index.cshtml", "excluirRequisitante.ajax.error", error);
-									}
-								}
-							});
-						}
-					} catch (error) {
-						Alerta.TratamentoErroComLinha("Index.cshtml", "excluirRequisitante.confirmar.then", error);
-					}
-				});
-			} catch (error) {
-				Alerta.TratamentoErroComLinha("Index.cshtml", "excluirRequisitante", error);
-			}
-		}
-	</script>
-
-	<script asp-append-version="true">
-		var L10n = ej.base.L10n;
-		L10n.load({
-			"pt-BR": {
-				"grid": {
-					"EmptyRecord": "Nenhum registro encontrado",
-					"GroupDropArea": "Arraste um cabeçalho de coluna aqui para agrupar",
-					"UnGroup": "Clique aqui para desagrupar",
-					"Item": "Item",
-					"Items": "Itens",
-					"Search": "Buscar",
-					"FilterButton": "Filtrar",
-					"ClearButton": "Limpar",
-					"SelectAll": "Selecionar Tudo",
-					"Blanks": "Em branco",
-					"FilterTrue": "Verdadeiro",
-					"FilterFalse": "Falso",
-					"NoResult": "Nenhuma correspondência encontrada",
-					"StartsWith": "Começa com",
-					"EndsWith": "Termina com",
-					"Contains": "Contém",
-					"Equal": "Igual",
-					"NotEqual": "Diferente de",
-					"LessThan": "Menor que",
-					"LessThanOrEqual": "Menor ou igual a",
-					"GreaterThan": "Maior que",
-					"GreaterThanOrEqual": "Maior ou igual a",
-					"ChooseDate": "Escolha uma data",
-					"EnterValue": "Digite o valor",
-					"matchCase": "Diferenciar maiúsculas/minúsculas",
-					"OK": "OK",
-					"Cancel": "Cancelar",
-					"MatchCase": "Diferenciar maiúsculas/minúsculas",
-					"Between": "Entre",
-					"CustomFilter": "Filtro Personalizado",
-					"CustomFilterPlaceHolder": "Digite o valor",
-					"CustomFilterDatePlaceHolder": "Escolha uma data",
-					"AND": "E",
-					"OR": "OU",
-					"ShowRowsWhere": "Mostrar linhas onde"
-				},
-				"pager": {
-					"currentPageInfo": "Página {0} de {1}",
-					"totalItemsInfo": "({0} registro(s))",
-					"firstPageTooltip": "Primeira página",
-					"lastPageTooltip": "Última página",
-					"nextPageTooltip": "Próxima página",
-					"previousPageTooltip": "Página anterior",
-					"nextPagerTooltip": "Próximo paginador",
-					"previousPagerTooltip": "Paginador anterior"
-				},
-				"dropdowns": {
-					"noRecordsTemplate": "Nenhum registro encontrado",
-					"actionFailureTemplate": "Falha na requisição",
-					"overflowCountTemplate": "+${count} mais..."
-				},
-				"drop-down-tree": {
-					"noRecordsTemplate": "Nenhum registro encontrado"
-				},
-				"datepicker": {
-					"placeholder": "Selecione uma data",
-					"today": "Hoje"
-				}
-			}
-		});
-	</script>
+	<script src="~/js/cadastros/requisitante.js" asp-append-version="true"></script>
 }

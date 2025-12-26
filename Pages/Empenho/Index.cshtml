@@ -383,10 +383,11 @@
                             <label class="ftx-label">
                                 <i class="fa-duotone fa-coins"></i> Valor do Aporte
                             </label>
-                            <input id="txtValor" class="form-control form-control-sm text-end" 
-                                   data-inputmask="'alias': 'currency'" 
-                                   onKeyPress="return(moeda(this,'.',',',event))" 
-                                   placeholder="R$ 0,00" />
+                            <input id="txtValor" 
+                                   class="form-control form-control-sm"
+                                   style="text-align: right;"
+                                   onkeypress="return moeda(this,'.',',',event)"
+                                   placeholder="0,00" />
                         </div>
                     </div>
                 </form>
@@ -438,10 +439,11 @@
                             <label class="ftx-label">
                                 <i class="fa-duotone fa-coins"></i> Valor da Anulação
                             </label>
-                            <input id="txtValoranulacao" class="form-control form-control-sm text-end" 
-                                   data-inputmask="'alias': 'currency'" 
-                                   onKeyPress="return(moeda(this,'.',',',event))" 
-                                   placeholder="R$ 0,00" />
+                            <input id="txtValoranulacao" 
+                                   class="form-control form-control-sm"
+                                   style="text-align: right;"
+                                   onkeypress="return moeda(this,'.',',',event)"
+                                   placeholder="0,00" />
                         </div>
                     </div>
                 </form>
@@ -505,36 +507,81 @@
 
     <script>
         // ===== UTILITÁRIOS =====
-        function brToNumberString(v) {
+        // Converte valor BR para número (ex: "10.000,50" -> 10000.50)
+        function parseCurrencyBR(str) {
             try {
-                if (v == null) return "0";
-                return String(v).replace(/\s/g, '').replace(/\./g, '').replace(',', '.').replace('R$', '').replace('&nbsp;', '');
+                if (!str) return 0;
+                let limpo = String(str)
+                    .replace(/\s/g, '')
+                    .replace('R$', '')
+                    .replace(/\./g, '')
+                    .replace(',', '.');
+                return parseFloat(limpo) || 0;
             } catch (error) {
-                Alerta.TratamentoErroComLinha("Index.cshtml", "brToNumberString", error);
-                return "0";
+                Alerta.TratamentoErroComLinha("Index.cshtml", "parseCurrencyBR", error);
+                return 0;
             }
         }
 
-        function moeda(a, e, r, t) {
+        // Função de formatação de moeda (últimos 2 dígitos = centavos)
+        // Para R$ 1.000,00 digite 100000
+        function moeda(input, sep, dec, event) {
             try {
-                let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
-                    o = window.Event ? t.which : t.keyCode;
-                if (o == 13 || o == 8) return !0;
-                n = String.fromCharCode(o);
-                if ("0123456789".indexOf(n) == -1) return !1;
-                for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
-                for (l = ""; h < u; h++) "0123456789".indexOf(a.value.charAt(h)) != -1 && (l += a.value.charAt(h));
-                if (l += n, (u = l.length) == 0) a.value = "";
-                if (u == 1) a.value = "0" + r + "0" + l;
-                if (u == 2) a.value = "0" + r + l;
-                if (u > 2) {
-                    for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--) 3 == j && (ajd2 += e, j = 0), ajd2 += l.charAt(h), j++;
-                    for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--) a.value += ajd2.charAt(h);
-                    a.value += r + l.substr(u - 2, u)
+                let digitado = "",
+                    i = j = 0,
+                    tamanho = tamanho2 = 0,
+                    limpo = ajustado = "",
+                    tecla = window.Event ? event.which : event.keyCode;
+
+                if (tecla === 13 || tecla === 8) return true;
+
+                digitado = String.fromCharCode(tecla);
+
+                if ("0123456789".indexOf(digitado) === -1) return false;
+
+                for (tamanho = input.value.length, i = 0;
+                     i < tamanho && (input.value.charAt(i) === "0" || input.value.charAt(i) === dec);
+                     i++);
+
+                for (limpo = ""; i < tamanho; i++) {
+                    if ("0123456789".indexOf(input.value.charAt(i)) !== -1) {
+                        limpo += input.value.charAt(i);
+                    }
                 }
-                return !1;
+
+                limpo += digitado;
+                tamanho = limpo.length;
+
+                if (tamanho === 0) {
+                    input.value = "";
+                } else if (tamanho === 1) {
+                    input.value = "0" + dec + "0" + limpo;
+                } else if (tamanho === 2) {
+                    input.value = "0" + dec + limpo;
+                } else {
+                    for (ajustado = "", j = 0, i = tamanho - 3; i >= 0; i--) {
+                        if (j === 3) {
+                            ajustado += sep;
+                            j = 0;
+                        }
+                        ajustado += limpo.charAt(i);
+                        j++;
+                    }
+
+                    input.value = "";
+                    tamanho2 = ajustado.length;
+
+                    for (i = tamanho2 - 1; i >= 0; i--) {
+                        input.value += ajustado.charAt(i);
+                    }
+
+                    input.value += dec + limpo.substr(tamanho - 2, tamanho);
+                }
+
+                return false;
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Index.cshtml", "moeda", error);
+                return false;
             }
         }
 
@@ -894,12 +941,13 @@
                     Alerta.Erro("Atenção", "A descrição do Aporte é obrigatória!");
                     return;
                 }
+                
                 if (!$("#txtValor").val()) {
                     Alerta.Erro("Atenção", "O valor do Aporte é obrigatório!");
                     return;
                 }
-
-                const valorAporte = brToNumberString($("#txtValor").val());
+                
+                const valorAporte = parseCurrencyBR($("#txtValor").val());
 
                 const objEmpenho = JSON.stringify({
                     EmpenhoId: $('#txtIdAporte').val(),
@@ -956,12 +1004,13 @@
                     Alerta.Erro("Atenção", "A descrição da anulação é obrigatória!");
                     return;
                 }
+                
                 if (!$("#txtValoranulacao").val()) {
                     Alerta.Erro("Atenção", "O valor da anulação é obrigatório!");
                     return;
                 }
-
-                const valorAnulacao = brToNumberString($("#txtValoranulacao").val());
+                
+                const valorAnulacao = parseCurrencyBR($("#txtValoranulacao").val());
 
                 const objEmpenho = JSON.stringify({
                     EmpenhoId: $('#txtIdAnulacao').val(),

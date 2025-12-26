@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -145,7 +145,7 @@ namespace FrotiX.Models
 
 
     public class RepactuacaoContrato
-        {
+    {
         [Key]
         public Guid RepactuacaoContratoId { get; set; }
 
@@ -154,6 +154,9 @@ namespace FrotiX.Models
         public string? Descricao { get; set; }
 
         public double? Valor { get; set; }
+
+        [Display(Name = "Percentual (%)")]
+        public double? Percentual { get; set; }
 
         [Display(Name = "Contrato")]
         public Guid ContratoId { get; set; }
@@ -167,9 +170,7 @@ namespace FrotiX.Models
 
         [NotMapped]
         public bool AtualizaContrato { get; set; }
-
-
-        }
+    }
 
     public class ItemVeiculoContrato
         {

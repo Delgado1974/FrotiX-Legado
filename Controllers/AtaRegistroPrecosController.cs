@@ -9,7 +9,7 @@ namespace FrotiX.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AtaRegistroPrecosController :ControllerBase
+    public partial class AtaRegistroPrecosController :ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
 

@@ -10,88 +10,6 @@
     ViewData["PageIcon"] = "fal fa-car";
 }
 
-@section HeadBlock {
-    <style>
-        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
-        .ftx-card-header {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-            border-radius: 8px 8px 0 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ftx-card-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shimmer 3s infinite;
-        }
-
-        @@keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .ftx-card-header .titulo-paginas {
-            color: #fff !important;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .ftx-card-header .titulo-paginas i.fa-duotone {
-            --fa-primary-color: #fff;
-            --fa-secondary-color: rgba(255, 255, 255, 0.6);
-            --fa-secondary-opacity: 0.6;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-
-        .ftx-card-actions {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ====== BOTÃO ADICIONAR LARANJA (SEM DEGRADÊ) ====== */
-        .ftx-card-header .btn-add {
-            background: #e67333;
-            color: #fff !important;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            box-shadow: 0 2px 6px rgba(230, 115, 51, 0.3);
-        }
-
-        .ftx-card-header .btn-add:hover {
-            background: #ff8c42;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(230, 115, 51, 0.4);
-            color: #fff !important;
-        }
-
-        .ftx-card-header .btn-add i {
-            --fa-primary-color: #fff;
-            --fa-secondary-color: rgba(255, 255, 255, 0.7);
-        }
-    </style>
-}
-
 <div class="row">
     <div class="col-xl-12">
         <div class="panel">
@@ -100,12 +18,13 @@
                 <!-- HEADER AZUL PADRÃO FROTIX -->
                 <div class="ftx-card-header">
                     <h2 class="titulo-paginas">
-                        <i class="fa-duotone fa-car"></i>
+                        <i class="fa-duotone fa-cars"></i>
                         Gestão de Veículos
                     </h2>
                     <div class="ftx-card-actions">
-                        <a href="/Veiculo/Upsert" class="btn btn-add">
-                            <i class="fa-duotone fa-plus"></i> Adicionar Veículo
+                        <a href="/Veiculo/Upsert" class="btn btn-header-orange">
+                            <i class="fa-duotone fa-car-circle-bolt" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
+                            Adicionar Veículo
                         </a>
                     </div>
                 </div>
