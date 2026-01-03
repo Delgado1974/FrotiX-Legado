@@ -572,6 +572,42 @@
                 }
             });
 
+            // ====== NORMALIZAR DADOS DA API (PascalCase -> camelCase) ======
+            function normalizarItem(item) {
+                if (!item) return null;
+
+                var normalizado = {
+                    id: item.id || item.Id,
+                    text: item.text || item.Text || item.nomeMenu || item.NomeMenu,
+                    title: item.title || item.Title,
+                    nomeMenu: item.nomeMenu || item.NomeMenu,
+                    href: item.href || item.Href,
+                    icon: item.icon || item.Icon,
+                    iconCss: item.iconCss || item.IconCss,
+                    parentId: item.parentId || item.ParentId,
+                    hasChild: item.hasChild || item.HasChild || false,
+                    expanded: item.expanded !== undefined ? item.expanded : (item.Expanded !== undefined ? item.Expanded : true),
+                    items: []
+                };
+
+                var filhos = item.items || item.Items;
+                if (filhos && filhos.length > 0) {
+                    normalizado.items = filhos.map(function(filho) {
+                        return normalizarItem(filho);
+                    });
+                    normalizado.hasChild = true;
+                }
+
+                return normalizado;
+            }
+
+            function normalizarDados(dados) {
+                if (!dados || !Array.isArray(dados)) return [];
+                return dados.map(function(item) {
+                    return normalizarItem(item);
+                });
+            }
+
             // ====== CARREGAR NAVEGAÇÃO ======
             function carregarNavegacao() {
                 try {
@@ -584,7 +620,8 @@
                         success: function(res) {
                             try {
                                 if (res && res.success) {
-                                    treeData = res.data || [];
+                                    // Normaliza os dados da API (PascalCase -> camelCase)
+                                    treeData = normalizarDados(res.data || []);
                                     renderizarTreeView();
                                     atualizarDropdownPais();
                                 } else {
@@ -1100,8 +1137,8 @@
 
             function adicionarOpcoesPai(items, prefixo, $select) {
                 items.forEach(function(item) {
-                    var texto = prefixo + (item.text || item.nomeMenu);
-                    $select.append('<option value="' + item.id + '">' + texto + '</option>');
+                    var texto = prefixo + (item.text || item.nomeMenu || 'Sem nome');
+                    $select.append('<option value="' + item.id + '">' + escapeHtml(texto) + '</option>');
 
                     if (item.items && item.items.length > 0) {
                         adicionarOpcoesPai(item.items, prefixo + '— ', $select);
