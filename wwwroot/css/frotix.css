@@ -1804,16 +1804,16 @@ table.dataTable td .badge,
 
 /* ================================================================
    ÍCONES DUOTONE EM BADGES DE STATUS - DESTAQUE NO ELEMENTO INTERNO
-   Diminui a opacidade da camada primária (círculo) para destacar
-   o símbolo interno (check/xmark)
+   Diminui a opacidade da camada secundária (círculo) para destacar
+   o símbolo interno (check/xmark) que é a camada primária
    ================================================================ */
 .ftx-badge-status i.fa-duotone,
 .ftx-status-badge i.fa-duotone,
 .badge-ativo i.fa-duotone,
 .badge-inativo i.fa-duotone,
 table.dataTable td .badge i.fa-duotone {
-    --fa-primary-opacity: 0.4;
-    --fa-secondary-opacity: 1;
+    --fa-primary-opacity: 1;
+    --fa-secondary-opacity: 0.4;
 }
 
 .ftx-table .ftx-actions a.btn,
