@@ -1,0 +1,566 @@
+@page
+@model FrotiX.Pages.Manutencao.DashboardLavagemModel
+@{
+    ViewData["Title"] = "Dashboard de Lavagem";
+    ViewData["PageName"] = "manutencao_dashboardlavagem";
+}
+
+<style>
+    /* ========================================
+       PALETA DE CORES - TEMA CYAN (LIMPEZA)
+       ======================================== */
+    :root {
+        --lav-primary: #0891b2;
+        --lav-secondary: #06b6d4;
+        --lav-accent: #22d3ee;
+        --lav-dark: #0e7490;
+        --lav-light: #ecfeff;
+        --lav-gradient: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+    }
+
+    /* Cards de Estatisticas */
+    .card-estatistica-lav {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        border-left: 4px solid;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-estatistica-lav:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+
+    .card-borda-cyan { border-left-color: #0891b2; }
+    .card-borda-teal { border-left-color: #14b8a6; }
+    .card-borda-sky { border-left-color: #0ea5e9; }
+    .card-borda-emerald { border-left-color: #10b981; }
+    .card-borda-indigo { border-left-color: #6366f1; }
+    .card-borda-violet { border-left-color: #8b5cf6; }
+    .card-borda-amber { border-left-color: #f59e0b; }
+    .card-borda-rose { border-left-color: #f43f5e; }
+
+    .icone-card-lav {
+        font-size: 24px;
+        margin-bottom: 12px;
+        opacity: 0.85;
+    }
+
+    .icone-cyan { color: #0891b2; }
+    .icone-teal { color: #14b8a6; }
+    .icone-sky { color: #0ea5e9; }
+    .icone-emerald { color: #10b981; }
+    .icone-indigo { color: #6366f1; }
+    .icone-violet { color: #8b5cf6; }
+    .icone-amber { color: #f59e0b; }
+    .icone-rose { color: #f43f5e; }
+
+    .texto-metrica {
+        font-size: 0.75rem;
+        color: #6B7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .valor-metrica {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.2;
+    }
+
+    .variacao-metrica {
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 8px;
+    }
+
+    .variacao-positiva { color: #10b981; }
+    .variacao-negativa { color: #f43f5e; }
+    .variacao-neutra { color: #6B7280; }
+
+    /* Container de Filtros */
+    .filter-card-lav {
+        background: var(--lav-gradient);
+        color: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+
+    .filter-card-lav .form-label {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    /* Botoes de Periodo Rapido */
+    .btn-period-lav {
+        border-radius: 20px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.15);
+        color: white;
+    }
+
+    .btn-period-lav:hover {
+        transform: scale(1.05);
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+        color: white;
+    }
+
+    .btn-period-lav.active {
+        background: white;
+        color: var(--lav-primary);
+        border-color: white;
+    }
+
+    /* Containers de Graficos */
+    .chart-container-lav {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: box-shadow 0.3s ease;
+        height: 100%;
+    }
+
+    .chart-container-lav:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .chart-title-lav {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chart-title-lav i {
+        color: var(--lav-primary);
+    }
+
+    /* Header Padrao FrotiX - Cyan */
+    .header-dashboard-lav {
+        background: var(--lav-gradient);
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 15px rgba(8, 145, 178, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-dashboard-lav::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        animation: lavHeaderShine 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes lavHeaderShine {
+        0%, 100% { left: -100%; }
+        50% { left: 100%; }
+    }
+
+    .header-dashboard-titulo-lav {
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-dashboard-titulo-lav i {
+        font-size: 1.75rem;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+    }
+
+    /* Botao Filtrar */
+    .btn-filtrar-lav {
+        background: linear-gradient(135deg, #0e7490 0%, #0891b2 100%);
+        border: 2px solid rgba(255, 255, 255, 0.6) !important;
+        color: white !important;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+    }
+
+    .btn-filtrar-lav:hover {
+        background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+        border-color: rgba(255, 255, 255, 0.9) !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.5);
+    }
+
+    /* Tabelas */
+    .table-lav {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-lav thead {
+        background: var(--lav-gradient);
+        color: white;
+    }
+
+    .table-lav tbody tr:hover {
+        background-color: var(--lav-light) !important;
+    }
+
+    /* Heatmap */
+    .heatmap-container {
+        overflow-x: auto;
+    }
+
+    .heatmap-cell {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border-radius: 4px;
+        margin: 1px;
+    }
+
+    /* Loading */
+    .loading-overlay-lav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .spinner-lav {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--lav-light);
+        border-top-color: var(--lav-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Card Destaque */
+    .card-destaque-lav {
+        background: linear-gradient(135deg, var(--lav-light) 0%, #f0fdfa 100%);
+        border: 1px solid var(--lav-accent);
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .card-destaque-lav .destaque-label {
+        font-size: 0.7rem;
+        color: #6B7280;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .card-destaque-lav .destaque-valor {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--lav-dark);
+    }
+
+    .card-destaque-lav .destaque-info {
+        font-size: 0.8rem;
+        color: var(--lav-primary);
+        font-weight: 600;
+    }
+</style>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay-lav">
+    <div class="spinner-lav"></div>
+    <p class="mt-3 text-muted">Carregando dados...</p>
+</div>
+
+<!-- Header do Dashboard -->
+<div class="header-dashboard-lav">
+    <h1 class="header-dashboard-titulo-lav">
+        <i class="fa-duotone fa-car-wash"></i>
+        Dashboard de Lavagem de Veiculos
+    </h1>
+</div>
+
+<!-- Filtros -->
+<div class="filter-card-lav">
+    <div class="row align-items-end">
+        <div class="col-md-2">
+            <label class="form-label">
+                <i class="fa-duotone fa-calendar-days me-1"></i> Data Inicial
+            </label>
+            <input type="date" id="dataInicio" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">
+                <i class="fa-duotone fa-calendar-check me-1"></i> Data Final
+            </label>
+            <input type="date" id="dataFim" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Periodo Rapido</label>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-period-lav" data-dias="7">7 dias</button>
+                <button class="btn btn-period-lav" data-dias="15">15 dias</button>
+                <button class="btn btn-period-lav active" data-dias="30">30 dias</button>
+                <button class="btn btn-period-lav" data-dias="60">60 dias</button>
+                <button class="btn btn-period-lav" data-dias="90">90 dias</button>
+                <button class="btn btn-period-lav" data-dias="365">1 ano</button>
+            </div>
+        </div>
+        <div class="col-md-2 text-end">
+            <button id="btnFiltrar" class="btn btn-filtrar-lav">
+                <i class="fa-duotone fa-filter me-2"></i> Filtrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Cards KPI - Linha 1 -->
+<div class="row g-3 mb-4">
+    <div class="col-md col-6">
+        <div class="card-estatistica-lav card-borda-cyan">
+            <i class="fa-duotone fa-car-wash icone-card-lav icone-cyan"></i>
+            <span class="texto-metrica">Total de Lavagens</span>
+            <span class="valor-metrica" id="totalLavagens">0</span>
+            <span class="variacao-metrica variacao-neutra" id="variacaoLavagens"></span>
+        </div>
+    </div>
+    <div class="col-md col-6">
+        <div class="card-estatistica-lav card-borda-teal">
+            <i class="fa-duotone fa-cars icone-card-lav icone-teal"></i>
+            <span class="texto-metrica">Veiculos Lavados</span>
+            <span class="valor-metrica" id="veiculosLavados">0</span>
+        </div>
+    </div>
+    <div class="col-md col-6">
+        <div class="card-estatistica-lav card-borda-sky">
+            <i class="fa-duotone fa-users icone-card-lav icone-sky"></i>
+            <span class="texto-metrica">Lavadores Ativos</span>
+            <span class="valor-metrica" id="lavadoresAtivos">0</span>
+        </div>
+    </div>
+    <div class="col-md col-6">
+        <div class="card-estatistica-lav card-borda-emerald">
+            <i class="fa-duotone fa-chart-line icone-card-lav icone-emerald"></i>
+            <span class="texto-metrica">Media Diaria</span>
+            <span class="valor-metrica" id="mediaDiaria">0</span>
+        </div>
+    </div>
+    <div class="col-md col-6">
+        <div class="card-estatistica-lav card-borda-indigo">
+            <i class="fa-duotone fa-car icone-card-lav icone-indigo"></i>
+            <span class="texto-metrica">Media por Veiculo</span>
+            <span class="valor-metrica" id="mediaPorVeiculo">0</span>
+        </div>
+    </div>
+</div>
+
+<!-- Cards KPI - Linha 2 (Destaques) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="card-destaque-lav">
+            <div class="destaque-label">
+                <i class="fa-duotone fa-trophy me-1"></i> Lavador Destaque
+            </div>
+            <div class="destaque-valor" id="lavadorDestaqueNome">-</div>
+            <div class="destaque-info" id="lavadorDestaqueQtd">0 lavagens</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card-destaque-lav">
+            <div class="destaque-label">
+                <i class="fa-duotone fa-car-side me-1"></i> Veiculo Mais Lavado
+            </div>
+            <div class="destaque-valor" id="veiculoMaisLavadoPlaca">-</div>
+            <div class="destaque-info" id="veiculoMaisLavadoQtd">0 lavagens</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card-destaque-lav">
+            <div class="destaque-label">
+                <i class="fa-duotone fa-calendar-day me-1"></i> Dia Mais Movimentado
+            </div>
+            <div class="destaque-valor" id="diaMaisMovimentado">-</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card-destaque-lav">
+            <div class="destaque-label">
+                <i class="fa-duotone fa-clock me-1"></i> Horario de Pico
+            </div>
+            <div class="destaque-valor" id="horarioPico">-</div>
+        </div>
+    </div>
+</div>
+
+<!-- Graficos - Linha 1 -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-chart-column"></i> Lavagens por Dia da Semana
+            </h5>
+            <div id="chartDiaSemana" style="height: 300px;"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-chart-area"></i> Distribuicao por Horario
+            </h5>
+            <div id="chartHorario" style="height: 300px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Graficos - Linha 2 -->
+<div class="row g-4 mb-4">
+    <div class="col-md-8">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-chart-line"></i> Evolucao Mensal
+            </h5>
+            <div id="chartEvolucao" style="height: 300px;"></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-chart-pie"></i> Lavagens por Contrato
+            </h5>
+            <div id="chartContrato" style="height: 300px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Graficos - Linha 3 (Top 10) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-ranking-star"></i> Top 10 Lavadores
+            </h5>
+            <div id="chartTopLavadores" style="height: 350px;"></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-cars"></i> Top 10 Veiculos
+            </h5>
+            <div id="chartTopVeiculos" style="height: 350px;"></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-user-helmet-safety"></i> Top 10 Motoristas
+            </h5>
+            <div id="chartTopMotoristas" style="height: 350px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Heatmap -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-grid-2"></i> Mapa de Calor - Dia x Horario
+            </h5>
+            <div id="heatmapContainer" class="heatmap-container"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabelas -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-table"></i> Estatisticas por Lavador
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-lav" id="tabelaLavadores">
+                    <thead>
+                        <tr>
+                            <th>Lavador</th>
+                            <th class="text-center">Lavagens</th>
+                            <th class="text-center">%</th>
+                            <th class="text-center">Media/Dia</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-table"></i> Estatisticas por Veiculo
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-lav" id="tabelaVeiculos">
+                    <thead>
+                        <tr>
+                            <th>Veiculo</th>
+                            <th class="text-center">Lavagens</th>
+                            <th class="text-center">Ultima</th>
+                            <th class="text-center">Dias</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/js/dashboards/dashboard-lavagem.js" asp-append-version="true"></script>
+}
