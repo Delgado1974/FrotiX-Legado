@@ -69,10 +69,17 @@ namespace FrotiX.Controllers
                     .OrderByDescending(x => x.Quantidade)
                     .FirstOrDefault();
 
-                // Veículo mais lavado
+                // Veículo mais lavado (com indicador PM)
                 var veiculoMaisLavado = lavagens
-                    .GroupBy(l => new { l.VeiculoId, Placa = l.Veiculo?.Placa })
-                    .Select(g => new { Placa = g.Key.Placa ?? "N/A", Quantidade = g.Count() })
+                    .GroupBy(l => new {
+                        l.VeiculoId,
+                        Placa = l.Veiculo?.Placa,
+                        IsPM = l.Veiculo?.PlacaBronzeId != null
+                    })
+                    .Select(g => new {
+                        Placa = g.Key.IsPM ? $"{g.Key.Placa} (PM)" : g.Key.Placa ?? "N/A",
+                        Quantidade = g.Count()
+                    })
                     .OrderByDescending(x => x.Quantidade)
                     .FirstOrDefault();
 
@@ -288,12 +295,19 @@ namespace FrotiX.Controllers
                     .ToListAsync();
 
                 var resultado = lavagens
-                    .GroupBy(l => new { l.VeiculoId, l.Veiculo?.Placa, Modelo = l.Veiculo?.ModeloVeiculo?.DescricaoModelo })
+                    .GroupBy(l => new {
+                        l.VeiculoId,
+                        l.Veiculo?.Placa,
+                        Modelo = l.Veiculo?.ModeloVeiculo?.DescricaoModelo,
+                        IsPM = l.Veiculo?.PlacaBronzeId != null
+                    })
                     .Select(g => new
                     {
-                        placa = g.Key.Placa ?? "N/A",
+                        placa = g.Key.IsPM ? $"{g.Key.Placa} (PM)" : g.Key.Placa ?? "N/A",
                         modelo = g.Key.Modelo ?? "",
-                        descricao = $"({g.Key.Placa}) - {g.Key.Modelo ?? ""}",
+                        descricao = g.Key.IsPM
+                            ? $"({g.Key.Placa}) PM - {g.Key.Modelo ?? ""}"
+                            : $"({g.Key.Placa}) - {g.Key.Modelo ?? ""}",
                         quantidade = g.Count()
                     })
                     .OrderByDescending(x => x.quantidade)
@@ -437,8 +451,14 @@ namespace FrotiX.Controllers
                     .Where(l => l.Data >= dataInicio && l.Data <= dataFim)
                     .ToListAsync();
 
+                // Separa veículos PM (que têm PlacaBronzeId) dos demais
                 var resultado = lavagens
-                    .GroupBy(l => l.Veiculo?.Categoria ?? "Não Informado")
+                    .GroupBy(l =>
+                    {
+                        if (l.Veiculo?.PlacaBronzeId != null)
+                            return "PM";
+                        return l.Veiculo?.Categoria ?? "Não Informado";
+                    })
                     .Select(g => new
                     {
                         categoria = g.Key,
@@ -527,10 +547,15 @@ namespace FrotiX.Controllers
                 var hoje = DateTime.Now.Date;
 
                 var resultado = lavagens
-                    .GroupBy(l => new { l.VeiculoId, l.Veiculo?.Placa, Modelo = l.Veiculo?.ModeloVeiculo?.DescricaoModelo })
+                    .GroupBy(l => new {
+                        l.VeiculoId,
+                        l.Veiculo?.Placa,
+                        Modelo = l.Veiculo?.ModeloVeiculo?.DescricaoModelo,
+                        IsPM = l.Veiculo?.PlacaBronzeId != null
+                    })
                     .Select(g => new
                     {
-                        placa = g.Key.Placa ?? "N/A",
+                        placa = g.Key.IsPM ? $"{g.Key.Placa} (PM)" : g.Key.Placa ?? "N/A",
                         modelo = g.Key.Modelo ?? "",
                         lavagens = g.Count(),
                         ultimaLavagem = g.Max(l => l.Data)?.ToString("dd/MM/yyyy") ?? "N/A",

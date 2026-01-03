@@ -363,26 +363,17 @@ async function carregarHeatmap(dataInicio, dataFim) {
 
 async function carregarCategoria(dataInicio, dataFim) {
     try {
-        console.log('Carregando categorias...');
         const response = await fetch(`/api/DashboardLavagem/LavagensPorCategoria?dataInicio=${dataInicio}&dataFim=${dataFim}`);
         const result = await response.json();
-        console.log('Resultado categorias:', result);
 
         if (result.success && result.data) {
-            console.log('Dados categorias:', result.data);
-
             if (chartCategoria) {
                 chartCategoria.destroy();
                 chartCategoria = null;
             }
 
             var container = document.getElementById('chartCategoria');
-            console.log('Container encontrado:', container);
-
-            if (!container) {
-                console.error('Container #chartCategoria nao encontrado');
-                return;
-            }
+            if (!container) return;
 
             // Se não houver dados, mostra mensagem
             if (result.data.length === 0) {
@@ -416,9 +407,6 @@ async function carregarCategoria(dataInicio, dataFim) {
             });
 
             chartCategoria.appendTo('#chartCategoria');
-            console.log('Grafico categoria criado com sucesso');
-        } else {
-            console.error('API retornou erro ou sem dados:', result);
         }
     } catch (error) {
         console.error('Erro ao carregar grafico categoria:', error);
