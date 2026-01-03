@@ -325,21 +325,25 @@
         margin-bottom: 0;
     }
 
-    .table-abast thead {
-        background: var(--abast-gradient);
-        color: white;
+    .table-abast thead,
+    .table.table-abast thead {
+        background: var(--abast-gradient) !important;
+        color: white !important;
     }
 
-    .table-abast thead th {
-        font-weight: 600;
-        font-size: 0.75rem;
+    .table-abast thead th,
+    .table.table-abast thead th {
+        font-weight: 600 !important;
+        font-size: 0.75rem !important;
         text-transform: uppercase;
         letter-spacing: 0.3px;
-        padding: 10px 12px;
-        border: none;
+        padding: 10px 12px !important;
+        border: none !important;
         position: sticky;
         top: 0;
         z-index: 1;
+        background: transparent !important;
+        color: white !important;
     }
 
     .table-abast tbody tr {
@@ -988,7 +992,7 @@
                 </h5>
             </div>
             <div class="modal-body">
-                <img src="/images/logo-frotix.png" alt="FrotiX" class="ftx-loading-logo">
+                <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
                 <div class="ftx-loading-bar"></div>
                 <div class="ftx-loading-text-abast">Processando informações...</div>
                 <div class="ftx-loading-subtext-abast">Por favor, aguarde</div>
