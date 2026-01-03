@@ -1,5 +1,6 @@
 using FrotiX.Models;
 using FrotiX.Repository.IRepository;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,18 @@ namespace FrotiX.Controllers
     public class NavigationController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private const string NavJsonPath = "nav.json";
-        private const string NavJsonBackupPath = "nav.json.bak";
+        private readonly IWebHostEnvironment _env;
 
-        public NavigationController(IUnitOfWork unitOfWork)
+        // Caminhos absolutos para garantir persistência correta
+        private string NavJsonPath => Path.Combine(_env.ContentRootPath, "nav.json");
+        private string NavJsonBackupPath => Path.Combine(_env.ContentRootPath, "nav.json.bak");
+
+        public NavigationController(IUnitOfWork unitOfWork, IWebHostEnvironment env)
         {
             try
             {
                 _unitOfWork = unitOfWork;
+                _env = env;
             }
             catch (Exception error)
             {

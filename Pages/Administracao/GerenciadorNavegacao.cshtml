@@ -807,15 +807,20 @@
                         success: function(res) {
                             try {
                                 if (res && res.success) {
-                                    AppToast.show('Verde', res.message || 'Navegação salva com sucesso!', 3000);
+                                    AppToast.show('Verde', res.message || 'Navegação salva com sucesso!', 2000);
                                     limparAlteracoesPendentes();
+                                    // Recarrega a página após 1.5s para atualizar a barra de navegação
+                                    setTimeout(function() {
+                                        window.location.reload();
+                                    }, 1500);
                                 } else {
                                     AppToast.show('Vermelho', res.message || 'Erro ao salvar navegação', 3000);
+                                    $('#loadingOverlay').hide();
                                 }
                             } catch (error) {
                                 Alerta.TratamentoErroComLinha("GerenciadorNavegacao.cshtml", "salvarNavegacao.success", error);
+                                $('#loadingOverlay').hide();
                             }
-                            $('#loadingOverlay').hide();
                         },
                         error: function(err) {
                             $('#loadingOverlay').hide();
