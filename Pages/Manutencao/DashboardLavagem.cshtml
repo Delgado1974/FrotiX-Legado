@@ -336,30 +336,50 @@
         background: #fff;
     }
 
-    /* Spinner duplo estilizado - Tema Cyan */
-    .ftx-loading-spinner-lav {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        border: 5px solid transparent;
-        border-top-color: #0891b2;
-        animation: ftxLoadingSpin 1s linear infinite;
+    /* Logo FrotiX animado no Loading */
+    .ftx-loading-logo {
+        width: 80px;
+        height: 80px;
         margin: 0 auto 1.25rem;
-        position: relative;
+        animation: ftxLogoPulse 1.5s ease-in-out infinite;
+        filter: drop-shadow(0 4px 8px rgba(8, 145, 178, 0.3));
     }
 
-    .ftx-loading-spinner-lav::before {
+    @@keyframes ftxLogoPulse {
+        0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 4px 8px rgba(8, 145, 178, 0.3));
+        }
+        50% {
+            transform: scale(1.08);
+            filter: drop-shadow(0 6px 12px rgba(8, 145, 178, 0.5));
+        }
+    }
+
+    /* Barra de progresso animada */
+    .ftx-loading-bar {
+        width: 120px;
+        height: 4px;
+        background: #e5e7eb;
+        border-radius: 2px;
+        margin: 0 auto 1rem;
+        overflow: hidden;
+    }
+
+    .ftx-loading-bar::after {
         content: "";
-        position: absolute;
-        inset: 5px;
-        border-radius: 50%;
-        border: 5px solid transparent;
-        border-right-color: #22d3ee;
-        animation: ftxLoadingSpin 0.75s linear infinite reverse;
+        display: block;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, #0891b2, #22d3ee, #0891b2);
+        background-size: 200% 100%;
+        border-radius: 2px;
+        animation: ftxBarSlide 1.5s ease-in-out infinite;
     }
 
-    @@keyframes ftxLoadingSpin {
-        to { transform: rotate(360deg); }
+    @@keyframes ftxBarSlide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
     }
 
     .ftx-loading-text-lav {
@@ -454,7 +474,8 @@
                 </h5>
             </div>
             <div class="modal-body">
-                <div class="ftx-loading-spinner-lav"></div>
+                <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
+                <div class="ftx-loading-bar"></div>
                 <div class="ftx-loading-text-lav" id="loadingLavagemMensagem">Aguarde enquanto carregamos os dados...</div>
                 <div class="ftx-loading-subtext-lav">Isso pode levar alguns segundos</div>
             </div>
