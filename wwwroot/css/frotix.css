@@ -1147,6 +1147,16 @@ a.btn.btn-vinho i {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    box-shadow: none !important; /* Remove glow dos botões no formulário */
+}
+
+.ftx-btn-group .btn:hover {
+    box-shadow: none !important;
+}
+
+.ftx-btn-group .btn:focus,
+.ftx-btn-group .btn:active {
+    box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.25) !important; /* Apenas focus ring */
 }
 
 /* Botões de Ação em DataTables */
