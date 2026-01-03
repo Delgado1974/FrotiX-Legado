@@ -1812,6 +1812,8 @@ table.dataTable td .badge,
 .badge-ativo i.fa-duotone,
 .badge-inativo i.fa-duotone,
 table.dataTable td .badge i.fa-duotone {
+    --fa-primary-color: #fff;
+    --fa-secondary-color: #fff;
     --fa-primary-opacity: 1;
     --fa-secondary-opacity: 0.3;
 }
