@@ -42,18 +42,21 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 
 #### Botão Criar (novo registro):
 - Classe: `btn btn-azul btn-submit-spin`
-- Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse` (pulsa continuamente, gira ao clicar)
+- Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse`
 - Texto: **"Criar"** (NÃO incluir o nome da entidade, ex: NÃO usar "Criar Usuário")
+- Comportamento: **pulsa** enquanto visível → **gira** ao clicar (processando)
 
 #### Botão Atualizar (edição):
 - Classe: `btn btn-azul btn-submit-spin`
-- Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse` (pulsa continuamente, gira ao clicar)
+- Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse`
 - Texto: **"Atualizar"**
+- Comportamento: **pulsa** enquanto visível → **gira** ao clicar (processando)
 
 #### Botão Cancelar Operação:
 - Classe: `btn btn-ftx-fechar`
 - Ícone: `fa-duotone fa-circle-xmark icon-space icon-pulse`
 - Texto: **"Cancelar Operação"**
+- Comportamento: **pulsa** continuamente
 
 ### Classes CSS importantes:
 | Classe | Descrição |
