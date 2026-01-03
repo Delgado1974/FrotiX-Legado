@@ -325,19 +325,28 @@
         margin-bottom: 0;
     }
 
-    .table-abast thead,
-    .table.table-abast thead,
-    .table.table-sm.table-abast thead,
-    table.table-abast thead {
+    /* Sobrescreve o estilo global azul do frotix.css */
+    .chart-container-abast .table-abast thead,
+    .chart-container-abast .table.table-abast thead,
+    .chart-container-abast table.table-abast thead,
+    .chart-container-abast table.table thead,
+    .chart-container-abast .table thead,
+    .chart-container-abast table thead,
+    div.chart-container-abast .table-abast thead,
+    div.chart-container-abast table thead {
         background: var(--abast-gradient) !important;
         background-color: var(--abast-primary) !important;
         color: white !important;
     }
 
-    .table-abast thead th,
-    .table.table-abast thead th,
-    .table.table-sm.table-abast thead th,
-    table.table-abast thead th {
+    .chart-container-abast .table-abast thead th,
+    .chart-container-abast .table.table-abast thead th,
+    .chart-container-abast table.table-abast thead th,
+    .chart-container-abast table.table thead th,
+    .chart-container-abast .table thead th,
+    .chart-container-abast table thead th,
+    div.chart-container-abast .table-abast thead th,
+    div.chart-container-abast table thead th {
         font-weight: 600 !important;
         font-size: 0.75rem !important;
         text-transform: uppercase;
@@ -348,13 +357,14 @@
         position: sticky;
         top: 0;
         z-index: 1;
-        background: inherit !important;
+        background: transparent !important;
         background-color: transparent !important;
         color: white !important;
+        text-shadow: none !important;
     }
 
-    .table-abast thead tr,
-    .table.table-abast thead tr {
+    .chart-container-abast .table-abast thead tr,
+    .chart-container-abast table thead tr {
         background: var(--abast-gradient) !important;
     }
 
