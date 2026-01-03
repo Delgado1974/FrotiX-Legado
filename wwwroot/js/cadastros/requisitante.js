@@ -209,7 +209,7 @@ function loadList()
                                 return '<span class="ftx-badge-status ftx-badge-ativo ftx-badge-clickable btn-toggle-status" ' +
                                        'data-url="/api/Requisitante/updateStatusRequisitante?Id=' + id + '" ' +
                                        'title="Clique para desativar">' +
-                                       '<i class="fa-duotone fa-circle-check" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i>' +
+                                       '<i class="fa-duotone fa-circle-check"></i> ' +
                                        'Ativo</span>';
                             } else
                             {
@@ -217,7 +217,7 @@ function loadList()
                                 return '<span class="ftx-badge-status ftx-badge-inativo ftx-badge-clickable btn-toggle-status" ' +
                                        'data-url="/api/Requisitante/updateStatusRequisitante?Id=' + id + '" ' +
                                        'title="Clique para ativar">' +
-                                       '<i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#fff; --fa-secondary-color:#adb5bd;"></i>' +
+                                       '<i class="fa-duotone fa-circle-xmark"></i> ' +
                                        'Inativo</span>';
                             }
                         }
