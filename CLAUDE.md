@@ -41,7 +41,7 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 ### Botões de Ação (rodapé do formulário):
 
 #### Botão Criar (novo registro):
-- Classe: `btn btn-fundo-laranja btn-submit-spin`
+- Classe: `btn btn-azul btn-submit-spin`
 - Ícone: `fa-duotone fa-[icone-apropriado] icon-space icon-pulse` (pulsa continuamente, gira ao clicar)
 - Texto: **"Criar"** (NÃO incluir o nome da entidade, ex: NÃO usar "Criar Usuário")
 
@@ -50,18 +50,17 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 - Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse` (pulsa continuamente, gira ao clicar)
 - Texto: **"Atualizar"**
 
-#### Botão Fechar (cancelar e voltar):
+#### Botão Cancelar Operação:
 - Classe: `btn btn-ftx-fechar`
-- Ícone: `fa-duotone fa-circle-xmark icon-space` (pulsa automaticamente pela classe btn-ftx-fechar)
-- Texto: **"Fechar"** (NÃO usar "Cancelar")
+- Ícone: `fa-duotone fa-circle-xmark icon-space icon-pulse`
+- Texto: **"Cancelar Operação"**
 
 ### Classes CSS importantes:
 | Classe | Descrição |
 |--------|-----------|
 | `btn-header-orange` | Botão laranja para header com borda preta e outline branco no hover |
-| `btn-fundo-laranja` | Botão laranja para ações principais (Criar) |
-| `btn-azul` | Botão azul para ações de atualização |
-| `btn-ftx-fechar` | Botão vinho para fechar (com pulse no ícone automático) |
+| `btn-azul` | Botão azul para ações principais (Criar e Atualizar) |
+| `btn-ftx-fechar` | Botão vinho para cancelar operação |
 | `icon-pulse` | Animação de pulsação contínua no ícone |
 | `icon-spin` | Animação de rotação contínua no ícone |
 | `icon-rotate-left` | Animação de rotação anti-horária (para ícone de voltar) |
