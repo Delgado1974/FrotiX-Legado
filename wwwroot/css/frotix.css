@@ -309,7 +309,7 @@ body {
     flex-wrap: wrap;
     gap: 1rem;
     position: relative;
-    overflow: hidden;
+    overflow: visible !important; /* Permite wiggle dos botões sem cortar */
     border-radius: 10px 10px 0 0; /* Bordas arredondadas no topo - Padrão FrotiX */
 }
 
@@ -324,6 +324,7 @@ body {
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
     animation: ftxHeaderShine 6s ease-in-out infinite;
     pointer-events: none;
+    clip-path: inset(0 round 10px 10px 0 0); /* Mantém shimmer dentro do border-radius */
 }
 
 @keyframes ftxHeaderShine {
@@ -1129,15 +1130,8 @@ a.btn.btn-vinho i {
         color: white !important
     }
 
-/* Animação icon-pulse automática para ícones em botões Voltar */
-.btn-voltar i,
-.btn.btn-voltar i,
-button.btn-voltar i,
-a.btn.btn-voltar i,
-a.btn-voltar i {
-    animation: ftxHeaderBtnIconPulse 1.5s ease-in-out infinite !important;
-    display: inline-block !important;
-}
+/* Ícones em botões Voltar: NÃO aplicar icon-pulse automático.
+   O ícone usa icon-rotate-left (rotação) definido no HTML, não pulse. */
 
 /* Botío Fundo Vermelho */
 .btn.fundo-vermelho, a.btn.fundo-vermelho, button.fundo-vermelho {

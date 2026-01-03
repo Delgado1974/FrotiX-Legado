@@ -18,75 +18,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* ====== HEADER AZUL PADRÃO FROTIX ====== */
-        .ftx-card-header {
-            background-color: #3D5771;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-            border-radius: 8px 8px 0 0;
-            position: relative;
-            overflow: hidden;
-        }
+        /* ====== HEADER: herda do frotix.css global, apenas ajustes locais ====== */
 
-        .ftx-card-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shimmer 3s infinite;
-        }
-
-        @@keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .ftx-card-header .titulo-paginas {
-            color: #fff !important;
-            font-family: 'Outfit', sans-serif !important;
-            font-weight: 900 !important;
-            font-size: 1.5rem;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .ftx-card-header .titulo-paginas i.fa-duotone {
-            --fa-primary-color: #fff;
-            --fa-secondary-color: rgba(255, 255, 255, 0.6);
-            --fa-secondary-opacity: 0.6;
-            font-size: 1.75rem;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-
-        /* ====== BOTÃO LARANJA COM BORDA BRANCA ====== */
+        /* Ajuste do botão laranja no header */
         .ftx-card-header .btn-fundo-laranja {
             border: 2px solid rgba(255, 255, 255, 0.7) !important;
             outline: 1px solid rgba(255, 255, 255, 0.3);
-            position: relative;
-            z-index: 1;
-            padding: 0.5rem 1.25rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .ftx-card-header .btn-fundo-laranja:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         /* ====== PANEL CONTENT ====== */
