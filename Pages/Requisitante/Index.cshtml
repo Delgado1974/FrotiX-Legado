@@ -18,22 +18,12 @@
 			outline-offset: 1px;
 			transition: all 0.2s ease;
 			position: relative;
-			overflow: hidden;
+			overflow: visible !important; /* Permite ripple externo */
 		}
 
 		.ftx-card-header .btn-fundo-laranja:hover {
 			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
 			outline-offset: 2px;
-		}
-
-		/* ======== RIPPLE INTENSO PARA BOTÃO LARANJA ======== */
-		.btn-fundo-laranja .ftx-ripple-circle {
-			background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.3) 55%, transparent 75%) !important;
-			animation-duration: 800ms !important;
-			width: 120px !important;
-			height: 120px !important;
-			margin-left: -60px !important;
-			margin-top: -60px !important;
 		}
 	</style>
 }
@@ -237,11 +227,11 @@
 	<script src="~/js/cadastros/requisitante.js" asp-append-version="true"></script>
 
 	<script>
-		// ========== RIPPLE LOCAL PARA TESTE ==========
+		// ========== RIPPLE EXTERNO PARA BOTÕES LARANJA ==========
 		(function() {
 			'use strict';
 
-			function createLocalRipple(event, element) {
+			function createExternalRipple(event, element) {
 				if (element.disabled || element.classList.contains('disabled')) return;
 
 				// Remove ripples anteriores
@@ -250,7 +240,7 @@
 				const rect = element.getBoundingClientRect();
 				const x = event.clientX - rect.left;
 				const y = event.clientY - rect.top;
-				const size = Math.max(rect.width, rect.height) * 2.5;
+				const size = Math.max(rect.width, rect.height) * 3; // Maior para efeito externo
 
 				const ripple = document.createElement('span');
 				ripple.className = 'ftx-ripple-circle';
@@ -259,25 +249,26 @@
 					border-radius: 50%;
 					pointer-events: none;
 					transform: scale(0);
-					animation: ftxRippleAnim 800ms ease-out forwards;
-					background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 40%, transparent 70%);
+					animation: ftxRippleAnim 900ms ease-out forwards;
+					background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
 					width: ${size}px;
 					height: ${size}px;
 					left: ${x}px;
 					top: ${y}px;
 					margin-left: -${size/2}px;
 					margin-top: -${size/2}px;
+					z-index: 9999;
 				`;
 
 				element.appendChild(ripple);
-				setTimeout(() => ripple.remove(), 800);
+				setTimeout(() => ripple.remove(), 900);
 			}
 
 			// Captura cliques nos botões laranja
 			document.addEventListener('click', function(e) {
 				const btn = e.target.closest('.btn-fundo-laranja, .btn-header-orange');
 				if (btn) {
-					createLocalRipple(e, btn);
+					createExternalRipple(e, btn);
 				}
 			}, true);
 		})();
