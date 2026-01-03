@@ -769,7 +769,7 @@ $("#modalManutencao")
                                                 data-itemid="${full.itemManutencaoId}"
                                                 data-viagemid="${full.viagemId}"
                                                 style="background: linear-gradient(135deg, #dc3545, #c82333);">
-                                            <i class="fa-duotone fa-arrow-up-from-bracket" style="--fa-primary-color: #fff; --fa-secondary-color: #ffebee; --fa-secondary-opacity: 0.8;"></i>
+                                            <i class="fa-duotone fa-circle-minus" style="--fa-primary-color: #fff; --fa-secondary-color: #ffebee; --fa-secondary-opacity: 0.8;"></i>
                                         </button>
                                     </div>`;
                             } catch (error)
