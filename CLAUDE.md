@@ -2,11 +2,19 @@
 
 Este arquivo contém instruções e regras específicas do projeto FrotiX para o Claude Code.
 
+## Regras Gerais
+
+### Memorização:
+- Quando o usuário disser "memorize", "guarde na memória" ou similar, **adicionar a instrução neste arquivo CLAUDE.md**
+- Claude não tem memória persistente entre sessões - este arquivo é a "memória eterna"
+
 ## Regras de Git
 
 ### Commit e Push:
 - Quando o usuário pedir para fazer commit, **sempre fazer push automaticamente** após o commit
-- Fazer commit/push apenas dos arquivos gerados ou modificados na sessão atual do terminal
+- **IMPORTANTE:** Fazer commit/push **APENAS** dos arquivos gerados ou modificados na sessão/janela atual
+- **NUNCA** incluir arquivos staged de sessões anteriores - ignorá-los completamente
+- Usar `git commit -- <arquivos>` para commitar apenas arquivos específicos da sessão quando necessário
 
 ### Commits de Correção de Erros Próprios:
 - Quando o commit for para corrigir erros que EU (Claude) gerei no próprio chat, o comentário do commit deve explicar:
