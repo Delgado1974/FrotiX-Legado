@@ -506,10 +506,8 @@
 			if (modalControleAcesso) {
 				modalControleAcesso.addEventListener('shown.bs.modal', function (event) {
 					try {
-						var button = event.relatedTarget;
-						var recursoId = button.getAttribute('data-id');
-
-						document.getElementById('txtRecursoId').value = recursoId;
+						// Pega o recursoId do campo hidden (já definido antes de abrir o modal)
+						var recursoId = document.getElementById('txtRecursoId').value;
 
 						if ($.fn.DataTable.isDataTable('#tblRecursos')) {
 							$('#tblRecursos').DataTable().destroy();
