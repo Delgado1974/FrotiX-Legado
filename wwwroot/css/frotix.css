@@ -1091,6 +1091,15 @@ body.loading {
         color: white !important
     }
 
+/* Animação icon-pulse automática para ícones em botões Fechar (vinho) */
+.btn-vinho i,
+.btn.btn-vinho i,
+button.btn-vinho i,
+a.btn.btn-vinho i {
+    animation: ftxHeaderBtnIconPulse 1.5s ease-in-out infinite !important;
+    display: inline-block !important;
+}
+
 /* Botío Fundo Vermelho */
 .btn.fundo-vermelho, a.btn.fundo-vermelho, button.fundo-vermelho {
     background-color: #dc3545 !important;
