@@ -84,8 +84,8 @@ async function carregarDados() {
         const dataInicio = document.getElementById('dataInicio').value;
         const dataFim = document.getElementById('dataFim').value;
 
-        // Carrega todos os dados em paralelo (otimizado - removidos graficos desnecessarios)
-        await Promise.all([
+        // Carrega todos os dados em paralelo (usando allSettled para não interromper em caso de erro)
+        await Promise.allSettled([
             carregarEstatisticasGerais(dataInicio, dataFim),
             carregarGraficosDiaSemana(dataInicio, dataFim),
             carregarGraficosHorario(dataInicio, dataFim),
@@ -447,23 +447,25 @@ async function carregarCategoria(dataInicio, dataFim) {
 async function carregarDuracao(dataInicio, dataFim) {
     try {
         const response = await fetch(`/api/DashboardLavagem/DuracaoLavagens?dataInicio=${dataInicio}&dataFim=${dataFim}`);
+
+        if (!response.ok) {
+            console.warn('API DuracaoLavagens retornou erro:', response.status);
+            exibirDuracaoMockup();
+            return;
+        }
+
         const result = await response.json();
 
         // Atualiza estatisticas de duracao
         const statsDuracao = document.getElementById('statsDuracao');
         if (statsDuracao) {
-            if (result.success && result.estatisticas.totalComDuracao > 0) {
+            if (result.success && result.estatisticas && result.estatisticas.totalComDuracao > 0) {
                 document.getElementById('duracaoMedia').textContent = `${result.estatisticas.duracaoMedia} min`;
                 document.getElementById('duracaoMinima').textContent = `${result.estatisticas.duracaoMinima} min`;
                 document.getElementById('duracaoMaxima').textContent = `${result.estatisticas.duracaoMaxima} min`;
                 document.getElementById('totalComDuracao').textContent = result.estatisticas.totalComDuracao;
             } else {
-                // Mockup quando nao ha dados reais (campo HorarioFim e novo)
-                document.getElementById('duracaoMedia').textContent = '32 min';
-                document.getElementById('duracaoMinima').textContent = '8 min';
-                document.getElementById('duracaoMaxima').textContent = '75 min';
-                document.getElementById('totalComDuracao').textContent = '0';
-                document.getElementById('msgMockup').style.display = 'block';
+                exibirDuracaoMockup();
             }
         }
 
@@ -528,7 +530,79 @@ async function carregarDuracao(dataInicio, dataFim) {
 
     } catch (error) {
         console.error('Erro ao carregar grafico duracao:', error);
+        exibirDuracaoMockup();
+        renderizarGraficoDuracaoMockup();
+        renderizarDuracaoPorCategoria(null);
     }
+}
+
+function renderizarGraficoDuracaoMockup() {
+    try {
+        if (chartDuracao) chartDuracao.destroy();
+
+        const dadosDistribuicao = [
+            { faixa: '0-15 min', quantidade: 12 },
+            { faixa: '15-30 min', quantidade: 45 },
+            { faixa: '30-45 min', quantidade: 28 },
+            { faixa: '45-60 min', quantidade: 15 },
+            { faixa: '60+ min', quantidade: 8 }
+        ];
+
+        chartDuracao = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelStyle: { color: '#6B7280', fontWeight: '500' },
+                majorGridLines: { width: 0 }
+            },
+            primaryYAxis: {
+                labelStyle: { color: '#6B7280' },
+                minimum: 0,
+                majorGridLines: { width: 1, color: '#f0f0f0' }
+            },
+            series: [{
+                dataSource: dadosDistribuicao,
+                xName: 'faixa',
+                yName: 'quantidade',
+                type: 'Column',
+                fill: CORES_LAV.primary,
+                cornerRadius: { topLeft: 6, topRight: 6 },
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        position: 'Top',
+                        font: { fontWeight: '600', color: '#333' }
+                    }
+                }
+            }],
+            tooltip: { enable: true, format: '${point.x}: <b>${point.y} lavagens</b>' },
+            chartArea: { border: { width: 0 } },
+            background: 'transparent',
+            width: '100%',
+            height: '280px'
+        });
+
+        chartDuracao.appendTo('#chartDuracao');
+    } catch (err) {
+        console.error('Erro ao renderizar grafico duracao mockup:', err);
+    }
+}
+
+function exibirDuracaoMockup() {
+    // Mockup quando nao ha dados reais (campo HorarioFim e novo)
+    const duracaoMedia = document.getElementById('duracaoMedia');
+    if (duracaoMedia) duracaoMedia.textContent = '32 min';
+
+    const duracaoMinima = document.getElementById('duracaoMinima');
+    if (duracaoMinima) duracaoMinima.textContent = '8 min';
+
+    const duracaoMaxima = document.getElementById('duracaoMaxima');
+    if (duracaoMaxima) duracaoMaxima.textContent = '75 min';
+
+    const totalComDuracao = document.getElementById('totalComDuracao');
+    if (totalComDuracao) totalComDuracao.textContent = '0';
+
+    const msgMockup = document.getElementById('msgMockup');
+    if (msgMockup) msgMockup.style.display = 'block';
 }
 
 function renderizarDuracaoPorCategoria(dados) {
