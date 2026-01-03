@@ -463,18 +463,22 @@
     <!-- /Modal de Detalhamento de Custos -->
 
     <!-- ============================================
-         MODAL DE LOADING
+         MODAL DE LOADING - PADRÃO FROTIX
          ============================================ -->
-    <div class="modal fade" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
-                <div class="modal-body text-center p-4">
-                    <div class="bg-white rounded-3 p-4 shadow">
-                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                            <span class="visually-hidden">Carregando...</span>
-                        </div>
-                        <h5 class="mb-0 text-dark" id="loadingMessage">Carregando Eventos...</h5>
-                    </div>
+    <div class="modal fade ftx-modal-loading" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-duotone fa-calendar-star"></i>
+                        <span>Carregando Eventos</span>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
+                    <div class="ftx-loading-bar"></div>
+                    <div class="ftx-loading-text" id="loadingMessage">Carregando Eventos...</div>
+                    <div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
                 </div>
             </div>
         </div>

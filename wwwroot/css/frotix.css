@@ -1802,6 +1802,20 @@ table.dataTable td .badge,
     text-transform: capitalize !important;
 }
 
+/* ================================================================
+   ÍCONES DUOTONE EM BADGES DE STATUS - DESTAQUE NO ELEMENTO INTERNO
+   Diminui a opacidade da camada primária (círculo) para destacar
+   o símbolo interno (check/xmark)
+   ================================================================ */
+.ftx-badge-status i.fa-duotone,
+.ftx-status-badge i.fa-duotone,
+.badge-ativo i.fa-duotone,
+.badge-inativo i.fa-duotone,
+table.dataTable td .badge i.fa-duotone {
+    --fa-primary-opacity: 0.4;
+    --fa-secondary-opacity: 1;
+}
+
 .ftx-table .ftx-actions a.btn,
 .ftx-table .ftx-actions button.btn {
     width: var(--ftx-icon-btn);
@@ -3535,6 +3549,189 @@ table.dataTable thead .sorting_desc::after {
 /* Animação do ícone voltar na classe legada */
 .btn-modal-fechar i.fa-rotate-left {
     animation: ftxSpinReverse 1.5s linear infinite;
+}
+
+/* ================================================================
+   MODAL DE LOADING - PADRÃO FROTIX (GLOBAL)
+   Uso: Qualquer modal de loading do sistema deve usar essas classes
+   ================================================================ */
+
+/* Container do Modal */
+.ftx-modal-loading .modal-dialog {
+    max-width: 360px;
+}
+
+.ftx-modal-loading .modal-content {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+/* Header do Modal - Gradiente azul padrão */
+.ftx-modal-loading .modal-header {
+    background: linear-gradient(135deg, #325d88 0%, #2a4d73 50%, #3d6f9e 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradient 4s ease infinite;
+    border-bottom: none;
+    padding: 1rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header alternativo - Tema Cyan (para dashboards) */
+.ftx-modal-loading.ftx-theme-cyan .modal-header {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 50%, #06b6d4 100%);
+}
+
+/* Header alternativo - Tema Laranja */
+.ftx-modal-loading.ftx-theme-orange .modal-header {
+    background: linear-gradient(135deg, #c67750 0%, #a85d3b 50%, #d4896a 100%);
+}
+
+/* Header alternativo - Tema Verde */
+.ftx-modal-loading.ftx-theme-green .modal-header {
+    background: linear-gradient(135deg, #059669 0%, #047857 50%, #10b981 100%);
+}
+
+/* Efeito de brilho no header */
+.ftx-modal-loading .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: ftxModalShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ftxModalShine {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+}
+
+@keyframes ftxHeaderGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Título do Modal */
+.ftx-modal-loading .modal-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Ícone do título */
+.ftx-modal-loading .modal-title i {
+    font-size: 1.3rem;
+    --fa-primary-color: #ffd700;
+    --fa-secondary-color: #ffffff;
+    --fa-secondary-opacity: 0.8;
+    animation: ftxLoadingIconPulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes ftxLoadingIconPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+    50% {
+        transform: scale(1.12);
+        filter: drop-shadow(0 3px 6px rgba(255, 215, 0, 0.4));
+    }
+}
+
+/* Corpo do Modal */
+.ftx-modal-loading .modal-body {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: #fff;
+}
+
+/* Logo FrotiX animado */
+.ftx-loading-logo {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.25rem;
+    animation: ftxLogoPulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(50, 93, 136, 0.3));
+}
+
+@keyframes ftxLogoPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 4px 8px rgba(50, 93, 136, 0.3));
+    }
+    50% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 6px 12px rgba(50, 93, 136, 0.5));
+    }
+}
+
+/* Barra de progresso animada */
+.ftx-loading-bar {
+    width: 120px;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    margin: 0 auto 1rem;
+    overflow: hidden;
+}
+
+.ftx-loading-bar::after {
+    content: "";
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, #325d88, #3d6f9e, #325d88);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: ftxBarSlide 1.5s ease-in-out infinite;
+}
+
+/* Barra tema Cyan */
+.ftx-modal-loading.ftx-theme-cyan .ftx-loading-bar::after {
+    background: linear-gradient(90deg, #0891b2, #22d3ee, #0891b2);
+    background-size: 200% 100%;
+}
+
+/* Barra tema Laranja */
+.ftx-modal-loading.ftx-theme-orange .ftx-loading-bar::after {
+    background: linear-gradient(90deg, #c67750, #d4896a, #c67750);
+    background-size: 200% 100%;
+}
+
+/* Barra tema Verde */
+.ftx-modal-loading.ftx-theme-green .ftx-loading-bar::after {
+    background: linear-gradient(90deg, #059669, #10b981, #059669);
+    background-size: 200% 100%;
+}
+
+@keyframes ftxBarSlide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+}
+
+/* Textos do Loading */
+.ftx-loading-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.ftx-loading-subtext {
+    font-size: 0.85rem;
+    color: #6c757d;
 }
 
 /* ================================================================

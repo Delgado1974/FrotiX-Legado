@@ -544,10 +544,22 @@
 </div>
 
 <!-- MODAL DE LOADING PADRÃO FROTIX -->
-<div id="modalLoading" class="ftx-loading-overlay" style="display: none;">
-    <div class="ftx-loading-box">
-        <div class="ftx-loading-spinner"></div>
-        <p id="txtLoadingMessage">Carregando...</p>
+<div class="modal fade ftx-modal-loading" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-users-gear"></i>
+                    <span>Carregando</span>
+                </h5>
+            </div>
+            <div class="modal-body">
+                <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
+                <div class="ftx-loading-bar"></div>
+                <div class="ftx-loading-text" id="txtLoadingMessage">Carregando...</div>
+                <div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal fade ftx-modal" id="modalIniciaLotacao" tabindex="-1" aria-labelledby="modalIniciaLotacaoLabel" aria-hidden="true">
@@ -982,11 +994,22 @@
 
 @section ScriptsBlock {
     <script>
-        // Funções auxiliares para loading
+        // Funções auxiliares para loading - Padrão FrotiX (Bootstrap Modal)
+        var modalLoadingInstance = null;
+
         function mostrarLoading(mensagem) {
             try {
                 $('#txtLoadingMessage').text(mensagem || 'Carregando...');
-                $('#modalLoading').fadeIn(200);
+                var modalEl = document.getElementById('modalLoading');
+                if (modalEl) {
+                    if (!modalLoadingInstance) {
+                        modalLoadingInstance = new bootstrap.Modal(modalEl, {
+                            backdrop: 'static',
+                            keyboard: false
+                        });
+                    }
+                    modalLoadingInstance.show();
+                }
             } catch (error) {
                 console.warn("Erro ao mostrar loading:", error);
             }
@@ -994,7 +1017,9 @@
 
         function esconderLoading() {
             try {
-                $('#modalLoading').fadeOut(200);
+                if (modalLoadingInstance) {
+                    modalLoadingInstance.hide();
+                }
             } catch (error) {
                 console.warn("Erro ao esconder loading:", error);
             }

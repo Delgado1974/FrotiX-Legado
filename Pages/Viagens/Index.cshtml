@@ -685,9 +685,9 @@
 </script>
 
 @*=========================================================================
-   MODAL DE LOADING - PADRÃO FROTIX
+   MODAL DE LOADING - PADRÃO FROTIX (usa classes globais de frotix.css)
    =========================================================================*@
-<div class="modal fade" id="modalLoadingViagens" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade ftx-modal-loading" id="modalLoadingViagens" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -697,7 +697,8 @@
 				</h5>
 			</div>
 			<div class="modal-body">
-				<div class="ftx-loading-spinner"></div>
+				<img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
+				<div class="ftx-loading-bar"></div>
 				<div class="ftx-loading-text" id="loadingViagensMensagem">Aguarde enquanto carregamos as viagens...</div>
 				<div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
 			</div>
