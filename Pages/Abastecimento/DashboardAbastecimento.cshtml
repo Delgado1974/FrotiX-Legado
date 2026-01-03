@@ -326,24 +326,36 @@
     }
 
     .table-abast thead,
-    .table.table-abast thead {
+    .table.table-abast thead,
+    .table.table-sm.table-abast thead,
+    table.table-abast thead {
         background: var(--abast-gradient) !important;
+        background-color: var(--abast-primary) !important;
         color: white !important;
     }
 
     .table-abast thead th,
-    .table.table-abast thead th {
+    .table.table-abast thead th,
+    .table.table-sm.table-abast thead th,
+    table.table-abast thead th {
         font-weight: 600 !important;
         font-size: 0.75rem !important;
         text-transform: uppercase;
         letter-spacing: 0.3px;
         padding: 10px 12px !important;
         border: none !important;
+        border-bottom: none !important;
         position: sticky;
         top: 0;
         z-index: 1;
-        background: transparent !important;
+        background: inherit !important;
+        background-color: transparent !important;
         color: white !important;
+    }
+
+    .table-abast thead tr,
+    .table.table-abast thead tr {
+        background: var(--abast-gradient) !important;
     }
 
     .table-abast tbody tr {
