@@ -1692,7 +1692,24 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
     padding: var(--ftx-badge-pad-v) var(--ftx-badge-pad-h) !important;
     border-radius: var(--ftx-badge-radius) !important;
     line-height: 1.1;
-    font-weight: 600
+    font-weight: 600;
+    text-transform: capitalize !important;
+}
+
+/* ================================================================
+   BADGES DE STATUS EM DATATABLES - TEXTO EM CAMEL CASE
+   Aplica text-transform: capitalize a todos os badges de status
+   ================================================================ */
+.ftx-badge-status,
+.ftx-status-badge,
+.ftx-manut-badge,
+.ftx-ocorrencia-badge,
+.ftx-viagem-badge,
+.badge-ativo,
+.badge-inativo,
+table.dataTable td .badge,
+.dataTables_wrapper .badge {
+    text-transform: capitalize !important;
 }
 
 .ftx-table .ftx-actions a.btn,
