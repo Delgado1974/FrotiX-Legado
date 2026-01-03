@@ -25,7 +25,7 @@ body, html {
     --glow-spread: 4px;
     --glow-depth: 8px;
     /* Paleta para Status (centralizado no Global) */
-    --status-active-bg: #22c55e; /* Verde “ok” */
+    --status-active-bg: #22c55e; /* Verde "ok" */
     --status-active-bg-hover: #16a34a;
     --status-active-shadow: rgba(34,197,94,.45);
     --status-inactive-bg: #2F4F4F; /* Cinza tema */
@@ -39,6 +39,41 @@ body, html {
     --ftx-badge-radius: .65rem;
     --ftx-avatar: 32px;
     --ftx-action-icon: .90rem; /* tamanho do ícone nos botões quadrados */
+    /* Altura padrão dos controles de formulário */
+    --ftx-input-height: 38px;
+}
+
+/* ================================================================
+   CONTROLES DE FORMULÁRIO - ALTURA PADRÃO 38px (GLOBAL FROTIX)
+   Aplica altura uniforme a todos os inputs, selects e textareas
+   ================================================================ */
+.form-control,
+.form-control-xs,
+.form-select,
+input.e-input,
+.e-input-group input.e-input,
+.e-ddl.e-input-group,
+.e-ddl.e-input-group.e-control-wrapper,
+.e-dropdowntree .e-input-group {
+    height: var(--ftx-input-height) !important;
+    min-height: var(--ftx-input-height) !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.875rem !important;
+    border-radius: 0.375rem;
+}
+
+/* Foco nos controles */
+.form-control:focus,
+.form-control-xs:focus,
+.form-select:focus {
+    border-color: #3D5771;
+    box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.25);
+}
+
+/* Textarea pode ter altura maior */
+textarea.form-control {
+    height: auto !important;
+    min-height: 80px !important;
 }
 
 body {
