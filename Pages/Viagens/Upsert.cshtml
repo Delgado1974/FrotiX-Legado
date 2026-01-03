@@ -1850,10 +1850,10 @@ ViewData["valueTemplate"] = @"
                                             <button id="btnSubmit"
                                                     type="submit"
                                                     asp-page-handler="Submit"
-                                                    class="btn btn-azul w-100">
+                                                    class="btn btn-azul btn-submit-spin w-100">
                                                 <span class="d-flex justify-content-center align-items-center">
-                                                    <i class="fa-duotone fa-calendar-lines-pen icon-space icon-pulse"></i>
-                                                    <span>Salvar Alterações</span>
+                                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+                                                    <span>Atualizar Viagem</span>
                                                 </span>
                                             </button>
                                             }
@@ -1863,21 +1863,21 @@ ViewData["valueTemplate"] = @"
                                                     type="submit"
                                                     value="Submit"
                                                     asp-page-handler="Submit"
-                                                    class="btn btn-azul w-100">
+                                                    class="btn btn-azul btn-submit-spin w-100">
                                                 <span class="d-flex justify-content-center align-items-center">
-                                                    <i class="fa-duotone fa-calendar-lines-pen icon-space icon-pulse"></i>
+                                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
                                                     <span>Criar Viagem</span>
                                                 </span>
                                             </button>
                                             }
                                         </div>
 
-                                        <!-- Botão Voltar (mesmo estilo do botão de cima) -->
+                                        <!-- Botão Cancelar Operação -->
                                         <div class="col-12 col-md-4 col-lg-3 pb-2">
-                                            <a href="javascript:void(0)" class="btn btn-voltar w-100 btn-voltar-lista">
+                                            <a href="javascript:void(0)" class="btn btn-ftx-fechar w-100 btn-voltar-lista">
                                                 <span class="d-flex justify-content-center align-items-center">
-                                                    <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
-                                                    <span class="ms-2">Voltar à Lista</span>
+                                                    <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i>
+                                                    <span class="ms-2">Cancelar Operação</span>
                                                 </span>
                                             </a>
                                         </div>
@@ -1891,7 +1891,8 @@ ViewData["valueTemplate"] = @"
                                                     data-handler="Edit"
                                                     data-id="@Model.ViagemObj.Viagem.ViagemId"
                                                     class="btn btn-azul form-control">
-                                                Atualizar
+                                                <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+                                                Atualizar Viagem
                                             </button>
                                             }
                                             else
@@ -1900,7 +1901,8 @@ ViewData["valueTemplate"] = @"
                                                     type="button"
                                                     data-handler="Submit"
                                                     class="btn btn-azul form-control">
-                                                Criar
+                                                <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+                                                Criar Viagem
                                             </button>
                                             }
                                         </div>
