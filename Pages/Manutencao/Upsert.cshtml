@@ -680,13 +680,13 @@
                                         <div class="col-12 col-md-4">
                                             @if (Model.ManutencaoObj.Manutencao.ManutencaoId != Guid.Empty)
                                             {
-                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id="@Model.ManutencaoObj.Manutencao.ManutencaoId" class="btn btn-azul btn-submit-spin form-control" data-ejtip="Atualizar Registro de Manutenção">
+                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id="@Model.ManutencaoObj.Manutencao.ManutencaoId" class="btn btn-azul btn-submit-spin form-control">
                                                     <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Manutenção
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" data-ejtip="Criar Novo Registro de Manutenção">
+                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control">
                                                     <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Manutenção
                                                 </button>
                                             }
@@ -766,10 +766,10 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button id="btnInsereItem" class="btn btn-azul form-control" type="submit" value="SUBMIT" data-ejtip="Inserir Item de Manutenção" style="max-width: 200px;">
+                    <button id="btnInsereItem" class="btn btn-azul form-control" type="submit" value="SUBMIT" style="max-width: 200px;">
                         <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Inserir o Item
                     </button>
-                    <button id="btnFechar" type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal" data-ejtip="Fechar Modal" style="max-width: 150px;">
+                    <button id="btnFechar" type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal" style="max-width: 150px;">
                         <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
                     </button>
                 </div>
@@ -783,7 +783,7 @@
         <div class="modal-content">
             <div class="modal-header modal-header-terracota">
                 <h4 class="modal-title" id="DynamicModalLabel">Foto da Ocorrência</h4>
-                <button id="btnFecharModal" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                <button id="btnFecharModal" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
                     <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
                 </button>
             </div>
@@ -800,7 +800,7 @@
         <div class="modal-content">
             <div class="modal-header modal-header-terracota">
                 <h4 class="modal-title">Foto da Pendência</h4>
-                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
                     <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
                 </button>
             </div>
@@ -826,11 +826,11 @@
                 <div class="d-flex gap-2">
                     @if (Model.ManutencaoObj.Manutencao.StatusOS != "Fechada" && Model.ManutencaoObj.Manutencao.StatusOS != "Cancelada")
                     {
-                        <button id="btnAdicionarFoto" type="button" class="btn btn-azul" style="width:200px" data-ejtip="Inserir Foto do Item">
+                        <button id="btnAdicionarFoto" type="button" class="btn btn-azul" style="width:200px">
                             <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Inserir Foto
                         </button>
                     }
-                    <button id="btnFecharModal" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
+                    <button id="btnFecharModal" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
                         <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
                     </button>
                 </div>

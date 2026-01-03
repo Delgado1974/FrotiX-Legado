@@ -125,8 +125,7 @@
 											<button type="button"
 													id="btnAddMarca"
 													class="btn btn-azul btn-sm ml-2"
-													style="width: 35px; height: 35px; padding: 0;"
-													data-ejtip="Adicionar Nova Marca">
+													style="width: 35px; height: 35px; padding: 0;">
 												<i class="fa-duotone fa-rectangle-history-circle-plus"></i>
 											</button>
 										</div>
@@ -153,7 +152,6 @@
 													id="btnAddModelo"
 													class="btn btn-azul btn-sm ml-2"
 													style="width: 35px; height: 35px; padding: 0;"
-													data-ejtip="Adicionar Novo Modelo"
 													disabled>
 												<i class="fa-duotone fa-rectangle-history-circle-plus"></i>
 											</button>
@@ -299,14 +297,14 @@
 										<div class="col-6 float-left">
 											@if (Model.PatrimonioObj.Patrimonio.PatrimonioId != Guid.Empty)
 											{
-												<button method="post" asp-page-handler="Edit" asp-route-id="@Model.PatrimonioObj.Patrimonio.PatrimonioId" asp-route-npratual="@Model.PatrimonioObj.Patrimonio.NPR" class="btn btn-azul btn-submit-spin form-control" style="width:300px" data-ejtip="Atualizar os dados do patrimônio">
+												<button method="post" asp-page-handler="Edit" asp-route-id="@Model.PatrimonioObj.Patrimonio.PatrimonioId" asp-route-npratual="@Model.PatrimonioObj.Patrimonio.NPR" class="btn btn-azul btn-submit-spin form-control" style="width:300px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
 													Atualizar Patrimônio
 												</button>
 											}
 											else
 											{
-												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:300px" data-ejtip="Criar novo patrimônio">
+												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:300px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
 													Criar Patrimônio
 												</button>

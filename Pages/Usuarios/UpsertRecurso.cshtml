@@ -124,7 +124,7 @@
 							@(Model.RecursoObj.Recurso.RecursoId != Guid.Empty ? "Atualizar" : "Criar") Recurso
 						</h2>
 						<div class="ftx-card-actions">
-							<a asp-page="./Recursos" class="btn btn-header-orange" data-ejtip="Voltar à lista de recursos" data-ftx-loading>
+							<a asp-page="./Recursos" class="btn btn-header-orange" data-ftx-loading>
 								<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
 								Voltar à Lista
 							</a>
@@ -184,13 +184,13 @@
 										<div class="col-6 float-left">
 											@if (Model.RecursoObj.Recurso.RecursoId != Guid.Empty)
 											{
-												<button method="post" asp-page-handler="Edit" asp-route-id="@Model.RecursoObj.Recurso.RecursoId" class="btn btn-azul btn-submit-spin form-control" style="width:200px" data-ejtip="Atualizar dados do recurso">
+												<button method="post" asp-page-handler="Edit" asp-route-id="@Model.RecursoObj.Recurso.RecursoId" class="btn btn-azul btn-submit-spin form-control" style="width:200px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Recurso
 												</button>
 											}
 											else
 											{
-												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:200px" data-ejtip="Criar novo recurso">
+												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:200px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Recurso
 												</button>
 											}

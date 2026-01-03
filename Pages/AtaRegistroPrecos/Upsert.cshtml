@@ -245,13 +245,13 @@
                                         <div class="col-6">
                                             @if (Model.AtaObj.AtaRegistroPrecos.AtaId != Guid.Empty)
                                             {
-                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id=@Model.AtaObj.AtaRegistroPrecos.AtaId class="btn btn-azul btn-submit-spin form-control" data-ejtip="Atualizar Ata de Registro de Preços">
+                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id=@Model.AtaObj.AtaRegistroPrecos.AtaId class="btn btn-azul btn-submit-spin form-control">
                                                     <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Ata
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" data-ejtip="Criar nova Ata de Registro de Preços">
+                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control">
                                                     <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Ata
                                                 </button>
                                             }

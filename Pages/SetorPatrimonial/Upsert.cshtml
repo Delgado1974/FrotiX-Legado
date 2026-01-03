@@ -137,14 +137,14 @@
 										<div class="col-6 float-left">
 											@if (Model.SetorObj.SetorId != Guid.Empty)
 											{
-												<button method="post" asp-page-handler="Edit" asp-route-id=@Model.SetorObj.SetorId class="btn btn-azul btn-submit-spin form-control" style="width:300px" data-ejtip="Atualizar os dados do setor patrimonial">
+												<button method="post" asp-page-handler="Edit" asp-route-id=@Model.SetorObj.SetorId class="btn btn-azul btn-submit-spin form-control" style="width:300px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
 													Atualizar Setor Patrimonial
 												</button>
 											}
 											else
 											{
-												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:300px" data-ejtip="Criar novo setor patrimonial">
+												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:300px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
 													Criar Setor Patrimonial
 												</button>

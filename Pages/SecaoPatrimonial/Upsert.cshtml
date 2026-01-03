@@ -112,14 +112,14 @@
 										<div class="col-6 float-left">
 											@if (Model.SecaoObj.SecaoId != Guid.Empty)
 											{
-												<button method="post" asp-page-handler="Edit" asp-route-id=@Model.SecaoObj.SecaoId class="btn btn-azul btn-submit-spin form-control" style="width:300px" data-ejtip="Atualizar os dados da seção patrimonial">
+												<button method="post" asp-page-handler="Edit" asp-route-id=@Model.SecaoObj.SecaoId class="btn btn-azul btn-submit-spin form-control" style="width:300px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
 													Atualizar Seção Patrimonial
 												</button>
 											}
 											else
 											{
-												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:300px" data-ejtip="Criar nova seção patrimonial">
+												<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" style="width:300px">
 													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
 													Criar Seção Patrimonial
 												</button>

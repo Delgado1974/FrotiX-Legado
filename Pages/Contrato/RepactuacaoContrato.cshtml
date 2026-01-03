@@ -1207,10 +1207,10 @@
                                         <td style="text-align:center;">${item.vigencia || '-'}</td>
                                         <td style="text-align:center;">${item.prorrogacao || '-'}</td>
                                         <td style="text-align:center;">
-                                            <button type="button" class="btn btn-icon-28 btn-azul btn-editar" data-id="${item.repactuacaoContratoId}" data-ejtip="Editar Repactuação: no Card abaixo">
+                                            <button type="button" class="btn btn-icon-28 btn-azul btn-editar" data-id="${item.repactuacaoContratoId}">
                                                 <i class="fa-duotone fa-pen-to-square"></i>
                                             </button>
-                                            <button type="button" class="btn btn-icon-28 btn-vinho btn-excluir" data-id="${item.repactuacaoContratoId}" data-ejtip="Excluir Repactuação">
+                                            <button type="button" class="btn btn-icon-28 btn-vinho btn-excluir" data-id="${item.repactuacaoContratoId}">
                                                 <i class="fa-duotone fa-trash-can"></i>
                                             </button>
                                         </td>
@@ -1877,10 +1877,10 @@
                         <td style="text-align:right;">R$ ${floatToBR(valUnit)}</td>
                         <td style="text-align:right;">R$ ${floatToBR(valTotal)}</td>
                         <td style="text-align:center;">
-                            <button type="button" class="btn btn-icon-28 btn-azul" onclick="abrirModalItem(${index})" data-ejtip="Editar Item da Repactuação">
+                            <button type="button" class="btn btn-icon-28 btn-azul" onclick="abrirModalItem(${index})">
                                 <i class="fa-duotone fa-pen-to-square"></i>
                             </button>
-                            <button type="button" class="btn btn-icon-28 btn-vinho" onclick="excluirItemLocacao(${index})" ${temVeiculo ? 'disabled' : ''} data-ejtip="${temVeiculo ? 'Bloqueado para exclusão: existem veículos associados' : 'Excluir Item da Repactuação'}">
+                            <button type="button" class="btn btn-icon-28 btn-vinho" onclick="excluirItemLocacao(${index})" ${temVeiculo ? 'disabled' : ''}>
                                 <i class="fa-duotone fa-trash-can"></i>
                             </button>
                         </td>
