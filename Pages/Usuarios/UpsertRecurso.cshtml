@@ -114,6 +114,12 @@
 							<i class="fa-duotone fa-book-journal-whills"></i>
 							@(Model.RecursoObj.Recurso.RecursoId != Guid.Empty ? "Atualizar" : "Criar") Recurso
 						</h2>
+						<div class="ftx-card-actions">
+							<a asp-page="./Recursos" class="btn btn-header-orange" data-ejtip="Voltar à lista de recursos" data-ftx-loading>
+								<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
+								Voltar à Lista
+							</a>
+						</div>
 					</div>
 
 					<!-- Formulário -->

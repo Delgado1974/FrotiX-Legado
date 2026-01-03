@@ -2962,12 +2962,21 @@ h3.modal-title,
 .btn-danger .ftx-ripple-circle,
 .btn-info .ftx-ripple-circle,
 .btn-dark .ftx-ripple-circle,
-.btn-header-orange .ftx-ripple-circle,
-.btn-fundo-laranja .ftx-ripple-circle,
 .btn-nfs .ftx-ripple-circle,
 [class*="btn-icon-28"] .ftx-ripple-circle,
 [class*="btn-acao-ftx"] .ftx-ripple-circle {
     background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 40%, transparent 70%);
+}
+
+/* ===== RIPPLE INTENSO PARA BOTÕES LARANJA ===== */
+.btn-header-orange .ftx-ripple-circle,
+.btn-fundo-laranja .ftx-ripple-circle {
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.3) 55%, transparent 75%);
+    animation-duration: 800ms;
+    width: 120px;
+    height: 120px;
+    margin-left: -60px;
+    margin-top: -60px;
 }
 
 /* ===== RIPPLE ESCURO (para botões claros) ===== */
