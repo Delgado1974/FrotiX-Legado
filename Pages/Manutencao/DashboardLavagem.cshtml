@@ -5,6 +5,7 @@
     ViewData["PageName"] = "manutencao_dashboardlavagem";
 }
 
+@section HeadBlock {
 <style>
     /* ========================================
        PALETA DE CORES - TEMA CYAN (LIMPEZA)
@@ -103,29 +104,51 @@
     }
 
     /* Botoes de Periodo Rapido - Cor sólida (20% mais escuro) */
-    .btn-period-lav {
-        border-radius: 8px;
-        padding: 8px 16px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-        background: #0b5d73;
+    .filter-card-lav .btn.btn-period-lav,
+    .filter-card-lav button.btn-period-lav,
+    button.btn.btn-period-lav {
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        border: 2px solid transparent !important;
+        background: #0b5d73 !important;
+        background-color: #0b5d73 !important;
+        background-image: none !important;
         color: white !important;
-        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4) !important;
+        opacity: 1 !important;
     }
 
-    .btn-period-lav:hover {
-        transform: translateY(-1px);
-        background: #094a5c;
-        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.5);
+    .filter-card-lav .btn.btn-period-lav:hover,
+    .filter-card-lav button.btn-period-lav:hover,
+    button.btn.btn-period-lav:hover {
+        transform: translateY(-1px) !important;
+        background: #094a5c !important;
+        background-color: #094a5c !important;
+        background-image: none !important;
+        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.5) !important;
         color: white !important;
     }
 
-    .btn-period-lav.active {
-        background: #0b5d73;
+    .filter-card-lav .btn.btn-period-lav.active,
+    .filter-card-lav button.btn-period-lav.active,
+    button.btn.btn-period-lav.active {
+        background: #0b5d73 !important;
+        background-color: #0b5d73 !important;
+        background-image: none !important;
         color: white !important;
-        border: 2px solid white;
-        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+        border: 2px solid white !important;
+        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4) !important;
+    }
+
+    /* Focus state */
+    .filter-card-lav .btn.btn-period-lav:focus,
+    button.btn.btn-period-lav:focus {
+        background: #0b5d73 !important;
+        background-color: #0b5d73 !important;
+        background-image: none !important;
+        box-shadow: 0 0 0 0.25rem rgba(11, 93, 115, 0.5) !important;
     }
 
     /* Containers de Graficos */
@@ -461,6 +484,7 @@
         border-left: 3px solid var(--lav-primary);
     }
 </style>
+}
 
 @*=========================================================================
    MODAL DE LOADING - PADRÃO FROTIX
