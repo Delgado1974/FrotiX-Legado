@@ -767,10 +767,10 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
                                 id="btnSalvarEvento"
                                 value="Submit"
                                 asp-page-handler="Submit"
-                                class="btn btn-azul w-100">
+                                class="btn btn-azul btn-submit-spin w-100">
                             <span class="btn-content">
                                 <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
-                                @(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar" : "Salvar") Evento
+                                @(Model.EventoObj.Evento.EventoId != Guid.Empty ? "Atualizar Evento" : "Criar Evento")
                             </span>
                             <span class="btn-loading d-none">
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -780,9 +780,9 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
                     </div>
                     <div class="col-12 col-md-3">
                         <a asp-page="./ListaEventos"
-                           class="btn btn-voltar w-100" data-ftx-loading>
-                            <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
-                            Voltar à Lista
+                           class="btn btn-ftx-fechar w-100" data-ftx-loading>
+                            <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i>
+                            Cancelar Operação
                         </a>
                     </div>
                 </div>

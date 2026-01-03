@@ -421,12 +421,12 @@
 						<!-- Botões de Ação -->
 						<div class="row mt-4">
 							<div class="col-md-12 d-flex justify-content-end gap-2">
-								<button type="button" class="btn btn-voltar form-control" onclick="window.location.href='/AlertasFrotiX'" data-ejtip="Cancelar e voltar para a lista">
-									<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Cancelar
+								<button type="button" class="btn btn-ftx-fechar form-control" onclick="window.location.href='/AlertasFrotiX'" data-ejtip="Cancelar e voltar para a lista">
+									<i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i> Cancelar Operação
 								</button>
-								<button type="submit" class="btn btn-azul form-control" data-ejtip="@(Model.AlertasFrotiXId == Guid.Empty ? "Cadastrar novo alerta" : "Salvar alterações do alerta")">
-									<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
-									@(Model.AlertasFrotiXId == Guid.Empty ? "Cadastrar Alerta" : "Salvar Alterações")
+								<button type="submit" class="btn btn-azul btn-submit-spin form-control" data-ejtip="@(Model.AlertasFrotiXId == Guid.Empty ? "Cadastrar novo alerta" : "Salvar alterações do alerta")">
+									<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+									@(Model.AlertasFrotiXId == Guid.Empty ? "Criar Alerta" : "Atualizar Alerta")
 								</button>
 							</div>
 						</div>
