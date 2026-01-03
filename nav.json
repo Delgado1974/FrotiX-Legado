@@ -573,6 +573,12 @@
                     "nomeMenu": "Dashboard Ajuste Estatístico",
                     "href": "administracao_dashboardadministracao.html",
                     "roles": []
+                },
+                {
+                    "title": "Gerenciador de Navega&ccedil;&atilde;o",
+                    "nomeMenu": "Gerenciador de Navegação",
+                    "href": "administracao_gerenciadornavegacao.html",
+                    "roles": []
                 }
             ]
         }
