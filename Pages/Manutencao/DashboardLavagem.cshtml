@@ -226,24 +226,30 @@
         filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
     }
 
-    /* Botao Filtrar - Cor sólida (20% mais escuro) */
-    .btn-filtrar-lav {
-        background: #0b5d73;
+    /* Botao Filtrar - Mesma cor dos botões de período */
+    .filter-card-lav .btn-filtrar-lav,
+    button.btn-filtrar-lav {
+        background: #0b5d73 !important;
+        background-color: #0b5d73 !important;
+        background-image: none !important;
         border: 2px solid rgba(255, 255, 255, 0.6) !important;
         color: white !important;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4);
+        padding: 10px 20px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4) !important;
     }
 
-    .btn-filtrar-lav:hover {
-        background: #094a5c;
+    .filter-card-lav .btn-filtrar-lav:hover,
+    button.btn-filtrar-lav:hover {
+        background: #094a5c !important;
+        background-color: #094a5c !important;
+        background-image: none !important;
         border-color: rgba(255, 255, 255, 0.9) !important;
         color: white !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.5);
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.5) !important;
     }
 
     /* Tabelas */
@@ -360,10 +366,10 @@
         background: #fff;
     }
 
-    /* Logo FrotiX animado no Loading */
+    /* Logo FrotiX animado no Loading (+15% = 115px) */
     .ftx-loading-logo {
-        width: 100px;
-        height: 100px;
+        width: 115px;
+        height: 115px;
         margin: 0 auto 1.25rem;
         animation: ftxLogoPulse 1.5s ease-in-out infinite;
         filter: drop-shadow(0 4px 8px rgba(8, 145, 178, 0.3));
