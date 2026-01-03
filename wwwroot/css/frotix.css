@@ -399,7 +399,7 @@ body {
 }
 
 /* Botão Laranja do Header - Padrão FrotiX
-   Bordas: 1px preto + 3px branco ao redor */
+   Bordas: 1px preto + 2px branco ao redor */
 .ftx-card-header .btn-header-orange,
 .ftx-card-header .btn-fundo-laranja,
 .btn-header-orange {
@@ -416,7 +416,7 @@ body {
     gap: 0.5rem;
     transition: all 0.3s ease;
     text-decoration: none;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), /* Borda branca 3x */
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), /* Borda branca 2px */
                 0 0 12px rgba(160, 82, 45, 0.4);
     position: relative;
     overflow: hidden; /* Para o ripple */
@@ -428,7 +428,7 @@ body {
     background-color: #8B4513 !important;
     color: #fff !important;
     transform: translateY(-2px);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 1), /* Borda branca mais forte */
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 1), /* Borda branca no hover */
                 0 0 20px rgba(160, 82, 45, 0.6);
 }
 
