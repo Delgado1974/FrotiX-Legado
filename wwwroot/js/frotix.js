@@ -422,8 +422,8 @@ function createRipple(event, element)
         const isOrangeButton = element.classList.contains('btn-fundo-laranja') ||
                                element.classList.contains('btn-header-orange');
 
-        // Tamanho: 1.0x para botões laranja (externo), 2x para outros
-        const multiplier = isOrangeButton ? 1.0 : 2;
+        // Tamanho: 1.0x para todos os botões
+        const multiplier = 1.0;
         const size = Math.max(rect.width, rect.height) * multiplier;
         const duration = isOrangeButton ? 900 : 600;
 
