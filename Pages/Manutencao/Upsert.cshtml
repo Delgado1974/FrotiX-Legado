@@ -47,16 +47,7 @@
             --fa-secondary-color: rgba(255,255,255,0.7) !important;
         }
 
-        .ftx-card-header .btn-fundo-laranja {
-            background: linear-gradient(135deg, #D2691E 0%, #E07020 100%) !important;
-            color: #fff !important;
-            border: none !important;
-        }
-
-        .ftx-card-header .btn-fundo-laranja:hover {
-            background: linear-gradient(135deg, #E07020 0%, #D2691E 100%) !important;
-            color: #fff !important;
-        }
+        /* Botão laranja usa padrão global do frotix.css */
     </style>
 }
 
@@ -403,6 +394,10 @@
                             }
                         </h2>
                         <div class="ftx-card-actions">
+                            <a asp-page="./ListaManutencao" class="btn btn-header-orange" data-ftx-loading>
+                                <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
+                                Voltar à Lista
+                            </a>
                         </div>
                     </div>
 
