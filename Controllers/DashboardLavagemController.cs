@@ -299,7 +299,7 @@ namespace FrotiX.Controllers
                     .ToListAsync();
 
                 var resultado = lavagens
-                    .GroupBy(l => new { l.VeiculoId, l.Veiculo?.Placa, Modelo = l.Veiculo?.ModeloVeiculo?.Modelo })
+                    .GroupBy(l => new { l.VeiculoId, l.Veiculo?.Placa, Modelo = l.Veiculo?.ModeloVeiculo?.DescricaoModelo })
                     .Select(g => new
                     {
                         placa = g.Key.Placa ?? "N/A",
@@ -414,7 +414,7 @@ namespace FrotiX.Controllers
                     .ToListAsync();
 
                 var resultado = lavadoresLavagem
-                    .GroupBy(ll => ll.Lavador?.Contrato?.Fornecedor?.Nome ?? "Sem Contrato")
+                    .GroupBy(ll => ll.Lavador?.Contrato?.Fornecedor?.DescricaoFornecedor ?? "Sem Contrato")
                     .Select(g => new
                     {
                         contrato = g.Key,
@@ -503,7 +503,7 @@ namespace FrotiX.Controllers
                 var hoje = DateTime.Now.Date;
 
                 var resultado = lavagens
-                    .GroupBy(l => new { l.VeiculoId, l.Veiculo?.Placa, Modelo = l.Veiculo?.ModeloVeiculo?.Modelo })
+                    .GroupBy(l => new { l.VeiculoId, l.Veiculo?.Placa, Modelo = l.Veiculo?.ModeloVeiculo?.DescricaoModelo })
                     .Select(g => new
                     {
                         placa = g.Key.Placa ?? "N/A",
