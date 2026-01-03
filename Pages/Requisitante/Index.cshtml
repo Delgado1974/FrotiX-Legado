@@ -11,21 +11,6 @@
 }
 
 @section HeadBlock {
-	<style>
-		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
-		.ftx-card-header .btn-fundo-laranja {
-			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
-			outline-offset: 1px;
-			transition: all 0.2s ease;
-			position: relative;
-			overflow: visible !important; /* Permite ripple externo */
-		}
-
-		.ftx-card-header .btn-fundo-laranja:hover {
-			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
-			outline-offset: 2px;
-		}
-	</style>
 }
 
 <style>
@@ -225,60 +210,4 @@
 
 @section ScriptsBlock {
 	<script src="~/js/cadastros/requisitante.js" asp-append-version="true"></script>
-
-	<script>
-		// ========== RIPPLE EXTERNO PARA BOTÕES LARANJA ==========
-		(function() {
-			'use strict';
-
-			function createExternalRipple(event, element) {
-				if (element.disabled || element.classList.contains('disabled')) return;
-
-				// Remove ripples anteriores
-				element.querySelectorAll('.ftx-ripple-circle').forEach(r => r.remove());
-
-				const rect = element.getBoundingClientRect();
-				const x = event.clientX - rect.left;
-				const y = event.clientY - rect.top;
-				const size = Math.max(rect.width, rect.height) * 1.5; // Efeito externo moderado
-
-				const ripple = document.createElement('span');
-				ripple.className = 'ftx-ripple-circle';
-				ripple.style.cssText = `
-					position: absolute;
-					border-radius: 50%;
-					pointer-events: none;
-					transform: scale(0);
-					animation: ftxRippleAnim 900ms ease-out forwards;
-					background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-					width: ${size}px;
-					height: ${size}px;
-					left: ${x}px;
-					top: ${y}px;
-					margin-left: -${size/2}px;
-					margin-top: -${size/2}px;
-					z-index: 9999;
-				`;
-
-				element.appendChild(ripple);
-				setTimeout(() => ripple.remove(), 900);
-			}
-
-			// Captura cliques nos botões laranja
-			document.addEventListener('click', function(e) {
-				const btn = e.target.closest('.btn-fundo-laranja, .btn-header-orange');
-				if (btn) {
-					createExternalRipple(e, btn);
-				}
-			}, true);
-		})();
-	</script>
-
-	<style>
-		/* Keyframe para animação do ripple */
-		@@keyframes ftxRippleAnim {
-			0% { transform: scale(0); opacity: 1; }
-			100% { transform: scale(1); opacity: 0; }
-		}
-	</style>
 }
