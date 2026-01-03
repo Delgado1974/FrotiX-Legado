@@ -471,14 +471,14 @@
                                 <!-- ===== BOTÕES DE AÇÃO ===== -->
                                 <div class="row mt-4">
                                     <div class="col-md-6 col-12 mb-2">
-                                        <button type="button" id="btnSubmit" class="ftx-btn ftx-btn-verde w-100">
-                                            <i class="fa-duotone fa-file-check"></i>
-                                            @(isEditing ? "Atualizar Nota Fiscal" : "Salvar Nota Fiscal")
+                                        <button type="button" id="btnSubmit" class="btn btn-azul btn-submit-spin w-100">
+                                            <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+                                            @(isEditing ? "Atualizar Nota Fiscal" : "Criar Nota Fiscal")
                                         </button>
                                     </div>
                                     <div class="col-md-6 col-12 mb-2">
-                                        <a asp-page="./Index" class="btn btn-voltar w-100">
-                                            <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+                                        <a asp-page="./Index" class="btn btn-ftx-fechar w-100">
+                                            <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i> Cancelar Operação
                                         </a>
                                     </div>
                                 </div>

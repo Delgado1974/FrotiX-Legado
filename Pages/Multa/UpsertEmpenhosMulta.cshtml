@@ -470,15 +470,15 @@
 						<!-- Botões de Ação -->
 						<div class="ftx-form-actions">
 							<div>
-								<button type="submit" asp-page-handler="Submit" class="ftx-btn-submit" data-ejtip="@(isEdit ? "Salvar alterações" : "Cadastrar empenho")">
-									<i class="fa-duotone fa-floppy-disk icon-pulse"></i>
-									@(isEdit ? "Atualizar" : "Cadastrar")
+								<button type="submit" asp-page-handler="Submit" class="ftx-btn-submit btn-submit-spin" data-ejtip="@(isEdit ? "Atualizar empenho do órgão" : "Criar novo empenho do órgão")">
+									<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+									@(isEdit ? "Atualizar Empenho" : "Criar Empenho")
 								</button>
 							</div>
 							<div>
-								<a asp-page="./ListaEmpenhosMulta" class="btn btn-voltar" data-ejtip="Voltar para a lista">
-									<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
-									Voltar à Lista
+								<a asp-page="./ListaEmpenhosMulta" class="btn btn-ftx-fechar" data-ejtip="Cancelar e voltar à lista" data-ftx-loading>
+									<i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i>
+									Cancelar Operação
 								</a>
 							</div>
 						</div>

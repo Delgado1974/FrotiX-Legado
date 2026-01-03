@@ -675,18 +675,18 @@
 										<div id="divSubmit" class="col-12 col-md-4 pb-2">
 											@if (Model.MultaObj.Multa.MultaId != Guid.Empty)
 											{
-												<button id="btnSubmit" method="post" asp-page-handler="Edit" asp-route-id="@Model.MultaObj.Multa.MultaId" class="btn btn-azul form-control">
+												<button id="btnSubmit" method="post" asp-page-handler="Edit" asp-route-id="@Model.MultaObj.Multa.MultaId" class="btn btn-azul btn-submit-spin form-control">
 													<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-													<i class="fa-duotone fa-floppy-disk icon-space"></i>
-													<span class="btn-text">Atualizar</span>
+													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+													<span class="btn-text">Atualizar Penalidade</span>
 												</button>
 											}
 											else
 											{
-												<button id="btnSubmit" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
+												<button id="btnSubmit" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control">
 													<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-													<i class="fa-duotone fa-file-plus icon-space"></i>
-													<span class="btn-text">Criar</span>
+													<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+													<span class="btn-text">Criar Penalidade</span>
 												</button>
 											}
 										</div>
@@ -696,7 +696,7 @@
 											{
 												<button id="btnEscondido" method="post" asp-page-handler="Edit" asp-route-id="@Model.MultaObj.Multa.MultaId" class="btn btn-azul form-control">
 													<span class="d-flex justify-content-center align-items-center">
-														<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i><span>&nbsp;Atualizar</span>
+														<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i><span>&nbsp;Atualizar Penalidade</span>
 													</span>
 												</button>
 											}
@@ -704,16 +704,16 @@
 											{
 												<button id="btnEscondido" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
 													<span class="d-flex justify-content-center align-items-center">
-														<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i><span>&nbsp;Criar</span>
+														<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i><span>&nbsp;Criar Penalidade</span>
 													</span>
 												</button>
 											}
 										</div>
 
 										<div class="col-12 col-md-4">
-											<a asp-page="./ListaPenalidade" class="btn btn-voltar form-control">
-												<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
-												<span>Voltar à Lista</span>
+											<a asp-page="./ListaPenalidade" class="btn btn-ftx-fechar form-control" data-ftx-loading>
+												<i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i>
+												<span>Cancelar Operação</span>
 											</a>
 										</div>
 									</div>

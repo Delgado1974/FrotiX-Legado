@@ -680,21 +680,21 @@
                                         <div class="col-12 col-md-4">
                                             @if (Model.ManutencaoObj.Manutencao.ManutencaoId != Guid.Empty)
                                             {
-                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id="@Model.ManutencaoObj.Manutencao.ManutencaoId" class="btn btn-azul form-control" data-ejtip="Atualizar Registro de Manutenção">
-                                                    <i class="fa-duotone fa-pen-to-square icon-space icon-pulse"></i> Atualizar
+                                                <button id="btnEdita" method="post" asp-page-handler="Edit" asp-route-id="@Model.ManutencaoObj.Manutencao.ManutencaoId" class="btn btn-azul btn-submit-spin form-control" data-ejtip="Atualizar Registro de Manutenção">
+                                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Manutenção
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control" data-ejtip="Criar Novo Registro de Manutenção">
-                                                    <i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Criar
+                                                <button id="btnAdiciona" type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control" data-ejtip="Criar Novo Registro de Manutenção">
+                                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Manutenção
                                                 </button>
                                             }
                                         </div>
 
                                         <div class="col-12 col-md-4 text-end">
-                                            <a id="btnVoltar" asp-page="./ListaManutencao" class="btn btn-voltar form-control" data-ejtip="Voltar à Lista de Manutenções">
-                                                <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
+                                            <a id="btnVoltar" asp-page="./ListaManutencao" class="btn btn-ftx-fechar form-control" data-ejtip="Cancelar e voltar à lista">
+                                                <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i> Cancelar Operação
                                             </a>
                                         </div>
                                     </div>

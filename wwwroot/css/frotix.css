@@ -398,13 +398,14 @@ body {
     }
 }
 
-/* Botão Laranja do Header - Padrão FrotiX (igual btn-fundo-laranja + outline) */
+/* Botão Laranja do Header - Padrão FrotiX
+   Bordas: 1px preto + 3px branco ao redor */
 .ftx-card-header .btn-header-orange,
+.ftx-card-header .btn-fundo-laranja,
 .btn-header-orange {
     background-color: #A0522D !important;
-    border-color: #8B4513 !important;
     color: #fff !important;
-    border: none;
+    border: 1px solid #333 !important; /* Borda preta fina */
     border-radius: 8px;
     padding: 0.5rem 1.25rem;
     font-family: 'Outfit', sans-serif !important;
@@ -415,27 +416,39 @@ body {
     gap: 0.5rem;
     transition: all 0.3s ease;
     text-decoration: none;
-    box-shadow: 0 0 8px rgba(160, 82, 45, 0.5), 0 2px 4px rgba(160, 82, 45, 0.3);
-    outline: 2px solid rgba(255, 255, 255, 0.5) !important;
-    outline-offset: 1px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), /* Borda branca 3x */
+                0 0 12px rgba(160, 82, 45, 0.4);
     position: relative;
+    overflow: hidden; /* Para o ripple */
 }
 
 .ftx-card-header .btn-header-orange:hover,
+.ftx-card-header .btn-fundo-laranja:hover,
 .btn-header-orange:hover {
     background-color: #8B4513 !important;
-    border-color: #6B3410 !important;
     color: #fff !important;
     transform: translateY(-2px);
-    box-shadow: 0 0 20px rgba(160, 82, 45, 0.8), 0 6px 12px rgba(160, 82, 45, 0.5);
-    outline: 2px solid rgba(255, 255, 255, 0.8) !important;
-    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 1), /* Borda branca mais forte */
+                0 0 20px rgba(160, 82, 45, 0.6);
 }
 
 .ftx-card-header .btn-header-orange:active,
+.ftx-card-header .btn-fundo-laranja:active,
 .btn-header-orange:active {
     transform: translateY(0);
     background-color: #6B3410 !important;
+}
+
+/* Ícone fa-clone-plus no botão do header - Branco + Cinza médio */
+.ftx-card-header .btn-fundo-laranja i.fa-clone-plus::before,
+.ftx-card-header .btn-header-orange i.fa-clone-plus::before {
+    color: #ffffff !important;
+}
+
+.ftx-card-header .btn-fundo-laranja i.fa-clone-plus::after,
+.ftx-card-header .btn-header-orange i.fa-clone-plus::after {
+    color: #999999 !important; /* Cinza médio */
+    opacity: 1 !important;
 }
 
 /* Ícone do botão header orange - SEM animação por padrão */

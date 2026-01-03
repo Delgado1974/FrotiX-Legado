@@ -151,9 +151,9 @@
                     "roles": [],
                     "items": [
                         {
-                            "title": "Estat&iacute;sticas de Lavagens",
-                            "nomeMenu": "Estatísticas de Lavagens",
-                            "href": "manutencao_pbilavagem.html",
+                            "title": "Dashboard de Lavagens",
+                            "nomeMenu": "Dashboard de Lavagens",
+                            "href": "manutencao_dashboardlavagem.html",
                             "roles": []
                         }
                     ]

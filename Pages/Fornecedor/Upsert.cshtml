@@ -123,15 +123,15 @@
 								<div class="col-9">
 									<div class="row">
 										<div class="col-6">
-											<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul form-control">
-												<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
-												@(Model.FornecedorObj.FornecedorId != Guid.Empty ? "Atualizar" : "Criar")
+											<button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin form-control">
+												<i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+												@(Model.FornecedorObj.FornecedorId != Guid.Empty ? "Atualizar Fornecedor" : "Criar Fornecedor")
 											</button>
 										</div>
 										<div class="col-6">
-											<a asp-page="./Index" class="btn btn-voltar form-control">
-												<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
-												Voltar à Lista
+											<a asp-page="./Index" class="btn btn-ftx-fechar form-control">
+												<i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i>
+												Cancelar Operação
 											</a>
 										</div>
 									</div>

@@ -651,18 +651,18 @@
                                 <div class="d-flex justify-content-end gap-2 flex-wrap">
                                     @if (isEdit)
                                     {
-                                        <button id="btnEdita" type="button" asp-page-handler="Edit" asp-route-id="@Model.ContratoObj.Contrato.ContratoId" class="btn ftx-btn-action btn-azul">
-                                            <i class="fa-duotone fa-file-check icon-pulse"></i> Atualizar
+                                        <button id="btnEdita" type="button" asp-page-handler="Edit" asp-route-id="@Model.ContratoObj.Contrato.ContratoId" class="btn ftx-btn-action btn-azul btn-submit-spin">
+                                            <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Contrato
                                         </button>
                                     }
                                     else
                                     {
-                                        <button id="btnAdiciona" type="button" value="Submit" asp-page-handler="Submit" class="btn ftx-btn-action btn-azul">
-                                            <i class="fa-duotone fa-file-plus icon-pulse"></i> Criar Contrato
+                                        <button id="btnAdiciona" type="button" value="Submit" asp-page-handler="Submit" class="btn ftx-btn-action btn-azul btn-submit-spin">
+                                            <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Contrato
                                         </button>
                                     }
-                                    <a asp-page="./Index" class="btn ftx-btn-action btn-vinho">
-                                        <i class="fa-duotone fa-rotate-left icon-rotate-left"></i> Cancelar
+                                    <a asp-page="./Index" class="btn btn-ftx-fechar">
+                                        <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i> Cancelar Operação
                                     </a>
                                 </div>
                             </div>

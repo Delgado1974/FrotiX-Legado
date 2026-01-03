@@ -23,17 +23,6 @@ namespace FrotiX.Controllers
             _userManager = userManager;
         }
 
-        #region Página Principal
-
-        [HttpGet]
-        [Route("DashboardLavagem")]
-        public IActionResult Index()
-        {
-            return View("/Pages/Manutencao/DashboardLavagem.cshtml");
-        }
-
-        #endregion
-
         #region Estatísticas Gerais
 
         [HttpGet]

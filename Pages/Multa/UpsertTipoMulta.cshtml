@@ -28,7 +28,7 @@
                             @(isEdit ? "Editar" : "Nova") Infração de Trânsito
                         </h2>
                         <div class="ftx-card-actions">
-                            <a asp-page="./ListaTiposMulta" class="btn btn-fundo-laranja">
+                            <a asp-page="./ListaTiposMulta" class="btn btn-fundo-laranja" data-ftx-loading>
                                 <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
                                 Voltar à Lista
                             </a>
@@ -103,13 +103,13 @@
                             <!-- Botões -->
                             <div class="col-12 mt-4">
                                 <div class="d-flex gap-2">
-                                    <button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul px-4">
-                                        <i class="fa-duotone fa-floppy-disk icon-space"></i>
-                                        @(isEdit ? "Atualizar" : "Salvar")
+                                    <button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul btn-submit-spin px-4" data-ejtip="@(isEdit ? "Atualizar infração de trânsito" : "Criar nova infração de trânsito")">
+                                        <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i>
+                                        @(isEdit ? "Atualizar Infração" : "Criar Infração")
                                     </button>
-                                    <a asp-page="./ListaTiposMulta" class="btn btn-vinho px-4">
-                                        <i class="fa-duotone fa-rotate-left icon-space"></i>
-                                        Cancelar
+                                    <a asp-page="./ListaTiposMulta" class="btn btn-ftx-fechar px-4" data-ejtip="Cancelar e voltar à lista">
+                                        <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i>
+                                        Cancelar Operação
                                     </a>
                                 </div>
                             </div>
