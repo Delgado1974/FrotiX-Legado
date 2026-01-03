@@ -126,7 +126,7 @@ namespace FrotiX.Pages.Usuarios
                     {
                         UsuarioId = user.Id ,
                         RecursoId = RecursoId ,
-                        Acesso = false
+                        Acesso = true
                     };
 
                     _unitOfWork.ControleAcesso.Add(objAcesso);

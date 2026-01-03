@@ -10,21 +10,217 @@
 }
 
 @section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-recurso-azul: #3D5771;
+			--ftx-recurso-azul-hover: #2d4559;
+		}
+
+		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+		/* ====== OVERRIDE HEADER ====== */
+		.ftx-card-header .ftx-card-title {
+			font-family: 'Outfit', sans-serif !important;
+			font-weight: 900 !important;
+			color: #fff !important;
+		}
+
+		.ftx-card-header .ftx-card-title i {
+			color: #fff !important;
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: rgba(255,255,255,0.7) !important;
+		}
+
+		/* ====== TABELA ====== */
+		#tblRecurso {
+			font-size: 0.85rem;
+		}
+
+		#tblRecurso thead {
+			background: linear-gradient(180deg, #3D5771 0%, #2d4559 100%);
+		}
+
+		#tblRecurso thead th {
+			color: #fff !important;
+			font-weight: 600;
+			font-size: 0.80rem;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			padding: 0.75rem 0.625rem;
+			text-align: center;
+			border: none !important;
+			vertical-align: middle !important;
+		}
+
+		#tblRecurso tbody tr {
+			transition: background-color 0.15s ease;
+		}
+
+		#tblRecurso tbody tr:hover {
+			background-color: rgba(50, 93, 136, 0.06) !important;
+		}
+
+		#tblRecurso tbody td {
+			padding: 0.625rem;
+			vertical-align: middle !important;
+			border-color: rgba(0,0,0,0.05) !important;
+		}
+
+		/* ====== BOTÕES DE AÇÃO NA TABELA - COM GLOW FROTIX ====== */
+		.ftx-btn-icon {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: .375rem !important;
+			border: none !important;
+			color: #fff !important;
+			font-size: 0.85rem;
+			cursor: pointer;
+			transition: all .3s ease, transform .2s ease !important;
+			position: relative;
+			overflow: hidden;
+			margin: 1px !important;
+		}
+
+		.ftx-btn-icon:hover:not([aria-disabled="true"]) {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		.ftx-btn-icon:active:not([aria-disabled="true"]),
+		.ftx-btn-icon:focus:not([aria-disabled="true"]) {
+			transform: translateY(0) scale(1) !important;
+		}
+
+		.ftx-btn-icon i {
+			font-size: var(--ftx-action-icon, 0.90rem);
+			line-height: 1;
+			color: #fff !important;
+		}
+
+		/* Editar - Azul com GLOW */
+		.ftx-btn-editar {
+			background-color: #3D5771 !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+		.ftx-btn-editar:hover:not([aria-disabled="true"]) {
+			background-color: #2d4559 !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+		.ftx-btn-editar:active, .ftx-btn-editar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
+
+		/* Apagar - Vinho com GLOW */
+		.ftx-btn-apagar {
+			background-color: #722f37 !important;
+			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+		}
+		.ftx-btn-apagar:hover:not([aria-disabled="true"]) {
+			background-color: #5a252c !important;
+			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+		}
+		.ftx-btn-apagar:active, .ftx-btn-apagar:focus {
+			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+		}
+
+		/* Controle Acesso - Laranja com GLOW */
+		.ftx-btn-acesso {
+			background-color: #d35400 !important;
+			box-shadow: 0 0 8px rgba(211, 84, 0, 0.5), 0 2px 4px rgba(211, 84, 0, 0.3) !important;
+		}
+		.ftx-btn-acesso:hover:not([aria-disabled="true"]) {
+			background-color: #b84800 !important;
+			box-shadow: 0 0 20px rgba(211, 84, 0, 0.8), 0 6px 12px rgba(211, 84, 0, 0.5) !important;
+		}
+		.ftx-btn-acesso:active, .ftx-btn-acesso:focus {
+			box-shadow: 0 0 0 0.2rem rgba(211, 84, 0, 0.35) !important;
+		}
+
+		/* ====== DATATABLE CONTROLS ====== */
+		.dataTables_wrapper .dataTables_filter input {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.25rem 0.5rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_length select {
+			font-size: 0.82rem;
+			height: 32px;
+			padding: 0.15rem 0.35rem;
+			border-radius: 6px;
+		}
+
+		.dataTables_wrapper .dataTables_info,
+		.dataTables_wrapper .dataTables_paginate,
+		.dataTables_wrapper .dataTables_length label,
+		.dataTables_wrapper .dataTables_filter label {
+			font-size: 0.80rem;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+		}
+	</style>
 }
 
 <div class="row">
 	<div class="col-xl-12">
-		<div id="panel-1" class="panel">
+		<div id="panel-1" class="panel ftx-card-styled">
 			<div class="panel-container show">
-				<div class="panel-content float-right">
-					<a href="/Usuarios/UpsertRecurso" class="btn btn-azul" aria-label="Adicionar Recurso" data-ejtip="Adicionar novo recurso ao sistema">
-						<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Adicionar Recurso
-					</a>
+
+				<!-- Header Padrão FrotiX -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-book-journal-whills"></i>
+						Cadastros: Recursos
+					</h2>
+					<div class="ftx-card-actions">
+						<a href="/Usuarios/UpsertRecurso" class="btn btn-fundo-laranja" data-ejtip="Adicionar novo recurso ao sistema" data-ftx-loading>
+							<i class="fa-duotone fa-clone-plus icon-pulse me-1"></i>
+							Adicionar Recurso
+						</a>
+					</div>
 				</div>
+
+				<!-- Tabela -->
 				<div class="panel-content">
-					<div class="box-body">
-						<br /><br />
-						<table id="tblRecurso" class="table table-bordered table-striped" width="100%">
+					<div id="divRecursos">
+						<table id="tblRecurso" class="table table-bordered table-striped ftx-table" width="100%">
 							<thead>
 								<tr>
 									<th>Nome</th>
@@ -38,6 +234,7 @@
 						</table>
 					</div>
 				</div>
+
 			</div>
 		</div>
 	</div>
@@ -265,14 +462,14 @@
 								render: function (data) {
 									return `
 										<div class="text-center">
-											<a href="/Usuarios/UpsertRecurso?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar Recurso" aria-label="Editar Recurso" role="button" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
+											<a href="/Usuarios/UpsertRecurso?id=${data}" class="btn ftx-btn-icon ftx-btn-editar" data-ejtip="Editar Recurso" aria-label="Editar Recurso" role="button">
 												<i class="fa-duotone fa-edit"></i>
 											</a>
-											<a class="btn-delete btn btn-vinho text-white" data-ejtip="Excluir Recurso" aria-label="Excluir Recurso" role="button" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
+											<a class="btn-delete btn ftx-btn-icon ftx-btn-apagar" data-ejtip="Excluir Recurso" aria-label="Excluir Recurso" role="button" data-id='${data}'>
 												<i class="fa-duotone fa-trash-alt"></i>
 											</a>
-											<a class="btn btn-foto text-white btn-fundo-laranja" data-bs-toggle="modal" data-bs-target="#modalControleAcesso" data-ejtip="Controle de Acesso" aria-label="Controle de Acesso" role="button" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
-												<i class="fa-thin fa-diagram-successor"></i>
+											<a class="btn ftx-btn-icon ftx-btn-acesso" data-bs-toggle="modal" data-bs-target="#modalControleAcesso" data-ejtip="Controle de Acesso" aria-label="Controle de Acesso" role="button" data-id='${data}'>
+												<i class="fa-duotone fa-users-gear"></i>
 											</a>
 										</div>`;
 								}

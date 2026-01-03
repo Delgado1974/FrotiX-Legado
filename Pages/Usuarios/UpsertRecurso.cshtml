@@ -11,54 +11,118 @@
 	ViewData["PageIcon"] = "fa-duotone fa-book-journal-whills";
 }
 
-<style>
-	.form-control-xs {
-		height: calc(1em + .775rem + 2px) !important;
-		padding: .125rem .25rem !important;
-		font-size: .75rem !important;
-		line-height: 1.5;
-		border-radius: .2rem;
-	}
-
-	.label {
-		margin-bottom: -5px;
-		margin-top: 10px;
-	}
-
-	input[type=checkbox] {
-		vertical-align: middle;
-		position: relative;
-		bottom: 1px;
-	}
-
-	.escondido {
-		display: none;
-	}
-
-	.espacofundo {
-		padding-bottom: 20px;
-	}
-</style>
-
 @section HeadBlock {
+	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
 	<link rel="stylesheet" href="~/css/dropify.min.css" />
+
+	<style>
+		/* ====== FONTE OUTFIT ====== */
+		@@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+		/* ====== ANIMAÇÃO GLOW FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== VARIÁVEIS LOCAIS ====== */
+		:root {
+			--ftx-recurso-azul: #3D5771;
+			--ftx-recurso-azul-hover: #2d4559;
+		}
+
+		/* ====== OVERRIDE HEADER ====== */
+		.ftx-card-header .ftx-card-title {
+			font-family: 'Outfit', sans-serif !important;
+			font-weight: 900 !important;
+			color: #fff !important;
+		}
+
+		.ftx-card-header .ftx-card-title i {
+			color: #fff !important;
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: rgba(255,255,255,0.7) !important;
+		}
+
+		/* ====== FORMULÁRIO ====== */
+		.form-control-xs {
+			height: calc(1em + .775rem + 2px) !important;
+			padding: .125rem .25rem !important;
+			font-size: .75rem !important;
+			line-height: 1.5;
+			border-radius: .2rem;
+		}
+
+		.label {
+			margin-bottom: -5px;
+			margin-top: 10px;
+		}
+
+		input[type=checkbox] {
+			vertical-align: middle;
+			position: relative;
+			bottom: 1px;
+		}
+
+		.escondido {
+			display: none;
+		}
+
+		.espacofundo {
+			padding-bottom: 20px;
+		}
+
+		/* ====== BOTÕES DE AÇÃO - COM GLOW FROTIX ====== */
+		.btn-azul {
+			transition: all .3s ease, transform .2s ease !important;
+		}
+
+		.btn-azul:hover {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.6), 0 6px 12px rgba(61, 87, 113, 0.4) !important;
+		}
+
+		.btn-ftx-fechar:hover {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+		}
+
+		/* ====== RESPONSIVIDADE ====== */
+		@@media (max-width: 768px) {
+			.ftx-card-header {
+				flex-direction: column;
+				align-items: stretch;
+				text-align: center;
+			}
+		}
+	</style>
 }
 
 <form method="post" asp-action="Upsert" enctype="multipart/form-data">
 	<div class="row espacofundo">
 		<div class="col-xl-12">
-			<div id="panel-1" class="panel">
+			<div id="panel-1" class="panel ftx-card-styled">
 				<div id="painelfundo" class="panel-container show espacofundo">
+
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-book-journal-whills"></i>
+							@(Model.RecursoObj.Recurso.RecursoId != Guid.Empty ? "Atualizar" : "Criar") Recurso
+						</h2>
+					</div>
+
+					<!-- Formulário -->
 					<div class="panel-content">
 						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 						@if (Model.RecursoObj.Recurso.RecursoId != Guid.Empty)
 						{
 							<input type="hidden" asp-for="RecursoObj.Recurso.RecursoId" />
 						}
-
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="text-primary">@(Model.RecursoObj.Recurso.RecursoId != Guid.Empty ? "Atualizar " : "Criar ") Recurso</h2>
-						</div>
 
 						<div class="col-12 pt-3">
 
