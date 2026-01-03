@@ -11,6 +11,7 @@ let chartHorario = null;
 let chartEvolucao = null;
 let chartTopLavadores = null;
 let chartTopVeiculos = null;
+let chartCategoria = null;
 
 // Cores do tema Cyan
 const CORES_LAV = {
@@ -91,6 +92,7 @@ async function carregarDados() {
             carregarTopLavadores(dataInicio, dataFim),
             carregarTopVeiculos(dataInicio, dataFim),
             carregarHeatmap(dataInicio, dataFim),
+            carregarCategoria(dataInicio, dataFim),
             carregarTabelaLavadores(dataInicio, dataFim),
             carregarTabelaVeiculos(dataInicio, dataFim)
         ]);
@@ -356,6 +358,48 @@ async function carregarHeatmap(dataInicio, dataFim) {
         }
     } catch (error) {
         console.error('Erro ao carregar heatmap:', error);
+    }
+}
+
+async function carregarCategoria(dataInicio, dataFim) {
+    try {
+        const response = await fetch(`/api/DashboardLavagem/LavagensPorCategoria?dataInicio=${dataInicio}&dataFim=${dataFim}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            if (chartCategoria) chartCategoria.destroy();
+
+            chartCategoria = new ej.charts.AccumulationChart({
+                series: [{
+                    dataSource: result.data,
+                    xName: 'categoria',
+                    yName: 'quantidade',
+                    type: 'Pie',
+                    innerRadius: '40%',
+                    palettes: CORES_LAV.gradient,
+                    dataLabel: {
+                        visible: true,
+                        name: 'categoria',
+                        position: 'Outside',
+                        font: { fontWeight: '600', size: '11px' },
+                        connectorStyle: { length: '10px' }
+                    }
+                }],
+                legendSettings: {
+                    visible: true,
+                    position: 'Bottom'
+                },
+                tooltip: {
+                    enable: true,
+                    format: '${point.x}: <b>${point.y} lavagens</b>'
+                },
+                background: 'transparent'
+            });
+
+            chartCategoria.appendTo('#chartCategoria');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar grafico categoria:', error);
     }
 }
 

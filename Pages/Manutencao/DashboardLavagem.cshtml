@@ -738,7 +738,7 @@
     </div>
 </div>
 
-<!-- Heatmap e Legenda -->
+<!-- Heatmap e Grafico por Categoria -->
 <div class="row g-4 mb-4">
     <div class="col-md-8">
         <div class="chart-container-lav">
@@ -751,34 +751,9 @@
     <div class="col-md-4">
         <div class="chart-container-lav">
             <h5 class="chart-title-lav">
-                <i class="fa-duotone fa-lightbulb"></i> Interpretacao do Mapa
+                <i class="fa-duotone fa-bus"></i> Lavagens por Tipo de Veiculo
             </h5>
-            <div class="heatmap-legend-info">
-                <div class="legend-item mb-3">
-                    <div class="legend-color-scale d-flex mb-2">
-                        <div class="legend-color" style="background: #ecfeff;"></div>
-                        <div class="legend-color" style="background: #a5f3fc;"></div>
-                        <div class="legend-color" style="background: #67e8f9;"></div>
-                        <div class="legend-color" style="background: #22d3ee;"></div>
-                        <div class="legend-color" style="background: #06b6d4;"></div>
-                        <div class="legend-color" style="background: #0891b2;"></div>
-                        <div class="legend-color" style="background: #0e7490;"></div>
-                    </div>
-                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
-                        <span>Menos lavagens</span>
-                        <span>Mais lavagens</span>
-                    </div>
-                </div>
-                <hr />
-                <div class="insight-box">
-                    <p class="mb-2"><i class="fa-duotone fa-circle-info text-info me-2"></i><strong>Como interpretar:</strong></p>
-                    <ul class="ps-3 mb-0" style="font-size: 0.85rem; color: #6B7280;">
-                        <li>Celulas mais escuras = maior volume de lavagens</li>
-                        <li>Identifique horarios de pico para melhor alocacao</li>
-                        <li>Dias com baixa demanda podem ser usados para manutencao</li>
-                    </ul>
-                </div>
-            </div>
+            <div id="chartCategoria" style="height: 350px;"></div>
         </div>
     </div>
 </div>

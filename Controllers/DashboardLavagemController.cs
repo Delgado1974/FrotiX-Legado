@@ -420,6 +420,41 @@ namespace FrotiX.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/DashboardLavagem/LavagensPorCategoria")]
+        public async Task<IActionResult> LavagensPorCategoria(DateTime? dataInicio, DateTime? dataFim)
+        {
+            try
+            {
+                if (!dataInicio.HasValue || !dataFim.HasValue)
+                {
+                    dataFim = DateTime.Now.Date.AddDays(1).AddSeconds(-1);
+                    dataInicio = dataFim.Value.AddDays(-30);
+                }
+
+                var lavagens = await _context.Lavagem
+                    .Include(l => l.Veiculo)
+                    .Where(l => l.Data >= dataInicio && l.Data <= dataFim)
+                    .ToListAsync();
+
+                var resultado = lavagens
+                    .GroupBy(l => l.Veiculo?.Categoria ?? "Não Informado")
+                    .Select(g => new
+                    {
+                        categoria = g.Key,
+                        quantidade = g.Count()
+                    })
+                    .OrderByDescending(x => x.quantidade)
+                    .ToList();
+
+                return Json(new { success = true, data = resultado });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         #endregion
 
         #region Tabelas
