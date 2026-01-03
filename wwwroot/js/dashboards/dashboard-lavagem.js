@@ -366,33 +366,29 @@ async function carregarCategoria(dataInicio, dataFim) {
         const response = await fetch(`/api/DashboardLavagem/LavagensPorCategoria?dataInicio=${dataInicio}&dataFim=${dataFim}`);
         const result = await response.json();
 
-        if (result.success && result.data) {
+        if (result.success && result.data && result.data.length > 0) {
             if (chartCategoria) chartCategoria.destroy();
 
-            chartCategoria = new ej.charts.AccumulationChart({
+            chartCategoria = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category',
+                    labelStyle: { color: '#6B7280' }
+                },
+                primaryYAxis: {
+                    labelStyle: { color: '#6B7280' },
+                    minimum: 0
+                },
                 series: [{
                     dataSource: result.data,
                     xName: 'categoria',
                     yName: 'quantidade',
-                    type: 'Pie',
-                    innerRadius: '40%',
-                    palettes: CORES_LAV.gradient,
-                    dataLabel: {
-                        visible: true,
-                        name: 'categoria',
-                        position: 'Outside',
-                        font: { fontWeight: '600', size: '11px' },
-                        connectorStyle: { length: '10px' }
-                    }
+                    type: 'Bar',
+                    fill: CORES_LAV.primary,
+                    cornerRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                    marker: { dataLabel: { visible: true, position: 'Top', font: { fontWeight: '600' } } }
                 }],
-                legendSettings: {
-                    visible: true,
-                    position: 'Bottom'
-                },
-                tooltip: {
-                    enable: true,
-                    format: '${point.x}: <b>${point.y} lavagens</b>'
-                },
+                tooltip: { enable: true },
+                chartArea: { border: { width: 0 } },
                 background: 'transparent'
             });
 
