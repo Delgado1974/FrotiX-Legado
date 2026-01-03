@@ -381,30 +381,56 @@ async function carregarCategoria(dataInicio, dataFim) {
                 return;
             }
 
-            chartCategoria = new ej.charts.Chart({
-                primaryXAxis: {
-                    valueType: 'Category',
-                    labelStyle: { color: '#6B7280' }
-                },
-                primaryYAxis: {
-                    labelStyle: { color: '#6B7280' },
-                    minimum: 0
-                },
-                series: [{
-                    dataSource: result.data,
-                    xName: 'categoria',
-                    yName: 'quantidade',
-                    type: 'Bar',
-                    fill: CORES_LAV.primary,
-                    cornerRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
-                    marker: { dataLabel: { visible: true, position: 'Top', font: { fontWeight: '600' } } }
-                }],
-                tooltip: { enable: true },
-                chartArea: { border: { width: 0 } },
-                background: 'transparent',
-                width: '100%',
-                height: '100%'
-            });
+            // Gráfico de Pizza (Donut) - Verifica se AccumulationChart está disponível
+            if (ej.charts.AccumulationChart) {
+                chartCategoria = new ej.charts.AccumulationChart({
+                    series: [{
+                        dataSource: result.data,
+                        xName: 'categoria',
+                        yName: 'quantidade',
+                        innerRadius: '40%',
+                        palettes: CORES_LAV.gradient,
+                        dataLabel: {
+                            visible: true,
+                            name: 'categoria',
+                            position: 'Outside',
+                            font: { fontWeight: '600', size: '11px' },
+                            connectorStyle: { length: '10px', type: 'Curve' }
+                        }
+                    }],
+                    legendSettings: {
+                        visible: true,
+                        position: 'Bottom',
+                        textStyle: { size: '11px' }
+                    },
+                    tooltip: {
+                        enable: true,
+                        format: '${point.x}: <b>${point.y} lavagens</b>'
+                    },
+                    enableSmartLabels: true,
+                    background: 'transparent',
+                    width: '100%',
+                    height: '100%'
+                });
+            } else {
+                // Fallback para gráfico de barras se AccumulationChart não estiver disponível
+                chartCategoria = new ej.charts.Chart({
+                    primaryXAxis: { valueType: 'Category', labelStyle: { color: '#6B7280' } },
+                    primaryYAxis: { labelStyle: { color: '#6B7280' }, minimum: 0 },
+                    series: [{
+                        dataSource: result.data,
+                        xName: 'categoria',
+                        yName: 'quantidade',
+                        type: 'Bar',
+                        fill: CORES_LAV.primary,
+                        cornerRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
+                        marker: { dataLabel: { visible: true, position: 'Top', font: { fontWeight: '600' } } }
+                    }],
+                    tooltip: { enable: true },
+                    chartArea: { border: { width: 0 } },
+                    background: 'transparent'
+                });
+            }
 
             chartCategoria.appendTo('#chartCategoria');
         }
