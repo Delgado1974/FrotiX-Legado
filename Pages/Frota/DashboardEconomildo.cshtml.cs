@@ -39,7 +39,7 @@ namespace FrotiX.Pages.Frota
                 MobList = new List<SelectListItem>
                 {
                     new SelectListItem { Value = "", Text = "Todos" },
-                    new SelectListItem { Value = "Rodoviaria", Text = "Rodoviária" },
+                    new SelectListItem { Value = "Rodoviaria", Text = "Rodoviaria" },
                     new SelectListItem { Value = "PGR", Text = "PGR" },
                     new SelectListItem { Value = "Cefor", Text = "Cefor" }
                 };
@@ -50,7 +50,7 @@ namespace FrotiX.Pages.Frota
                     new SelectListItem { Value = "", Text = "Todos" },
                     new SelectListItem { Value = "1", Text = "Janeiro" },
                     new SelectListItem { Value = "2", Text = "Fevereiro" },
-                    new SelectListItem { Value = "3", Text = "Março" },
+                    new SelectListItem { Value = "3", Text = "Marco" },
                     new SelectListItem { Value = "4", Text = "Abril" },
                     new SelectListItem { Value = "5", Text = "Maio" },
                     new SelectListItem { Value = "6", Text = "Junho" },
@@ -62,7 +62,7 @@ namespace FrotiX.Pages.Frota
                     new SelectListItem { Value = "12", Text = "Dezembro" }
                 };
 
-                // Lista de Anos (últimos 5 anos)
+                // Lista de Anos (ultimos 5 anos)
                 var anoAtual = DateTime.Now.Year;
                 var anos = new List<SelectListItem> { new SelectListItem { Value = "", Text = "Todos" } };
                 for (int i = anoAtual; i >= anoAtual - 5; i--)

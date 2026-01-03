@@ -236,6 +236,38 @@ namespace FrotiX.Controllers
             }
         }
 
+        // ViagemController.cs
+        [Route("VerificaFichaExiste")]
+        [HttpGet]
+        public IActionResult VerificaFichaExiste(int noFichaVistoria)
+        {
+            try
+            {
+                var viagem = _unitOfWork.ViewViagens
+                    .GetFirstOrDefault(v => v.NoFichaVistoria == noFichaVistoria);
+
+                if (viagem != null)
+                {
+                    return Json(new
+                    {
+                        success = true ,
+                        data = new
+                        {
+                            existe = true ,
+                            viagemId = viagem.ViagemId ,
+                            fichaId = viagem.NoFichaVistoria
+                        }
+                    });
+                }
+
+                return Json(new { success = true , data = new { existe = false } });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false , message = ex.Message });
+            }
+        }
+
         [HttpGet]
         [Route("ObterFichaVistoria")]
         public IActionResult ObterFichaVistoria(string viagemId)
@@ -1168,27 +1200,47 @@ namespace FrotiX.Controllers
 
         [Route("ApagaFluxoEconomildo")]
         [HttpPost]
-        public IActionResult ApagaFluxoEconomildo(ViagensEconomildo viagensEconomildo)
+        public IActionResult ApagaFluxoEconomildo([FromBody] ViagensEconomildo viagensEconomildo)
         {
             try
             {
+                if (viagensEconomildo == null || viagensEconomildo.ViagemEconomildoId == Guid.Empty)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "ID da viagem não informado"
+                    });
+                }
+
                 var objFromDb = _unitOfWork.ViagensEconomildo.GetFirstOrDefault(v =>
                     v.ViagemEconomildoId == viagensEconomildo.ViagemEconomildoId
                 );
+
+                if (objFromDb == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Registro não encontrado"
+                    });
+                }
+
                 _unitOfWork.ViagensEconomildo.Remove(objFromDb);
                 _unitOfWork.Save();
+
                 return Json(new
                 {
-                    success = true ,
+                    success = true,
                     message = "Viagem apagada com sucesso"
                 });
             }
             catch (Exception error)
             {
-                Alerta.TratamentoErroComLinha("ViagemController.cs" , "ApagaFluxoEconomildo" , error);
+                Alerta.TratamentoErroComLinha("ViagemController.cs", "ApagaFluxoEconomildo", error);
                 return Json(new
                 {
-                    success = false ,
+                    success = false,
                     message = "Erro ao apagar viagem"
                 });
             }

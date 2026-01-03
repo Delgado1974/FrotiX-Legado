@@ -5,9 +5,25 @@
 @{
     ViewData["Title"] = "Veículos";
     ViewData["PageName"] = "veiculo_index";
-    ViewData["Heading"] = "<i class='fad fa-car'></i> Cadastros: <span class='fw-300'>Veículos</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-car'></i> Cadastros: <span class='fw-300'>Veículos</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-car";
+    ViewData["PageIcon"] = "fa-duotone fa-car";
+}
+
+@section HeadBlock {
+	<style>
+		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+	</style>
 }
 
 <div class="row">
@@ -22,8 +38,8 @@
                         Gestão de Veículos
                     </h2>
                     <div class="ftx-card-actions">
-                        <a href="/Veiculo/Upsert" class="btn btn-header-orange">
-                            <i class="fa-duotone fa-car-circle-bolt" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
+                        <a href="/Veiculo/Upsert" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-car-circle-bolt icon-pulse me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
                             Adicionar Veículo
                         </a>
                     </div>

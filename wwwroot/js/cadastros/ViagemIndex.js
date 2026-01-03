@@ -22,6 +22,145 @@ const FtxFotoQueue = [];
 const FTX_MAX_CONCURRENT = 4;
 let FtxFotoCurrent = 0;
 
+/* =========================================================================================
+   MÓDULO DE LOADING DE VIAGENS - PADRÃO FROTIX
+   Substitui o spinner de bolinhas por um modal elegante
+   ========================================================================================= */
+const FtxViagens = (function() {
+    'use strict';
+
+    let _modalLoading = null;
+    let _primeiroCarregamento = true;
+
+    // Inicializa referência ao modal
+    function _initModal() {
+        try {
+            const modalEl = document.getElementById('modalLoadingViagens');
+            if (modalEl) {
+                _modalLoading = new bootstrap.Modal(modalEl, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens._initModal", error);
+        }
+    }
+
+    // Mostra o modal de loading
+    function mostrarLoading(mensagem) {
+        try {
+            // Esconde o spinner global de bolinhas (data-ftx-spin) se existir
+            if (window.FTXSpinner) {
+                window.FTXSpinner.hide();
+            }
+            if (window.FtxSpin) {
+                window.FtxSpin.hide();
+            }
+            // Remove overlay do spinner global se existir
+            $('.ftx-spin-overlay').remove();
+
+            // Inicializa referência ao modal se ainda não foi feito
+            if (!_modalLoading) {
+                _initModal();
+            }
+
+            // Atualiza mensagem
+            const msgEl = document.getElementById('loadingViagensMensagem');
+            if (msgEl) {
+                msgEl.textContent = mensagem || 'Aguarde enquanto carregamos as viagens...';
+            }
+
+            // Verifica se o modal já está aberto (pelo script inline)
+            var modalEl = document.getElementById('modalLoadingViagens');
+            if (modalEl && modalEl.classList.contains('show')) {
+                // Modal já está aberto, apenas atualiza a referência
+                if (!_modalLoading && typeof bootstrap !== 'undefined') {
+                    _modalLoading = bootstrap.Modal.getInstance(modalEl);
+                }
+                return;
+            }
+
+            // Abre o modal
+            if (_modalLoading) {
+                _modalLoading.show();
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens.mostrarLoading", error);
+        }
+    }
+
+    // Esconde o modal de loading
+    function esconderLoading() {
+        try {
+            var modalEl = document.getElementById('modalLoadingViagens');
+            
+            if (_modalLoading) {
+                _modalLoading.hide();
+            } else if (modalEl) {
+                // Fallback: fecha manualmente se foi aberto sem Bootstrap
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                modalEl.setAttribute('aria-hidden', 'true');
+            }
+            
+            // Remove backdrop e restaura scroll do body (Bootstrap 5 adiciona overflow:hidden inline)
+            setTimeout(() => {
+                $('.modal-backdrop').remove();
+                $('#ftx-loading-backdrop').remove();
+                $('body').removeClass('modal-open').css({
+                    'padding-right': '',
+                    'overflow': ''
+                });
+            }, 150);
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens.esconderLoading", error);
+        }
+    }
+
+    // Adiciona aviso de filtro próximo ao campo de pesquisa do DataTable
+    function adicionarAvisoFiltro() {
+        try {
+            const filterWrapper = $('#tblViagem_wrapper .dataTables_filter');
+            if (filterWrapper.length && !filterWrapper.find('.ftx-filter-hint').length) {
+                const avisoHtml = `
+                    <span class="ftx-filter-hint" title="Digite qualquer termo para filtrar em todas as colunas visíveis">
+                        <i class="fa-duotone fa-lightbulb"></i>
+                        <span>Filtra em todas as colunas</span>
+                    </span>
+                `;
+                filterWrapper.append(avisoHtml);
+            }
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens.adicionarAvisoFiltro", error);
+        }
+    }
+
+    // Função pública para filtrar viagens (chamada pelo botão Filtrar)
+    function filtrar() {
+        try {
+            mostrarLoading('Filtrando viagens...');
+            ListaTodasViagens();
+        } catch (error) {
+            Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens.filtrar", error);
+            esconderLoading();
+        }
+    }
+
+    // Retorna interface pública
+    return {
+        mostrarLoading: mostrarLoading,
+        esconderLoading: esconderLoading,
+        adicionarAvisoFiltro: adicionarAvisoFiltro,
+        filtrar: filtrar,
+        isPrimeiroCarregamento: function() { return _primeiroCarregamento; },
+        setPrimeiroCarregamento: function(val) { _primeiroCarregamento = val; }
+    };
+})();
+
+// Expõe globalmente para uso no onclick do botão
+window.FtxViagens = FtxViagens;
+
 // Clique nos botões "Finalizar" dentro da tabela
 $(document).on('click', '#tblViagem .btn-fundo-laranja', function (e)
 {
@@ -480,11 +619,19 @@ $(function ()
 {
     try
     {
-        if (window.FTXSpinner) FTXSpinner.show('Carregando viagens…');
+        // Garante que o modal de loading está aberto
+        // (pode já ter sido aberto pelo script inline no HTML)
+        var modalEl = document.getElementById('modalLoadingViagens');
+        if (modalEl && !modalEl.classList.contains('show')) {
+            FtxViagens.mostrarLoading('Aguarde enquanto carregamos as viagens...');
+        }
+        
+        // Carrega as viagens
         ListaTodasViagens();
     } catch (error)
     {
         Alerta.TratamentoErroComLinha("ViagemIndex.js", "$(function)", error);
+        FtxViagens.esconderLoading();
     }
 });
 
@@ -1852,30 +1999,49 @@ function ListaTodasViagens()
                 {
                     Alerta.TratamentoErroComLinha("ViagemIndex.js", "DataTable.drawCallback", error);
                 }
+            },
+            // Callback quando DataTable termina de inicializar
+            initComplete: function(settings, json) {
+                try {
+                    // Adiciona o aviso de filtro após a tabela ser criada
+                    FtxViagens.adicionarAvisoFiltro();
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("ViagemIndex.js", "DataTable.initComplete", error);
+                }
             }
         });
 
-        let closed = false;
-        function safeHide()
+        // Controle para esconder o loading apenas uma vez
+        let loadingHidden = false;
+        function safeHideLoading()
         {
-            if (closed) return;
-            closed = true;
-            requestAnimationFrame(() =>
-            {
-                // CORREÇÃO: Usar FTXSpinner em vez de FtxSpin
-                if (window.FTXSpinner)
-                {
+            if (loadingHidden) return;
+            loadingHidden = true;
+            
+            requestAnimationFrame(() => {
+                // Esconde o modal de loading do FrotiX
+                FtxViagens.esconderLoading();
+                
+                // Fallback: esconde spinner global se ainda existir
+                if (window.FTXSpinner) {
                     window.FTXSpinner.hide();
-                } else if (window.FtxSpin)
-                {
-                    // Fallback caso o nome seja diferente
+                }
+                if (window.FtxSpin) {
                     window.FtxSpin.hide();
                 }
+                // Remove overlay do spinner global
+                $('.ftx-spin-overlay').remove();
+                
+                // Marca que não é mais o primeiro carregamento
+                FtxViagens.setPrimeiroCarregamento(false);
             });
         }
 
-        dataTableViagens.one('draw.dt', safeHide);
-        dataTableViagens.on('error.dt', safeHide);
+        // Esconde loading quando os dados forem carregados
+        dataTableViagens.one('draw.dt', safeHideLoading);
+        dataTableViagens.on('error.dt', safeHideLoading);
+        
+        // Bind para lazy loading de fotos
         dataTableViagens.on('draw.dt', function ()
         {
             try
@@ -1890,10 +2056,13 @@ function ListaTodasViagens()
             }
         });
 
-        setTimeout(safeHide, 20000);
+        // Timeout de segurança (20 segundos)
+        setTimeout(safeHideLoading, 20000);
+        
     } catch (error)
     {
         TratamentoErroComLinha("ViagemIndex.js", "ListaTodasViagens", error);
+        FtxViagens.esconderLoading();
     }
 }
 

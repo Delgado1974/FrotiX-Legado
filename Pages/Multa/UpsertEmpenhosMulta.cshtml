@@ -8,9 +8,9 @@
 	var empenhoId = Model.EmpenhoMultaObj.EmpenhoMulta.EmpenhoMultaId.ToString();
 	ViewData["Title"] = "Empenhos dos Órgãos Autuantes";
 	ViewData["PageName"] = "multa_empenhosmulta";
-	ViewData["Heading"] = "<i class='fad fa-money-check-alt'></i>&nbsp;Cadastros: <span class='fw-300'>Empenhos dos Órgãos Autuantes</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-money-check-alt'></i>&nbsp;Cadastros: <span class='fw-300'>Empenhos dos Órgãos Autuantes</span>";
 	ViewData["Category1"] = "Multas";
-	ViewData["PageIcon"] = "fad fa-money-check-alt";
+	ViewData["PageIcon"] = "fa-duotone fa-money-check-alt";
 }
 
 @section HeadBlock {
@@ -471,7 +471,7 @@
 						<div class="ftx-form-actions">
 							<div>
 								<button type="submit" asp-page-handler="Submit" class="ftx-btn-submit" data-ejtip="@(isEdit ? "Salvar alterações" : "Cadastrar empenho")">
-									<i class="fa-duotone fa-floppy-disk"></i>
+									<i class="fa-duotone fa-floppy-disk icon-pulse"></i>
 									@(isEdit ? "Atualizar" : "Cadastrar")
 								</button>
 							</div>
@@ -612,7 +612,7 @@
 			</div>
 			<div class="ftx-modal-footer">
 				<button id="btnAportar" class="ftx-btn-modal ftx-btn-confirmar" type="button">
-					<i class="fa-duotone fa-floppy-disk"></i>
+					<i class="fa-duotone fa-floppy-disk icon-pulse"></i>
 					Salvar Aporte
 				</button>
 				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal">
@@ -662,7 +662,7 @@
 			</div>
 			<div class="ftx-modal-footer">
 				<button id="btnAnular" class="ftx-btn-modal ftx-btn-confirmar" type="button">
-					<i class="fa-duotone fa-floppy-disk"></i>
+					<i class="fa-duotone fa-floppy-disk icon-pulse"></i>
 					Salvar Anulação
 				</button>
 				<button type="button" class="ftx-btn-modal ftx-btn-fechar" data-bs-dismiss="modal">

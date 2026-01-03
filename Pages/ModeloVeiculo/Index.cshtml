@@ -4,13 +4,26 @@
 @{
 	ViewData["Title"] = "Modelos de Veículos";
 	ViewData["PageName"] = "modeloveiculo_index";
-	ViewData["Heading"] = "<i class='fad fa-car-garage'></i> Cadastros: <span class='fw-300'>Modelos de Veículos</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-car-garage'></i> Cadastros: <span class='fw-300'>Modelos de Veículos</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-regular fa-car-garage";
+	ViewData["PageIcon"] = "fa-duotone fa-car-garage";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
 
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
 }
 
 <style>
@@ -28,16 +41,17 @@
 	<div class="col-xl-12">
 		<div id="panel-1" class="panel">
 			<div class="panel-container show">
-				<div class="col-12 px-3">
-					<div class="header-toolbar">
-						<h2 class="titulo-paginas">
-							<i class="fa-duotone fa-solid fa-car-bus icon-150"></i>
-							Listagem de Modelos de Veículos
-						</h2>
+				<!-- HEADER DO CARD -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-car-bus"></i>
+						Listagem de Modelos de Veículos
+					</h2>
+					<div class="ftx-card-actions">
 						<a href="/ModeloVeiculo/Upsert"
-						   class="btn btn-azul form-control flex-shrink-0"
-						   style="width: 250px;">
-							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+						   class="btn btn-fundo-laranja"
+						   data-ftx-loading>
+							<i class="fa-duotone fa-file-plus icon-pulse me-1 icon-pulse me-1"></i>
 							Adicionar Modelo
 						</a>
 					</div>

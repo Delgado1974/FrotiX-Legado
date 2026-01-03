@@ -22,12 +22,26 @@
 @{
     ViewData["Title"]     = "Lotação de Motoristas";
     ViewData["PageName"]  = "unidade_lotacaomotoristas";
-    ViewData["Heading"]   = "<i class='fad fa-pen-to-square'></i> Unidades: <span class='fw-300'>Lotação de Motoristas</span>";
+    ViewData["Heading"]   = "<i class='fa-duotone fa-pen-to-square'></i> Unidades: <span class='fw-300'>Lotação de Motoristas</span>";
     ViewData["Category1"] = "Lotação";
-    ViewData["PageIcon"]  = "fad fa-pen-to-square";
+    ViewData["PageIcon"]  = "fa-duotone fa-pen-to-square";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
     <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
     <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
@@ -471,7 +485,7 @@
                                 id="btn-inicialotacao" 
                                 data-bs-toggle="modal" 
                                 data-bs-target="#modalIniciaLotacao">
-                            <i class="fa-duotone fa-file-plus"></i>
+                            <i class="fa-duotone fa-file-plus icon-pulse me-1"></i>
                             Iniciar Lotação
                         </button>
                     </div>
@@ -780,7 +794,7 @@
             </div>
             <div class="modal-footer">
                 <button id="btnEditaLotacao" class="btn btn-azul" type="button">
-                    <i class="fa-duotone fa-floppy-disk"></i>
+                    <i class="fa-duotone fa-floppy-disk icon-pulse"></i>
                     Salvar Alterações
                 </button>
                 <button id="btnFecharLotacaoEdicao" type="button" class="btn btn-vinho" data-bs-dismiss="modal">

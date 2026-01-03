@@ -14,8 +14,26 @@ var dtVeiculos, dtEncarregados, dtOperadores, dtMotoristas, dtLavadores;
 // ============================================================
 $(document).ready(function () {
     try {
-        loadContratos(true);
-        loadAtas(true);
+        // Verificar se há parâmetro na URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var contratoIdParam = urlParams.get('contratoId');
+        var ataIdParam = urlParams.get('ataId');
+
+        // Carregar listas
+        if (contratoIdParam) {
+            // Se veio com contratoId, carregar contratos e selecionar
+            loadContratos(true, contratoIdParam);
+        } else {
+            loadContratos(true);
+        }
+
+        if (ataIdParam) {
+            // Se veio com ataId, mudar para aba de Ata e selecionar
+            switchTipo('ata');
+            loadAtas(true, ataIdParam);
+        } else {
+            loadAtas(true);
+        }
 
         $('#ddlStatus').on('change', function () {
             try {
@@ -176,7 +194,7 @@ function ocultarShimmer() {
 // ============================================================
 // CARREGAMENTO DE LISTAS
 // ============================================================
-function loadContratos(status) {
+function loadContratos(status, contratoIdParaSelecionar) {
     try {
         $.ajax({
             type: "GET",
@@ -191,6 +209,14 @@ function loadContratos(status) {
                         });
                     }
                     $('#ddlContrato').html(options);
+
+                    // Se foi passado um contratoId para selecionar, selecionar e disparar evento
+                    if (contratoIdParaSelecionar) {
+                        $('#ddlContrato').val(contratoIdParaSelecionar);
+                        if ($('#ddlContrato').val() === contratoIdParaSelecionar) {
+                            $('#ddlContrato').trigger('change');
+                        }
+                    }
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("itenscontrato.js", "loadContratos.success", error);
                 }
@@ -204,7 +230,7 @@ function loadContratos(status) {
     }
 }
 
-function loadAtas(status) {
+function loadAtas(status, ataIdParaSelecionar) {
     try {
         $.ajax({
             type: "GET",
@@ -219,6 +245,14 @@ function loadAtas(status) {
                         });
                     }
                     $('#ddlAta').html(options);
+
+                    // Se foi passado um ataId para selecionar, selecionar e disparar evento
+                    if (ataIdParaSelecionar) {
+                        $('#ddlAta').val(ataIdParaSelecionar);
+                        if ($('#ddlAta').val() === ataIdParaSelecionar) {
+                            $('#ddlAta').trigger('change');
+                        }
+                    }
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("itenscontrato.js", "loadAtas.success", error);
                 }
@@ -785,20 +819,21 @@ function loadTblEncarregados(contratoId) {
                 { data: 'celular01' },
                 {
                     data: 'status',
+                    className: 'text-center',
                     render: function (data) {
                         if (data) {
-                            return '<span class="badge-status ativo"><i class="fad fa-check-circle"></i> Ativo</span>';
+                            return '<span class="badge ftx-badge-status bg-success" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo</span>';
                         } else {
-                            return '<span class="badge-status inativo"><i class="fad fa-times-circle"></i> Inativo</span>';
+                            return '<span class="badge ftx-badge-status bg-secondary" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ccc;"></i> Inativo</span>';
                         }
                     }
                 },
                 {
                     data: null,
                     orderable: false,
-                    className: 'text-center',
+                    className: 'text-center ftx-actions',
                     render: function (data, type, row) {
-                        return '<button type="button" class="btn-action btn-danger" onclick="removerEncarregado(\'' + row.encarregadoId + '\', \'' + row.contratoId + '\')" title="Remover"><i class="fad fa-trash-alt"></i></button>';
+                        return '<button type="button" class="btn-icon-28 btn-terracota" onclick="desvincularEncarregado(\'' + row.encarregadoId + '\', \'' + row.contratoId + '\')" data-ejtip="Desvincular do Contrato"><i class="fa-duotone fa-link-slash"></i></button>';
                     }
                 }
             ],
@@ -845,20 +880,21 @@ function loadTblOperadores(contratoId) {
                 { data: 'celular01' },
                 {
                     data: 'status',
+                    className: 'text-center',
                     render: function (data) {
                         if (data) {
-                            return '<span class="badge-status ativo"><i class="fad fa-check-circle"></i> Ativo</span>';
+                            return '<span class="badge ftx-badge-status bg-success" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo</span>';
                         } else {
-                            return '<span class="badge-status inativo"><i class="fad fa-times-circle"></i> Inativo</span>';
+                            return '<span class="badge ftx-badge-status bg-secondary" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ccc;"></i> Inativo</span>';
                         }
                     }
                 },
                 {
                     data: null,
                     orderable: false,
-                    className: 'text-center',
+                    className: 'text-center ftx-actions',
                     render: function (data, type, row) {
-                        return '<button type="button" class="btn-action btn-danger" onclick="removerOperador(\'' + row.operadorId + '\', \'' + row.contratoId + '\')" title="Remover"><i class="fad fa-trash-alt"></i></button>';
+                        return '<button type="button" class="btn-icon-28 btn-terracota" onclick="desvincularOperador(\'' + row.operadorId + '\', \'' + row.contratoId + '\')" data-ejtip="Desvincular do Contrato"><i class="fa-duotone fa-link-slash"></i></button>';
                     }
                 }
             ],
@@ -906,20 +942,21 @@ function loadTblMotoristas(contratoId) {
                 { data: 'celular01' },
                 {
                     data: 'status',
+                    className: 'text-center',
                     render: function (data) {
                         if (data) {
-                            return '<span class="badge-status ativo"><i class="fad fa-check-circle"></i> Ativo</span>';
+                            return '<span class="badge ftx-badge-status bg-success" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo</span>';
                         } else {
-                            return '<span class="badge-status inativo"><i class="fad fa-times-circle"></i> Inativo</span>';
+                            return '<span class="badge ftx-badge-status bg-secondary" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ccc;"></i> Inativo</span>';
                         }
                     }
                 },
                 {
                     data: null,
                     orderable: false,
-                    className: 'text-center',
+                    className: 'text-center ftx-actions',
                     render: function (data, type, row) {
-                        return '<button type="button" class="btn-action btn-danger" onclick="removerMotorista(\'' + row.motoristaId + '\', \'' + row.contratoId + '\')" title="Remover"><i class="fad fa-trash-alt"></i></button>';
+                        return '<button type="button" class="btn-icon-28 btn-terracota" onclick="desvincularMotorista(\'' + row.motoristaId + '\', \'' + row.contratoId + '\')" data-ejtip="Desvincular do Contrato"><i class="fa-duotone fa-link-slash"></i></button>';
                     }
                 }
             ],
@@ -966,20 +1003,21 @@ function loadTblLavadores(contratoId) {
                 { data: 'celular01' },
                 {
                     data: 'status',
+                    className: 'text-center',
                     render: function (data) {
                         if (data) {
-                            return '<span class="badge-status ativo"><i class="fad fa-check-circle"></i> Ativo</span>';
+                            return '<span class="badge ftx-badge-status bg-success" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo</span>';
                         } else {
-                            return '<span class="badge-status inativo"><i class="fad fa-times-circle"></i> Inativo</span>';
+                            return '<span class="badge ftx-badge-status bg-secondary" style="font-size:0.86rem; border:1px solid #454545;"><i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ccc;"></i> Inativo</span>';
                         }
                     }
                 },
                 {
                     data: null,
                     orderable: false,
-                    className: 'text-center',
+                    className: 'text-center ftx-actions',
                     render: function (data, type, row) {
-                        return '<button type="button" class="btn-action btn-danger" onclick="removerLavador(\'' + row.lavadorId + '\', \'' + row.contratoId + '\')" title="Remover"><i class="fad fa-trash-alt"></i></button>';
+                        return '<button type="button" class="btn-icon-28 btn-terracota" onclick="desvincularLavador(\'' + row.lavadorId + '\', \'' + row.contratoId + '\')" data-ejtip="Desvincular do Contrato"><i class="fa-duotone fa-link-slash"></i></button>';
                     }
                 }
             ],
@@ -1485,12 +1523,12 @@ function removerVeiculoAta(veiculoId, ataId) {
     }
 }
 
-function removerEncarregado(encarregadoId, contratoId) {
+function desvincularEncarregado(encarregadoId, contratoId) {
     try {
         Alerta.Confirmar(
-            "Deseja realmente remover este encarregado do contrato?",
-            "Esta ação não poderá ser desfeita!",
-            "Sim, remover",
+            "Deseja desvincular este encarregado do contrato?",
+            "O encarregado ficará disponível para outros contratos.",
+            "Sim, desvincular",
             "Cancelar"
         ).then((confirmado) => {
             if (confirmado) {
@@ -1502,32 +1540,32 @@ function removerEncarregado(encarregadoId, contratoId) {
                     success: function (res) {
                         try {
                             if (res && res.success) {
-                                AppToast.show("Verde", res.message, 3000);
+                                AppToast.show("Verde", "Encarregado desvinculado com sucesso!", 3000);
                                 loadTblEncarregados(contratoId);
                             } else {
-                                AppToast.show("Vermelho", res.message || "Erro ao remover encarregado", 3000);
+                                AppToast.show("Vermelho", res.message || "Erro ao desvincular encarregado", 3000);
                             }
                         } catch (error) {
-                            Alerta.TratamentoErroComLinha("itenscontrato.js", "removerEncarregado.success", error);
+                            Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularEncarregado.success", error);
                         }
                     },
                     error: function (err) {
-                        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerEncarregado.error", err);
+                        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularEncarregado.error", err);
                     }
                 });
             }
         });
     } catch (error) {
-        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerEncarregado", error);
+        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularEncarregado", error);
     }
 }
 
-function removerOperador(operadorId, contratoId) {
+function desvincularOperador(operadorId, contratoId) {
     try {
         Alerta.Confirmar(
-            "Deseja realmente remover este operador do contrato?",
-            "Esta ação não poderá ser desfeita!",
-            "Sim, remover",
+            "Deseja desvincular este operador do contrato?",
+            "O operador ficará disponível para outros contratos.",
+            "Sim, desvincular",
             "Cancelar"
         ).then((confirmado) => {
             if (confirmado) {
@@ -1539,32 +1577,32 @@ function removerOperador(operadorId, contratoId) {
                     success: function (res) {
                         try {
                             if (res && res.success) {
-                                AppToast.show("Verde", res.message, 3000);
+                                AppToast.show("Verde", "Operador desvinculado com sucesso!", 3000);
                                 loadTblOperadores(contratoId);
                             } else {
-                                AppToast.show("Vermelho", res.message || "Erro ao remover operador", 3000);
+                                AppToast.show("Vermelho", res.message || "Erro ao desvincular operador", 3000);
                             }
                         } catch (error) {
-                            Alerta.TratamentoErroComLinha("itenscontrato.js", "removerOperador.success", error);
+                            Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularOperador.success", error);
                         }
                     },
                     error: function (err) {
-                        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerOperador.error", err);
+                        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularOperador.error", err);
                     }
                 });
             }
         });
     } catch (error) {
-        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerOperador", error);
+        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularOperador", error);
     }
 }
 
-function removerMotorista(motoristaId, contratoId) {
+function desvincularMotorista(motoristaId, contratoId) {
     try {
         Alerta.Confirmar(
-            "Deseja realmente remover este motorista do contrato?",
-            "Esta ação não poderá ser desfeita!",
-            "Sim, remover",
+            "Deseja desvincular este motorista do contrato?",
+            "O motorista ficará disponível para outros contratos.",
+            "Sim, desvincular",
             "Cancelar"
         ).then((confirmado) => {
             if (confirmado) {
@@ -1576,32 +1614,32 @@ function removerMotorista(motoristaId, contratoId) {
                     success: function (res) {
                         try {
                             if (res && res.success) {
-                                AppToast.show("Verde", res.message, 3000);
+                                AppToast.show("Verde", "Motorista desvinculado com sucesso!", 3000);
                                 loadTblMotoristas(contratoId);
                             } else {
-                                AppToast.show("Vermelho", res.message || "Erro ao remover motorista", 3000);
+                                AppToast.show("Vermelho", res.message || "Erro ao desvincular motorista", 3000);
                             }
                         } catch (error) {
-                            Alerta.TratamentoErroComLinha("itenscontrato.js", "removerMotorista.success", error);
+                            Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularMotorista.success", error);
                         }
                     },
                     error: function (err) {
-                        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerMotorista.error", err);
+                        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularMotorista.error", err);
                     }
                 });
             }
         });
     } catch (error) {
-        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerMotorista", error);
+        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularMotorista", error);
     }
 }
 
-function removerLavador(lavadorId, contratoId) {
+function desvincularLavador(lavadorId, contratoId) {
     try {
         Alerta.Confirmar(
-            "Deseja realmente remover este lavador do contrato?",
-            "Esta ação não poderá ser desfeita!",
-            "Sim, remover",
+            "Deseja desvincular este lavador do contrato?",
+            "O lavador ficará disponível para outros contratos.",
+            "Sim, desvincular",
             "Cancelar"
         ).then((confirmado) => {
             if (confirmado) {
@@ -1613,23 +1651,23 @@ function removerLavador(lavadorId, contratoId) {
                     success: function (res) {
                         try {
                             if (res && res.success) {
-                                AppToast.show("Verde", res.message, 3000);
+                                AppToast.show("Verde", "Lavador desvinculado com sucesso!", 3000);
                                 loadTblLavadores(contratoId);
                             } else {
-                                AppToast.show("Vermelho", res.message || "Erro ao remover lavador", 3000);
+                                AppToast.show("Vermelho", res.message || "Erro ao desvincular lavador", 3000);
                             }
                         } catch (error) {
-                            Alerta.TratamentoErroComLinha("itenscontrato.js", "removerLavador.success", error);
+                            Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularLavador.success", error);
                         }
                     },
                     error: function (err) {
-                        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerLavador.error", err);
+                        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularLavador.error", err);
                     }
                 });
             }
         });
     } catch (error) {
-        Alerta.TratamentoErroComLinha("itenscontrato.js", "removerLavador", error);
+        Alerta.TratamentoErroComLinha("itenscontrato.js", "desvincularLavador", error);
     }
 }
 

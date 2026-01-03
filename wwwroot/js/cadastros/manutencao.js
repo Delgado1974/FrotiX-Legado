@@ -6,6 +6,8 @@ var ImagemSelecionada = "semimagem.jpg";
 var dataTableItens;
 // Variável global para controlar a linha selecionada
 var linhaSelecionadaFoto = -1;
+// Variável global para controlar modo visualização do modal de foto (OS Fechada/Cancelada)
+window.modoVisualizacaoFoto = false;
 
 document.getElementById("txtFileItem").addEventListener("change", async (e) =>
 {
@@ -309,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function ()
                         {
                             document.getElementById("divUsuarioCriacao").style.display = "block";
                             document.getElementById("lblUsuarioCriacao").innerHTML =
-                                '<i class="fa-sharp-duotone fa-solid fa-user-plus"></i> <span>Criado/Alterado por:</span> ' +
+                                '<i class="fa-sharp-duotone fa-solid fa-user-plus"></i> <span>Criado por:</span> ' +
                                 usuarioCriacao +
                                 " em " +
                                 DataCriacao +
@@ -335,6 +337,81 @@ document.addEventListener("DOMContentLoaded", function ()
                     }
                 },
             });
+
+            // - Definir o texto da label de Alteração (se houver);
+            if (typeof manutencaoIdUsuarioAlteracao !== "undefined" && manutencaoIdUsuarioAlteracao != null && manutencaoIdUsuarioAlteracao != "")
+            {
+                const DataAlteracao = formatarDataBR(manutencaoDataAlteracao);
+                const HoraAlteracao = formatarHora(manutencaoDataAlteracao);
+
+                $.ajax({
+                    url: "/api/Manutencao/RecuperaUsuario",
+                    type: "GET",
+                    data: { id: manutencaoIdUsuarioAlteracao },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data)
+                    {
+                        try
+                        {
+                            let usuarioAlteracao = "";
+                            $.each(data, function (key, val)
+                            {
+                                try
+                                {
+                                    usuarioAlteracao = val;
+                                }
+                                catch (error)
+                                {
+                                    Alerta.TratamentoErroComLinha(
+                                        "manutencao.js",
+                                        "callback@$.each#alteracao",
+                                        error,
+                                    );
+                                }
+                            });
+                            if (!usuarioAlteracao)
+                            {
+                                document.getElementById("divUsuarioAlteracao").style.display = "none";
+                                document.getElementById("lblUsuarioAlteracao").innerHTML = "";
+                            } else
+                            {
+                                document.getElementById("divUsuarioAlteracao").style.display = "block";
+                                document.getElementById("lblUsuarioAlteracao").innerHTML =
+                                    '<i class="fa-sharp-duotone fa-solid fa-user-pen"></i> <span>Alterado por:</span> ' +
+                                    usuarioAlteracao +
+                                    " em " +
+                                    DataAlteracao +
+                                    " às " +
+                                    HoraAlteracao;
+                            }
+                        }
+                        catch (error)
+                        {
+                            TratamentoErroComLinha("manutencao.js", "(success: function alteracao)", error);
+                        }
+                    },
+                    error: function (err)
+                    {
+                        try
+                        {
+                            console.log(err);
+                        }
+                        catch (error)
+                        {
+                            TratamentoErroComLinha("manutencao.js", "(error: function alteracao)", error);
+                        }
+                    },
+                });
+            } else
+            {
+                var divAlteracao = document.getElementById("divUsuarioAlteracao");
+                if (divAlteracao)
+                {
+                    divAlteracao.style.display = "none";
+                    document.getElementById("lblUsuarioAlteracao").innerHTML = "";
+                }
+            }
 
             // - Definir o texto da label de Cancelamento;
             if (manutencaoIdUsuarioCancelamento != null && manutencaoIdUsuarioCancelamento != "")
@@ -380,7 +457,7 @@ document.addEventListener("DOMContentLoaded", function ()
                                 document.getElementById("divUsuarioCancelamento").style.display =
                                     "block";
                                 document.getElementById("lblUsuarioCancelamento").innerHTML =
-                                    '<i class="fa-duotone fa-regular fa-trash-can-xmark"></i> <span>Cancelado por:</span> ' +
+                                    '<i class="fa-sharp-duotone fa-solid fa-user-xmark"></i> <span>Cancelado por:</span> ' +
                                     usuarioCancelamento +
                                     " em " +
                                     DataCancelamento +
@@ -418,7 +495,7 @@ document.addEventListener("DOMContentLoaded", function ()
 
                 const DataFinalizacao = formatarDataBR(manutencaoDataFinalizacao);
 
-                const HoraFinalizacao = formatarHora(manutencaoDataCancelamento);
+                const HoraFinalizacao = formatarHora(manutencaoDataFinalizacao);
 
                 $.ajax({
                     url: "/api/Manutencao/RecuperaUsuario",
@@ -491,6 +568,12 @@ document.addEventListener("DOMContentLoaded", function ()
         {
             document.getElementById("divUsuarioCriacao").style.display = "none";
             document.getElementById("lblUsuarioCriacao").innerHTML = "";
+            var divAlteracao = document.getElementById("divUsuarioAlteracao");
+            if (divAlteracao)
+            {
+                divAlteracao.style.display = "none";
+                document.getElementById("lblUsuarioAlteracao").innerHTML = "";
+            }
             document.getElementById("divUsuarioCancelamento").style.display = "none";
             document.getElementById("lblUsuarioCancelamento").innerHTML = "";
             document.getElementById("divUsuarioFinalizacao").style.display = "none";
@@ -505,8 +588,12 @@ document.addEventListener("DOMContentLoaded", function ()
             $("#btnAdiciona").hide();
 
             var $keepBtn = $("#btnVoltarLista")
+                .add("#btnVoltar")
                 .add('a[href*="ListaManutencao"]')
-                .add("a.btn.btn-verde.form-control");
+                .add("a.btn.btn-vinho.form-control")
+                .add('[data-bs-dismiss="modal"]')  // Botões de fechar modal
+                .add("#btnFecharModal")            // Botão fechar específico
+                .add(".modal .btn-vinho");         // Botões vinho dentro de modais
 
             var $keep = $keepBtn.add($keepBtn.parents());
 
@@ -541,7 +628,69 @@ document.addEventListener("DOMContentLoaded", function ()
             $(
                 'input:disabled, select:disabled, textarea:disabled, button:disabled, a[aria-disabled="true"], .btn[aria-disabled="true"]',
             ).css("cursor", "not-allowed");
-        } else if (StatusOS != "Aberta")
+
+            // ===== GARANTE que o botão Voltar fica HABILITADO =====
+            var $btnVoltar = $("#btnVoltar, a[href*='ListaManutencao']");
+            $btnVoltar
+                .removeAttr("aria-disabled")
+                .removeAttr("tabindex")
+                .off("click.block")
+                .prop("disabled", false)
+                .css({
+                    "opacity": "1",
+                    "pointer-events": "auto",
+                    "cursor": "pointer"
+                });
+            // Habilita pointer-events nos pais do botão Voltar
+            $btnVoltar.parents().css("pointer-events", "auto");
+
+            // ===== GARANTE que botões de FECHAR MODAL ficam HABILITADOS =====
+            var $btnFecharModal = $('[data-bs-dismiss="modal"], #btnFecharModal, .modal .btn-vinho, .modal button.btn-vinho');
+            $btnFecharModal
+                .removeAttr("aria-disabled")
+                .removeAttr("tabindex")
+                .off("click.block")
+                .prop("disabled", false)
+                .css({
+                    "opacity": "1",
+                    "pointer-events": "auto",
+                    "cursor": "pointer"
+                });
+            // Habilita pointer-events nos modais e seus elementos
+            $(".modal, .modal-dialog, .modal-content, .modal-header, .modal-body, .modal-footer").css("pointer-events", "auto");
+            $btnFecharModal.parents().css("pointer-events", "auto");
+
+            // ===== HABILITA botões de FOTO para VISUALIZAÇÃO (OS Fechada/Cancelada) =====
+            window.modoVisualizacaoFoto = true; // Flag global para modal saber que é visualização
+            
+            // Oculta botão "Adicionar Item" (não pode adicionar em OS fechada)
+            $("#btnAdicionaItem").hide();
+            
+            // Oculta botão "Inserir Foto" no header do modal (só visualização)
+            $("#btnAdicionarFoto").hide();
+            
+            // Nota: A reabilitação dos botões de foto é feita no drawCallback da DataTable
+            // pois os botões são criados dinamicamente após o AJAX
+
+            // ===== MUDA LABEL do grid para "Manutenções efetuadas no veículo" =====
+            var lblItensSelecionados = document.querySelector("#tblItens")?.closest(".card")?.querySelector(".card-header span, .card-header h5, .card-header h6, .card-header .card-title");
+            if (lblItensSelecionados)
+            {
+                lblItensSelecionados.innerHTML = '<i class="fa-duotone fa-solid fa-wrench me-2"></i>Manutenções efetuadas no veículo';
+            }
+            // Também tenta por ID específico se existir
+            var lblItensById = document.getElementById("lblItensSelecionados");
+            if (lblItensById)
+            {
+                lblItensById.innerHTML = '<i class="fa-duotone fa-solid fa-wrench me-2"></i>Manutenções efetuadas no veículo';
+            }
+        } else
+        {
+            // OS não está fechada/cancelada - modo normal
+            window.modoVisualizacaoFoto = false;
+        }
+        
+        if (StatusOS != "Aberta" && StatusOS !== "Fechada" && StatusOS !== "Cancelada")
         {
             // Nova OS: se o campo estiver vazio, define hoje (sem fuso)
             if (!$ds.val())
@@ -686,6 +835,55 @@ function SelecionaLinha(
         //Descricao = removeHTML(Descricao || "");
         //Resumo = removeHTML(Resumo || "");
 
+        // Verifica se tem foto (incluindo semimagem.jpg como "sem foto")
+        const img = ImagemOcorrencia || '';
+        const temFoto = img && img !== '' && img !== 'null' && img.toLowerCase() !== 'semimagem.jpg';
+        
+        // Botão de foto condicional
+        const botaoFoto = temFoto 
+            ? `<button type="button"
+                        class="btn btn-sm btnFoto js-ver-foto"
+                        style="background: linear-gradient(135deg, #17a2b8, #138496); 
+                               color: white; 
+                               border: none; 
+                               border-radius: 5px; 
+                               padding: 6px 8px;
+                               transition: all 0.3s ease;
+                               box-shadow: 0 2px 4px rgba(23,162,184,0.3);"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalFotoManutencao"
+                        data-ejtip="Ver Foto"
+                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                   this.style.boxShadow='0 6px 20px rgba(23,162,184,0.6), 0 0 15px rgba(23,162,184,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; 
+                                  this.style.boxShadow='0 2px 4px rgba(23,162,184,0.3)'">
+                  <i class="fa-duotone fa-camera-polaroid"
+                     style="--fa-primary-color: #ffffff; 
+                            --fa-secondary-color: #e1f7fe; 
+                            --fa-secondary-opacity: 0.8;"></i>
+                </button>`
+            : `<button type="button"
+                        class="btn btn-sm btnFoto js-ver-foto"
+                        style="background: linear-gradient(135deg, #fd7e14, #e96b02); 
+                               color: white; 
+                               border: none; 
+                               border-radius: 5px; 
+                               padding: 6px 8px;
+                               transition: all 0.3s ease;
+                               box-shadow: 0 2px 4px rgba(253,126,20,0.3);"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalFotoManutencao"
+                        data-ejtip="Inserir Foto"
+                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                   this.style.boxShadow='0 6px 20px rgba(253,126,20,0.6), 0 0 15px rgba(253,126,20,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; 
+                                  this.style.boxShadow='0 2px 4px rgba(253,126,20,0.3)'">
+                  <i class="fa-duotone fa-camera-viewfinder"
+                     style="--fa-primary-color: #ffffff; 
+                            --fa-secondary-color: #fff3e0; 
+                            --fa-secondary-opacity: 0.8;"></i>
+                </button>`;
+
         // 1) adiciona no destino
         $('#tblItens').DataTable().row.add({
             tipoItem: "Ocorrência",
@@ -697,7 +895,7 @@ function SelecionaLinha(
                         <div class="col-acao">
                             <div class="d-flex gap-2 justify-content-center">
                                 <button type="button"
-                                        class="btn btn-sm btn-delete"
+                                        class="btn btn-sm btn-delete js-devolver-item"
                                         style="background: linear-gradient(135deg, #dc3545, #c82333); 
                                                color: white; 
                                                border: none; 
@@ -705,7 +903,7 @@ function SelecionaLinha(
                                                padding: 6px 8px;
                                                transition: all 0.3s ease;
                                                box-shadow: 0 2px 4px rgba(220,53,69,0.3);"
-                                        data-ejtip="Remover Item"
+                                        data-ejtip="Devolver Item"
                                         onmouseover="this.style.transform='translateY(-2px)'; 
                                                    this.style.boxShadow='0 6px 20px rgba(220,53,69,0.6), 0 0 15px rgba(220,53,69,0.4)'"
                                         onmouseout="this.style.transform='translateY(0)'; 
@@ -716,27 +914,7 @@ function SelecionaLinha(
                                             --fa-secondary-opacity: 0.8;"></i>
                                 </button>
         
-                                <button type="button"
-                                        class="btn btn-sm btnFoto"
-                                        style="background: linear-gradient(135deg, #6c757d, #5a6268); 
-                                               color: white; 
-                                               border: none; 
-                                               border-radius: 5px; 
-                                               padding: 6px 8px;
-                                               transition: all 0.3s ease;
-                                               box-shadow: 0 2px 4px rgba(108,117,125,0.3);"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#modalFotoManutencao"
-                                        data-ejtip="Gerenciar Foto"
-                                        onmouseover="this.style.transform='translateY(-2px)'; 
-                                                   this.style.boxShadow='0 6px 20px rgba(108,117,125,0.6), 0 0 15px rgba(108,117,125,0.4)'"
-                                        onmouseout="this.style.transform='translateY(0)'; 
-                                                  this.style.boxShadow='0 2px 4px rgba(108,117,125,0.3)'">
-                                  <i class="fa-duotone fa-camera-polaroid"
-                                     style="--fa-primary-color: #ffffff; 
-                                            --fa-secondary-color: #e3f2fd; 
-                                            --fa-secondary-opacity: 0.8;"></i>
-                                </button>
+                                ${botaoFoto}
                             </div>
                         </div>
                         `,
@@ -847,6 +1025,55 @@ function SelecionaLinhaPendencia(
     {
         Descricao = removeHTML(Descricao);
 
+        // Verifica se tem foto (incluindo semimagem.jpg como "sem foto")
+        const img = ImagemOcorrencia || '';
+        const temFoto = img && img !== '' && img !== 'null' && img.toLowerCase() !== 'semimagem.jpg';
+        
+        // Botão de foto condicional
+        const botaoFoto = temFoto 
+            ? `<button type="button"
+                        class="btn btn-sm btnFoto js-ver-foto"
+                        style="background: linear-gradient(135deg, #17a2b8, #138496); 
+                               color: white; 
+                               border: none; 
+                               border-radius: 5px; 
+                               padding: 6px 8px;
+                               transition: all 0.3s ease;
+                               box-shadow: 0 2px 4px rgba(23,162,184,0.3);"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalFotoManutencao"
+                        data-ejtip="Ver Foto"
+                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                   this.style.boxShadow='0 6px 20px rgba(23,162,184,0.6), 0 0 15px rgba(23,162,184,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; 
+                                  this.style.boxShadow='0 2px 4px rgba(23,162,184,0.3)'">
+                  <i class="fa-duotone fa-camera-polaroid"
+                     style="--fa-primary-color: #ffffff; 
+                            --fa-secondary-color: #e1f7fe; 
+                            --fa-secondary-opacity: 0.8;"></i>
+                </button>`
+            : `<button type="button"
+                        class="btn btn-sm btnFoto js-ver-foto"
+                        style="background: linear-gradient(135deg, #fd7e14, #e96b02); 
+                               color: white; 
+                               border: none; 
+                               border-radius: 5px; 
+                               padding: 6px 8px;
+                               transition: all 0.3s ease;
+                               box-shadow: 0 2px 4px rgba(253,126,20,0.3);"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalFotoManutencao"
+                        data-ejtip="Inserir Foto"
+                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                   this.style.boxShadow='0 6px 20px rgba(253,126,20,0.6), 0 0 15px rgba(253,126,20,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; 
+                                  this.style.boxShadow='0 2px 4px rgba(253,126,20,0.3)'">
+                  <i class="fa-duotone fa-camera-viewfinder"
+                     style="--fa-primary-color: #ffffff; 
+                            --fa-secondary-color: #fff3e0; 
+                            --fa-secondary-opacity: 0.8;"></i>
+                </button>`;
+
         $("#tblItens")
             .DataTable()
             .row.add({
@@ -859,7 +1086,7 @@ function SelecionaLinhaPendencia(
                         <div class="col-acao">
                             <div class="d-flex gap-2 justify-content-center">
                                 <button type="button"
-                                        class="btn btn-sm btn-delete"
+                                        class="btn btn-sm btn-delete js-devolver-item"
                                         style="background: linear-gradient(135deg, #dc3545, #c82333); 
                                                color: white; 
                                                border: none; 
@@ -867,7 +1094,7 @@ function SelecionaLinhaPendencia(
                                                padding: 6px 8px;
                                                transition: all 0.3s ease;
                                                box-shadow: 0 2px 4px rgba(220,53,69,0.3);"
-                                        data-ejtip="Remover Item"
+                                        data-ejtip="Devolver Item"
                                         onmouseover="this.style.transform='translateY(-2px)'; 
                                                    this.style.boxShadow='0 6px 20px rgba(220,53,69,0.6), 0 0 15px rgba(220,53,69,0.4)'"
                                         onmouseout="this.style.transform='translateY(0)'; 
@@ -878,27 +1105,7 @@ function SelecionaLinhaPendencia(
                                             --fa-secondary-opacity: 0.8;"></i>
                                 </button>
         
-                                <button type="button"
-                                        class="btn btn-sm btnFoto"
-                                        style="background: linear-gradient(135deg, #6c757d, #5a6268); 
-                                               color: white; 
-                                               border: none; 
-                                               border-radius: 5px; 
-                                               padding: 6px 8px;
-                                               transition: all 0.3s ease;
-                                               box-shadow: 0 2px 4px rgba(108,117,125,0.3);"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#modalFotoManutencao"
-                                        data-ejtip="Gerenciar Foto"
-                                        onmouseover="this.style.transform='translateY(-2px)'; 
-                                                   this.style.boxShadow='0 6px 20px rgba(108,117,125,0.6), 0 0 15px rgba(108,117,125,0.4)'"
-                                        onmouseout="this.style.transform='translateY(0)'; 
-                                                  this.style.boxShadow='0 2px 4px rgba(108,117,125,0.3)'">
-                                  <i class="fa-duotone fa-camera-polaroid"
-                                     style="--fa-primary-color: #ffffff; 
-                                            --fa-secondary-color: #e3f2fd; 
-                                            --fa-secondary-opacity: 0.8;"></i>
-                                </button>
+                                ${botaoFoto}
                             </div>
                         </div>
                         `,
@@ -1131,8 +1338,12 @@ $("#btnFechar").click(function (e)
 {
     try
     {
-        $("div").removeClass("modal-backdrop");
-        $("body").removeClass("modal-open");
+        // Limpa backdrop e restaura scroll do body (Bootstrap 5 adiciona overflow:hidden inline)
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open").css({
+            'overflow': '',
+            'padding-right': ''
+        });
     }
     catch (error)
     {
@@ -1208,6 +1419,15 @@ $("#modalManutencao")
                     }
                 }
             }
+            
+            // Garante restauração do scroll do body (Bootstrap 5 adiciona overflow:hidden inline)
+            setTimeout(() => {
+                $(".modal-backdrop").remove();
+                $("body").removeClass("modal-open").css({
+                    'overflow': '',
+                    'padding-right': ''
+                });
+            }, 100);
         } catch (error)
         {
             TratamentoErroComLinha("manutencao.js", "modalManutencao.hidden.bs.modal", error);
@@ -1251,6 +1471,55 @@ $("#btnInsereItem").click(function (e)
         var Descricao = document.getElementById("rteManutencao").ej2_instances[0];
         var Motorista = document.getElementById("lstMotorista").ej2_instances[0];
 
+        // Verifica se tem foto (incluindo semimagem.jpg como "sem foto")
+        const img = ImagemOcorrencia || '';
+        const temFoto = img && img !== '' && img !== 'null' && img.toLowerCase() !== 'semimagem.jpg';
+        
+        // Botão de foto condicional
+        const botaoFoto = temFoto 
+            ? `<button type="button"
+                        class="btn btn-sm btnFoto js-ver-foto"
+                        style="background: linear-gradient(135deg, #17a2b8, #138496); 
+                               color: white; 
+                               border: none; 
+                               border-radius: 5px; 
+                               padding: 6px 8px;
+                               transition: all 0.3s ease;
+                               box-shadow: 0 2px 4px rgba(23,162,184,0.3);"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalFotoManutencao"
+                        data-ejtip="Ver Foto"
+                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                   this.style.boxShadow='0 6px 20px rgba(23,162,184,0.6), 0 0 15px rgba(23,162,184,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; 
+                                  this.style.boxShadow='0 2px 4px rgba(23,162,184,0.3)'">
+                  <i class="fa-duotone fa-camera-polaroid"
+                     style="--fa-primary-color: #ffffff; 
+                            --fa-secondary-color: #e1f7fe; 
+                            --fa-secondary-opacity: 0.8;"></i>
+                </button>`
+            : `<button type="button"
+                        class="btn btn-sm btnFoto js-ver-foto"
+                        style="background: linear-gradient(135deg, #fd7e14, #e96b02); 
+                               color: white; 
+                               border: none; 
+                               border-radius: 5px; 
+                               padding: 6px 8px;
+                               transition: all 0.3s ease;
+                               box-shadow: 0 2px 4px rgba(253,126,20,0.3);"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalFotoManutencao"
+                        data-ejtip="Inserir Foto"
+                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                   this.style.boxShadow='0 6px 20px rgba(253,126,20,0.6), 0 0 15px rgba(253,126,20,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; 
+                                  this.style.boxShadow='0 2px 4px rgba(253,126,20,0.3)'">
+                  <i class="fa-duotone fa-camera-viewfinder"
+                     style="--fa-primary-color: #ffffff; 
+                            --fa-secondary-color: #fff3e0; 
+                            --fa-secondary-opacity: 0.8;"></i>
+                </button>`;
+
         $("#tblItens")
             .DataTable()
             .row.add({
@@ -1260,7 +1529,7 @@ $("#btnInsereItem").click(function (e)
                 nomeMotorista: Motorista.text,
                 resumo: `<div class='text-center'><a aria-label='&#9881; (${removeHTML(Descricao.value)})' data-microtip-position='top' role='tooltip' data-microtip-size='medium' style='cursor:pointer;'>${Resumo}</a></div>`,
                 itemManutencaoId: `<button type="button"
-                                            class="btn btn-sm btn-delete"
+                                            class="btn btn-sm btn-delete js-remover-item"
                                             style="background: linear-gradient(135deg, #dc3545, #c82333); 
                                                    color: white; 
                                                    border: none; 
@@ -1268,38 +1537,18 @@ $("#btnInsereItem").click(function (e)
                                                    padding: 6px 8px;
                                                    transition: all 0.3s ease;
                                                    box-shadow: 0 2px 4px rgba(220,53,69,0.3);"
-                                            data-ejtip="Remover Item"
+                                            data-ejtip="Excluir Item"
                                             onmouseover="this.style.transform='translateY(-2px)'; 
                                                        this.style.boxShadow='0 6px 20px rgba(220,53,69,0.6), 0 0 15px rgba(220,53,69,0.4)'"
                                             onmouseout="this.style.transform='translateY(0)'; 
                                                       this.style.boxShadow='0 2px 4px rgba(220,53,69,0.3)'">
-                                      <i class="fa-duotone fa-up-from-bracket"
+                                      <i class="fa-duotone fa-trash-can"
                                          style="--fa-primary-color: #ffffff; 
                                                 --fa-secondary-color: #ffebee; 
                                                 --fa-secondary-opacity: 0.8;"></i>
                                     </button>
         
-                                    <button type="button"
-                                            class="btn btn-sm btnFoto"
-                                            style="background: linear-gradient(135deg, #6c757d, #5a6268); 
-                                                   color: white; 
-                                                   border: none; 
-                                                   border-radius: 5px; 
-                                                   padding: 6px 8px;
-                                                   transition: all 0.3s ease;
-                                                   box-shadow: 0 2px 4px rgba(108,117,125,0.3);"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalFotoManutencao"
-                                            data-ejtip="Gerenciar Foto"
-                                            onmouseover="this.style.transform='translateY(-2px)'; 
-                                                       this.style.boxShadow='0 6px 20px rgba(108,117,125,0.6), 0 0 15px rgba(108,117,125,0.4)'"
-                                            onmouseout="this.style.transform='translateY(0)'; 
-                                                      this.style.boxShadow='0 2px 4px rgba(108,117,125,0.3)'">
-                                      <i class="fa-duotone fa-camera-polaroid"
-                                         style="--fa-primary-color: #ffffff; 
-                                                --fa-secondary-color: #e3f2fd; 
-                                                --fa-secondary-opacity: 0.8;"></i>
-                                    </button>`,
+                                    ${botaoFoto}`,
                 itemManutencaoId: "",
                 descricao: removeHTML(Descricao.value),
                 resumo: Resumo,
@@ -1309,9 +1558,22 @@ $("#btnInsereItem").click(function (e)
             })
             .draw(false);
 
-        $("#modalManutencao").hide();
-        $("div").removeClass("modal-backdrop");
-        $("body").removeClass("modal-open");
+        // Fecha o modal usando Bootstrap 5 corretamente
+        const modalEl = document.getElementById('modalManutencao');
+        if (modalEl && window.bootstrap?.Modal)
+        {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+        
+        // Garante limpeza do backdrop e overflow (fallback)
+        setTimeout(() => {
+            $(".modal-backdrop").remove();
+            $("body").removeClass("modal-open").css({
+                'overflow': '',
+                'padding-right': ''
+            });
+        }, 300);
     }
     catch (error)
     {
@@ -1328,6 +1590,81 @@ $("#tblItens tbody").on("click", "tr", function ()
     catch (error)
     {
         TratamentoErroComLinha("manutencao.js", "click.tr.tblItens", error);
+    }
+});
+
+/* ==========================================
+   Handlers delegados para abrir modais de foto
+   (necessário pois botões são criados dinamicamente)
+   ========================================== */
+
+// Handler para botões de foto na tabela de Ocorrências
+$(document).on("click", "#tblOcorrencia [data-bs-target='#modalFotoOcorrencia']", function(e)
+{
+    try
+    {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const modalEl = document.getElementById('modalFotoOcorrencia');
+        if (modalEl && window.bootstrap?.Modal)
+        {
+            // Armazena dados do botão para o evento show.bs.modal
+            $(modalEl).data('triggerBtn', this);
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+    catch (error)
+    {
+        console.error("Erro ao abrir modalFotoOcorrencia:", error);
+        Alerta.TratamentoErroComLinha("manutencao.js", "click.modalFotoOcorrencia", error);
+    }
+});
+
+// Handler para botões de foto na tabela de Pendências
+$(document).on("click", "#tblPendencia [data-bs-target='#modalFotoPendencia']", function(e)
+{
+    try
+    {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const modalEl = document.getElementById('modalFotoPendencia');
+        if (modalEl && window.bootstrap?.Modal)
+        {
+            $(modalEl).data('triggerBtn', this);
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+    catch (error)
+    {
+        console.error("Erro ao abrir modalFotoPendencia:", error);
+        Alerta.TratamentoErroComLinha("manutencao.js", "click.modalFotoPendencia", error);
+    }
+});
+
+// Handler para botões de foto na tabela de Itens Selecionados
+$(document).on("click", "#tblItens [data-bs-target='#modalFotoManutencao']", function(e)
+{
+    try
+    {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const modalEl = document.getElementById('modalFotoManutencao');
+        if (modalEl && window.bootstrap?.Modal)
+        {
+            $(modalEl).data('triggerBtn', this);
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+    catch (error)
+    {
+        console.error("Erro ao abrir modalFotoManutencao:", error);
+        Alerta.TratamentoErroComLinha("manutencao.js", "click.modalFotoManutencao", error);
     }
 });
 
@@ -1351,8 +1688,12 @@ $("#tblItens tbody").on("click", "tr", function ()
             try
             {
                 // Pega a imagem do data attribute do botão que disparou o modal
-                var btnClicado = event.relatedTarget;
+                // Tenta primeiro o relatedTarget, depois o botão armazenado via jQuery
+                var btnClicado = event.relatedTarget || $(modalElement).data('triggerBtn');
                 var imagemOcorrencia = $(btnClicado).data('imagem') || '';
+                
+                // Limpa o botão armazenado
+                $(modalElement).removeData('triggerBtn');
                 
                 $("#imgViewerOcorrencia").removeAttr("src");
 
@@ -1382,6 +1723,14 @@ $("#tblItens tbody").on("click", "tr", function ()
             try
             {
                 $("#imgViewerOcorrencia").removeAttr("src");
+                
+                // Garante restauração do scroll do body (Bootstrap 5 adiciona overflow:hidden inline)
+                setTimeout(() => {
+                    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 150);
             }
             catch (error)
             {
@@ -1415,8 +1764,12 @@ $("#tblItens tbody").on("click", "tr", function ()
             try
             {
                 // Pega a imagem do data attribute do botão que disparou o modal
-                var btnClicado = event.relatedTarget;
+                // Tenta primeiro o relatedTarget, depois o botão armazenado via jQuery
+                var btnClicado = event.relatedTarget || $(modalElement).data('triggerBtn');
                 var imagemPendencia = $(btnClicado).data('foto') || $(btnClicado).data('imagem') || '';
+                
+                // Limpa o botão armazenado
+                $(modalElement).removeData('triggerBtn');
                 
                 $("#imgViewerPendencia").removeAttr("src");
 
@@ -1424,7 +1777,7 @@ $("#tblItens tbody").on("click", "tr", function ()
                 {
                     $("#imgViewerPendencia").attr(
                         "src",
-                        "/DadosEditaveis/ImagensOcorrencias/" + imagemPendencia
+                        "/DadosEditaveis/ImagensOcorrencias/" + decodeURIComponent(imagemPendencia)
                     );
                 } else
                 {
@@ -1446,6 +1799,14 @@ $("#tblItens tbody").on("click", "tr", function ()
             try
             {
                 $("#imgViewerPendencia").removeAttr("src");
+                
+                // Garante restauração do scroll do body (Bootstrap 5 adiciona overflow:hidden inline)
+                setTimeout(() => {
+                    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 150);
             }
             catch (error)
             {
@@ -1545,8 +1906,18 @@ $("#tblItens tbody").on("click", "tr", function ()
     {
         try
         {
-            const btn = event.relatedTarget;
-            if (!btn) return;
+            // Tenta primeiro o relatedTarget, depois o botão armazenado via jQuery
+            const btn = event.relatedTarget || $(modalEl).data('triggerBtn');
+            
+            // Limpa o botão armazenado
+            $(modalEl).removeData('triggerBtn');
+            
+            if (!btn)
+            {
+                console.warn("Botão não encontrado para modalFotoManutencao");
+                imgEl.src = BASE + "semimagem.jpg";
+                return;
+            }
 
             // Encontra a linha do botão clicado diretamente na tabela
             const table = $('#tblItens').DataTable();
@@ -1570,6 +1941,73 @@ $("#tblItens tbody").on("click", "tr", function ()
             imgEl.src = temFoto ? (BASE + encodeURIComponent(fotoAtual)) : (BASE + "semimagem.jpg");
 
             console.log("Foto carregada:", fotoAtual);
+
+            // ===== MODO VISUALIZAÇÃO: Oculta controles de upload =====
+            const modoVisualizacao = window.modoVisualizacaoFoto === true;
+            
+            // Elementos a ocultar em modo visualização
+            const elementosUpload = [
+                "#txtFileItem", "#txtFileItemNovo",      // Inputs de arquivo
+                "#divUploadFoto", "#divControlesUpload", // Containers de upload
+                ".upload-container", ".k-upload",        // Kendo upload
+                "#btnGravarFoto", "#btnSalvarFoto",      // Botões de gravar
+                "#lblSelecionarFoto", "#lblInstrucaoUpload" // Labels de instrução
+            ];
+            
+            elementosUpload.forEach(selector =>
+            {
+                const el = modalEl.querySelector(selector) || document.querySelector(selector);
+                if (el)
+                {
+                    el.style.display = modoVisualizacao ? "none" : "";
+                }
+            });
+            
+            // Também oculta o input file pelo ID mais comum
+            const inputFile = document.getElementById("txtFileItemNovo");
+            if (inputFile)
+            {
+                const wrapper = inputFile.closest(".mb-3, .form-group, .upload-wrapper");
+                if (wrapper)
+                {
+                    wrapper.style.display = modoVisualizacao ? "none" : "";
+                } else
+                {
+                    inputFile.style.display = modoVisualizacao ? "none" : "";
+                }
+            }
+            
+            // Altera o título do modal em modo visualização
+            const modalTitle = modalEl.querySelector(".modal-title");
+            if (modalTitle)
+            {
+                modalTitle.textContent = modoVisualizacao ? "Visualizar Foto" : "Foto do Item";
+            }
+            
+            // Oculta botão de gravar no footer
+            const footerButtons = modalEl.querySelectorAll(".modal-footer button:not([data-bs-dismiss]), .modal-footer .btn-primary, .modal-footer .btn-success");
+            footerButtons.forEach(btn =>
+            {
+                if (btn.textContent.toLowerCase().includes("gravar") || 
+                    btn.textContent.toLowerCase().includes("salvar") ||
+                    btn.classList.contains("btn-primary") ||
+                    btn.classList.contains("btn-success"))
+                {
+                    btn.style.display = modoVisualizacao ? "none" : "";
+                }
+            });
+
+            // ===== GARANTE que botões de FECHAR ficam HABILITADOS =====
+            const botoesFechar = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-vinho, #btnFecharModal');
+            botoesFechar.forEach(btnFechar =>
+            {
+                btnFechar.removeAttribute("aria-disabled");
+                btnFechar.removeAttribute("tabindex");
+                btnFechar.disabled = false;
+                btnFechar.style.opacity = "1";
+                btnFechar.style.pointerEvents = "auto";
+                btnFechar.style.cursor = "pointer";
+            });
 
         } catch (error)
         {
@@ -1792,8 +2230,9 @@ $(document).ready(function ()
 
                 // Mantém apenas o botão Voltar à Lista ativo
                 var $keepBtn = $("#btnVoltarLista")
+                    .add("#btnVoltar")
                     .add('a[href*="ListaManutencao"]')
-                    .add("a.btn.btn-verde.form-control");
+                    .add("a.btn.btn-vinho.form-control");
 
                 // Inclui também TODOS os ancestrais do botão, para não bloquear o clique por herança de pointer-events
                 var $keep = $keepBtn.add($keepBtn.parents());
@@ -1834,6 +2273,19 @@ $(document).ready(function ()
                 $(
                     'input:disabled, select:disabled, textarea:disabled, button:disabled, a[aria-disabled="true"], .btn[aria-disabled="true"]',
                 ).css("cursor", "not-allowed");
+
+                // ===== GARANTE que o botão Voltar fica HABILITADO =====
+                var $btnVoltar = $("#btnVoltar, a[href*='ListaManutencao']");
+                $btnVoltar
+                    .removeAttr("aria-disabled")
+                    .removeAttr("tabindex")
+                    .off("click.block")
+                    .css({
+                        "opacity": "1",
+                        "pointer-events": "auto",
+                        "cursor": "pointer"
+                    });
+                $btnVoltar.parents().css("pointer-events", "auto");
             }
         } else
         {
@@ -1892,6 +2344,15 @@ $(document).ready(function ()
                             const foto = full.imagemOcorrencia || "";
                             const fotoAttr = encodeURIComponent(foto);
                             const rowIndex = meta.row;
+                            
+                            // Define ícone e tooltip baseado no tipo de item
+                            const isManual = full.tipoItem === "Inserção Manual";
+                            const iconeRemover = isManual 
+                                ? "fa-trash-can" 
+                                : "fa-up-from-bracket";
+                            const tooltipRemover = isManual 
+                                ? "Excluir Item" 
+                                : "Devolver Item";
 
                             return `
                                         <div class="col-acao">
@@ -1906,40 +2367,69 @@ $(document).ready(function ()
                                                                transition: all 0.3s ease;
                                                                box-shadow: 0 2px 4px rgba(220,53,69,0.3);"
                                                         data-item-id="${full.itemManutencaoId}"
-                                                        data-ejtip="Remover Item"
+                                                        data-ejtip="${tooltipRemover}"
                                                         onmouseover="this.style.transform='translateY(-2px)'; 
                                                                    this.style.boxShadow='0 6px 20px rgba(220,53,69,0.6), 0 0 15px rgba(220,53,69,0.4)'"
                                                         onmouseout="this.style.transform='translateY(0)'; 
                                                                   this.style.boxShadow='0 2px 4px rgba(220,53,69,0.3)'">
-                                                  <i class="fa-duotone fa-up-from-bracket"
+                                                  <i class="fa-duotone ${iconeRemover}"
                                                      style="--fa-primary-color: #ffffff; 
                                                             --fa-secondary-color: #ffebee; 
                                                             --fa-secondary-opacity: 0.8;"></i>
                                                 </button>
                     
-                                                <button type="button"
+                                                ${(() => {
+                                                    const temFoto = foto && foto !== '' && foto !== 'null' && foto.toLowerCase() !== 'semimagem.jpg';
+                                                    if (temFoto) {
+                                                        return `<button type="button"
                                                         class="btn btn-sm btnFoto js-ver-foto"
-                                                        style="background: linear-gradient(135deg, #6c757d, #5a6268); 
+                                                        style="background: linear-gradient(135deg, #17a2b8, #138496); 
                                                                color: white; 
                                                                border: none; 
                                                                border-radius: 5px; 
                                                                padding: 6px 8px;
                                                                transition: all 0.3s ease;
-                                                               box-shadow: 0 2px 4px rgba(108,117,125,0.3);"
+                                                               box-shadow: 0 2px 4px rgba(23,162,184,0.3);"
                                                         data-bs-toggle="modal" 
                                                         data-bs-target="#modalFotoManutencao"
                                                         data-foto="${fotoAttr}"
                                                         data-row-index="${rowIndex}"
-                                                        data-ejtip="Gerenciar Foto"
+                                                        data-ejtip="Ver Foto"
                                                         onmouseover="this.style.transform='translateY(-2px)'; 
-                                                                   this.style.boxShadow='0 6px 20px rgba(108,117,125,0.6), 0 0 15px rgba(108,117,125,0.4)'"
+                                                                   this.style.boxShadow='0 6px 20px rgba(23,162,184,0.6), 0 0 15px rgba(23,162,184,0.4)'"
                                                         onmouseout="this.style.transform='translateY(0)'; 
-                                                                  this.style.boxShadow='0 2px 4px rgba(108,117,125,0.3)'">
+                                                                  this.style.boxShadow='0 2px 4px rgba(23,162,184,0.3)'">
                                                   <i class="fa-duotone fa-camera-polaroid"
                                                      style="--fa-primary-color: #ffffff; 
-                                                            --fa-secondary-color: #e3f2fd; 
+                                                            --fa-secondary-color: #e1f7fe; 
                                                             --fa-secondary-opacity: 0.8;"></i>
-                                                </button>
+                                                </button>`;
+                                                    } else {
+                                                        return `<button type="button"
+                                                        class="btn btn-sm btnFoto js-ver-foto"
+                                                        style="background: linear-gradient(135deg, #fd7e14, #e96b02); 
+                                                               color: white; 
+                                                               border: none; 
+                                                               border-radius: 5px; 
+                                                               padding: 6px 8px;
+                                                               transition: all 0.3s ease;
+                                                               box-shadow: 0 2px 4px rgba(253,126,20,0.3);"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#modalFotoManutencao"
+                                                        data-foto="${fotoAttr}"
+                                                        data-row-index="${rowIndex}"
+                                                        data-ejtip="Inserir Foto"
+                                                        onmouseover="this.style.transform='translateY(-2px)'; 
+                                                                   this.style.boxShadow='0 6px 20px rgba(253,126,20,0.6), 0 0 15px rgba(253,126,20,0.4)'"
+                                                        onmouseout="this.style.transform='translateY(0)'; 
+                                                                  this.style.boxShadow='0 2px 4px rgba(253,126,20,0.3)'">
+                                                  <i class="fa-duotone fa-camera-viewfinder"
+                                                     style="--fa-primary-color: #ffffff; 
+                                                            --fa-secondary-color: #fff3e0; 
+                                                            --fa-secondary-opacity: 0.8;"></i>
+                                                </button>`;
+                                                    }
+                                                })()}
                                             </div>
                                         </div>
                                     `;
@@ -2151,6 +2641,59 @@ $(document).ready(function ()
                     decimal: ",",
                 },
                 width: "100%",
+                
+                // Callback executado após cada draw da tabela
+                drawCallback: function(settings)
+                {
+                    try
+                    {
+                        // Se OS está Fechada/Cancelada, reabilita botões de foto para visualização
+                        var statusOS = window.manutencaoStatusOS || manutencaoStatusOS || "";
+                        var osFechadaOuCancelada = (statusOS === "Fechada" || statusOS === "Cancelada");
+                        
+                        console.log("drawCallback - Status OS:", statusOS, "| Fechada/Cancelada:", osFechadaOuCancelada);
+                        
+                        if (osFechadaOuCancelada)
+                        {
+                            // Reabilita botões de foto para visualização
+                            var $botoesF = $("#tblItens .js-ver-foto, #tblItens .btnFoto, #tblItens [data-bs-target='#modalFotoManutencao']");
+                            console.log("Botões de foto encontrados:", $botoesF.length);
+                            
+                            $botoesF.each(function() {
+                                $(this)
+                                    .removeAttr("aria-disabled")
+                                    .removeAttr("tabindex")
+                                    .off("click.block")
+                                    .prop("disabled", false)
+                                    .css({
+                                        "opacity": "1",
+                                        "pointer-events": "auto",
+                                        "cursor": "pointer"
+                                    });
+                            });
+                            
+                            // Habilita pointer-events em toda a estrutura da tabela
+                            $("#tblItens").css("pointer-events", "auto");
+                            $("#tblItens tbody").css("pointer-events", "auto");
+                            $("#tblItens td").css("pointer-events", "auto");
+                            $botoesF.parents("td, tr, div, .col-acao").css("pointer-events", "auto");
+                            
+                            // Desabilita botões de remover (mantém desabilitados)
+                            var $botoesRemover = $("#tblItens .js-remover-item, #tblItens .btn-delete");
+                            $botoesRemover
+                                .prop("disabled", true)
+                                .css({
+                                    "opacity": "0.35",
+                                    "pointer-events": "none",
+                                    "cursor": "not-allowed"
+                                });
+                        }
+                    }
+                    catch (error)
+                    {
+                        console.error("Erro no drawCallback:", error);
+                    }
+                }
             });
         }
         catch (error)
@@ -2351,18 +2894,33 @@ function PreenchePagina()
                 decimal: ",",
             };
 
+            // =====================================================================
+            // OS FECHADA/CANCELADA: NÃO preencher grids de Ocorrências/Pendências disponíveis
+            // =====================================================================
+            var osFechada = typeof manutencaoStatusOS !== "undefined" && 
+                           (manutencaoStatusOS === "Fechada" || manutencaoStatusOS === "Cancelada");
+
+            // Esconde as divs de Ocorrências e Pendências disponíveis se OS estiver Fechada/Cancelada
+            if (osFechada)
+            {
+                document.getElementById("divOcorrencias").style.display = "none";
+                document.getElementById("divPendencias").style.display = "none";
+            }
+
             try
             {
                 DataTable.datetime("DD/MM/YYYY");
 
-                // Configura dataTableOcorrencias
-                if (typeof dataTableOcorrencias !== "undefined" && dataTableOcorrencias)
+                // Configura dataTableOcorrencias - APENAS se OS NÃO estiver Fechada/Cancelada
+                if (!osFechada)
                 {
-                    dataTableOcorrencias.destroy();
-                }
-                $("#tblOcorrencia tbody").empty();
+                    if (typeof dataTableOcorrencias !== "undefined" && dataTableOcorrencias)
+                    {
+                        dataTableOcorrencias.destroy();
+                    }
+                    $("#tblOcorrencia tbody").empty();
 
-                dataTableOcorrencias = $("#tblOcorrencia").DataTable({
+                    dataTableOcorrencias = $("#tblOcorrencia").DataTable({
                     autoWidth: false,
                     dom: "Bfrtip",
                     bFilter: false,
@@ -2452,7 +3010,11 @@ function PreenchePagina()
                                                                     --fa-secondary-opacity: 0.8;"></i>
                                                         </button>
                         
-                                                        <button type="button"
+                                                        ${(() => {
+                                                            const img = full.imagemOcorrencia || '';
+                                                            const temFoto = img && img !== '' && img !== 'null' && img.toLowerCase() !== 'semimagem.jpg';
+                                                            if (temFoto) {
+                                                                return `<button type="button"
                                                                 class="btn btn-sm js-ver-foto"
                                                                 style="background: linear-gradient(135deg, #17a2b8, #138496); 
                                                                        color: white; 
@@ -2475,7 +3037,27 @@ function PreenchePagina()
                                                              style="--fa-primary-color: #ffffff; 
                                                                     --fa-secondary-color: #e1f7fe; 
                                                                     --fa-secondary-opacity: 0.8;"></i>
-                                                        </button>
+                                                        </button>`;
+                                                            } else {
+                                                                return `<button type="button"
+                                                                class="btn btn-sm"
+                                                                style="background: linear-gradient(135deg, #9e9e9e, #757575); 
+                                                                       color: white; 
+                                                                       border: none; 
+                                                                       border-radius: 5px; 
+                                                                       padding: 6px 8px;
+                                                                       opacity: 0.6;
+                                                                       cursor: not-allowed;
+                                                                       box-shadow: none;"
+                                                                data-ejtip="Sem Foto"
+                                                                disabled>
+                                                          <i class="fa-duotone fa-camera-slash"
+                                                             style="--fa-primary-color: #ffffff; 
+                                                                    --fa-secondary-color: #e0e0e0; 
+                                                                    --fa-secondary-opacity: 0.8;"></i>
+                                                        </button>`;
+                                                            }
+                                                        })()}
                                                     </div>
                                                 </div>
                                             `;
@@ -2515,6 +3097,7 @@ function PreenchePagina()
                     language: languageDataTable,
                     width: "100%",
                 });
+                } // Fim do if (!osFechada) para dataTableOcorrencias
             }
             catch (error)
             {
@@ -2526,14 +3109,16 @@ function PreenchePagina()
             }
             try
             {
-                // Configura dataTablePendencias
-                if (typeof dataTablePendencias !== "undefined" && dataTablePendencias)
+                // Configura dataTablePendencias - APENAS se OS NÃO estiver Fechada/Cancelada
+                if (!osFechada)
                 {
-                    dataTablePendencias.destroy();
-                }
-                $("#tblPendencia tbody").empty();
+                    if (typeof dataTablePendencias !== "undefined" && dataTablePendencias)
+                    {
+                        dataTablePendencias.destroy();
+                    }
+                    $("#tblPendencia tbody").empty();
 
-                dataTablePendencias = $("#tblPendencia").DataTable({
+                    dataTablePendencias = $("#tblPendencia").DataTable({
                     autoWidth: false,
                     dom: "Bfrtip",
                     bFilter: false,
@@ -2628,7 +3213,10 @@ function PreenchePagina()
                                                                 --fa-secondary-opacity: 0.8;"></i>
                                                     </button>
                         
-                                                    <button type="button"
+                                                    ${(() => {
+                                                        const temFoto = foto && foto !== '' && foto !== 'null' && foto.toLowerCase() !== 'semimagem.jpg';
+                                                        if (temFoto) {
+                                                            return `<button type="button"
                                                             class="btn btn-sm js-ver-foto-pendencia"
                                                             style="background: linear-gradient(135deg, #17a2b8, #138496); 
                                                                    color: white; 
@@ -2641,7 +3229,7 @@ function PreenchePagina()
                                                             data-bs-target="#modalFotoPendencia"
                                                             data-foto="${fotoAttr}"
                                                             data-row-index="${rowIndex}"
-                                                            data-ejtip="Gerenciar Foto da Pendência"
+                                                            data-ejtip="Ver Foto"
                                                             onmouseover="this.style.transform='translateY(-2px)'; 
                                                                        this.style.boxShadow='0 6px 20px rgba(23,162,184,0.6), 0 0 15px rgba(23,162,184,0.4)'"
                                                             onmouseout="this.style.transform='translateY(0)'; 
@@ -2650,7 +3238,27 @@ function PreenchePagina()
                                                          style="--fa-primary-color: #ffffff; 
                                                                 --fa-secondary-color: #e1f7fe; 
                                                                 --fa-secondary-opacity: 0.8;"></i>
-                                                    </button>
+                                                    </button>`;
+                                                        } else {
+                                                            return `<button type="button"
+                                                            class="btn btn-sm"
+                                                            style="background: linear-gradient(135deg, #9e9e9e, #757575); 
+                                                                   color: white; 
+                                                                   border: none; 
+                                                                   border-radius: 5px; 
+                                                                   padding: 6px 8px;
+                                                                   opacity: 0.6;
+                                                                   cursor: not-allowed;
+                                                                   box-shadow: none;"
+                                                            data-ejtip="Sem Foto"
+                                                            disabled>
+                                                      <i class="fa-duotone fa-camera-slash"
+                                                         style="--fa-primary-color: #ffffff; 
+                                                                --fa-secondary-color: #e0e0e0; 
+                                                                --fa-secondary-opacity: 0.8;"></i>
+                                                    </button>`;
+                                                        }
+                                                    })()}
                                                 </div>
                                             </div>
                                         `;
@@ -2691,6 +3299,7 @@ function PreenchePagina()
                     language: languageDataTable,
                     width: "100%",
                 });
+                } // Fim do if (!osFechada) para dataTablePendencias
             }
             catch (error)
             {

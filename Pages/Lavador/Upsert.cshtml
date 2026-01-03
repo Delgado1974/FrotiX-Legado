@@ -6,9 +6,9 @@
 @{
     ViewData["Title"]     = "Lavadores";
     ViewData["PageName"]  = "lavador_upsert";
-    ViewData["Heading"]   = "<i class='fad fa-car-wash'></i> Cadastros: <span class='fw-300'>Lavadores</span>";
+    ViewData["Heading"]   = "<i class='fa-duotone fa-car-wash'></i> Cadastros: <span class='fw-300'>Lavadores</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"]  = "fal fa-car-wash";
+    ViewData["PageIcon"]  = "fa-duotone fa-car-wash";
     
     var isEdicao = Model.LavadorObj.Lavador.LavadorId != Guid.Empty;
 }
@@ -486,7 +486,7 @@
                                                 asp-page-handler="Edit"
                                                 asp-route-id="@Model.LavadorObj.Lavador.LavadorId"
                                                 class="btn btn-azul">
-                                            <i class="fa-duotone fa-floppy-disk"></i>
+                                            <i class="fa-duotone fa-floppy-disk icon-pulse"></i>
                                             Atualizar
                                         </button>
                                     }

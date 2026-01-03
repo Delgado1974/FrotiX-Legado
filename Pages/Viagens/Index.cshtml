@@ -31,9 +31,9 @@
 @{
 	ViewData["Title"] = "Viagens";
 	ViewData["PageName"] = "viagens_index";
-	ViewData["Heading"] = "<i class='fad fa-route'></i> Cadastros: <span class='fw-300'>Viagens</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-route'></i> Cadastros: <span class='fw-300'>Viagens</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-route";
+	ViewData["PageIcon"] = "fa-duotone fa-route";
 }
 
 @section HeadBlock {
@@ -72,13 +72,6 @@
 		font-size: 1.925rem !important;
 		color: #ffffff !important;
 		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
-	}
-
-	.ftx-card-header .titulo-paginas i {
-		--fa-primary-color: #ffffff;
-		--fa-secondary-color: rgba(255, 255, 255, 0.7);
-		font-size: 2.2rem !important;
-		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
 	}
 
 	/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER ======== */
@@ -508,6 +501,166 @@
 		padding-top: 0 !important;
 		padding-bottom: 0 !important;
 	}
+
+	/* ================================================================
+	   MODAL DE LOADING - PADRÃO FROTIX
+	   ================================================================ */
+	#modalLoadingViagens .modal-dialog {
+		max-width: 360px;
+	}
+
+	#modalLoadingViagens .modal-content {
+		border: none;
+		border-radius: 16px;
+		overflow: hidden;
+		box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+	}
+
+	#modalLoadingViagens .modal-header {
+		background: linear-gradient(135deg, #325d88 0%, #2a4d73 50%, #3d6f9e 100%);
+		background-size: 200% 200%;
+		animation: headerGradientShift 4s ease infinite;
+		border-bottom: none;
+		padding: 1rem 1.25rem;
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* Efeito de brilho no header do modal */
+	#modalLoadingViagens .modal-header::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+		animation: ftxModalShine 5s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	@@keyframes ftxModalShine {
+		0%, 100% { left: -100%; }
+		50% { left: 100%; }
+	}
+
+	#modalLoadingViagens .modal-title {
+		font-family: 'Outfit', sans-serif;
+		font-weight: 700;
+		font-size: 1.1rem;
+		color: #fff;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	/* Ícone duotone com cores amarelo/branco e animação pulsante */
+	#modalLoadingViagens .modal-title i {
+		font-size: 1.3rem;
+		--fa-primary-color: #ffd700;
+		--fa-secondary-color: #ffffff;
+		--fa-secondary-opacity: 0.8;
+		animation: ftxLoadingIconPulse 2s ease-in-out infinite;
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+	}
+
+	@@keyframes ftxLoadingIconPulse {
+		0%, 100% { 
+			transform: scale(1); 
+			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+		}
+		50% { 
+			transform: scale(1.12); 
+			filter: drop-shadow(0 3px 6px rgba(255, 215, 0, 0.4));
+		}
+	}
+
+	#modalLoadingViagens .modal-body {
+		padding: 2rem 1.5rem;
+		text-align: center;
+		background: #fff;
+	}
+
+	/* Spinner duplo estilizado */
+	.ftx-loading-spinner {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		border: 5px solid transparent;
+		border-top-color: #325d88;
+		animation: ftxLoadingSpin 1s linear infinite;
+		margin: 0 auto 1.25rem;
+		position: relative;
+	}
+
+	.ftx-loading-spinner::before {
+		content: "";
+		position: absolute;
+		inset: 5px;
+		border-radius: 50%;
+		border: 5px solid transparent;
+		border-right-color: #22d3ee;
+		animation: ftxLoadingSpin 0.75s linear infinite reverse;
+	}
+
+	@@keyframes ftxLoadingSpin {
+		to { transform: rotate(360deg); }
+	}
+
+	.ftx-loading-text {
+		font-family: 'Outfit', sans-serif;
+		font-size: 1rem;
+		font-weight: 600;
+		color: #333;
+		margin-bottom: 0.5rem;
+	}
+
+	.ftx-loading-subtext {
+		font-size: 0.85rem;
+		color: #6c757d;
+	}
+
+	/* ================================================================
+	   AVISO DE FILTRO DO DATATABLE
+	   ================================================================ */
+	.ftx-filter-hint {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.78rem;
+		color: #6c757d;
+		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		padding: 0.35rem 0.75rem;
+		border-radius: 20px;
+		border: 1px solid #dee2e6;
+		margin-left: 0.75rem;
+		white-space: nowrap;
+		transition: all 0.2s ease;
+	}
+
+	.ftx-filter-hint:hover {
+		background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+		border-color: #adb5bd;
+		color: #495057;
+	}
+
+	.ftx-filter-hint i {
+		color: #325d88;
+		font-size: 0.85rem;
+	}
+
+	/* Posiciona o aviso junto ao campo de pesquisa */
+	#tblViagem_wrapper .dataTables_filter {
+		display: flex !important;
+		align-items: center !important;
+		flex-wrap: wrap;
+	}
+
+	#tblViagem_wrapper .dataTables_filter label {
+		display: flex !important;
+		align-items: center !important;
+		gap: 0.5rem;
+	}
 </style>
 
 <script>
@@ -531,6 +684,79 @@
 	}
 </script>
 
+@*=========================================================================
+   MODAL DE LOADING - PADRÃO FROTIX
+   =========================================================================*@
+<div class="modal fade" id="modalLoadingViagens" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<i class="fa-duotone fa-route"></i>
+					<span>Carregando Viagens</span>
+				</h5>
+			</div>
+			<div class="modal-body">
+				<div class="ftx-loading-spinner"></div>
+				<div class="ftx-loading-text" id="loadingViagensMensagem">Aguarde enquanto carregamos as viagens...</div>
+				<div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@* =========================================================================
+   SCRIPT INLINE - MOSTRA MODAL DE LOADING IMEDIATAMENTE
+   Este script roda ANTES do ViagemIndex.js carregar
+   ========================================================================= *@
+<script>
+(function() {
+    'use strict';
+    
+    // Mostra o modal de loading assim que possível
+    function mostrarModalLoading() {
+        var modalEl = document.getElementById('modalLoadingViagens');
+        if (!modalEl) return;
+        
+        // Verifica se Bootstrap está disponível
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            var existingModal = bootstrap.Modal.getInstance(modalEl);
+            if (existingModal) {
+                existingModal.show();
+            } else {
+                var modal = new bootstrap.Modal(modalEl, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                modal.show();
+            }
+        } else {
+            // Fallback: mostra manualmente se Bootstrap ainda não carregou
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.removeAttribute('aria-hidden');
+            document.body.classList.add('modal-open');
+            
+            // Cria backdrop manualmente se não existir
+            if (!document.getElementById('ftx-loading-backdrop')) {
+                var backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.id = 'ftx-loading-backdrop';
+                document.body.appendChild(backdrop);
+            }
+        }
+    }
+    
+    // Mostra modal quando DOM estiver minimamente pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mostrarModalLoading);
+    } else {
+        // DOM já está pronto
+        mostrarModalLoading();
+    }
+})();
+</script>
+
 <form>
 	<div class="row">
 		<div class="col-xl-12">
@@ -543,12 +769,12 @@
 					<!-- HEADER DO CARD -->
 					<div class="ftx-card-header">
 						<h2 class="titulo-paginas">
-							<i class="fa-duotone fa-solid fa-route"></i>
+							<i class="fa-duotone fa-route"></i>
 							Controle de Viagens
 						</h2>
 						<div class="ftx-card-actions">
 							<a href="/Viagens/Upsert" class="btn btn-fundo-laranja" data-ftx-loading>
-								<i class="fal fa-route icon-pulse me-1"></i>
+								<i class="fa-duotone fa-route icon-pulse me-1 icon-pulse me-1"></i>
 								Adicionar Viagem
 							</a>
 						</div>
@@ -649,9 +875,8 @@
 												id="btnFiltro"
 												name="btnFiltro"
 												style="height: 44px;"
-												data-ftx-loading
-												onclick="ListaTodasViagens()">
-											<i class="fa-sharp-duotone fa-solid fa-filter-list me-2"></i>
+												onclick="FtxViagens.filtrar()">
+											<i class="fa-sharp-duotone fa-duotone fa-filter-list me-2"></i>
 											<span>Filtrar Viagens</span>
 										</button>
 									</div>
@@ -661,29 +886,29 @@
 							<!-- ===== TABELA DE VIAGENS ===== -->
 							<div id="divViagens">
 								<table id="tblViagem" class="table table-bordered table-striped table-hover mt-2 ftx-table" width="100%">
-									<thead>
+									<thead style="background-color: #4a6fa5 !important;">
 										<tr>
-											<th>Vistoria</th>
-											<th>Data</th>
-											<th>Início</th>
-											<th>Requisitante</th>
-											<th>Setor</th>
-											<th>Motorista</th>
-											<th>Veículo</th>
-											<th>Status</th>
-											<th>Ação</th>
-											<th></th>
-											<th>Km Inicial</th>
-											<th>Combustivel Inicial</th>
-											<th>Data Final</th>
-											<th>Hora Final</th>
-											<th>Km Final</th>
-											<th>Combustivel Final</th>
-											<th>Resumo Ocorrência</th>
-											<th>Descrição Ocorrência</th>
-											<th>Status Documento</th>
-											<th>Status Cartão Abastecimento</th>
-											<th>Descricao</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Vistoria</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Data</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Início</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Requisitante</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Setor</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Motorista</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Veículo</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Status</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Ação</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;"></th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Km Inicial</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Combustivel Inicial</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Data Final</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Hora Final</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Km Final</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Combustivel Final</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Resumo Ocorrência</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Descrição Ocorrência</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Status Documento</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Status Cartão Abastecimento</th>
+											<th style="background-color: #4a6fa5 !important; color: #fff !important;">Descricao</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -802,312 +1027,91 @@
 						</div>
 					</div>
 
-					<!-- Linha 3: Estatísticas Calculadas -->
+					<!-- Linha 3: Km Percorrido + Duração -->
 					<div class="row g-3 mb-4">
-						<div class="col-md-6">
+						<div class="col-md-3">
 							<label class="ftx-label">
 								<i class="fa-duotone fa-road"></i>
 								Km Percorrido
 							</label>
-							<input id="txtKmPercorrido" readonly class="form-control bg-light" />
+							<input readonly id="txtKmPercorrido" class="form-control" />
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-3">
 							<label class="ftx-label">
-								<i class="fa-duotone fa-hourglass-half"></i>
-								Duração da Viagem
+								<i class="fa-duotone fa-stopwatch"></i>
+								Duração
 							</label>
-							<input id="txtDuracao" readonly class="form-control bg-light" />
+							<input readonly id="txtDuracao" class="form-control" />
 						</div>
-					</div>
-
-					<!-- Linha 4: Checkboxes -->
-					<div class="row g-3 mb-4">
-						<div class="col-md-6">
-							<div class="form-check form-switch">
-								<input class="form-check-input" type="checkbox" id="chkStatusDocumento" checked>
-								<label class="form-check-label fw-semibold" for="chkStatusDocumento">
-									<i class="fa-duotone fa-file-check me-1 text-success"></i>
-									Documentos Entregues
-								</label>
+						<div class="col-md-3">
+							<label class="ftx-label">
+								<i class="fa-duotone fa-file-check"></i>
+								Status Documento
+							</label>
+							<div class="form-check form-switch mt-2">
+								<input class="form-check-input" type="checkbox" id="chkStatusDocumento" checked />
+								<label class="form-check-label" for="chkStatusDocumento">Entregue</label>
 							</div>
 						</div>
-						<div class="col-md-6">
-							<div class="form-check form-switch">
-								<input class="form-check-input" type="checkbox" id="chkStatusCartaoAbastecimento" checked>
-								<label class="form-check-label fw-semibold" for="chkStatusCartaoAbastecimento">
-									<i class="fa-duotone fa-credit-card me-1 text-success"></i>
-									Cartão de Abastecimento Entregue
-								</label>
+						<div class="col-md-3">
+							<label class="ftx-label">
+								<i class="fa-duotone fa-credit-card"></i>
+								Cartão Abastecimento
+							</label>
+							<div class="form-check form-switch mt-2">
+								<input class="form-check-input" type="checkbox" id="chkStatusCartaoAbastecimento" checked />
+								<label class="form-check-label" for="chkStatusCartaoAbastecimento">Entregue</label>
 							</div>
 						</div>
 					</div>
 
-					<!-- Linha 5: Descrição -->
-					<div class="mb-4">
-						<label class="ftx-label">
-							<i class="fa-duotone fa-file-lines"></i>
-							Descrição / Observações
-						</label>
-						<ejs-richtexteditor id="rteDescricao" 
-											created="onCreateDescricao" 
-											locale="pt-BR" 
-											height="150px"
-											placeholder="Observações sobre a viagem...">
-							<e-richtexteditor-insertimagesettings saveUrl="api/Viagem/SaveImage" 
-																  path="./DadosEditaveis/ImagensViagens/">
-							</e-richtexteditor-insertimagesettings>
-						</ejs-richtexteditor>
+					<!-- Descrição -->
+					<div class="row g-3 mb-3">
+						<div class="col-12">
+							<label class="ftx-label">
+								<i class="fa-duotone fa-align-left"></i>
+								Descrição / Observações
+							</label>
+							<ejs-richtexteditor id="rteDescricao" 
+												placeholder="Digite observações sobre a viagem..." 
+												height="150px"
+												created="onCreateDescricao">
+							</ejs-richtexteditor>
+						</div>
 					</div>
 
-					<!-- ====== SEÇÃO DE OCORRÊNCIAS MÚLTIPLAS ====== -->
-					@await Html.PartialAsync("_SecaoOcorrenciasFinalizacao")
-
+					<!-- Seção de Ocorrências -->
+					<div class="secao-ocorrencias mt-4">
+						<div class="d-flex justify-content-between align-items-center mb-3">
+							<h5 class="mb-0">
+								<i class="fa-duotone fa-car-burst me-2 text-danger"></i>
+								Ocorrências da Viagem
+							</h5>
+							<button type="button" class="btn btn-adicionar-ocorrencia btn-sm" id="btnAdicionarOcorrencia">
+								<i class="fa-duotone fa-plus me-1"></i> Adicionar Ocorrência
+							</button>
+						</div>
+						<div id="listaOcorrencias">
+							<!-- Ocorrências serão inseridas aqui dinamicamente -->
+						</div>
+					</div>
 				</form>
 			</div>
 
-			<div class="modal-footer justify-content-between">
-				<button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
-				</button>
-				<button id="btnFinalizarViagem" class="btn btn-azul" type="submit">
-					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Finalizar Viagem
-				</button>
-
-				<!-- Modal Bootstrap para o Spinner -->
-				<div class="modal fade" id="modalSpinnerFinalizacao" data-backdrop="static" data-keyboard="false" tabindex="-1">
-					<div class="modal-dialog modal-dialog-centered modal-sm">
-						<div class="modal-content">
-							<div class="modal-body text-center py-4">
-								<!-- Spinner -->
-								<div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-									<span class="sr-only">Carregando...</span>
-								</div>
-
-								<!-- Texto -->
-								<h6 class="mb-1">Finalizando a Viagem...</h6>
-								<small class="text-muted">Isso pode levar alguns segundos</small>
-							</div>
-						</div>
-					</div>
-				</div>
-
-			</div>
-		</div>
-	</div>
-</div>
-
-@*=========================================================================
-   MODAL OCORRÊNCIAS DA VIAGEM - MODERNIZADO
-   =========================================================================*@
-<div class="modal fade" id="modalOcorrenciasViagem" tabindex="-1" aria-labelledby="modalOcorrenciasViagemLabel" aria-hidden="true">
-	<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
-		<div class="modal-content">
-			<div class="modal-header modal-header-terracota">
-				<h4 class="modal-title d-flex align-items-center gap-2" id="modalOcorrenciasViagemLabel">
-					<i class="fa-duotone fa-car-burst" aria-hidden="true"></i>
-					<span>Ocorrências da Viagem</span>
-				</h4>
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-			</div>
-
-			<div class="modal-body">
-				<input type="hidden" id="hiddenOcorrenciasViagemId" />
-
-				<div class="table-responsive">
-					<table id="tblOcorrenciasViagem" class="table table-bordered table-striped table-hover mb-0">
-						<thead class="table-dark">
-							<tr>
-								<th class="text-center" style="width: 50px;">#</th>
-								<th style="width: 25%;">Resumo</th>
-								<th style="width: 30%;">Descrição</th>
-								<th class="text-center" style="width: 90px;">Data</th>
-								<th class="text-center" style="width: 90px;">Status</th>
-								<th class="text-center" style="width: 120px;">Ações</th>
-							</tr>
-						</thead>
-						<tbody>
-						</tbody>
-					</table>
-				</div>
-			</div>
-
-			<div class="modal-footer justify-content-end">
-				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-xmark me-1"></i> Fechar
-				</button>
-			</div>
-		</div>
-	</div>
-</div>
-
-@*=========================================================================
-   MODAL IMAGEM DA OCORRÊNCIA - MODERNIZADO
-   =========================================================================*@
-<div class="modal fade" id="modalImagemOcorrencia" tabindex="-1" aria-labelledby="modalImagemOcorrenciaLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-header modal-header-azul">
-				<h5 class="modal-title d-flex align-items-center gap-2" id="modalImagemOcorrenciaLabel">
-					<i class="fa-duotone fa-image" aria-hidden="true"></i>
-					<span>Imagem da Ocorrência</span>
-				</h5>
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-			</div>
-
-			<div class="modal-body text-center p-4">
-				<img id="imgOcorrenciaViewer"
-					 class="img-fluid rounded shadow"
-					 style="max-height: 500px; display: none;"
-					 alt="Imagem da Ocorrência" />
-				<div id="noImageOcorrencia" class="p-5" style="display: none;">
-					<i class="fa-duotone fa-image fa-4x text-muted"></i>
-					<p class="text-muted mt-3 mb-0">Nenhuma imagem disponível</p>
-				</div>
-			</div>
-
-			<div class="modal-footer justify-content-end">
-				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-xmark me-1"></i> Fechar
-				</button>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Modal Ficha de Vistoria -->
-<div class="modal fade" id="modalFicha" tabindex="-1" aria-labelledby="modalFichaLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header modal-header-azul">
-				<h3 class="modal-title d-flex align-items-center gap-2" id="modalFichaLabel">
-					<i class="fa-duotone fa-file-invoice" aria-hidden="true"></i>
-					<span>Ficha de Vistoria</span>
-				</h3>
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-
-			<div class="modal-body">
-				<!-- Hidden para armazenar o ID da viagem -->
-				<input type="hidden" id="hiddenViagemId" />
-
-				<!-- Container para upload -->
-				<div id="uploadContainer" class="mb-3">
-					<label class="form-label fw-bold">Selecionar Arquivo</label>
-					<input type="file"
-						   id="txtFile"
-						   class="form-control"
-						   accept="image/*" />
-					<small class="text-muted">Formatos aceitos: JPG, PNG, GIF (Máximo: 5MB)</small>
-				</div>
-
-				<!-- Container para exibir imagem -->
-				<div id="imageContainer" class="text-center">
-					<img id="imgFichaViewer"
-						 class="img-fluid border rounded shadow-sm"
-						 style="max-height: 500px; display: none;"
-						 alt="Ficha de Vistoria" />
-
-					<!-- Container para quando não há imagem -->
-					<div id="noImageContainer" style="display: none;">
-						<div class="p-4 bg-light rounded">
-							<i class="fa fa-image fa-4x text-muted mb-3"></i>
-							<p class="text-muted">Nenhuma ficha de vistoria cadastrada</p>
-							<p class="text-muted small">Selecione um arquivo para fazer upload</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Loading spinner -->
-				<div id="loadingSpinner" class="text-center" style="display: none;">
-					<div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
-						<div>
-							<div class="spinner-border text-primary" role="status">
-								<span class="sr-only">Carregando...</span>
-							</div>
-							<p class="mt-2 text-muted">Processando...</p>
-						</div>
-					</div>
-				</div>
-			</div>
-
 			<div class="modal-footer">
-				<button type="button"
-						id="btnSalvarFicha"
-						class="btn btn-azul"
-						style="display: none;">
-					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Salvar Ficha
+				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
 				</button>
-
-				<button type="button"
-						id="btnAlterarFicha"
-						class="btn btn-azul"
-						style="display: none;">
-					<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i> Alterar Ficha
-				</button>
-
-				<button type="button"
-						id="btnFecharModalFicha"
-						class="btn btn-vinho"
-						data-bs-dismiss="modal">
-					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+				<button type="button" class="btn btn-verde" id="btnFinalizarViagem">
+					<i class="fa-duotone fa-check me-1"></i> Finalizar Viagem
 				</button>
 			</div>
-		</div>
-	</div>
-</div>
-
-@* -------------- Modal da Ficha da Viagem -------------- *@
-@* ====================================================== *@
-<div class="modal fade" id="modalPrint" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-xl" role="document">
-		<div class="modal-content">
-
-			<div class="modal-header modal-header-azul">
-				<h4 class="modal-title d-flex align-items-center gap-2" id="DynamicModalLabel">
-					<i class="fa-duotone fa-print" aria-hidden="true"></i>
-					<span>Ficha da Viagem</span>
-				</h4>
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-			</div>
-
-			<div class="modal-body table-bordered container-fluid">
-				<input type="hidden" id="txtViagemId" asp-for="ViagemId" />
-
-				<div class="row">
-					<div class="col-xl-12">
-						<div id="panel-1" class="panel">
-							<div class="panel-container show">
-								<div id="divPainel" class="panel-content">
-									<div class="d-flex" style="height:700px" id="ReportContainer">
-										<div id="reportViewer1" style="width:100%" class="pb-3">
-											Loading...
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="modal-footer justify-content-end pe-3">
-				<button id="btnFecharModalPrint"
-						type="button"
-						class="btn btn-vinho d-inline-flex align-items-center gap-2 px-3 py-2"
-						data-bs-dismiss="modal">
-					<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
-					<span>Fechar</span>
-				</button>
-			</div>
-
 		</div>
 	</div>
 </div>
 
 @*=========================================================================
-   MODAL CUSTOS DA VIAGEM
+   MODAL CUSTOS DA VIAGEM - MODERNIZADO
    =========================================================================*@
 <div class="modal fade" id="modalCustosViagem" tabindex="-1" aria-labelledby="modalCustosViagemLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -1248,7 +1252,7 @@
 
             <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                    <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
                 </button>
             </div>
         </div>
@@ -1286,10 +1290,10 @@
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-xmark me-1"></i> Cancelar
+					<i class="fa-duotone fa-xmark me-1"></i> Cancelar
 				</button>
 				<button type="button" id="btnConfirmarBaixaSolucao" class="btn btn-verde">
-					<i class="fa-solid fa-check me-1"></i> Confirmar Baixa
+					<i class="fa-duotone fa-check me-1"></i> Confirmar Baixa
 				</button>
 			</div>
 		</div>

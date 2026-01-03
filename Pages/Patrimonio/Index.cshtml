@@ -16,33 +16,44 @@
 
 	ViewData["Title"] = "Patrimônios";
 	ViewData["PageName"] = "patrimonio_index";
-	ViewData["Heading"] = "<i class='fa-duotone fa-solid fa-print-magnifying-glass'></i> Cadastros: <span class='fw-300'>Patrimônios</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-print-magnifying-glass'></i> Cadastros: <span class='fw-300'>Patrimônios</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-regular fa-print-magnifying-glass";
+	ViewData["PageIcon"] = "fa-duotone fa-print-magnifying-glass";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
 }
 
 <div class="row">
 	<div class="col-xl-12">
 		<div id="panel-1" class="panel">
 			<div class="panel-container show">
-				<!-- Adiciona espaçamento superior -->
-				<div class="pt-4">
-					<!-- Container para título e botão -->
-					<div class="d-flex justify-content-between align-items-center px-3 mb-3">
-						<h2 class="titulo-paginas mb-0">
-							<i class="fa-duotone fa-solid fa-pallet-boxes"></i>
-							Listagem de Patrimônios
-						</h2>
-						<a href="./Patrimonio/Upsert" class="btn btn-azul" data-ejtip="Adicionar novo patrimônio ao sistema">
-							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+				<!-- HEADER DO CARD -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-pallet-boxes"></i>
+						Listagem de Patrimônios
+					</h2>
+					<div class="ftx-card-actions">
+						<a href="./Patrimonio/Upsert" class="btn btn-fundo-laranja" data-ftx-loading data-ejtip="Adicionar novo patrimônio ao sistema">
+							<i class="fa-duotone fa-file-plus icon-pulse me-1 icon-pulse me-1"></i>
 							Adicionar Patrimônio
 						</a>
 					</div>
-					<!-- Linha divisória -->
-					<div class="col-12" style="border-bottom:1px solid #325d88"></div>
 				</div>
 
 				<div class="panel-content">
@@ -50,7 +61,7 @@
 						<br /><br />
 						<div class="col-12 px-3">
 							<label class="fw-bold">
-								<i class="fa-duotone fa-solid fa-filter"></i>
+								<i class="fa-duotone fa-filter"></i>
 								Escolha os filtros desejados para visualizar os Patrimônios:
 							</label>
 						</div>
@@ -93,7 +104,7 @@
 									   id="btnFiltrarPatrimonios"
 									   data-ejtip="Filtrar os Patrimônios!"
 									   style="cursor:pointer;">
-										<i class="fa-duotone fa-solid fa-filter"></i>
+										<i class="fa-duotone fa-filter"></i>
 										Filtrar Patrimônios
 									</a>
 								</div>

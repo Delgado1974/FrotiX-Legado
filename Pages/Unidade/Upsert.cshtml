@@ -42,20 +42,20 @@
 		<div class="col-xl-12">
 			<div id="panel-1" class="panel">
 				<div class="panel-container show">
+					<!-- HEADER DO CARD -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-garage-car"></i>
+							@(Model.UnidadeObj.UnidadeId != Guid.Empty ? "Atualizar " : "Criar ") Unidade Usuária
+						</h2>
+					</div>
+
 					<div class="panel-content">
 						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 						@if (Model.UnidadeObj.UnidadeId != Guid.Empty)
 						{
 							<input type="hidden" asp-for="UnidadeObj.UnidadeId" />
 						}
-
-						<!-- Cabeçalho -->
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="titulo-paginas d-flex align-items-center pb-3">
-								<i class="fa-duotone fa-solid fa-garage-car fa-xl me-2 icon-150" aria-hidden="true"></i>
-								@(Model.UnidadeObj.UnidadeId != Guid.Empty ? "Atualizar " : "Criar ") Unidade Usuária
-							</h2>
-						</div>
 
 						<div class="col-8 pt-3">
 
@@ -194,7 +194,7 @@
 										</div>
 										<div class="col-6">
 											<a asp-page="./Index" class="btn btn-vinho form-control">
-												<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+												<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
 												Voltar à Lista
 											</a>
 										</div>

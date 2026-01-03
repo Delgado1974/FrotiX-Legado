@@ -5,9 +5,9 @@
 @{
     ViewData["Title"] = "Calcula Custos das Viagens";
     ViewData["PageName"] = "calcula_custo_viagens_index";
-    ViewData["Heading"] = "<i class='fad fa-calculator'></i> Atualização: <span class='fw-300'>Custos das Viagens</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-calculator'></i> Atualização: <span class='fw-300'>Custos das Viagens</span>";
     ViewData["Category1"] = "Administração";
-    ViewData["PageIcon"] = "fal fa-calculator";
+    ViewData["PageIcon"] = "fa-duotone fa-calculator";
 }
 
 @section HeadBlock {
@@ -187,13 +187,20 @@
 <div class="row">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
+            <!-- ===== HEADER FROTIX ===== -->
+            <div class="ftx-card-header">
+                <h2 class="titulo-paginas">
+                    <i class="fa-duotone fa-calculator"></i>
+                    Cálculo de Custos das Viagens
+                </h2>
+            </div>
+
             <div class="panel-container show">
                 <div class="panel-content">
                     <div class="row">
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="text-primary">Cálculo Otimizado de Custos das Viagens</h2>
+                        <div class="col-12">
                             <p class="text-muted mb-3">
-                                <i class="fal fa-info-circle"></i>
+                                <i class="fa-duotone fa-info-circle"></i>
                                 Esta operação irá recalcular os custos de todas as viagens realizadas no sistema usando processamento em batch otimizado.
                             </p>
                         </div>
@@ -202,7 +209,7 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="info-box">
-                                <i class="fad fa-lightbulb"></i>
+                                <i class="fa-duotone fa-lightbulb"></i>
                                 <strong>Otimização Implementada:</strong>
                                 Este processo carrega todos os dados necessários uma única vez em memória e processa as viagens em lotes de 500 registros.
                                 Tempo estimado: <strong>5-15 minutos</strong> para 53.000 viagens (vs. 111 horas do método anterior).
@@ -213,7 +220,7 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <button id="btnCalculaCustoViagens" class="btn fundo-azul form-control">
-                                <i class="fad fa-play-circle"></i> Iniciar Cálculo dos Custos (Batch Otimizado)
+                                <i class="fa-duotone fa-play-circle"></i> Iniciar Cálculo dos Custos (Batch Otimizado)
                             </button>
                         </div>
                     </div>
@@ -255,7 +262,7 @@
 
                         <!-- Ícone de Sucesso (hidden inicialmente) -->
                         <div id="successIcon" class="success-icon" style="display: none;">
-                            <i class="fad fa-check-circle"></i>
+                            <i class="fa-duotone fa-check-circle"></i>
                         </div>
                     </div>
                 </div>
@@ -464,7 +471,7 @@
                 $("#btnCalculaCustoViagens")
                     .addClass("btn-processing")
                     .prop("disabled", true)
-                    .html('<i class="fad fa-spinner-third fa-spin"></i> Processando...');
+                    .html('<i class="fa-duotone fa-spinner-third fa-spin"></i> Processando...');
             } catch (error) {
                 Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "marcarBotaoProcessando", error);
             }
@@ -475,7 +482,7 @@
                 $("#btnCalculaCustoViagens")
                     .removeClass("btn-processing")
                     .prop("disabled", false)
-                    .html('<i class="fad fa-play-circle"></i> Iniciar Cálculo dos Custos (Batch Otimizado)');
+                    .html('<i class="fa-duotone fa-play-circle"></i> Iniciar Cálculo dos Custos (Batch Otimizado)');
             } catch (error) {
                 Alerta.TratamentoErroComLinha("CalculaCustoViagensTotal.cshtml", "desmarcarBotaoProcessando", error);
             }

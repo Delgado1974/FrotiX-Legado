@@ -539,20 +539,30 @@ namespace FrotiX.Controllers
         [Route("BaixaOS")]
         [HttpPost]
         public JsonResult BaixaOS(
-            Guid manutencaoId,
-            string dataDevolucao = null,
-            string resumoOS = null,
-            string reservaEnviado = null,
-            string veiculoReservaId = null,
-            string dataRecebimentoReserva = null,
-            string dataDevolucaoReserva = null,
-            string itensRemovidosJson = null // JSON array de itens removidos
+            [FromForm] string manutencaoId = null,
+            [FromForm] string dataDevolucao = null,
+            [FromForm] string resumoOS = null,
+            [FromForm] string reservaEnviado = null,
+            [FromForm] string veiculoReservaId = null,
+            [FromForm] string dataRecebimentoReserva = null,
+            [FromForm] string dataDevolucaoReserva = null,
+            [FromForm] string itensRemovidosJson = null // JSON array de itens removidos
         )
         {
             try
             {
+                // Parse do manutencaoId
+                if (string.IsNullOrWhiteSpace(manutencaoId) || !Guid.TryParse(manutencaoId, out var manutencaoGuid))
+                {
+                    return new JsonResult(new
+                    {
+                        sucesso = false,
+                        message = "ID da OS inválido"
+                    });
+                }
+
                 var objManutencao = _unitOfWork.Manutencao.GetFirstOrDefault(m =>
-                    m.ManutencaoId == manutencaoId
+                    m.ManutencaoId == manutencaoGuid
                 );
 
                 if (objManutencao == null)
@@ -631,7 +641,7 @@ namespace FrotiX.Controllers
                 _unitOfWork.Manutencao.Update(objManutencao);
 
                 // Processa todos os itens da OS
-                var itensOS = _unitOfWork.ItensManutencao.GetAll(im => im.ManutencaoId == manutencaoId);
+                var itensOS = _unitOfWork.ItensManutencao.GetAll(im => im.ManutencaoId == manutencaoGuid);
                 int itensBaixados = 0;
                 int itensPendentes = 0;
                 
@@ -693,7 +703,7 @@ namespace FrotiX.Controllers
                 return new JsonResult(new
                 {
                     sucesso = true,
-                    data = manutencaoId,
+                    data = manutencaoGuid,
                     message = "OS Baixada com Sucesso!",
                     itensBaixados = itensBaixados,
                     itensPendentes = itensPendentes

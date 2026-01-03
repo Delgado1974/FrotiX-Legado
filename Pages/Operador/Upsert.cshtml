@@ -6,9 +6,9 @@
 @{
     ViewData["Title"]     = "Operadores";
     ViewData["PageName"]  = "operador_upsert";
-    ViewData["Heading"]   = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Operadores</span>";
+    ViewData["Heading"]   = "<i class='fa-duotone fa-user-tie'></i> Cadastros: <span class='fw-300'>Operadores</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"]  = "fal fa-user-tie";
+    ViewData["PageIcon"]  = "fa-duotone fa-user-tie";
     
     var isEdicao = Model.OperadorObj.Operador.OperadorId != Guid.Empty;
 }
@@ -486,7 +486,7 @@
                                                 asp-page-handler="Edit"
                                                 asp-route-id="@Model.OperadorObj.Operador.OperadorId"
                                                 class="btn btn-azul">
-                                            <i class="fa-duotone fa-floppy-disk"></i>
+                                            <i class="fa-duotone fa-floppy-disk icon-pulse"></i>
                                             Atualizar
                                         </button>
                                     }

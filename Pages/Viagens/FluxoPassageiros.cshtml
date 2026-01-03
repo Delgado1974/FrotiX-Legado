@@ -69,9 +69,9 @@
 	}
 
 	.header-economildo h1 i.fa-duotone {
-		--fa-primary-color: #ffffff;
-		--fa-secondary-color: #b8d4e8;
-		--fa-secondary-opacity: 0.7;
+		--fa-primary-color: #C67750;
+		--fa-secondary-color: #ffffff;
+		--fa-secondary-opacity: 0.9;
 		font-size: 2.4rem;
 		line-height: 1;
 		filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
@@ -149,6 +149,71 @@
 	.fundo-cinza {
 		background-color: #2F4F4F;
 		color: aliceblue;
+	}
+
+	/* ================================================================
+	   GRIDS SYNCFUSION - HEADER AZUL PADRÃO FROTIX
+	   ================================================================ */
+	#grdIda .e-gridheader,
+	#grdVolta .e-gridheader {
+		background-color: #4a6fa5 !important;
+	}
+
+	#grdIda .e-gridheader .e-headercell,
+	#grdVolta .e-gridheader .e-headercell {
+		background-color: #4a6fa5 !important;
+		color: #ffffff !important;
+		text-transform: uppercase !important;
+		font-weight: 600 !important;
+		font-size: 0.85rem !important;
+		letter-spacing: 0.3px !important;
+	}
+
+	#grdIda .e-gridheader .e-headercelldiv,
+	#grdVolta .e-gridheader .e-headercelldiv {
+		color: #ffffff !important;
+	}
+
+	/* Ícones de ordenação em branco */
+	#grdIda .e-gridheader .e-sortfilterdiv .e-icons,
+	#grdVolta .e-gridheader .e-sortfilterdiv .e-icons,
+	#grdIda .e-gridheader .e-icon-ascending,
+	#grdIda .e-gridheader .e-icon-descending,
+	#grdVolta .e-gridheader .e-icon-ascending,
+	#grdVolta .e-gridheader .e-icon-descending {
+		color: #ffffff !important;
+	}
+
+	/* Hover no header */
+	#grdIda .e-gridheader .e-headercell:hover,
+	#grdVolta .e-gridheader .e-headercell:hover {
+		background-color: #3d5f8a !important;
+	}
+
+	/* ================================================================
+	   BOTÃO INSERIR LINHA - 50% MAIOR
+	   ================================================================ */
+	.btn-insere-linha {
+		width: 51px !important;      /* 34px * 1.5 = 51px */
+		height: 51px !important;
+		padding: 0 !important;
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		border-radius: 6px !important;
+		margin-bottom: -8px;         /* Ajuste para alinhar com input de 34px */
+	}
+
+	.btn-insere-linha i {
+		font-size: 1.5rem !important;
+		--fa-primary-color: #ffffff;
+		--fa-secondary-color: #b8d4e8;
+		--fa-secondary-opacity: 0.8;
+	}
+
+	.btn-insere-linha:hover i {
+		transform: scale(1.1);
+		transition: transform 0.2s ease;
 	}
 </style>
 
@@ -360,13 +425,13 @@
 												<input id="txtQtd" class="form-control form-control-xs" type="number" />
 											</div>
 
-											<div class="col-1 align-self-end">
-												<a class="btn btn-azul btn-sm text-white btnFicha"
+											<div class="col-1 d-flex align-items-end">
+												<a class="btn btn-azul text-white btnFicha btn-insere-linha"
 												   id="btnInsere"
 												   href="#"
 												   style="cursor: pointer;"
-												   data-ejtip="Insere a Linha">
-													<i class="fa-thin fa-clipboard-list"></i>
+												   data-ejtip="Insere a Linha na Tabela">
+													<i class="fa-duotone fa-circle-plus"></i>
 												</a>
 											</div>
 										</div>
@@ -436,7 +501,7 @@
 									</div>
 									<div class="col-6">
 										<button id="btnCancela" type="button" class="btn btn-vinho form-control">
-											<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancela Inserção
+											<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Cancela Inserção
 										</button>
 									</div>
 								</div>

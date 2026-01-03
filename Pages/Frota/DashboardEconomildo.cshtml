@@ -7,22 +7,22 @@
 }
 
 <style>
-    /* ========== VARIÁVEIS E BASE ========== */
+    /* ========== VARIAVEIS E BASE - PALETA TERRACOTA ========== */
     :root {
-        --eco-primary: #1a5f7a;
-        --eco-primary-dark: #134b5f;
-        --eco-secondary: #57c785;
-        --eco-accent: #f8b739;
+        --eco-primary: #b45a3c;
+        --eco-primary-dark: #8b4531;
+        --eco-secondary: #c96d4e;
+        --eco-accent: #e8a87c;
         --eco-purple: #8b5cf6;
         --eco-pink: #ec4899;
-        --eco-gradient-start: #1a5f7a;
-        --eco-gradient-end: #2d8f6f;
-        --eco-bg: #f0f4f8;
+        --eco-gradient-start: #b45a3c;
+        --eco-gradient-end: #d4856a;
+        --eco-bg: #faf6f4;
         --eco-card: #ffffff;
         --eco-text: #1e293b;
         --eco-text-light: #64748b;
-        --eco-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        --eco-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+        --eco-shadow: 0 4px 20px rgba(180, 90, 60, 0.08);
+        --eco-shadow-hover: 0 8px 30px rgba(180, 90, 60, 0.15);
         --eco-radius: 16px;
         --eco-radius-sm: 10px;
     }
@@ -114,7 +114,7 @@
         cursor: pointer;
         min-width: 130px;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231a5f7a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b45a3c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 12px center;
         transition: all 0.2s ease;
@@ -128,6 +128,205 @@
     .eco-filter-select:focus {
         outline: none;
         box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    }
+
+    /* ========== CARDS MOB DESTAQUE ========== */
+    .eco-mob-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .eco-mob-card {
+        background: var(--eco-card);
+        border-radius: var(--eco-radius);
+        padding: 24px;
+        box-shadow: var(--eco-shadow);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .eco-mob-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--eco-shadow-hover);
+    }
+
+    .eco-mob-card.rodoviaria {
+        border-top: 4px solid #f97316;
+    }
+
+    .eco-mob-card.pgr {
+        border-top: 4px solid #3b82f6;
+    }
+
+    .eco-mob-card.cefor {
+        border-top: 4px solid #8b5cf6;
+    }
+
+    .eco-mob-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .eco-mob-card-header .eco-mob-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .eco-mob-card.rodoviaria .eco-mob-icon {
+        background: linear-gradient(135deg, #fff7ed, #ffedd5);
+        color: #f97316;
+    }
+
+    .eco-mob-card.pgr .eco-mob-icon {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        color: #3b82f6;
+    }
+
+    .eco-mob-card.cefor .eco-mob-icon {
+        background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+        color: #8b5cf6;
+    }
+
+    .eco-mob-card-stats {
+        text-align: right;
+    }
+
+    .eco-mob-value {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+
+    .eco-mob-card.rodoviaria .eco-mob-value { color: #f97316; }
+    .eco-mob-card.pgr .eco-mob-value { color: #3b82f6; }
+    .eco-mob-card.cefor .eco-mob-value { color: #8b5cf6; }
+
+    .eco-mob-sublabel {
+        font-size: 0.8rem;
+        color: var(--eco-text-light);
+        margin-top: 4px;
+    }
+
+    .eco-mob-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--eco-text);
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* ========== TRAJETOS IDA/VOLTA ========== */
+    .eco-trajetos {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .eco-trajeto-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .eco-trajeto-item.ida {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    }
+
+    .eco-trajeto-item.volta {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    }
+
+    .eco-trajeto-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .eco-trajeto-item.ida .eco-trajeto-icon {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .eco-trajeto-item.volta .eco-trajeto-icon {
+        background: #22c55e;
+        color: white;
+    }
+
+    .eco-trajeto-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .eco-trajeto-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .eco-trajeto-tipo {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .eco-trajeto-item.ida .eco-trajeto-tipo { color: #3b82f6; }
+    .eco-trajeto-item.volta .eco-trajeto-tipo { color: #22c55e; }
+
+    .eco-trajeto-destino {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--eco-text);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .eco-trajeto-destino i {
+        font-size: 0.7rem;
+        flex-shrink: 0;
+    }
+
+    .eco-trajeto-duracao {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .eco-trajeto-duracao-valor {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--eco-text);
+        line-height: 1;
+    }
+
+    .eco-trajeto-duracao-label {
+        font-size: 0.6rem;
+        color: var(--eco-text-light);
+    }
+
+    .eco-mob-card.hidden {
+        display: none;
     }
 
     /* ========== CARDS KPI ========== */
@@ -163,22 +362,6 @@
         background: linear-gradient(90deg, var(--eco-gradient-start), var(--eco-gradient-end));
     }
 
-    .eco-kpi-card.rodoviaria::before {
-        background: linear-gradient(90deg, #f97316, #fb923c);
-    }
-
-    .eco-kpi-card.pgr::before {
-        background: linear-gradient(90deg, #3b82f6, #60a5fa);
-    }
-
-    .eco-kpi-card.cefor::before {
-        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
-    }
-
-    .eco-kpi-card.tempo::before {
-        background: linear-gradient(90deg, var(--eco-secondary), #34d399);
-    }
-
     .eco-kpi-icon {
         width: 48px;
         height: 48px;
@@ -187,30 +370,7 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 16px;
-    }
-
-    .eco-kpi-icon.rodoviaria {
-        background: linear-gradient(135deg, #fff7ed, #ffedd5);
-        color: #f97316;
-    }
-
-    .eco-kpi-icon.pgr {
-        background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        color: #3b82f6;
-    }
-
-    .eco-kpi-icon.cefor {
-        background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-        color: #8b5cf6;
-    }
-
-    .eco-kpi-icon.tempo {
-        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-        color: #10b981;
-    }
-
-    .eco-kpi-icon.total {
-        background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+        background: linear-gradient(135deg, #fef3f2, #fee4e2);
         color: var(--eco-primary);
     }
 
@@ -245,32 +405,6 @@
         opacity: 0.8;
     }
 
-    /* Cards de tempo especiais */
-    .eco-tempo-card {
-        background: linear-gradient(135deg, var(--eco-gradient-start), var(--eco-gradient-end));
-        color: white;
-        grid-column: span 2;
-    }
-
-    .eco-tempo-card::before {
-        display: none;
-    }
-
-    .eco-tempo-card .eco-kpi-icon {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-    }
-
-    .eco-tempo-card .eco-kpi-value {
-        color: white;
-        font-size: 2.5rem;
-    }
-
-    .eco-tempo-card .eco-kpi-label,
-    .eco-tempo-card .eco-kpi-sublabel {
-        color: rgba(255, 255, 255, 0.9);
-    }
-
     /* Grid responsivo para KPIs */
     .eco-kpi-card.span-2 {
         grid-column: span 2;
@@ -280,78 +414,11 @@
         grid-column: span 3;
     }
 
-    /* ========== CARDS MOB DESTAQUE ========== */
-    .eco-mob-cards {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-bottom: 24px;
+    .eco-kpi-card.span-4 {
+        grid-column: span 4;
     }
 
-    .eco-mob-card {
-        background: var(--eco-card);
-        border-radius: var(--eco-radius);
-        padding: 28px;
-        box-shadow: var(--eco-shadow);
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .eco-mob-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--eco-shadow-hover);
-    }
-
-    .eco-mob-card.rodoviaria {
-        border-top: 4px solid #f97316;
-    }
-
-    .eco-mob-card.pgr {
-        border-top: 4px solid #3b82f6;
-    }
-
-    .eco-mob-card.cefor {
-        border-top: 4px solid #8b5cf6;
-    }
-
-    .eco-mob-card .eco-mob-value {
-        font-size: 3rem;
-        font-weight: 800;
-        letter-spacing: -2px;
-        margin-bottom: 8px;
-    }
-
-    .eco-mob-card.rodoviaria .eco-mob-value {
-        color: #f97316;
-    }
-
-    .eco-mob-card.pgr .eco-mob-value {
-        color: #3b82f6;
-    }
-
-    .eco-mob-card.cefor .eco-mob-value {
-        color: #8b5cf6;
-    }
-
-    .eco-mob-card .eco-mob-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--eco-text);
-        margin-bottom: 4px;
-    }
-
-    .eco-mob-card .eco-mob-media {
-        font-size: 0.9rem;
-        color: var(--eco-text-light);
-    }
-
-    .eco-mob-card.hidden {
-        display: none;
-    }
-
-    /* ========== SEÇÃO DE GRÁFICOS ========== */
+    /* ========== SECAO DE GRAFICOS ========== */
     .eco-charts-grid {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
@@ -400,7 +467,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+        background: linear-gradient(135deg, #fef3f2, #fee4e2);
         color: var(--eco-primary);
     }
 
@@ -416,57 +483,6 @@
 
     .eco-chart-container.small {
         height: 280px;
-    }
-
-    /* ========== RESUMO LATERAL ========== */
-    .eco-summary-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-top: 20px;
-    }
-
-    .eco-summary-item {
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-        border-radius: var(--eco-radius-sm);
-        padding: 16px;
-        text-align: center;
-    }
-
-    .eco-summary-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--eco-text);
-        margin-bottom: 4px;
-    }
-
-    .eco-summary-label {
-        font-size: 0.8rem;
-        color: var(--eco-text-light);
-    }
-
-    /* ========== LOADING ========== */
-    .eco-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        min-height: 200px;
-    }
-
-    .eco-spinner {
-        width: 48px;
-        height: 48px;
-        border: 4px solid #e2e8f0;
-        border-top-color: var(--eco-primary);
-        border-radius: 50%;
-        animation: eco-spin 1s linear infinite;
-    }
-
-    @@keyframes eco-spin {
-        to {
-            transform: rotate(360deg);
-        }
     }
 
     /* ========== LEGENDA TURNO ========== */
@@ -492,17 +508,9 @@
         border-radius: 50%;
     }
 
-    .eco-turno-dot.manha {
-        background: var(--eco-secondary);
-    }
-
-    .eco-turno-dot.tarde {
-        background: #3b82f6;
-    }
-
-    .eco-turno-dot.noite {
-        background: #9f1239;
-    }
+    .eco-turno-dot.manha { background: #f97316; }
+    .eco-turno-dot.tarde { background: #3b82f6; }
+    .eco-turno-dot.noite { background: #8b5cf6; }
 
     /* ========== HEATMAP STYLES ========== */
     .eco-heatmap-card {
@@ -564,17 +572,17 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    /* Cores do heatmap - escala de verde (viagens) */
-    .eco-heatmap-0 { background: #f8fafc; color: #94a3b8; }
-    .eco-heatmap-1 { background: #dcfce7; color: #166534; }
-    .eco-heatmap-2 { background: #bbf7d0; color: #166534; }
-    .eco-heatmap-3 { background: #86efac; color: #166534; }
-    .eco-heatmap-4 { background: #4ade80; color: #ffffff; }
-    .eco-heatmap-5 { background: #22c55e; color: #ffffff; }
-    .eco-heatmap-6 { background: #16a34a; color: #ffffff; }
+    /* Cores do heatmap - escala terracota (viagens) */
+    .eco-heatmap-0 { background: #faf6f4; color: #94a3b8; }
+    .eco-heatmap-1 { background: #fee4e2; color: #b45a3c; }
+    .eco-heatmap-2 { background: #fecaca; color: #b45a3c; }
+    .eco-heatmap-3 { background: #f5a898; color: #8b4531; }
+    .eco-heatmap-4 { background: #e8a87c; color: #ffffff; }
+    .eco-heatmap-5 { background: #c96d4e; color: #ffffff; }
+    .eco-heatmap-6 { background: #b45a3c; color: #ffffff; }
 
-    /* Cores do heatmap passageiros - escala de creme */
-    .eco-heatmap-passageiros-0 { background: #fafaf9; color: #78716c; }
+    /* Cores do heatmap passageiros - escala laranja */
+    .eco-heatmap-passageiros-0 { background: #fffbeb; color: #78716c; }
     .eco-heatmap-passageiros-1 { background: #fef3c7; color: #92400e; }
     .eco-heatmap-passageiros-2 { background: #fde68a; color: #92400e; }
     .eco-heatmap-passageiros-3 { background: #fcd34d; color: #78350f; }
@@ -609,6 +617,58 @@
         border-radius: 3px;
     }
 
+    /* ========== LOADING ========== */
+    .eco-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 200px;
+    }
+
+    .eco-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #fee4e2;
+        border-top-color: var(--eco-primary);
+        border-radius: 50%;
+        animation: eco-spin 1s linear infinite;
+    }
+
+    @@keyframes eco-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ========== BOTAO EXPORTAR PDF ========== */
+    .eco-btn-pdf {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        background: linear-gradient(135deg, #b45a3c, #8b4531);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.8;
+    }
+
+    .eco-btn-pdf:hover {
+        opacity: 1;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(180, 90, 60, 0.3);
+    }
+
+    .eco-btn-pdf svg {
+        width: 12px;
+        height: 12px;
+    }
+
     /* ========== RESPONSIVIDADE ========== */
     @@media (max-width: 1400px) {
         .eco-kpi-card.span-2,
@@ -631,7 +691,8 @@
         }
 
         .eco-kpi-card.span-2,
-        .eco-kpi-card.span-3 {
+        .eco-kpi-card.span-3,
+        .eco-kpi-card.span-4 {
             grid-column: span 6;
         }
 
@@ -668,11 +729,8 @@
         }
 
         .eco-kpi-card.span-2,
-        .eco-kpi-card.span-3 {
-            grid-column: span 12;
-        }
-
-        .eco-tempo-card {
+        .eco-kpi-card.span-3,
+        .eco-kpi-card.span-4 {
             grid-column: span 12;
         }
 
@@ -683,40 +741,6 @@
         .eco-filter-select {
             flex: 1;
         }
-    }
-
-    /* ========== BOTÃO EXPORTAR PDF ========== */
-    .eco-btn-pdf {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 10px;
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        opacity: 0.8;
-    }
-
-    .eco-btn-pdf:hover {
-        opacity: 1;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
-    }
-
-    .eco-btn-pdf svg {
-        width: 12px;
-        height: 12px;
-    }
-
-    .eco-chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
     }
 </style>
 
@@ -743,7 +767,7 @@
                 <select id="filtroMob" class="eco-filter-select" asp-items="Model.MobList"></select>
             </div>
             <div class="eco-filter-group">
-                <span class="eco-filter-label">Mês:</span>
+                <span class="eco-filter-label">Mes:</span>
                 <select id="filtroMes" class="eco-filter-select" asp-items="Model.MesList"></select>
             </div>
             <div class="eco-filter-group">
@@ -753,56 +777,170 @@
         </div>
     </div>
 
-    <!-- Cards MOB em Destaque -->
+    <!-- Cards MOB com Trajetos -->
     <div class="eco-mob-cards">
+        <!-- PGR -->
         <div class="eco-mob-card pgr" id="cardPGR">
-            <div class="eco-mob-value" id="totalPGR">-</div>
+            <div class="eco-mob-card-header">
+                <div class="eco-mob-icon">
+                    <i class="fa-duotone fa-building-columns"></i>
+                </div>
+                <div class="eco-mob-card-stats">
+                    <div class="eco-mob-value" id="totalPGR">-</div>
+                    <div class="eco-mob-sublabel">usuarios</div>
+                </div>
+            </div>
             <div class="eco-mob-name">MOB PGR</div>
-            <div class="eco-mob-media">Média Mensal: <span id="mediaPGR">-</span></div>
+            <div class="eco-trajetos">
+                <div class="eco-trajeto-item ida">
+                    <div class="eco-trajeto-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div class="eco-trajeto-info">
+                        <div class="eco-trajeto-tipo">Tempo de Ida</div>
+                        <div class="eco-trajeto-destino">
+                            <i class="fa-duotone fa-location-dot"></i> PGR sentido Anexo II
+                        </div>
+                    </div>
+                    <div class="eco-trajeto-duracao">
+                        <div class="eco-trajeto-duracao-valor" id="tempoIdaPGR">-</div>
+                        <div class="eco-trajeto-duracao-label">min</div>
+                    </div>
+                </div>
+                <div class="eco-trajeto-item volta">
+                    <div class="eco-trajeto-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5"></path>
+                            <path d="m12 19-7-7 7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="eco-trajeto-info">
+                        <div class="eco-trajeto-tipo">Tempo de Volta</div>
+                        <div class="eco-trajeto-destino">
+                            <i class="fa-duotone fa-location-dot"></i> Anexo II sentido PGR
+                        </div>
+                    </div>
+                    <div class="eco-trajeto-duracao">
+                        <div class="eco-trajeto-duracao-valor" id="tempoVoltaPGR">-</div>
+                        <div class="eco-trajeto-duracao-label">min</div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Rodoviaria -->
         <div class="eco-mob-card rodoviaria" id="cardRodoviaria">
-            <div class="eco-mob-value" id="totalRodoviaria">-</div>
-            <div class="eco-mob-name">MOB Rodoviária</div>
-            <div class="eco-mob-media">Média Mensal: <span id="mediaRodoviaria">-</span></div>
+            <div class="eco-mob-card-header">
+                <div class="eco-mob-icon">
+                    <i class="fa-duotone fa-bus"></i>
+                </div>
+                <div class="eco-mob-card-stats">
+                    <div class="eco-mob-value" id="totalRodoviaria">-</div>
+                    <div class="eco-mob-sublabel">usuarios</div>
+                </div>
+            </div>
+            <div class="eco-mob-name">MOB Rodoviaria</div>
+            <div class="eco-trajetos">
+                <div class="eco-trajeto-item ida">
+                    <div class="eco-trajeto-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div class="eco-trajeto-info">
+                        <div class="eco-trajeto-tipo">Tempo de Ida</div>
+                        <div class="eco-trajeto-destino">
+                            <i class="fa-duotone fa-location-dot"></i> Rodoviaria sentido Camara
+                        </div>
+                    </div>
+                    <div class="eco-trajeto-duracao">
+                        <div class="eco-trajeto-duracao-valor" id="tempoIdaRodoviaria">-</div>
+                        <div class="eco-trajeto-duracao-label">min</div>
+                    </div>
+                </div>
+                <div class="eco-trajeto-item volta">
+                    <div class="eco-trajeto-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5"></path>
+                            <path d="m12 19-7-7 7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="eco-trajeto-info">
+                        <div class="eco-trajeto-tipo">Tempo de Volta</div>
+                        <div class="eco-trajeto-destino">
+                            <i class="fa-duotone fa-location-dot"></i> Camara sentido Rodoviaria
+                        </div>
+                    </div>
+                    <div class="eco-trajeto-duracao">
+                        <div class="eco-trajeto-duracao-valor" id="tempoVoltaRodoviaria">-</div>
+                        <div class="eco-trajeto-duracao-label">min</div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Cefor -->
         <div class="eco-mob-card cefor" id="cardCefor">
-            <div class="eco-mob-value" id="totalCefor">-</div>
+            <div class="eco-mob-card-header">
+                <div class="eco-mob-icon">
+                    <i class="fa-duotone fa-graduation-cap"></i>
+                </div>
+                <div class="eco-mob-card-stats">
+                    <div class="eco-mob-value" id="totalCefor">-</div>
+                    <div class="eco-mob-sublabel">usuarios</div>
+                </div>
+            </div>
             <div class="eco-mob-name">MOB Cefor</div>
-            <div class="eco-mob-media">Média Mensal: <span id="mediaCefor">-</span></div>
+            <div class="eco-trajetos">
+                <div class="eco-trajeto-item ida">
+                    <div class="eco-trajeto-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div class="eco-trajeto-info">
+                        <div class="eco-trajeto-tipo">Tempo de Ida</div>
+                        <div class="eco-trajeto-destino">
+                            <i class="fa-duotone fa-location-dot"></i> Cefor sentido Chapelaria
+                        </div>
+                    </div>
+                    <div class="eco-trajeto-duracao">
+                        <div class="eco-trajeto-duracao-valor" id="tempoIdaCefor">-</div>
+                        <div class="eco-trajeto-duracao-label">min</div>
+                    </div>
+                </div>
+                <div class="eco-trajeto-item volta">
+                    <div class="eco-trajeto-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5"></path>
+                            <path d="m12 19-7-7 7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="eco-trajeto-info">
+                        <div class="eco-trajeto-tipo">Tempo de Volta</div>
+                        <div class="eco-trajeto-destino">
+                            <i class="fa-duotone fa-location-dot"></i> Chapelaria sentido Cefor
+                        </div>
+                    </div>
+                    <div class="eco-trajeto-duracao">
+                        <div class="eco-trajeto-duracao-valor" id="tempoVoltaCefor">-</div>
+                        <div class="eco-trajeto-duracao-label">min</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- KPIs Grid -->
     <div class="eco-kpi-grid">
-        <!-- Tempo Ida -->
-        <div class="eco-kpi-card eco-tempo-card span-2">
+        <!-- Total Usuarios -->
+        <div class="eco-kpi-card span-3">
             <div class="eco-kpi-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-            </div>
-            <div class="eco-kpi-value" id="tempoIda">00:00</div>
-            <div class="eco-kpi-label">Média de Duração</div>
-            <div class="eco-kpi-sublabel">Trajeto de Ida</div>
-        </div>
-
-        <!-- Tempo Volta -->
-        <div class="eco-kpi-card eco-tempo-card span-2">
-            <div class="eco-kpi-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 8 14"></polyline>
-                </svg>
-            </div>
-            <div class="eco-kpi-value" id="tempoVolta">00:00</div>
-            <div class="eco-kpi-label">Média de Duração</div>
-            <div class="eco-kpi-sublabel">Trajeto de Volta</div>
-        </div>
-
-        <!-- Total Usuários -->
-        <div class="eco-kpi-card span-2">
-            <div class="eco-kpi-icon total">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
@@ -811,39 +949,12 @@
                 </svg>
             </div>
             <div class="eco-kpi-value" id="totalUsuarios">-</div>
-            <div class="eco-kpi-label">Total de Usuários</div>
-        </div>
-
-        <!-- Média Mensal -->
-        <div class="eco-kpi-card span-2">
-            <div class="eco-kpi-icon tempo">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-            </div>
-            <div class="eco-kpi-value small" id="mediaMensal">-</div>
-            <div class="eco-kpi-label">Média Usuários/Mês</div>
-        </div>
-
-        <!-- Média Diária -->
-        <div class="eco-kpi-card span-2">
-            <div class="eco-kpi-icon pgr">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 20V10"></path>
-                    <path d="M18 20V4"></path>
-                    <path d="M6 20v-4"></path>
-                </svg>
-            </div>
-            <div class="eco-kpi-value small" id="mediaDiaria">-</div>
-            <div class="eco-kpi-label">Média Usuários/Dia</div>
+            <div class="eco-kpi-label">Total de Usuarios</div>
         </div>
 
         <!-- Total Viagens -->
-        <div class="eco-kpi-card span-2">
-            <div class="eco-kpi-icon cefor">
+        <div class="eco-kpi-card span-3">
+            <div class="eco-kpi-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
                     <path d="M15 18H9"></path>
@@ -855,11 +966,38 @@
             <div class="eco-kpi-value small" id="totalViagens">-</div>
             <div class="eco-kpi-label">Total de Viagens</div>
         </div>
+
+        <!-- Media Mensal -->
+        <div class="eco-kpi-card span-3">
+            <div class="eco-kpi-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+            <div class="eco-kpi-value small" id="mediaMensal">-</div>
+            <div class="eco-kpi-label">Media Usuarios/Mes</div>
+        </div>
+
+        <!-- Media Diaria -->
+        <div class="eco-kpi-card span-3">
+            <div class="eco-kpi-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20V10"></path>
+                    <path d="M18 20V4"></path>
+                    <path d="M6 20v-4"></path>
+                </svg>
+            </div>
+            <div class="eco-kpi-value small" id="mediaDiaria">-</div>
+            <div class="eco-kpi-label">Media Usuarios/Dia</div>
+        </div>
     </div>
 
-    <!-- Gráficos -->
+    <!-- Graficos -->
     <div class="eco-charts-grid">
-        <!-- Usuários por Mês -->
+        <!-- Usuarios por Mes -->
         <div class="eco-chart-card span-8">
             <div class="eco-chart-header">
                 <div class="eco-chart-title">
@@ -870,7 +1008,7 @@
                             <line x1="6" y1="20" x2="6" y2="14"></line>
                         </svg>
                     </div>
-                    Usuários por Mês
+                    Usuarios por Mes
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('UsuariosMes')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -882,7 +1020,7 @@
             </div>
         </div>
 
-        <!-- Usuários por Turno -->
+        <!-- Usuarios por Turno -->
         <div class="eco-chart-card span-4">
             <div class="eco-chart-header">
                 <div class="eco-chart-title">
@@ -892,7 +1030,7 @@
                             <path d="M12 2a7 7 0 0 0 0 14"></path>
                         </svg>
                     </div>
-                    Usuários por Turno
+                    Usuarios por Turno
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('UsuariosTurno')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -905,7 +1043,7 @@
             <div class="eco-turno-legend">
                 <div class="eco-turno-item">
                     <div class="eco-turno-dot manha"></div>
-                    <span>Manhã</span>
+                    <span>Manha</span>
                 </div>
                 <div class="eco-turno-item">
                     <div class="eco-turno-dot tarde"></div>
@@ -940,7 +1078,7 @@
             </div>
         </div>
 
-        <!-- Usuários por Dia da Semana -->
+        <!-- Usuarios por Dia da Semana -->
         <div class="eco-chart-card span-4">
             <div class="eco-chart-header">
                 <div class="eco-chart-title">
@@ -952,7 +1090,7 @@
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
                     </div>
-                    Usuários por Dia da Semana
+                    Usuarios por Dia da Semana
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('UsuariosDiaSemana')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -964,7 +1102,7 @@
             </div>
         </div>
 
-        <!-- Usuários por Hora -->
+        <!-- Usuarios por Hora -->
         <div class="eco-chart-card span-6">
             <div class="eco-chart-header">
                 <div class="eco-chart-title">
@@ -974,7 +1112,7 @@
                             <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
                     </div>
-                    Distribuição por Horário
+                    Distribuicao por Horario
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('DistribuicaoHorario')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -986,7 +1124,7 @@
             </div>
         </div>
 
-        <!-- Top Veículos -->
+        <!-- Top Veiculos -->
         <div class="eco-chart-card span-6">
             <div class="eco-chart-header">
                 <div class="eco-chart-title">
@@ -1000,7 +1138,7 @@
                             <circle cx="17" cy="18" r="2"></circle>
                         </svg>
                     </div>
-                    Top 10 Veículos
+                    Top 10 Veiculos
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('TopVeiculos')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -1012,7 +1150,7 @@
             </div>
         </div>
 
-        <!-- Mapa de Calor - Distribuição de Viagens (Dia x Hora) -->
+        <!-- Mapa de Calor - Viagens -->
         <div class="eco-chart-card eco-heatmap-card">
             <div class="eco-chart-header">
                 <div class="eco-chart-title">
@@ -1024,7 +1162,7 @@
                             <rect x="3" y="14" width="7" height="7"></rect>
                         </svg>
                     </div>
-                    Mapa de Calor - Distribuição de Viagens (Dia x Hora)
+                    Mapa de Calor - Distribuicao de Viagens (Dia x Hora)
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('HeatmapViagens')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -1042,9 +1180,7 @@
                             <th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th>
                         </tr>
                     </thead>
-                    <tbody id="heatmapBody">
-                        <!-- Preenchido via JavaScript -->
-                    </tbody>
+                    <tbody id="heatmapBody"></tbody>
                 </table>
             </div>
             <div class="eco-heatmap-legend">
@@ -1074,7 +1210,7 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
                     </div>
-                    Mapa de Calor - Distribuição de Passageiros (Dia x Hora)
+                    Mapa de Calor - Distribuicao de Passageiros (Dia x Hora)
                 </div>
                 <button type="button" class="eco-btn-pdf" onclick="exportarPdf('HeatmapPassageiros')" title="Exportar PDF">
                     <svg viewBox="0 0 512 512"><path fill="currentColor" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>
@@ -1092,9 +1228,7 @@
                             <th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th>
                         </tr>
                     </thead>
-                    <tbody id="heatmapPassageirosBody">
-                        <!-- Preenchido via JavaScript -->
-                    </tbody>
+                    <tbody id="heatmapPassageirosBody"></tbody>
                 </table>
             </div>
             <div class="eco-heatmap-legend">
@@ -1117,7 +1251,7 @@
 @section ScriptsBlock {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" asp-append-version="true"></script>
     <script asp-append-version="true">
-        // Variáveis globais dos gráficos
+        // Variaveis globais dos graficos
         let chartUsuariosMes = null;
         let chartTurno = null;
         let chartComparativoMob = null;
@@ -1125,20 +1259,20 @@
         let chartHora = null;
         let chartTopVeiculos = null;
 
-        // Cores do tema
+        // Cores do tema terracota
         const cores = {
-            primary: '#1a5f7a',
-            secondary: '#57c785',
+            primary: '#b45a3c',
+            secondary: '#c96d4e',
             rodoviaria: '#f97316',
             pgr: '#3b82f6',
             cefor: '#8b5cf6',
-            manha: '#57c785',
+            manha: '#f97316',
             tarde: '#3b82f6',
-            noite: '#9f1239',
-            gradient: ['#1a5f7a', '#2d8f6f']
+            noite: '#8b5cf6',
+            gradient: ['#b45a3c', '#d4856a']
         };
 
-        // Configuração padrão dos gráficos
+        // Configuracao padrao dos graficos
         Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
         Chart.defaults.color = '#64748b';
 
@@ -1158,16 +1292,16 @@
 
         function inicializarGraficos() {
             try {
-                // Gráfico Usuários por Mês
+                // Grafico Usuarios por Mes
                 const ctxMes = document.getElementById('chartUsuariosMes').getContext('2d');
                 chartUsuariosMes = new Chart(ctxMes, {
                     type: 'bar',
                     data: {
                         labels: [],
                         datasets: [{
-                            label: 'Usuários',
+                            label: 'Usuarios',
                             data: [],
-                            backgroundColor: createGradient(ctxMes, cores.primary, '#2563eb'),
+                            backgroundColor: createGradient(ctxMes, cores.primary, cores.secondary),
                             borderRadius: 8,
                             borderSkipped: false
                         }]
@@ -1182,7 +1316,7 @@
                                 padding: 12,
                                 cornerRadius: 8,
                                 callbacks: {
-                                    label: (ctx) => formatarNumero(ctx.raw) + ' usuários'
+                                    label: (ctx) => formatarNumero(ctx.raw) + ' usuarios'
                                 }
                             }
                         },
@@ -1197,12 +1331,12 @@
                     }
                 });
 
-                // Gráfico Turno (Doughnut)
+                // Grafico Turno (Doughnut)
                 const ctxTurno = document.getElementById('chartTurno').getContext('2d');
                 chartTurno = new Chart(ctxTurno, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Manhã', 'Tarde', 'Noite'],
+                        labels: ['Manha', 'Tarde', 'Noite'],
                         datasets: [{
                             data: [0, 0, 0],
                             backgroundColor: [cores.manha, cores.tarde, cores.noite],
@@ -1227,7 +1361,7 @@
                     }
                 });
 
-                // Gráfico Comparativo MOB
+                // Grafico Comparativo MOB
                 const ctxMob = document.getElementById('chartComparativoMob').getContext('2d');
                 chartComparativoMob = new Chart(ctxMob, {
                     type: 'line',
@@ -1235,7 +1369,7 @@
                         labels: [],
                         datasets: [
                             {
-                                label: 'Rodoviária',
+                                label: 'Rodoviaria',
                                 data: [],
                                 borderColor: cores.rodoviaria,
                                 backgroundColor: hexToRgba(cores.rodoviaria, 0.1),
@@ -1290,20 +1424,17 @@
                     }
                 });
 
-                // Gráfico Dia da Semana
+                // Grafico Dia da Semana
                 const ctxDia = document.getElementById('chartDiaSemana').getContext('2d');
                 chartDiaSemana = new Chart(ctxDia, {
                     type: 'bar',
                     data: {
                         labels: [],
                         datasets: [{
-                            label: 'Usuários',
+                            label: 'Usuarios',
                             data: [],
-                            backgroundColor: [
-                                '#f97316', '#3b82f6', '#8b5cf6',
-                                '#10b981', '#f59e0b', '#6366f1', '#ec4899'
-                            ],
-                            borderRadius: 6,
+                            backgroundColor: [cores.primary, cores.secondary, '#e8a87c', '#d4856a', '#c96d4e'],
+                            borderRadius: 8,
                             borderSkipped: false
                         }]
                     },
@@ -1315,10 +1446,7 @@
                             tooltip: {
                                 backgroundColor: '#1e293b',
                                 padding: 12,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: (ctx) => formatarNumero(ctx.raw) + ' usuários'
-                                }
+                                cornerRadius: 8
                             }
                         },
                         scales: {
@@ -1331,22 +1459,21 @@
                     }
                 });
 
-                // Gráfico Hora
+                // Grafico por Hora
                 const ctxHora = document.getElementById('chartHora').getContext('2d');
                 chartHora = new Chart(ctxHora, {
                     type: 'line',
                     data: {
                         labels: [],
                         datasets: [{
-                            label: 'Usuários',
+                            label: 'Usuarios',
                             data: [],
                             borderColor: cores.primary,
-                            backgroundColor: createGradient(ctxHora, hexToRgba(cores.primary, 0.3), hexToRgba(cores.primary, 0.01)),
+                            backgroundColor: hexToRgba(cores.primary, 0.15),
                             fill: true,
                             tension: 0.4,
-                            pointRadius: 3,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: cores.primary
+                            pointRadius: 4,
+                            pointHoverRadius: 6
                         }]
                     },
                     options: {
@@ -1357,10 +1484,7 @@
                             tooltip: {
                                 backgroundColor: '#1e293b',
                                 padding: 12,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: (ctx) => formatarNumero(ctx.raw) + ' usuários'
-                                }
+                                cornerRadius: 8
                             }
                         },
                         scales: {
@@ -1373,7 +1497,7 @@
                     }
                 });
 
-                // Gráfico Top Veículos
+                // Top Veiculos
                 const ctxVeiculos = document.getElementById('chartTopVeiculos').getContext('2d');
                 chartTopVeiculos = new Chart(ctxVeiculos, {
                     type: 'bar',
@@ -1382,8 +1506,8 @@
                         datasets: [{
                             label: 'Viagens',
                             data: [],
-                            backgroundColor: cores.secondary,
-                            borderRadius: 6,
+                            backgroundColor: createGradient(ctxVeiculos, cores.primary, cores.secondary),
+                            borderRadius: 8,
                             borderSkipped: false
                         }]
                     },
@@ -1396,17 +1520,13 @@
                             tooltip: {
                                 backgroundColor: '#1e293b',
                                 padding: 12,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: (ctx) => formatarNumero(ctx.raw) + ' viagens'
-                                }
+                                cornerRadius: 8
                             }
                         },
                         scales: {
                             x: {
                                 beginAtZero: true,
-                                grid: { color: '#e2e8f0', drawBorder: false },
-                                ticks: { callback: (v) => formatarNumeroResumido(v) }
+                                grid: { color: '#e2e8f0', drawBorder: false }
                             },
                             y: { grid: { display: false } }
                         }
@@ -1423,9 +1543,6 @@
                 const mes = document.getElementById('filtroMes').value;
                 const ano = document.getElementById('filtroAno').value;
 
-                // Controlar visibilidade dos cards MOB
-                atualizarVisibilidadeCardsMob(mob);
-
                 const params = new URLSearchParams();
                 if (mob) params.append('mob', mob);
                 if (mes) params.append('mes', mes);
@@ -1435,17 +1552,16 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            atualizarKPIs(data);
-                            atualizarGraficos(data);
+                            atualizarDashboard(data, mob);
                         } else {
-                            AppToast.show('Vermelho', 'Erro ao carregar dashboard: ' + data.message, 5000);
+                            console.error('Erro ao carregar dashboard:', data.message);
                         }
                     })
                     .catch(error => {
                         Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'carregarDashboard fetch', error);
                     });
 
-                // Carregar Heatmaps separadamente
+                // Carregar heatmaps
                 carregarHeatmap();
                 carregarHeatmapPassageiros();
             } catch (error) {
@@ -1453,86 +1569,59 @@
             }
         }
 
-        function atualizarVisibilidadeCardsMob(mobSelecionado) {
+        function atualizarDashboard(data, mobFiltro) {
             try {
+                // KPIs principais
+                document.getElementById('totalUsuarios').textContent = formatarNumeroGrande(data.totalUsuarios);
+                document.getElementById('totalViagens').textContent = formatarNumeroGrande(data.totalViagens);
+                document.getElementById('mediaMensal').textContent = formatarNumero(data.mediaMensal);
+                document.getElementById('mediaDiaria').textContent = formatarNumero(data.mediaDiaria);
+
+                // Cards MOB com trajetos
+                document.getElementById('totalPGR').textContent = formatarNumeroGrande(data.totalPGR);
+                document.getElementById('totalRodoviaria').textContent = formatarNumeroGrande(data.totalRodoviaria);
+                document.getElementById('totalCefor').textContent = formatarNumeroGrande(data.totalCefor);
+
+                // Tempos de trajeto por MOB (extrair numero do formato "12 min")
+                document.getElementById('tempoIdaPGR').textContent = extrairMinutos(data.tempoMedioIdaPGR);
+                document.getElementById('tempoVoltaPGR').textContent = extrairMinutos(data.tempoMedioVoltaPGR);
+                document.getElementById('tempoIdaRodoviaria').textContent = extrairMinutos(data.tempoMedioIdaRodoviaria);
+                document.getElementById('tempoVoltaRodoviaria').textContent = extrairMinutos(data.tempoMedioVoltaRodoviaria);
+                document.getElementById('tempoIdaCefor').textContent = extrairMinutos(data.tempoMedioIdaCefor);
+                document.getElementById('tempoVoltaCefor').textContent = extrairMinutos(data.tempoMedioVoltaCefor);
+
+                // Visibilidade dos cards MOB baseado no filtro
                 const cardPGR = document.getElementById('cardPGR');
                 const cardRodoviaria = document.getElementById('cardRodoviaria');
                 const cardCefor = document.getElementById('cardCefor');
 
-                // Se nenhum MOB selecionado, mostrar todos
-                if (!mobSelecionado) {
+                if (mobFiltro) {
+                    cardPGR.classList.toggle('hidden', mobFiltro !== 'PGR');
+                    cardRodoviaria.classList.toggle('hidden', mobFiltro !== 'Rodoviaria');
+                    cardCefor.classList.toggle('hidden', mobFiltro !== 'Cefor');
+                } else {
                     cardPGR.classList.remove('hidden');
                     cardRodoviaria.classList.remove('hidden');
                     cardCefor.classList.remove('hidden');
-                } else {
-                    // Esconder todos primeiro
-                    cardPGR.classList.add('hidden');
-                    cardRodoviaria.classList.add('hidden');
-                    cardCefor.classList.add('hidden');
-
-                    // Mostrar apenas o selecionado
-                    switch (mobSelecionado) {
-                        case 'PGR':
-                            cardPGR.classList.remove('hidden');
-                            break;
-                        case 'Rodoviaria':
-                            cardRodoviaria.classList.remove('hidden');
-                            break;
-                        case 'Cefor':
-                            cardCefor.classList.remove('hidden');
-                            break;
-                    }
                 }
-            } catch (error) {
-                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarVisibilidadeCardsMob', error);
-            }
-        }
 
-        function atualizarKPIs(data) {
-            try {
-                // MOBs
-                document.getElementById('totalPGR').textContent = formatarNumero(data.totalPGR);
-                document.getElementById('mediaPGR').textContent = formatarNumero(data.mediaMensalPGR);
-                document.getElementById('totalRodoviaria').textContent = formatarNumero(data.totalRodoviaria);
-                document.getElementById('mediaRodoviaria').textContent = formatarNumero(data.mediaMensalRodoviaria);
-                document.getElementById('totalCefor').textContent = formatarNumero(data.totalCefor);
-                document.getElementById('mediaCefor').textContent = formatarNumero(data.mediaMensalCefor);
-
-                // Tempos
-                document.getElementById('tempoIda').textContent = data.tempoMedioIda || '00:00:00';
-                document.getElementById('tempoVolta').textContent = data.tempoMedioVolta || '00:00:00';
-
-                // Totais
-                document.getElementById('totalUsuarios').textContent = formatarNumeroGrande(data.totalUsuarios);
-                document.getElementById('mediaMensal').textContent = formatarNumero(data.mediaMensal);
-                document.getElementById('mediaDiaria').textContent = formatarNumero(data.mediaDiaria);
-                document.getElementById('totalViagens').textContent = formatarNumero(data.totalViagens);
-            } catch (error) {
-                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarKPIs', error);
-            }
-        }
-
-        function atualizarGraficos(data) {
-            try {
-                // Usuários por Mês
-                if (chartUsuariosMes && data.usuariosPorMes) {
+                // Graficos
+                if (data.usuariosPorMes && chartUsuariosMes) {
                     chartUsuariosMes.data.labels = data.usuariosPorMes.map(x => x.mes);
                     chartUsuariosMes.data.datasets[0].data = data.usuariosPorMes.map(x => x.total);
                     chartUsuariosMes.update();
                 }
 
-                // Turno
-                if (chartTurno && data.usuariosPorTurno) {
+                if (data.usuariosPorTurno && chartTurno) {
                     chartTurno.data.datasets[0].data = [
-                        data.usuariosPorTurno.manha || 0,
-                        data.usuariosPorTurno.tarde || 0,
-                        data.usuariosPorTurno.noite || 0
+                        data.usuariosPorTurno.manha,
+                        data.usuariosPorTurno.tarde,
+                        data.usuariosPorTurno.noite
                     ];
                     chartTurno.update();
                 }
 
-                // Comparativo MOB
-                if (chartComparativoMob && data.comparativoMob) {
+                if (data.comparativoMob && chartComparativoMob) {
                     chartComparativoMob.data.labels = data.comparativoMob.map(x => x.mes);
                     chartComparativoMob.data.datasets[0].data = data.comparativoMob.map(x => x.rodoviaria);
                     chartComparativoMob.data.datasets[1].data = data.comparativoMob.map(x => x.pgr);
@@ -1540,33 +1629,38 @@
                     chartComparativoMob.update();
                 }
 
-                // Dia da Semana
-                if (chartDiaSemana && data.usuariosPorDiaSemana) {
+                if (data.usuariosPorDiaSemana && chartDiaSemana) {
                     chartDiaSemana.data.labels = data.usuariosPorDiaSemana.map(x => x.dia);
                     chartDiaSemana.data.datasets[0].data = data.usuariosPorDiaSemana.map(x => x.total);
                     chartDiaSemana.update();
                 }
 
-                // Hora
-                if (chartHora && data.usuariosPorHora) {
+                if (data.usuariosPorHora && chartHora) {
                     chartHora.data.labels = data.usuariosPorHora.map(x => x.hora);
                     chartHora.data.datasets[0].data = data.usuariosPorHora.map(x => x.total);
                     chartHora.update();
                 }
 
-                // Top Veículos
-                if (chartTopVeiculos && data.topVeiculos) {
+                if (data.topVeiculos && chartTopVeiculos) {
                     chartTopVeiculos.data.labels = data.topVeiculos.map(x => x.placa);
                     chartTopVeiculos.data.datasets[0].data = data.topVeiculos.map(x => x.total);
                     chartTopVeiculos.update();
                 }
             } catch (error) {
-                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarGraficos', error);
+                Alerta.TratamentoErroComLinha('DashboardEconomildo.cshtml', 'atualizarDashboard', error);
+            }
+        }
+
+        function extrairMinutos(valor) {
+            try {
+                if (!valor) return '-';
+                return valor.replace(' min', '').trim() || '-';
+            } catch (error) {
+                return '-';
             }
         }
 
         // ========== HEATMAP FUNCTIONS ==========
-
         function carregarHeatmap() {
             try {
                 const mob = document.getElementById('filtroMob').value;
@@ -1605,27 +1699,22 @@
                 dados.forEach(dia => {
                     const tr = document.createElement('tr');
 
-                    // Coluna do dia da semana
                     const tdDia = document.createElement('td');
                     tdDia.textContent = dia.diaSemana;
                     tr.appendChild(tdDia);
 
-                    // Colunas das horas (0-23)
                     for (let hora = 0; hora < 24; hora++) {
                         const td = document.createElement('td');
                         const valor = dia.horas[hora];
 
-                        // Calcular intensidade (0-6)
                         const intensidade = calcularIntensidadeHeatmap(valor, maxValor);
                         td.className = `eco-heatmap-${intensidade}`;
 
-                        // Mostrar valor apenas se > 0
                         if (valor > 0) {
                             td.textContent = valor;
                         }
 
-                        // Tooltip com detalhes
-                        td.title = `${dia.diaSemana} às ${hora.toString().padStart(2, '0')}:00 - ${valor} viagem(ns)`;
+                        td.title = `${dia.diaSemana} as ${hora.toString().padStart(2, '0')}:00 - ${valor} viagem(ns)`;
 
                         tr.appendChild(td);
                     }
@@ -1642,7 +1731,6 @@
                 if (valor === 0) return 0;
                 if (maxValor === 0) return 0;
 
-                // Escala de 1 a 6 baseada no percentual do máximo
                 const percentual = valor / maxValor;
 
                 if (percentual <= 0.1) return 1;
@@ -1657,8 +1745,7 @@
             }
         }
 
-        // ========== HEATMAP PASSAGEIROS FUNCTIONS ==========
-
+        // ========== HEATMAP PASSAGEIROS ==========
         function carregarHeatmapPassageiros() {
             try {
                 const mob = document.getElementById('filtroMob').value;
@@ -1697,27 +1784,22 @@
                 dados.forEach(dia => {
                     const tr = document.createElement('tr');
 
-                    // Coluna do dia da semana
                     const tdDia = document.createElement('td');
                     tdDia.textContent = dia.diaSemana;
                     tr.appendChild(tdDia);
 
-                    // Colunas das horas (0-23)
                     for (let hora = 0; hora < 24; hora++) {
                         const td = document.createElement('td');
                         const valor = dia.horas[hora];
 
-                        // Calcular intensidade (0-6)
                         const intensidade = calcularIntensidadeHeatmap(valor, maxValor);
                         td.className = `eco-heatmap-passageiros-${intensidade}`;
 
-                        // Mostrar valor apenas se > 0
                         if (valor > 0) {
                             td.textContent = valor;
                         }
 
-                        // Tooltip com detalhes
-                        td.title = `${dia.diaSemana} às ${hora.toString().padStart(2, '0')}:00 - ${valor} passageiro(s)`;
+                        td.title = `${dia.diaSemana} as ${hora.toString().padStart(2, '0')}:00 - ${valor} passageiro(s)`;
 
                         tr.appendChild(td);
                     }
@@ -1729,7 +1811,7 @@
             }
         }
 
-        // Funções auxiliares
+        // ========== FUNCOES AUXILIARES ==========
         function formatarNumero(num) {
             try {
                 if (num === null || num === undefined) return '-';
@@ -1744,10 +1826,10 @@
             try {
                 if (num === null || num === undefined) return '-';
                 if (num >= 1000000) {
-                    return (num / 1000000).toFixed(3).replace('.', ',') + ' Mi';
+                    return (num / 1000000).toFixed(1).replace('.', ',') + ' Mi';
                 }
                 if (num >= 1000) {
-                    return (num / 1000).toFixed(0).replace('.', ',') + ' Mil';
+                    return (num / 1000).toFixed(0) + ' Mil';
                 }
                 return formatarNumero(num);
             } catch (error) {
@@ -1791,8 +1873,7 @@
             }
         }
 
-        // ========== EXPORTAR PDF - FUNÇÃO UNIFICADA ==========
-
+        // ========== EXPORTAR PDF ==========
         async function exportarPdf(tipo) {
             try {
                 AppToast.show('amarelo', 'Gerando PDF, aguarde...', 3000);

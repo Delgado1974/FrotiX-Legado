@@ -12,6 +12,20 @@
 	<link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
 
 	@RenderSection("HeadBlock" , required: false)
+
+    <style>
+        thead, thead th, table thead th, .dataTable thead th, table.dataTable thead th {
+            background: #4a6fa5 !important;
+            background-color: #4a6fa5 !important;
+            color: #ffffff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            font-size: 0.82rem !important;
+        }
+    </style>
+    <script src="~/js/ftx-datatable-style.js" asp-append-version="true"></script>
+
 </head>
 <body>
 	@* Carrega scripts/flags de loading/saving cedo, se necessário *@

@@ -26,9 +26,9 @@
 @{
 	ViewData["Title"] = "Multas";
 	ViewData["PageName"] = "multa_listapenalidade";
-	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Multas: <span class='fw-300'>Penalidades</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-pen-to-square'></i> Multas: <span class='fw-300'>Penalidades</span>";
 	ViewData["Category1"] = "Penalidade";
-	ViewData["PageIcon"] = "fad fa-pen-to-square";
+	ViewData["PageIcon"] = "fa-duotone fa-pen-to-square";
 }
 
 @section HeadBlock {
@@ -71,17 +71,6 @@
 			color: #fff !important;
 			--fa-primary-color: #fff !important;
 			--fa-secondary-color: rgba(255,255,255,0.7) !important;
-		}
-
-		.ftx-card-header .btn-header-orange {
-			background: linear-gradient(135deg, var(--ftx-penalidade-laranja) 0%, var(--ftx-penalidade-laranja-hover) 100%) !important;
-			color: #fff !important;
-			border: none !important;
-		}
-
-		.ftx-card-header .btn-header-orange:hover {
-			background: linear-gradient(135deg, var(--ftx-penalidade-laranja-hover) 0%, var(--ftx-penalidade-laranja) 100%) !important;
-			color: #fff !important;
 		}
 
 		/* ====== ÁREA DE FILTROS ====== */
@@ -329,6 +318,15 @@
 			box-shadow: 0 0 0 0.2rem rgba(210, 105, 30, 0.35) !important;
 		}
 
+		/* Pagamento Desabilitado - Já possui comprovante */
+		.ftx-btn-pagamento-disabled {
+			background-color: #999 !important;
+			box-shadow: none !important;
+			cursor: not-allowed !important;
+			opacity: 0.5;
+			pointer-events: auto !important;
+		}
+
 		/* Apagar - Vinho com GLOW */
 		.ftx-btn-apagar {
 			background-color: #722f37 !important;
@@ -361,6 +359,7 @@
 			box-shadow: none !important;
 			cursor: not-allowed !important;
 			opacity: 0.5;
+			pointer-events: auto !important;
 		}
 
 		/* Comprovante - Verde com GLOW */
@@ -382,6 +381,7 @@
 			box-shadow: none !important;
 			cursor: not-allowed !important;
 			opacity: 0.5;
+			pointer-events: auto !important;
 		}
 
 		/* ====== DATATABLE CONTROLS ====== */
@@ -484,6 +484,19 @@
 			padding: 0.875rem 1.25rem;
 			background: #f8f9fa;
 			gap: 0.5rem;
+			position: relative;
+			z-index: 1;
+		}
+
+		/* Container do PDF Viewer - deve ficar acima do footer */
+		#ComprovantePDFViewerContainer {
+			position: relative;
+			z-index: 5;
+		}
+
+		#ComprovantePDFViewerContainer .e-pdfviewer {
+			position: relative;
+			z-index: 5;
 		}
 
 		/* Modal Exibir Notificação de Penalidade (PDF) */
@@ -555,32 +568,8 @@
 		}
 
 		/* ====== BOTÕES DOS MODAIS - COM GLOW FROTIX ====== */
-		.btn-modal-fechar {
-			background-color: #722f37 !important;
-			color: #fff !important;
-			border: none;
-			padding: 0.5rem 1.25rem;
-			border-radius: .375rem;
-			font-weight: 600;
-			font-size: 0.875rem;
-			display: inline-flex;
-			align-items: center;
-			gap: 0.5rem;
-			transition: all .3s ease, transform .2s ease !important;
-			box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
-		}
-
-		.btn-modal-fechar:hover {
-			background-color: #5a252c !important;
-			color: #fff !important;
-			animation: buttonWiggle 0.5s ease-in-out !important;
-			box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
-		}
-
-		.btn-modal-fechar:active, .btn-modal-fechar:focus {
-			transform: translateY(0) scale(1) !important;
-			box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
-		}
+		/* Botões de ação do modal - agora usa classes globais do frotix.css */
+		/* btn-ftx-fechar, btn-ftx-voltar, btn-ftx-confirmar, etc. */
 
 		.btn-modal-confirmar {
 			background-color: #3D5771 !important;
@@ -858,8 +847,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn-modal-fechar" data-bs-dismiss="modal">
-					<i class="fa-duotone fa-rotate-left"></i>
+				<button id="btnFecharModalPDF" type="button" class="btn-ftx-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-circle-xmark"></i>
 					Fechar
 				</button>
 			</div>
@@ -899,7 +888,7 @@
 							<div class="form-group">
 								<label class="label font-weight-bold">Valor Pago</label>
 								<input id="txtValorPago" class="form-control form-control-xs" style="text-align:right;"
-									   onkeypress="return moeda(this,'.',',',event)" />
+									   onkeypress="return moeda(this,'.',',',event)" placeholder="R$ 0,00" />
 							</div>
 						</div>
 
@@ -921,38 +910,36 @@
 						<div id="divPDF">
 							<label class="label font-weight-bold">Upload do Comprovante de Pagamento (PDF)</label>
 							<ejs-uploader id="pdfComprovante"
-										  asyncSettings="@(new Syncfusion.EJ2.Inputs.UploaderAsyncSettings {
-											  SaveUrl = "/Multa/ListaPenalidade?handler=SavePDF",
-											  RemoveUrl = "/Multa/ListaPenalidade?handler=RemovePDF"
-										  })"
-										  allowedExtensions=".pdf"
-										  success="onUploadSuccess"
-										  failure="onUploadError">
+							              name="UploadFiles"
+							              multiple="false"
+							              autoUpload="true"
+							              allowedExtensions=".pdf">
+								<e-uploader-asyncsettings saveUrl="/api/MultaUpload/save"
+								                          removeUrl="/api/MultaUpload/remove">
+								</e-uploader-asyncsettings>
 							</ejs-uploader>
 
-							<div id="PDFContainer" style="margin-top: 15px;">
-								<div id="ComprovantePDFViewerContainer" style="height: 400px; display:none;">
-									<ejs-pdfviewer id="ComprovantePDFViewer"
-												   serviceUrl="/api/PdfViewer"
-												   style="height:100%;">
-									</ejs-pdfviewer>
-								</div>
-							</div>
-
 							<input id="txtComprovantePDF" class="form-control form-control-xs" style="display:none" />
+
+							<div id="ComprovantePDFViewerContainer" style="margin-top: 10px; display:none;">
+								<ejs-pdfviewer id="ComprovantePDFViewer"
+								               style="height:400px;width:100%;"
+								               serviceUrl="/api/MultaPdfViewer">
+								</ejs-pdfviewer>
+							</div>
 						</div>
 					</div>
 				</form>
 			</div>
 
 			<div class="modal-footer">
-				<button id="btnPagamento" class="btn-modal-pagar" type="button" data-ejtip="Confirmar pagamento">
+				<button id="btnPagamento" class="btn-modal-pagar" type="button">
 					<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
 					<i class="fa-duotone fa-check"></i>
 					<span class="btn-text">Registrar Pagamento</span>
 				</button>
-				<button id="btnFechar" type="button" class="btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-					<i class="fa-duotone fa-rotate-left"></i>
+				<button id="btnFechar" type="button" class="btn-ftx-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-circle-xmark"></i>
 					Fechar
 				</button>
 			</div>
@@ -988,8 +975,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button id="btnFecharExibePDFPenalidade" type="button" class="btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-					<i class="fa-duotone fa-rotate-left"></i>
+				<button id="btnFecharExibePDFPenalidade" type="button" class="btn-ftx-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-circle-xmark"></i>
 					Fechar
 				</button>
 			</div>
@@ -1024,8 +1011,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button id="btnFecharExibeComprovante" type="button" class="btn-modal-fechar" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-					<i class="fa-duotone fa-rotate-left"></i>
+				<button id="btnFecharExibeComprovante" type="button" class="btn-ftx-fechar" data-bs-dismiss="modal">
+					<i class="fa-duotone fa-circle-xmark"></i>
 					Fechar
 				</button>
 			</div>
@@ -1269,6 +1256,11 @@
 							render: function (data, type, full) {
 								const hasPenalidadePDF = full.penalidadePDF && full.penalidadePDF !== '';
 								const hasComprovantePDF = full.comprovantePDF && full.comprovantePDF !== '';
+								
+								// Botão de pagamento: desabilitado se já tem comprovante
+								const pagamentoDisabled = hasComprovantePDF;
+								const pagamentoClass = pagamentoDisabled ? 'ftx-btn-pagamento-disabled' : '';
+								const pagamentoTooltip = pagamentoDisabled ? 'Pagamento já registrado' : (full.tooltip || 'Registrar Pagamento');
 
 								return `<div class="text-center" style="white-space: nowrap;">
 									<a href="/Multa/UpsertPenalidade?id=${data}"
@@ -1276,11 +1268,10 @@
 									   data-ejtip="Editar a Penalidade">
 										<i class="fa-duotone fa-pen-to-square"></i>
 									</a>
-									<a class="ftx-btn-icon ftx-btn-pagamento btn-pagamento"
-									   data-ejtip="${full.tooltip}"
-									   data-bs-toggle="modal"
-									   data-bs-target="#modalRegistraPagamento"
-									   data-id="${data}" ${full.habilitado}>
+									<a href="#" class="ftx-btn-icon ftx-btn-pagamento btn-pagamento ${pagamentoClass}"
+									   data-ejtip="${pagamentoTooltip}"
+									   data-id="${data}"
+									   ${pagamentoDisabled ? 'aria-disabled="true"' : ''}>
 										<i class="fa-duotone fa-dollar-sign"></i>
 									</a>
 									<a class="ftx-btn-icon ftx-btn-apagar btn-apagar"
@@ -1298,7 +1289,7 @@
 									<a class="ftx-btn-icon ftx-btn-comprovante btn-exibe-comprovante ${!hasComprovantePDF ? 'ftx-btn-comprovante-disabled' : ''}"
 									   data-id="${data}" 
 									   data-comprovantepdf="${full.comprovantePDF || ''}"
-									   data-ejtip="Exibe o Comprovante de Pagamento"
+									   data-ejtip="${hasComprovantePDF ? 'Exibe o Comprovante de Pagamento' : 'Sem comprovante anexado'}"
 									   ${!hasComprovantePDF ? 'aria-disabled="true"' : ''}>
 										<i class="fa-duotone fa-receipt"></i>
 									</a>
@@ -1426,48 +1417,223 @@
 	</script>
 
 	<script>
-		$('#modalRegistraPagamento').on('shown.bs.modal', function (event) {
-			try {
-				const pdfViewer = document.getElementById('ComprovantePDFViewer')?.ej2_instances?.[0];
-				if (pdfViewer) {
-					pdfViewer.unload();
-					document.getElementById('ComprovantePDFViewerContainer').style.display = 'none';
+		// ====================================================================
+		// FUNÇÕES AUXILIARES PARA PDF - UPLOAD COMPROVANTE
+		// ====================================================================
+		var uploaderEventosVinculados = false;
+
+		function getViewer(viewerId)
+		{
+			try
+			{
+				const viewerElement = document.getElementById(viewerId);
+				return viewerElement?.ej2_instances?.[0] || null;
+			} catch (err)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "getViewer", err);
+				return null;
+			}
+		}
+
+		function loadPdfInViewer(fileName, viewerId)
+		{
+			try
+			{
+				if (!fileName || fileName === '' || fileName === 'null')
+				{
+					console.warn(`⚠️ Nome de arquivo inválido para carregar no viewer ${viewerId}`);
+					return;
 				}
 
+				const viewer = getViewer(viewerId);
+				if (!viewer)
+				{
+					console.error(`❌ Viewer ${viewerId} não encontrado`);
+					return;
+				}
+
+				// Mostra o container
+				document.getElementById('ComprovantePDFViewerContainer').style.display = 'block';
+
+				// Carrega o PDF
+				viewer.documentPath = fileName;
+				viewer.dataBind();
+				viewer.load(fileName, null);
+				console.log(`✅ PDF carregado no viewer ${viewerId}: ${fileName}`);
+			} catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "loadPdfInViewer", error);
+				console.error("❌ Erro ao carregar PDF:", error);
+			}
+		}
+
+		function onComprovanteUploadSelected(args)
+		{
+			try
+			{
+				if (!args || !args.filesData || args.filesData.length === 0) return;
+
+				const file = args.filesData[0];
+				const fileName = (file?.name || "").toLowerCase();
+
+				if (!fileName.endsWith(".pdf"))
+				{
+					args.cancel = true;
+					AppToast.show('Vermelho', 'Apenas arquivos PDF são permitidos', 3000);
+				}
+			} catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onComprovanteUploadSelected", error);
+			}
+		}
+
+		function onComprovanteUploadSuccess(args)
+		{
+			try
+			{
+				if (!args || !args.e) return;
+
+				console.log('✅ Upload Comprovante success args:', args);
+
+				const serverResponse = typeof args.e.target.response === 'string'
+					? JSON.parse(args.e.target.response)
+					: args.e.target.response;
+
+				console.log('📦 Server response:', serverResponse);
+
+				if (serverResponse.error)
+				{
+					console.error('❌ Erro do servidor:', serverResponse.error);
+					AppToast.show('Vermelho', serverResponse.error.message || 'Erro ao enviar arquivo', 3000);
+					return;
+				}
+
+				const uploadedFiles = serverResponse.files || [];
+				if (uploadedFiles.length === 0)
+				{
+					console.error('❌ Nenhum arquivo retornado pelo servidor');
+					return;
+				}
+
+				const fileName = uploadedFiles[0].name;
+				$('#txtComprovantePDF').val(fileName);
+				console.log('✅ txtComprovantePDF atualizado:', fileName);
+
+				loadPdfInViewer(fileName, 'ComprovantePDFViewer');
+				AppToast.show('Verde', 'Comprovante enviado com sucesso!', 3000);
+			} catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onComprovanteUploadSuccess", error);
+			}
+		}
+
+		function onComprovanteUploadFailure(args)
+		{
+			try
+			{
+				console.error("❌ Erro no upload de Comprovante:", args);
+				AppToast.show('Vermelho', 'Erro ao enviar PDF de Comprovante', 3000);
+			} catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onComprovanteUploadFailure", error);
+			}
+		}
+
+		function vincularEventosUploader()
+		{
+			try {
+				if (uploaderEventosVinculados) return;
+
+				const uploaderComprovante = document.getElementById("pdfComprovante")?.ej2_instances?.[0];
+				if (uploaderComprovante)
+				{
+					uploaderComprovante.selected = onComprovanteUploadSelected;
+					uploaderComprovante.success = onComprovanteUploadSuccess;
+					uploaderComprovante.failure = onComprovanteUploadFailure;
+					uploaderEventosVinculados = true;
+					console.log('✅ Eventos do Uploader Comprovante vinculados');
+				}
+				else
+				{
+					console.warn('⚠️ Uploader pdfComprovante não encontrado');
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "vincularEventosUploader", error);
+			}
+		}
+
+		// Tenta vincular no document.ready
+		$(document).ready(function() {
+			vincularEventosUploader();
+		});
+	</script>
+
+	<script>
+		// ====================================================================
+		// HANDLER CLIQUE NO BOTÃO DE PAGAMENTO (delegado)
+		// ====================================================================
+		$(document).on('click', '.btn-pagamento', function (e) {
+			try {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				// Ignora se desabilitado
+				if ($(this).attr('aria-disabled') === 'true' || $(this).hasClass('ftx-btn-pagamento-disabled')) {
+					return false;
+				}
+				
+				// Pega o ID diretamente do atributo data-id do botão clicado
+				const multaId = $(this).attr('data-id');
+				
+				console.log('🔍 Botão pagamento clicado, multaId:', multaId);
+				
+				if (!multaId) {
+					AppToast.show('Vermelho', 'Erro: ID da multa não encontrado', 3000);
+					return false;
+				}
+				
+				// Limpa TODOS os campos do modal antes de abrir
+				$('#txtId').val(multaId);
+				$('#txtEmpenhoMultaId').val('');
+				$('#txtDataPagamento').val('');
+				$('#txtValorPago').val('');
+				$('#txtComprovantePDF').val('');
+				$('#lstPagamento').val('');
+				
+				// Limpa o uploader
 				const uploader = document.getElementById("pdfComprovante")?.ej2_instances?.[0];
 				if (uploader) {
 					uploader.clearAll();
 				}
+				
+				// Limpa e esconde o PDF viewer
+				const pdfViewer = document.getElementById('ComprovantePDFViewer')?.ej2_instances?.[0];
+				if (pdfViewer) {
+					try { pdfViewer.unload(); } catch(e) {}
+				}
+				document.getElementById('ComprovantePDFViewerContainer').style.display = 'none';
+				
+				// Vincula eventos do uploader (caso ainda não estejam vinculados)
+				vincularEventosUploader();
+				
+				// Abre o modal
+				$('#modalRegistraPagamento').modal('show');
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "btn-pagamento.click", error);
+			}
+		});
 
-				const button = $(event.relatedTarget);
-				const multaId = button.data("id");
-				$('#txtId').val(multaId);
+		$('#modalRegistraPagamento').on('shown.bs.modal', function (event) {
+			try {
+				// O multaId já foi definido no handler de clique do botão
+				const multaId = $('#txtId').val();
+				
+				console.log('📋 Modal aberto, multaId:', multaId);
 
-				$.ajax({
-					type: "GET",
-					url: "/api/Multa/PegaValor",
-					dataType: "json",
-					data: { Id: multaId },
-					success: function (data) {
-						try {
-							if (data && data.valor != null) {
-								$('#txtValorPago').val(Number(data.valor).toLocaleString('pt-br'));
-							}
-						}
-						catch (error) {
-							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "PegaValor.success", error);
-						}
-					},
-					error: function (err) {
-						try {
-							console.error('Erro ao buscar valor:', err);
-						}
-						catch (error) {
-							Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "PegaValor.error", error);
-						}
-					}
-				});
+				// Vincula eventos do uploader (caso ainda não estejam vinculados)
+				vincularEventosUploader();
 
+				// Busca o EmpenhoMultaId
 				$.ajax({
 					type: "GET",
 					url: "/api/Multa/PegaEmpenhoMultaId",
@@ -1530,12 +1696,15 @@
 				n = String.fromCharCode(o);
 				if ("0123456789".indexOf(n) === -1) return false;
 
-				u = a.value.length;
-				for (h = 0; h < u && ("0" === a.value.charAt(h) || a.value.charAt(h) === r); h++);
+				// Remove o prefixo R$ para processar apenas números
+				let valorAtual = a.value.replace('R$ ', '');
+
+				u = valorAtual.length;
+				for (h = 0; h < u && ("0" === valorAtual.charAt(h) || valorAtual.charAt(h) === r); h++);
 
 				for (l = ""; h < u; h++) {
-					if ("0123456789".indexOf(a.value.charAt(h)) !== -1) {
-						l += a.value.charAt(h);
+					if ("0123456789".indexOf(valorAtual.charAt(h)) !== -1) {
+						l += valorAtual.charAt(h);
 					}
 				}
 
@@ -1543,8 +1712,8 @@
 				u = l.length;
 
 				if (u === 0) a.value = "";
-				if (u === 1) a.value = "0" + r + "0" + l;
-				if (u === 2) a.value = "0" + r + l;
+				if (u === 1) a.value = "R$ 0" + r + "0" + l;
+				if (u === 2) a.value = "R$ 0" + r + l;
 
 				if (u > 2) {
 					ajd2 = "";
@@ -1557,7 +1726,7 @@
 						ajd2 += l.charAt(h);
 						j++;
 					}
-					a.value = "";
+					a.value = "R$ ";
 					tamanho2 = ajd2.length;
 					for (h = tamanho2 - 1; h >= 0; h--) {
 						a.value += ajd2.charAt(h);
@@ -1570,69 +1739,6 @@
 			catch (error) {
 				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "moeda", error);
 				return false;
-			}
-		}
-	</script>
-
-	<script>
-		function onUploadSuccess(args) {
-			try {
-				if (!args || !args.file) return;
-
-				const nomeLimpo = TiraAcento(args.file.name);
-				$("#txtComprovantePDF").val(nomeLimpo);
-
-				const pdfViewer = document.getElementById('ComprovantePDFViewer')?.ej2_instances?.[0];
-
-				if (pdfViewer) {
-					const pdfPath = "/DadosEditaveis/Multas/" + nomeLimpo;
-					document.getElementById('ComprovantePDFViewerContainer').style.display = 'block';
-					pdfViewer.load(pdfPath, null);
-					AppToast.show('Verde', 'Comprovante carregado com sucesso', 2000);
-				}
-				else {
-					console.error('PDFViewer não encontrado');
-				}
-			}
-			catch (error) {
-				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onUploadSuccess", error);
-			}
-		}
-
-		function onUploadError(args) {
-			try {
-				console.error('Erro no upload:', args);
-				AppToast.show('Vermelho', 'Erro ao fazer upload do arquivo', 3000);
-			}
-			catch (error) {
-				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "onUploadError", error);
-			}
-		}
-
-		function TiraAcento(input) {
-			try {
-				const accentMap = {
-					'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
-					'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
-					'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
-					'ã': 'a', 'õ': 'o', 'ç': 'c',
-					'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
-					'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
-					'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
-					'Ã': 'A', 'Õ': 'O', 'Ç': 'C'
-				};
-
-				let result = '';
-				for (let i = 0; i < input.length; i++) {
-					const ch = input.charAt(i);
-					result += (accentMap[ch] || ch);
-				}
-
-				return result.replace(/\s/g, '_').toUpperCase();
-			}
-			catch (error) {
-				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "TiraAcento", error);
-				return input;
 			}
 		}
 	</script>
@@ -1659,7 +1765,9 @@
 					return;
 				}
 
-				if (!$("#txtValorPago").val() || $("#txtValorPago").val() === "0") {
+				// Validação do valor - considera o prefixo R$
+				let valorDigitado = $("#txtValorPago").val().replace('R$ ', '').trim();
+				if (!valorDigitado || valorDigitado === "0" || valorDigitado === "0,00") {
 					Alerta.Erro("Informação Ausente", "O Valor Pago é obrigatório", "Ok");
 					return;
 				}
@@ -1677,7 +1785,8 @@
 
 				const Status = (lstPagamento.value === "Defin") ? "À Enviar Secle" : "Paga (Infrator)";
 
-				let ValorPago = $('#txtValorPago').val().replaceAll(".", "");
+				// Remove R$, pontos de milhar e converte vírgula decimal para ponto
+				let ValorPago = $('#txtValorPago').val().replace('R$ ', '').replaceAll(".", "");
 				ValorPago = ValorPago.replaceAll(",", ".");
 
 				$.ajax({
@@ -1745,6 +1854,9 @@
 			{
 				e.preventDefault();
 				
+				// Ignora se botão desabilitado
+				if ($(this).attr('aria-disabled') === 'true') return;
+				
 				const penalidadePDF = $(this).data('penalidadepdf');
 				
 				console.log('🔍 Clique em btn-exibe-penalidade, penalidadePDF:', penalidadePDF);
@@ -1776,6 +1888,9 @@
 			try
 			{
 				e.preventDefault();
+				
+				// Ignora se botão desabilitado
+				if ($(this).attr('aria-disabled') === 'true') return;
 				
 				const comprovantePDF = $(this).data('comprovantepdf');
 				
@@ -1967,6 +2082,26 @@
 			catch (error)
 			{
 				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "modalExibeComprovante.hidden", error);
+			}
+		});
+
+		// ====================================================================
+		// EVENT HANDLER: LIMPAR PDF AO FECHAR MODAL FICHA DE VISTORIA
+		// ====================================================================
+		$('#modalPDF').on('hidden.bs.modal', function ()
+		{
+			try
+			{
+				const pdfViewer = document.getElementById('pdfViewerControl')?.ej2_instances?.[0];
+				if (pdfViewer)
+				{
+					pdfViewer.unload();
+				}
+				console.log('✅ Modal Ficha de Vistoria fechado e viewer limpo');
+			}
+			catch (error)
+			{
+				Alerta.TratamentoErroComLinha("ListaPenalidade.cshtml", "modalPDF.hidden", error);
 			}
 		});
 	</script>

@@ -5,9 +5,9 @@
 @{
     ViewData["Title"] = "Veículos";
     ViewData["PageName"] = "veiculo_upsert";
-    ViewData["Heading"] = "<i class='fad fa-car-bus'></i> Cadastros: <span class='fw-300'>Veículos</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-car-bus'></i> Cadastros: <span class='fw-300'>Veículos</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fa-regular fa-car-bus";
+    ViewData["PageIcon"] = "fa-duotone fa-car-bus";
 
     var isEdit = Model.VeiculoObj.Veiculo.VeiculoId != Guid.Empty;
     var temCRLV = Model.VeiculoObj.Veiculo.CRLV != null && Model.VeiculoObj.Veiculo.CRLV.Length > 0;
@@ -15,6 +15,18 @@
 
 @section HeadBlock {
     <style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
         /* ====== HEADER AZUL PADRÃO FROTIX ====== */
         .ftx-card-header {
             background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
@@ -272,7 +284,7 @@
                         </h2>
                         <div class="ftx-card-actions">
                             <a href="/Veiculo/Index" class="btn btn-voltar">
-                                <i class="fa-duotone fa-arrow-left"></i> Voltar à Lista
+                                <i class="fa-duotone fa-arrow-left icon-pulse me-1"></i> Voltar à Lista
                             </a>
                         </div>
                     </div>
@@ -714,7 +726,7 @@
                                         asp-page-handler="Edit"
                                         asp-route-id="@Model.VeiculoObj.Veiculo.VeiculoId"
                                         class="btn btn-azul">
-                                    <i class="fa-duotone fa-floppy-disk"></i> Atualizar Veículo
+                                    <i class="fa-duotone fa-floppy-disk icon-pulse"></i> Atualizar Veículo
                                 </button>
                             }
                             else

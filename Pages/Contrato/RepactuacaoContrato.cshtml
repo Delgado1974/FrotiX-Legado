@@ -346,12 +346,12 @@
 <div class="row">
     <div class="col-xl-12">
         <div class="ftx-card-repactuacao">
-            <!-- Header do Card -->
+            <!-- ===== HEADER FROTIX ===== -->
             <div class="ftx-card-header">
-                <div class="ftx-card-title">
+                <h2 class="titulo-paginas">
                     <i class="fa-duotone fa-handshake-simple"></i>
                     Repactuação de Contratos
-                </div>
+                </h2>
             </div>
 
             <div class="ftx-card-body">
@@ -477,11 +477,11 @@
                     <div class="row mt-2">
                         <div class="col-md-12">
                             <span id="badgeTipoRepactuacao" class="badge bg-info">
-                                <i class="fa-solid fa-info-circle me-1"></i>
+                                <i class="fa-duotone fa-info-circle me-1"></i>
                                 <span id="txtTipoRepactuacao">Valores Iniciais do Contrato</span>
                             </span>
                             <span id="badgeQtdRepactuacoes" class="badge bg-secondary ms-2">
-                                <i class="fa-solid fa-list-ol me-1"></i>
+                                <i class="fa-duotone fa-list-ol me-1"></i>
                                 <span id="txtQtdRepactuacoes">0 repactuações</span>
                             </span>
                         </div>
@@ -580,7 +580,7 @@
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <button id="btnAplicarPercentual" type="button" class="ftx-btn-action btn-laranja w-100" style="height:32px;">
-                                <i class="fa-solid fa-percent"></i> Aplicar
+                                <i class="fa-duotone fa-percent"></i> Aplicar
                             </button>
                         </div>
                     </div>
@@ -601,7 +601,7 @@
                     </div>
 
                     <div class="ftx-info-box">
-                        <i class="fa-solid fa-info-circle"></i>
+                        <i class="fa-duotone fa-info-circle"></i>
                         Informe os valores mensais unitários para cada categoria. Marque apenas as categorias que fazem parte deste contrato.
                     </div>
 
@@ -696,14 +696,14 @@
                     </div>
 
                     <div class="ftx-info-box">
-                        <i class="fa-solid fa-info-circle"></i>
+                        <i class="fa-duotone fa-info-circle"></i>
                         Edite os valores e quantidades de cada item. Use o botão de percentual acima para aplicar reajuste em todos os itens.
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <button id="btnAdicionarItem" type="button" class="ftx-btn-action btn-verde-militar w-100">
-                                <i class="fa-solid fa-plus"></i> Adicionar Item
+                                <i class="fa-duotone fa-plus"></i> Adicionar Item
                             </button>
                         </div>
                     </div>
@@ -779,10 +779,10 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="ftx-btn-action btn-vinho" data-bs-dismiss="modal">
-                                    <i class="fa-solid fa-times"></i> Cancelar
+                                    <i class="fa-duotone fa-times"></i> Cancelar
                                 </button>
                                 <button type="button" id="btnSalvarItem" class="ftx-btn-action btn-azul">
-                                    <i class="fa-solid fa-check"></i> Salvar
+                                    <i class="fa-duotone fa-check"></i> Salvar
                                 </button>
                             </div>
                         </div>
@@ -810,12 +810,12 @@
                     <div class="row">
                         <div class="col-md-3">
                             <button id="btnSalvarRepactuacao" type="button" class="ftx-btn-action btn-azul w-100">
-                                <i class="fa-duotone fa-floppy-disk"></i> Salvar Repactuação
+                                <i class="fa-duotone fa-floppy-disk icon-pulse"></i> Salvar Repactuação
                             </button>
                         </div>
                         <div class="col-md-3">
                             <button id="btnCancelar" type="button" class="ftx-btn-action btn-vinho w-100">
-                                <i class="fa-solid fa-rotate-left"></i> Cancelar
+                                <i class="fa-duotone fa-rotate-left"></i> Cancelar
                             </button>
                         </div>
                     </div>
@@ -832,6 +832,22 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 
     <script asp-append-version="true">
+        // =============================================
+        // POLYFILL: $.debounce (caso não esteja carregado)
+        // =============================================
+        if (typeof $.debounce !== 'function') {
+            $.debounce = function(delay, callback) {
+                var timer = null;
+                return function() {
+                    var context = this, args = arguments;
+                    clearTimeout(timer);
+                    timer = setTimeout(function() {
+                        callback.apply(context, args);
+                    }, delay);
+                };
+            };
+        }
+
         // =============================================
         // VARIÁVEIS GLOBAIS
         // =============================================
@@ -927,30 +943,57 @@
         // =============================================
         document.addEventListener('DOMContentLoaded', function () {
             try {
-                carregarContratos();
+                // Verificar se há parâmetro na URL
+                var urlParams = new URLSearchParams(window.location.search);
+                var contratoIdParam = urlParams.get('id');
+                
+                console.log('Parâmetro contratoId da URL:', contratoIdParam);
+                
+                carregarContratos(contratoIdParam);
                 configurarEventos();
             } catch (error) {
                 Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "DOMContentLoaded", error);
             }
         });
 
-        function carregarContratos() {
+        function carregarContratos(contratoIdParaSelecionar) {
             try {
                 $.ajax({
                     url: '/api/Contrato/ListaContratos',
                     type: 'GET',
                     success: function (res) {
                         try {
-                            var select = document.getElementById('lstContratos');
-                            select.innerHTML = '<option value="">-- Selecione um Contrato --</option>';
+                            var $select = $('#lstContratos');
+                            $select.html('<option value="">-- Selecione um Contrato --</option>');
 
+                            console.log('API ListaContratos retornou:', res);
+                            
                             if (res && res.data) {
                                 res.data.forEach(function (item) {
-                                    var option = document.createElement('option');
-                                    option.value = item.value;
-                                    option.textContent = item.text;
-                                    select.appendChild(option);
+                                    $select.append('<option value="' + item.value + '">' + item.text + '</option>');
                                 });
+                                console.log('Total de contratos carregados:', res.data.length);
+                            }
+                            
+                            // Se veio contratoId por parâmetro, seleciona e carrega os dados
+                            if (contratoIdParaSelecionar) {
+                                // Converter para maiúsculas (API retorna GUIDs em maiúsculas)
+                                var contratoIdUpper = contratoIdParaSelecionar.toUpperCase();
+                                console.log('Tentando selecionar contrato:', contratoIdUpper);
+                                
+                                $select.val(contratoIdUpper);
+                                console.log('Valor selecionado no dropdown:', $select.val());
+                                
+                                if ($select.val() === contratoIdUpper) {
+                                    console.log('✅ Contrato encontrado! Carregando dados...');
+                                    // Chamar funções diretamente (addEventListener não responde ao trigger jQuery)
+                                    limparTelaCompleta();
+                                    document.getElementById('txtContratoId').value = contratoIdUpper;
+                                    carregarDadosContrato(contratoIdUpper);
+                                } else {
+                                    console.warn('❌ Contrato não encontrado na lista:', contratoIdUpper);
+                                    console.log('Valores disponíveis:', res.data.map(function(i) { return i.value; }));
+                                }
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("RepactuacaoContrato.cshtml", "carregarContratos.success", error);

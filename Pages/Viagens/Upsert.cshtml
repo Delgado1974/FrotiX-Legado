@@ -41,7 +41,7 @@ ViewData["Title"] = "Viagens";
 ViewData["PageName"] = "viagens_upsert";
 ViewData["Heading"] = "";
 ViewData["Category1"] = "Cadastros";
-ViewData["PageIcon"] = "fad fa-route";
+ViewData["PageIcon"] = "fa-duotone fa-route";
 
 ViewData["fieldsMotorista"] = new ComboBoxFieldSettings
 {
@@ -63,6 +63,20 @@ ViewData["valueTemplate"] = @"
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
     <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
     
     <style>
@@ -73,7 +87,7 @@ ViewData["valueTemplate"] = @"
         }
 
         .k-editor-content {
-            min-height: 350px;
+            min-height: 280px;
         }
 
         /* Kendo Editor desabilitado */
@@ -1156,21 +1170,21 @@ ViewData["valueTemplate"] = @"
                             @if (Model.ViagemObj.Viagem.Status == "Realizada" || Model.ViagemObj.Viagem.Status == "Cancelada")
                             {
                                 <h2 class="titulo-paginas">
-                                    <i class="fa-duotone fa-solid fa-suitcase-rolling"></i>
+                                    <i class="fa-duotone fa-suitcase-rolling"></i>
                                     Viagem Realizada/Cancelada - Edição não permitida
                                 </h2>
                             }
                             else
                             {
                                 <h2 class="titulo-paginas">
-                                    <i class="fa-duotone fa-solid fa-suitcase-rolling"></i>
+                                    <i class="fa-duotone fa-suitcase-rolling"></i>
                                     @(Model.ViagemObj.Viagem.ViagemId != Guid.Empty ? "Atualizar" : "Criar") Viagem
                                 </h2>
                             }
                             <div class="ftx-card-actions">
-                                <a asp-page="./Index" class="btn btn-vinho" data-ftx-loading>
-                                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
-                                    Voltar
+                                <a href="javascript:void(0)" class="btn btn-fundo-laranja" id="btnVoltarLista" data-ftx-loading>
+                                    <i class="fa-duotone fa-rotate-left ftx-icon-spin icon-pulse me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
+                                    Voltar à Lista
                                 </a>
                             </div>
                         </div>
@@ -1233,14 +1247,14 @@ ViewData["valueTemplate"] = @"
                                             </div>
                                         </div>
                                         <div class="col-6 col-md-2">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.DataInicial">
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.DataInicial">
                                                 Data Inicial
                                             </label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.DataInicial"></span>
                                             <input id="txtDataInicial" class="form-control" asp-for="ViagemObj.Viagem.DataInicial" type="date" />
                                         </div>
                                         <div class="col-6 col-md-2">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.HoraInicio">
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.HoraInicio">
                                                 Hora Início
                                             </label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.HoraInicio"></span>
@@ -1278,7 +1292,7 @@ ViewData["valueTemplate"] = @"
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-12 col-md-4">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.Finalidade">Finalidade</label>
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.Finalidade">Finalidade</label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.Finalidade"></span>
                                             <ejs-dropdowntree id="ddtFinalidade" placeholder="Escolha a Finalidade..."
                                                               showCheckBox="false" allowMultiSelection="false"
@@ -1289,7 +1303,7 @@ ViewData["valueTemplate"] = @"
                                             </ejs-dropdowntree>
                                         </div>
                                         <div class="col-12 col-md-4">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.Origem">Origem</label>
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.Origem">Origem</label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.Origem"></span>
                                             <ejs-combobox id="cmbOrigem" ejs-for="ViagemObj.Viagem.Origem"
                                                           dataSource="@ViewData["ListaOrigem"]"
@@ -1299,7 +1313,7 @@ ViewData["valueTemplate"] = @"
                                             </ejs-combobox>
                                         </div>
                                         <div class="col-12 col-md-4">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.Destino">Destino</label>
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.Destino">Destino</label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.Destino"></span>
                                             <ejs-combobox id="cmbDestino" ejs-for="ViagemObj.Viagem.Destino"
                                                           dataSource="@ViewData["ListaDestino"]" placeholder="Selecione ou digite o destino"
@@ -1336,7 +1350,7 @@ ViewData["valueTemplate"] = @"
                                                    style="height: 38px; display: flex; align-items: center;"
                                                    title="Adicionar Evento"
                                                    data-bs-toggle="modal" data-bs-target="#modalEvento">
-                                                    <i class="fal fa-calendar-plus"></i>
+                                                    <i class="fa-duotone fa-calendar-plus"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -1353,7 +1367,7 @@ ViewData["valueTemplate"] = @"
                                     </div>
                                     <div class="row g-3 mb-3">
                                         <div class="col-12 col-md-5">
-                                            <label class="ftx-label">Motorista</label>
+                                            <label class="ftx-label ftx-required">Motorista</label>
                                             <ejs-combobox id="cmbMotorista"
                                                           placeholder="Selecione um Motorista"
                                                           ejs-for="@Model.ViagemObj.Viagem.MotoristaId"
@@ -1369,7 +1383,7 @@ ViewData["valueTemplate"] = @"
                                             </ejs-combobox>
                                         </div>
                                         <div class="col-12 col-md-5">
-                                            <label class="ftx-label">Veículo</label>
+                                            <label class="ftx-label ftx-required">Veículo</label>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="flex-grow-1">
                                                     <ejs-combobox id="cmbVeiculo" placeholder="Selecione um Veículo"
@@ -1406,7 +1420,7 @@ ViewData["valueTemplate"] = @"
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-4 col-md-2">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.KmInicial">Km Inicial</label>
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.KmInicial">Km Inicial</label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.KmInicial"></span>
                                             <input id="txtKmInicial" class="form-control" asp-for="ViagemObj.Viagem.KmInicial" type="number" />
                                         </div>
@@ -1435,7 +1449,7 @@ ViewData["valueTemplate"] = @"
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-6 col-md-3">
-                                            <label class="ftx-label">Combustível Inicial</label>
+                                            <label class="ftx-label ftx-required">Combustível Inicial</label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.CombustivelInicial"></span>
                                             <ejs-dropdowntree id="ddtCombustivelInicial" popupHeight="200px" showClearButton="true"
                                                               ejs-for="@Model.ViagemObj.Viagem.CombustivelInicial">
@@ -1555,7 +1569,7 @@ ViewData["valueTemplate"] = @"
                                     <!-- Lista de Ocorrências -->
                                     <div id="listaOcorrenciasUpsert" class="ocorrencias-lista">
                                         <div id="semOcorrenciasUpsert" class="text-center text-muted py-4">
-                                            <i class="fa fa-check-circle fa-2x mb-2 text-success"></i>
+                                            <i class="fa-duotone fa-circle-check fa-2x mb-2 text-success"></i>
                                             <p class="mb-0">Nenhuma ocorrência registrada</p>
                                         </div>
                                     </div>
@@ -1574,7 +1588,7 @@ ViewData["valueTemplate"] = @"
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-12 col-md-5">
-                                            <label class="ftx-label">Requisitante</label>
+                                            <label class="ftx-label ftx-required">Requisitante</label>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="flex-grow-1">
                                                     <ejs-combobox id="cmbRequisitante" placeholder="Selecione um Requisitante..."
@@ -1590,17 +1604,17 @@ ViewData["valueTemplate"] = @"
                                                    style="height: 38px; display: flex; align-items: center;"
                                                    data-bs-toggle="modal" data-bs-target="#modalRequisitante"
                                                    title="Adicionar Requisitante">
-                                                    <i class="fal fa-user-plus"></i>
+                                                    <i class="fa-duotone fa-user-plus"></i>
                                                 </a>
                                             </div>
                                         </div>
                                         <div class="col-6 col-md-2">
-                                            <label class="ftx-label" asp-for="ViagemObj.Viagem.RamalRequisitante">Ramal</label>
+                                            <label class="ftx-label ftx-required" asp-for="ViagemObj.Viagem.RamalRequisitante">Ramal</label>
                                             <span class="text-danger font-weight-light" asp-validation-for="ViagemObj.Viagem.RamalRequisitante"></span>
                                             <input id="txtRamalRequisitante" class="form-control" asp-for="ViagemObj.Viagem.RamalRequisitante" />
                                         </div>
                                         <div class="col-12 col-md-5">
-                                            <label class="ftx-label">Setor Solicitante</label>
+                                            <label class="ftx-label ftx-required">Setor Solicitante</label>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="flex-grow-1">
                                                     <ejs-dropdowntree id="ddtSetor" placeholder="Selecione um Setor" enabled="false"
@@ -1618,7 +1632,7 @@ ViewData["valueTemplate"] = @"
                                                    style="height: 38px; display: flex; align-items: center;"
                                                    data-bs-toggle="modal" data-bs-target="#modalSetor"
                                                    title="Adicionar Setor">
-                                                    <i class="fa-light fa-house-medical"></i>
+                                                    <i class="fa-duotone fa-house-medical"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -1638,7 +1652,7 @@ ViewData["valueTemplate"] = @"
                                             <label class="ftx-label">Passageiros / Carga</label>
                                             <input type="hidden" id="DescricaoViagemWordBase64" name="DescricaoViagemWordBase64" />
                                             <!-- Kendo Editor - Substitui Syncfusion RTE -->
-                                            <textarea id="rte" name="ViagemObj.Viagem.Descricao" style="height:400px; width:100%;">@Html.Raw(Model.ViagemObj?.Viagem?.Descricao ?? "")</textarea>
+                                            <textarea id="rte" name="ViagemObj.Viagem.Descricao" style="height:320px; width:100%;">@Html.Raw(Model.ViagemObj?.Viagem?.Descricao ?? "")</textarea>
                                             <div id="errorMessage">
                                                 <span asp-validation-for="@Model.ViagemObj.Viagem.Descricao"></span>
                                             </div>
@@ -1742,7 +1756,7 @@ ViewData["valueTemplate"] = @"
                                             </label>
                                             <div id="containerRubricaInicial" class="rubrica-container">
                                                 <div id="semRubricaInicial" class="rubrica-vazia">
-                                                    <i class="fa fa-pen fa-2x text-muted"></i>
+                                                    <i class="fa-duotone fa-pen fa-2x text-muted"></i>
                                                     <p class="text-muted mb-0 mt-2">Sem rubrica inicial</p>
                                                 </div>
                                                 <img id="imgRubricaInicial" 
@@ -1759,7 +1773,7 @@ ViewData["valueTemplate"] = @"
                                             </label>
                                             <div id="containerRubricaFinal" class="rubrica-container">
                                                 <div id="semRubricaFinal" class="rubrica-vazia">
-                                                    <i class="fa fa-pen-fancy fa-2x text-muted"></i>
+                                                    <i class="fa-duotone fa-pen-fancy fa-2x text-muted"></i>
                                                     <p class="text-muted mb-0 mt-2">Sem rubrica final</p>
                                                 </div>
                                                 <img id="imgRubricaFinal" 
@@ -1838,7 +1852,7 @@ ViewData["valueTemplate"] = @"
                                                     asp-page-handler="Submit"
                                                     class="btn btn-azul w-100">
                                                 <span class="d-flex justify-content-center align-items-center">
-                                                    <i class="fa-sharp-duotone fa-solid fa-calendar-lines-pen icon-space icon-pulse"></i>
+                                                    <i class="fa-duotone fa-calendar-lines-pen icon-space icon-pulse"></i>
                                                     <span>Salvar Alterações</span>
                                                 </span>
                                             </button>
@@ -1851,7 +1865,7 @@ ViewData["valueTemplate"] = @"
                                                     asp-page-handler="Submit"
                                                     class="btn btn-azul w-100">
                                                 <span class="d-flex justify-content-center align-items-center">
-                                                    <i class="fa-sharp-duotone fa-solid fa-calendar-lines-pen icon-space icon-pulse"></i>
+                                                    <i class="fa-duotone fa-calendar-lines-pen icon-space icon-pulse"></i>
                                                     <span>Criar Viagem</span>
                                                 </span>
                                             </button>
@@ -1860,10 +1874,10 @@ ViewData["valueTemplate"] = @"
 
                                         <!-- Botão Voltar (mesmo estilo do botão de cima) -->
                                         <div class="col-12 col-md-4 col-lg-3 pb-2">
-                                            <a asp-page="./Index" class="btn btn-vinho w-100" data-ftx-loading>
+                                            <a href="javascript:void(0)" class="btn btn-fundo-laranja w-100 btn-voltar-lista">
                                                 <span class="d-flex justify-content-center align-items-center">
-                                                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
-                                                    <span>Voltar</span>
+                                                    <i class="fa-duotone fa-rotate-left ftx-icon-spin" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
+                                                    <span class="ms-2">Voltar à Lista</span>
                                                 </span>
                                             </a>
                                         </div>
@@ -1963,7 +1977,7 @@ ViewData["valueTemplate"] = @"
                             data-bs-target="#modalZoom"
                             aria-label="Ampliar imagem"
                             onclick="atualizarImagemModal()">
-						<i class="fa-solid fa-magnifying-glass-plus" style="font-size: 20px; color: black;"></i>
+						<i class="fa-duotone fa-magnifying-glass-plus" style="font-size: 20px; color: black;"></i>
                     </button>
                 </div>
             </div>
@@ -1996,7 +2010,7 @@ ViewData["valueTemplate"] = @"
             <!-- Modal Header -->
             <div class="modal-header modal-header-azul">
                 <h4 class="modal-title">
-                    <i class="fa-duotone fa-solid fa-users"></i>
+                    <i class="fa-duotone fa-users"></i>
                     Inserir um novo Evento
                 </h4>
             </div>
@@ -2068,7 +2082,7 @@ ViewData["valueTemplate"] = @"
                                 value="SUBMIT"
                                 class="btn custom-primary-btn">
                             <span class="btn-inner">
-                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                <i class="fa-duotone fa-down-to-bracket"></i>
                                 <span>Inserir Evento</span>
                             </span>
                         </button>
@@ -2076,7 +2090,7 @@ ViewData["valueTemplate"] = @"
                                 class="btn btn-vinho ml-auto ms-auto"
                                 data-bs-dismiss="modal" data-bs-dismiss="modal" aria-label="Fechar">
                             <span class="btn-inner">
-                                <i class="fa-regular fa-circle-xmark icon-spin" aria-hidden="true"></i>
+                                <i class="fa-duotone fa-circle-xmark icon-spin" aria-hidden="true"></i>
                                 <span>Fechar</span>
                             </span>
                         </button>
@@ -2151,7 +2165,7 @@ ViewData["valueTemplate"] = @"
                                 type="submit"
                                 value="SUBMIT">
                             <span class="btn-inner">
-                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                <i class="fa-duotone fa-down-to-bracket"></i>
                                 <span>Inserir Requisitante</span>
                             </span>
                         </button>
@@ -2160,7 +2174,7 @@ ViewData["valueTemplate"] = @"
                                 class="btn fundo-vermelho"
                                 data-bs-dismiss="modal" data-bs-dismiss="modal" aria-label="Fechar modal">
                             <span class="btn-inner">
-                                <i class="fa-regular fa-circle-xmark icon-spin" aria-hidden="true"></i>
+                                <i class="fa-duotone fa-circle-xmark icon-spin" aria-hidden="true"></i>
                                 <span>Fechar</span>
                             </span>
                         </button>
@@ -2223,7 +2237,7 @@ ViewData["valueTemplate"] = @"
                                 value="SUBMIT"
                                 class="btn custom-primary-btn">
                             <span class="btn-inner">
-                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                <i class="fa-duotone fa-down-to-bracket"></i>
                                 <span>Inserir Setor</span>
                             </span>
                         </button>
@@ -2232,7 +2246,7 @@ ViewData["valueTemplate"] = @"
                                 class="btn btn-vinho ml-auto ms-auto"
                                 data-bs-dismiss="modal" data-bs-dismiss="modal" aria-label="Fechar">
                             <span class="btn-inner">
-                                <i class="fa-regular fa-circle-xmark icon-spin" aria-hidden="true"></i>
+                                <i class="fa-duotone fa-circle-xmark icon-spin" aria-hidden="true"></i>
                                 <span>Fechar</span>
                             </span>
                         </button>
@@ -2284,7 +2298,7 @@ ViewData["valueTemplate"] = @"
 
             <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                    <i class="fa-duotone fa-rotate-left ftx-icon-spin"></i> Fechar
                 </button>
             </div>
         </div>
@@ -2311,14 +2325,14 @@ ViewData["valueTemplate"] = @"
                      style="max-height: 500px; display: none;"
                      alt="Imagem da Ocorrência" />
                 <div id="noImageOcorrenciaUpsert" class="p-4 bg-light rounded" style="display: none;">
-                    <i class="fa fa-image fa-4x text-muted mb-3"></i>
+                    <i class="fa-duotone fa-image fa-4x text-muted mb-3"></i>
                     <p class="text-muted">Nenhuma imagem disponível</p>
                 </div>
             </div>
 
             <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                    <i class="fa-duotone fa-rotate-left ftx-icon-spin"></i> Fechar
                 </button>
             </div>
         </div>
@@ -2353,7 +2367,7 @@ ViewData["valueTemplate"] = @"
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-xmark me-1"></i> Cancelar
+                    <i class="fa-duotone fa-xmark me-1"></i> Cancelar
                 </button>
                 <button type="button" id="btnConfirmarSolucaoUpsert" class="btn btn-verde">
                     <i class="fa-duotone fa-circle-check me-1"></i> Confirmar Baixa
@@ -2426,7 +2440,7 @@ ViewData["valueTemplate"] = @"
                                  style="max-height: 400px; display: none;" 
                                  alt="Imagem da Ocorrência" />
                             <div id="semImagemOcorrenciaViagem" class="p-4">
-                                <i class="fa fa-image fa-3x text-muted mb-2"></i>
+                                <i class="fa-duotone fa-image fa-3x text-muted mb-2"></i>
                                 <p class="text-muted mb-0">Nenhuma imagem disponível</p>
                             </div>
                         </div>
@@ -2436,7 +2450,7 @@ ViewData["valueTemplate"] = @"
 
             <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+                    <i class="fa-duotone fa-rotate-left ftx-icon-spin"></i> Fechar
                 </button>
             </div>
         </div>
@@ -2494,7 +2508,7 @@ ViewData["valueTemplate"] = @"
                                    class="form-control" 
                                    accept="image/*" />
                             <button type="button" class="btn btn-outline-secondary" id="btnLimparImagemOcorrenciaUpsert">
-                                <i class="fa fa-times"></i>
+                                <i class="fa-duotone fa-xmark"></i>
                             </button>
                         </div>
                         <div id="previewImagemOcorrenciaUpsert" class="mt-2 text-center" style="display: none;">
@@ -2509,10 +2523,10 @@ ViewData["valueTemplate"] = @"
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-xmark me-1"></i> Cancelar
+                    <i class="fa-duotone fa-xmark me-1"></i> Cancelar
                 </button>
                 <button type="button" id="btnConfirmarOcorrenciaUpsert" class="btn btn-fundo-laranja">
-                    <i class="fa-solid fa-plus me-1"></i> Adicionar Ocorrência
+                    <i class="fa-duotone fa-plus me-1"></i> Adicionar Ocorrência
                 </button>
             </div>
         </div>
@@ -2540,7 +2554,7 @@ ViewData["valueTemplate"] = @"
             </div>
             <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-xmark me-1"></i> Fechar
+                    <i class="fa-duotone fa-xmark me-1"></i> Fechar
                 </button>
             </div>
         </div>
@@ -2793,5 +2807,74 @@ ViewData["valueTemplate"] = @"
 	<script src="~/js/viagens/kendo-editor-upsert.js" asp-append-version="true"></script>
 
 	<script src="~/js/cadastros/ViagemUpsert.js" asp-append-version="true"></script>
+
+	<script>
+		// ===== DETECÇÃO DE MUDANÇAS E CONFIRMAÇÃO AO SAIR =====
+		$(document).ready(function () {
+			try {
+				// Salva o estado inicial do formulário para detectar mudanças
+				var estadoInicial = $('form').serialize();
+				var formularioAlterado = false;
+
+				// Detecta mudanças no formulário
+				$('form').on('change input', 'input, select, textarea', function () {
+					try {
+						formularioAlterado = ($('form').serialize() !== estadoInicial);
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Viagem_Upsert.cshtml", "form.change", error);
+					}
+				});
+
+				// Função para verificar e redirecionar
+				function verificarEVoltar() {
+					try {
+						if (formularioAlterado) {
+							Alerta.Confirmar(
+								"Descartar Alterações?",
+								"Você fez alterações no formulário que ainda não foram salvas. Deseja realmente descartar essas mudanças?",
+								"Sim, descartar",
+								"Cancelar"
+							).then(function (confirmado) {
+								try {
+									if (confirmado) {
+										window.location.href = '/Viagens';
+									}
+								} catch (error) {
+									Alerta.TratamentoErroComLinha("Viagem_Upsert.cshtml", "verificarEVoltar.confirmar.then", error);
+								}
+							});
+						} else {
+							window.location.href = '/Viagens';
+						}
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Viagem_Upsert.cshtml", "verificarEVoltar", error);
+					}
+				}
+
+				// Intercepta clique no botão Voltar à Lista (header)
+				$('#btnVoltarLista').on('click', function (e) {
+					try {
+						e.preventDefault();
+						verificarEVoltar();
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Viagem_Upsert.cshtml", "btnVoltarLista.click", error);
+					}
+				});
+
+				// Intercepta clique no botão Voltar à Lista (rodapé)
+				$('.btn-voltar-lista').on('click', function (e) {
+					try {
+						e.preventDefault();
+						verificarEVoltar();
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Viagem_Upsert.cshtml", "btn-voltar-lista.click", error);
+					}
+				});
+
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("Viagem_Upsert.cshtml", "document.ready.voltarLista", error);
+			}
+		});
+	</script>
 
 }

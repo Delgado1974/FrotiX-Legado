@@ -39,5 +39,9 @@ namespace FrotiX.Models
         public string? HoraFim { get; set; }
 
         public int? QtdPassageiros { get; set; }
+
+        public string? Trajeto { get; set; }
+
+        public int? Duracao { get; set; }
     }
 }

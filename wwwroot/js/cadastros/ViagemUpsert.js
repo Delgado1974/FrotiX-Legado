@@ -2452,11 +2452,7 @@ $("#btnSubmit").click(async function (event)
     {
         event.preventDefault();
 
-        if ($("#txtNoFichaVistoria").val() === "")
-        {
-            Alerta.Erro("Informação Ausente", "O número da Ficha de Vistoria é obrigatório");
-            return;
-        }
+        // NoFichaVistoria não é mais obrigatório - se vazio, será gravado como 0 (viagem mobile)
 
         if ($("#txtDataInicial").val() === "")
         {

@@ -66,12 +66,13 @@
 <div class="row">
 	<div class="col-xl-12">
 		<div id="panel-1" class="panel">
-			<h2 class="titulo-paginas mb-0">
-				<i class="fa-duotone fa-solid fa-bell-plus"></i>
-				@(Model.AlertasFrotiXId == Guid.Empty ? "Cadastrar Novo Alerta" : "Editar Alerta")
-			</h2>
-			<!-- Linha divisória -->
-			<div class="col-12" style="border-bottom:1px solid #325d88"></div>
+			<!-- ===== HEADER FROTIX ===== -->
+			<div class="ftx-card-header">
+				<h2 class="titulo-paginas">
+					<i class="fa-duotone fa-bell-plus"></i>
+					@(Model.AlertasFrotiXId == Guid.Empty ? "Cadastrar Novo Alerta" : "Editar Alerta")
+				</h2>
+			</div>
 
 			<div class="panel-container show">
 				<div class="panel-content">
@@ -319,7 +320,7 @@
 							<div class="col-md-6" id="divDiasAlerta" style="display: none;">
 								<label class="label font-weight-bold">
 									Dias da Semana
-									<i class="fa-duotone fa-solid fa-calendar-week field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+									<i class="fa-duotone fa-calendar-week field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
 								</label>
 								<ejs-multiselect id="lstDiasAlerta"
 												name="DiasSemana"
@@ -338,7 +339,7 @@
 							<div class="col-md-2" id="divDiaMesAlerta" style="display: none;">
 								<label class="label font-weight-bold">
 									Dia do Mês
-									<i class="fa-duotone fa-solid fa-calendar-clock field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+									<i class="fa-duotone fa-calendar-clock field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
 								</label>
 								<ejs-dropdownlist id="lstDiasMesAlerta"
 												name="DiaMesRecorrencia"
@@ -357,7 +358,7 @@
 							<div class="col-md-4 col-lg-3">
 								<label class="label font-weight-bold d-block mb-2">
 									Selecione as Datas
-									<i class="fa-duotone fa-solid fa-calendar-days field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+									<i class="fa-duotone fa-calendar-days field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
 								</label>
 								<div style="position: relative; display: inline-block;">
 									<!-- Badge laranja no canto superior direito do calendário (40% dentro, 60% fora) -->
@@ -421,7 +422,7 @@
 						<div class="row mt-4">
 							<div class="col-md-12 d-flex justify-content-end gap-2">
 								<button type="button" class="btn btn-vinho form-control" onclick="window.location.href='/AlertasFrotiX'" data-ejtip="Cancelar e voltar para a lista">
-									<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Cancelar
+									<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Cancelar
 								</button>
 								<button type="submit" class="btn btn-azul form-control" data-ejtip="@(Model.AlertasFrotiXId == Guid.Empty ? "Cadastrar novo alerta" : "Salvar alterações do alerta")">
 									<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>

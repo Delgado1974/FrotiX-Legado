@@ -110,7 +110,7 @@ function carregaManutencaoInicial()
                             {
                                 return '<span class="ftx-manut-badge ftx-manut-badge-cancelada"><i class="fa-solid fa-xmark"></i> Cancelada</span>';
                             }
-                            return '<span class="ftx-manut-badge ftx-manut-badge-fechada"><i class="fa-solid fa-lock"></i> Fechada</span>';
+                            return '<span class="ftx-manut-badge ftx-manut-badge-fechada"><i class="fa-solid fa-lock"></i> Fechada/Baixada</span>';
                         } catch (error)
                         {
                             Alerta.TratamentoErroComLinha("ListaManutencao.js", "render@statusOS@init", error);
@@ -134,8 +134,8 @@ function carregaManutencaoInicial()
                                     : "Cancelar OS";
 
                             const disabledAttr = isClosed ? 'aria-disabled="true"' : '';
-                            const iconEditar = isClosed ? "fa-light fa-eye" : "fa-light fa-edit";
-                            const iconBaixar = isClosed ? "fa-regular fa-lock" : (full.icon || "fa-regular fa-flag-checkered");
+                            const iconEditar = isClosed ? "fa-duotone fa-eye" : "fa-duotone fa-pen-to-square";
+                            const iconBaixar = isClosed ? "fa-duotone fa-lock" : "fa-duotone fa-flag-checkered";
 
                             return `
                                 <div class="text-center">
@@ -143,20 +143,20 @@ function carregaManutencaoInicial()
                                        class="ftx-manut-btn-icon ftx-manut-btn-editar"
                                        data-ejtip="${tooltipEditar}"
                                        data-id="${data}">
-                                        <i class="${iconEditar}"></i>
+                                        <i class="${iconEditar}" style="--fa-primary-color: #fff; --fa-secondary-color: #d0e8f0; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                     <a class="ftx-manut-btn-icon ftx-manut-btn-baixar btn-baixar"
                                        data-ejtip="${tooltipBaixar}"
                                        ${disabledAttr}
                                        
                                        data-id="${data}">
-                                        <i class="${iconBaixar}"></i>
+                                        <i class="${iconBaixar}" style="--fa-primary-color: #fff; --fa-secondary-color: #ffe8d0; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                     <a class="ftx-manut-btn-icon ftx-manut-btn-cancelar btn-deletemanutencao"
                                        data-ejtip="${tooltipCancelar}"
                                        ${disabledAttr}
                                        data-id="${data}">
-                                        <i class="fa-regular fa-ban"></i>
+                                        <i class="fa-duotone fa-ban" style="--fa-primary-color: #fff; --fa-secondary-color: #ffebee; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                 </div>`;
                         } catch (error)
@@ -334,7 +334,7 @@ $("#btnDatas").click(function ()
                             {
                                 return '<span class="ftx-manut-badge ftx-manut-badge-cancelada"><i class="fa-solid fa-xmark"></i> Cancelada</span>';
                             }
-                            return '<span class="ftx-manut-badge ftx-manut-badge-fechada"><i class="fa-solid fa-lock"></i> Fechada</span>';
+                            return '<span class="ftx-manut-badge ftx-manut-badge-fechada"><i class="fa-solid fa-lock"></i> Fechada/Baixada</span>';
                         } catch (error)
                         {
                             Alerta.TratamentoErroComLinha("ListaManutencao.js", "render@statusOS", error);
@@ -358,8 +358,8 @@ $("#btnDatas").click(function ()
                                     : "Cancelar OS";
 
                             const disabledAttr = isClosed ? 'aria-disabled="true"' : '';
-                            const iconEditar = isClosed ? "fa-light fa-eye" : "fa-light fa-edit";
-                            const iconBaixar = isClosed ? "fa-regular fa-lock" : (full.icon || "fa-regular fa-flag-checkered");
+                            const iconEditar = isClosed ? "fa-duotone fa-eye" : "fa-duotone fa-pen-to-square";
+                            const iconBaixar = isClosed ? "fa-duotone fa-lock" : "fa-duotone fa-flag-checkered";
 
                             return `
                                 <div class="text-center">
@@ -367,20 +367,20 @@ $("#btnDatas").click(function ()
                                        class="ftx-manut-btn-icon ftx-manut-btn-editar"
                                        data-ejtip="${tooltipEditar}"
                                        data-id="${data}">
-                                        <i class="${iconEditar}"></i>
+                                        <i class="${iconEditar}" style="--fa-primary-color: #fff; --fa-secondary-color: #d0e8f0; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                     <a class="ftx-manut-btn-icon ftx-manut-btn-baixar btn-baixar"
                                        data-ejtip="${tooltipBaixar}"
                                        ${disabledAttr}
                                        
                                        data-id="${data}">
-                                        <i class="${iconBaixar}"></i>
+                                        <i class="${iconBaixar}" style="--fa-primary-color: #fff; --fa-secondary-color: #ffe8d0; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                     <a class="ftx-manut-btn-icon ftx-manut-btn-cancelar btn-deletemanutencao"
                                        data-ejtip="${tooltipCancelar}"
                                        ${disabledAttr}
                                        data-id="${data}">
-                                        <i class="fa-regular fa-ban"></i>
+                                        <i class="fa-duotone fa-ban" style="--fa-primary-color: #fff; --fa-secondary-color: #ffebee; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                 </div>`;
                         } catch (error)
@@ -516,7 +516,7 @@ function ListaTblManutencao(URLapi, IDapi)
                             {
                                 return '<span class="ftx-manut-badge ftx-manut-badge-cancelada"><i class="fa-solid fa-xmark"></i> Cancelada</span>';
                             }
-                            return '<span class="ftx-manut-badge ftx-manut-badge-fechada"><i class="fa-solid fa-lock"></i> Fechada</span>';
+                            return '<span class="ftx-manut-badge ftx-manut-badge-fechada"><i class="fa-solid fa-lock"></i> Fechada/Baixada</span>';
                         } catch (error)
                         {
                             Alerta.TratamentoErroComLinha("ListaManutencao.js", "render@statusOS#2", error);
@@ -540,8 +540,8 @@ function ListaTblManutencao(URLapi, IDapi)
                                     : "Cancelar OS";
 
                             const disabledAttr = isClosed ? 'aria-disabled="true"' : '';
-                            const iconEditar = isClosed ? "fa-light fa-eye" : "fa-light fa-edit";
-                            const iconClass = isClosed ? "fa-regular fa-lock" : (full.icon || "fa-regular fa-flag-checkered");
+                            const iconEditar = isClosed ? "fa-duotone fa-eye" : "fa-duotone fa-pen-to-square";
+                            const iconClass = isClosed ? "fa-duotone fa-lock" : "fa-duotone fa-flag-checkered";
 
                             return `
                                 <div class="text-center">
@@ -549,20 +549,20 @@ function ListaTblManutencao(URLapi, IDapi)
                                        class="ftx-manut-btn-icon ftx-manut-btn-editar"
                                        data-ejtip="${tooltipEditar}"
                                        data-id="${data}">
-                                        <i class="${iconEditar}"></i>
+                                        <i class="${iconEditar}" style="--fa-primary-color: #fff; --fa-secondary-color: #d0e8f0; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                     <a class="ftx-manut-btn-icon ftx-manut-btn-baixar btn-baixar"
                                        data-ejtip="${tooltipBaixar}"
                                        ${disabledAttr}
                                        
                                        data-id="${data}">
-                                        <i class="${iconClass}"></i>
+                                        <i class="${iconClass}" style="--fa-primary-color: #fff; --fa-secondary-color: #ffe8d0; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                     <a class="ftx-manut-btn-icon ftx-manut-btn-cancelar btn-deletemanutencao"
                                        data-ejtip="${tooltipCancelar}"
                                        ${disabledAttr}
                                        data-id="${data}">
-                                        <i class="fa-regular fa-ban"></i>
+                                        <i class="fa-duotone fa-ban" style="--fa-primary-color: #fff; --fa-secondary-color: #ffebee; --fa-secondary-opacity: 0.8;"></i>
                                     </a>
                                 </div>`;
                         } catch (error)
@@ -742,23 +742,34 @@ $("#modalManutencao")
                         {
                             try
                             {
-                                const hasImage = full.imagemOcorrencia && full.imagemOcorrencia.trim().length > 0;
-                                const btnFotoClass = hasImage ? "ftx-manut-btn-editar" : "ftx-manut-btn-cancelar disabled";
-                                const tooltipFoto = hasImage ? "Ver Imagem" : "Sem Imagem";
+                                const img = full.imagemOcorrencia || '';
+                                const hasImage = img && img.trim().length > 0 && img.toLowerCase() !== 'semimagem.jpg';
+                                
+                                // Botão de foto: azul com foto, laranja sem foto
+                                const btnFoto = hasImage 
+                                    ? `<button type="button" class="ftx-manut-btn-icon ftx-manut-btn-editar btn-ver-foto"
+                                            data-ejtip="Ver Foto"
+                                            data-imagem="${full.imagemOcorrencia || ''}"
+                                            style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                                        <i class="fa-duotone fa-camera-polaroid" style="--fa-primary-color: #fff; --fa-secondary-color: #e1f7fe; --fa-secondary-opacity: 0.8;"></i>
+                                    </button>`
+                                    : `<button type="button" class="ftx-manut-btn-icon btn-ver-foto"
+                                            data-ejtip="Sem Foto"
+                                            data-imagem=""
+                                            style="background: linear-gradient(135deg, #9e9e9e, #757575); opacity: 0.6; cursor: not-allowed;"
+                                            disabled>
+                                        <i class="fa-duotone fa-camera-slash" style="--fa-primary-color: #fff; --fa-secondary-color: #e0e0e0; --fa-secondary-opacity: 0.8;"></i>
+                                    </button>`;
 
                                 return `
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <button type="button" class="ftx-manut-btn-icon ${btnFotoClass} btn-ver-foto"
-                                                data-ejtip="${tooltipFoto}"
-                                                data-imagem="${full.imagemOcorrencia || ''}"
-                                                ${hasImage ? '' : 'disabled'}>
-                                            <i class="fa-solid fa-image"></i>
-                                        </button>
+                                        ${btnFoto}
                                         <button type="button" class="ftx-manut-btn-icon ftx-manut-btn-cancelar btn-remover-item-baixa"
                                                 data-ejtip="Remover da Baixa (ficará Pendente)"
                                                 data-itemid="${full.itemManutencaoId}"
-                                                data-viagemid="${full.viagemId}">
-                                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                                data-viagemid="${full.viagemId}"
+                                                style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                                            <i class="fa-duotone fa-arrow-up-from-bracket" style="--fa-primary-color: #fff; --fa-secondary-color: #ffebee; --fa-secondary-opacity: 0.8;"></i>
                                         </button>
                                     </div>`;
                             } catch (error)

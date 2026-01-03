@@ -4,13 +4,25 @@
 @{
     ViewData["Title"] = "Motoristas";
     ViewData["PageName"] = "motorista_index";
-    ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-user-tie";
+    ViewData["PageIcon"] = "fa-duotone fa-user-tie";
 }
 
 @section HeadBlock {
     <style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
         /* ====== HEADER AZUL PADRÃO FROTIX ====== */
         .ftx-card-header {
             background-color: #3D5771;
@@ -242,8 +254,8 @@
                     </h2>
                     <div class="ftx-card-actions">
                         <a href="/Motorista/Upsert"
-                           class="btn btn-fundo-laranja">
-                            <i class="fa-duotone fa-user-plus"></i>
+                           class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-user-plus icon-pulse me-1"></i>
                             Adicionar Motorista
                         </a>
                     </div>

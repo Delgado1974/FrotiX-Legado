@@ -6,7 +6,7 @@
 	ViewData["PageName"] = "usuarios_recursos";
 	ViewData["Heading"] = "<i class='fa-duotone fa-book-journal-whills'></i> Cadastros: <span class='fw-300'>Recursos</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-light fa-book-journal-whills";
+	ViewData["PageIcon"] = "fa-duotone fa-book-journal-whills";
 }
 
 @section HeadBlock {
@@ -74,7 +74,7 @@
 				<br /><br />
 				<div class="modal-footer">
 					<button id="btnFechar" type="button" class="btn btn-vinho form-control" data-bs-dismiss="modal">
-						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i> Fechar
+						<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Fechar
 					</button>
 				</div>
 			</div>
@@ -266,10 +266,10 @@
 									return `
 										<div class="text-center">
 											<a href="/Usuarios/UpsertRecurso?id=${data}" class="btn btn-azul text-white" data-ejtip="Editar Recurso" aria-label="Editar Recurso" role="button" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;">
-												<i class="far fa-edit"></i>
+												<i class="fa-duotone fa-edit"></i>
 											</a>
 											<a class="btn-delete btn btn-vinho text-white" data-ejtip="Excluir Recurso" aria-label="Excluir Recurso" role="button" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
-												<i class="far fa-trash-alt"></i>
+												<i class="fa-duotone fa-trash-alt"></i>
 											</a>
 											<a class="btn btn-foto text-white btn-fundo-laranja" data-bs-toggle="modal" data-bs-target="#modalControleAcesso" data-ejtip="Controle de Acesso" aria-label="Controle de Acesso" role="button" style="cursor:pointer; padding: 2px 6px !important; font-size: 12px !important; margin: 1px !important;" data-id='${data}'>
 												<i class="fa-thin fa-diagram-successor"></i>

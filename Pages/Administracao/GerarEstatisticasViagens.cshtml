@@ -5,9 +5,9 @@
 @{
     ViewData["Title"] = "Gerar Estatísticas de Viagens";
     ViewData["PageName"] = "gerar_estatisticas_viagens_index";
-    ViewData["Heading"] = "<i class='fad fa-chart-line'></i> Atualização: <span class='fw-300'>Estatísticas de Viagens</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-chart-line'></i> Atualização: <span class='fw-300'>Estatísticas de Viagens</span>";
     ViewData["Category1"] = "Administração";
-    ViewData["PageIcon"] = "fal fa-chart-line";
+    ViewData["PageIcon"] = "fa-duotone fa-chart-line";
 }
 
 @section HeadBlock {
@@ -158,13 +158,20 @@
 <div class="row">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
+            <!-- ===== HEADER FROTIX ===== -->
+            <div class="ftx-card-header">
+                <h2 class="titulo-paginas">
+                    <i class="fa-duotone fa-chart-pie"></i>
+                    Geração de Estatísticas de Viagens
+                </h2>
+            </div>
+
             <div class="panel-container show">
                 <div class="panel-content">
                     <div class="row">
-                        <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                            <h2 class="text-primary">Serviços de Geração das Estatísticas de Viagens</h2>
+                        <div class="col-12">
                             <p class="text-muted mb-3">
-                                <i class="fal fa-info-circle"></i>
+                                <i class="fa-duotone fa-info-circle"></i>
                                 Esta operação irá processar e armazenar as estatísticas consolidadas de todas as viagens no sistema.
                             </p>
                         </div>
@@ -173,7 +180,7 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <button id="btnGerarEstatisticas" class="btn fundo-azul form-control">
-                                <i class="fad fa-play-circle"></i> Iniciar Geração das Estatísticas
+                                <i class="fa-duotone fa-play-circle"></i> Iniciar Geração das Estatísticas
                             </button>
                         </div>
                     </div>
@@ -277,7 +284,7 @@
                 const btn = $("#btnGerarEstatisticas");
                 btn.addClass("btn-processing");
                 btn.prop("disabled", true);
-                btn.html('<i class="fad fa-spinner-third fa-spin"></i> Processando...');
+                btn.html('<i class="fa-duotone fa-spinner-third fa-spin"></i> Processando...');
             } catch (error) {
                 Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "marcarBotaoProcessando", error);
             }
@@ -288,7 +295,7 @@
                 const btn = $("#btnGerarEstatisticas");
                 btn.removeClass("btn-processing");
                 btn.prop("disabled", false);
-                btn.html('<i class="fad fa-play-circle"></i> Iniciar Geração das Estatísticas');
+                btn.html('<i class="fa-duotone fa-play-circle"></i> Iniciar Geração das Estatísticas');
             } catch (error) {
                 Alerta.TratamentoErroComLinha("GerarEstatisticasViagens.cshtml", "desmarcarBotaoProcessando", error);
             }

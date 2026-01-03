@@ -6,9 +6,9 @@
 @{
     ViewData["Title"] = "Empenhos";
     ViewData["PageName"] = "empenho_index";
-    ViewData["Heading"] = "<i class='fad fa-money-check-alt'></i> Cadastros: <span class='fw-300'>Empenhos</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-money-check-alt'></i> Cadastros: <span class='fw-300'>Empenhos</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-money-check-alt";
+    ViewData["PageIcon"] = "fa-duotone fa-money-check-alt";
 }
 
 <style>
@@ -441,7 +441,7 @@
                             {
                                 <div class="ftx-card-actions">
                                     <span class="badge" style="background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.95rem; color: #ffd700;">
-                                        <i class="fa-duotone fa-hashtag me-1"></i>@Model.EmpenhoObj.Empenho.NotaEmpenho
+                                        <i class="fa-duotone fa-hashtag me-1 icon-pulse me-1"></i>@Model.EmpenhoObj.Empenho.NotaEmpenho
                                     </span>
                                 </div>
                             }
@@ -680,7 +680,7 @@
 
                                         <div class="col-12 col-md-4">
                                             <a asp-page="./Index" class="ftx-btn ftx-btn-vinho w-100">
-                                                <i class="fa-solid fa-rotate-left"></i> Voltar à Lista
+                                                <i class="fa-duotone fa-rotate-left"></i> Voltar à Lista
                                             </a>
                                         </div>
                                     </div>
@@ -818,7 +818,7 @@
                     <i class="fa-duotone fa-check"></i> Salvar Aporte
                 </button>
                 <button type="button" class="ftx-btn ftx-btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-xmark"></i> Fechar
+                    <i class="fa-duotone fa-xmark"></i> Fechar
                 </button>
             </div>
         </div>
@@ -879,7 +879,7 @@
                     <i class="fa-duotone fa-check"></i> Salvar Anulação
                 </button>
                 <button type="button" class="ftx-btn ftx-btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-xmark"></i> Fechar
+                    <i class="fa-duotone fa-xmark"></i> Fechar
                 </button>
             </div>
         </div>
@@ -915,7 +915,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="ftx-btn ftx-btn-vinho" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-xmark"></i> Fechar
+                    <i class="fa-duotone fa-xmark"></i> Fechar
                 </button>
             </div>
         </div>

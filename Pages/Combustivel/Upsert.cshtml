@@ -34,12 +34,13 @@
     <div class="row">
         <div class="col-xl-12">
             <div id="panel-1" class="panel">
-                <h2 class="titulo-paginas mb-0">
-                    <i class="fa-duotone fa-gas-pump"></i>
-                    @(Model.CombustivelObj.CombustivelId != Guid.Empty ? "Atualizar " : "Criar ") Tipo de Combustível
-                </h2>
-                <!-- Linha divisória -->
-                <div class="col-12" style="border-bottom:1px solid #325d88"></div>
+                <!-- ===== HEADER FROTIX ===== -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-gas-pump"></i>
+                        @(Model.CombustivelObj.CombustivelId != Guid.Empty ? "Atualizar " : "Criar ") Tipo de Combustível
+                    </h2>
+                </div>
 
                 <div class="panel-container show">
                     <div class="panel-content">
@@ -82,7 +83,7 @@
                                         </div>
                                         <div class="col-6">
                                             <a asp-page="./Index" class="btn btn-vinho form-control" data-ejtip="Voltar para a lista de tipos de combustível">
-                                                <i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+                                                <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
                                                 Voltar à Lista
                                             </a>
                                         </div>

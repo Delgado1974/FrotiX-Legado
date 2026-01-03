@@ -4,9 +4,25 @@
 @{
     ViewData["Title"] = "Infrações";
     ViewData["PageName"] = "multa_tiposmulta";
-    ViewData["Heading"] = "<i class='fad fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Infrações</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Infrações</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-ballot-check";
+    ViewData["PageIcon"] = "fa-duotone fa-ballot-check";
+}
+
+@section HeadBlock {
+	<style>
+		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+	</style>
 }
 
 @Html.AntiForgeryToken()
@@ -19,12 +35,12 @@
                 <!-- HEADER PADRÃO FROTIX -->
                 <div class="ftx-card-header">
                     <h2 class="titulo-paginas">
-                        <i class="fad fa-list-check"></i>
+                        <i class="fa-duotone fa-list-check"></i>
                         Infrações de Trânsito
                     </h2>
                     <div class="ftx-card-actions">
-                        <a href="/Multa/UpsertTipoMulta" class="btn btn-header-orange">
-                            <i class="fad fa-plus-circle"></i>
+                        <a href="/Multa/UpsertTipoMulta" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-plus-circle icon-pulse me-1"></i>
                             Nova Infração
                         </a>
                     </div>
@@ -171,13 +187,13 @@
                                     const edit = `<a href="/Multa/UpsertTipoMulta?id=${data}" 
                                                      class="btn btn-sm btn-azul text-white btn-icon-28" 
                                                      data-ejtip="Editar Infração">
-                                                     <i class="fad fa-edit"></i>
+                                                     <i class="fa-duotone fa-edit"></i>
                                                   </a>`;
                                     const del = `<button type="button" 
                                                          class="btn btn-sm btn-vinho text-white btn-icon-28 btn-delete" 
                                                          data-id="${data}" 
                                                          data-ejtip="Excluir Infração">
-                                                         <i class="fad fa-trash-alt"></i>
+                                                         <i class="fa-duotone fa-trash-alt"></i>
                                                  </button>`;
                                     return `<div class="d-flex justify-content-center gap-1">${edit}${del}</div>`;
                                 } catch (error) {

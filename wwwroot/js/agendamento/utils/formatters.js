@@ -113,10 +113,12 @@ window.calcularDistanciaViagem = function ()
     {
         const kmInicialStr = $("#txtKmInicial").val();
         const kmFinalStr = $("#txtKmFinal").val();
+        const txtQuilometragem = $("#txtQuilometragem");
 
         if (!kmInicialStr || !kmFinalStr)
         {
-            $("#txtKmPercorrido").val("");
+            txtQuilometragem.val("");
+            txtQuilometragem.removeClass("distancia-alerta");
             return;
         }
 
@@ -125,12 +127,23 @@ window.calcularDistanciaViagem = function ()
 
         if (isNaN(kmInicial) || isNaN(kmFinal))
         {
-            $("#txtKmPercorrido").val("");
+            txtQuilometragem.val("");
+            txtQuilometragem.removeClass("distancia-alerta");
             return;
         }
 
         const kmPercorrido = Math.round(kmFinal - kmInicial);
-        $("#txtQuilometragem").val(kmPercorrido);
+        txtQuilometragem.val(kmPercorrido);
+
+        // Aplicar estilo vermelho negrito se > 100km
+        if (kmPercorrido > 100)
+        {
+            txtQuilometragem.addClass("distancia-alerta");
+        }
+        else
+        {
+            txtQuilometragem.removeClass("distancia-alerta");
+        }
     } catch (error)
     {
         Alerta.TratamentoErroComLinha("formatters.js", "calcularDistanciaViagem", error);

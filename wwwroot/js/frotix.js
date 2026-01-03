@@ -550,3 +550,179 @@ function removeRippleFromElement(element)
 // Expõe funções auxiliares globalmente
 window.addRippleToElement = addRippleToElement;
 window.removeRippleFromElement = removeRippleFromElement;
+
+/* ================================================================
+   SISTEMA DATA-FTX-LOADING - SPINNER EM BOTÕES/LINKS AO CLICAR
+   Padrão FrotiX: Adiciona spinner automático em elementos com data-ftx-loading
+   ================================================================ */
+
+(function initFtxLoadingSystem() {
+    'use strict';
+
+    // Configuração do sistema
+    const FTX_LOADING_CONFIG = {
+        spinnerClass: 'fa-duotone fa-spinner-third fa-spin',
+        loadingClass: 'ftx-btn-loading',
+        timeout: 30000, // 30 segundos para timeout
+        disableOnClick: true
+    };
+
+    // Seletor de elementos que terão loading automático
+    const LOADING_SELECTOR = '[data-ftx-loading]';
+
+    /**
+     * Aplica o estado de loading em um elemento
+     * @param {HTMLElement} element - Botão ou link
+     */
+    function applyLoading(element) {
+        if (!element || element.classList.contains(FTX_LOADING_CONFIG.loadingClass)) {
+            return false;
+        }
+
+        // Salva estado original
+        const icon = element.querySelector('i[class*="fa-"]');
+        if (icon) {
+            element.dataset.ftxOriginalIcon = icon.className;
+            icon.className = FTX_LOADING_CONFIG.spinnerClass;
+        } else {
+            // Se não tem ícone, adiciona um spinner no início
+            const spinner = document.createElement('i');
+            spinner.className = FTX_LOADING_CONFIG.spinnerClass + ' me-1';
+            spinner.dataset.ftxTempSpinner = 'true';
+            element.insertBefore(spinner, element.firstChild);
+        }
+
+        // Salva largura para evitar "pulo"
+        const rect = element.getBoundingClientRect();
+        element.style.minWidth = rect.width + 'px';
+
+        // Marca como loading
+        element.classList.add(FTX_LOADING_CONFIG.loadingClass);
+
+        // Desabilita para evitar duplo clique
+        if (FTX_LOADING_CONFIG.disableOnClick) {
+            if (element.tagName === 'BUTTON' || element.tagName === 'INPUT') {
+                element.disabled = true;
+            }
+            element.style.pointerEvents = 'none';
+        }
+
+        // Timeout para restaurar (caso a página não navegue)
+        element._ftxLoadingTimeout = setTimeout(() => {
+            resetLoading(element);
+        }, FTX_LOADING_CONFIG.timeout);
+
+        return true;
+    }
+
+    /**
+     * Remove o estado de loading de um elemento
+     * @param {HTMLElement} element - Botão ou link
+     */
+    function resetLoading(element) {
+        if (!element || !element.classList.contains(FTX_LOADING_CONFIG.loadingClass)) {
+            return;
+        }
+
+        // Limpa timeout
+        if (element._ftxLoadingTimeout) {
+            clearTimeout(element._ftxLoadingTimeout);
+            element._ftxLoadingTimeout = null;
+        }
+
+        // Remove spinner temporário
+        const tempSpinner = element.querySelector('[data-ftx-temp-spinner]');
+        if (tempSpinner) {
+            tempSpinner.remove();
+        }
+
+        // Restaura ícone original
+        const icon = element.querySelector('i[class*="fa-spin"]');
+        if (icon && element.dataset.ftxOriginalIcon) {
+            icon.className = element.dataset.ftxOriginalIcon;
+            delete element.dataset.ftxOriginalIcon;
+        }
+
+        // Remove classe e estilos
+        element.classList.remove(FTX_LOADING_CONFIG.loadingClass);
+        element.style.minWidth = '';
+        element.style.pointerEvents = '';
+
+        // Reabilita
+        if (element.tagName === 'BUTTON' || element.tagName === 'INPUT') {
+            element.disabled = false;
+        }
+    }
+
+    /**
+     * Handler de clique com delegação
+     */
+    function handleLoadingClick(event) {
+        const target = event.target.closest(LOADING_SELECTOR);
+        
+        if (!target) return;
+
+        // Evita duplo clique
+        if (target.classList.contains(FTX_LOADING_CONFIG.loadingClass)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
+        // Aplica loading
+        applyLoading(target);
+    }
+
+    // Registra listener global com delegação
+    document.addEventListener('click', handleLoadingClick, true);
+
+    // Reseta loading quando página volta do cache (bfcache)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Página veio do cache, reseta todos os loadings
+            document.querySelectorAll('.' + FTX_LOADING_CONFIG.loadingClass).forEach(resetLoading);
+        }
+    });
+
+    // Expõe funções globalmente
+    window.FtxLoading = {
+        apply: applyLoading,
+        reset: resetLoading,
+        resetAll: function() {
+            document.querySelectorAll('.' + FTX_LOADING_CONFIG.loadingClass).forEach(resetLoading);
+        }
+    };
+
+    // console.log('🔄 FrotiX Loading System initialized');
+})();
+
+/* ================================================================
+   CSS INLINE PARA LOADING (caso não esteja no frotix.css)
+   ================================================================ */
+(function injectLoadingStyles() {
+    const styleId = 'ftx-loading-styles';
+    if (document.getElementById(styleId)) return;
+
+    const css = `
+        /* FrotiX Loading State */
+        .ftx-btn-loading {
+            position: relative;
+            cursor: wait !important;
+            opacity: 0.85;
+        }
+        
+        .ftx-btn-loading i.fa-spin {
+            animation: ftx-spin 0.8s linear infinite;
+        }
+        
+        @keyframes ftx-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = css;
+    document.head.appendChild(style);
+})();

@@ -6,9 +6,9 @@
 @{
 	ViewData["Title"] = "Setor Patrimonial";
 	ViewData["PageName"] = "setorpatrimonial_upsert";
-	ViewData["Heading"] = "<i class='fa-duotone fa-solid fa-chess-rook'></i> Cadastros: <span class='fw-300'>Setor Patrimonial</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-chess-rook'></i> Cadastros: <span class='fw-300'>Setor Patrimonial</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-regular fa-chess-rook";
+	ViewData["PageIcon"] = "fa-duotone fa-chess-rook";
 }
 
 <style>
@@ -60,6 +60,14 @@
 		<div class="col-xl-12">
 			<div id="panel-1" class="panel">
 				<div id="painelfundo" class="panel-container show espacofundo">
+					<!-- HEADER DO CARD -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
+							<i class="fa-duotone fa-warehouse"></i>
+							@(Model.SetorObj.SetorId != Guid.Empty ? "Atualizar " : "Criar ")Setor Patrimonial
+						</h2>
+					</div>
+
 					<div class="panel-content">
 						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -69,13 +77,6 @@
 						{
 							<input type="hidden" name="SetorObj.SetorId" value="@Model.SetorObj.SetorId" />
 						}
-
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="titulo-paginas">
-								<i class="fa-duotone fa-solid fa-warehouse"></i>
-								&nbsp;@(Model.SetorObj.SetorId != Guid.Empty ? "Atualizar " : "Criar ")Setor Patrimonial
-							</h2>
-						</div>
 
 						<div class="col-12 pt-3">
 							<div class="row mb-6">
@@ -151,7 +152,7 @@
 										</div>
 										<div class="col-6 float-right">
 											<a asp-page="./Index" class="btn btn-vinho form-control" style="width:300px" data-ejtip="Voltar para a lista de setores patrimoniais">
-												<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+												<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
 												&nbsp;&nbsp;Voltar à Lista
 											</a>
 										</div>

@@ -3,10 +3,10 @@
 
 @{
     ViewData["Title"] = "Itens dos Contratos e Atas";
-    ViewData["PageName"] = "itenscontrato";
-    ViewData["Heading"] = "<i class='fad fa-sitemap'></i> Cadastros: <span class='fw-300'>Itens dos Contratos e Atas</span>";
+    ViewData["PageName"] = "itenscontrato_index";
+    ViewData["Heading"] = "<i class='fa-duotone fa-sitemap'></i> Cadastros: <span class='fw-300'>Itens dos Contratos e Atas</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fad fa-sitemap";
+    ViewData["PageIcon"] = "fa-duotone fa-sitemap";
 }
 
 @section HeadBlock {
@@ -389,12 +389,12 @@
         justify-content: center;
     }
 
-    .btn-action.btn-danger {
+    .btn-action.btn-vinho {
         background: var(--danger-color);
         color: white;
     }
 
-    .btn-action.btn-danger:hover {
+    .btn-action.btn-vinho:hover {
         background: #c82333;
         transform: scale(1.1);
         box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
@@ -549,11 +549,11 @@
     }
 
     /* Estado loading do botão salvar */
-    .btn-success.loading .icon-default {
+    .btn-verde.loading .icon-default {
         display: none !important;
     }
 
-    .btn-success.loading .spinner {
+    .btn-verde.loading .spinner {
         display: inline-block !important;
     }
 
@@ -601,7 +601,7 @@
             <!-- Header Padrão FrotiX -->
             <div class="ftx-card-header">
                 <h2 class="titulo-paginas">
-                    <i class="fad fa-sitemap"></i>
+                    <i class="fa-duotone fa-sitemap"></i>
                     Itens dos Contratos e Atas
                 </h2>
             </div>
@@ -612,10 +612,10 @@
                     <!-- Switch Contrato/Ata - Segmented Control -->
                     <div class="segmented-control">
                         <button type="button" class="seg-btn active" id="btnSwitchContrato" onclick="switchTipo('contrato')">
-                            <i class="fad fa-file-contract"></i> CONTRATOS
+                            <i class="fa-duotone fa-file-contract"></i> CONTRATOS
                         </button>
                         <button type="button" class="seg-btn" id="btnSwitchAta" onclick="switchTipo('ata')">
-                            <i class="fad fa-clipboard-list"></i> ATAS DE REGISTRO DE PREÇOS
+                            <i class="fa-duotone fa-clipboard-list"></i> ATAS DE REGISTRO DE PREÇOS
                         </button>
                     </div>
 
@@ -654,7 +654,7 @@
                     <div class="resumo-card" id="resumoContrato">
                         <div class="resumo-header">
                             <div class="resumo-title">
-                                <i class="fad fa-file-contract"></i>
+                                <i class="fa-duotone fa-file-contract"></i>
                                 <span id="resumoContratoNumero">Contrato</span>
                             </div>
                             <span class="resumo-badge locacao" id="resumoContratoBadge">LOCAÇÃO</span>
@@ -683,7 +683,7 @@
                     <div class="resumo-card" id="resumoAta">
                         <div class="resumo-header">
                             <div class="resumo-title">
-                                <i class="fad fa-clipboard-list"></i>
+                                <i class="fa-duotone fa-clipboard-list"></i>
                                 <span id="resumoAtaNumero">Ata</span>
                             </div>
                             <span class="resumo-badge locacao">ATA</span>
@@ -710,7 +710,7 @@
 
                     <!-- Resumo Serviço (sem TabStrip) -->
                     <div class="resumo-servico" id="resumoServico">
-                        <i class="fad fa-tools"></i>
+                        <i class="fa-duotone fa-tools"></i>
                         <h5>Contrato de Serviço</h5>
                         <p>Contratos de serviço não possuem itens vinculados.</p>
                     </div>
@@ -720,31 +720,31 @@
                         <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
                             <li class="nav-item" id="navItemVeiculos" style="display:none;">
                                 <a class="nav-link" id="tabVeiculos" data-bs-toggle="tab" href="#paneVeiculos" role="tab">
-                                    <i class="fad fa-car"></i> Veículos
+                                    <i class="fa-duotone fa-car"></i> Veículos
                                     <span class="badge" id="badgeVeiculos">0</span>
                                 </a>
                             </li>
                             <li class="nav-item" id="navItemEncarregados" style="display:none;">
                                 <a class="nav-link" id="tabEncarregados" data-bs-toggle="tab" href="#paneEncarregados" role="tab">
-                                    <i class="fad fa-user-tie"></i> Encarregados
+                                    <i class="fa-duotone fa-user-tie"></i> Encarregados
                                     <span class="badge" id="badgeEncarregados">0</span>
                                 </a>
                             </li>
                             <li class="nav-item" id="navItemOperadores" style="display:none;">
                                 <a class="nav-link" id="tabOperadores" data-bs-toggle="tab" href="#paneOperadores" role="tab">
-                                    <i class="fad fa-user-cog"></i> Operadores
+                                    <i class="fa-duotone fa-user-cog"></i> Operadores
                                     <span class="badge" id="badgeOperadores">0</span>
                                 </a>
                             </li>
                             <li class="nav-item" id="navItemMotoristas" style="display:none;">
                                 <a class="nav-link" id="tabMotoristas" data-bs-toggle="tab" href="#paneMotoristas" role="tab">
-                                    <i class="fad fa-steering-wheel"></i> Motoristas
+                                    <i class="fa-duotone fa-steering-wheel"></i> Motoristas
                                     <span class="badge" id="badgeMotoristas">0</span>
                                 </a>
                             </li>
                             <li class="nav-item" id="navItemLavadores" style="display:none;">
                                 <a class="nav-link" id="tabLavadores" data-bs-toggle="tab" href="#paneLavadores" role="tab">
-                                    <i class="fad fa-soap"></i> Lavadores
+                                    <i class="fa-duotone fa-soap"></i> Lavadores
                                     <span class="badge" id="badgeLavadores">0</span>
                                 </a>
                             </li>
@@ -759,26 +759,26 @@
                                         <span id="spanCustoVeiculos"> | Custo Mensal: <strong id="custoMensalVeiculos">R$ 0,00</strong></span>
                                     </div>
                                     <button type="button" class="btn-incluir" onclick="abrirModalVeiculo()">
-                                        <i class="fad fa-plus"></i> Incluir Veículo
+                                        <i class="fa-duotone fa-plus"></i> Incluir Veículo
                                     </button>
                                 </div>
-                                
+
                                 <!-- Filtro por Item -->
                                 <div class="filtro-item-container">
                                     <div class="filtro-item-group">
-                                        <label for="ddlFiltroItem"><i class="fad fa-filter"></i> Filtrar por Item:</label>
+                                        <label for="ddlFiltroItem"><i class="fa-duotone fa-filter"></i> Filtrar por Item:</label>
                                         <select id="ddlFiltroItem" class="form-control">
                                             <option value="">-- Todos os Itens --</option>
                                         </select>
                                         <button type="button" class="btn-filtrar" onclick="filtrarPorItem()">
-                                            <i class="fad fa-search"></i> Filtrar
+                                            <i class="fa-duotone fa-search"></i> Filtrar
                                         </button>
                                         <button type="button" class="btn-limpar-filtro" onclick="limparFiltroItem()" title="Limpar Filtro">
-                                            <i class="fad fa-times"></i>
+                                            <i class="fa-duotone fa-times"></i>
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <div class="table-container">
                                     <table id="tblVeiculos" class="table table-bordered table-striped w-100">
                                         <thead>
@@ -796,11 +796,11 @@
                                 <!-- Card Contadores Veículos -->
                                 <div class="card-contadores" id="cardContadoresVeiculos">
                                     <div class="contador ativos">
-                                        <i class="fad fa-check-circle"></i>
+                                        <i class="fa-duotone fa-check-circle"></i>
                                         <span>Veículos Ativos: <strong id="qtdVeiculosAtivos">0</strong></span>
                                     </div>
                                     <div class="contador inativos">
-                                        <i class="fad fa-times-circle"></i>
+                                        <i class="fa-duotone fa-times-circle"></i>
                                         <span>Veículos Inativos: <strong id="qtdVeiculosInativos">0</strong></span>
                                     </div>
                                 </div>
@@ -814,7 +814,7 @@
                                         | Custo Mensal: <strong id="custoMensalEncarregados">R$ 0,00</strong>
                                     </div>
                                     <button type="button" class="btn-incluir" onclick="abrirModalEncarregado()">
-                                        <i class="fad fa-plus"></i> Incluir Encarregado
+                                        <i class="fa-duotone fa-plus"></i> Incluir Encarregado
                                     </button>
                                 </div>
                                 <div class="table-container">
@@ -841,7 +841,7 @@
                                         | Custo Mensal: <strong id="custoMensalOperadores">R$ 0,00</strong>
                                     </div>
                                     <button type="button" class="btn-incluir" onclick="abrirModalOperador()">
-                                        <i class="fad fa-plus"></i> Incluir Operador
+                                        <i class="fa-duotone fa-plus"></i> Incluir Operador
                                     </button>
                                 </div>
                                 <div class="table-container">
@@ -868,7 +868,7 @@
                                         | Custo Mensal: <strong id="custoMensalMotoristas">R$ 0,00</strong>
                                     </div>
                                     <button type="button" class="btn-incluir" onclick="abrirModalMotorista()">
-                                        <i class="fad fa-plus"></i> Incluir Motorista
+                                        <i class="fa-duotone fa-plus"></i> Incluir Motorista
                                     </button>
                                 </div>
                                 <div class="table-container">
@@ -896,7 +896,7 @@
                                         | Custo Mensal: <strong id="custoMensalLavadores">R$ 0,00</strong>
                                     </div>
                                     <button type="button" class="btn-incluir" onclick="abrirModalLavador()">
-                                        <i class="fad fa-plus"></i> Incluir Lavador
+                                        <i class="fa-duotone fa-plus"></i> Incluir Lavador
                                     </button>
                                 </div>
                                 <div class="table-container">
@@ -928,7 +928,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header ftx-modal-header">
-                <h5 class="modal-title"><i class="fad fa-car"></i> Incluir Veículo</h5>
+                <h5 class="modal-title"><i class="fa-duotone fa-car"></i> Incluir Veículo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -947,11 +947,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fad fa-times me-1"></i> Cancelar
+                    <i class="fa-duotone fa-times me-1"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-success" id="btnSalvarVeiculo" onclick="salvarVeiculo()">
-                    <i class="fad fa-save me-1 icon-default"></i>
-                    <i class="fad fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
+                <button type="button" class="btn btn-verde" id="btnSalvarVeiculo" onclick="salvarVeiculo()">
+                    <i class="fa-duotone fa-save me-1 icon-pulse"></i>
+                    <i class="fa-duotone fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
                     Salvar
                 </button>
             </div>
@@ -964,7 +964,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header ftx-modal-header">
-                <h5 class="modal-title"><i class="fad fa-user-tie"></i> Incluir Encarregado</h5>
+                <h5 class="modal-title"><i class="fa-duotone fa-user-tie"></i> Incluir Encarregado</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -977,11 +977,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fad fa-times me-1"></i> Cancelar
+                    <i class="fa-duotone fa-times me-1"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-success" id="btnSalvarEncarregado" onclick="salvarEncarregado()">
-                    <i class="fad fa-save me-1 icon-default"></i>
-                    <i class="fad fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
+                <button type="button" class="btn btn-verde" id="btnSalvarEncarregado" onclick="salvarEncarregado()">
+                    <i class="fa-duotone fa-save me-1 icon-pulse"></i>
+                    <i class="fa-duotone fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
                     Salvar
                 </button>
             </div>
@@ -994,7 +994,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header ftx-modal-header">
-                <h5 class="modal-title"><i class="fad fa-user-cog"></i> Incluir Operador</h5>
+                <h5 class="modal-title"><i class="fa-duotone fa-user-cog"></i> Incluir Operador</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -1007,11 +1007,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fad fa-times me-1"></i> Cancelar
+                    <i class="fa-duotone fa-times me-1"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-success" id="btnSalvarOperador" onclick="salvarOperador()">
-                    <i class="fad fa-save me-1 icon-default"></i>
-                    <i class="fad fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
+                <button type="button" class="btn btn-verde" id="btnSalvarOperador" onclick="salvarOperador()">
+                    <i class="fa-duotone fa-save me-1 icon-pulse"></i>
+                    <i class="fa-duotone fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
                     Salvar
                 </button>
             </div>
@@ -1024,7 +1024,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header ftx-modal-header">
-                <h5 class="modal-title"><i class="fad fa-steering-wheel"></i> Incluir Motorista</h5>
+                <h5 class="modal-title"><i class="fa-duotone fa-steering-wheel"></i> Incluir Motorista</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -1037,11 +1037,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fad fa-times me-1"></i> Cancelar
+                    <i class="fa-duotone fa-times me-1"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-success" id="btnSalvarMotorista" onclick="salvarMotorista()">
-                    <i class="fad fa-save me-1 icon-default"></i>
-                    <i class="fad fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
+                <button type="button" class="btn btn-verde" id="btnSalvarMotorista" onclick="salvarMotorista()">
+                    <i class="fa-duotone fa-save me-1 icon-pulse"></i>
+                    <i class="fa-duotone fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
                     Salvar
                 </button>
             </div>
@@ -1054,7 +1054,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header ftx-modal-header">
-                <h5 class="modal-title"><i class="fad fa-soap"></i> Incluir Lavador</h5>
+                <h5 class="modal-title"><i class="fa-duotone fa-soap"></i> Incluir Lavador</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -1067,11 +1067,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fad fa-times me-1"></i> Cancelar
+                    <i class="fa-duotone fa-times me-1"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-success" id="btnSalvarLavador" onclick="salvarLavador()">
-                    <i class="fad fa-save me-1 icon-default"></i>
-                    <i class="fad fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
+                <button type="button" class="btn btn-verde" id="btnSalvarLavador" onclick="salvarLavador()">
+                    <i class="fa-duotone fa-save me-1 icon-pulse"></i>
+                    <i class="fa-duotone fa-spinner-third fa-spin me-1 spinner" style="display:none;"></i>
                     Salvar
                 </button>
             </div>

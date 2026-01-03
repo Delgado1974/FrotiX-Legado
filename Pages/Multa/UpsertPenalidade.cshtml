@@ -8,9 +8,9 @@
 @{
 	ViewData["Title"] = "Notificações";
 	ViewData["PageName"] = "multa_upsertpenalidade";
-	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Cadastros: <span class='fw-300'>Notificação de Penalidade</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-pen-to-square'></i> Cadastros: <span class='fw-300'>Notificação de Penalidade</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-pen-to-square";
+	ViewData["PageIcon"] = "fa-duotone fa-pen-to-square";
 }
 
 @section HeadBlock {
@@ -63,6 +63,12 @@
 			color: #495057;
 		}
 
+		/* ===== ÍCONE DUOTONE NO HEADER ===== */
+		.ftx-card-header .titulo-paginas i {
+			--fa-primary-color: #fff !important;
+			--fa-secondary-color: #C67750 !important;
+		}
+
 		input[type=checkbox] {
 			vertical-align: middle;
 			position: relative;
@@ -84,11 +90,6 @@
 
 		.e-pv-toolbar {
 			border-radius: .25rem;
-		}
-
-		#txtValorAteVencimento .e-input-group input,
-		#txtValorPosVencimento .e-input-group input {
-			text-align: right !important;
 		}
 
 		/* ====== BOTÕES DE AÇÃO - COM SOMBREADO FORTE ====== */
@@ -330,41 +331,41 @@
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.NumInfracao"></label>
 										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.NumInfracao"></span>
-										<input id="txtNumInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.NumInfracao" data-ejtip="Número da Infração" />
+										<input id="txtNumInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.NumInfracao" />
 									</div>
 								</div>
 								<div class="col-6 col-md-2 col-xl-2">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Data"></label>
 										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Data"></span>
-										<input id="txtDataInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Data" type="date" data-ejtip="Data da Infração" />
+										<input id="txtDataInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Data" type="date" />
 									</div>
 								</div>
 								<div class="col-6 col-md-2 col-xl-2">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Hora"></label>
 										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Hora"></span>
-										<input id="txtHoraInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Hora" type="time" data-ejtip="Hora da Infração" />
+										<input id="txtHoraInfracao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Hora" type="time" />
 									</div>
 								</div>
 								<div class="col-6 col-md-2 col-xl-2">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.DataNotificacao"></label>
 										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.DataNotificacao"></span>
-										<input id="txtDataNotificacao" class="form-control form-control-xs" asp-for="MultaObj.Multa.DataNotificacao" type="date" data-ejtip="Data de Notificação" />
+										<input id="txtDataNotificacao" class="form-control form-control-xs" asp-for="MultaObj.Multa.DataNotificacao" type="date" />
 									</div>
 								</div>
 								<div class="col-6 col-md-2 col-xl-2">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.DataLimite"></label>
 										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.DataLimite"></span>
-										<input id="txtDataLimite" class="form-control form-control-xs" asp-for="MultaObj.Multa.DataLimite" type="date" data-ejtip="Data Limite para Pagamento" />
+										<input id="txtDataLimite" class="form-control form-control-xs" asp-for="MultaObj.Multa.DataLimite" type="date" />
 									</div>
 								</div>
 								<div class="col-6 col-md-2 col-xl-2">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Vencimento"></label>
-										<input id="txtVencimento" class="form-control form-control-xs" asp-for="MultaObj.Multa.Vencimento" type="date" data-ejtip="Data de Vencimento" />
+										<input id="txtVencimento" class="form-control form-control-xs" asp-for="MultaObj.Multa.Vencimento" type="date" />
 									</div>
 								</div>
 							</div>
@@ -374,21 +375,21 @@
 									<label class="label font-weight-bold" asp-for="MultaObj.Multa.ValorAteVencimento"></label>
 									<span class="text-danger" asp-validation-for="MultaObj.Multa.ValorAteVencimento"></span>
 									<input id="txtValorAteVencimento"
-									       class="form-control form-control-xs moeda-brasileira"
-									       style="text-align:right"
-									       asp-for="MultaObj.Multa.ValorAteVencimento"
-									       placeholder="R$ 0,00"
-									       data-ejtip="Valor até o Vencimento" />
+									       class="form-control form-control-xs"
+									       style="text-align: right;"
+									       onkeypress="return moeda(this,'.',',',event)"
+									       placeholder="R$ 0,00" />
+									<input type="hidden" asp-for="MultaObj.Multa.ValorAteVencimento" id="hdnValorAteVencimento" />
 								</div>
 								<div class="col-12 col-md-3 col-xl-3">
 									<label class="label font-weight-bold" asp-for="MultaObj.Multa.ValorPosVencimento"></label>
 									<span class="text-danger" asp-validation-for="MultaObj.Multa.ValorPosVencimento"></span>
 									<input id="txtValorPosVencimento"
-									       class="form-control form-control-xs moeda-brasileira"
-									       style="text-align:right"
-									       asp-for="MultaObj.Multa.ValorPosVencimento"
-									       placeholder="R$ 0,00"
-									       data-ejtip="Valor após o Vencimento" />
+									       class="form-control form-control-xs"
+									       style="text-align: right;"
+									       onkeypress="return moeda(this,'.',',',event)"
+									       placeholder="R$ 0,00" />
+									<input type="hidden" asp-for="MultaObj.Multa.ValorPosVencimento" id="hdnValorPosVencimento" />
 								</div>
 								<div class="col-12 col-md-2 col-xl-2">
 									<label class="label">&nbsp;</label>
@@ -423,7 +424,7 @@
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.Localizacao"></label>
 										<span class="text-danger font-weight-light" asp-validation-for="MultaObj.Multa.Localizacao"></span>
-										<input id="txtLocalizacao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Localizacao" data-ejtip="Local da Infração" />
+										<input id="txtLocalizacao" class="form-control form-control-xs" asp-for="MultaObj.Multa.Localizacao" />
 									</div>
 								</div>
 							</div>
@@ -452,19 +453,19 @@
 								<div class="col-3">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.ProcessoEDoc"></label>
-										<input id="txtProcessoEDoc" class="form-control form-control-xs" asp-for="MultaObj.Multa.ProcessoEDoc" data-ejtip="Número do Processo e-Doc" />
+										<input id="txtProcessoEDoc" class="form-control form-control-xs" asp-for="MultaObj.Multa.ProcessoEDoc" />
 									</div>
 								</div>
 								<div class="col-3">
 									<div class="form-group">
 										<label class="label font-weight-bold" asp-for="MultaObj.Multa.NoFichaVistoria"></label>
-										<input id="txtNoFichaVistoria" class="form-control form-control-xs" asp-for="MultaObj.Multa.NoFichaVistoria" type="number" data-ejtip="Número da Ficha de Vistoria" />
+										<input id="txtNoFichaVistoria" class="form-control form-control-xs" asp-for="MultaObj.Multa.NoFichaVistoria" type="number" />
 									</div>
 								</div>
 								<div class="col-3">
 									<div class="form-group">
 										<label class="label font-weight-bold"></label>
-										<button id="btnFicha" type="button" class="btn btn-fundo-laranja btn-sm" data-bs-toggle="modal" data-bs-target="#modalFicha" style="margin-top: 26px; height: 32px;">
+										<button id="btnFicha" type="button" class="btn btn-fundo-laranja btn-sm" style="margin-top: 26px; height: 32px;" disabled>
 											<i class="fa-duotone fa-magnifying-glass"></i>
 											Ver Ficha
 										</button>
@@ -771,7 +772,141 @@
 		ej.base.setCurrencyCode('BRL');
 	</script>
 
+	<script>
+		// ===== UTILITÁRIOS =====
+		// Converte valor BR para número (ex: "10.000,50" -> 10000.50)
+		function parseCurrencyBR(str) {
+			try {
+				if (!str) return 0;
+				let limpo = String(str)
+					.replace(/\s/g, '')
+					.replace('R$', '')
+					.replace(/\./g, '')
+					.replace(',', '.');
+				return parseFloat(limpo) || 0;
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertPenalidade.cshtml", "parseCurrencyBR", error);
+				return 0;
+			}
+		}
+
+		// Função de formatação de moeda (últimos 2 dígitos = centavos)
+		// Para R$ 1.000,00 digite 100000
+		function moeda(input, sep, dec, event) {
+			try {
+				let digitado = "",
+					i = j = 0,
+					tamanho = tamanho2 = 0,
+					limpo = ajustado = "",
+					tecla = window.Event ? event.which : event.keyCode;
+
+				if (tecla === 13 || tecla === 8) return true;
+
+				digitado = String.fromCharCode(tecla);
+
+				if ("0123456789".indexOf(digitado) === -1) return false;
+
+				// Remove o prefixo R$ para processar apenas números
+				let valorAtual = input.value.replace('R$ ', '');
+
+				for (tamanho = valorAtual.length, i = 0;
+				     i < tamanho && (valorAtual.charAt(i) === "0" || valorAtual.charAt(i) === dec);
+				     i++);
+
+				for (limpo = ""; i < tamanho; i++) {
+					if ("0123456789".indexOf(valorAtual.charAt(i)) !== -1) {
+						limpo += valorAtual.charAt(i);
+					}
+				}
+
+				limpo += digitado;
+				tamanho = limpo.length;
+
+				if (tamanho === 0) {
+					input.value = "";
+				} else if (tamanho === 1) {
+					input.value = "R$ 0" + dec + "0" + limpo;
+				} else if (tamanho === 2) {
+					input.value = "R$ 0" + dec + limpo;
+				} else {
+					for (ajustado = "", j = 0, i = tamanho - 3; i >= 0; i--) {
+						if (j === 3) {
+							ajustado += sep;
+							j = 0;
+						}
+						ajustado += limpo.charAt(i);
+						j++;
+					}
+
+					input.value = "R$ ";
+					tamanho2 = ajustado.length;
+
+					for (i = tamanho2 - 1; i >= 0; i--) {
+						input.value += ajustado.charAt(i);
+					}
+
+					input.value += dec + limpo.substr(tamanho - 2, tamanho);
+				}
+
+				return false;
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertPenalidade.cshtml", "moeda", error);
+				return false;
+			}
+		}
+
+		// Formata número para exibição BR (ex: 10000.50 -> "R$ 10.000,50")
+		function formatCurrencyBR(valor) {
+			try {
+				if (!valor && valor !== 0) return "";
+				return "R$ " + parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertPenalidade.cshtml", "formatCurrencyBR", error);
+				return "";
+			}
+		}
+	</script>
+
 	<script src="~/js/cadastros/upsert_penalidade.js" asp-append-version="true"></script>
+
+	<script>
+		// ===== INICIALIZAÇÃO DOS CAMPOS DE VALOR =====
+		document.addEventListener('DOMContentLoaded', function () {
+			try {
+				// Carrega valores iniciais formatados nos campos visíveis
+				const hdnAteVenc = document.getElementById('hdnValorAteVencimento');
+				const hdnPosVenc = document.getElementById('hdnValorPosVencimento');
+				const txtAteVenc = document.getElementById('txtValorAteVencimento');
+				const txtPosVenc = document.getElementById('txtValorPosVencimento');
+
+				if (hdnAteVenc && txtAteVenc && hdnAteVenc.value) {
+					txtAteVenc.value = formatCurrencyBR(hdnAteVenc.value);
+				}
+				if (hdnPosVenc && txtPosVenc && hdnPosVenc.value) {
+					txtPosVenc.value = formatCurrencyBR(hdnPosVenc.value);
+				}
+
+				// Antes do submit, converte valores para os campos hidden
+				const form = document.querySelector('form');
+				if (form) {
+					form.addEventListener('submit', function (e) {
+						try {
+							if (txtAteVenc && hdnAteVenc) {
+								hdnAteVenc.value = parseCurrencyBR(txtAteVenc.value);
+							}
+							if (txtPosVenc && hdnPosVenc) {
+								hdnPosVenc.value = parseCurrencyBR(txtPosVenc.value);
+							}
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("UpsertPenalidade.cshtml", "form.submit.valores", error);
+						}
+					});
+				}
+			} catch (error) {
+				Alerta.TratamentoErroComLinha("UpsertPenalidade.cshtml", "DOMContentLoaded-Valores", error);
+			}
+		});
+	</script>
 
 	<script>
 		// ===== SPINNER NOS BOTÕES DE SUBMIT =====

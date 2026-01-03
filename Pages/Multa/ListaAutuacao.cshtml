@@ -24,9 +24,9 @@
 
 	ViewData["Title"] = "Multas";
 	ViewData["PageName"] = "multa_listaautuacao";
-	ViewData["Heading"] = "<i class='fad fa-pen-to-square'></i> Multas: <span class='fw-300'>Autuações</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-pen-to-square'></i> Multas: <span class='fw-300'>Autuações</span>";
 	ViewData["Category1"] = "Autuações";
-	ViewData["PageIcon"] = "fad fa-pen-to-square";
+	ViewData["PageIcon"] = "fa-duotone fa-pen-to-square";
 }
 
 @section HeadBlock {
@@ -57,13 +57,13 @@
 			--fa-secondary-color: rgba(255,255,255,0.7) !important;
 		}
 
-		.ftx-card-header .btn-header-orange {
+		.ftx-card-header .btn-fundo-laranja {
 			background: linear-gradient(135deg, var(--ftx-autuacao-laranja) 0%, var(--ftx-autuacao-laranja-hover) 100%) !important;
 			color: #fff !important;
 			border: none !important;
 		}
 
-		.ftx-card-header .btn-header-orange:hover {
+		.ftx-card-header .btn-fundo-laranja:hover {
 			background: linear-gradient(135deg, var(--ftx-autuacao-laranja-hover) 0%, var(--ftx-autuacao-laranja) 100%) !important;
 			color: #fff !important;
 		}
@@ -567,10 +567,10 @@
 					<!-- Header Padrão FrotiX -->
 					<div class="ftx-card-header">
 						<h2 class="titulo-paginas">
-							<i class="fa-duotone fa-solid fa-file-pen"></i>
+							<i class="fa-duotone fa-file-pen"></i>
 							Multas: Lista de Autuações
 						</h2>
-						<a href="/Multa/UpsertAutuacao" class="btn btn-header-orange" data-ejtip="Adicionar nova autuação">
+						<a href="/Multa/UpsertAutuacao" class="btn btn-fundo-laranja" data-ejtip="Adicionar nova autuação">
 							<i class="fa-duotone fa-plus me-2"></i>
 							Adicionar Autuação
 						</a>
@@ -710,7 +710,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-						<i class="fa-solid fa-xmark icon-space"></i>
+						<i class="fa-duotone fa-xmark icon-space"></i>
 						Fechar
 					</button>
 				</div>
@@ -745,7 +745,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="btnFecharExibePDF" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-					<i class="fa-solid fa-xmark icon-space"></i>
+					<i class="fa-duotone fa-xmark icon-space"></i>
 					Fechar
 				</button>
 			</div>
@@ -770,7 +770,7 @@
 
 					<div class="card mb-3">
 						<div class="card-header bg-light">
-							<strong><i class="fa-solid fa-info-circle me-2"></i> Informações da Autuação</strong>
+							<strong><i class="fa-duotone fa-info-circle me-2"></i> Informações da Autuação</strong>
 						</div>
 						<div class="card-body">
 							<div class="row mb-2">
@@ -804,7 +804,7 @@
 
 					<div class="form-group">
 						<label class="label font-weight-bold">
-							<i class="fa-solid fa-flag me-1"></i> Novo Status da Autuação
+							<i class="fa-duotone fa-flag me-1"></i> Novo Status da Autuação
 						</label>
 						<ejs-combobox id="lstStatusAlterado"
 									  placeholder="Selecione o novo status..."
@@ -823,7 +823,7 @@
 					<span class="btn-text">Alterar Status</span>
 				</button>
 				<button id="btnFecharStatus" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-					<i class="fa-solid fa-xmark icon-space"></i>
+					<i class="fa-duotone fa-xmark icon-space"></i>
 					Fechar
 				</button>
 			</div>
@@ -911,7 +911,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="btnFecharTransformaPenalidade" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar modal">
-					<i class="fa-solid fa-xmark icon-space"></i>
+					<i class="fa-duotone fa-xmark icon-space"></i>
 					Fechar
 				</button>
 				<button id="btnTransformaPenalidade" class="btn btn-verde" type="submit" value="SUBMIT" data-ejtip="Confirmar transformação">

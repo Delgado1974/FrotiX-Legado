@@ -210,7 +210,6 @@ namespace FrotiX.Controllers
                     
                     foreach (var item in itens)
                     {
-                        // Se já existe, mantém o mais recente (último adicionado)
                         itensContrato[item.ItemVeiculoId] = (item.NumItem, item.Descricao);
                     }
                 }
@@ -222,12 +221,10 @@ namespace FrotiX.Controllers
 
                 var veiculoIds = veiculosContrato.Select(vc => vc.VeiculoId).ToList();
 
-                // Busca os veículos completos para pegar o ItemVeiculoId (que está na tabela Veiculo)
                 var veiculosCompletos = _unitOfWork.Veiculo.GetAll(
                     filter: v => veiculoIds.Contains(v.VeiculoId)
                 ).ToDictionary(v => v.VeiculoId);
 
-                // Busca ViewVeiculos para dados de exibição (MarcaModelo, etc)
                 var viewVeiculos = _unitOfWork.ViewVeiculos.GetAll(
                     filter: v => veiculoIds.Contains(v.VeiculoId)
                 ).ToDictionary(v => v.VeiculoId);
@@ -238,11 +235,7 @@ namespace FrotiX.Controllers
                     {
                         var viewVeiculo = viewVeiculos[vc.VeiculoId];
                         var veiculoCompleto = veiculosCompletos.ContainsKey(vc.VeiculoId) ? veiculosCompletos[vc.VeiculoId] : null;
-                        
-                        // ItemVeiculoId está na tabela Veiculo
                         var itemVeiculoId = veiculoCompleto?.ItemVeiculoId;
-                        
-                        // Verifica se tem item associado
                         var temItem = itemVeiculoId.HasValue && itensContrato.ContainsKey(itemVeiculoId.Value);
                         var numItem = temItem ? itensContrato[itemVeiculoId.Value].NumItem : (int?)null;
                         var descricaoItem = temItem ? $"Item {itensContrato[itemVeiculoId.Value].NumItem} - {itensContrato[itemVeiculoId.Value].Descricao}" : "";
@@ -262,7 +255,6 @@ namespace FrotiX.Controllers
                     .OrderBy(v => v.placa)
                     .ToList();
 
-                // Conta ativos e inativos
                 var qtdAtivos = veiculos.Count(v => v.status == true);
                 var qtdInativos = veiculos.Count(v => v.status == false);
 
@@ -272,58 +264,6 @@ namespace FrotiX.Controllers
             {
                 Alerta.TratamentoErroComLinha("ItensContratoController.cs", "GetVeiculosContrato", error);
                 return Ok(new { success = false, data = new List<object>() });
-            }
-        }
-
-        // DEBUG: Endpoint temporário para verificar ItemVeiculoId
-        [HttpGet]
-        [Route("DebugItensVeiculos")]
-        public IActionResult DebugItensVeiculos(Guid contratoId)
-        {
-            try
-            {
-                // Busca todas as repactuações
-                var repactuacoes = _unitOfWork.RepactuacaoContrato.GetAll(
-                    filter: r => r.ContratoId == contratoId
-                ).Select(r => new { r.RepactuacaoContratoId, r.DataRepactuacao, r.Descricao }).ToList();
-
-                // Busca todos os itens de todas as repactuações
-                var repactuacaoIds = repactuacoes.Select(r => r.RepactuacaoContratoId).ToList();
-                var itensContrato = _unitOfWork.ItemVeiculoContrato.GetAll(
-                    filter: i => repactuacaoIds.Contains(i.RepactuacaoContratoId)
-                ).Select(i => new { 
-                    i.ItemVeiculoId, 
-                    i.NumItem, 
-                    i.Descricao,
-                    i.RepactuacaoContratoId
-                }).ToList();
-
-                // Busca veículos do contrato
-                var veiculosContrato = _unitOfWork.VeiculoContrato.GetAll(
-                    filter: vc => vc.ContratoId == contratoId
-                ).Select(vc => vc.VeiculoId).ToList();
-
-                // Busca veículos completos com ItemVeiculoId
-                var veiculos = _unitOfWork.Veiculo.GetAll(
-                    filter: v => veiculosContrato.Contains(v.VeiculoId)
-                ).Select(v => new {
-                    v.VeiculoId,
-                    v.Placa,
-                    v.ItemVeiculoId,
-                    ItemVeiculoIdStr = v.ItemVeiculoId.HasValue ? v.ItemVeiculoId.Value.ToString() : "NULL"
-                }).ToList();
-
-                return Ok(new { 
-                    success = true, 
-                    repactuacoes = repactuacoes,
-                    itensDisponiveis = itensContrato,
-                    veiculosComItemId = veiculos
-                });
-            }
-            catch (Exception error)
-            {
-                Alerta.TratamentoErroComLinha("ItensContratoController.cs", "DebugItensVeiculos", error);
-                return Ok(new { success = false, message = error.Message });
             }
         }
 
@@ -411,7 +351,6 @@ namespace FrotiX.Controllers
                     return Ok(new { success = false, message = "Este veículo já está associado ao contrato!" });
                 }
 
-                // Cria vínculo VeiculoContrato
                 var veiculoContrato = new VeiculoContrato
                 {
                     VeiculoId = model.VeiculoId,
@@ -420,7 +359,6 @@ namespace FrotiX.Controllers
 
                 _unitOfWork.VeiculoContrato.Add(veiculoContrato);
 
-                // Se informou ItemVeiculoId, atualiza na tabela Veiculo
                 if (model.ItemVeiculoId.HasValue)
                 {
                     var veiculo = _unitOfWork.Veiculo.GetFirstOrDefault(v => v.VeiculoId == model.VeiculoId);
@@ -457,10 +395,8 @@ namespace FrotiX.Controllers
                     return Ok(new { success = false, message = "Associação não encontrada!" });
                 }
 
-                // Remove a associação VeiculoContrato
                 _unitOfWork.VeiculoContrato.Remove(veiculoContrato);
 
-                // Limpa os campos do veículo
                 var veiculo = _unitOfWork.Veiculo.GetFirstOrDefault(v => v.VeiculoId == model.VeiculoId);
                 if (veiculo != null)
                 {
@@ -481,7 +417,7 @@ namespace FrotiX.Controllers
         }
 
         // ============================================================
-        // ENCARREGADOS DO CONTRATO
+        // ENCARREGADOS DO CONTRATO - Relacionamento 1:N via ContratoId
         // ============================================================
 
         [HttpGet]
@@ -490,19 +426,13 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var encarregadosContrato = _unitOfWork.EncarregadoContrato.GetAll(
-                    filter: ec => ec.ContratoId == contratoId
-                ).ToList();
-
-                var encarregadoIds = encarregadosContrato.Select(ec => ec.EncarregadoId).ToList();
-
                 var encarregados = _unitOfWork.Encarregado.GetAll(
-                    filter: e => encarregadoIds.Contains(e.EncarregadoId)
+                    filter: e => e.ContratoId == contratoId
                 )
                 .Select(e => new
                 {
                     encarregadoId = e.EncarregadoId,
-                    contratoId = contratoId,
+                    contratoId = e.ContratoId,
                     nome = e.Nome,
                     ponto = e.Ponto,
                     celular01 = e.Celular01,
@@ -526,12 +456,8 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var noContrato = _unitOfWork.EncarregadoContrato.GetAll(
-                    filter: ec => ec.ContratoId == contratoId
-                ).Select(ec => ec.EncarregadoId).ToList();
-
                 var encarregados = _unitOfWork.Encarregado.GetAll(
-                    filter: e => e.Status == true && !noContrato.Contains(e.EncarregadoId)
+                    filter: e => e.Status == true && e.ContratoId == Guid.Empty
                 )
                 .Select(e => new
                 {
@@ -556,22 +482,22 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var existe = _unitOfWork.EncarregadoContrato.GetFirstOrDefault(
-                    ec => ec.EncarregadoId == model.EncarregadoId && ec.ContratoId == model.ContratoId
+                var encarregado = _unitOfWork.Encarregado.GetFirstOrDefault(
+                    e => e.EncarregadoId == model.EncarregadoId
                 );
 
-                if (existe != null)
+                if (encarregado == null)
+                {
+                    return Ok(new { success = false, message = "Encarregado não encontrado!" });
+                }
+
+                if (encarregado.ContratoId == model.ContratoId)
                 {
                     return Ok(new { success = false, message = "Este encarregado já está associado ao contrato!" });
                 }
 
-                var encarregadoContrato = new EncarregadoContrato
-                {
-                    EncarregadoId = model.EncarregadoId,
-                    ContratoId = model.ContratoId
-                };
-
-                _unitOfWork.EncarregadoContrato.Add(encarregadoContrato);
+                encarregado.ContratoId = model.ContratoId;
+                _unitOfWork.Encarregado.Update(encarregado);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Encarregado incluído no contrato com sucesso!" });
@@ -589,16 +515,17 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var encarregadoContrato = _unitOfWork.EncarregadoContrato.GetFirstOrDefault(
-                    ec => ec.EncarregadoId == model.EncarregadoId && ec.ContratoId == model.ContratoId
+                var encarregado = _unitOfWork.Encarregado.GetFirstOrDefault(
+                    e => e.EncarregadoId == model.EncarregadoId && e.ContratoId == model.ContratoId
                 );
 
-                if (encarregadoContrato == null)
+                if (encarregado == null)
                 {
-                    return Ok(new { success = false, message = "Associação não encontrada!" });
+                    return Ok(new { success = false, message = "Encarregado não encontrado neste contrato!" });
                 }
 
-                _unitOfWork.EncarregadoContrato.Remove(encarregadoContrato);
+                encarregado.ContratoId = Guid.Empty;
+                _unitOfWork.Encarregado.Update(encarregado);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Encarregado removido do contrato com sucesso!" });
@@ -611,7 +538,7 @@ namespace FrotiX.Controllers
         }
 
         // ============================================================
-        // OPERADORES DO CONTRATO
+        // OPERADORES DO CONTRATO - Relacionamento 1:N via ContratoId
         // ============================================================
 
         [HttpGet]
@@ -620,19 +547,13 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var operadoresContrato = _unitOfWork.OperadorContrato.GetAll(
-                    filter: oc => oc.ContratoId == contratoId
-                ).ToList();
-
-                var operadorIds = operadoresContrato.Select(oc => oc.OperadorId).ToList();
-
                 var operadores = _unitOfWork.Operador.GetAll(
-                    filter: o => operadorIds.Contains(o.OperadorId)
+                    filter: o => o.ContratoId == contratoId
                 )
                 .Select(o => new
                 {
                     operadorId = o.OperadorId,
-                    contratoId = contratoId,
+                    contratoId = o.ContratoId,
                     nome = o.Nome,
                     ponto = o.Ponto,
                     celular01 = o.Celular01,
@@ -656,12 +577,8 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var noContrato = _unitOfWork.OperadorContrato.GetAll(
-                    filter: oc => oc.ContratoId == contratoId
-                ).Select(oc => oc.OperadorId).ToList();
-
                 var operadores = _unitOfWork.Operador.GetAll(
-                    filter: o => o.Status == true && !noContrato.Contains(o.OperadorId)
+                    filter: o => o.Status == true && o.ContratoId == Guid.Empty
                 )
                 .Select(o => new
                 {
@@ -686,22 +603,22 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var existe = _unitOfWork.OperadorContrato.GetFirstOrDefault(
-                    oc => oc.OperadorId == model.OperadorId && oc.ContratoId == model.ContratoId
+                var operador = _unitOfWork.Operador.GetFirstOrDefault(
+                    o => o.OperadorId == model.OperadorId
                 );
 
-                if (existe != null)
+                if (operador == null)
+                {
+                    return Ok(new { success = false, message = "Operador não encontrado!" });
+                }
+
+                if (operador.ContratoId == model.ContratoId)
                 {
                     return Ok(new { success = false, message = "Este operador já está associado ao contrato!" });
                 }
 
-                var operadorContrato = new OperadorContrato
-                {
-                    OperadorId = model.OperadorId,
-                    ContratoId = model.ContratoId
-                };
-
-                _unitOfWork.OperadorContrato.Add(operadorContrato);
+                operador.ContratoId = model.ContratoId;
+                _unitOfWork.Operador.Update(operador);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Operador incluído no contrato com sucesso!" });
@@ -719,16 +636,17 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var operadorContrato = _unitOfWork.OperadorContrato.GetFirstOrDefault(
-                    oc => oc.OperadorId == model.OperadorId && oc.ContratoId == model.ContratoId
+                var operador = _unitOfWork.Operador.GetFirstOrDefault(
+                    o => o.OperadorId == model.OperadorId && o.ContratoId == model.ContratoId
                 );
 
-                if (operadorContrato == null)
+                if (operador == null)
                 {
-                    return Ok(new { success = false, message = "Associação não encontrada!" });
+                    return Ok(new { success = false, message = "Operador não encontrado neste contrato!" });
                 }
 
-                _unitOfWork.OperadorContrato.Remove(operadorContrato);
+                operador.ContratoId = Guid.Empty;
+                _unitOfWork.Operador.Update(operador);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Operador removido do contrato com sucesso!" });
@@ -741,7 +659,7 @@ namespace FrotiX.Controllers
         }
 
         // ============================================================
-        // MOTORISTAS DO CONTRATO
+        // MOTORISTAS DO CONTRATO - Relacionamento 1:N via ContratoId
         // ============================================================
 
         [HttpGet]
@@ -750,25 +668,17 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var motoristasContrato = _unitOfWork.MotoristaContrato.GetAll(
-                    filter: mc => mc.ContratoId == contratoId
-                ).ToList();
-
-                var motoristaIds = motoristasContrato.Select(mc => mc.MotoristaId).ToList();
-
-                var motoristas = _unitOfWork.ViewMotoristas.GetAll(
-                    filter: m => motoristaIds.Contains(m.MotoristaId)
+                var motoristas = _unitOfWork.Motorista.GetAll(
+                    filter: m => m.ContratoId == contratoId
                 )
                 .Select(m => new
                 {
                     motoristaId = m.MotoristaId,
-                    contratoId = contratoId,
+                    contratoId = m.ContratoId,
                     nome = m.Nome,
                     ponto = m.Ponto,
                     cnh = m.CNH,
-                    categoriaCNH = m.CategoriaCNH,
                     celular01 = m.Celular01,
-                    sigla = m.Sigla,
                     status = m.Status
                 })
                 .OrderBy(m => m.nome)
@@ -789,12 +699,8 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var noContrato = _unitOfWork.MotoristaContrato.GetAll(
-                    filter: mc => mc.ContratoId == contratoId
-                ).Select(mc => mc.MotoristaId).ToList();
-
-                var motoristas = _unitOfWork.ViewMotoristas.GetAll(
-                    filter: m => m.Status == true && !noContrato.Contains(m.MotoristaId)
+                var motoristas = _unitOfWork.Motorista.GetAll(
+                    filter: m => m.Status == true && m.ContratoId == Guid.Empty
                 )
                 .Select(m => new
                 {
@@ -819,22 +725,22 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var existe = _unitOfWork.MotoristaContrato.GetFirstOrDefault(
-                    mc => mc.MotoristaId == model.MotoristaId && mc.ContratoId == model.ContratoId
+                var motorista = _unitOfWork.Motorista.GetFirstOrDefault(
+                    m => m.MotoristaId == model.MotoristaId
                 );
 
-                if (existe != null)
+                if (motorista == null)
+                {
+                    return Ok(new { success = false, message = "Motorista não encontrado!" });
+                }
+
+                if (motorista.ContratoId == model.ContratoId)
                 {
                     return Ok(new { success = false, message = "Este motorista já está associado ao contrato!" });
                 }
 
-                var motoristaContrato = new MotoristaContrato
-                {
-                    MotoristaId = model.MotoristaId,
-                    ContratoId = model.ContratoId
-                };
-
-                _unitOfWork.MotoristaContrato.Add(motoristaContrato);
+                motorista.ContratoId = model.ContratoId;
+                _unitOfWork.Motorista.Update(motorista);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Motorista incluído no contrato com sucesso!" });
@@ -852,16 +758,17 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var motoristaContrato = _unitOfWork.MotoristaContrato.GetFirstOrDefault(
-                    mc => mc.MotoristaId == model.MotoristaId && mc.ContratoId == model.ContratoId
+                var motorista = _unitOfWork.Motorista.GetFirstOrDefault(
+                    m => m.MotoristaId == model.MotoristaId && m.ContratoId == model.ContratoId
                 );
 
-                if (motoristaContrato == null)
+                if (motorista == null)
                 {
-                    return Ok(new { success = false, message = "Associação não encontrada!" });
+                    return Ok(new { success = false, message = "Motorista não encontrado neste contrato!" });
                 }
 
-                _unitOfWork.MotoristaContrato.Remove(motoristaContrato);
+                motorista.ContratoId = Guid.Empty;
+                _unitOfWork.Motorista.Update(motorista);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Motorista removido do contrato com sucesso!" });
@@ -874,7 +781,7 @@ namespace FrotiX.Controllers
         }
 
         // ============================================================
-        // LAVADORES DO CONTRATO
+        // LAVADORES DO CONTRATO - Relacionamento 1:N via ContratoId
         // ============================================================
 
         [HttpGet]
@@ -883,19 +790,13 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var lavadoresContrato = _unitOfWork.LavadorContrato.GetAll(
-                    filter: lc => lc.ContratoId == contratoId
-                ).ToList();
-
-                var lavadorIds = lavadoresContrato.Select(lc => lc.LavadorId).ToList();
-
                 var lavadores = _unitOfWork.Lavador.GetAll(
-                    filter: l => lavadorIds.Contains(l.LavadorId)
+                    filter: l => l.ContratoId == contratoId
                 )
                 .Select(l => new
                 {
                     lavadorId = l.LavadorId,
-                    contratoId = contratoId,
+                    contratoId = l.ContratoId,
                     nome = l.Nome,
                     ponto = l.Ponto,
                     celular01 = l.Celular01,
@@ -919,12 +820,8 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var noContrato = _unitOfWork.LavadorContrato.GetAll(
-                    filter: lc => lc.ContratoId == contratoId
-                ).Select(lc => lc.LavadorId).ToList();
-
                 var lavadores = _unitOfWork.Lavador.GetAll(
-                    filter: l => l.Status == true && !noContrato.Contains(l.LavadorId)
+                    filter: l => l.Status == true && l.ContratoId == Guid.Empty
                 )
                 .Select(l => new
                 {
@@ -949,22 +846,22 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var existe = _unitOfWork.LavadorContrato.GetFirstOrDefault(
-                    lc => lc.LavadorId == model.LavadorId && lc.ContratoId == model.ContratoId
+                var lavador = _unitOfWork.Lavador.GetFirstOrDefault(
+                    l => l.LavadorId == model.LavadorId
                 );
 
-                if (existe != null)
+                if (lavador == null)
+                {
+                    return Ok(new { success = false, message = "Lavador não encontrado!" });
+                }
+
+                if (lavador.ContratoId == model.ContratoId)
                 {
                     return Ok(new { success = false, message = "Este lavador já está associado ao contrato!" });
                 }
 
-                var lavadorContrato = new LavadorContrato
-                {
-                    LavadorId = model.LavadorId,
-                    ContratoId = model.ContratoId
-                };
-
-                _unitOfWork.LavadorContrato.Add(lavadorContrato);
+                lavador.ContratoId = model.ContratoId;
+                _unitOfWork.Lavador.Update(lavador);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Lavador incluído no contrato com sucesso!" });
@@ -982,16 +879,17 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var lavadorContrato = _unitOfWork.LavadorContrato.GetFirstOrDefault(
-                    lc => lc.LavadorId == model.LavadorId && lc.ContratoId == model.ContratoId
+                var lavador = _unitOfWork.Lavador.GetFirstOrDefault(
+                    l => l.LavadorId == model.LavadorId && l.ContratoId == model.ContratoId
                 );
 
-                if (lavadorContrato == null)
+                if (lavador == null)
                 {
-                    return Ok(new { success = false, message = "Associação não encontrada!" });
+                    return Ok(new { success = false, message = "Lavador não encontrado neste contrato!" });
                 }
 
-                _unitOfWork.LavadorContrato.Remove(lavadorContrato);
+                lavador.ContratoId = Guid.Empty;
+                _unitOfWork.Lavador.Update(lavador);
                 _unitOfWork.Save();
 
                 return Ok(new { success = true, message = "Lavador removido do contrato com sucesso!" });
@@ -1124,10 +1022,8 @@ namespace FrotiX.Controllers
                     return Ok(new { success = false, message = "Associação não encontrada!" });
                 }
 
-                // Remove a associação VeiculoAta
                 _unitOfWork.VeiculoAta.Remove(veiculoAta);
 
-                // Limpa os campos do veículo
                 var veiculo = _unitOfWork.Veiculo.GetFirstOrDefault(v => v.VeiculoId == model.VeiculoId);
                 if (veiculo != null)
                 {

@@ -4,13 +4,25 @@
 @{
     ViewData["Title"] = "Notas Fiscais";
     ViewData["PageName"] = "notafiscal_index";
-    ViewData["Heading"] = "<i class='fad fa-file-invoice-dollar'></i> Cadastros: <span class='fw-300'>Notas Fiscais</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-file-invoice-dollar'></i> Cadastros: <span class='fw-300'>Notas Fiscais</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-file-invoice-dollar";
+    ViewData["PageIcon"] = "fa-duotone fa-file-invoice-dollar";
 }
 
 @section HeadBlock {
     <style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
         /* ===== CONTAINER DE FILTROS ===== */
         .ftx-filtros-container {
             background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
@@ -379,8 +391,8 @@
                         Gestão de Notas Fiscais
                     </h2>
                     <div class="ftx-card-actions">
-                        <a href="/NotaFiscal/Upsert" class="btn btn-header-orange">
-                            <i class="fa-duotone fa-file-circle-plus icon-pulse"></i> Adicionar Nota Fiscal
+                        <a href="/NotaFiscal/Upsert" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-file-circle-plus icon-pulse icon-pulse me-1"></i> Adicionar Nota Fiscal
                         </a>
                     </div>
                 </div>

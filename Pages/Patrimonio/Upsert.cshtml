@@ -7,9 +7,9 @@
 @{
 	ViewData["Title"] = "Patrimônio";
 	ViewData["PageName"] = "patrimonio_upsert";
-	ViewData["Heading"] = "<i class='fa-sharp-duotone fa-solid fa-arrows-turn-to-dots'></i> Cadastros: <span class='fw-300'>Patrimônio</span>";
+	ViewData["Heading"] = "<i class='fa-sharp-duotone fa-duotone fa-arrows-turn-to-dots'></i> Cadastros: <span class='fw-300'>Patrimônio</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-regular fa-arrows-turn-to-dots";
+	ViewData["PageIcon"] = "fa-duotone fa-arrows-turn-to-dots";
 }
 
 <style>
@@ -90,7 +90,7 @@
 
 						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
 							<h2 class="titulo-pagina">
-								<i class="fa-duotone fa-solid fa-shelves"></i>
+								<i class="fa-duotone fa-shelves"></i>
 								&nbsp;@(Model.PatrimonioObj.Patrimonio.PatrimonioId != Guid.Empty ? "Atualizar" : "Criar")&nbsp;Patrimônio
 							</h2>
 						</div>
@@ -127,7 +127,7 @@
 													class="btn btn-azul btn-sm ml-2"
 													style="width: 35px; height: 35px; padding: 0;"
 													data-ejtip="Adicionar Nova Marca">
-												<i class="fa-duotone fa-solid fa-rectangle-history-circle-plus"></i>
+												<i class="fa-duotone fa-rectangle-history-circle-plus"></i>
 											</button>
 										</div>
 									</div>
@@ -155,7 +155,7 @@
 													style="width: 35px; height: 35px; padding: 0;"
 													data-ejtip="Adicionar Novo Modelo"
 													disabled>
-												<i class="fa-duotone fa-solid fa-rectangle-history-circle-plus"></i>
+												<i class="fa-duotone fa-rectangle-history-circle-plus"></i>
 											</button>
 										</div>
 									</div>
@@ -314,7 +314,7 @@
 										</div>
 										<div class="col-6 float-right">
 											<a asp-page="./Index" class="btn btn-vinho form-control" style="width:300px" data-ejtip="Voltar para a lista de patrimônios">
-												<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+												<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
 												&nbsp;&nbsp;Voltar à Lista
 											</a>
 										</div>
@@ -334,7 +334,7 @@
 			<div class="modal-content">
 				<div class="modal-header modal-header-azul">
 					<h5 class="modal-title" id="modalNovaMarcaLabel">
-						<i class="fa-duotone fa-solid fa-tag"></i> Adicionar Nova Marca
+						<i class="fa-duotone fa-tag"></i> Adicionar Nova Marca
 					</h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
@@ -352,7 +352,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+						<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
 						Cancelar
 					</button>
 					<button type="button" class="btn btn-azul" onclick="salvarNovaMarca()">
@@ -370,7 +370,7 @@
 			<div class="modal-content">
 				<div class="modal-header modal-header-azul">
 					<h5 class="modal-title" id="modalNovoModeloLabel">
-						<i class="fa-duotone fa-solid fa-cube"></i> Adicionar Novo Modelo
+						<i class="fa-duotone fa-cube"></i> Adicionar Novo Modelo
 					</h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
@@ -395,7 +395,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-						<i class="fa-solid fa-rotate-left icon-space icon-rotate-left"></i>
+						<i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i>
 						Cancelar
 					</button>
 					<button type="button" class="btn btn-azul" onclick="salvarNovoModelo()">

@@ -24,10 +24,24 @@
     ViewData["PageName"] = "manutencao_listamanutencao";
     ViewData["Heading"] = "<i class='fa-duotone fa-users-gear'></i> Manutenção: <span class='fw-300'>Registro de Ordens de Serviço</span>";
     ViewData["Category1"] = "Manutenção";
-    ViewData["PageIcon"] = "fad fa-users-gear";
+    ViewData["PageIcon"] = "fa-duotone fa-users-gear";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
     <link href="~/css/ftx-card-styled.css" rel="stylesheet" asp-append-version="true" />
 }
 
@@ -57,13 +71,13 @@
         --fa-secondary-color: rgba(255,255,255,0.7) !important;
     }
 
-    .ftx-card-header .btn-header-orange {
+    .ftx-card-header .btn-fundo-laranja {
         background: linear-gradient(135deg, #D2691E 0%, #E07020 100%) !important;
         color: #fff !important;
         border: none !important;
     }
 
-    .ftx-card-header .btn-header-orange:hover {
+    .ftx-card-header .btn-fundo-laranja:hover {
         background: linear-gradient(135deg, #E07020 0%, #D2691E 100%) !important;
         color: #fff !important;
     }
@@ -281,7 +295,7 @@
     }
 
     .ftx-manut-btn-editar {
-        background: linear-gradient(135deg, #0D98BA 0%, #0b8099 100%);
+        background: linear-gradient(135deg, #3D5771 0%, #2d4559 100%);
     }
 
     .ftx-manut-btn-baixar {
@@ -416,8 +430,8 @@
                         Manutenção: Ordens de Serviço
                     </h2>
                     <div class="ftx-card-actions">
-                        <a href="/Manutencao/Upsert" class="btn btn-header-orange" data-ejtip="Adicionar Nova Ordem de Serviço">
-                            <i class="fa-duotone fa-plus-circle"></i>
+                        <a href="/Manutencao/Upsert" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-plus-circle icon-pulse me-1"></i>
                             Nova OS
                         </a>
                     </div>
@@ -426,7 +440,7 @@
                 <!-- Filtros -->
                 <div class="ftx-manut-filters">
                     <div class="ftx-manut-filters-title">
-                        <i class="fa-solid fa-filter"></i>
+                        <i class="fa-duotone fa-filter"></i>
                         Filtros de Pesquisa
                     </div>
 
@@ -506,7 +520,7 @@
                         <!-- Botão Filtrar -->
                         <div class="ftx-manut-filter-group">
                             <label>&nbsp;</label>
-                            <a class="btn-filtrar-manut" id="btnDatas" role="button" data-ejtip="Filtrar Ordens de Serviço">
+                            <a class="btn-filtrar-manut" id="btnDatas" role="button">
                                 <i class="fa-duotone fa-magnifying-glass-waveform"></i>
                                 Filtrar
                             </a>
@@ -612,7 +626,7 @@
 
                     <div class="mt-4">
                         <h6 class="mb-3 text-muted">
-                            <i class="fa-solid fa-list-check me-2"></i>
+                            <i class="fa-duotone fa-list-check me-2"></i>
                             Itens da Ordem de Serviço
                         </h6>
                         <table id="tblItens" class="table table-bordered table-striped" width="100%">
@@ -639,12 +653,12 @@
             </div>
 
             <div class="modal-footer">
-                <button id="btnFecharManutencao" class="btn btn-azul" type="button" data-ejtip="Baixar Ordem de Serviço">
+                <button id="btnFecharManutencao" class="btn btn-azul" type="button">
                     <i class="fa-duotone fa-file-check icon-pulse"></i>
                     Baixar OS
                 </button>
-                <button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
-                    <i class="fa-solid fa-rotate-left icon-rotate-left"></i>
+                <button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-circle-xmark icon-pulse"></i>
                     Fechar
                 </button>
             </div>
@@ -674,8 +688,8 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal" data-ejtip="Fechar Modal">
-                    <i class="fa-solid fa-rotate-left icon-rotate-left"></i>
+                <button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-circle-xmark icon-pulse"></i>
                     Fechar
                 </button>
             </div>

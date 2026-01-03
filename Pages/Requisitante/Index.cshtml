@@ -5,12 +5,26 @@
 @{
 	ViewData["Title"] = "Requisitantes";
 	ViewData["PageName"] = "requisitante_index";
-	ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Requisitantes</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-user-tie'></i> Cadastros: <span class='fw-300'>Requisitantes</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-user-tie";
+	ViewData["PageIcon"] = "fa-duotone fa-user-tie";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
 }
 
 <style>
@@ -164,8 +178,8 @@
 						Gestão de Requisitantes
 					</h2>
 					<div class="ftx-card-actions">
-						<a href="/Requisitante/Upsert" class="btn btn-header-orange">
-							<i class="fa-duotone fa-user-plus" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
+						<a href="/Requisitante/Upsert" class="btn btn-fundo-laranja" data-ftx-loading>
+							<i class="fa-duotone fa-user-plus ftx-icon-pulse icon-pulse me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
 							Adicionar Requisitante
 						</a>
 					</div>

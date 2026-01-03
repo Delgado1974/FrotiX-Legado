@@ -40,7 +40,7 @@ $(document).ready(function () {
                                     catch (error)
                                     {
                                         Alerta.TratamentoErroComLinha(
-                                            "ata_<num>.js",
+                                            "ata.js",
                                             "success",
                                             error,
                                         );
@@ -55,7 +55,7 @@ $(document).ready(function () {
                                     catch (error)
                                     {
                                         Alerta.TratamentoErroComLinha(
-                                            "ata_<num>.js",
+                                            "ata.js",
                                             "error",
                                             error,
                                         );
@@ -67,7 +67,7 @@ $(document).ready(function () {
                     catch (error)
                     {
                         Alerta.TratamentoErroComLinha(
-                            "ata_<num>.js",
+                            "ata.js",
                             "callback@swal.then#0",
                             error,
                         );
@@ -76,7 +76,7 @@ $(document).ready(function () {
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("ata_<num>.js", "callback@$.on#2", error);
+                Alerta.TratamentoErroComLinha("ata.js", "callback@$.on#2", error);
             }
         });
 
@@ -91,32 +91,40 @@ $(document).ready(function () {
                     {
                         if (data.success) {
                             AppToast.show('Verde', "Status alterado com sucesso!");
-                            var text = "Ativo";
 
-                            if (data.type == 1) {
-                                text = "Inativo";
-                                currentElement.removeClass("btn-verde").addClass("fundo-cinza");
-                            } else
-                                currentElement.removeClass("fundo-cinza").addClass("btn-verde");
-
-                            currentElement.text(text);
-                        } else alert("Something went wrong!");
+                            // Inverte o status baseado no estado atual do elemento
+                            if (currentElement.hasClass("btn-verde")) {
+                                // Era Ativo, agora é Inativo
+                                currentElement
+                                    .removeClass("btn-verde")
+                                    .addClass("fundo-cinza")
+                                    .html('<i class="fa-duotone fa-circle-xmark"></i> Inativo');
+                            } else {
+                                // Era Inativo, agora é Ativo
+                                currentElement
+                                    .removeClass("fundo-cinza")
+                                    .addClass("btn-verde")
+                                    .html('<i class="fa-duotone fa-circle-check"></i> Ativo');
+                            }
+                        } else {
+                            AppToast.show('Vermelho', 'Erro ao alterar status!');
+                        }
                     }
                     catch (error)
                     {
-                        Alerta.TratamentoErroComLinha("ata_<num>.js", "callback@$.get#1", error);
+                        Alerta.TratamentoErroComLinha("ata.js", "updateStatusAta.get.success", error);
                     }
                 });
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("ata_<num>.js", "callback@$.on#2", error);
+                Alerta.TratamentoErroComLinha("ata.js", "updateStatusAta.click", error);
             }
         });
     }
     catch (error)
     {
-        Alerta.TratamentoErroComLinha("ata_<num>.js", "callback@$.ready#0", error);
+        Alerta.TratamentoErroComLinha("ata.js", "callback@$.ready#0", error);
     }
 });
 
@@ -187,21 +195,25 @@ function loadList() {
                         try
                         {
                             if (data)
-                                return (
-                                    '<a href="javascript:void" class="updateStatusAta btn btn-verde btn-xs text-white" data-url="/api/AtaRegistroPrecos/updateStatusAta?Id=' +
-                                    row.ataId +
-                                    '">Ativo</a>'
-                                );
+                                return `<a href="javascript:void(0)" 
+                                           class="updateStatusAta ftx-badge-status btn-verde" 
+                                           data-url="/api/AtaRegistroPrecos/updateStatusAta?Id=${row.ataId}"
+                                           style="cursor:pointer;">
+                                           <i class="fa-duotone fa-circle-check"></i>
+                                           Ativo
+                                        </a>`;
                             else
-                                return (
-                                    '<a href="javascript:void" class="updateStatusAta btn  btn-xs fundo-cinza text-white text-bold" data-url="/api/AtaRegistroPrecos/updateStatusAta?Id=' +
-                                    row.ataId +
-                                    '">Inativo</a>'
-                                );
+                                return `<a href="javascript:void(0)" 
+                                           class="updateStatusAta ftx-badge-status fundo-cinza" 
+                                           data-url="/api/AtaRegistroPrecos/updateStatusAta?Id=${row.ataId}"
+                                           style="cursor:pointer;">
+                                           <i class="fa-duotone fa-circle-xmark"></i>
+                                           Inativo
+                                        </a>`;
                         }
                         catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("ata_<num>.js", "render", error);
+                            Alerta.TratamentoErroComLinha("ata.js", "render.status", error);
                         }
                     },
                 },
@@ -210,19 +222,25 @@ function loadList() {
                     render: function (data) {
                         try
                         {
-                            return `<div class="text-center">
-                                <a href="/AtaRegistroPrecos/Upsert?id=${data}" class="btn btn-azul btn-xs text-white"  aria-label="Editar a Ata!" data-microtip-position="top" role="tooltip" style="cursor:pointer; ">
-                                    <i class="far fa-edit"></i>
-                                </a>
-                                <a class="btn btn-delete btn-vinho btn-xs text-white" aria-label="Excluir a Ata!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
-                                    <i class="far fa-trash-alt"></i>
-                                </a>
-
-                    </div>`;
+                            return `<div class="ftx-actions">
+                                        <a href="/AtaRegistroPrecos/Upsert?id=${data}" 
+                                           class="btn btn-azul btn-icon-28" 
+                                           data-ejtip="Editar Ata"
+                                           style="cursor:pointer;">
+                                            <i class="fa-duotone fa-pen-to-square"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" 
+                                           class="btn btn-delete btn-vinho btn-icon-28" 
+                                           data-ejtip="Excluir Ata"
+                                           style="cursor:pointer;" 
+                                           data-id="${data}">
+                                            <i class="fa-duotone fa-trash-can"></i>
+                                        </a>
+                                    </div>`;
                         }
                         catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("ata_<num>.js", "render", error);
+                            Alerta.TratamentoErroComLinha("ata.js", "render.actions", error);
                         }
                     },
                 },
@@ -237,6 +255,6 @@ function loadList() {
     }
     catch (error)
     {
-        Alerta.TratamentoErroComLinha("ata_<num>.js", "loadList", error);
+        Alerta.TratamentoErroComLinha("ata.js", "loadList", error);
     }
 }

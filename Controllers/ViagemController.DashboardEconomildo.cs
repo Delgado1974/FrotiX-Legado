@@ -40,11 +40,11 @@ namespace FrotiX.Controllers
 
                 var viagens = query.ToList();
 
-                // Total de usuários (soma de passageiros)
+                // Total de usuarios (soma de passageiros)
                 var totalUsuarios = viagens.Sum(v => v.QtdPassageiros ?? 0);
                 var totalViagens = viagens.Count;
 
-                // Calcular meses distintos para média
+                // Calcular meses distintos para media
                 var mesesDistintos = viagens
                     .Where(v => v.Data.HasValue)
                     .Select(v => new { v.Data.Value.Year, v.Data.Value.Month })
@@ -53,7 +53,7 @@ namespace FrotiX.Controllers
 
                 var mediaMensal = mesesDistintos > 0 ? (double)totalUsuarios / mesesDistintos : 0;
 
-                // Calcular dias distintos para média diária
+                // Calcular dias distintos para media diaria
                 var diasDistintos = viagens
                     .Where(v => v.Data.HasValue)
                     .Select(v => v.Data.Value.Date)
@@ -85,7 +85,7 @@ namespace FrotiX.Controllers
                 var totalRodoviaria = viagensRodoviaria.Sum(v => v.QtdPassageiros ?? 0);
                 var totalCefor = viagensCefor.Sum(v => v.QtdPassageiros ?? 0);
 
-                // Médias mensais por MOB
+                // Medias mensais por MOB
                 var mesesPGR = viagensPGR.Where(v => v.Data.HasValue).Select(v => new { v.Data.Value.Year, v.Data.Value.Month }).Distinct().Count();
                 var mesesRodoviaria = viagensRodoviaria.Where(v => v.Data.HasValue).Select(v => new { v.Data.Value.Year, v.Data.Value.Month }).Distinct().Count();
                 var mesesCefor = viagensCefor.Where(v => v.Data.HasValue).Select(v => new { v.Data.Value.Year, v.Data.Value.Month }).Distinct().Count();
@@ -94,12 +94,19 @@ namespace FrotiX.Controllers
                 var mediaMensalRodoviaria = mesesRodoviaria > 0 ? (double)totalRodoviaria / mesesRodoviaria : 0;
                 var mediaMensalCefor = mesesCefor > 0 ? (double)totalCefor / mesesCefor : 0;
 
-                // Tempo médio de ida e volta (calculado entre viagens consecutivas)
-                var temposCalculados = CalcularTemposMedios(viagens);
-                var tempoMedioIda = temposCalculados.tempoIda;
-                var tempoMedioVolta = temposCalculados.tempoVolta;
+                // Tempo medio de IDA e VOLTA (usando campo Duracao da tabela)
+                var tempoMedioIda = CalcularMediaDuracao(viagens, true);
+                var tempoMedioVolta = CalcularMediaDuracao(viagens, false);
 
-                // Usuários por Mês
+                // Tempo medio por MOB (IDA e VOLTA)
+                var tempoMedioIdaPGR = CalcularMediaDuracao(viagensPGR, true);
+                var tempoMedioVoltaPGR = CalcularMediaDuracao(viagensPGR, false);
+                var tempoMedioIdaRodoviaria = CalcularMediaDuracao(viagensRodoviaria, true);
+                var tempoMedioVoltaRodoviaria = CalcularMediaDuracao(viagensRodoviaria, false);
+                var tempoMedioIdaCefor = CalcularMediaDuracao(viagensCefor, true);
+                var tempoMedioVoltaCefor = CalcularMediaDuracao(viagensCefor, false);
+
+                // Usuarios por Mes
                 var usuariosPorMes = viagens
                     .Where(v => v.Data.HasValue)
                     .GroupBy(v => v.Data.Value.Month)
@@ -112,10 +119,10 @@ namespace FrotiX.Controllers
                     .OrderBy(x => x.mesNum)
                     .ToList();
 
-                // Usuários por Turno
+                // Usuarios por Turno
                 var usuariosPorTurno = new
                 {
-                    manha = viagens.Where(v => ClassificarTurno(v.HoraInicio) == "Manhã").Sum(v => v.QtdPassageiros ?? 0),
+                    manha = viagens.Where(v => ClassificarTurno(v.HoraInicio) == "Manha").Sum(v => v.QtdPassageiros ?? 0),
                     tarde = viagens.Where(v => ClassificarTurno(v.HoraInicio) == "Tarde").Sum(v => v.QtdPassageiros ?? 0),
                     noite = viagens.Where(v => ClassificarTurno(v.HoraInicio) == "Noite").Sum(v => v.QtdPassageiros ?? 0)
                 };
@@ -135,7 +142,7 @@ namespace FrotiX.Controllers
                     .OrderBy(x => x.mesNum)
                     .ToList();
 
-                // Usuários por Dia da Semana
+                // Usuarios por Dia da Semana
                 var usuariosPorDiaSemana = viagens
                     .Where(v => v.Data.HasValue)
                     .GroupBy(v => v.Data.Value.DayOfWeek)
@@ -149,7 +156,7 @@ namespace FrotiX.Controllers
                     .OrderBy(x => x.diaNum == 0 ? 7 : x.diaNum)
                     .ToList();
 
-                // Usuários por Hora
+                // Usuarios por Hora
                 var usuariosPorHora = viagens
                     .Where(v => !string.IsNullOrEmpty(v.HoraInicio))
                     .GroupBy(v => ExtrairHora(v.HoraInicio))
@@ -163,7 +170,7 @@ namespace FrotiX.Controllers
                     .OrderBy(x => x.horaNum)
                     .ToList();
 
-                // Top 10 Veículos
+                // Top 10 Veiculos
                 var topVeiculos = viagens
                     .Where(v => v.VeiculoId != Guid.Empty)
                     .GroupBy(v => v.VeiculoId)
@@ -176,7 +183,7 @@ namespace FrotiX.Controllers
                     .Take(10)
                     .ToList();
 
-                // Buscar placas dos veículos
+                // Buscar placas dos veiculos
                 var veiculoIds = topVeiculos.Select(v => v.veiculoId).ToList();
                 var veiculos = _unitOfWork.ViewVeiculos
                     .GetAll(v => veiculoIds.Contains(v.VeiculoId))
@@ -205,6 +212,12 @@ namespace FrotiX.Controllers
                     mediaMensalCefor,
                     tempoMedioIda,
                     tempoMedioVolta,
+                    tempoMedioIdaPGR,
+                    tempoMedioVoltaPGR,
+                    tempoMedioIdaRodoviaria,
+                    tempoMedioVoltaRodoviaria,
+                    tempoMedioIdaCefor,
+                    tempoMedioVoltaCefor,
                     usuariosPorMes,
                     usuariosPorTurno,
                     comparativoMob,
@@ -224,109 +237,70 @@ namespace FrotiX.Controllers
             }
         }
 
-        private (string tempoIda, string tempoVolta) CalcularTemposMedios(List<ViagensEconomildo> viagens)
+        private bool EhIda(string? idaVolta)
         {
             try
             {
-                if (!viagens.Any()) return ("00:00", "00:00");
-
-                // Ordenar viagens por Data e HoraInicio
-                var viagensOrdenadas = viagens
-                    .Where(v => v.Data.HasValue && !string.IsNullOrEmpty(v.HoraInicio) && !string.IsNullOrEmpty(v.IdaVolta))
-                    .OrderBy(v => v.Data.Value)
-                    .ThenBy(v => v.HoraInicio)
-                    .ToList();
-
-                if (viagensOrdenadas.Count < 2) return ("00:00", "00:00");
-
-                var duracoesIda = new List<double>();
-                var duracoesVolta = new List<double>();
-
-                for (int i = 0; i < viagensOrdenadas.Count - 1; i++)
-                {
-                    var atual = viagensOrdenadas[i];
-                    var proxima = viagensOrdenadas[i + 1];
-
-                    // Verificar se são do mesmo dia
-                    if (atual.Data.Value.Date != proxima.Data.Value.Date) continue;
-
-                    // Parse das horas
-                    if (!TimeSpan.TryParse(atual.HoraInicio, out var horaAtual)) continue;
-                    if (!TimeSpan.TryParse(proxima.HoraInicio, out var horaProxima)) continue;
-
-                    var tipoAtual = NormalizarTipoViagem(atual.IdaVolta);
-                    var tipoProxima = NormalizarTipoViagem(proxima.IdaVolta);
-
-                    // Duração da IDA: IDA seguida de VOLTA
-                    if (tipoAtual == "I" && tipoProxima == "V")
-                    {
-                        var duracao = horaProxima - horaAtual;
-                        if (duracao.TotalMinutes > 0 && duracao.TotalMinutes < 120) // Limite de 2 horas
-                        {
-                            duracoesIda.Add(duracao.TotalMinutes);
-                        }
-                    }
-                    // Duração da VOLTA: VOLTA seguida de IDA
-                    else if (tipoAtual == "V" && tipoProxima == "I")
-                    {
-                        var duracao = horaProxima - horaAtual;
-                        if (duracao.TotalMinutes > 0 && duracao.TotalMinutes < 120) // Limite de 2 horas
-                        {
-                            duracoesVolta.Add(duracao.TotalMinutes);
-                        }
-                    }
-                }
-
-                var tempoIda = "00:00";
-                var tempoVolta = "00:00";
-
-                if (duracoesIda.Any())
-                {
-                    var mediaIda = TimeSpan.FromMinutes(duracoesIda.Average());
-                    tempoIda = mediaIda.ToString(@"mm\:ss");
-                }
-
-                if (duracoesVolta.Any())
-                {
-                    var mediaVolta = TimeSpan.FromMinutes(duracoesVolta.Average());
-                    tempoVolta = mediaVolta.ToString(@"mm\:ss");
-                }
-
-                return (tempoIda, tempoVolta);
+                if (string.IsNullOrEmpty(idaVolta)) return false;
+                var tipo = idaVolta.Trim().ToUpper();
+                return tipo == "IDA" || tipo == "I";
             }
             catch
             {
-                return ("00:00", "00:00");
+                return false;
             }
         }
 
-        private string NormalizarTipoViagem(string? idaVolta)
+        private bool EhVolta(string? idaVolta)
         {
-            if (string.IsNullOrEmpty(idaVolta)) return "";
-            var tipo = idaVolta.Trim().ToUpper();
-            if (tipo == "IDA" || tipo == "I") return "I";
-            if (tipo == "VOLTA" || tipo == "V") return "V";
-            return "";
+            try
+            {
+                if (string.IsNullOrEmpty(idaVolta)) return false;
+                var tipo = idaVolta.Trim().ToUpper();
+                return tipo == "VOLTA" || tipo == "V";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private string CalcularMediaDuracao(List<ViagensEconomildo> viagens, bool ehIda)
+        {
+            try
+            {
+                var viagensFiltradas = viagens
+                    .Where(v => v.Duracao.HasValue && v.Duracao > 0 && (ehIda ? EhIda(v.IdaVolta) : EhVolta(v.IdaVolta)))
+                    .ToList();
+
+                if (!viagensFiltradas.Any()) return "0 min";
+
+                return Math.Round(viagensFiltradas.Average(v => v.Duracao.Value), 0).ToString() + " min";
+            }
+            catch
+            {
+                return "0 min";
+            }
         }
 
         private string ClassificarTurno(string? horaInicio)
         {
             try
             {
-                if (string.IsNullOrEmpty(horaInicio)) return "Manhã";
+                if (string.IsNullOrEmpty(horaInicio)) return "Manha";
 
                 if (TimeSpan.TryParse(horaInicio, out var hora))
                 {
-                    if (hora.Hours >= 6 && hora.Hours < 12) return "Manhã";
+                    if (hora.Hours >= 6 && hora.Hours < 12) return "Manha";
                     if (hora.Hours >= 12 && hora.Hours < 18) return "Tarde";
                     return "Noite";
                 }
 
-                return "Manhã";
+                return "Manha";
             }
             catch
             {
-                return "Manhã";
+                return "Manha";
             }
         }
 
@@ -351,23 +325,37 @@ namespace FrotiX.Controllers
 
         private string ObterNomeMes(int mes)
         {
-            var nomes = new[] { "", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
-            return mes >= 1 && mes <= 12 ? nomes[mes] : "";
+            try
+            {
+                var nomes = new[] { "", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
+                return mes >= 1 && mes <= 12 ? nomes[mes] : "";
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         private string ObterNomeDiaSemana(DayOfWeek dia)
         {
-            return dia switch
+            try
             {
-                DayOfWeek.Monday => "Seg",
-                DayOfWeek.Tuesday => "Ter",
-                DayOfWeek.Wednesday => "Qua",
-                DayOfWeek.Thursday => "Qui",
-                DayOfWeek.Friday => "Sex",
-                DayOfWeek.Saturday => "Sáb",
-                DayOfWeek.Sunday => "Dom",
-                _ => ""
-            };
+                return dia switch
+                {
+                    DayOfWeek.Monday => "Seg",
+                    DayOfWeek.Tuesday => "Ter",
+                    DayOfWeek.Wednesday => "Qua",
+                    DayOfWeek.Thursday => "Qui",
+                    DayOfWeek.Friday => "Sex",
+                    DayOfWeek.Saturday => "Sab",
+                    DayOfWeek.Sunday => "Dom",
+                    _ => ""
+                };
+            }
+            catch
+            {
+                return "";
+            }
         }
     }
 }

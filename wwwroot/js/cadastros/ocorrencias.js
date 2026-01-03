@@ -189,19 +189,19 @@ function BuildGridOcorrencias(params)
                             switch (s)
                             {
                                 case "Aberta":
-                                    icon = '<i class="fa-solid fa-circle-exclamation me-1"></i>';
+                                    icon = '<i class="fa-duotone fa-circle-exclamation me-1"></i>';
                                     badgeClass = "ftx-badge-aberta";
                                     break;
                                 case "Baixada":
-                                    icon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                    icon = '<i class="fa-duotone fa-circle-check me-1"></i>';
                                     badgeClass = "ftx-badge-baixada";
                                     break;
                                 case "Pendente":
-                                    icon = '<i class="fa-solid fa-clock me-1"></i>';
+                                    icon = '<i class="fa-duotone fa-clock me-1"></i>';
                                     badgeClass = "ftx-badge-pendente";
                                     break;
                                 case "Manutenção":
-                                    icon = '<i class="fa-solid fa-wrench me-1"></i>';
+                                    icon = '<i class="fa-duotone fa-wrench me-1"></i>';
                                     badgeClass = "ftx-badge-manutencao";
                                     break;
                             }
@@ -224,35 +224,40 @@ function BuildGridOcorrencias(params)
                             var baixada = row.statusOcorrencia === "Baixada";
                             var temImagem = row.imagemOcorrencia && row.imagemOcorrencia.trim() !== "";
 
-                            // Botão Ver Imagem - sempre visível, disabled se não tiver imagem
-                            var btnImagem = `
-                                <button type="button" class="btn btn-foto text-white btn-icon-28 btn-ver-imagem ${temImagem ? '' : 'disabled'}" 
-                                    data-imagem="${row.imagemOcorrencia || ''}" 
-                                    title="${temImagem ? 'Ver Imagem/Vídeo' : 'Sem imagem'}"
-                                    ${temImagem ? '' : 'disabled'}>
-                                    <i class="fad fa-image"></i>
-                                </button>`;
-
-                            // Botão Editar - sempre visível
+                            // Botão Editar - Padrão FrotiX (Azul)
                             var btnEditar = `
-                                <button type="button" class="btn btn-azul-escuro text-white btn-icon-28 btn-editar-ocorrencia" 
-                                    data-id="${data}" title="Editar">
-                                    <i class="fal fa-edit"></i>
-                                </button>`;
-
-                            // Botão Baixar - sempre visível, disabled se já baixada
-                            var btnBaixa = `
-                                <button type="button" class="btn btn-verde text-white btn-icon-28 btn-baixar ${baixada ? 'disabled' : ''}" 
+                                <a class="btn-azul btn-icon-28 btn-editar-ocorrencia" 
                                     data-id="${data}" 
-                                    title="${baixada ? 'Já baixada' : 'Dar Baixa'}"
-                                    ${baixada ? 'disabled' : ''}>
-                                    <i class="fa-solid fa-flag-checkered"></i>
-                                </button>`;
+                                    data-ejtip="Editar Ocorrência"
+                                    style="cursor:pointer;">
+                                    <i class="fa-duotone fa-pen-to-square"></i>
+                                </a>`;
 
-                            return `<div class="text-center ftx-actions">
-                                ${btnImagem}
+                            // Botão Baixar - Padrão FrotiX (Vinho)
+                            var btnBaixa = `
+                                <a class="btn-vinho btn-icon-28 btn-baixar ${baixada ? 'disabled' : ''}" 
+                                    data-id="${data}" 
+                                    data-ejtip="${baixada ? 'Já baixada' : 'Dar Baixa'}"
+                                    style="cursor:pointer;"
+                                    ${baixada ? 'disabled' : ''}>
+                                    <i class="fa-duotone fa-flag-checkered"></i>
+                                </a>`;
+
+                            // Botão Ver Imagem - Padrão FrotiX (Terracota)
+                            var btnImagem = `
+                                <a class="btn-terracota btn-icon-28 btn-ver-imagem ${temImagem ? '' : 'disabled'}" 
+                                    data-imagem="${row.imagemOcorrencia || ''}" 
+                                    data-ejtip="${temImagem ? 'Ver Imagem/Vídeo' : 'Sem imagem'}"
+                                    style="cursor:pointer;"
+                                    ${temImagem ? '' : 'disabled'}>
+                                    <i class="fa-duotone fa-image"></i>
+                                </a>`;
+
+                            // Ordem: Edição, Baixa, Foto
+                            return `<div class="text-center" style="display:flex; justify-content:center; gap:4px;">
                                 ${btnEditar}
                                 ${btnBaixa}
+                                ${btnImagem}
                             </div>`;
                         }
                         catch (error)
@@ -349,172 +354,226 @@ function validateDatesBeforeSearch()
 }
 
 /* ==========================
-   Funções de Imagem
+   Upload de Imagem
    ========================== */
-function renderizarImagemOcorrencia(imagemUrl, readonly)
-{
-    try
-    {
-        const container = document.getElementById("divImagemOcorrencia");
-        if (!container) return;
-
-        imagemOcorrenciaAlterada = false;
-        novaImagemOcorrencia = "";
-
-        if (imagemUrl && imagemUrl.trim())
-        {
-            const isVideo = /\.(mp4|webm)$/i.test(imagemUrl);
-            let mediaHtml = isVideo
-                ? `<video class="img-ocorrencia-preview" controls>
-                     <source src="${imagemUrl}" type="video/${imagemUrl.split('.').pop()}">
-                   </video>`
-                : `<img src="${imagemUrl}" class="img-ocorrencia-preview" alt="Imagem" />`;
-
-            const actionsHtml = readonly ? "" : `
-                <div class="img-ocorrencia-actions">
-                    <button type="button" class="btn-img-action btn-alterar" id="btnAlterarImagem">
-                        <i class="fad fa-image"></i> Alterar
-                    </button>
-                    <button type="button" class="btn-img-action btn-excluir" id="btnExcluirImagem">
-                        <i class="fad fa-trash-can"></i> Excluir
-                    </button>
-                </div>`;
-
-            container.innerHTML = `<div class="img-ocorrencia-container p-3">${mediaHtml}${actionsHtml}</div>`;
-        }
-        else
-        {
-            const actionsHtml = readonly ? "" : `
-                <div class="img-ocorrencia-actions">
-                    <button type="button" class="btn-img-action btn-alterar" id="btnAlterarImagem">
-                        <i class="fad fa-image"></i> Adicionar Imagem
-                    </button>
-                </div>`;
-
-            container.innerHTML = `
-                <div class="img-ocorrencia-placeholder">
-                    <i class="fad fa-image-slash"></i>
-                    <p>Nenhuma imagem registrada</p>
-                    ${actionsHtml}
-                </div>`;
-        }
-
-        registrarEventosImagem();
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "renderizarImagemOcorrencia", error);
-    }
-}
-
-function registrarEventosImagem()
-{
-    try
-    {
-        const btnAlterar = document.getElementById("btnAlterarImagem");
-        if (btnAlterar)
-        {
-            btnAlterar.onclick = () =>
-            {
-                try { document.getElementById("inputImagemOcorrencia").click(); }
-                catch (e) { Alerta.TratamentoErroComLinha("ocorrencias.js", "btnAlterarImagem.click", e); }
-            };
-        }
-
-        const btnExcluir = document.getElementById("btnExcluirImagem");
-        if (btnExcluir)
-        {
-            btnExcluir.onclick = async () =>
-            {
-                try
-                {
-                    const confirmado = await Alerta.Confirmar(
-                        "Excluir Imagem",
-                        "Deseja realmente excluir a imagem?",
-                        "Sim, excluir",
-                        "Cancelar"
-                    );
-
-                    if (confirmado)
-                    {
-                        imagemOcorrenciaAlterada = true;
-                        novaImagemOcorrencia = "";
-                        $("#txtImagemOcorrenciaAtual").val("");
-                        renderizarImagemOcorrencia("", false);
-                        AppToast.show("Amarelo", "Imagem marcada para exclusão. Salve para confirmar.", 3000);
-                    }
-                }
-                catch (e)
-                {
-                    Alerta.TratamentoErroComLinha("ocorrencias.js", "btnExcluirImagem.click", e);
-                }
-            };
-        }
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "registrarEventosImagem", error);
-    }
-}
-
 async function uploadImagemOcorrencia(file)
 {
     try
     {
         const formData = new FormData();
-        formData.append("arquivo", file);
-
-        const container = document.getElementById("divImagemOcorrencia");
-        container.innerHTML = `
-            <div class="img-ocorrencia-placeholder">
-                <i class="fa fa-spinner fa-spin" style="font-size: 3rem;"></i>
-                <p class="mt-3">Enviando arquivo...</p>
-            </div>`;
+        formData.append("file", file);
 
         const response = await fetch("/api/OcorrenciaViagem/UploadImagem", {
             method: "POST",
             body: formData
         });
 
-        const result = await response.json();
+        const data = await response.json();
 
-        if (result.success)
+        if (data.success)
         {
             imagemOcorrenciaAlterada = true;
-            novaImagemOcorrencia = result.url;
-            $("#txtImagemOcorrenciaAtual").val(result.url);
-            renderizarImagemOcorrencia(result.url, false);
-            AppToast.show("Verde", "Imagem carregada. Salve para confirmar.", 3000);
+            novaImagemOcorrencia = data.path || data.url || "";
+            exibirPreviewImagem(novaImagemOcorrencia);
+            AppToast.show("Verde", "Imagem enviada com sucesso!", 2000);
         }
         else
         {
-            Alerta.Erro("Erro no Upload", result.message || "Erro ao enviar arquivo.", "OK");
-            renderizarImagemOcorrencia($("#txtImagemOcorrenciaAtual").val(), false);
+            AppToast.show("Vermelho", data.message || "Erro ao enviar imagem.", 3000);
         }
-
-        document.getElementById("inputImagemOcorrencia").value = "";
     }
     catch (error)
     {
         Alerta.TratamentoErroComLinha("ocorrencias.js", "uploadImagemOcorrencia", error);
-        Alerta.Erro("Erro", "Erro ao enviar arquivo.", "OK");
-        renderizarImagemOcorrencia($("#txtImagemOcorrenciaAtual").val(), false);
+        AppToast.show("Vermelho", "Erro ao enviar imagem.", 3000);
     }
 }
 
 /* ==========================
-   Verificação de Solução
+   Preview de Imagem
    ========================== */
-function verificarSolucaoPreenchida()
+function exibirPreviewImagem(src)
 {
     try
     {
-        const rteSol = document.getElementById("rteSolucao")?.ej2_instances?.[0];
-        if (!rteSol) return false;
+        const container = $("#divImagemOcorrencia");
+        container.empty();
 
-        const valor = rteSol.value || "";
-        const textoLimpo = valor.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
-        return textoLimpo.length > 0;
+        if (!src)
+        {
+            container.html(`
+                <div class="p-3 text-center border rounded bg-light" style="cursor:pointer;" onclick="$('#inputImagemOcorrencia').click();">
+                    <i class="fa-duotone fa-image fa-3x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">Clique para adicionar imagem ou vídeo</p>
+                </div>
+            `);
+            return;
+        }
+
+        const isVideo = /\.(mp4|webm)$/i.test(src);
+
+        if (isVideo)
+        {
+            container.html(`
+                <div class="position-relative">
+                    <video src="${src}" controls style="max-width:100%; max-height:200px; border-radius:8px;"></video>
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" onclick="removerImagemOcorrencia()">
+                        <i class="fa-duotone fa-trash"></i>
+                    </button>
+                </div>
+            `);
+        }
+        else
+        {
+            container.html(`
+                <div class="position-relative">
+                    <img src="${src}" alt="Preview" style="max-width:100%; max-height:200px; border-radius:8px; cursor:pointer;" onclick="$('#inputImagemOcorrencia').click();" />
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" onclick="removerImagemOcorrencia()">
+                        <i class="fa-duotone fa-trash"></i>
+                    </button>
+                </div>
+            `);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "exibirPreviewImagem", error);
+    }
+}
+
+/* ==========================
+   Remover Imagem
+   ========================== */
+function removerImagemOcorrencia()
+{
+    try
+    {
+        imagemOcorrenciaAlterada = true;
+        novaImagemOcorrencia = "";
+        exibirPreviewImagem("");
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "removerImagemOcorrencia", error);
+    }
+}
+
+/* ==========================
+   Limpar Modal
+   ========================== */
+function limparModal()
+{
+    try
+    {
+        $("#txtId").val("");
+        $("#txtResumo").val("");
+        $("#txtImagemOcorrenciaAtual").val("");
+        $("#chkStatusOcorrencia").val("");
+        imagemOcorrenciaAlterada = false;
+        novaImagemOcorrencia = "";
+
+        const rteDesc = document.getElementById("rteOcorrencias")?.ej2_instances?.[0];
+        const rteSol = document.getElementById("rteSolucao")?.ej2_instances?.[0];
+        if (rteDesc) rteDesc.value = "";
+        if (rteSol) rteSol.value = "";
+
+        exibirPreviewImagem("");
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "limparModal", error);
+    }
+}
+
+/* ==========================
+   Fechar Modais
+   ========================== */
+function fecharModalOcorrencia()
+{
+    try
+    {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("modalOcorrencia"));
+        if (modal) modal.hide();
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "fecharModalOcorrencia", error);
+    }
+}
+
+function fecharModalBaixaRapida()
+{
+    try
+    {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("modalBaixaRapida"));
+        if (modal) modal.hide();
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "fecharModalBaixaRapida", error);
+    }
+}
+
+/* ==========================
+   Carregar Ocorrência
+   ========================== */
+async function carregarOcorrencia(id)
+{
+    try
+    {
+        const response = await fetch(`/api/OcorrenciaViagem/ObterOcorrencia?id=${id}`);
+        const data = await response.json();
+
+        if (data.success && data.ocorrencia)
+        {
+            const oc = data.ocorrencia;
+
+            $("#txtId").val(oc.ocorrenciaViagemId || "");
+            $("#txtResumo").val(oc.resumoOcorrencia || "");
+            $("#txtImagemOcorrenciaAtual").val(oc.imagemOcorrencia || "");
+            $("#chkStatusOcorrencia").val(oc.statusOcorrencia || "Aberta");
+
+            const rteDesc = document.getElementById("rteOcorrencias")?.ej2_instances?.[0];
+            const rteSol = document.getElementById("rteSolucao")?.ej2_instances?.[0];
+
+            if (rteDesc) rteDesc.value = oc.descricaoOcorrencia || "";
+            if (rteSol) rteSol.value = oc.solucaoOcorrencia || "";
+
+            exibirPreviewImagem(oc.imagemOcorrencia || "");
+
+            // Atualizar título do modal
+            const titulo = oc.statusOcorrencia === "Baixada" ? "Visualizar Ocorrência" : "Editar Ocorrência";
+            $("#modalOcorrenciaLabel span").text(titulo);
+
+            // Habilitar/desabilitar botões
+            const baixada = oc.statusOcorrencia === "Baixada";
+            $("#btnBaixarOcorrenciaModal").prop("disabled", baixada);
+            $("#btnEditarOcorrencia").prop("disabled", baixada);
+
+            new bootstrap.Modal(document.getElementById("modalOcorrencia")).show();
+        }
+        else
+        {
+            AppToast.show("Vermelho", data.message || "Erro ao carregar ocorrência.", 3000);
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "carregarOcorrencia", error);
+        AppToast.show("Vermelho", "Erro ao carregar ocorrência.", 3000);
+    }
+}
+
+/* ==========================
+   Verificar Solução
+   ========================== */
+function verificarSolucaoPreenchida(solucao)
+{
+    try
+    {
+        if (!solucao) return false;
+        const texto = solucao.replace(/<[^>]*>/g, "").trim();
+        return texto.length > 0;
     }
     catch (error)
     {
@@ -524,100 +583,62 @@ function verificarSolucaoPreenchida()
 }
 
 /* ==========================
-   Baixa de Ocorrência
+   Execução da Baixa
    ========================== */
-async function executarBaixaOcorrencia(id, solucao, onSuccess)
+async function executarBaixaOcorrencia(id, solucao, callbackSucesso)
 {
     try
     {
-        const response = await fetch("/api/OcorrenciaViagem/BaixarOcorrenciaComSolucao", {
+        const payload = {
+            OcorrenciaViagemId: id,
+            SolucaoOcorrencia: solucao,
+            StatusOcorrencia: "Baixada"
+        };
+
+        const response = await fetch("/api/OcorrenciaViagem/BaixarOcorrencia", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                OcorrenciaViagemId: id,
-                SolucaoOcorrencia: solucao || ""
-            })
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
 
         if (data.success)
         {
-            AppToast.show("Verde", data.message, 2000);
-            if (onSuccess) onSuccess();
+            AppToast.show("Verde", data.message || "Ocorrência baixada com sucesso!", 2000);
+            if (callbackSucesso) callbackSucesso();
             if (dataTable) dataTable.ajax.reload(null, false);
         }
         else
         {
-            AppToast.show("Vermelho", data.message, 2000);
+            AppToast.show("Vermelho", data.message || "Erro ao baixar ocorrência.", 3000);
         }
     }
     catch (error)
     {
         Alerta.TratamentoErroComLinha("ocorrencias.js", "executarBaixaOcorrencia", error);
-        Alerta.Erro("Erro", "Erro ao baixar ocorrência.", "OK");
+        AppToast.show("Vermelho", "Erro ao baixar ocorrência.", 3000);
     }
 }
 
-function abrirModalBaixaRapida(id, solucaoAtual)
+/* ==========================
+   Baixa com Validação
+   ========================== */
+async function processarBaixaComValidacao(id, solucaoAtual, callbackSucesso)
 {
     try
     {
-        $("#txtBaixaRapidaId").val(id);
-        $("#txtBaixaRapidaSolucao").val(solucaoAtual || "");
-        
-        const modalEl = document.getElementById("modalBaixaRapida");
-        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        bsModal.show();
-        
-        // Foca no campo de solução
-        setTimeout(() => $("#txtBaixaRapidaSolucao").focus(), 300);
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "abrirModalBaixaRapida", error);
-    }
-}
-
-function fecharModalBaixaRapida()
-{
-    try
-    {
-        const modalEl = document.getElementById("modalBaixaRapida");
-        const bsModal = bootstrap.Modal.getInstance(modalEl);
-        if (bsModal) bsModal.hide();
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "fecharModalBaixaRapida", error);
-    }
-}
-
-async function processarBaixaComValidacao(id, solucaoAtual, onSuccess)
-{
-    try
-    {
-        const solucaoLimpa = (solucaoAtual || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
-        
-        if (solucaoLimpa.length > 0)
+        if (verificarSolucaoPreenchida(solucaoAtual))
         {
-            // Já tem solução: confirma direto
-            const confirmado = await Alerta.Confirmar(
-                "Baixa na Ocorrência",
-                "Você tem certeza que deseja dar baixa nesta ocorrência?",
-                "Sim, dar baixa",
-                "Cancelar"
-            );
-
-            if (confirmado)
-            {
-                await executarBaixaOcorrencia(id, solucaoAtual, onSuccess);
-            }
+            // Solução preenchida - executa diretamente
+            await executarBaixaOcorrencia(id, solucaoAtual, callbackSucesso);
         }
         else
         {
-            // Sem solução: abre modal para digitar
-            abrirModalBaixaRapida(id, "");
+            // Solução vazia - abre modal de baixa rápida
+            if (callbackSucesso) callbackSucesso();
+            $("#txtBaixaRapidaId").val(id);
+            new bootstrap.Modal(document.getElementById("modalBaixaRapida")).show();
         }
     }
     catch (error)
@@ -627,169 +648,59 @@ async function processarBaixaComValidacao(id, solucaoAtual, onSuccess)
 }
 
 /* ==========================
-   Visualizar Imagem/Vídeo
+   Ver Imagem/Vídeo
    ========================== */
-function abrirModalImagem(imagemUrl)
+function abrirVisualizacaoImagem(src)
 {
     try
     {
-        const container = document.getElementById("divImagemVisualizacao");
-        if (!container) return;
+        const container = $("#divImagemVisualizacao");
+        container.empty();
 
-        const isVideo = /\.(mp4|webm)$/i.test(imagemUrl);
-        
+        if (!src)
+        {
+            container.html('<p class="text-muted">Sem imagem disponível</p>');
+            return;
+        }
+
+        const isVideo = /\.(mp4|webm)$/i.test(src);
+
         if (isVideo)
         {
-            container.innerHTML = `
-                <video controls autoplay style="max-width:100%; max-height:70vh;">
-                    <source src="${imagemUrl}" type="video/${imagemUrl.split('.').pop()}">
-                    Seu navegador não suporta vídeos.
-                </video>`;
+            container.html(`<video src="${src}" controls style="max-width:100%; max-height:500px;"></video>`);
+            $("#modalVisualizarImagem .modal-title").html('<i class="fa-duotone fa-video me-2"></i>Vídeo da Ocorrência');
         }
         else
         {
-            container.innerHTML = `<img src="${imagemUrl}" style="max-width:100%; max-height:70vh;" alt="Imagem da Ocorrência" />`;
+            container.html(`<img src="${src}" alt="Imagem" style="max-width:100%; max-height:500px;" />`);
+            $("#modalVisualizarImagem .modal-title").html('<i class="fa-duotone fa-image me-2"></i>Imagem da Ocorrência');
         }
 
-        const modalEl = document.getElementById("modalVisualizarImagem");
-        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        bsModal.show();
+        new bootstrap.Modal(document.getElementById("modalVisualizarImagem")).show();
     }
     catch (error)
     {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "abrirModalImagem", error);
+        Alerta.TratamentoErroComLinha("ocorrencias.js", "abrirVisualizacaoImagem", error);
     }
 }
 
 /* ==========================
-   Abertura do Modal
-   ========================== */
-function abrirModalOcorrencia()
-{
-    try
-    {
-        const modalEl = document.getElementById("modalOcorrencia");
-        if (!modalEl) return;
-
-        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        bsModal.show();
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "abrirModalOcorrencia", error);
-    }
-}
-
-function fecharModalOcorrencia()
-{
-    try
-    {
-        const modalEl = document.getElementById("modalOcorrencia");
-        if (!modalEl) return;
-
-        const bsModal = bootstrap.Modal.getInstance(modalEl);
-        if (bsModal) bsModal.hide();
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "fecharModalOcorrencia", error);
-    }
-}
-
-function preencherModalComDados(data)
-{
-    try
-    {
-        $("#txtId").val(data.ocorrenciaViagemId);
-        $("#txtResumo").val(data.resumoOcorrencia || "");
-        $("#txtImagemOcorrenciaAtual").val(data.imagemOcorrencia || "");
-
-        const rteDesc = document.getElementById("rteOcorrencias")?.ej2_instances?.[0];
-        const rteSol = document.getElementById("rteSolucao")?.ej2_instances?.[0];
-
-        if (rteDesc) rteDesc.value = data.descricaoOcorrencia || "";
-        if (rteSol) rteSol.value = data.descricaoSolucaoOcorrencia || "";
-
-        const baixada = data.statusOcorrencia === "Baixada";
-        $("#chkStatusOcorrencia").val(baixada ? "Baixada" : "Aberta");
-        $("#txtResumo").prop("readonly", baixada);
-
-        if (rteDesc) rteDesc.readonly = baixada;
-
-        renderizarImagemOcorrencia(data.imagemOcorrencia || "", baixada);
-
-        // Botões sempre visíveis, mas desabilitados se já baixada
-        $("#btnEditarOcorrencia").show().prop("disabled", baixada);
-        $("#btnBaixarOcorrenciaModal").show().prop("disabled", baixada);
-        
-        // Ajustar aparência visual quando desabilitado
-        if (baixada)
-        {
-            $("#btnEditarOcorrencia").css("opacity", "0.5").css("cursor", "not-allowed");
-            $("#btnBaixarOcorrenciaModal").css("opacity", "0.5").css("cursor", "not-allowed");
-        }
-        else
-        {
-            $("#btnEditarOcorrencia").css("opacity", "1").css("cursor", "pointer");
-            $("#btnBaixarOcorrenciaModal").css("opacity", "1").css("cursor", "pointer");
-        }
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "preencherModalComDados", error);
-    }
-}
-
-function limparModal()
-{
-    try
-    {
-        $("#txtId").val("");
-        $("#txtResumo").val("").prop("readonly", false);
-        $("#txtImagemOcorrenciaAtual").val("");
-        $("#chkStatusOcorrencia").val("");
-
-        try { document.getElementById("rteOcorrencias").ej2_instances[0].value = ""; } catch (_) { }
-        try { document.getElementById("rteSolucao").ej2_instances[0].value = ""; } catch (_) { }
-
-        imagemOcorrenciaAlterada = false;
-        novaImagemOcorrencia = "";
-
-        const container = document.getElementById("divImagemOcorrencia");
-        if (container) container.innerHTML = "";
-    }
-    catch (error)
-    {
-        Alerta.TratamentoErroComLinha("ocorrencias.js", "limparModal", error);
-    }
-}
-
-/* ==========================
-   Document Ready
+   Inicialização
    ========================== */
 $(document).ready(function ()
 {
     try
     {
-        // Carrega grid inicial com ocorrências ABERTAS
-        BuildGridOcorrencias({
-            veiculoId: "",
-            motoristaId: "",
-            statusId: "Aberta",
-            data: "",
-            dataInicial: "",
-            dataFinal: ""
-        });
+        // Carrega grid com status "Aberta" por padrão
+        BuildGridOcorrencias({ statusId: "Aberta" });
 
         // Botão Filtrar
-        $("#btnFiltrarOcorrencias").on("click", function (e)
+        $("#btnFiltrarOcorrencias").on("click", function ()
         {
             try
             {
-                e.preventDefault();
                 if (!validateDatesBeforeSearch()) return;
                 const params = collectParamsFromUI();
-                console.log("[Ocorrências] Filtros:", params);
                 BuildGridOcorrencias(params);
             }
             catch (error)
@@ -798,91 +709,46 @@ $(document).ready(function ()
             }
         });
 
-        // Enter nos campos de data
-        $("#txtData, #txtDataInicial, #txtDataFinal").on("keydown", function (e)
-        {
-            try
-            {
-                if (e.key === "Enter") $("#btnFiltrarOcorrencias").trigger("click");
-            }
-            catch (error)
-            {
-                Alerta.TratamentoErroComLinha("ocorrencias.js", "txtData.keydown", error);
-            }
-        });
-
-        // Clique em Editar (delegado)
+        // Delegação de eventos para botões da tabela
         $(document).on("click", ".btn-editar-ocorrencia", function (e)
         {
             try
             {
                 e.preventDefault();
-                e.stopPropagation();
-
                 const id = $(this).data("id");
-                if (!id) return;
-
-                const table = $("#tblOcorrencia").DataTable();
-                const rowApi = table.row((idx, rowData) => String(rowData.ocorrenciaViagemId) === String(id));
-
-                if (rowApi.any())
-                {
-                    preencherModalComDados(rowApi.data());
-                    abrirModalOcorrencia();
-                }
+                if (id) carregarOcorrencia(id);
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("ocorrencias.js", "btn-editar.click", error);
+                Alerta.TratamentoErroComLinha("ocorrencias.js", "btnEditar.click", error);
             }
         });
 
-        // Clique em Ver Imagem (delegado)
-        $(document).on("click", ".btn-ver-imagem", function (e)
+        $(document).on("click", ".btn-ver-imagem:not(.disabled)", function (e)
         {
             try
             {
                 e.preventDefault();
-                e.stopPropagation();
-
                 const imagem = $(this).data("imagem");
-                if (imagem)
-                {
-                    abrirModalImagem(imagem);
-                }
+                if (imagem) abrirVisualizacaoImagem(imagem);
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("ocorrencias.js", "btn-ver-imagem.click", error);
+                Alerta.TratamentoErroComLinha("ocorrencias.js", "btnVerImagem.click", error);
             }
         });
 
-        // Clique em Baixar na tabela (delegado)
-        $(document).on("click", ".btn-baixar", async function (e)
+        $(document).on("click", ".btn-baixar:not(.disabled)", async function (e)
         {
             try
             {
                 e.preventDefault();
-                e.stopPropagation();
-
                 const id = $(this).data("id");
-                if (!id) return;
-
-                const table = $("#tblOcorrencia").DataTable();
-                const rowApi = table.row((idx, rowData) => String(rowData.ocorrenciaViagemId) === String(id));
-
-                let solucaoAtual = "";
-                if (rowApi.any())
-                {
-                    const data = rowApi.data();
-                    solucaoAtual = data.descricaoSolucaoOcorrencia || "";
-                }
-
-                await processarBaixaComValidacao(id, solucaoAtual, null);
+                if (id) await processarBaixaComValidacao(id, "", null);
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("ocorrencias.js", "btn-baixar.click", error);
+                Alerta.TratamentoErroComLinha("ocorrencias.js", "btnBaixar.click", error);
             }
         });
 
@@ -892,31 +758,31 @@ $(document).ready(function ()
             try
             {
                 e.preventDefault();
-                
+
                 const $btn = $(this);
                 if ($btn.data("busy")) return;
 
                 const id = $("#txtBaixaRapidaId").val();
-                const solucao = $("#txtBaixaRapidaSolucao").val();
+                const solucao = ($("#txtBaixaRapidaSolucao").val() || "").trim();
 
-                if (!id)
+                if (!solucao)
                 {
-                    Alerta.Erro("Erro", "ID da ocorrência não encontrado.", "OK");
+                    Alerta.Erro("Informação Ausente", "Preencha a Solução da Ocorrência.", "OK");
                     return;
                 }
 
-                $btn.data("busy", true).prop("disabled", true).html('<i class="fa fa-spinner fa-spin me-1"></i> Baixando...');
+                $btn.data("busy", true).prop("disabled", true).html('<i class="fa-duotone fa-spinner-third fa-spin me-1"></i> Baixando...');
 
                 await executarBaixaOcorrencia(id, solucao, function() {
                     fecharModalBaixaRapida();
                 });
 
-                $btn.data("busy", false).prop("disabled", false).html('<i class="fa-solid fa-flag-checkered me-1" style="color:#fff;"></i> Confirmar Baixa');
+                $btn.data("busy", false).prop("disabled", false).html('<i class="fa-duotone fa-flag-checkered me-1" style="color:#fff;"></i> Confirmar Baixa');
             }
             catch (error)
             {
                 Alerta.TratamentoErroComLinha("ocorrencias.js", "btnConfirmarBaixaRapida.click", error);
-                $("#btnConfirmarBaixaRapida").data("busy", false).prop("disabled", false).html('<i class="fa-solid fa-flag-checkered me-1" style="color:#fff;"></i> Confirmar Baixa');
+                $("#btnConfirmarBaixaRapida").data("busy", false).prop("disabled", false).html('<i class="fa-duotone fa-flag-checkered me-1" style="color:#fff;"></i> Confirmar Baixa');
             }
         });
 
@@ -995,7 +861,7 @@ $(document).ready(function ()
                     ImagemOcorrencia: imagemFinal
                 };
 
-                $btn.data("busy", true).prop("disabled", true).html('<i class="fa fa-spinner fa-spin me-2"></i> Salvando...');
+                $btn.data("busy", true).prop("disabled", true).html('<i class="fa-duotone fa-spinner-third fa-spin me-2"></i> Salvando...');
 
                 const response = await fetch("/api/OcorrenciaViagem/EditarOcorrencia", {
                     method: "POST",
@@ -1016,12 +882,12 @@ $(document).ready(function ()
                     AppToast.show("Vermelho", data.message || "Erro ao salvar.", 2000);
                 }
 
-                $btn.data("busy", false).prop("disabled", false).html('<i class="fad fa-floppy-disk me-1" style="color:#fff;"></i> Salvar Alterações');
+                $btn.data("busy", false).prop("disabled", false).html('<i class="fa-duotone fa-floppy-disk me-1" style="color:#fff;"></i> Salvar Alterações');
             }
             catch (error)
             {
                 Alerta.TratamentoErroComLinha("ocorrencias.js", "btnSalvar.click", error);
-                $("#btnEditarOcorrencia").data("busy", false).prop("disabled", false).html('<i class="fad fa-floppy-disk me-1" style="color:#fff;"></i> Salvar Alterações');
+                $("#btnEditarOcorrencia").data("busy", false).prop("disabled", false).html('<i class="fa-duotone fa-floppy-disk me-1" style="color:#fff;"></i> Salvar Alterações');
             }
         });
 

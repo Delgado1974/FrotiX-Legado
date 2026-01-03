@@ -846,6 +846,12 @@ namespace FrotiX.Pages.Viagens
             {
                 ViagemObj.Viagem.ViagemId = Id;
 
+                // Se NoFichaVistoria não foi informado, gravar 0 (viagem mobile)
+                if (ViagemObj.Viagem.NoFichaVistoria == null || ViagemObj.Viagem.NoFichaVistoria == 0)
+                {
+                    ViagemObj.Viagem.NoFichaVistoria = 0;
+                }
+
                 // PROCESSAR IMAGEM BASE64
                 if (Request.Form.ContainsKey("FotoBase64"))
                 {
@@ -1124,6 +1130,12 @@ namespace FrotiX.Pages.Viagens
                 if (ViagemObj.Viagem.ViagemId == Guid.Empty)
                 {
                     ViagemObj.Viagem.ViagemId = Guid.NewGuid();
+                }
+
+                // Se NoFichaVistoria não foi informado, gravar 0 (viagem mobile)
+                if (ViagemObj.Viagem.NoFichaVistoria == null || ViagemObj.Viagem.NoFichaVistoria == 0)
+                {
+                    ViagemObj.Viagem.NoFichaVistoria = 0;
                 }
 
                 if (Request.Form.ContainsKey("FotoBase64"))

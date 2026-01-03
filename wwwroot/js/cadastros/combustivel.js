@@ -41,7 +41,7 @@ $(document).ready(function () {
                                     catch (error)
                                     {
                                         Alerta.TratamentoErroComLinha(
-                                            "combustivel_<num>.js",
+                                            "combustivel.js",
                                             "success",
                                             error,
                                         );
@@ -51,12 +51,12 @@ $(document).ready(function () {
                                     try
                                     {
                                         console.log(err);
-                                        alert("something went wrong");
+                                        AppToast.show('Vermelho', 'Erro ao excluir o combustível');
                                     }
                                     catch (error)
                                     {
                                         Alerta.TratamentoErroComLinha(
-                                            "combustivel_<num>.js",
+                                            "combustivel.js",
                                             "error",
                                             error,
                                         );
@@ -68,7 +68,7 @@ $(document).ready(function () {
                     catch (error)
                     {
                         Alerta.TratamentoErroComLinha(
-                            "combustivel_<num>.js",
+                            "combustivel.js",
                             "callback@swal.then#0",
                             error,
                         );
@@ -77,7 +77,7 @@ $(document).ready(function () {
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("combustivel_<num>.js", "callback@$.on#2", error);
+                Alerta.TratamentoErroComLinha("combustivel.js", "callback@$.on#2", error);
             }
         });
 
@@ -101,12 +101,12 @@ $(document).ready(function () {
                                 currentElement.removeClass("fundo-cinza").addClass("btn-verde");
 
                             currentElement.text(text);
-                        } else alert("Something went wrong!");
+                        } else AppToast.show('Vermelho', 'Erro ao alterar o status');
                     }
                     catch (error)
                     {
                         Alerta.TratamentoErroComLinha(
-                            "combustivel_<num>.js",
+                            "combustivel.js",
                             "callback@$.get#1",
                             error,
                         );
@@ -115,13 +115,13 @@ $(document).ready(function () {
             }
             catch (error)
             {
-                Alerta.TratamentoErroComLinha("combustivel_<num>.js", "callback@$.on#2", error);
+                Alerta.TratamentoErroComLinha("combustivel.js", "callback@$.on#2", error);
             }
         });
     }
     catch (error)
     {
-        Alerta.TratamentoErroComLinha("combustivel_<num>.js", "callback@$.ready#0", error);
+        Alerta.TratamentoErroComLinha("combustivel.js", "callback@$.ready#0", error);
     }
 });
 
@@ -131,14 +131,14 @@ function loadList() {
         dataTable = $("#tblCombustivel").DataTable({
             columnDefs: [
                 {
-                    targets: 1, // your case first column
+                    targets: 1,
                     className: "text-center",
-                    width: "20%",
+                    width: "15%",
                 },
                 {
-                    targets: 2, // your case first column
+                    targets: 2,
                     className: "text-center",
-                    width: "20%",
+                    width: "15%",
                 },
             ],
 
@@ -149,52 +149,53 @@ function loadList() {
                 datatype: "json",
             },
             columns: [
-                { data: "descricao", width: "30%" },
+                { data: "descricao", width: "70%" },
                 {
                     data: "status",
                     render: function (data, type, row, meta) {
                         try
                         {
                             if (data)
-                                return (
-                                    '<a href="javascript:void" class="updateStatusCombustivel btn btn-verde btn-xs text-white" data-url="/api/Combustivel/UpdateStatusCombustivel?Id=' +
-                                    row.combustivelId +
-                                    '">Ativo</a>'
-                                );
+                                return `<a href="javascript:void(0)" 
+                                           class="updateStatusCombustivel btn btn-verde btn-xs text-white" 
+                                           data-url="/api/Combustivel/UpdateStatusCombustivel?Id=${row.combustivelId}">Ativo</a>`;
                             else
-                                return (
-                                    '<a href="javascript:void" class="updateStatusCombustivel btn  btn-xs fundo-cinza text-white text-bold" data-url="/api/Combustivel/UpdateStatusCombustivel?Id=' +
-                                    row.combustivelId +
-                                    '">Inativo</a>'
-                                );
+                                return `<a href="javascript:void(0)" 
+                                           class="updateStatusCombustivel btn btn-xs fundo-cinza text-white text-bold" 
+                                           data-url="/api/Combustivel/UpdateStatusCombustivel?Id=${row.combustivelId}">Inativo</a>`;
                         }
                         catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("combustivel_<num>.js", "render", error);
+                            Alerta.TratamentoErroComLinha("combustivel.js", "render@status", error);
                         }
                     },
-                    width: "10%",
+                    width: "15%",
                 },
                 {
                     data: "combustivelId",
                     render: function (data) {
                         try
                         {
-                            return `<div class="text-center">
-                                <a href="/Combustivel/Upsert?id=${data}" class="btn btn-azul btn-xs text-white" style="cursor:pointer; width:75px;">
-                                    <i class="far fa-edit"></i> Editar
+                            return `<div class="ftx-actions">
+                                <a href="/Combustivel/Upsert?id=${data}" 
+                                   class="btn btn-icon-28 btn-azul" 
+                                   data-ejtip="Editar combustível">
+                                    <i class="far fa-edit"></i>
                                 </a>
-                                <a class="btn-delete btn btn-vinho btn-xs text-white" style="cursor:pointer; width:80px;" data-id='${data}'>
-                                    <i class="far fa-trash-alt"></i> Excluir
+                                <a href="javascript:void(0)" 
+                                   class="btn-delete btn btn-icon-28 btn-vinho" 
+                                   data-ejtip="Excluir combustível"
+                                   data-id="${data}">
+                                    <i class="far fa-trash-alt"></i>
                                 </a>
-                    </div>`;
+                            </div>`;
                         }
                         catch (error)
                         {
-                            Alerta.TratamentoErroComLinha("combustivel_<num>.js", "render", error);
+                            Alerta.TratamentoErroComLinha("combustivel.js", "render@acoes", error);
                         }
                     },
-                    width: "20%",
+                    width: "15%",
                 },
             ],
 
@@ -207,6 +208,6 @@ function loadList() {
     }
     catch (error)
     {
-        Alerta.TratamentoErroComLinha("combustivel_<num>.js", "loadList", error);
+        Alerta.TratamentoErroComLinha("combustivel.js", "loadList", error);
     }
 }

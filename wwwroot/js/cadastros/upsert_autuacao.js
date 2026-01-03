@@ -244,45 +244,76 @@ function onAutuacaoUploadFailure(args)
  * param {string} r - Separador decimal
  * param {string} t - Separador de milhares
  */
-function moeda(a, e, r, t)
+function moeda(input, sep, dec, event)
 {
     try
     {
-        let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
-            o = window.Event ? e.which : e.keyCode;
+        let digitado = "",
+            i = j = 0,
+            tamanho = tamanho2 = 0,
+            limpo = ajustado = "",
+            tecla = window.Event ? event.which : event.keyCode;
 
-        if (13 == o || 8 == o) return true;
-        if (n = String.fromCharCode(o), -1 == "0123456789".indexOf(n)) return false;
+        if (tecla === 13 || tecla === 8) return true;
 
-        for (u = a.value.length, h = 0; h < u && ("0" == a.value.charAt(h) || a.value.charAt(h) == r); h++);
+        digitado = String.fromCharCode(tecla);
 
-        for (l = ""; h < u; h++)
+        if ("0123456789".indexOf(digitado) === -1) return false;
+
+        // Remove o prefixo R$ para processar apenas números
+        let valorAtual = input.value.replace('R$ ', '');
+
+        for (tamanho = valorAtual.length, i = 0;
+             i < tamanho && (valorAtual.charAt(i) === "0" || valorAtual.charAt(i) === dec);
+             i++);
+
+        for (limpo = ""; i < tamanho; i++)
         {
-            if (-1 != "0123456789".indexOf(a.value.charAt(h)))
+            if ("0123456789".indexOf(valorAtual.charAt(i)) !== -1)
             {
-                l += a.value.charAt(h);
+                limpo += valorAtual.charAt(i);
             }
         }
 
-        if (l += n, 0 == (u = l.length) && (a.value = ""), 1 == u && (a.value = "0" + r + "0" + l), 2 == u && (a.value = "0" + r + l), u > 2)
+        limpo += digitado;
+        tamanho = limpo.length;
+
+        if (tamanho === 0)
         {
-            for (ajd2 = "", j = 0, h = u - 3; h >= 0; h--)
+            input.value = "";
+        }
+        else if (tamanho === 1)
+        {
+            input.value = "R$ 0" + dec + "0" + limpo;
+        }
+        else if (tamanho === 2)
+        {
+            input.value = "R$ 0" + dec + limpo;
+        }
+        else
+        {
+            for (ajustado = "", j = 0, i = tamanho - 3; i >= 0; i--)
             {
-                if (3 == j)
+                if (j === 3)
                 {
-                    ajd2 += t;
+                    ajustado += sep;
                     j = 0;
                 }
-                ajd2 += l.charAt(h);
+                ajustado += limpo.charAt(i);
                 j++;
             }
 
-            for (a.value = "", tamanho2 = ajd2.length, h = tamanho2 - 1; h >= 0; h--)
+            input.value = "R$ ";
+            tamanho2 = ajustado.length;
+
+            for (i = tamanho2 - 1; i >= 0; i--)
             {
-                a.value += ajd2.charAt(h);
+                input.value += ajustado.charAt(i);
             }
-            a.value += r + l.substr(u - 2, u);
+
+            input.value += dec + limpo.substr(tamanho - 2, tamanho);
         }
+
         return false;
     } catch (error)
     {

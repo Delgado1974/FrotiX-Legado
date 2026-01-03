@@ -603,7 +603,7 @@
                                                 <i class="fa-duotone fa-file-excel ftx-dropzone-icon"></i>
                                                 <p class="mb-1 fw-semibold text-success" id="nomeArquivo"></p>
                                                 <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="btnRemoverArquivo">
-                                                    <i class="fa-solid fa-xmark me-1"></i>Remover
+                                                    <i class="fa-duotone fa-xmark me-1"></i>Remover
                                                 </button>
                                             </div>
                                         </div>
@@ -684,7 +684,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="resumo-periodo-seta">
-                                                            <i class="fa-solid fa-arrow-right"></i>
+                                                            <i class="fa-duotone fa-arrow-right"></i>
                                                         </div>
                                                         <div class="resumo-periodo-item">
                                                             <i class="fa-duotone fa-calendar-arrow-up text-danger"></i>
@@ -819,7 +819,7 @@
 
                                         <!-- Botão Acessar Pendências -->
                                         <div class="d-grid gap-2 mb-4">
-                                            <a href="/Abastecimento/Pendencias" class="btn btn-warning btn-lg">
+                                            <a href="/Abastecimento/Pendencias" class="btn btn-terracota btn-lg">
                                                 <i class="fa-duotone fa-clipboard-list-check me-2"></i>
                                                 Acessar Pendências para Correção
                                             </a>
@@ -872,7 +872,7 @@
 
                                         <!-- Botão Acessar Pendências -->
                                         <div class="d-grid gap-2 mb-4">
-                                            <a href="/Abastecimento/Pendencias" class="btn btn-warning btn-lg">
+                                            <a href="/Abastecimento/Pendencias" class="btn btn-terracota btn-lg">
                                                 <i class="fa-duotone fa-clipboard-list-check me-2"></i>
                                                 Acessar Pendências para Correção
                                             </a>
@@ -1070,7 +1070,7 @@
                                     <strong class="text-danger">Linha ${erro.linhaArquivoErros} (original: ${erro.linhaOriginal})</strong>
                                     <div class="d-flex gap-2">
                                         <span class="badge-tipo-erro badge-erro">${erro.tipo}</span>
-                                        ${erro.corrigivel ? '<span class="badge-tipo-erro badge-corrigivel"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>sugestão</span>' : ''}
+                                        ${erro.corrigivel ? '<span class="badge-tipo-erro badge-corrigivel"><i class="fa-duotone fa-wand-magic-sparkles me-1"></i>sugestão</span>' : ''}
                                     </div>
                                 </div>
                                 <p class="mb-0 text-muted small">${erro.descricao}</p>
@@ -1099,7 +1099,7 @@
                                             <span class="valor-label">Atual (errado)</span>
                                             <span class="valor-numero">${erro.valorAtual?.toLocaleString('pt-BR')}</span>
                                         </div>
-                                        <i class="fa-solid fa-arrow-right sugestao-seta"></i>
+                                        <i class="fa-duotone fa-arrow-right sugestao-seta"></i>
                                         <div class="sugestao-valor valor-correto">
                                             <span class="valor-label">Sugerido</span>
                                             <span class="valor-numero">${erro.valorSugerido?.toLocaleString('pt-BR')}</span>
@@ -1109,7 +1109,7 @@
                                         ${erro.justificativaSugestao}
                                     </div>
                                     <button type="button" class="btn-aplicar-correcao" onclick="aplicarCorrecao(${index}, this)">
-                                        <i class="fa-solid fa-check"></i>
+                                        <i class="fa-duotone fa-check"></i>
                                         Aplicar e Importar
                                     </button>
                                 </div>
@@ -1144,7 +1144,7 @@
 
                     // Desabilitar botão
                     btnElement.classList.add('loading');
-                    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aplicando...';
+                    btnElement.innerHTML = '<i class="fa-duotone fa-spinner fa-spin"></i> Aplicando...';
 
                     const response = await fetch('/api/Abastecimento/AplicarCorrecao', {
                         method: 'POST',
@@ -1183,14 +1183,14 @@
                     } else {
                         AppToast.show('Vermelho', result.message || 'Erro ao aplicar correção', 5000);
                         btnElement.classList.remove('loading');
-                        btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Aplicar e Importar';
+                        btnElement.innerHTML = '<i class="fa-duotone fa-check"></i> Aplicar e Importar';
                     }
 
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'aplicarCorrecao', error);
                     AppToast.show('Vermelho', 'Erro ao aplicar correção', 4000);
                     btnElement.classList.remove('loading');
-                    btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Aplicar e Importar';
+                    btnElement.innerHTML = '<i class="fa-duotone fa-check"></i> Aplicar e Importar';
                 }
             }
 

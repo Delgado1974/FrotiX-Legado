@@ -1,92 +1,103 @@
-using FrotiX.Data;
 using FrotiX.Models;
 using FrotiX.Repository.IRepository;
-using FrotiX.Services;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
+using FrotiX.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace FrotiX.Controllers
 {
-    public partial class ViagemController
+    /// <summary>
+    /// Partial class para endpoint ListaEventos otimizado
+    /// Arquivo: ViagemController_ListaEventos.cs
+    /// Destino: /Controllers/ViagemController_ListaEventos.cs
+    /// </summary>
+    public partial class ViagemController : Controller
     {
         /// <summary>
-        /// Lista todos os eventos COM o campo custoViagem calculado
+        /// Lista todos os eventos com custos agregados - OTIMIZADO
         /// Rota: /api/viagem/listaeventos
+        /// 
+        /// ANTES: 20+ segundos (subquery correlacionada, 53k viagens na memória)
+        /// DEPOIS: < 1 segundo (agregação SQL, apenas eventos na memória)
         /// </summary>
         [HttpGet]
         [Route("ListaEventos")]
         public IActionResult ListaEventos()
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
             try
             {
-                // Busca todos os eventos
-                var eventos = _unitOfWork.Evento.GetAll().ToList();
+                // ============================================================
+                // PASSO 1: Agregar custos no SQL (NÃO traz 53k viagens!)
+                // ============================================================
+                var custosDict = new Dictionary<Guid, double>();
 
-                // Busca custos das viagens agrupados por EventoId
-                var custosPorEvento = _unitOfWork.Viagem
-                    .GetAll()
-                    .Where(v => v.EventoId != null && v.EventoId != Guid.Empty)
-                    .ToList()
-                    .GroupBy(v => v.EventoId ?? Guid.Empty)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Sum(v => (v.CustoMotorista ?? 0) +
-                                       (v.CustoCombustivel ?? 0) +
-                                       (v.CustoLavador ?? 0))
-                    );
+                var sqlCustos = @"
+                    SELECT 
+                        EventoId,
+                        ROUND(SUM(
+                            ISNULL(CustoCombustivel, 0) + 
+                            ISNULL(CustoMotorista, 0) + 
+                            ISNULL(CustoVeiculo, 0) + 
+                            ISNULL(CustoOperador, 0) + 
+                            ISNULL(CustoLavador, 0)
+                        ), 2) AS CustoTotal
+                    FROM Viagem
+                    WHERE EventoId IS NOT NULL
+                    GROUP BY EventoId";
 
-                // Busca setores
-                var setores = _unitOfWork.SetorSolicitante
-                    .GetAll()
-                    .ToList()
-                    .ToDictionary(s => s.SetorSolicitanteId, s => new { s.Nome, s.Sigla });
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = sqlCustos;
+                    command.CommandTimeout = 30;
 
-                // Busca requisitantes
-                var requisitantes = _unitOfWork.Requisitante
-                    .GetAll()
-                    .ToList()
-                    .ToDictionary(r => r.RequisitanteId, r => r.Nome);
+                    _context.Database.OpenConnection();
 
-                // Monta resultado
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (!reader.IsDBNull(0))
+                            {
+                                var eventoId = reader.GetGuid(0);
+                                var custo = reader.IsDBNull(1) ? 0 : Convert.ToDouble(reader.GetValue(1));
+                                custosDict[eventoId] = custo;
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"[ListaEventos] Custos SQL: {sw.ElapsedMilliseconds}ms ({custosDict.Count} eventos)");
+
+                // ============================================================
+                // PASSO 2: Buscar eventos com Include (1 query)
+                // ============================================================
+                var eventos = _context.Evento
+                    .Include(e => e.SetorSolicitante)
+                    .Include(e => e.Requisitante)
+                    .AsNoTracking()
+                    .ToList();
+
+                Console.WriteLine($"[ListaEventos] Eventos: {sw.ElapsedMilliseconds}ms ({eventos.Count})");
+
+                // ============================================================
+                // PASSO 3: Montar resultado (em memória)
+                // ============================================================
                 var resultado = eventos.Select(e =>
                 {
-                    // Pega nome do setor (SetorSolicitanteId é Guid, não nullable)
                     string nomeSetor = "";
-                    if (e.SetorSolicitanteId != Guid.Empty && setores.TryGetValue(e.SetorSolicitanteId, out var setor))
+                    if (e.SetorSolicitante != null)
                     {
-                        nomeSetor = !string.IsNullOrEmpty(setor.Sigla)
-                            ? $"{setor.Nome} ({setor.Sigla})"
-                            : setor.Nome ?? "";
+                        nomeSetor = !string.IsNullOrEmpty(e.SetorSolicitante.Sigla)
+                            ? $"{e.SetorSolicitante.Nome} ({e.SetorSolicitante.Sigla})"
+                            : e.SetorSolicitante.Nome ?? "";
                     }
 
-                    // Pega nome do requisitante (RequisitanteId é Guid, não nullable)
-                    string nomeRequisitante = "";
-                    if (e.RequisitanteId != Guid.Empty && requisitantes.TryGetValue(e.RequisitanteId, out var reqNome))
-                    {
-                        nomeRequisitante = reqNome ?? "";
-                    }
-
-                    // Pega custo calculado
-                    double custoViagem = 0;
-                    if (custosPorEvento.TryGetValue(e.EventoId, out var custo))
-                    {
-                        custoViagem = custo;
-                    }
+                    custosDict.TryGetValue(e.EventoId, out double custoViagem);
 
                     return new
                     {
@@ -95,24 +106,32 @@ namespace FrotiX.Controllers
                         descricao = e.Descricao ?? "",
                         dataInicial = e.DataInicial,
                         dataFinal = e.DataFinal,
-                        qtdParticipantes = e.QtdParticipantes ?? 0,
+                        qtdParticipantes = e.QtdParticipantes,
                         status = e.Status == "1" ? 1 : 0,
                         nomeSetor = nomeSetor,
-                        nomeRequisitante = nomeRequisitante,
-                        nomeRequisitanteHTML = nomeRequisitante,
+                        nomeRequisitante = e.Requisitante?.Nome ?? "",
+                        nomeRequisitanteHTML = e.Requisitante?.Nome ?? "",
                         custoViagem = custoViagem
                     };
-                }).ToList();
+                })
+                .OrderBy(e => e.nome)
+                .ToList();
+
+                sw.Stop();
+                Console.WriteLine($"[ListaEventos] ✅ TOTAL: {sw.ElapsedMilliseconds}ms - {resultado.Count} eventos");
 
                 return Json(new { data = resultado });
             }
             catch (Exception error)
             {
+                sw.Stop();
+                Console.WriteLine($"[ListaEventos] ❌ ERRO após {sw.ElapsedMilliseconds}ms: {error.Message}");
                 Alerta.TratamentoErroComLinha("ViagemController.cs", "ListaEventos", error);
+                
                 return Json(new
                 {
                     success = false,
-                    message = $"Erro ao listar eventos: {error.Message}",
+                    message = "Erro ao listar eventos",
                     data = new List<object>()
                 });
             }

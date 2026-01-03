@@ -16,6 +16,20 @@
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
     <link href="https://cdn.kendostatic.com/2022.1.412/styles/kendo.default-main.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.kendostatic.com/2022.1.412/js/jszip.min.js"></script>
     <script src="https://cdn.kendostatic.com/2022.1.412/js/kendo.all.min.js"></script>
@@ -97,31 +111,32 @@
     <div class="row">
         <div class="col-xl-12">
             <div id="panel-1" class="panel">
-                <div class="panel-container show">
-                    <div class="panel-content float-right">
-                        <a href="/Abastecimento/UpsertCupons" class="btn btn-info">
-                            <i class="fa-light fa-scroll"></i> &nbsp; Importar Registro de Cupons de Abastecimento
+                <!-- ===== HEADER FROTIX ===== -->
+                <div class="ftx-card-header">
+                    <h2 class="titulo-paginas">
+                        <i class="fa-duotone fa-scroll"></i>
+                        Registro de Cupons de Abastecimento
+                    </h2>
+                    <div class="ftx-card-actions">
+                        <a href="/Abastecimento/UpsertCupons" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-file-import icon-pulse me-1"></i> Importar Cupons
                         </a>
                     </div>
-                    <div class="panel-content ">
+                </div>
+
+                <div class="panel-container show">
+                    <div class="panel-content">
                         <div class="box-body">
-                            <br /><br />
-                            <div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-                                <h2 class="text-primary">
-                                    Escolha a data desejada para visualizar os Cupons:
-                                </h2>
-                            </div>
-                            <br />
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-8 col-sm-3">
                                         <br />
-                                        <label class="label font-weight-bold color-black ">Escolha uma Data</label>
+                                        <label class="label font-weight-bold color-black">Escolha uma Data</label>
                                         <input id="txtData" class="form-control form-control-xs" type="date" />
                                     </div>
                                 </div>
                             </div>
-                            <br /><br />
+                            <br />
                             <div id="divCupons">
                                 <table id="tblCupons" class="table table-bordered table-striped" width="100%">
                                     <thead>
@@ -200,7 +215,7 @@
                     <br />
                 </form>
                 <div class="modal-footer">
-                    <button id="btnFechar" type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
+                    <button id="btnFechar" type="button" class="btn btn-vinho" data-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
@@ -321,11 +336,11 @@
                         "render": function (data, type, full, meta) {
                             return `<div class="text-center">
                                         <a href="/Abastecimento/UpsertCupons?id=${data}" class="btn btn_topo fundo-azul btn-xs text-white" aria-label="Editar o Registro!" data-microtip-position="top" role="tooltip"  style="cursor:pointer;">
-                                            <i class="far fa-edit"></i>
+                                            <i class="fa-duotone fa-edit"></i>
                                         </a>
 
-                                        <a class="btn btn_topo btn-apagar btn-danger btn-xs text-white" aria-label="Apagar a lista de Cupons!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
-                                            <i class="far fa-window-close"></i>
+                                        <a class="btn btn_topo btn-apagar btn-vinho btn-xs text-white" aria-label="Apagar a lista de Cupons!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
+                                            <i class="fa-duotone fa-window-close"></i>
                                         </a>
                                     </div>`;
                         }

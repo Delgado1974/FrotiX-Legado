@@ -6,9 +6,9 @@
 @{
     ViewData["Title"]     = "Encarregados";
     ViewData["PageName"]  = "encarregado_upsert";
-    ViewData["Heading"]   = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Encarregados</span>";
+    ViewData["Heading"]   = "<i class='fa-duotone fa-user-tie'></i> Cadastros: <span class='fw-300'>Encarregados</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"]  = "fal fa-user-tie";
+    ViewData["PageIcon"]  = "fa-duotone fa-user-tie";
     
     var isEdicao = Model.EncarregadoObj.Encarregado.EncarregadoId != Guid.Empty;
 }
@@ -497,7 +497,7 @@
                                                 asp-page-handler="Edit"
                                                 asp-route-id="@Model.EncarregadoObj.Encarregado.EncarregadoId"
                                                 class="btn btn-azul">
-                                            <i class="fa-duotone fa-floppy-disk"></i>
+                                            <i class="fa-duotone fa-floppy-disk icon-pulse"></i>
                                             Atualizar
                                         </button>
                                     }

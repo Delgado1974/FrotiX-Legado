@@ -266,12 +266,16 @@ namespace FrotiX.Controllers
                     if (viagem.StatusAgendamento == null)
                     {
                         viagem.StatusAgendamento = true;
-                        viagem.FoiAgendamento = true;
+                        // CORREÇÃO: FoiAgendamento deve ser FALSE ao criar agendamento
+                        // Só será TRUE quando o agendamento for transformado em viagem Realizada
+                        viagem.FoiAgendamento = false;
                     }
 
-                    if (viagem.StatusAgendamento == true)
+                    // CORREÇÃO: Removida lógica incorreta que definia FoiAgendamento = true
+                    // FoiAgendamento só deve ser true quando transformar agendamento em viagem
+                    if (viagem.StatusAgendamento == true && viagem.FoiAgendamento == null)
                     {
-                        viagem.FoiAgendamento = true;
+                        viagem.FoiAgendamento = false;
                     }
 
                     var primeiraDataSelecionada = DatasSelecionadasAdicao.FirstOrDefault();

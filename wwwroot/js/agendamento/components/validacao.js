@@ -22,6 +22,10 @@ class ValidadorAgendamento
         try
         {
             this.erros = [];
+            
+            // Resetar flags de confirmação para nova validação
+            this._kmConfirmado = false;
+            this._finalizacaoConfirmada = false;
 
             // Validar data inicial
             if (!await this.validarDataInicial()) return false;
@@ -212,22 +216,47 @@ class ValidadorAgendamento
         {
             const dataFinal = $("#txtDataFinal").val();
             const horaFinal = $("#txtHoraFinal").val();
-            const combustivelFinal = document.getElementById("ddtCombustivelFinal").ej2_instances[0].value;
+            const combustivelFinal = document.getElementById("ddtCombustivelFinal")?.ej2_instances?.[0]?.value;
             const kmFinal = $("#txtKmFinal").val();
 
             const todosFinalPreenchidos = dataFinal && horaFinal && combustivelFinal && kmFinal;
 
             if (!todosFinalPreenchidos)
             {
-                await Alerta.Erro("Informação Incompleta", "Todos os campos de Finalização devem ser preenchidos para encerrar a viagem");
+                await Alerta.Erro(
+                    "Campos de Finalização Incompletos", 
+                    "Para gravar uma viagem como 'Realizada', é necessário preencher todos os campos de Finalização:\n\n• Data Final\n• Hora Final\n• Km Final\n• Combustível Final"
+                );
                 return false;
             }
 
+            // Validação: Data Final não pode ser superior à data atual
+            if (dataFinal)
+            {
+                const dtFinal = window.parseDate ? window.parseDate(dataFinal) : new Date(dataFinal);
+                const dtAtual = new Date();
+                
+                // Zerar horas para comparar apenas datas
+                dtFinal.setHours(0, 0, 0, 0);
+                dtAtual.setHours(0, 0, 0, 0);
+                
+                if (dtFinal > dtAtual)
+                {
+                    await Alerta.Erro(
+                        "Data Inválida", 
+                        "A Data Final não pode ser superior à data atual."
+                    );
+                    $("#txtDataFinal").val("");
+                    $("#txtDataFinal").focus();
+                    return false;
+                }
+            }
+
             // Validar destino quando finalizado
-            const destino = document.getElementById("cmbDestino").ej2_instances[0].value;
+            const destino = document.getElementById("cmbDestino")?.ej2_instances?.[0]?.value;
             if (destino === "" || destino === null)
             {
-                await Alerta.Erro("Informação Ausente", "O Destino é obrigatório");
+                await Alerta.Erro("Informação Ausente", "O Destino é obrigatório para finalizar a viagem");
                 return false;
             }
 
@@ -246,12 +275,8 @@ class ValidadorAgendamento
     {
         try
         {
-            // Validar ficha de vistoria
-            if ($("#txtNoFichaVistoria").val() === "" || $("#txtNoFichaVistoria").val() === null)
-            {
-                await Alerta.Erro("Informação Ausente", "O Nº da Ficha de Vistoria é obrigatório");
-                return false;
-            }
+            // REMOVIDO: Ficha de Vistoria não é mais obrigatória
+            // Se não informada, será gravada como 0
 
             // Validar motorista
             const lstMotorista = document.getElementById("lstMotorista").ej2_instances[0];
@@ -563,14 +588,29 @@ class ValidadorAgendamento
             const ini = parseFloat(kmInicial.replace(",", "."));
             const fim = parseFloat(kmFinal.replace(",", "."));
 
+            // Validação: Km Final deve ser maior que Km Inicial
             if (fim < ini)
             {
                 await Alerta.Erro("Erro", "A quilometragem final deve ser maior que a inicial.");
                 return false;
             }
 
+            // Validação: Km Final não pode exceder Km Inicial em mais de 2.000km
             const diff = fim - ini;
-            if (diff > 100)
+            if (diff > 2000)
+            {
+                await Alerta.Erro(
+                    "Quilometragem Inválida", 
+                    `A quilometragem final não pode exceder a inicial em mais de 2.000 km.\n\nDiferença informada: ${diff.toLocaleString('pt-BR')} km`
+                );
+                $("#txtKmFinal").val("");
+                $("#txtKmFinal").focus();
+                return false;
+            }
+
+            // Alerta (não bloqueante) se diferença > 100km
+            // Só perguntar se ainda não foi confirmado nesta sessão de validação
+            if (diff > 100 && !this._kmConfirmado)
             {
                 const confirmacao = await Alerta.Confirmar(
                     "Atenção",
@@ -585,6 +625,9 @@ class ValidadorAgendamento
                     $("#txtKmFinal").focus();
                     return false;
                 }
+                
+                // Marcar como confirmado para não perguntar novamente
+                this._kmConfirmado = true;
             }
 
             return true;
@@ -632,7 +675,8 @@ class ValidadorAgendamento
 
             const todosFinalPreenchidos = dataFinal && horaFinal && combustivelFinal && kmFinal;
 
-            if (todosFinalPreenchidos)
+            // Só perguntar se ainda não foi confirmado nesta sessão de validação
+            if (todosFinalPreenchidos && !this._finalizacaoConfirmada)
             {
                 const confirmacao = await Alerta.Confirmar(
                     "Confirmar Fechamento",
@@ -642,6 +686,9 @@ class ValidadorAgendamento
                 );
 
                 if (!confirmacao) return false;
+                
+                // Marcar como confirmado para não perguntar novamente
+                this._finalizacaoConfirmada = true;
             }
 
             return true;

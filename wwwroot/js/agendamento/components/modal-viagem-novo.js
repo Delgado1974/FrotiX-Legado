@@ -137,7 +137,7 @@ window.criarAgendamentoNovo = function ()
         const kmAtual = window.parseIntSafe($("#txtKmAtual").val());
         const kmInicial = window.parseIntSafe($("#txtKmInicial").val());
         const kmFinal = window.parseIntSafe($("#txtKmFinal").val());
-        const noFichaVistoria = $("#txtNoFichaVistoria").val();
+        const noFichaVistoria = $("#txtNoFichaVistoria").val() || 0;
 
         // Processar evento
         let eventoId = null;
@@ -455,7 +455,7 @@ window.criarAgendamentoEdicao = function (agendamentoOriginal)
         const finalidade = window.getSfValue0(ddtFinalidade);
         const combustivelInicial = window.getSfValue0(ddtCombIniInst);
         const combustivelFinal = window.getSfValue0(ddtCombFimInst);
-        const noFichaVistoria = $("#txtNoFichaVistoria").val();
+        const noFichaVistoria = $("#txtNoFichaVistoria").val() || 0;
         const kmAtual = window.parseIntSafe($("#txtKmAtual").val());
         const kmInicial = window.parseIntSafe($("#txtKmInicial").val());
         const kmFinal = window.parseIntSafe($("#txtKmFinal").val());
@@ -502,9 +502,43 @@ window.criarAgendamentoEdicao = function (agendamentoOriginal)
         const dataFinalStr = dataFinalDate ? window.toDateOnlyString(dataFinalDate) : null;
         const horaFimTexto = $("#txtHoraFinal").val() || null;
 
-        // Preservar status original
-        const statusAgendamento = agendamentoOriginal?.statusAgendamento ?? true;
-        const foiAgendamento = agendamentoOriginal?.foiAgendamento ?? true;
+        // ============================================================
+        // LÓGICA DE STATUS E FOIAGENDAMENTO
+        // ============================================================
+        // Verificar se TODOS os campos de finalização estão preenchidos
+        const todosFinalPreenchidos = dataFinalStr && horaFimTexto && combustivelFinal && kmFinal;
+        
+        // Determinar status original
+        const statusOriginal = agendamentoOriginal?.status;
+        const statusAgendamentoOriginal = agendamentoOriginal?.statusAgendamento;
+        
+        // Verificar se é um agendamento (Status = 'Agendada' ou StatusAgendamento = true)
+        const eraAgendamento = statusOriginal === "Agendada" || 
+                              statusAgendamentoOriginal === true || 
+                              statusAgendamentoOriginal === 1 ||
+                              statusAgendamentoOriginal === "1" ||
+                              statusAgendamentoOriginal === "true";
+        
+        // Definir novo status
+        let novoStatus = statusOriginal;
+        let novoStatusAgendamento = statusAgendamentoOriginal;
+        let novoFoiAgendamento = agendamentoOriginal?.foiAgendamento ?? false;
+        
+        // Se todos os campos de finalização preenchidos → Realizada
+        if (todosFinalPreenchidos)
+        {
+            novoStatus = "Realizada";
+            novoStatusAgendamento = false;
+            
+            // Se era agendamento, marcar FoiAgendamento = true
+            if (eraAgendamento)
+            {
+                novoFoiAgendamento = true;
+                console.log("✅ Viagem finalizada a partir de Agendamento - FoiAgendamento = true");
+            }
+            
+            console.log("✅ Todos campos de finalização preenchidos - Status = 'Realizada'");
+        }
 
         // Montar payload de edição
         const payload = {
@@ -527,9 +561,9 @@ window.criarAgendamentoEdicao = function (agendamentoOriginal)
             RamalRequisitante: $("#txtRamalRequisitanteSF").val(),
             SetorSolicitanteId: setorId,
             Descricao: rteDescricaoHtmlContent,
-            StatusAgendamento: statusAgendamento,
-            FoiAgendamento: foiAgendamento,
-            Status: agendamentoOriginal?.status,
+            StatusAgendamento: novoStatusAgendamento,
+            FoiAgendamento: novoFoiAgendamento,
+            Status: novoStatus,
             EventoId: eventoId,
             Recorrente: agendamentoOriginal?.recorrente,
             RecorrenciaViagemId: agendamentoOriginal?.recorrenciaViagemId,
@@ -640,7 +674,7 @@ window.criarAgendamentoViagem = function (agendamentoUnicoAlterado)
 
         let statusAgendamento = document.getElementById("txtStatusAgendamento").value;
         let criarViagemFechada = true;
-        let noFichaVistoria = document.getElementById("txtNoFichaVistoria").value;
+        let noFichaVistoria = document.getElementById("txtNoFichaVistoria").value || 0;
         let status = "Aberta";
 
         // Determinar status baseado nos campos preenchidos

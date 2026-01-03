@@ -240,7 +240,7 @@ namespace FrotiX.Pages.Manutencao
                 status.Add(new ListaStatusManutencao { Status = "Todas" , StatusId = "Todas" });
                 status.Add(new ListaStatusManutencao { Status = "Abertas" , StatusId = "Aberta" });
                 status.Add(new ListaStatusManutencao { Status = "Canceladas" , StatusId = "Cancelada" });
-                status.Add(new ListaStatusManutencao { Status = "Fechadas" , StatusId = "Fechada" });
+                status.Add(new ListaStatusManutencao { Status = "Fechadas/Baixadas" , StatusId = "Fechada" });
 
                 return status;
             }

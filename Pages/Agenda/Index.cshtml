@@ -71,9 +71,9 @@ var Closebutton = new
 @{
 ViewData["Title"] = "Agenda";
 ViewData["PageName"] = "agenda_index";
-ViewData["Heading"] = "<i class='fad fa-calendar-alt'></i> Agenda: <span class='fw-300'>Agenda de Viagens</span>";
+ViewData["Heading"] = "<i class='fa-duotone fa-calendar-alt'></i> Agenda: <span class='fw-300'>Agenda de Viagens</span>";
 ViewData["Category1"] = "Agenda";
-ViewData["PageIcon"] = "fad fa-calendar-alt";
+ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
 }
 
 @* ============================================
@@ -87,6 +87,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="~/css/modal-viagens-consolidado.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/modal-viagens-headers.css" asp-append-version="true" />
 
 <!-- FullCalendar 6.1.15 -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
@@ -219,6 +220,38 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
 </script>
 
 <style>
+    /* Usamos o header padrão FrotiX (ftx-card-header + titulo-paginas) definido em frotix.css */
+
+    /* ======== Legenda de Cores da Agenda ======== */
+    .legenda-cores {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #dee2e6;
+        flex-wrap: wrap;
+    }
+
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .legenda-bola {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .legenda-texto {
+        font-size: 1.2rem;
+        color: #495057;
+        font-weight: 500;
+    }
 
     /* ======== Syncfusion ComboBox personalizado (motorista) ======== */
     .lstMotorista_popup .e-dropdownbase .e-list-item {
@@ -261,6 +294,41 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
             margin-right: 8px;
         }
 
+    /* ======== Placeholder (mobile) para Ficha de Vistoria ======== */
+    .placeholder-mobile::placeholder {
+        color: #555555;
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    .placeholder-mobile::-webkit-input-placeholder {
+        color: #555555;
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    /* Firefox */
+    .placeholder-mobile::-moz-placeholder {
+        color: #555555;
+        font-style: italic;
+        font-weight: 400;
+        opacity: 1;
+    }
+
+    /* IE 10+ */
+    .placeholder-mobile:-ms-input-placeholder {
+        color: #555555;
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    /* ======== Distância > 100km - Vermelho Negrito ======== */
+    .distancia-alerta {
+        color: #dc3545 !important;
+        font-weight: 700 !important;
+    }
+
 </style>
 
 }
@@ -275,12 +343,45 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
 <div class="row" align="center">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
+            <!-- ===== HEADER FROTIX ===== -->
+            <div class="ftx-card-header">
+                <h2 class="titulo-paginas">
+                    <i class="fa-duotone fa-calendar-lines-pen"></i>
+                    Agenda de Viagens
+                </h2>
+            </div>
+
             <div class="panel-container show">
                 <div class="panel-content ">
+
+                    <!-- Legenda de Cores -->
+                    <div class="legenda-cores">
+                        <div class="legenda-item">
+                            <span class="legenda-bola" style="background-color: #D55102;"></span>
+                            <span class="legenda-texto">Agendamento</span>
+                        </div>
+                        <div class="legenda-item">
+                            <span class="legenda-bola" style="background-color: #4C2B08;"></span>
+                            <span class="legenda-texto">Evento</span>
+                        </div>
+                        <div class="legenda-item">
+                            <span class="legenda-bola" style="background-color: #3d5c3d;"></span>
+                            <span class="legenda-texto">Aberta</span>
+                        </div>
+                        <div class="legenda-item">
+                            <span class="legenda-bola" style="background-color: #154c62;"></span>
+                            <span class="legenda-texto">Realizada</span>
+                        </div>
+                        <div class="legenda-item">
+                            <span class="legenda-bola" style="background-color: #722F37;"></span>
+                            <span class="legenda-texto">Cancelada</span>
+                        </div>
+                    </div>
+
                     <div id="loading " class="example">
                     </div>
                     <div class="box-body">
-                        <br /><br />
+                        <br />
                         <div id='agenda'></div>
                         <br /><br />
                     </div>
@@ -299,8 +400,8 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
         <div class="modal-content">
             <div id="Titulo" class="modal-header modal-header-dinheiro">
                 <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="close btn-close-modal" data-dismiss="modal" aria-label="Close">
+                    <i class="fa-duotone fa-xmark"></i>
                 </button>
             </div>
             <div id="divModal" class="modal-body">
@@ -320,7 +421,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-info-circle"></i> Informações Básicas
+                        <i class="fa-duotone fa-info-circle"></i> Informações Básicas
                     </div>
                     <div class="section-card-body">
                         <div class="row align-baseline">
@@ -333,7 +434,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group">
                                     <label class="label font-weight-bold">
                                         Nº Ficha Vistoria
-                                        <i class="fa-duotone fa-solid fa-clipboard-list field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-clipboard-list field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input id="txtNoFichaVistoria" class="form-control form-control-xs" />
                                 </div>
@@ -348,7 +449,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group">
                                     <label class="label font-weight-bold">
                                         Data Inicial
-                                        <i class="fa-duotone fa-solid fa-calendar-day field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-calendar-day field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <ejs-datepicker id="txtDataInicial"
                                                     format="dd/MM/yyyy"
@@ -367,7 +468,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group">
                                     <label class="label font-weight-bold">
                                         Hora Iní­cio
-                                        <i class="fa-duotone fa-solid fa-clock field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-clock field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input id="txtHoraInicial" class="form-control form-control-xs" type="time" />
                                 </div>
@@ -382,7 +483,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div id="divDataFinal" class="form-group">
                                     <label class="label font-weight-bold">
                                         Data Final
-                                        <i class="fa-duotone fa-solid fa-calendar-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-calendar-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <ejs-datepicker id="txtDataFinal"
                                                     format="dd/MM/yyyy"
@@ -401,7 +502,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div id="divHoraFinal" class="form-group">
                                     <label class="label font-weight-bold">
                                         Hora Fim
-                                        <i class="fa-duotone fa-solid fa-stopwatch field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-stopwatch field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input id="txtHoraFinal" class="form-control form-control-xs" type="time" />
                                 </div>
@@ -416,7 +517,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div id="divDuracao" class="form-group">
                                     <label class="label font-weight-bold">
                                         Duração (hs)
-                                        <i class="fa-duotone fa-solid fa-hourglass-half field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-hourglass-half field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <ejs-numerictextbox id="txtDuracao"
                                                         Enabled="false"
@@ -438,7 +539,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card" id="divFinalidadeOrigemDestino">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-route"></i> Roteiro
+                        <i class="fa-duotone fa-route"></i> Roteiro
                     </div>
                     <div class="section-card-body">
                         <div class="row align-baseline">
@@ -454,7 +555,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="d-flex flex-column ml-2">
                                         <div class="d-flex align-items-center mb-1">
                                             <label for="lstFinalidade" class="label mr-2 mb-0">Finalidade</label>
-                                            <i class="fa-duotone fa-solid fa-rectangle-history-circle-user field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-rectangle-history-circle-user field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </div>
 
                                         <div class="dropdown-wrapper">
@@ -489,7 +590,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="d-flex flex-column ml-2">
                                         <div class="d-flex align-items-center mb-1">
                                             <label for="cmbOrigem" class="label mr-2 mb-0">Origem</label>
-                                            <i class="fa-duotone fa-solid fa-map-location field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-map-location field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </div>
                                         <!-- allowCustom="true" permite digitação livre -->
                                         <ejs-combobox id="cmbOrigem"
@@ -516,7 +617,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="d-flex flex-column ml-2">
                                         <div class="d-flex align-items-center mb-1">
                                             <label for="cmbDestino" class="label mr-2 mb-0">Destino</label>
-                                            <i class="fa-duotone fa-solid fa-map-location-dot field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-map-location-dot field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </div>
                                         <!-- allowCustom="true" permite digitação livre -->
                                         <ejs-combobox id="cmbDestino"
@@ -543,7 +644,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div id="sectionEvento" class="section-card" style="display: none;">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-tent-circus"></i> Evento
+                        <i class="fa-duotone fa-tent-circus"></i> Evento
                     </div>
                     <div class="section-card-body">
                         <div class="row">
@@ -555,7 +656,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                             <div class="col-md-8 mb-3">
                                 <label for="lstEventos" class="label font-weight-bold">
                                     Nome do Evento
-                                    <i class="fa-duotone fa-solid fa-tent-circus field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                    <i class="fa-duotone fa-tent-circus field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                 </label>
                                 <ejs-combobox id="lstEventos"
                                               placeholder="Selecione um evento..."
@@ -580,7 +681,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                         onclick="document.getElementById('btnEvento').click();"
                                         class="btn btn-azul"
                                         style="width: 100%; height: 38px;">
-                                    <i class="fa-duotone fa-solid fa-calendar-check"></i>
+                                    <i class="fa-duotone fa-calendar-check"></i>
                                     Novo Evento
                                 </button>
 
@@ -601,7 +702,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                             <div class="col-md-4 mb-3">
                                 <label for="txtDataInicioEvento" class="label font-weight-bold">
                                     Data Início
-                                    <i class="fa-duotone fa-solid fa-calendar-day field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                    <i class="fa-duotone fa-calendar-day field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                 </label>
                                 <ejs-datepicker id="txtDataInicioEvento"
                                                 format="dd/MM/yyyy"
@@ -615,7 +716,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                             <div class="col-md-4 mb-3">
                                 <label for="txtDataFimEvento" class="label font-weight-bold">
                                     Data Fim
-                                    <i class="fa-duotone fa-solid fa-calendar-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                    <i class="fa-duotone fa-calendar-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                 </label>
                                 <ejs-datepicker id="txtDataFimEvento"
                                                 format="dd/MM/yyyy"
@@ -629,7 +730,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                             <div class="col-md-4 mb-3">
                                 <label for="txtQtdParticipantesEvento" class="label font-weight-bold">
                                     Qtd Participantes
-                                    <i class="fa-duotone fa-solid fa-users field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                    <i class="fa-duotone fa-users field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                 </label>
                                 <ejs-numerictextbox id="txtQtdParticipantesEvento"
                                                     format="N0"
@@ -649,7 +750,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                             <div class="accordion" id="accordionEvento">
                                 <div class="accordion-item">
                                     <div class="section-card-header">
-                                        <i class="fa-duotone fa-solid fa-users"></i> Cadastrar Novo Evento
+                                        <i class="fa-duotone fa-users"></i> Cadastrar Novo Evento
                                     </div>
                                     <div id="collapseEvento"
                                          class="accordion-collapse collapse show" 
@@ -769,13 +870,13 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                                 <button type="button" 
                                                         id="btnCancelarEvento" 
                                                         class="btn btn-secondary">
-                                                    <i class="fa-solid fa-times me-1"></i>
+                                                    <i class="fa-duotone fa-times me-1"></i>
                                                     Cancelar
                                                 </button>
                                                 <button type="button" 
                                                         id="btnInserirEvento" 
                                                         class="btn btn-verde">
-                                                    <i class="fa-solid fa-save me-1"></i>
+                                                    <i class="fa-duotone fa-save me-1 icon-pulse"></i>
                                                     Salvar Evento
                                                 </button>
                                             </div>
@@ -794,7 +895,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-car"></i> Informações do Transporte
+                        <i class="fa-duotone fa-car"></i> Informações do Transporte
                     </div>
                     <div class="section-card-body">
 
@@ -812,7 +913,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="d-flex flex-column ml-2">
                                     <div class="d-flex align-items-center mb-1">
                                         <label id="lblMotorista" for="lstMotorista" class="label font-weight-bold mr-2" style="margin: 0;">Motorista</label>
-                                        <i id="icoMotorista" class="fa-duotone fa-solid fa-person-biking field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i id="icoMotorista" class="fa-duotone fa-person-biking field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </div>
                                     <ejs-combobox id="lstMotorista"
                                                   placeholder="Selecione um Motorista"
@@ -837,7 +938,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="d-flex flex-column ml-2">
                                     <div class="d-flex align-items-center mb-1">
                                         <label for="lstVeiculo" class="label mr-2 mb-0">Veí­culo</label>
-                                        <i class="fa-duotone fa-solid fa-truck-bolt field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-truck-bolt field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </div>
                                     <ejs-combobox id="lstVeiculo"
                                                   placeholder="Selecione um Veí­culo"
@@ -863,7 +964,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group mr-2" id="divKmAtual">
                                     <label class="label">
                                         Km Atual
-                                        <i class="fa-duotone fa-solid fa-gauge field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-gauge field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input readonly id="txtKmAtual" class="form-control form-control-xs" />
                                 </div>
@@ -872,7 +973,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group mr-2" id="divKmInicial">
                                     <label class="label">
                                         Km Inicial
-                                        <i class="fa-duotone fa-solid fa-gauge-max field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-gauge-max field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input id="txtKmInicial" class="form-control form-control-xs" />
                                 </div>
@@ -881,7 +982,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group mr-2" id="divKmFinal">
                                     <label class="label">
                                         Km Final
-                                        <i class="fa-duotone fa-solid fa-gauge-min field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-gauge-min field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input id="txtKmFinal" class="form-control form-control-xs" />
                                 </div>
@@ -890,10 +991,11 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group mr-2" id="divQuilometragem">
                                     <label class="label">
                                         Distância
-                                        <i class="fa-duotone fa-solid fa-road field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-road field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <input id="txtQuilometragem"
                                            class="form-control form-control-xs"
+                                           readonly
                                            data-ejtip="Quilometragem alta? Confirme os valores antes de salvar" />
                                 </div>
                             </div>
@@ -911,7 +1013,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group" id="divCombustivelInicial">
                                     <label class="label">
                                         Combustí­vel Inicial
-                                        <i class="fa-duotone fa-solid fa-gauge-circle-plus field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-gauge-circle-plus field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <!-- DropDownTree com imagens dos níveis -->
                                     <ejs-dropdowntree id="ddtCombustivelInicial" popupHeight="200px" showClearButton="true">
@@ -929,7 +1031,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                 <div class="form-group" id="divCombustivelFinal">
                                     <label class="label">
                                         Combustí­vel Final
-                                        <i class="fa-duotone fa-solid fa-gauge-circle-minus field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                        <i class="fa-duotone fa-gauge-circle-minus field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                     </label>
                                     <!-- DropDownTree com imagens dos níveis -->
                                     <ejs-dropdowntree id="ddtCombustivelFinal" popupHeight="200px" showClearButton="true">
@@ -953,7 +1055,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-users"></i> Requisitante e Setor
+                        <i class="fa-duotone fa-users"></i> Requisitante e Setor
                     </div>
                     <div class="section-card-body">
                         <!-- g-3: espaçamento horizontal/vertical; align-items-end: alinha pela base -->
@@ -971,7 +1073,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                             <label for="lstRequisitante" class="label font-weight-bold mr-2" style="margin: 0;">
                                                 Requisitante
                                             </label>
-                                            <i class="fa-duotone fa-solid fa-person-simple field-icon"
+                                            <i class="fa-duotone fa-person-simple field-icon"
                                                style="font-size: 1.25em; cursor: pointer;"></i>
                                         </div>
 
@@ -992,7 +1094,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
 
                                             <!-- Botão Novo Requisitante -->
                                             <a class="btn btn-nfs" id="btnRequisitante" style="height: 38px; display: flex; align-items: center;">
-                                                <i class="fal fa-user-plus"></i>
+                                                <i class="fa-duotone fa-user-plus"></i>
                                             </a>
                                         </div>
                                     </div>
@@ -1011,7 +1113,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                             <label class="label font-weight-bold mr-2" style="margin: 0;">
                                                 Ramal
                                             </label>
-                                            <i class="fa-duotone fa-solid fa-phone-office field-icon"
+                                            <i class="fa-duotone fa-phone-office field-icon"
                                                style="font-size: 1.25em; cursor: pointer;"></i>
                                         </div>
 
@@ -1033,7 +1135,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                             <label for="lstSetorRequisitanteAgendamento" class="label font-weight-bold mr-2" style="margin: 0;">
                                                 Setor do Requisitante
                                             </label>
-                                            <i class="fa-duotone fa-solid fa-building-user field-icon"
+                                            <i class="fa-duotone fa-building-user field-icon"
                                                style="font-size: 1.25em; cursor: pointer;"></i>
                                         </div>
 
@@ -1066,7 +1168,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="accordion" id="accordionRequisitante">
                                         <div class="accordion-item">
                                             <div class="section-card-header">
-                                                <i class="fa-duotone fa-solid fa-users"></i> Cadastrar Novo Requisitante
+                                                <i class="fa-duotone fa-users"></i> Cadastrar Novo Requisitante
                                             </div>
                                             <div id="collapseRequisitante"
                                                  class="accordion-collapse collapse show"
@@ -1122,13 +1224,13 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                                     <div class="d-flex justify-content-end gap-2 mt-4">
                                                         <button type="button" id="btnFecharAccordionRequisitante" class="btn btn-vinho">
                                                             <span class="btn-inner">
-                                                                <i class="fa-regular fa-circle-xmark icon-spin"></i>
+                                                                <i class="fa-duotone fa-circle-xmark icon-spin"></i>
                                                                 <span>Cancelar</span>
                                                             </span>
                                                         </button>
                                                         <button type="button" id="btnInserirRequisitante" class="btn btn-azul">
                                                             <span class="btn-inner">
-                                                                <i class="fa-duotone fa-solid fa-down-to-bracket"></i>
+                                                                <i class="fa-duotone fa-down-to-bracket"></i>
                                                                 <span>Salvar Requisitante</span>
                                                             </span>
                                                         </button>
@@ -1150,7 +1252,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card" id="cardRecorrencia">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-repeat"></i> Configurações de Recorrência
+                        <i class="fa-duotone fa-repeat"></i> Configurações de Recorrência
                     </div>
                     <div class="section-card-body">
                         <div class="select-container" id="divRecorrencia">
@@ -1165,7 +1267,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="form-group mb-3">
                                         <label for="lstRecorrente" class="label font-weight-bold">
                                             Recorrente?
-                                            <i class="fa-duotone fa-solid fa-arrows-spin field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-arrows-spin field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         <ejs-dropdownlist id="lstRecorrente"
                                                           popupHeight="200px"
@@ -1181,7 +1283,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="form-group mb-3">
                                         <label for="lstPeriodos" class="label font-weight-bold">
                                             Perí­odo
-                                            <i class="fa-duotone fa-solid fa-calendar-circle-exclamation field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-calendar-circle-exclamation field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         <input id="lstPeriodos"
                                                type="text"
@@ -1200,7 +1302,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="form-group mb-3">
                                         <label for="lstDias" class="label font-weight-bold">
                                             Dias da Semana
-                                            <i class="fa-duotone fa-solid fa-calendar-week field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-calendar-week field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         <ejs-multiselect id="lstDias"
                                                          placeholder="Selecione os dias..."
@@ -1219,7 +1321,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="form-group mb-3">
                                         <label for="lstDiasMes" class="label font-weight-bold">
                                             Dia do Mês
-                                            <i class="fa-duotone fa-solid fa-calendar-clock field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-calendar-clock field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         <ejs-dropdownlist id="lstDiasMes"
                                                           placeholder="Selecione o dia..."
@@ -1235,7 +1337,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="form-group mb-3">
                                         <label for="txtFinalRecorrencia" class="label font-weight-bold">
                                             Data Final Recorrência
-                                            <i class="fa-duotone fa-solid fa-calendar-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-calendar-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         <ejs-datepicker id="txtFinalRecorrencia"
                                                         format="dd/MM/yyyy"
@@ -1257,7 +1359,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                     <div class="form-group mb-3">
                                         <label class="label font-weight-bold" id="lblSelecioneAsDatas">
                                             Selecione as Datas
-                                            <i class="fa-duotone fa-solid fa-calendar-days field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-calendar-days field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         <!-- Componente Calendar será inicializado via JavaScript -->
                                         <div id="calDatasSelecionadas"></div>
@@ -1277,14 +1379,14 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                         
                                         <label class="label font-weight-bold">
                                             Datas Selecionadas para este Agendamento
-                                            <i class="fa-duotone fa-solid fa-list-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                            <i class="fa-duotone fa-list-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
                                         
                                         <!-- ListBox Syncfusion será inicializado aqui via JavaScript -->
                                         <select id="lstDatasVariadas" class="form-control"></select>
                                         
                                         <small class="form-text text-muted mt-2">
-                                            <i class="fa-solid fa-info-circle"></i>
+                                            <i class="fa-duotone fa-info-circle"></i>
                                             Lista de todas as datas vinculadas a este agendamento recorrente.
                                             <span style="color: #dc3545; font-weight: bold;">A data atual é destacada em vermelho.</span>
                                         </small>
@@ -1302,7 +1404,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-file-alt"></i> Descrição da Viagem
+                        <i class="fa-duotone fa-file-alt"></i> Descrição da Viagem
                     </div>
                     <div class="section-card-body">
                         <div class="row">
@@ -1312,7 +1414,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                                         <div class="d-flex flex-column ml-2">
                                             <div class="d-flex align-items-center mb-1">
                                                 <label for="rteDescricao" class="label mr-2 mb-0">Descrição da Viagem (passageiros / carga)</label>
-                                                <i class="fa-duotone fa-solid fa-typewriter field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
+                                                <i class="fa-duotone fa-typewriter field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                             </div>
                                             <!-- Kendo Editor - Substitui Syncfusion RTE -->
                                             <!-- Upload de imagens configurado em kendo-editor-helper.js -->
@@ -1332,7 +1434,7 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                      ============================================ -->
                 <div class="section-card" id="cardRelatorio" style="display: none;">
                     <div class="section-card-header">
-                        <i class="fa-duotone fa-solid fa-file-pdf" style="color: #e74c3c;"></i> Ficha da Viagem
+                        <i class="fa-duotone fa-file-pdf" style="color: #e74c3c;"></i> Ficha da Viagem
                     </div>
                     <div class="section-card-body p-0">
                         <!-- Hidden input para armazenar ID da viagem -->
@@ -1366,13 +1468,13 @@ ViewData["PageIcon"] = "fad fa-calendar-alt";
                 <!-- Modal Footer - MANTIDO ORIGINAL -->
                 <div class="modal-footer" id="divBotoes">
                     <button id="btnViagem" type="button" class="btn btn-sm btn-fundo-laranja">
-                        <i class="fa-regular fa-shuffle" aria-hidden="true"></i>&nbsp;Transforma em Viagem
+                        <i class="fa-duotone fa-shuffle" aria-hidden="true"></i>&nbsp;Transforma em Viagem
                     </button>
                     <button id="btnConfirma" type="button" class="btn btn-sm btn-azul">
                         <i class="fa fa-save" aria-hidden="true"></i>Confirmar
                     </button>
                     <button id="btnApaga" type="button" class="btn btn-sm btn-vinho">
-                        <i class="fa-light fa-trash-can-undo" aria-hidden="true"></i>Apagar
+                        <i class="fa-duotone fa-trash-can-undo" aria-hidden="true"></i>Apagar
                     </button>
                     <button id="btnCancela" type="button" class="btn btn-sm fundo-vermelho">
                         <i class="fa fa-ban" aria-hidden="true"></i>Cancelar

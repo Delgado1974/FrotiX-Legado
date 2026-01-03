@@ -999,7 +999,21 @@ function exibirViagemExistente(objViagem)
         }
 
         // 12. Campos de viagem
-        $("#txtNoFichaVistoria").val(objViagem.noFichaVistoria || "");
+        // Se NoFichaVistoria for 0, mostrar placeholder "(mobile)" em itálico cinza
+        const noFichaVal = objViagem.noFichaVistoria;
+        const txtNoFicha = $("#txtNoFichaVistoria");
+        if (noFichaVal === 0 || noFichaVal === "0" || noFichaVal === null || noFichaVal === "")
+        {
+            txtNoFicha.val("");
+            txtNoFicha.attr("placeholder", "(mobile)");
+            txtNoFicha.addClass("placeholder-mobile");
+        }
+        else
+        {
+            txtNoFicha.val(noFichaVal);
+            txtNoFicha.attr("placeholder", "");
+            txtNoFicha.removeClass("placeholder-mobile");
+        }
         $("#txtKmAtual").val(objViagem.kmAtual || "");
         $("#txtKmInicial").val(objViagem.kmInicial || "");
         $("#txtKmFinal").val(objViagem.kmFinal || "");
@@ -2348,13 +2362,23 @@ function mostrarCamposViagem(objViagem)
 {
     try
     {
-        // Mostrar campos
+        // Mostrar campos iniciais
         $("#divNoFichaVistoria, #divKmAtual, #divKmInicial, #divCombustivelInicial").show();
 
-        // Preencher ficha
-        if (objViagem.noFichaVistoria)
+        // Preencher ficha - Se 0, mostrar placeholder "(mobile)"
+        const noFichaVal = objViagem.noFichaVistoria;
+        const txtNoFicha = $("#txtNoFichaVistoria");
+        if (noFichaVal === 0 || noFichaVal === "0" || !noFichaVal)
         {
-            $("#txtNoFichaVistoria").val(objViagem.noFichaVistoria);
+            txtNoFicha.val("");
+            txtNoFicha.attr("placeholder", "(mobile)");
+            txtNoFicha.addClass("placeholder-mobile");
+        }
+        else
+        {
+            txtNoFicha.val(noFichaVal);
+            txtNoFicha.attr("placeholder", "");
+            txtNoFicha.removeClass("placeholder-mobile");
         }
 
         // Preencher km atual
@@ -2369,7 +2393,7 @@ function mostrarCamposViagem(objViagem)
             $("#txtKmInicial").val(objViagem.kmInicial);
         }
 
-        // Preencher combustí­vel inicial
+        // Preencher combustível inicial
         if (objViagem.combustivelInicial)
         {
             const ddtCombIni = document.getElementById("ddtCombustivelInicial");
@@ -2380,11 +2404,13 @@ function mostrarCamposViagem(objViagem)
             }
         }
 
-        // Se viagem está realizada, mostrar campos finais
-        if (objViagem.status === "Realizada")
+        // SEMPRE mostrar campos de finalização para Aberta, Agendada e Realizada
+        // Isso permite ao usuário finalizar a viagem diretamente
+        if (objViagem.status === "Aberta" || objViagem.status === "Agendada" || objViagem.status === "Realizada")
         {
             $("#divDataFinal, #divHoraFinal, #divKmFinal, #divCombustivelFinal, #divQuilometragem, #divDuracao").show();
 
+            // Preencher valores se existirem (para viagem Realizada)
             if (objViagem.kmFinal)
             {
                 $("#txtKmFinal").val(objViagem.kmFinal);
@@ -2746,37 +2772,98 @@ function definirTituloModal(objViagem)
     try
     {
         let tipoModal = 'NOVO_AGENDAMENTO';
-        let statusTexto = '';
 
-        if (objViagem && objViagem.viagemId)
+        if (objViagem && (objViagem.viagemId || objViagem.ViagemId))
         {
-            const status = objViagem.status;
-            const statusAgendamento = objViagem.statusAgendamento;
+            // IMPORTANTE: API pode retornar em PascalCase ou camelCase
+            const status = objViagem.status ?? objViagem.Status;
+            
+            // CORRIGIDO: Verificar StatusAgendamento de forma explícita
+            // O campo pode vir como boolean, number ou string
+            const statusAgendamentoRaw = objViagem.statusAgendamento ?? objViagem.StatusAgendamento;
+            const statusAgendamento = statusAgendamentoRaw === true || 
+                                      statusAgendamentoRaw === 1 || 
+                                      statusAgendamentoRaw === "1" || 
+                                      statusAgendamentoRaw === "true" ||
+                                      statusAgendamentoRaw === "True";
+            
+            // CORRIGIDO: Verificar FoiAgendamento de forma explícita
+            // IMPORTANTE: API pode retornar como FoiAgendamento (PascalCase) ou foiAgendamento (camelCase)
+            const foiAgendamentoRaw = objViagem.foiAgendamento ?? objViagem.FoiAgendamento;
+            const foiAgendamento = foiAgendamentoRaw === true || 
+                                   foiAgendamentoRaw === 1 || 
+                                   foiAgendamentoRaw === "1" || 
+                                   foiAgendamentoRaw === "true" ||
+                                   foiAgendamentoRaw === "True";
+            
+            // CORRIGIDO: Verificar Finalidade de múltiplas formas
+            const finalidadeNome = (objViagem.finalidade ?? objViagem.Finalidade ?? '').toString().toLowerCase().trim();
+            const isEvento = finalidadeNome === 'evento' || finalidadeNome === 'eventos';
 
-            if (status === "Cancelada")
+            console.log("🔍 DEBUG definirTituloModal:");
+            console.log("   objViagem COMPLETO:", JSON.stringify(objViagem, null, 2));
+            console.log("   status:", status);
+            console.log("   statusAgendamentoRaw:", statusAgendamentoRaw, "tipo:", typeof statusAgendamentoRaw);
+            console.log("   statusAgendamento (calculado):", statusAgendamento);
+            console.log("   foiAgendamentoRaw:", foiAgendamentoRaw, "tipo:", typeof foiAgendamentoRaw);
+            console.log("   foiAgendamento (calculado):", foiAgendamento);
+            console.log("   finalidadeNome:", finalidadeNome);
+            console.log("   isEvento:", isEvento);
+
+            // ===== EVENTO (Finalidade = Evento) - PRIORIDADE =====
+            if (isEvento)
+            {
+                if (status === "Cancelada")
+                {
+                    tipoModal = 'EVENTO_CANCELADO';
+                }
+                else if (status === "Realizada")
+                {
+                    tipoModal = 'EVENTO_REALIZADO';
+                }
+                else if (status === "Aberta" && !statusAgendamento)
+                {
+                    tipoModal = 'EVENTO_ABERTO';
+                }
+                else // Status = 'Agendada' ou 'Aberta' com statusAgendamento = true
+                {
+                    tipoModal = 'EVENTO_AGENDADO';
+                }
+            }
+            // ===== CANCELADA =====
+            else if (status === "Cancelada")
             {
                 tipoModal = 'VIAGEM_CANCELADA';
-                statusTexto = 'Angendamento/Viagem Cancelada';
-            } else if (status === "Realizada")
+            }
+            // ===== REALIZADA =====
+            else if (status === "Realizada")
             {
                 tipoModal = 'VIAGEM_REALIZADA';
-                statusTexto = 'Viagem Realizada';
-            } else if (status === "Aberta" && statusAgendamento === false)
+                // Passar foiAgendamento para adicionar texto em laranja se necessário
+                window._foiAgendamentoAtual = foiAgendamento;
+            }
+            // ===== ABERTA (viagem já transformada, não é mais agendamento) =====
+            else if (status === "Aberta" && !statusAgendamento)
             {
                 tipoModal = 'VIAGEM_ABERTA';
-                statusTexto = 'Viagem Aberta';
-            } else if (status === "Aberta" && statusAgendamento === true)
+                window._foiAgendamentoAtual = false;
+            }
+            // ===== AGENDADA (Status = 'Agendada' OU Status = 'Aberta' com statusAgendamento = true) =====
+            else if (status === "Agendada" || (status === "Aberta" && statusAgendamento))
+            {
+                tipoModal = 'VIAGEM_AGENDADA';
+                window._foiAgendamentoAtual = false;
+            }
+            // ===== DEFAULT =====
+            else
             {
                 tipoModal = 'EDITAR_AGENDAMENTO';
-                statusTexto = 'Editar Agendamento';
-            } else
-            {
-                tipoModal = 'EDITAR_AGENDAMENTO';
-                statusTexto = 'Viagem Aberta';
+                window._foiAgendamentoAtual = false;
             }
         }
 
-        window.setModalTitle(tipoModal, statusTexto);
+        console.log(`✅ Tipo de modal determinado: ${tipoModal}`);
+        window.setModalTitle(tipoModal);
     } catch (error)
     {
         Alerta.TratamentoErroComLinha("exibe-viagem.js", "definirTituloModal", error);
@@ -3608,11 +3695,24 @@ async function configurarRodapeLabelsExistente(objViagem)
             }
         });
 
-        console.log("🔍 [configurarRodapeLabelsExistente] Status:", objViagem.status);
-        console.log("🔍 [configurarRodapeLabelsExistente] FoiAgendamento:", objViagem.foiAgendamento || objViagem.statusAgendamento);
+        console.log("🔍 [configurarRodapeLabelsExistente] Status:", objViagem.status ?? objViagem.Status);
+        console.log("🔍 [configurarRodapeLabelsExistente] FoiAgendamento:", objViagem.foiAgendamento ?? objViagem.FoiAgendamento);
+        console.log("🔍 [configurarRodapeLabelsExistente] StatusAgendamento:", objViagem.statusAgendamento ?? objViagem.StatusAgendamento);
 
-        // REGRA 1: Agendado Por - quando FoiAgendamento = true
-        const foiAgendamento = objViagem.foiAgendamento === true || objViagem.statusAgendamento === true;
+        // REGRA 1: Agendado Por - quando FoiAgendamento = true (EXPLICITAMENTE)
+        // NÃO usar statusAgendamento aqui, pois são coisas diferentes:
+        // - FoiAgendamento = true significa que a viagem FOI um agendamento antes de ser realizada
+        // - StatusAgendamento = true significa que AINDA É um agendamento
+        // IMPORTANTE: API pode retornar como FoiAgendamento (PascalCase) ou foiAgendamento (camelCase)
+        const foiAgendamentoRaw = objViagem.foiAgendamento ?? objViagem.FoiAgendamento;
+        const foiAgendamento = foiAgendamentoRaw === true || 
+                               foiAgendamentoRaw === 1 || 
+                               foiAgendamentoRaw === "1" || 
+                               foiAgendamentoRaw === "true" ||
+                               foiAgendamentoRaw === "True";
+        
+        console.log("🔍 [configurarRodapeLabelsExistente] foiAgendamentoRaw:", foiAgendamentoRaw, "tipo:", typeof foiAgendamentoRaw);
+        console.log("🔍 [configurarRodapeLabelsExistente] foiAgendamento (calculado):", foiAgendamento);
 
         if (foiAgendamento)
         {
@@ -3810,37 +3910,65 @@ async function configurarRodapeLabelsExistente(objViagem)
 
 /**
  * Configurações de títulos e ícones do modal
+ * ATUALIZADO: Novas cores e ícones por status - Padrão FrotiX
  */
 window.ModalConfig = {
     NOVO_AGENDAMENTO: {
-        icone: '<i class="fa-duotone fa-solid fa-calendar-plus fa-lg me-2" style="--fa-primary-color: #cc5500; --fa-secondary-color: #ff8c42; --fa-secondary-opacity: 0.6;"></i>',
+        icone: '<i class="fa-duotone fa-solid fa-calendar-plus fa-lg me-2" style="--fa-primary-color: #cc5500; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
         titulo: "Criar Agendamento",
-        cor: "laranja-escuro"
+        headerClass: "modal-header-novo-agendamento"
     },
     EDITAR_AGENDAMENTO: {
-        icone: '<i class="fa-duotone fa-solid fa-calendar-lines-pen fa-lg me-2" style="--fa-primary-color: #003d82; --fa-secondary-color: #4a90e2; --fa-secondary-opacity: 0.6;"></i>',
+        icone: '<i class="fa-duotone fa-solid fa-calendar-lines-pen fa-lg me-2" style="--fa-primary-color: #003d82; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
         titulo: "Editar Agendamento",
-        cor: "azul-escuro"
+        headerClass: "modal-header-editar-agendamento"
     },
     VIAGEM_ABERTA: {
-        icone: '<i class="fa-duotone fa-solid fa-calendar-range fa-lg me-2" style="--fa-primary-color: #003d82; --fa-secondary-color: #4a90e2; --fa-secondary-opacity: 0.6;"></i>',
-        titulo: "Editar Viagem",
-        cor: "azul-escuro"
+        icone: '<i class="fa-duotone fa-solid fa-calendar-range fa-lg me-2" style="--fa-primary-color: #314f31; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Viagem Aberta <span class="titulo-subtexto">(permite edição)</span>',
+        headerClass: "modal-header-viagem-aberta"
+    },
+    VIAGEM_AGENDADA: {
+        icone: '<i class="fa-duotone fa-solid fa-calendar-circle-user fa-lg me-2" style="--fa-primary-color: #E07435; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Viagem Agendada <span class="titulo-subtexto">(permite edição)</span>',
+        headerClass: "modal-header-viagem-agendada"
     },
     VIAGEM_REALIZADA: {
-        icone: '<i class="fa-duotone fa-solid fa-calendar-check fa-lg me-2" style="--fa-primary-color: #0d5e0d; --fa-secondary-color: #28a745; --fa-secondary-opacity: 0.6;"></i>',
-        titulo: "Viagem Finalizada",
-        cor: "verde-escuro"
+        icone: '<i class="fa-duotone fa-solid fa-calendar-check fa-lg me-2" style="--fa-primary-color: #113D4E; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Viagem Realizada <span class="titulo-subtexto">(não permite edição)</span>',
+        headerClass: "modal-header-viagem-realizada"
     },
     VIAGEM_CANCELADA: {
-        icone: '<i class="fa-duotone fa-solid fa-calendar-xmark fa-lg me-2" style="--fa-primary-color: #6b1f1f; --fa-secondary-color: #a94442; --fa-secondary-opacity: 0.6;"></i>',
-        titulo: "Viagem Cancelada",
-        cor: "vinho"
+        icone: '<i class="fa-duotone fa-solid fa-calendar-xmark fa-lg me-2" style="--fa-primary-color: #a24e58; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Viagem Cancelada <span class="titulo-subtexto">(não permite edição)</span>',
+        headerClass: "modal-header-viagem-cancelada"
+    },
+    // ===== EVENTOS =====
+    EVENTO_ABERTO: {
+        icone: '<i class="fa-duotone fa-solid fa-calendar-users fa-lg me-2" style="--fa-primary-color: #84593D; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Evento Aberto <span class="titulo-subtexto">(permite edição)</span>',
+        headerClass: "modal-header-viagem-evento"
+    },
+    EVENTO_AGENDADO: {
+        icone: '<i class="fa-duotone fa-solid fa-calendar-users fa-lg me-2" style="--fa-primary-color: #84593D; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Evento Agendado <span class="titulo-subtexto">(permite edição)</span>',
+        headerClass: "modal-header-viagem-evento"
+    },
+    EVENTO_REALIZADO: {
+        icone: '<i class="fa-duotone fa-solid fa-calendar-users fa-lg me-2" style="--fa-primary-color: #84593D; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Evento Realizado <span class="titulo-subtexto">(não permite edição)</span>',
+        headerClass: "modal-header-viagem-evento"
+    },
+    EVENTO_CANCELADO: {
+        icone: '<i class="fa-duotone fa-solid fa-calendar-users fa-lg me-2" style="--fa-primary-color: #84593D; --fa-secondary-color: #ffffff; --fa-secondary-opacity: 0.8;"></i>',
+        titulo: 'Evento Cancelado <span class="titulo-subtexto">(não permite edição)</span>',
+        headerClass: "modal-header-viagem-evento"
     }
 };
 
 /**
  * Define título do modal com ícone e cor
+ * ATUALIZADO: Agora também altera a classe do header
  * @param {string} tipo - Tipo de modal (NOVO_AGENDAMENTO, EDITAR_AGENDAMENTO, etc)
  * @param {string} tituloCustomizado - Título customizado opcional
  */
@@ -3856,7 +3984,14 @@ window.setModalTitle = function (tipo, tituloCustomizado = null)
             return;
         }
 
-        const titulo = tituloCustomizado || config.titulo;
+        let titulo = tituloCustomizado || config.titulo;
+        
+        // Se for VIAGEM_REALIZADA e foiAgendamento = true, adicionar texto em laranja
+        if (tipo === 'VIAGEM_REALIZADA' && window._foiAgendamentoAtual === true)
+        {
+            titulo = 'Viagem Realizada <span class="titulo-subtexto">(não permite edição)</span> <span class="titulo-via-agendamento">(através de Agendamento)</span>';
+        }
+        
         const tituloCompleto = config.icone + titulo;
 
         // Atualizar título do modal
@@ -3864,11 +3999,43 @@ window.setModalTitle = function (tipo, tituloCustomizado = null)
         if (modalTitle)
         {
             modalTitle.innerHTML = tituloCompleto;
-            console.log(`✅ Título do modal definido: ${tipo}`);
+            console.log(`✅ Título do modal definido: ${tipo}${window._foiAgendamentoAtual ? ' (via Agendamento)' : ''}`);
         } else
         {
             console.warn("⚠️ Elemento .modal-title não encontrado");
         }
+
+        // NOVO: Atualizar classe do header
+        const modalHeader = document.querySelector("#modalViagens #Titulo");
+        if (modalHeader && config.headerClass)
+        {
+            // Remove todas as classes de header anteriores
+            const classesToRemove = [
+                'modal-header-dinheiro',
+                'modal-header-vinho',
+                'modal-header-azul',
+                'modal-header-terracota',
+                'modal-header-verde',
+                'modal-header-novo-agendamento',
+                'modal-header-editar-agendamento',
+                'modal-header-viagem-aberta',
+                'modal-header-viagem-agendada',
+                'modal-header-viagem-realizada',
+                'modal-header-viagem-cancelada',
+                'modal-header-viagem-evento'
+            ];
+            
+            classesToRemove.forEach(cls => {
+                modalHeader.classList.remove(cls);
+            });
+
+            // Adiciona a nova classe
+            modalHeader.classList.add(config.headerClass);
+            console.log(`✅ Classe do header alterada para: ${config.headerClass}`);
+        }
+        
+        // Limpar flag após uso
+        window._foiAgendamentoAtual = false;
     } catch (error)
     {
         console.error("❌ Erro ao definir título do modal:", error);

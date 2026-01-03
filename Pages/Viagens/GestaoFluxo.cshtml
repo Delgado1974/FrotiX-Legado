@@ -4,7 +4,7 @@
 @using Stimulsoft.Report.Mvc;
 @using FrotiX.Services;
 
-@model FrotiX.Models.ViewViagens
+@model FrotiX.Pages.Viagens.GestaoFluxoModel
 
 @inject IUnitOfWork _unitOfWork
 
@@ -21,108 +21,69 @@
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
 	<!-- Adicione libs específicas no layout, se necessário -->
 }
 
 <style>
-	/* Header animado com background gradiente */
-	.header-gestao {
-		position: relative;
-		background: linear-gradient(135deg, #325d88 0%, #2F4F4F 50%, #325d88 100%);
-		padding: 1.5rem 1.25rem;
-		margin: -1rem -1rem 1.5rem -1rem;
-		border-radius: 8px 8px 0 0;
-		overflow: hidden;
-		box-shadow: 0 4px 12px rgba(47, 79, 79, 0.15);
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+	/* ================================================================
+	   ESTILOS DATATABLE - PADRÃO FROTIX
+	   Header azul #4a6fa5 com texto branco uppercase
+	   ================================================================ */
+	#tblFluxo thead {
+		background-color: #4a6fa5 !important;
 	}
 
-	/* Efeito de brilho animado */
-	.header-gestao::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-		animation: ftxHeaderShine 4s ease-in-out infinite;
-		pointer-events: none;
+	#tblFluxo thead th {
+		background-color: #4a6fa5 !important;
+		color: #ffffff !important;
+		text-transform: uppercase !important;
+		font-weight: 600 !important;
+		font-size: 0.85rem !important;
+		letter-spacing: 0.3px !important;
+		border-color: rgba(255, 255, 255, 0.15) !important;
+		padding: 12px 10px !important;
 	}
 
-	/* Título do header */
-	.header-gestao h1 {
-		font-family: 'Outfit', sans-serif;
-		font-weight: 900;
-		font-size: 2rem;
-		line-height: 1.25;
-		margin: 0;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		color: #ffffff;
-		text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-		position: relative;
-		z-index: 1;
+	/* Centralizar colunas: Data (0), Hora Início (4), Hora Fim (5) */
+	#tblFluxo thead th:nth-child(1),
+	#tblFluxo thead th:nth-child(5),
+	#tblFluxo thead th:nth-child(6) {
+		text-align: center !important;
 	}
 
-	.header-gestao h1 i.fa-duotone {
-		--fa-primary-color: #ffffff;
-		--fa-secondary-color: #b8d4e8;
-		--fa-secondary-opacity: 0.7;
-		font-size: 2.4rem;
-		line-height: 1;
-		filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+	#tblFluxo tbody td:nth-child(1),
+	#tblFluxo tbody td:nth-child(5),
+	#tblFluxo tbody td:nth-child(6) {
+		text-align: center !important;
 	}
 
-	/* Botão laranja padrão FrotiX - SEM gradiente */
-	.btn-nova-ficha {
-		position: relative;
-		z-index: 1;
-		background-color: #f59e0b !important;
-		border: 2px solid rgba(255, 255, 255, 0.4) !important;
-		color: white !important;
-		padding: 0.75rem 1.5rem;
-		font-weight: 600;
-		font-size: 0.95rem;
-		border-radius: 8px;
-		box-shadow: 0 0 8px rgba(245, 158, 11, 0.5), 0 2px 4px rgba(245, 158, 11, 0.3) !important;
-		transition: all 0.3s ease, transform 0.2s ease !important;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.25rem;
-		min-width: 160px;
+	/* Coluna Quantidade (7) à direita */
+	#tblFluxo thead th:nth-child(7) {
+		text-align: right !important;
 	}
 
-	.btn-nova-ficha:hover {
-		background-color: #d97706 !important;
-		border-color: rgba(255, 255, 255, 0.6) !important;
-		animation: buttonWiggle 0.5s ease-in-out !important;
-		box-shadow: 0 0 20px rgba(245, 158, 11, 0.8), 0 6px 12px rgba(245, 158, 11, 0.5) !important;
-		color: white !important;
+	#tblFluxo tbody td:nth-child(7) {
+		text-align: right !important;
+		font-weight: 600 !important;
 	}
 
-	.btn-nova-ficha:active,
-	.btn-nova-ficha:focus {
-		background-color: #b45309 !important;
-		border-color: rgba(255, 255, 255, 0.5) !important;
-		transform: translateY(0) scale(1) !important;
-		box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.35) !important;
-		color: white !important;
-	}
-
-	.btn-nova-ficha i {
-		font-size: 2rem;
-		line-height: 1;
-	}
-
-	.btn-nova-ficha span {
-		font-size: 0.85rem;
-		line-height: 1.2;
-		white-space: nowrap;
+	/* Coluna Ação centralizada */
+	#tblFluxo thead th:nth-child(8) {
+		text-align: center !important;
 	}
 
 	/* Separador de seção */
@@ -212,6 +173,13 @@
 	/* Esconder o processing padrão do DataTables */
 	.dataTables_processing {
 		display: none !important;
+	}
+
+	/* Botão header laranja comprido para texto extenso */
+	.btn-fundo-laranja-wide {
+		min-width: 220px !important;
+		padding: 0.65rem 1.5rem !important;
+		white-space: nowrap !important;
 	}
 </style>
 
@@ -485,7 +453,7 @@
 					const btn = document.getElementById('btnEditarOcorrencia');
 					const iconOriginal = btn.querySelector('i');
 					const iconClasses = iconOriginal.className;
-					iconOriginal.className = 'fa-solid fa-spinner fa-spin icon-space';
+					iconOriginal.className = 'fa-duotone fa-spinner fa-spin icon-space';
 					btn.disabled = true;
 
 					// Monta objeto para enviar
@@ -538,7 +506,6 @@
 							}
 						}
 					});
-
 				} catch (error) {
 					Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "btnEditarOcorrencia.click", error);
 				}
@@ -566,7 +533,7 @@
 			const iconClasses = iconOriginal.className;
 			
 			// Adiciona spinner
-			iconOriginal.className = 'fa-solid fa-spinner fa-spin icon-space';
+			iconOriginal.className = 'fa-duotone fa-spinner fa-spin icon-space';
 			btn.disabled = true;
 
 			if (dataTable) {
@@ -605,19 +572,21 @@
 		<div id="panel-1" class="panel">
 			<div class="panel-container show">
 				<div class="panel-content">
-					<!-- Header Animado com Botão -->
-					<div class="header-gestao">
-						<h1>
+					<!-- Header Padrão FrotiX -->
+					<div class="ftx-card-header">
+						<h2 class="titulo-paginas">
 							<i class="fa-duotone fa-folder-open"></i>
 							Gestão das Fichas de Passageiros
-						</h1>
-						<a href="/Viagens/FluxoPassageiros" class="btn btn-nova-ficha">
-							<i class="fa-duotone fa-file-circle-plus"></i>
-							<span>Inserção de<br>Nova Ficha</span>
-						</a>
+						</h2>
+						<div class="ftx-card-actions">
+							<a href="/Viagens/FluxoPassageiros" class="btn btn-fundo-laranja" data-ftx-loading>
+								<i class="fa-duotone fa-file-circle-plus ftx-icon-pulse icon-pulse me-1"></i>
+								Inserção de Nova Ficha de Passageiros
+							</a>
+						</div>
 					</div>
 
-					<div class="box-body">
+					<div class="box-body mt-4">
 						<div class="secao-titulo">
 							<h3>
 								<i class="fa-duotone fa-filter"></i>
@@ -706,7 +675,7 @@
 <div class="modal fade" id="modalEditaRegistro" tabindex="-1" aria-labelledby="modalEditaRegistroLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
-			<div class="modal-header modal-header-terracota">
+			<div class="modal-header ftx-modal-header-terracota">
 				<h3 class="modal-title" id="modalEditaRegistroLabel">
 					<i class="fa-duotone fa-pen-to-square"></i> Editar Registro
 				</h3>
@@ -798,7 +767,7 @@
 					<i class="fa-duotone fa-floppy-disk icon-space"></i> Salvar Alterações
 				</button>
 				<button id="btnFechar" type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-solid fa-xmark icon-space"></i> Fechar
+					<i class="fa-duotone fa-xmark icon-space"></i> Fechar
 				</button>
 			</div>
 		</div>

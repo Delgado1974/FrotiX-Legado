@@ -11,12 +11,26 @@
 @{
 	ViewData["Title"] = "Setores Solicitantes";
 	ViewData["PageName"] = "setorsolicitante_index";
-	ViewData["Heading"] = "<i class='fad fa-building'></i> Cadastros: <span class='fw-300'>Setores Solicitantes</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-building'></i> Cadastros: <span class='fw-300'>Setores Solicitantes</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-building";
+	ViewData["PageIcon"] = "fa-duotone fa-building";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
 }
 
 <style>
@@ -220,8 +234,8 @@
 						Setores Solicitantes
 					</h2>
 					<div class="ftx-card-actions">
-						<button type="button" class="btn btn-header-orange" id="btnAdicionarSetor">
-							<i class="fa-duotone fa-building-circle-arrow-right" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
+						<button type="button" class="btn btn-fundo-laranja" id="btnAdicionarSetor">
+							<i class="fa-duotone fa-building-circle-arrow-right ftx-icon-pulse icon-pulse me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
 							Adicionar Setor
 						</button>
 					</div>

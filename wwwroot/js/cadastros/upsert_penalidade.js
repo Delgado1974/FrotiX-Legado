@@ -457,28 +457,81 @@ function onComprovanteUploadFailure(args)
 // FUNÇÃO DE FORMATAÇÃO DE MOEDA
 // ====================================================================
 
-function moeda(a, e, r, t)
+function moeda(input, sep, dec, event)
 {
     try
     {
-        let n = "", h = j = 0, u = tamanho2 = 0, l = ajd2 = "",
-            o = window.Event ? e.which : e.keyCode;
+        let digitado = "",
+            i = j = 0,
+            tamanho = tamanho2 = 0,
+            limpo = ajustado = "",
+            tecla = window.Event ? event.which : event.keyCode;
 
-        if (13 == o || 8 == o) return true;
-        if (n = String.fromCharCode(o), -1 == "0123456789".indexOf(n)) return false;
+        if (tecla === 13 || tecla === 8) return true;
 
-        j = a.value.length;
-        for (h = j; h > 0; h--) a.value.charAt(h - 1) != r && a.value.charAt(h - 1) != t || (a.value = a.value.substring(0, h - 1) + a.value.substring(h, j));
+        digitado = String.fromCharCode(tecla);
 
-        if (l = a.value.replace(/[\D]/gi, ""), l += n, 0 == (u = l.length) && (a.value = ""), 1 == u && (a.value = "0" + r + "0" + l), 2 == u && (a.value = "0" + r + l), u > 2)
+        if ("0123456789".indexOf(digitado) === -1) return false;
+
+        // Remove o prefixo R$ para processar apenas números
+        let valorAtual = input.value.replace('R$ ', '');
+
+        for (tamanho = valorAtual.length, i = 0;
+             i < tamanho && (valorAtual.charAt(i) === "0" || valorAtual.charAt(i) === dec);
+             i++);
+
+        for (limpo = ""; i < tamanho; i++)
         {
-            for (ajd2 = "", h = 0, u -= 3; h < u;) 3 == (h + 1) % 3 && (ajd2 += t), ajd2 += l.charAt(h), h++;
-            a.value = ajd2 + r + l.substr(u, 3);
+            if ("0123456789".indexOf(valorAtual.charAt(i)) !== -1)
+            {
+                limpo += valorAtual.charAt(i);
+            }
         }
+
+        limpo += digitado;
+        tamanho = limpo.length;
+
+        if (tamanho === 0)
+        {
+            input.value = "";
+        }
+        else if (tamanho === 1)
+        {
+            input.value = "R$ 0" + dec + "0" + limpo;
+        }
+        else if (tamanho === 2)
+        {
+            input.value = "R$ 0" + dec + limpo;
+        }
+        else
+        {
+            for (ajustado = "", j = 0, i = tamanho - 3; i >= 0; i--)
+            {
+                if (j === 3)
+                {
+                    ajustado += sep;
+                    j = 0;
+                }
+                ajustado += limpo.charAt(i);
+                j++;
+            }
+
+            input.value = "R$ ";
+            tamanho2 = ajustado.length;
+
+            for (i = tamanho2 - 1; i >= 0; i--)
+            {
+                input.value += ajustado.charAt(i);
+            }
+
+            input.value += dec + limpo.substr(tamanho - 2, tamanho);
+        }
+
         return false;
     } catch (error)
     {
         Alerta.TratamentoErroComLinha("upsert_penalidade.js", "moeda", error);
+        return false;
     }
 }
 
@@ -869,16 +922,47 @@ $("#btnFicha").on("click", function ()
 {
     try
     {
-        const lstVeiculo = document.getElementById("lstVeiculo")?.ej2_instances?.[0];
-        if (!lstVeiculo || !lstVeiculo.value)
+        const txtNoFichaVistoria = document.getElementById("txtNoFichaVistoria");
+        const noFicha = txtNoFichaVistoria?.value;
+
+        if (!noFicha)
         {
-            Alerta.Warning("Atenção", "Selecione um veículo primeiro");
+            AppToast.show('Amarelo', 'Informe o número da Ficha de Vistoria', 3000);
             return;
         }
 
-        FichaId = lstVeiculo.value;
-        const modalFicha = new bootstrap.Modal(document.getElementById('modalFicha'));
-        modalFicha.show();
+        // Verifica se a ficha existe antes de abrir o modal
+        $.ajax({
+            type: "get",
+            url: "/api/Viagem/VerificaFichaExiste",
+            data: { noFichaVistoria: noFicha },
+            success: function (res)
+            {
+                try
+                {
+                    if (res && res.success && res.data && res.data.existe)
+                    {
+                        // Ficha existe - abre o modal
+                        FichaId = res.data.fichaId;
+                        ViagemId = res.data.viagemId;
+                        const modalFicha = new bootstrap.Modal(document.getElementById('modalFicha'));
+                        modalFicha.show();
+                    }
+                    else
+                    {
+                        AppToast.show('Vermelho', `Ficha de Vistoria Nº ${noFicha} não encontrada`, 4000);
+                    }
+                } catch (innerError)
+                {
+                    Alerta.TratamentoErroComLinha("upsert_penalidade.js", "btnFicha.verificaFicha.success", innerError);
+                }
+            },
+            error: function (xhr, status, error)
+            {
+                AppToast.show('Vermelho', 'Erro ao verificar Ficha de Vistoria', 3000);
+                Alerta.TratamentoErroComLinha("upsert_penalidade.js", "btnFicha.verificaFicha.error", new Error(error));
+            }
+        });
     } catch (error)
     {
         Alerta.TratamentoErroComLinha("upsert_penalidade.js", "btnFicha.click", error);
@@ -938,37 +1022,46 @@ document.getElementById('modalFicha')?.addEventListener('show.bs.modal', functio
 {
     try
     {
-        const id = ViagemId;
+        const noFicha = document.getElementById("txtNoFichaVistoria")?.value;
         const label = document.getElementById("DynamicModalLabelFicha");
-        if (label) label.innerHTML = "";
+        const imgViewer = document.getElementById("imgViewer");
 
-        $.ajax({
-            type: "get",
-            url: "/api/Viagem/PegaFichaModal",
-            data: { id: id },
-            async: false,
-            success: function (res)
-            {
-                try
+        if (label) label.innerHTML = `<i class="fa-duotone fa-file-lines"></i> Ficha de Vistoria Nº ${noFicha}`;
+
+        // Carrega a imagem da ficha via API
+        if (imgViewer && ViagemId)
+        {
+            $.ajax({
+                url: '/api/Viagem/ObterFichaVistoria',
+                type: 'GET',
+                data: { viagemId: ViagemId },
+                success: function (response)
                 {
-                    if (res && res.data)
+                    try
                     {
-                        if (label)
+                        if (response.success && response.temImagem)
                         {
-                            label.innerHTML = `Ficha de Vistoria Nº ${res.data.noFichaVistoria}`;
+                            imgViewer.src = response.imagemBase64;
+                            imgViewer.style.display = 'block';
                         }
-                        $("#CorpoModalFicha").html(res.data.html);
+                        else
+                        {
+                            imgViewer.style.display = 'none';
+                            AppToast.show('Amarelo', 'Ficha de Vistoria não possui imagem cadastrada', 3000);
+                        }
+                    } catch (innerError)
+                    {
+                        Alerta.TratamentoErroComLinha("upsert_penalidade.js", "modalFicha.obterFicha.success", innerError);
                     }
-                } catch (innerError)
+                },
+                error: function (xhr, status, error)
                 {
-                    Alerta.TratamentoErroComLinha("upsert_penalidade.js", "modalFicha.success", innerError);
+                    imgViewer.style.display = 'none';
+                    AppToast.show('Vermelho', 'Erro ao carregar imagem da Ficha de Vistoria', 3000);
+                    Alerta.TratamentoErroComLinha("upsert_penalidade.js", "modalFicha.obterFicha.error", new Error(error));
                 }
-            },
-            error: function (xhr, status, error)
-            {
-                Alerta.TratamentoErroComLinha("upsert_penalidade.js", "modalFicha.error", new Error(error));
-            }
-        });
+            });
+        }
     } catch (error)
     {
         Alerta.TratamentoErroComLinha("upsert_penalidade.js", "modalFicha.show", error);
@@ -1165,7 +1258,31 @@ $(document).ready(function ()
                 lstEmpenhosChange();
             }
 
-            aplicarMascaraMoeda();
+            // ===== CONTROLE DO BOTÃO VER FICHA =====
+            const txtNoFichaVistoria = document.getElementById('txtNoFichaVistoria');
+            const btnFicha = document.getElementById('btnFicha');
+
+            // Função para habilitar/desabilitar o botão
+            function atualizarBotaoFicha()
+            {
+                if (btnFicha)
+                {
+                    const temValor = txtNoFichaVistoria && txtNoFichaVistoria.value && txtNoFichaVistoria.value.trim() !== '';
+                    btnFicha.disabled = !temValor;
+                }
+            }
+
+            // Evento de input no campo
+            if (txtNoFichaVistoria)
+            {
+                txtNoFichaVistoria.addEventListener('input', atualizarBotaoFicha);
+                txtNoFichaVistoria.addEventListener('change', atualizarBotaoFicha);
+
+                // Verifica estado inicial (modo edição)
+                atualizarBotaoFicha();
+            }
+
+            // Nota: Máscara de moeda agora é feita via onkeypress no HTML
 
             console.log('✅ Inicialização completa do upsert_penalidade.js');
         }, 500);

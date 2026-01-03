@@ -7,9 +7,9 @@
 	var isEdit = Model.OrgaoAutuanteObj.OrgaoAutuanteId != Guid.Empty;
 	ViewData["Title"] = "Órgãos Autuantes";
 	ViewData["PageName"] = "multa_upsertorgaoautuante";
-	ViewData["Heading"] = "<i class='fad fa-monument'></i>&nbsp;Cadastros: <span class='fw-300'>Órgãos Autuantes</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-monument'></i>&nbsp;Cadastros: <span class='fw-300'>Órgãos Autuantes</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-monument";
+	ViewData["PageIcon"] = "fa-duotone fa-monument";
 }
 
 @section HeadBlock {
@@ -250,7 +250,7 @@
 						<div class="ftx-form-actions">
 							<div>
 								<button type="submit" asp-page-handler="Submit" class="ftx-btn-submit" data-ejtip="@(isEdit ? "Salvar alterações" : "Cadastrar órgão")">
-									<i class="fa-duotone fa-floppy-disk"></i>
+									<i class="fa-duotone fa-floppy-disk icon-pulse"></i>
 									@(isEdit ? "Atualizar" : "Cadastrar")
 								</button>
 							</div>

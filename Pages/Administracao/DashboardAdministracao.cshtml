@@ -125,15 +125,12 @@
 </style>
 
 <div class="container-fluid">
-    <!-- Header Padrão FrotiX -->
-    <div class="dashboard-header">
-        <div class="d-flex align-items-center">
-            <i class="fa-duotone fa-chart-line header-icon"></i>
-            <div>
-                <h4>Dashboard de <span class="fw-300">Administração</span></h4>
-                <div class="subtitle">Visão gerencial da frota com indicadores de normalização e eficiência</div>
-            </div>
-        </div>
+    <!-- ===== HEADER FROTIX ===== -->
+    <div class="ftx-card-header" style="border-radius: 10px; margin-bottom: 1.5rem;">
+        <h2 class="titulo-paginas">
+            <i class="fa-duotone fa-chart-line"></i>
+            Dashboard de Administração
+        </h2>
     </div>
 
     <!-- Filtros -->
@@ -156,7 +153,7 @@
                         </div>
                         <div class="col-auto">
                             <button type="button" class="btn btn-atualizar btn-sm" onclick="carregarTodosGraficos()">
-                                <i class="fas fa-sync-alt me-1"></i>Atualizar
+                                <i class="fa-duotone fa-sync-alt me-1"></i>Atualizar
                             </button>
                         </div>
                         <div class="col-auto ms-auto">
@@ -185,7 +182,7 @@
                             <h3 class="mb-0 fw-bold" id="cardVeiculosAtivos">-</h3>
                         </div>
                         <div class="text-primary opacity-50">
-                            <i class="fas fa-car fa-2x"></i>
+                            <i class="fa-duotone fa-car fa-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -200,7 +197,7 @@
                             <h3 class="mb-0 fw-bold" id="cardMotoristasAtivos">-</h3>
                         </div>
                         <div class="text-success opacity-50">
-                            <i class="fas fa-id-card fa-2x"></i>
+                            <i class="fa-duotone fa-id-card fa-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -215,7 +212,7 @@
                             <h3 class="mb-0 fw-bold" id="cardViagensRealizadas">-</h3>
                         </div>
                         <div class="text-info opacity-50">
-                            <i class="fas fa-route fa-2x"></i>
+                            <i class="fa-duotone fa-route fa-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -230,7 +227,7 @@
                             <h3 class="mb-0 fw-bold" id="cardTotalKm">-</h3>
                         </div>
                         <div class="text-warning opacity-50">
-                            <i class="fas fa-tachometer-alt fa-2x"></i>
+                            <i class="fa-duotone fa-tachometer-alt fa-2x"></i>
                         </div>
                     </div>
                 </div>
@@ -244,7 +241,7 @@
         <div class="col-xl-4 col-lg-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Viagens Originais vs Normalizadas</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-chart-pie me-2 text-primary"></i>Viagens Originais vs Normalizadas</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerPizzaNormalizacao" style="height: 280px;">
@@ -261,7 +258,7 @@
         <div class="col-xl-4 col-lg-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2 text-info"></i>Por Tipo de Normalização</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-chart-bar me-2 text-info"></i>Por Tipo de Normalização</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerNormalizacaoTipo" style="height: 320px;">
@@ -275,7 +272,7 @@
         <div class="col-xl-4 col-lg-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-car-side me-2 text-success"></i>Distribuição por Tipo de Uso</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-car-side me-2 text-success"></i>Distribuição por Tipo de Uso</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerTipoUso" style="height: 280px;">
@@ -292,7 +289,7 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-th me-2 text-danger"></i>Mapa de Calor - Viagens por Dia/Hora</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-th me-2 text-danger"></i>Mapa de Calor - Viagens por Dia/Hora</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -331,7 +328,7 @@
         <div class="col-xl-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-car me-2 text-primary"></i>Top 10 Veículos por KM</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-car me-2 text-primary"></i>Top 10 Veículos por KM</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerTop10Veiculos" style="height: 350px;">
@@ -343,7 +340,7 @@
         <div class="col-xl-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-user me-2 text-success"></i>Top 10 Motoristas por KM</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-user me-2 text-success"></i>Top 10 Motoristas por KM</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerTop10Motoristas" style="height: 350px;">
@@ -359,7 +356,7 @@
         <div class="col-xl-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-money-bill-wave me-2 text-warning"></i>Custo Médio por Finalidade</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-money-bill-wave me-2 text-warning"></i>Custo Médio por Finalidade</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerCustoPorFinalidade" style="height: 350px;">
@@ -371,7 +368,7 @@
         <div class="col-xl-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-balance-scale me-2 text-info"></i>Próprios vs Terceirizados</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-balance-scale me-2 text-info"></i>Próprios vs Terceirizados</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerPropriosTerceirizados" style="height: 350px;">
@@ -387,7 +384,7 @@
         <div class="col-xl-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-trophy me-2 text-success"></i>Eficiência da Frota (Menor Custo/KM)</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-trophy me-2 text-success"></i>Eficiência da Frota (Menor Custo/KM)</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerEficiencia" style="height: 350px;">
@@ -399,7 +396,7 @@
         <div class="col-xl-6 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0"><i class="fas fa-chart-area me-2 text-primary"></i>Evolução Mensal de Custos</h6>
+                    <h6 class="mb-0"><i class="fa-duotone fa-chart-area me-2 text-primary"></i>Evolução Mensal de Custos</h6>
                 </div>
                 <div class="card-body">
                     <div id="containerEvolucaoMensal" style="height: 350px;">

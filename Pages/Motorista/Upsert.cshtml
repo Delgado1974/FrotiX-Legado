@@ -5,9 +5,9 @@
 @{
     ViewData["Title"] = "Motoristas";
     ViewData["PageName"] = "motorista_upsert";
-    ViewData["Heading"] = "<i class='fad fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-user-tie'></i> Cadastros: <span class='fw-300'>Motoristas</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fa-regular fa-user-tie";
+    ViewData["PageIcon"] = "fa-duotone fa-user-tie";
 
     var isEdit = Model.MotoristaObj.Motorista.MotoristaId != Guid.Empty;
     var pageTitle = isEdit ? "Atualizar Motorista" : "Criar Motorista";
@@ -356,7 +356,7 @@
                         </h2>
                         <div class="ftx-card-actions">
                             <a href="/Motorista" class="btn btn-vinho">
-                                <i class="fa-duotone fa-arrow-left"></i>
+                                <i class="fa-duotone fa-arrow-left icon-pulse me-1"></i>
                                 Voltar à Lista
                             </a>
                         </div>

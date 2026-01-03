@@ -8,9 +8,9 @@
     var isEdit = Model.TipoMultaObj.TipoMultaId != Guid.Empty;
     ViewData["Title"] = "Código de Trânsito Brasileiro";
     ViewData["PageName"] = "multa_upserttipomulta";
-    ViewData["Heading"] = "<i class='fad fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Tipos de Multa</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-ballot-check'></i> Cadastros: <span class='fw-300'>Código de Trânsito - Tipos de Multa</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-ballot-check";
+    ViewData["PageIcon"] = "fa-duotone fa-ballot-check";
 }
 
 <form method="post" asp-action="Upsert">
@@ -24,12 +24,12 @@
                     <!-- HEADER PADRÃO FROTIX -->
                     <div class="ftx-card-header">
                         <h2 class="titulo-paginas">
-                            <i class="fad fa-ballot-check"></i>
+                            <i class="fa-duotone fa-ballot-check"></i>
                             @(isEdit ? "Editar" : "Nova") Infração de Trânsito
                         </h2>
                         <div class="ftx-card-actions">
                             <a asp-page="./ListaTiposMulta" class="btn btn-vinho">
-                                <i class="fad fa-arrow-left"></i>
+                                <i class="fa-duotone fa-arrow-left icon-pulse me-1"></i>
                                 Voltar à Lista
                             </a>
                         </div>
@@ -104,11 +104,11 @@
                             <div class="col-12 mt-4">
                                 <div class="d-flex gap-2">
                                     <button type="submit" value="Submit" asp-page-handler="Submit" class="btn btn-azul px-4">
-                                        <i class="fad fa-floppy-disk icon-space"></i>
+                                        <i class="fa-duotone fa-floppy-disk icon-space"></i>
                                         @(isEdit ? "Atualizar" : "Salvar")
                                     </button>
                                     <a asp-page="./ListaTiposMulta" class="btn btn-vinho px-4">
-                                        <i class="fad fa-rotate-left icon-space"></i>
+                                        <i class="fa-duotone fa-rotate-left icon-space"></i>
                                         Cancelar
                                     </a>
                                 </div>

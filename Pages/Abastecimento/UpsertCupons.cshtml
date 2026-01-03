@@ -52,6 +52,15 @@
 	<div class="row">
 		<div class="col-xl-12">
 			<div id="panel-1" class="panel">
+				<!-- ===== HEADER FROTIX ===== -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-scroll"></i>
+						@(Model.RegistroCupomAbastecimentoObj.RegistroCupomAbastecimento.RegistroCupomId != Guid.Empty ? "Atualizar " : "Registrar ")
+						Cupons de Abastecimento
+					</h2>
+				</div>
+
 				<div class="panel-container show">
 					<div id="divPainel" class="panel-content">
 						<div asp-validation-summary="ModelOnly" class="text-danger">
@@ -59,13 +68,6 @@
 							{
 								<input type="hidden" asp-for="RegistroCupomAbastecimentoObj.RegistroCupomAbastecimento.RegistroCupomId" />
 							}
-						</div>
-
-						<div class="col-12 px-3" style="border-bottom:1px solid #325d88">
-							<h2 class="text-primary">
-								@(Model.RegistroCupomAbastecimentoObj.RegistroCupomAbastecimento.RegistroCupomId != Guid.Empty ? "Atualizar " : "Registrar ")
-								Cupons de Abastecimento
-							</h2>
 						</div>
 
 						<div class="p-3">

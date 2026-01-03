@@ -1,0 +1,321 @@
+/* ================================================================
+   MODAL VIAGENS - HEADERS POR STATUS - PADRÃO FROTIX
+   Adicionar ao final do frotix.css ou importar separadamente
+   ================================================================ */
+
+/* ===== NOVAS VARIÁVEIS DE CORES ===== */
+:root {
+    /* Verde Militar Escuro (Viagem Aberta) */
+    --modal-verde-militar: #3d5c3d;
+    --modal-verde-militar-light: #4a704a;
+    
+    /* Laranja Agendamento (Viagem Agendada) */
+    --modal-laranja-agendamento: #D55102;
+    --modal-laranja-agendamento-light: #E86A1A;
+    
+    /* Azul Petróleo (Viagem Realizada) */
+    --modal-azul-petroleo: #1a5f7a;
+    --modal-azul-petroleo-light: #2980b9;
+    
+    /* Marrom Evento */
+    --modal-marrom-evento: #4C2B08;
+    --modal-marrom-evento-light: #6B3D0F;
+}
+
+/* ===== VIAGEM ABERTA - Verde Militar Escuro ===== */
+.modal-header-viagem-aberta {
+    background: linear-gradient(135deg, var(--modal-verde-militar) 0%, var(--modal-verde-militar-light) 50%, var(--modal-verde-militar) 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-viagem-aberta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== VIAGEM AGENDADA - Laranja ===== */
+.modal-header-viagem-agendada {
+    background: linear-gradient(135deg, var(--modal-laranja-agendamento) 0%, var(--modal-laranja-agendamento-light) 50%, var(--modal-laranja-agendamento) 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-viagem-agendada::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== VIAGEM REALIZADA - Azul Petróleo 20% mais escuro ===== */
+.modal-header-viagem-realizada {
+    background: linear-gradient(135deg, #154c62 0%, #1a5f7a 50%, #154c62 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-viagem-realizada::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== VIAGEM CANCELADA - Vinho ===== */
+.modal-header-viagem-cancelada {
+    background: linear-gradient(135deg, var(--modal-vinho) 0%, var(--modal-vinho-light) 50%, var(--modal-vinho) 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-viagem-cancelada::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== VIAGEM EVENTO - Marrom ===== */
+.modal-header-viagem-evento {
+    background: linear-gradient(135deg, var(--modal-marrom-evento) 0%, var(--modal-marrom-evento-light) 50%, var(--modal-marrom-evento) 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-viagem-evento::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== NOVO AGENDAMENTO - Manter padrão atual ===== */
+.modal-header-novo-agendamento {
+    background: linear-gradient(135deg, #cc5500 0%, #ff8c42 50%, #cc5500 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-novo-agendamento::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== EDITAR AGENDAMENTO - Azul escuro ===== */
+.modal-header-editar-agendamento {
+    background: linear-gradient(135deg, #003d82 0%, #4a90e2 50%, #003d82 100%);
+    background-size: 200% 200%;
+    animation: ftxHeaderGradientShift 6s ease infinite;
+    color: #fff;
+    border-bottom: none;
+    padding: 0.9rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header-editar-agendamento::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: ftxHeaderShine 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* ===== SUBTÍTULO DISCRETO (através de Agendamento) ===== */
+.titulo-subtexto {
+    color: #b0b0b0;
+    font-weight: 400;
+    font-size: 0.9em;
+    margin-left: 0.25rem;
+}
+
+/* ===== TEXTO LARANJA (através de Agendamento) ===== */
+.titulo-via-agendamento {
+    color: #FFB366;
+    font-weight: 500;
+    font-size: 0.85em;
+    margin-left: 0.5rem;
+    font-style: italic;
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes ftxHeaderGradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes ftxHeaderShine {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+}
+
+/* ===== GARANTIR PADDING REDUZIDO EM TODOS OS HEADERS ===== */
+#modalViagens .modal-header,
+#Titulo.modal-header {
+    padding: 0.9rem 1.25rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* ===== TÍTULO DO MODAL - GARANTIR ESTILO ===== */
+#modalViagens .modal-title,
+#Titulo .modal-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 1.35rem;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    margin: 0;
+    line-height: 1;
+}
+
+#modalViagens .modal-title i,
+#Titulo .modal-title i {
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+    display: flex;
+    align-items: center;
+}
+
+/* ===== BOTÃO FECHAR - X COM BORDA CIRCULAR ===== */
+#modalViagens .modal-header .btn-close-modal,
+#Titulo.modal-header .btn-close-modal {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    opacity: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+#modalViagens .modal-header .btn-close-modal:hover,
+#Titulo.modal-header .btn-close-modal:hover {
+    transform: scale(1.1);
+}
+
+#modalViagens .modal-header .btn-close-modal i,
+#Titulo.modal-header .btn-close-modal i {
+    font-size: 1rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+}
+
+/* Cores de fundo específicas por tipo de header (cor do header - 30%) */
+.modal-header-viagem-aberta .btn-close-modal i {
+    background-color: #2a3f2a;
+}
+
+.modal-header-viagem-agendada .btn-close-modal i {
+    background-color: #953901;
+}
+
+.modal-header-viagem-realizada .btn-close-modal i {
+    background-color: #0e3544;
+}
+
+.modal-header-viagem-cancelada .btn-close-modal i {
+    background-color: #4f2026;
+}
+
+.modal-header-viagem-evento .btn-close-modal i {
+    background-color: #351c05;
+}
+
+.modal-header-novo-agendamento .btn-close-modal i {
+    background-color: #8f3b00;
+}
+
+.modal-header-editar-agendamento .btn-close-modal i {
+    background-color: #002a5b;
+}
+
+.modal-header-dinheiro .btn-close-modal i {
+    background-color: rgba(0, 0, 0, 0.3);
+}

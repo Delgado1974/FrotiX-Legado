@@ -6,12 +6,26 @@
 @{
 	ViewData["Title"] = "Movimentações";
 	ViewData["PageName"] = "movimentacaopatrimonio_index";
-	ViewData["Heading"] = "<i class='fa-duotone fa-solid fa-truck-fast'></i> Cadastros: <span class='fw-300'>Movimentações</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-truck-fast'></i> Cadastros: <span class='fw-300'>Movimentações</span>";
 	ViewData["Category1"] = "Movimentações";
-	ViewData["PageIcon"] = "fa-regular fa-truck-fast";
+	ViewData["PageIcon"] = "fa-duotone fa-truck-fast";
 }
 
 @section HeadBlock {
+	<style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+	</style>
 }
 
 <style>
@@ -29,21 +43,18 @@
 	<div class="col-xl-12">
 		<div id="panel-1" class="panel">
 			<div class="panel-container show">
-				<!-- Adiciona espaçamento superior -->
-				<div class="pt-4">
-					<!-- Container para título e botão -->
-					<div class="d-flex justify-content-between align-items-center px-3 mb-3">
-						<h2 class="titulo-paginas mb-0">
-							<i class="fa-duotone fa-solid fa-conveyor-belt-boxes"></i>
-							Movimentação de Patrimônios
-						</h2>
-						<a href="./MovimentacaoPatrimonio/Upsert" class="btn btn-azul" data-ejtip="Inserir nova movimentação de patrimônio">
-							<i class="fa-duotone fa-file-plus icon-space icon-pulse"></i>
+				<!-- HEADER DO CARD -->
+				<div class="ftx-card-header">
+					<h2 class="titulo-paginas">
+						<i class="fa-duotone fa-conveyor-belt-boxes"></i>
+						Movimentação de Patrimônios
+					</h2>
+					<div class="ftx-card-actions">
+						<a href="./MovimentacaoPatrimonio/Upsert" class="btn btn-fundo-laranja" data-ftx-loading data-ejtip="Inserir nova movimentação de patrimônio">
+							<i class="fa-duotone fa-file-plus icon-pulse me-1 icon-pulse me-1"></i>
 							Inserir Movimentação
 						</a>
 					</div>
-					<!-- Linha divisória -->
-					<div class="col-12" style="border-bottom:1px solid #325d88"></div>
 				</div>
 
 				<div class="panel-content">
@@ -52,11 +63,11 @@
 						<div class="col-12 px-3">
 							<div class="d-flex justify-content-between align-items-center">
 								<label class="fw-bold mb-0">
-									<i class="fa-duotone fa-solid fa-filter"></i>
+									<i class="fa-duotone fa-filter"></i>
 									Escolha os filtros desejados para visualizar as Movimentações:
 								</label>
 								<button id="btnFiltrarMovimentacoes" class="btn btn-marrom">
-									<i class="fa-duotone fa-solid fa-filter"></i>
+									<i class="fa-duotone fa-filter"></i>
 									Filtrar Movimentações
 								</button>
 							</div>
@@ -68,7 +79,7 @@
 							<div class="form-group row">
 								<div class="col-sm-3">
 									<label for="drpDataMovimentacao" class="form-label">
-										<i class="fa-duotone fa-solid fa-calendar"></i>
+										<i class="fa-duotone fa-calendar"></i>
 										Data Movimentação
 									</label>
 									<ejs-daterangepicker id="drpDataMovimentacao" 
@@ -81,7 +92,7 @@
 
 								<div class="col-sm-3">
 									<label for="ddtSetorSecaoOrigem" class="form-label">
-										<i class="fa-duotone fa-solid fa-building"></i>
+										<i class="fa-duotone fa-building"></i>
 										Setor/Seção Origem
 									</label>
 									<ejs-dropdowntree id="ddtSetorSecaoOrigem"
@@ -97,7 +108,7 @@
 
 								<div class="col-sm-3">
 									<label for="ddtSetorSecaoDestino" class="form-label">
-										<i class="fa-duotone fa-solid fa-building"></i>
+										<i class="fa-duotone fa-building"></i>
 										Setor/Seção Destino
 									</label>
 									<ejs-dropdowntree id="ddtSetorSecaoDestino"
@@ -113,7 +124,7 @@
 
 								<div class="col-sm-3">
 									<label for="cmbResponsavel" class="form-label">
-										<i class="fa-duotone fa-solid fa-user"></i>
+										<i class="fa-duotone fa-user"></i>
 										Responsável
 									</label>
 									<ejs-combobox id="cmbResponsavel"

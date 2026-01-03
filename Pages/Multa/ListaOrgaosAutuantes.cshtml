@@ -4,9 +4,9 @@
 @{
 	ViewData["Title"] = "Órgãos Autuantes";
 	ViewData["PageName"] = "multa_listaorgaosautuantes";
-	ViewData["Heading"] = "<i class='fad fa-monument'></i>&nbsp;Cadastros: <span class='fw-300'>Órgãos Autuantes</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-monument'></i>&nbsp;Cadastros: <span class='fw-300'>Órgãos Autuantes</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fad fa-monument";
+	ViewData["PageIcon"] = "fa-duotone fa-monument";
 }
 
 @section HeadBlock {
@@ -29,6 +29,18 @@
 		:root {
 			--ftx-orgao-azul: #3D5771;
 			--ftx-orgao-azul-hover: #2d4559;
+		}
+
+		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
 		}
 
 		/* ====== OVERRIDE HEADER ====== */
@@ -184,16 +196,18 @@
 						<i class="fa-duotone fa-monument"></i>
 						Cadastros: Órgãos Autuantes
 					</h2>
-					<a href="/Multa/UpsertOrgaoAutuante" class="btn btn-fundo-laranja" data-ejtip="Adicionar novo órgão autuante">
-						<i class="fa-duotone fa-plus icon-space"></i>
-						Adicionar Órgão
-					</a>
+					<div class="ftx-card-actions">
+						<a href="/Multa/UpsertOrgaoAutuante" class="btn btn-fundo-laranja" data-ejtip="Adicionar novo órgão autuante" data-ftx-loading>
+							<i class="fa-duotone fa-monument icon-pulse me-1"></i>
+							Adicionar Órgão
+						</a>
+					</div>
 				</div>
 
 				<!-- Tabela -->
 				<div class="panel-content">
 					<div id="divOrgaos">
-						<table id="tblOrgaoAutuante" class="table table-bordered table-striped" width="100%">
+						<table id="tblOrgaoAutuante" class="table table-bordered table-striped ftx-table" width="100%">
 							<thead>
 								<tr>
 									<th>Sigla</th>
@@ -212,8 +226,5 @@
 </div>
 
 @section ScriptsBlock {
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
 	<script src="~/js/cadastros/orgaoautuante.js" asp-append-version="true"></script>
 }

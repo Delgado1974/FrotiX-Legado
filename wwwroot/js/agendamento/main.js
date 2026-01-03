@@ -498,7 +498,41 @@
                         document.getElementById(id).style.display = "block";
                     });
 
-                    $("#txtKmInicial, #txtKmFinal").val("");
+                    // Buscar Km do veículo selecionado
+                    const lstVeiculo = document.getElementById("lstVeiculo");
+                    if (lstVeiculo && lstVeiculo.ej2_instances && lstVeiculo.ej2_instances[0])
+                    {
+                        const veiculoId = lstVeiculo.ej2_instances[0].value;
+                        if (veiculoId)
+                        {
+                            $.ajax({
+                                url: "/Viagens/Upsert?handler=PegaKmAtualVeiculo",
+                                method: "GET",
+                                datatype: "json",
+                                data: { id: veiculoId },
+                                success: function (res)
+                                {
+                                    try
+                                    {
+                                        const km = res.data || 0;
+                                        $("#txtKmAtual").val(km);
+                                        $("#txtKmInicial").val(km);
+                                        console.log("✅ Km do Veículo carregado ao transformar:", km);
+                                    } catch (innerError)
+                                    {
+                                        Alerta.TratamentoErroComLinha("main.js", "btnViagem_ajax_success", innerError);
+                                    }
+                                },
+                                error: function (jqXHR, textStatus, errorThrown)
+                                {
+                                    const erro = window.criarErroAjax(jqXHR, textStatus, errorThrown, this);
+                                    Alerta.TratamentoErroComLinha("main.js", "btnViagem_ajax_error", erro);
+                                }
+                            });
+                        }
+                    }
+
+                    $("#txtKmFinal").val("");
                     $("#txtStatusAgendamento").val(false);
                 } catch (error)
                 {
@@ -935,6 +969,7 @@
                     const kmInicial = parseInt($("#txtKmInicial").val());
                     const kmFinal = parseInt($("#txtKmFinal").val());
 
+                    // Validação básica - só limpa se inválido (validação completa é no submit)
                     if (kmFinal < kmInicial)
                     {
                         $("#txtKmFinal").val("");
@@ -942,11 +977,7 @@
                         return;
                     }
 
-                    if (kmFinal - kmInicial > 100)
-                    {
-                        Alerta.Warning("Alerta na Quilometragem", "A quilometragem final excede em 100km a inicial");
-                    }
-
+                    // Calcular distância (exibe alerta visual se > 100km)
                     window.calcularDistanciaViagem();
                 } catch (error)
                 {

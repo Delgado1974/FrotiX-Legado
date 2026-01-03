@@ -20,13 +20,25 @@
 @{
     ViewData["Title"] = "Abastecimentos Pendentes";
     ViewData["PageName"] = "abastecimento_pendencias";
-    ViewData["Heading"] = "<i class='fad fa-gas-pump'></i> Cadastros: <span class='fw-300'>Abastecimentos Pendentes</span>";
+    ViewData["Heading"] = "<i class='fa-duotone fa-gas-pump'></i> Cadastros: <span class='fw-300'>Abastecimentos Pendentes</span>";
     ViewData["Category1"] = "Cadastros";
-    ViewData["PageIcon"] = "fal fa-gas-pump";
+    ViewData["PageIcon"] = "fa-duotone fa-gas-pump";
 }
 
 @section HeadBlock {
     <style>
+/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
         /* ====== CARDS DE RESUMO ====== */
         .ftx-stat-card {
             background: #fff;
@@ -202,7 +214,7 @@
         }
 
         /* ====== HEADER AÇÕES ====== */
-        .ftx-card-header .btn-add {
+        .ftx-card-header .btn-fundo-laranja {
             background-color: #A0522D !important;
             border: 1px solid rgba(255,255,255,0.3) !important;
             color: white !important;
@@ -218,7 +230,7 @@
             box-shadow: 0 0 8px rgba(160,82,45,.5),0 2px 4px rgba(160,82,45,.3);
         }
 
-        .ftx-card-header .btn-add:hover {
+        .ftx-card-header .btn-fundo-laranja:hover {
             background-color: #8B4513 !important;
             border-color: rgba(255,255,255,0.5) !important;
             animation: buttonWiggle .5s ease-in-out;
@@ -399,14 +411,14 @@
                         Abastecimentos Pendentes
                     </h2>
                     <div class="ftx-card-actions d-flex gap-2">
-                        <a href="/Abastecimento/Index" class="btn btn-add">
-                            <i class="fa-duotone fa-gas-pump"></i> Abastecimentos
+                        <a href="/Abastecimento/Index" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-gas-pump icon-pulse me-1"></i> Abastecimentos
                         </a>
-                        <a href="/Abastecimento/Importacao" class="btn btn-add">
-                            <i class="fa-duotone fa-file-import"></i> Nova Importação
+                        <a href="/Abastecimento/Importacao" class="btn btn-fundo-laranja" data-ftx-loading>
+                            <i class="fa-duotone fa-file-import icon-pulse me-1"></i> Nova Importação
                         </a>
                         <button type="button" class="btn btn-excluir-todas" onclick="excluirTodasPendencias()">
-                            <i class="fa-duotone fa-trash-can"></i> Excluir Todas
+                            <i class="fa-duotone fa-trash-can icon-pulse me-1"></i> Excluir Todas
                         </button>
                     </div>
                 </div>
@@ -479,7 +491,7 @@
                             <i class="fa-duotone fa-filter"></i>
                             <span>Exibindo: <strong id="filtroNome">Todas</strong></span>
                             <button type="button" class="btn-limpar-filtro" onclick="filtrarPorCard('total')">
-                                <i class="fa-solid fa-xmark"></i> Limpar Filtro
+                                <i class="fa-duotone fa-xmark"></i> Limpar Filtro
                             </button>
                         </div>
 
@@ -609,7 +621,7 @@
                     <div id="cardSugestao" class="card-sugestao d-none">
                         <h6><i class="fa-duotone fa-wand-magic-sparkles"></i> Sugestão de Correção</h6>
                         <p id="txtSugestaoInfo"></p>
-                        <button type="button" class="btn btn-success btn-sm" onclick="aplicarSugestaoNoModal()">
+                        <button type="button" class="btn btn-verde btn-sm" onclick="aplicarSugestaoNoModal()">
                             <i class="fa-duotone fa-check"></i> Aplicar Sugestão
                         </button>
                     </div>
@@ -617,11 +629,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnSalvarPendencia" onclick="salvarPendencia()">
-                    <span class="btn-text"><i class="fa-duotone fa-floppy-disk"></i> Salvar</span>
+                <button type="button" class="btn btn-azul" id="btnSalvarPendencia" onclick="salvarPendencia()">
+                    <span class="btn-text"><i class="fa-duotone fa-floppy-disk icon-pulse"></i> Salvar</span>
                     <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Salvando...</span>
                 </button>
-                <button type="button" class="btn btn-success" id="btnSalvarImportar" onclick="salvarEImportar()">
+                <button type="button" class="btn btn-verde" id="btnSalvarImportar" onclick="salvarEImportar()">
                     <span class="btn-text"><i class="fa-duotone fa-file-import"></i> Salvar e Importar</span>
                     <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Processando...</span>
                 </button>
@@ -667,7 +679,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btnAplicarSugestao" onclick="confirmarAplicarSugestao()">
+                <button type="button" class="btn btn-verde" id="btnAplicarSugestao" onclick="confirmarAplicarSugestao()">
                     <span class="btn-text"><i class="fa-duotone fa-check"></i> Aplicar Correção</span>
                     <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Aplicando...</span>
                 </button>
@@ -1282,7 +1294,7 @@
                         confirm: {
                             text: "Excluir",
                             value: true,
-                            className: "btn-danger"
+                            className: "btn-vinho"
                         }
                     },
                     dangerMode: true
@@ -1332,7 +1344,7 @@
                         confirm: {
                             text: "Excluir Todas",
                             value: true,
-                            className: "btn-danger"
+                            className: "btn-vinho"
                         }
                     },
                     dangerMode: true

@@ -46,24 +46,9 @@
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
     }
 
-    .ftx-card-header .titulo-paginas i {
-        --fa-primary-color: #ffffff;
-        --fa-secondary-color: rgba(255, 255, 255, 0.7);
-        font-size: 2.2rem !important;
-        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-    }
+    /* Ícone do header - padrão FrotiX removido, usa CSS global */
 
-    /* ======== OUTLINE BRANCO NO BOTÃO DO HEADER ======== */
-    .ftx-card-header .btn-fundo-laranja {
-        outline: 2px solid rgba(255, 255, 255, 0.5) !important;
-        outline-offset: 1px;
-        transition: all 0.2s ease;
-    }
-
-    .ftx-card-header .btn-fundo-laranja:hover {
-        outline: 2px solid rgba(255, 255, 255, 0.8) !important;
-        outline-offset: 2px;
-    }
+    /* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (já definido no frotix.css para) ======== */
 
     /* ======== BOTÕES DE AÇÃO - ESPAÇAMENTO VERTICAL ======== */
     #tblEventos td:last-child .text-center {
@@ -134,11 +119,6 @@
         font-size: 2.4em;
     }
 
-    /* ======== HEADER DO MODAL DETALHES - 20% MAIS ESCURO ======== */
-    #modalDetalhes .modal-header-dinheiro {
-        background: linear-gradient(135deg, #3C6F2F 0%, #4A803B 50%, #3C6F2F 100%) !important;
-    }
-
     /* ======== BOTÃO DETALHES - 20% MAIS SUAVE ======== */
     #tblViagensModal .btn-detalhes-viagem,
     .btn-detalhes-viagem.fundo-roxo {
@@ -164,6 +144,51 @@
         margin-top: .25rem;
         margin-bottom: .25rem;
     }
+
+    /* ======== HEADER DO DATATABLE - AZUL SLATE (20% mais claro que header) ======== */
+    #tblEventos thead th {
+        background-color: #4a6fa5 !important;
+        color: #fff !important;
+        font-weight: 600;
+        border-color: #3d5d8a !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    #tblEventos thead th:hover {
+        background-color: #5a7fb5 !important;
+    }
+
+    /* Ícones de ordenação - tblEventos */
+    #tblEventos thead .sorting:before,
+    #tblEventos thead .sorting:after,
+    #tblEventos thead .sorting_asc:before,
+    #tblEventos thead .sorting_asc:after,
+    #tblEventos thead .sorting_desc:before,
+    #tblEventos thead .sorting_desc:after {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    #tblEventos thead .sorting_asc:before,
+    #tblEventos thead .sorting_desc:after {
+        color: #fff !important;
+    }
+
+    /* Ícones de ordenação - tblViagensModal */
+    #tblViagensModal thead .sorting:before,
+    #tblViagensModal thead .sorting:after,
+    #tblViagensModal thead .sorting_asc:before,
+    #tblViagensModal thead .sorting_asc:after,
+    #tblViagensModal thead .sorting_desc:before,
+    #tblViagensModal thead .sorting_desc:after {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    #tblViagensModal thead .sorting_asc:before,
+    #tblViagensModal thead .sorting_desc:after {
+        color: #fff !important;
+    }
 </style>
 
 <form>
@@ -182,8 +207,8 @@
                             Gestão de Eventos
                         </h2>
                         <div class="ftx-card-actions">
-                            <a href="/Viagens/UpsertEvento" class="btn btn-fundo-laranja">
-                                <i class="fa-duotone fa-calendar-plus icon-space"></i>
+                            <a href="/Viagens/UpsertEvento" class="btn btn-fundo-laranja" data-ftx-loading>
+                                <i class="fa-duotone fa-calendar-plus ftx-icon-pulse icon-pulse me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffeeba;"></i>
                                 Adicionar Evento
                             </a>
                         </div>

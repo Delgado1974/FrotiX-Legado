@@ -297,18 +297,6 @@ body {
     100% { background-position: 0% 50%; }
 }
 
-/* Animação do ícone pulsante do header */
-@keyframes ftxHeaderIconPulse {
-    0%, 100% { 
-        transform: scale(1); 
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    }
-    50% { 
-        transform: scale(1.08); 
-        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-    }
-}
-
 /* Container do Header do Card */
 .ftx-card-header {
     background: linear-gradient(135deg, #325d88 0%, #2a4d73 25%, #3d6f9e 50%, #2a4d73 75%, #325d88 100%);
@@ -322,6 +310,7 @@ body {
     gap: 1rem;
     position: relative;
     overflow: hidden;
+    border-radius: 10px 10px 0 0; /* Bordas arredondadas no topo - Padrão FrotiX */
 }
 
 /* Efeito de brilho sutil no header */
@@ -360,16 +349,28 @@ body {
     z-index: 1;
 }
 
-/* Ícone do Título - Pulsante */
+/* Ícone do Título - Duotone Laranja/Branco */
 .ftx-card-header .titulo-paginas i,
 .ftx-card-header h2.titulo-paginas i,
 .ftx-card-header .ftx-card-title i {
     font-size: 2.2rem !important;
-    --fa-primary-color: #ffffff;
-    --fa-secondary-color: rgba(255, 255, 255, 0.7);
-    --fa-secondary-opacity: 0.7;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    animation: ftxHeaderIconPulse 2.5s ease-in-out infinite;
+}
+
+/* Camada primária do ícone duotone - Laranja */
+.ftx-card-header .titulo-paginas i.fa-duotone::before,
+.ftx-card-header h2.titulo-paginas i.fa-duotone::before,
+.ftx-card-header .ftx-card-title i.fa-duotone::before {
+    color: #C67750 !important;
+    opacity: 1 !important;
+}
+
+/* Camada secundária do ícone duotone - Branco */
+.ftx-card-header .titulo-paginas i.fa-duotone::after,
+.ftx-card-header h2.titulo-paginas i.fa-duotone::after,
+.ftx-card-header .ftx-card-title i.fa-duotone::after {
+    color: #ffffff !important;
+    opacity: 1 !important;
 }
 
 /* Container de Ações do Header */
@@ -436,19 +437,67 @@ body {
     background-color: #6B3410 !important;
 }
 
-/* Ícone pulsante dentro do botão header orange */
+/* Ícone do botão header orange - SEM animação por padrão */
 .btn-header-orange i,
 .ftx-card-header .btn-header-orange i {
     font-size: 1rem;
-    animation: ftxHeaderBtnIconPulse 1.5s ease-in-out infinite;
-    display: inline-block;
+    display: inline-block !important;
+    transition: transform 0.2s ease;
+}
+
+/* Animação de rotação do ícone - Sentido anti-horário */
+@keyframes ftxIconSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
 }
 
 /* Pausa a animação no hover (feedback visual) */
 .btn-header-orange:hover i,
 .ftx-card-header .btn-header-orange:hover i {
-    animation-play-state: paused;
     transform: scale(1.1);
+}
+
+/* ================================================================
+   CLASSES UTILITÁRIAS PARA ANIMAÇÃO DE ÍCONES - PADRÃO FROTIX
+   Uso: adicionar no <i> para definir comportamento de animação
+   ================================================================ */
+
+/* Ícone Girando (Spinning) - Para botões Voltar */
+.ftx-icon-spin,
+.icon-rotate-left {
+    animation: ftxIconSpin 2s linear infinite !important;
+    display: inline-block !important;
+}
+
+/* Ícone Pulsante - Para botões Adicionar */
+.ftx-icon-pulse,
+.icon-pulse {
+    animation: ftxHeaderBtnIconPulse 1.5s ease-in-out infinite !important;
+    display: inline-block !important;
+}
+
+/* ================================================================
+   LABEL DE CAMPO OBRIGATÓRIO - PADRÃO FROTIX
+   Uso: adicionar classe .ftx-required no <label>
+   ================================================================ */
+
+/* Asterisco vermelho após o label */
+.ftx-required::after {
+    content: " *";
+    color: #dc3545;
+    font-weight: 700;
+    margin-left: 2px;
+}
+
+/* Versão com ícone (alternativa) */
+.ftx-required-icon::after {
+    content: " \f069";
+    font-family: "Font Awesome 6 Pro";
+    font-weight: 900;
+    font-size: 0.6rem;
+    color: #dc3545;
+    margin-left: 4px;
+    vertical-align: super;
 }
 
 /* Botão Vinho no Header com outline branco */
@@ -567,16 +616,17 @@ label {
 }
 
 /* ================================================================
-   TOOLTIPS SYNCFUSION - ESTILO ÚNICO E CONSOLIDADO
+   TOOLTIPS SYNCFUSION - PADRÃO FROTIX (Azul sem bordas, sem seta)
    ================================================================ */
 .e-tooltip-wrap {
-    background-color: #4a6b8a !important;
+    background: linear-gradient(135deg, #3D5771 0%, #4a6b8a 100%) !important;
     color: #ffffff !important;
-    border: 1px solid #7a8a9a !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 13px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 3px 12px rgba(61, 87, 113, 0.35) !important;
     z-index: 99999 !important;
     pointer-events: none
 }
@@ -585,28 +635,29 @@ label {
     .e-tooltip-wrap .e-tooltip-content {
         background-color: transparent !important;
         color: #ffffff !important;
-        line-height: 1.4 !important;
+        line-height: 1.3 !important;
         display: block !important;
         visibility: visible !important;
         padding: 0 !important
     }
 
     .e-tooltip-wrap.e-popup {
-        background-color: #4a6b8a !important
+        background: linear-gradient(135deg, #3D5771 0%, #4a6b8a 100%) !important
     }
 
+/* Ocultar seta do tooltip - Padrão FrotiX */
+.e-tooltip-wrap .e-arrow-tip,
+.e-tooltip-wrap .e-arrow-tip-outer,
+.e-tooltip-wrap .e-arrow-tip-inner,
 .e-arrow-tip-outer.e-tip-bottom,
 .e-arrow-tip-outer.e-tip-top,
 .e-arrow-tip-outer.e-tip-left,
-.e-arrow-tip-outer.e-tip-right {
-    border-color: #4a6b8a transparent transparent transparent !important
-}
-
+.e-arrow-tip-outer.e-tip-right,
 .e-arrow-tip-inner.e-tip-bottom,
 .e-arrow-tip-inner.e-tip-top,
 .e-arrow-tip-inner.e-tip-left,
 .e-arrow-tip-inner.e-tip-right {
-    border-color: #4a6b8a transparent transparent transparent !important
+    display: none !important
 }
 /* Tema específico para Alertas (azul claro) */
 .e-tooltip-wrap.ftx-theme-alertas {
@@ -1689,6 +1740,112 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
     font-size: var(--ftx-action-icon)
 }
 
+/* ================================================================
+   PADRÃO FROTIX - BOTÕES DE AÇÃO EM TABELAS (data-ejtip)
+   ================================================================ */
+/* Container de ações centralizado */
+.ftx-actions,
+td .text-center,
+td > div.text-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+}
+
+/* Botão de ação padrão em tabelas */
+.btn-icon-28,
+.ftx-btn-acao {
+    width: 28px;
+    height: 28px;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px !important;
+    border: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-icon-28:hover:not(.disabled):not(:disabled),
+.ftx-btn-acao:hover:not(.disabled):not(:disabled) {
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+}
+
+.btn-icon-28 i,
+.ftx-btn-acao i {
+    font-size: 0.85rem;
+    line-height: 1;
+    color: #fff !important;
+}
+
+/* Cores de botões de ação */
+.btn-icon-28.btn-azul,
+.ftx-btn-acao.btn-azul {
+    background: linear-gradient(135deg, #3D5771 0%, #2d4559 100%) !important;
+    color: #fff !important;
+}
+
+.btn-icon-28.btn-azul:hover:not(.disabled),
+.ftx-btn-acao.btn-azul:hover:not(.disabled) {
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    background: linear-gradient(135deg, #2d4559 0%, #1e3040 100%) !important;
+}
+
+.btn-icon-28.btn-vinho,
+.ftx-btn-acao.btn-vinho {
+    background: linear-gradient(135deg, #561D2D 0%, #3d1520 100%) !important;
+    color: #fff !important;
+}
+
+.btn-icon-28.btn-vinho:hover:not(.disabled),
+.ftx-btn-acao.btn-vinho:hover:not(.disabled) {
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    background: linear-gradient(135deg, #3d1520 0%, #2a0e16 100%) !important;
+}
+
+.btn-icon-28.btn-verde,
+.ftx-btn-acao.btn-verde {
+    background: linear-gradient(135deg, #27ae60 0%, #219a52 100%) !important;
+    color: #fff !important;
+}
+
+.btn-icon-28.btn-verde:hover:not(.disabled),
+.ftx-btn-acao.btn-verde:hover:not(.disabled) {
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    background: linear-gradient(135deg, #219a52 0%, #1a7a40 100%) !important;
+}
+
+.btn-icon-28.btn-terracota,
+.ftx-btn-acao.btn-terracota {
+    background: linear-gradient(135deg, #CC5500 0%, #b54b00 100%) !important;
+    color: #fff !important;
+}
+
+.btn-icon-28.btn-terracota:hover:not(.disabled),
+.ftx-btn-acao.btn-terracota:hover:not(.disabled) {
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    background: linear-gradient(135deg, #b54b00 0%, #993f00 100%) !important;
+}
+
+/* Estado desabilitado */
+.btn-icon-28.disabled,
+.btn-icon-28:disabled,
+.ftx-btn-acao.disabled,
+.ftx-btn-acao:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .ftx-table .ftx-avatar, .ftx-table .ftx-avatar-img, .ftx-table img.ftx-avatar-img {
     width: var(--ftx-avatar) !important;
     height: var(--ftx-avatar) !important;
@@ -2256,8 +2413,8 @@ button.btn-nfs, a.btn-nfs, input.btn-nfs {
     --modal-terracota-light: #C08B7E;
     --modal-verde: #557570;
     --modal-verde-light: #6A8A85;
-    --modal-dinheiro: #4B8B3B;
-    --modal-dinheiro-light: #5CA04A;
+    --modal-dinheiro: #3d4a3d;
+    --modal-dinheiro-light: #4a5a4a;
     
     /* Sombras de Modal */
     --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -2477,6 +2634,7 @@ h3.modal-title,
 }
 
 .modal-body .btn-icon-28:hover:not(.disabled) {
+    animation: buttonWiggle 0.5s ease-in-out !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
 }
@@ -2929,155 +3087,357 @@ button[type="submit"],
 
 
 /* ================================================================
-   DATATABLE HEADER - PADRÃO GLOBAL FROTIX
-   Header azul slate para todos os DataTables do sistema
+   DATATABLE HEADER - PADRÃO FROTIX
+   Cor: #4a6fa5 (azul médio - 20% mais claro que header da página)
    ================================================================ */
 
-/* Header do DataTable - Azul Slate (20% mais claro que .ftx-card-header) */
-table.dataTable thead th,
-table.dataTable thead td,
-.dataTables_wrapper table thead th,
-.dataTables_wrapper table thead td,
-#tblVeiculo thead th,
-.table thead th {
+/* Header do DataTable - Aplica a TODAS as DataTables do sistema */
+.dataTables_wrapper thead,
+.dataTables_wrapper table thead,
+.dataTable thead,
+table.dataTable thead,
+table.table thead,
+.table thead,
+.ftx-table thead,
+table thead {
     background-color: #4a6fa5 !important;
-    color: #fff !important;
-    font-weight: 600;
-    border-color: #3d5d8a !important;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
 }
 
-/* Hover no header */
-table.dataTable thead th:hover,
-.dataTables_wrapper table thead th:hover {
-    background-color: #5a7fb5 !important;
+.dataTables_wrapper thead th,
+.dataTables_wrapper table thead th,
+.dataTable thead th,
+table.dataTable thead th,
+table.table thead th,
+.table thead th,
+.ftx-table thead th,
+table thead th {
+    background-color: #4a6fa5 !important;
+    color: #ffffff !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.3px !important;
+    padding: 12px 10px !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Ícones de ordenação */
-table.dataTable thead .sorting:before,
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:before,
-table.dataTable thead .sorting_desc:after {
-    color: rgba(255, 255, 255, 0.7) !important;
+/* Ícones de ordenação do DataTable - brancos */
+table.dataTable thead .sorting::before,
+table.dataTable thead .sorting::after,
+table.dataTable thead .sorting_asc::before,
+table.dataTable thead .sorting_asc::after,
+table.dataTable thead .sorting_desc::before,
+table.dataTable thead .sorting_desc::after {
+    color: #ffffff !important;
+    opacity: 0.6 !important;
 }
 
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_desc:after {
-    color: #fff !important;
+table.dataTable thead .sorting_asc::after,
+table.dataTable thead .sorting_desc::after {
+    opacity: 1 !important;
 }
 
 /* ================================================================
-   DATATABLE HEADER - PADRÃO GLOBAL FROTIX
-   Header azul slate para todos os DataTables do sistema
+   BOTÕES DE AÇÃO EM MODAIS - PADRÃO FROTIX
+   - btn-ftx-fechar: Cor vinho, ícone fa-circle-xmark com pulse
+   - btn-ftx-voltar: Cor vinho, ícone fa-rotate-left girando
+   - btn-ftx-confirmar: Cor azul escuro, para ações de confirmação
+   - btn-ftx-salvar: Cor verde, para ações de salvar
    ================================================================ */
 
-/* Header do DataTable - Azul Slate (20% mais claro que .ftx-card-header) */
-table.dataTable thead th,
-table.dataTable thead td,
-.dataTables_wrapper table thead th,
-.dataTables_wrapper table thead td,
-#tblVeiculo thead th,
-.table thead th {
-    background-color: #4a6fa5 !important;
-    color: #fff !important;
-    font-weight: 600;
-    border-color: #3d5d8a !important;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-/* Hover no header */
-table.dataTable thead th:hover,
-.dataTables_wrapper table thead th:hover {
-    background-color: #5a7fb5 !important;
-}
-
-/* Ícones de ordenação */
-table.dataTable thead .sorting:before,
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:before,
-table.dataTable thead .sorting_desc:after {
-    color: rgba(255, 255, 255, 0.7) !important;
-}
-
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_desc:after {
-    color: #fff !important;
-}
-
-/* ================================================================
-   BOTÃO HEADER LARANJA - ÍCONE PULSANTE
-   Padrão FrotiX para botões de ação dentro de headers azuis
-   ================================================================ */
-
-/* Animação pulsante para ícone do botão header */
-@keyframes ftxHeaderBtnIconPulse {
+/* ===== ANIMAÇÕES ESPECÍFICAS DOS BOTÕES ===== */
+@keyframes ftxPulse {
     0%, 100% { 
         transform: scale(1); 
+        opacity: 1; 
     }
     50% { 
-        transform: scale(1.15); 
+        transform: scale(1.2); 
+        opacity: 0.7; 
     }
 }
 
-/* Ícone pulsante dentro do botão header orange */
-.btn-header-orange i,
-.ftx-card-header .btn-header-orange i {
-    animation: ftxHeaderBtnIconPulse 1.5s ease-in-out infinite;
-    display: inline-block;
+@keyframes ftxSpinReverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
 }
 
-/* Pausa a animação no hover (feedback visual) */
-.btn-header-orange:hover i,
-.ftx-card-header .btn-header-orange:hover i {
-    animation-play-state: paused;
-    transform: scale(1.1);
+/* ===== BOTÃO FECHAR - PADRÃO FROTIX ===== */
+/* Cor: Vinho | Ícone: fa-circle-xmark | Animação: Pulse */
+.btn-ftx-fechar {
+    background-color: #722f37 !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-ftx-fechar:hover {
+    background-color: #5a252c !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+}
+
+.btn-ftx-fechar:active,
+.btn-ftx-fechar:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+}
+
+/* Ícone do botão fechar - sempre com animação pulse */
+.btn-ftx-fechar i.fa-circle-xmark {
+    animation: ftxPulse 1s ease-in-out infinite;
+}
+
+/* ===== BOTÃO VOLTAR - PADRÃO FROTIX ===== */
+/* Cor: Vinho | Ícone: fa-rotate-left | Animação: Giro anti-horário */
+.btn-ftx-voltar {
+    background-color: #722f37 !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-ftx-voltar:hover {
+    background-color: #5a252c !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+}
+
+.btn-ftx-voltar:active,
+.btn-ftx-voltar:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+}
+
+/* Ícone do botão voltar - sempre com animação de giro */
+.btn-ftx-voltar i.fa-rotate-left {
+    animation: ftxSpinReverse 1.5s linear infinite;
+}
+
+/* ===== BOTÃO CONFIRMAR - PADRÃO FROTIX ===== */
+/* Cor: Azul escuro | Para ações de confirmação em modais */
+.btn-ftx-confirmar {
+    background-color: #3D5771 !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-ftx-confirmar:hover {
+    background-color: #2d4156 !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+}
+
+.btn-ftx-confirmar:active,
+.btn-ftx-confirmar:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.25) !important;
+}
+
+/* ===== BOTÃO SALVAR - PADRÃO FROTIX ===== */
+/* Cor: Verde | Para ações de salvar/gravar */
+.btn-ftx-salvar {
+    background-color: #2e7d32 !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(46, 125, 50, 0.5), 0 2px 4px rgba(46, 125, 50, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-ftx-salvar:hover {
+    background-color: #1b5e20 !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(46, 125, 50, 0.8), 0 6px 12px rgba(46, 125, 50, 0.5) !important;
+}
+
+.btn-ftx-salvar:active,
+.btn-ftx-salvar:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25) !important;
+}
+
+/* ===== BOTÃO EXCLUIR - PADRÃO FROTIX ===== */
+/* Cor: Vermelho | Para ações de exclusão/deletar */
+.btn-ftx-excluir {
+    background-color: #c62828 !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(198, 40, 40, 0.5), 0 2px 4px rgba(198, 40, 40, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-ftx-excluir:hover {
+    background-color: #b71c1c !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(198, 40, 40, 0.8), 0 6px 12px rgba(198, 40, 40, 0.5) !important;
+}
+
+.btn-ftx-excluir:active,
+.btn-ftx-excluir:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(198, 40, 40, 0.25) !important;
+}
+
+/* ===== BOTÃO CANCELAR - PADRÃO FROTIX ===== */
+/* Cor: Cinza | Para ações de cancelar */
+.btn-ftx-cancelar {
+    background-color: #546e7a !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(84, 110, 122, 0.5), 0 2px 4px rgba(84, 110, 122, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-ftx-cancelar:hover {
+    background-color: #37474f !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(84, 110, 122, 0.8), 0 6px 12px rgba(84, 110, 122, 0.5) !important;
+}
+
+.btn-ftx-cancelar:active,
+.btn-ftx-cancelar:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(84, 110, 122, 0.25) !important;
+}
+
+/* ===== SPINNER PARA BOTÕES DE AÇÃO ===== */
+.btn-ftx-fechar .spinner-border,
+.btn-ftx-voltar .spinner-border,
+.btn-ftx-confirmar .spinner-border,
+.btn-ftx-salvar .spinner-border,
+.btn-ftx-excluir .spinner-border,
+.btn-ftx-cancelar .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* ===== ESTADO DESABILITADO ===== */
+.btn-ftx-fechar:disabled,
+.btn-ftx-voltar:disabled,
+.btn-ftx-confirmar:disabled,
+.btn-ftx-salvar:disabled,
+.btn-ftx-excluir:disabled,
+.btn-ftx-cancelar:disabled,
+.btn-ftx-fechar.disabled,
+.btn-ftx-voltar.disabled,
+.btn-ftx-confirmar.disabled,
+.btn-ftx-salvar.disabled,
+.btn-ftx-excluir.disabled,
+.btn-ftx-cancelar.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ===== COMPATIBILIDADE COM CLASSES LEGADAS ===== */
+/* Mantém suporte às classes antigas enquanto migra para o novo padrão */
+.btn-modal-fechar {
+    background-color: #722f37 !important;
+    color: #fff !important;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: .375rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all .3s ease, transform .2s ease !important;
+    box-shadow: 0 0 8px rgba(114, 47, 55, 0.5), 0 2px 4px rgba(114, 47, 55, 0.3) !important;
+    cursor: pointer;
+}
+
+.btn-modal-fechar:hover {
+    background-color: #5a252c !important;
+    color: #fff !important;
+    animation: buttonWiggle 0.5s ease-in-out !important;
+    box-shadow: 0 0 20px rgba(114, 47, 55, 0.8), 0 6px 12px rgba(114, 47, 55, 0.5) !important;
+}
+
+.btn-modal-fechar:active,
+.btn-modal-fechar:focus {
+    transform: translateY(0) scale(1) !important;
+    box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25) !important;
+}
+
+/* Animação do ícone fechar na classe legada */
+.btn-modal-fechar i.fa-circle-xmark {
+    animation: ftxPulse 1s ease-in-out infinite;
+}
+
+/* Animação do ícone voltar na classe legada */
+.btn-modal-fechar i.fa-rotate-left {
+    animation: ftxSpinReverse 1.5s linear infinite;
 }
 
 /* ================================================================
-   DATATABLE HEADER - PADRÃO GLOBAL FROTIX
-   Header azul slate para todos os DataTables do sistema
+   FIM DO ARQUIVO FROTIX.CSS
    ================================================================ */
-
-/* Header do DataTable - Azul Slate (20% mais claro que .ftx-card-header) */
-table.dataTable thead th,
-table.dataTable thead td,
-.dataTables_wrapper table thead th,
-.dataTables_wrapper table thead td,
-.table thead th {
-    background-color: #4a6fa5 !important;
-    color: #fff !important;
-    font-weight: 600;
-    border-color: #3d5d8a !important;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-/* Hover no header */
-table.dataTable thead th:hover,
-.dataTables_wrapper table thead th:hover {
-    background-color: #5a7fb5 !important;
-}
-
-/* Ícones de ordenação */
-table.dataTable thead .sorting:before,
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:before,
-table.dataTable thead .sorting_desc:after {
-    color: rgba(255, 255, 255, 0.7) !important;
-}
-
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_desc:after {
-    color: #fff !important;
-}

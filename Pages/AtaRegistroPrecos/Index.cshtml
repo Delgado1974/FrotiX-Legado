@@ -3,46 +3,141 @@
 
 @{
 	ViewData["Title"] = "Atas de Registro de Preços";
-	ViewData["PageName"] = "atas_index";
+    ViewData["PageName"] = "ataregistroprecos_index";
 	ViewData["Heading"] = "<i class='fa-duotone fa-folders'></i> Cadastros: <span class='fw-300'>Atas de Registro de Preços</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fa-regular fa-folders";
+	ViewData["PageIcon"] = "fa-duotone fa-folders";
 }
 
 @section HeadBlock {
+	<style>
+		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
+			transition: all 0.2s ease;
+		}
+
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
+		}
+
+		/* ===== BADGE DE STATUS (sem degradê - Padrão FrotiX) ===== */
+		.ftx-badge-status {
+			font-size: 0.75rem;
+			padding: 0.35rem 0.75rem;
+			border-radius: 6px;
+			font-weight: 600;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.35rem;
+			min-width: 85px;
+			text-align: center;
+			text-decoration: none;
+			transition: all 0.2s ease;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+		}
+
+		.ftx-badge-status:hover {
+			transform: translateY(-1px);
+			cursor: pointer;
+		}
+
+		.ftx-badge-status i {
+			font-size: 0.7rem;
+		}
+
+		/* Ativo = Verde Militar */
+		.ftx-badge-status.btn-verde {
+			background-color: #4A5D23 !important;
+			color: #fff !important;
+			border: none;
+		}
+
+		.ftx-badge-status.btn-verde:hover {
+			background-color: #3d4d1c !important;
+		}
+
+		/* Inativo = Cinza Chumbo */
+		.ftx-badge-status.fundo-cinza {
+			background-color: #4A4A4A !important;
+			color: #fff !important;
+		}
+
+		.ftx-badge-status.fundo-cinza:hover {
+			background-color: #3a3a3a !important;
+		}
+
+		/* ===== BOTÕES DE AÇÃO NA TABELA ===== */
+		.ftx-actions {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 4px;
+		}
+
+		.ftx-actions .btn,
+		.ftx-actions .btn-icon-28 {
+			width: 28px;
+			height: 28px;
+			padding: 0 !important;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 6px;
+			font-size: 0.85rem;
+			transition: all 0.2s ease;
+			border: none;
+			color: #fff !important;
+		}
+
+		.ftx-actions .btn:hover,
+		.ftx-actions .btn-icon-28:hover {
+			transform: translateY(-2px);
+		}
+
+		/* Glow por cor de botão */
+		.ftx-actions .btn-azul {
+			box-shadow: 0 2px 6px rgba(50, 93, 136, 0.35);
+		}
+
+		.ftx-actions .btn-azul:hover {
+			box-shadow: 0 4px 10px rgba(50, 93, 136, 0.5);
+		}
+
+		.ftx-actions .btn-vinho {
+			box-shadow: 0 2px 6px rgba(114, 47, 55, 0.35);
+		}
+
+		.ftx-actions .btn-vinho:hover {
+			box-shadow: 0 4px 10px rgba(114, 47, 55, 0.5);
+		}
+	</style>
 }
-
-<style>
-	.fundo-cinza {
-		background-color: #2F4F4F;
-		color: aliceblue;
-	}
-
-	.label {
-		color: white;
-	}
-</style>
 
 <div class="row">
 	<div class="col-xl-12">
 		<div id="panel-1" class="panel">
-			<h2 class="titulo-paginas mb-0">
-				<i class="fa-duotone fa-folders"></i>
-				Atas de Registro de Preços
-			</h2>
-			<!-- Linha divisória -->
-			<div class="col-12" style="border-bottom:1px solid #325d88"></div>
-
-			<div class="panel-container show">
-				<div class="panel-content float-right">
-					<a href="/AtaRegistroPrecos/Upsert" class="btn btn-info" data-ejtip="Adicionar nova Ata de Registro de Preços">
-						<i class="fa-regular fa-folders"></i> &nbsp; Adicionar Ata
+			<!-- ===== HEADER FROTIX ===== -->
+			<div class="ftx-card-header">
+				<h2 class="titulo-paginas">
+					<i class="fa-duotone fa-folders"></i>
+					Atas de Registro de Preços
+				</h2>
+				<div class="ftx-card-actions">
+					<a href="/AtaRegistroPrecos/Upsert" class="btn btn-fundo-laranja" data-ejtip="Adicionar nova Ata de Registro de Preços" data-ftx-loading>
+						<i class="fa-duotone fa-folder-plus icon-pulse me-1"></i> Adicionar Ata
 					</a>
 				</div>
+			</div>
 
+			<div class="panel-container show">
 				<div class="panel-content">
 					<div class="box-body">
-						<br /><br />
 						<table id="tblAta" class="table table-bordered table-striped" width="100%">
 							<thead>
 								<tr>

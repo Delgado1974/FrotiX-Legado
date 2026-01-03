@@ -22,40 +22,23 @@
 @{
 	ViewData["Title"] = "Abastecimentos";
 	ViewData["PageName"] = "abastecimento_index";
-	ViewData["Heading"] = "<i class='fad fa-gas-pump'></i> Cadastros: <span class='fw-300'>Abastecimentos</span>";
+	ViewData["Heading"] = "<i class='fa-duotone fa-gas-pump'></i> Cadastros: <span class='fw-300'>Abastecimentos</span>";
 	ViewData["Category1"] = "Cadastros";
-	ViewData["PageIcon"] = "fal fa-gas-pump";
+	ViewData["PageIcon"] = "fa-duotone fa-gas-pump";
 }
 
 @section HeadBlock {
 	<style>
-		/* ====== BOTÃO ADICIONAR NO HEADER ====== */
-		.ftx-card-header .btn-add {
-			background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
-			color: #fff !important;
-			border: none;
-			padding: 0.5rem 1rem;
-			border-radius: 6px;
-			font-weight: 600;
-			font-size: 0.875rem;
-			display: flex;
-			align-items: center;
-			gap: 0.5rem;
+		/* ======== OUTLINE BRANCO NO BOTÃO DO HEADER (Padrão FrotiX) ======== */
+		.ftx-card-header .btn-fundo-laranja {
+			outline: 2px solid rgba(255, 255, 255, 0.5) !important;
+			outline-offset: 1px;
 			transition: all 0.2s ease;
-			text-decoration: none;
-			box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
 		}
 
-		.ftx-card-header .btn-add:hover {
-			background: linear-gradient(135deg, #8B4513 0%, #6b3a0f 100%);
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
-			color: #fff !important;
-		}
-
-		.ftx-card-header .btn-add i {
-			--fa-primary-color: #fff;
-			--fa-secondary-color: rgba(255, 255, 255, 0.7);
+		.ftx-card-header .btn-fundo-laranja:hover {
+			outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+			outline-offset: 2px;
 		}
 
 		/* ====== CARD INTERNO DE FILTROS ====== */
@@ -105,6 +88,55 @@
 		.ftx-label i {
 			font-size: 0.9rem;
 		}
+
+		/* ====== PADRONIZAÇÃO ALTURA DOS CAMPOS DE FILTRO ====== */
+		.ftx-inner-card-body .form-control,
+		.ftx-inner-card-body .e-input-group,
+		.ftx-inner-card-body .e-control-wrapper,
+		.ftx-inner-card-body .e-ddl.e-input-group,
+		.ftx-inner-card-body .e-combobox.e-input-group {
+			height: 38px !important;
+			min-height: 38px !important;
+		}
+
+		.ftx-inner-card-body .e-input-group input.e-input,
+		.ftx-inner-card-body .e-control-wrapper input.e-input {
+			height: 36px !important;
+			padding: 0.375rem 0.75rem !important;
+			font-size: 0.875rem !important;
+		}
+
+		.ftx-inner-card-body .e-input-group .e-input-group-icon,
+		.ftx-inner-card-body .e-control-wrapper .e-input-group-icon {
+			min-height: 36px !important;
+		}
+
+		/* ====== ANIMAÇÃO WIGGLE FROTIX ====== */
+		@@keyframes buttonWiggle {
+			0% { transform: translateY(0) rotate(0deg); }
+			25% { transform: translateY(-2px) rotate(-1deg); }
+			50% { transform: translateY(-3px) rotate(0deg); }
+			75% { transform: translateY(-2px) rotate(1deg); }
+			100% { transform: translateY(0) rotate(0deg); }
+		}
+
+		/* ====== BOTÃO DE AÇÃO KM - COM GLOW E WIGGLE ====== */
+		.btn-acao-km {
+			transition: all .3s ease, transform .2s ease !important;
+			box-shadow: 0 0 8px rgba(61, 87, 113, 0.5), 0 2px 4px rgba(61, 87, 113, 0.3) !important;
+		}
+
+		.btn-acao-km:hover {
+			transform: translateY(-2px);
+			animation: buttonWiggle 0.5s ease-in-out !important;
+			background-color: #2d4559 !important;
+			box-shadow: 0 0 20px rgba(61, 87, 113, 0.8), 0 6px 12px rgba(61, 87, 113, 0.5) !important;
+		}
+
+		.btn-acao-km:active, .btn-acao-km:focus {
+			transform: translateY(0) scale(1) !important;
+			box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.35) !important;
+		}
 	</style>
 }
 
@@ -120,8 +152,9 @@
 						Abastecimentos
 					</h2>
 					<div class="ftx-card-actions">
-						<a href="/Abastecimento/Importacao" class="btn btn-add">
-							<i class="fa-duotone fa-file-import"></i> Importar Abastecimentos
+						<a href="/Abastecimento/Importacao" class="btn btn-fundo-laranja" data-ftx-loading>
+							<i class="fa-duotone fa-file-import icon-pulse me-1 icon-pulse me-1"></i>
+							Importar Abastecimentos
 						</a>
 					</div>
 				</div>
@@ -204,7 +237,6 @@
 										<th>Consumo</th>
 										<th>Média</th>
 										<th>Ação</th>
-										<th></th> @* Row Number *@
 									</tr>
 								</thead>
 								<tbody>
@@ -256,7 +288,7 @@
 					</span>
 				</button>
 				<button type="button" class="btn btn-vinho" data-bs-dismiss="modal">
-					<i class="fa-duotone fa-xmark me-1"></i> Fechar
+					<i class="fa-duotone fa-circle-xmark icon-pulse"></i> Fechar
 				</button>
 			</div>
 		</div>
@@ -406,7 +438,6 @@
 						{ "targets": 11, "className": "text-center", "width": "2%" },  // Consumo
 						{ "targets": 12, "className": "text-center", "width": "2%" },  // Consumo Geral
 						{ "targets": 13, "className": "text-center", "width": "2%" },  // Ação
-						{ "targets": 14, "className": "text-center", "width": "1%" }   // Row Number
 					],
 					responsive: true,
 					"ajax": {
@@ -432,20 +463,13 @@
 							"data": "abastecimentoId",
 							"render": function (data) {
 								return `<div class="text-center">
-											<a class="btn btn-azul btn-icon-28"
+											<a class="btn text-white btn-acao-km"
 											   data-bs-toggle="modal" data-bs-target="#modalEditaKm"
-											   aria-label="Editar Quilometragem"
-											   data-microtip-position="top" role="tooltip"
-											   style="cursor:pointer;" data-id='${data}'>
-												<i class="fa-duotone fa-pen-to-square"></i>
+											   style="cursor:pointer; background-color:#3D5771; border-color:#2d4559; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:.35rem;"
+											   data-id='${data}'>
+												<i class="fad fa-pen-to-square"></i>
 											</a>
 										</div>`;
-							}
-						},
-						{
-							"data": "abastecimentoId",
-							render: function (data, type, row, meta) {
-								return meta.row + meta.settings._iDisplayStart + 1;
 							}
 						}
 					],
@@ -674,8 +698,7 @@
 						{ "targets": 10, "className": "text-right", "width": "2%" },
 						{ "targets": 11, "className": "text-center", "width": "2%" },
 						{ "targets": 12, "className": "text-center", "width": "2%" },
-						{ "targets": 13, "className": "text-center", "width": "2%" },
-						{ "targets": 14, "className": "text-center", "width": "1%" }
+						{ "targets": 13, "className": "text-center", "width": "2%" }
 					],
 					responsive: true,
 					"language": {
@@ -818,12 +841,11 @@
 		function renderBotaoAcao(abastecimentoId) {
 			try {
 				return `<div class="text-center">
-							<a class="btn btn-azul btn-icon-28"
+							<a class="btn text-white btn-acao-km"
 							   data-bs-toggle="modal" data-bs-target="#modalEditaKm"
-							   aria-label="Editar Quilometragem"
-							   data-microtip-position="top" role="tooltip"
-							   style="cursor:pointer;" data-id='${abastecimentoId}'>
-								<i class="fa-duotone fa-pen-to-square"></i>
+							   style="cursor:pointer; background-color:#3D5771; border-color:#2d4559; width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:.35rem;"
+							   data-id='${abastecimentoId}'>
+								<i class="fad fa-pen-to-square"></i>
 							</a>
 						</div>`;
 			} catch (error) {
@@ -885,12 +907,6 @@
 								"render": function (data) {
 									return renderBotaoAcao(data);
 								}
-							},
-							{
-								"data": "abastecimentoId",
-								render: function (data, type, row, meta) {
-									return meta.row + meta.settings._iDisplayStart + 1;
-								}
 							}
 						];
 
@@ -907,18 +923,27 @@
 
 		$('#modalEditaKm').on('shown.bs.modal', function (event) {
 			try {
-				var RowNumber = $(event.relatedTarget).closest("tr").find("td:eq(14)").text() - 1;
-				console.log("Row Number: " + RowNumber);
-
-				var button = $(event.relatedTarget); // botão que abriu o modal
+				var button = $(event.relatedTarget);
 				var abastecimentoId = button.data("id");
 
-				$('#txtId').attr('value', abastecimentoId);
+				$('#txtId').val(abastecimentoId);
 
-				var data = $('#tblAbastecimentos').DataTable().row(RowNumber).data();
-				var KmRodado = data['kmRodado'];
+				// Busca pelo ID diretamente no DataTable
+				var dt = $('#tblAbastecimentos').DataTable();
+				var found = false;
+				
+				dt.rows().every(function() {
+					var rowData = this.data();
+					if (rowData && String(rowData.abastecimentoId) === String(abastecimentoId)) {
+						$('#txtKm').val(rowData.kmRodado || '');
+						found = true;
+						return false; // break
+					}
+				});
 
-				$('#txtKm').attr('value', KmRodado);
+				if (!found) {
+					$('#txtKm').val('');
+				}
 			} catch (error) {
 				Alerta.TratamentoErroComLinha("Index.cshtml", "shown.bs.modal", error);
 			}
@@ -986,12 +1011,6 @@
 						"render": function (data) {
 							return renderBotaoAcao(data);
 						}
-					},
-					{
-						"data": "abastecimentoId",
-						render: function (data, type, row, meta) {
-							return meta.row + meta.settings._iDisplayStart + 1;
-						}
 					}
 				];
 
@@ -1052,12 +1071,6 @@
 						"data": "abastecimentoId",
 						"render": function (data) {
 							return renderBotaoAcao(data);
-						}
-					},
-					{
-						"data": "abastecimentoId",
-						render: function (data, type, row, meta) {
-							return meta.row + meta.settings._iDisplayStart + 1;
 						}
 					}
 				];
@@ -1121,12 +1134,6 @@
 						"render": function (data) {
 							return renderBotaoAcao(data);
 						}
-					},
-					{
-						"data": "abastecimentoId",
-						render: function (data, type, row, meta) {
-							return meta.row + meta.settings._iDisplayStart + 1;
-						}
 					}
 				];
 
@@ -1188,12 +1195,6 @@
 						"data": "abastecimentoId",
 						"render": function (data) {
 							return renderBotaoAcao(data);
-						}
-					},
-					{
-						"data": "abastecimentoId",
-						render: function (data, type, row, meta) {
-							return meta.row + meta.settings._iDisplayStart + 1;
 						}
 					}
 				];

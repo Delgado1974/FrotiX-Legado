@@ -5,7 +5,7 @@
     ViewData["Title"] = "Indice";
     ViewData["PageName"] = "intel_paginaprincipal";
     ViewData["Category1"] = "Pagina Principal";
-    //ViewData["Heading"] = "<i class='subheader-icon fas fa-home'></i> Página <span class='fw-300'>Inicial</span>";
+    //ViewData["Heading"] = "<i class='subheader-icon fa-duotone fa-home'></i> Página <span class='fw-300'>Inicial</span>";
 }
 
 @section HeadBlock {
@@ -27,6 +27,14 @@
 }
 
 <style>
+    /* =========================================================================
+       FEEDBACK VISUAL: CURSOR AMPULHETA DURANTE CARREGAMENTO
+       ========================================================================= */
+    body.ftx-loading,
+    body.ftx-loading * {
+        cursor: wait !important;
+    }
+
     .botaoFormat {
         color: #b29b2b;
     }
@@ -146,11 +154,11 @@
             <div style="font-size: 11px; color: #666; margin-bottom: 8px; text-align: center;">Simulação C#</div>
 
             <button onclick="simularAlertaCS()" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-code"></i> Simular C# Erro
+                <i class="fa-duotone fa-code"></i> Simular C# Erro
             </button>
 
             <button onclick="simularTratamentoErroCS()" class="btn btn-outline-dark btn-sm">
-                <i class="fas fa-server"></i> Simular C# Técnico
+                <i class="fa-duotone fa-server"></i> Simular C# Técnico
             </button> *@
 
                 @*             <!-- Painel de Teste dos Alertas SweetAlert -->
@@ -160,32 +168,32 @@
                 <div style="display: grid; gap: 8px;">
                     <!-- Alertas básicos -->
                     <button onclick="mostrarErro()" class="btn btn-vinho btn-sm" style="width: 100%;">
-                        <i class="fas fa-times-circle"></i> Erro
+                        <i class="fa-duotone fa-times-circle"></i> Erro
                     </button>
 
-                    <button onclick="mostrarAlerta()" class="btn btn-warning btn-sm" style="width: 100%;">
-                        <i class="fas fa-exclamation-triangle"></i> Aviso
+                    <button onclick="mostrarAlerta()" class="btn btn-terracota btn-sm" style="width: 100%;">
+                        <i class="fa-duotone fa-exclamation-triangle"></i> Aviso
                     </button>
 
                     <button onclick="mostrarInfo()" class="btn btn-info btn-sm" style="width: 100%;">
-                        <i class="fas fa-info-circle"></i> Informação
+                        <i class="fa-duotone fa-info-circle"></i> Informação
                     </button>
 
                     <button onclick="mostrarSucesso()" class="btn btn-verde btn-sm" style="width: 100%;">
-                        <i class="fas fa-check-circle"></i> Sucesso
+                        <i class="fa-duotone fa-check-circle"></i> Sucesso
                     </button>
 
                     <!-- Alertas especiais -->
-                    <button onclick="mostrarConfirmar()" class="btn btn-primary btn-sm" style="width: 100%;">
-                        <i class="fas fa-question-circle"></i> Confirmar
+                    <button onclick="mostrarConfirmar()" class="btn btn-azul btn-sm" style="width: 100%;">
+                        <i class="fa-duotone fa-question-circle"></i> Confirmar
                     </button>
 
                     <button onclick="mostrarUnexpected()" class="btn btn-dark btn-sm" style="width: 100%;">
-                        <i class="fas fa-bug"></i> Erro Técnico
+                        <i class="fa-duotone fa-bug"></i> Erro Técnico
                     </button>
 
                     <button onclick="testarPreventionAlert()" class="btn btn-secondary btn-sm" style="width: 100%;">
-                        <i class="fas fa-shield-alt"></i> Prevention Alert
+                        <i class="fa-duotone fa-shield-alt"></i> Prevention Alert
                     </button>
                 </div>
 
@@ -200,7 +208,7 @@
                 <h5>Teste de Alertas</h5>
                 <button onclick="testarAlertaErro()" class="btn btn-vinho btn-sm">Erro</button>
                 <button onclick="testarAlertaSucesso()" class="btn btn-verde btn-sm">Sucesso</button>
-                <button onclick="testarAlertaAviso()" class="btn btn-warning btn-sm">Aviso</button>
+                <button onclick="testarAlertaAviso()" class="btn btn-terracota btn-sm">Aviso</button>
                 <button onclick="testarAlertaComDetalhes()" class="btn btn-info btn-sm">Com Detalhes</button>
             </div>
 
@@ -256,7 +264,7 @@
                 @*             <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
                 <button id="btn-ok" class="btn btn-verde" type="button">Toast Verde (3s)</button>
                 <button id="btn-err" class="btn btn-vinho" type="button">Toast Vermelho (5s)</button>
-                <button id="btn-warn" class="btn btn-warning" type="button">Toast Amarelo (fixo)</button>
+                <button id="btn-warn" class="btn btn-terracota" type="button">Toast Amarelo (fixo)</button>
             </div> *@
 
                 <div class="mt-4">
@@ -270,16 +278,16 @@
                                         <div class="profile-card-1">
                                             <div class="profile-content">
                                                 <div class="profile-img">
-                                                    <a href="/agenda/index" data-ftx-spin="Carregando Agenda…">
+                                                    <a href="/agenda/index">
                                                         <img src="~/Images/Schedule.jpg" class="img img-responsive" alt="Agenda">
                                                     </a>
                                                 </div>
-                                                <div class="profile-name" data-ftx-spin="Carregando Agenda…">
+                                                <div class="profile-name">
                                                     <a href="/agenda/index">Agenda</a>
                                                 </div>
                                                 <p class="profile-description">Exibe a Agenda.</p>
                                                 <div class="profile-icons">
-                                                    <a href="/agenda/index" data-ftx-spin="Carregando Agenda…">
+                                                    <a href="/agenda/index">
                                                         <i class="fa-duotone fa-calendar-days"></i>
                                                     </a>
                                                 </div>
@@ -314,16 +322,16 @@
                                         <div class="profile-card-1">
                                             <div class="profile-content">
                                                 <div class="profile-img">
-                                                    <a href="/viagens/index" data-ftx-spin="Carregando viagens…">
+                                                    <a href="/viagens/index">
                                                         <img src="~/Images/GestaoViagens.jpg" class="img img-responsive" alt="Gestão de Viagens">
                                                     </a>
                                                 </div>
                                                 <div class="profile-name">
-                                                    <a href="/viagens/index" data-ftx-spin="Carregando viagens…">Gestão de Viagens</a>
+                                                    <a href="/viagens/index">Gestão de Viagens</a>
                                                 </div>
                                                 <p class="profile-description">Gerencia as Viagens Cadastradas</p>
                                                 <div class="profile-icons">
-                                                    <a href="/viagens/index" data-ftx-spin="Carregando viagens…">
+                                                    <a href="/viagens/index">
                                                         <i class="fa-duotone fa-car-bus"></i>
                                                     </a>
                                                 </div>
@@ -412,7 +420,7 @@
                                                 <p class="profile-description">Gerencia as Penalidades</p>
                                                 <div class="profile-icons">
                                                     <a href="/multa/listapenalidade">
-                                                        <i class="fad fa-pen-to-square"></i>
+                                                        <i class="fa-duotone fa-pen-to-square"></i>
                                                     </a>
                                                 </div>
                                             </div>
@@ -677,5 +685,59 @@
                 Alerta.TratamentoErroComLinha("AnalyticsDashboard.cshtml", "DOMContentLoaded", error);
             }
         });
+
+        /* =========================================================================
+           FEEDBACK VISUAL: CURSOR AMPULHETA AO CLICAR NOS CARDS
+           ========================================================================= */
+        (function() {
+            'use strict';
+            
+            // Adiciona evento de clique em todos os links dos cards
+            document.addEventListener('click', function(e) {
+                try {
+                    // Verifica se o clique foi em um link dentro de um card
+                    var link = e.target.closest('.profile-card-1 a');
+                    if (link && link.href) {
+                        // Muda o cursor do body para ampulheta
+                        document.body.style.cursor = 'wait';
+                        document.documentElement.style.cursor = 'wait';
+                        
+                        // Adiciona classe para estilização adicional se necessário
+                        document.body.classList.add('ftx-loading');
+                        
+                        // Muda o cursor do card clicado também
+                        var card = link.closest('.profile-card-1');
+                        if (card) {
+                            card.style.cursor = 'wait';
+                            card.querySelectorAll('*').forEach(function(el) {
+                                el.style.cursor = 'wait';
+                            });
+                        }
+                    }
+                } catch (error) {
+                    // Silencioso - não queremos quebrar a navegação
+                    console.error('Erro ao mudar cursor:', error);
+                }
+            });
+            
+            // Restaura o cursor se o usuário voltar para a página (cache do navegador)
+            window.addEventListener('pageshow', function(e) {
+                try {
+                    if (e.persisted) {
+                        document.body.style.cursor = '';
+                        document.documentElement.style.cursor = '';
+                        document.body.classList.remove('ftx-loading');
+                        document.querySelectorAll('.profile-card-1').forEach(function(card) {
+                            card.style.cursor = '';
+                            card.querySelectorAll('*').forEach(function(el) {
+                                el.style.cursor = '';
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao restaurar cursor:', error);
+                }
+            });
+        })();
     </script>
 }
