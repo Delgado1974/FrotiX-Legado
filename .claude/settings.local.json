@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAplicar text-transform capitalize nos badges de status dos DataTables\n\nAdiciona regra CSS para exibir texto dos badges em Camel Case ao invés de maiúsculas.\nAfeta: ftx-badge-status, ftx-status-badge, ftx-manut-badge, ftx-ocorrencia-badge,\nftx-viagem-badge, badge-ativo, badge-inativo e badges gerais em DataTables.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(git commit:*)",
+      "Bash(dir C:temp)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(done)"
+    ]
+  }
+}

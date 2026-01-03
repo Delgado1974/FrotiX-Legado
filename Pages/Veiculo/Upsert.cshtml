@@ -283,7 +283,7 @@
                             @(isEdit ? "Atualizar" : "Criar") Veículo
                         </h2>
                         <div class="ftx-card-actions">
-                            <a href="/Veiculo/Index" class="btn btn-fundo-laranja">
+                            <a href="/Veiculo/Index" class="btn btn-header-orange">
                                 <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
                             </a>
                         </div>
@@ -725,20 +725,20 @@
                                 <button type="submit"
                                         asp-page-handler="Edit"
                                         asp-route-id="@Model.VeiculoObj.Veiculo.VeiculoId"
-                                        class="btn btn-azul">
-                                    <i class="fa-duotone fa-floppy-disk icon-pulse"></i> Atualizar Veículo
+                                        class="btn btn-azul btn-submit-spin">
+                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Veículo
                                 </button>
                             }
                             else
                             {
                                 <button type="submit"
                                         asp-page-handler="Submit"
-                                        class="btn btn-azul">
-                                    <i class="fa-duotone fa-plus icon-pulse"></i> Criar Veículo
+                                        class="btn btn-azul btn-submit-spin">
+                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Veículo
                                 </button>
                             }
-                            <a asp-page="./Index" class="btn btn-vinho">
-                                <i class="fa-duotone fa-xmark icon-pulse"></i> Cancelar
+                            <a asp-page="./Index" class="btn btn-ftx-fechar">
+                                <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i> Cancelar Operação
                             </a>
                         </div>
 

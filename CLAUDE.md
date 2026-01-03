@@ -43,13 +43,13 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 #### Botão Criar (novo registro):
 - Classe: `btn btn-azul btn-submit-spin`
 - Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse`
-- Texto: **"Criar"** (NÃO incluir o nome da entidade, ex: NÃO usar "Criar Usuário")
+- Texto: **"Criar [Objeto]"** (ex: "Criar Viagem", "Criar Operador", "Criar Usuário")
 - Comportamento: **pulsa** enquanto visível → **gira** ao clicar (processando)
 
 #### Botão Atualizar (edição):
 - Classe: `btn btn-azul btn-submit-spin`
 - Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse`
-- Texto: **"Atualizar"**
+- Texto: **"Atualizar [Objeto]"** (ex: "Atualizar Viagem", "Atualizar Operador", "Atualizar Usuário")
 - Comportamento: **pulsa** enquanto visível → **gira** ao clicar (processando)
 
 #### Botão Cancelar Operação:
