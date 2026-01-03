@@ -6,6 +6,55 @@ $(document).ready(function () {
         console.log("Mostrei/Escondi Popup");
 
         ListaTodasViagens();
+
+        // Handler para abrir modal Finaliza Viagem (elementos dinâmicos - Bootstrap 5)
+        $(document).on("click", ".btn-modal-finaliza", function (e) {
+            try {
+                e.preventDefault();
+                if ($(this).hasClass('btn-disabled')) return;
+                var viagemId = $(this).data("id");
+                $('#txtViagemIdFinaliza').val(viagemId);
+                var modalElement = document.getElementById('modalFinalizaViagem');
+                if (modalElement) {
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("viagens_001.js", "btn-modal-finaliza.click", error);
+            }
+        });
+
+        // Handler para abrir modal Ficha de Vistoria (elementos dinâmicos - Bootstrap 5)
+        $(document).on("click", ".btn-modal-ficha", function (e) {
+            try {
+                e.preventDefault();
+                var viagemId = $(this).data("id");
+                $('#txtViagemIdFicha').val(viagemId);
+                var modalElement = document.getElementById('modalFicha');
+                if (modalElement) {
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("viagens_001.js", "btn-modal-ficha.click", error);
+            }
+        });
+
+        // Handler para abrir modal Print (elementos dinâmicos - Bootstrap 5)
+        $(document).on("click", ".btn-modal-print", function (e) {
+            try {
+                e.preventDefault();
+                var viagemId = $(this).data("id");
+                $('#txtViagemIdPrint').val(viagemId);
+                var modalElement = document.getElementById('modalPrint');
+                if (modalElement) {
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("viagens_001.js", "btn-modal-print.click", error);
+            }
+        });
     }
     catch (error)
     {
@@ -849,16 +898,16 @@ function ListaTodasViagens() {
                                 <a href="/Viagens/Upsert?id=${data}" class="btn btn-azul btn-xs text-white" aria-label="Editar a Viagem!" data-microtip-position="top" role="tooltip" style="cursor:pointer;">
                                     <i class="far fa-edit"></i>
                                 </a>
-                                <a class="btn btn-xs text-white btn-fundo-laranja ${disableClass}" ${disableTitle} data-toggle="modal" data-target="#modalFinalizaViagem" id="btnFinalizar" aria-label="Finaliza a Viagem!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
+                                <a class="btn btn-modal-finaliza btn-xs text-white btn-fundo-laranja ${disableClass}" ${disableTitle} aria-label="Finaliza a Viagem!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
                                     <i class="fal fa-flag-checkered"></i>
                                 </a>
                                 <a class="btn btn-cancelar btn-vinho btn-xs text-white ${disableClass}" ${disableTitle} aria-label="Cancelar a Viagem!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
                                     <i class="far fa-window-close"></i>
                                 </a>
-                                <a class="btn btn-foto btn-dark btn-xs text-white" data-toggle="modal" data-target="#modalFicha" id="rowdata" aria-label="Ficha de Vistoria!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}' data-backdrop="false">
+                                <a class="btn btn-modal-ficha btn-dark btn-xs text-white" aria-label="Ficha de Vistoria!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}'>
                                     <i class="fab fa-wpforms"></i>
                                 </a>
-                                <a class="btn btn-azul btn-xs text-white" data-toggle="modal" data-target="#modalPrint" id="rowdata" aria-label="Ficha da Viagem!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}' data-backdrop="false">
+                                <a class="btn btn-modal-print btn-azul btn-xs text-white" aria-label="Ficha da Viagem!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}'>
                                     <i class="fa-light fa-print"></i>
                                 </a>
                             </div>`;

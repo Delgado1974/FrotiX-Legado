@@ -156,6 +156,38 @@ $(document).ready(function () {
                 Alerta.TratamentoErroComLinha("usuario_<num>.js", "callback@$.on#2", error);
             }
         });
+
+        // Handler para abrir modal de Senha (elementos dinâmicos - Bootstrap 5)
+        $(document).on("click", ".btn-modal-senha", function (e) {
+            try {
+                e.preventDefault();
+                var usuarioId = $(this).data("id");
+                $('#txtUsuarioIdSenha').val(usuarioId);
+                var modalElement = document.getElementById('modalSenha');
+                if (modalElement) {
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("usuario_001.js", "btn-modal-senha.click", error);
+            }
+        });
+
+        // Handler para abrir modal de Controle de Acesso (elementos dinâmicos - Bootstrap 5)
+        $(document).on("click", ".btn-modal-acesso", function (e) {
+            try {
+                e.preventDefault();
+                var usuarioId = $(this).data("id");
+                $('#txtUsuarioIdAcesso').val(usuarioId);
+                var modalElement = document.getElementById('modalControleAcesso');
+                if (modalElement) {
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("usuario_001.js", "btn-modal-acesso.click", error);
+            }
+        });
     }
     catch (error)
     {
@@ -258,16 +290,16 @@ function loadList() {
                         try
                         {
                             return `<div class="text-center">
-                                <a href="/Usuarios/Upsert?id=${data}" class="btn btn-azul btn-xs text-white"  aria-label="Editar o Usuário!" data-microtip-position="top" role="tooltip"  style="cursor:pointer;">
-                                    <i class="far fa-edit"></i> 
+                                <a href="/Usuarios/Upsert?id=${data}" class="btn btn-azul btn-xs text-white" aria-label="Editar o Usuário!" data-microtip-position="top" role="tooltip" style="cursor:pointer;">
+                                    <i class="far fa-edit"></i>
                                 </a>
-                                <a class="btn-delete btn btn-vinho btn-xs text-white"   aria-label="Excluir o Usuário!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
+                                <a class="btn-delete btn btn-vinho btn-xs text-white" aria-label="Excluir o Usuário!" data-microtip-position="top" role="tooltip" style="cursor:pointer;" data-id='${data}'>
                                     <i class="far fa-trash-alt"></i>
                                 </a>
-                                <a class="btn btn-foto btn-dark btn-xs text-white" data-toggle="modal" data-target="#modalSenha" id="rowdata" aria-label="Altera a Senha!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}' data-backdrop="false">
+                                <a class="btn btn-modal-senha btn-dark btn-xs text-white" aria-label="Altera a Senha!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}'>
                                     <i class="fa-thin fa-camera-retro"></i>
                                 </a>
-                                <a class="btn btn-foto btn-xs text-white btn-fundo-laranja" data-toggle="modal" data-target="#modalControleAcesso" id="rowdata" aria-label="Controle de Acesso!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}' data-backdrop="false">
+                                <a class="btn btn-modal-acesso btn-xs text-white btn-fundo-laranja" aria-label="Controle de Acesso!" data-microtip-position="top" role="tooltip" style="cursor:pointer; margin: 2px" data-id='${data}'>
                                     <i class="fa-thin fa-diagram-successor"></i>
                                 </a>
                     </div>`;
