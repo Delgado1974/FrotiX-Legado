@@ -452,7 +452,7 @@ body {
     transition: all 0.3s ease;
     text-decoration: none;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), /* Borda branca 2px */
-                0 0 12px rgba(160, 82, 45, 0.4);
+                0 0 12px rgba(160, 82, 45, 0.4) !important;
     position: relative;
     overflow: visible !important; /* Ripple externo */
 }
@@ -464,7 +464,7 @@ body {
     color: #fff !important;
     transform: translateY(-2px);
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 1), /* Borda branca no hover */
-                0 0 20px rgba(160, 82, 45, 0.6);
+                0 0 20px rgba(160, 82, 45, 0.6) !important;
 }
 
 .ftx-card-header .btn-header-orange:active,
@@ -1092,19 +1092,20 @@ body.loading {
         color: white !important
     }
 
-/* Botío Fundo Laranja - Tom Escuro (Sienna) */
+/* Botão Fundo Laranja - Tom Escuro (Sienna)
+   NOTA: Botões no header (.ftx-card-header) usam regras específicas definidas acima */
 .btn.btn-fundo-laranja, a.btn.btn-fundo-laranja, button.btn-fundo-laranja {
     background-color: #A0522D !important;
     border-color: #8B4513 !important;
     color: white !important;
-    box-shadow: 0 0 8px rgba(160,82,45,.5),0 2px 4px rgba(160,82,45,.3) !important
+    box-shadow: 0 0 8px rgba(160,82,45,.5),0 2px 4px rgba(160,82,45,.3)
 }
 
     .btn.btn-fundo-laranja:hover, a.btn.btn-fundo-laranja:hover, button.btn-fundo-laranja:hover {
         background-color: #8B4513 !important;
         border-color: #6B3410 !important;
         animation: buttonWiggle .5s ease-in-out !important;
-        box-shadow: 0 0 20px rgba(160,82,45,.8),0 6px 12px rgba(160,82,45,.5) !important;
+        box-shadow: 0 0 20px rgba(160,82,45,.8),0 6px 12px rgba(160,82,45,.5);
         color: white !important
     }
 
@@ -1112,7 +1113,7 @@ body.loading {
         background-color: #6B3410 !important;
         border-color: #5A2A0D !important;
         transform: translateY(0) scale(1) !important;
-        box-shadow: 0 0 0 .2rem rgba(160,82,45,.35) !important;
+        box-shadow: 0 0 0 .2rem rgba(160,82,45,.35);
         color: white !important
     }
 
