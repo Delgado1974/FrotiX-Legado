@@ -363,11 +363,32 @@ async function carregarHeatmap(dataInicio, dataFim) {
 
 async function carregarCategoria(dataInicio, dataFim) {
     try {
+        console.log('Carregando categorias...');
         const response = await fetch(`/api/DashboardLavagem/LavagensPorCategoria?dataInicio=${dataInicio}&dataFim=${dataFim}`);
         const result = await response.json();
+        console.log('Resultado categorias:', result);
 
-        if (result.success && result.data && result.data.length > 0) {
-            if (chartCategoria) chartCategoria.destroy();
+        if (result.success && result.data) {
+            console.log('Dados categorias:', result.data);
+
+            if (chartCategoria) {
+                chartCategoria.destroy();
+                chartCategoria = null;
+            }
+
+            var container = document.getElementById('chartCategoria');
+            console.log('Container encontrado:', container);
+
+            if (!container) {
+                console.error('Container #chartCategoria nao encontrado');
+                return;
+            }
+
+            // Se não houver dados, mostra mensagem
+            if (result.data.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-5"><i class="fa-duotone fa-chart-pie fa-3x mb-3"></i><p>Sem dados de categoria</p></div>';
+                return;
+            }
 
             chartCategoria = new ej.charts.Chart({
                 primaryXAxis: {
@@ -389,10 +410,15 @@ async function carregarCategoria(dataInicio, dataFim) {
                 }],
                 tooltip: { enable: true },
                 chartArea: { border: { width: 0 } },
-                background: 'transparent'
+                background: 'transparent',
+                width: '100%',
+                height: '100%'
             });
 
             chartCategoria.appendTo('#chartCategoria');
+            console.log('Grafico categoria criado com sucesso');
+        } else {
+            console.error('API retornou erro ou sem dados:', result);
         }
     } catch (error) {
         console.error('Erro ao carregar grafico categoria:', error);
