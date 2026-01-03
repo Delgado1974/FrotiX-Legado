@@ -9,10 +9,8 @@
 let chartDiaSemana = null;
 let chartHorario = null;
 let chartEvolucao = null;
-let chartContrato = null;
 let chartTopLavadores = null;
 let chartTopVeiculos = null;
-let chartTopMotoristas = null;
 
 // Cores do tema Cyan
 const CORES_LAV = {
@@ -40,6 +38,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Event listeners
         document.getElementById('btnFiltrar').addEventListener('click', carregarDados);
+
+        // Desmarcar periodos rapidos ao editar datas manualmente
+        document.getElementById('dataInicio').addEventListener('change', function() {
+            document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
+        });
+        document.getElementById('dataFim').addEventListener('change', function() {
+            document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
+        });
 
         // Botoes de periodo rapido
         document.querySelectorAll('.btn-period-lav').forEach(btn => {
@@ -76,16 +82,14 @@ async function carregarDados() {
         const dataInicio = document.getElementById('dataInicio').value;
         const dataFim = document.getElementById('dataFim').value;
 
-        // Carrega todos os dados em paralelo
+        // Carrega todos os dados em paralelo (otimizado - removidos graficos desnecessarios)
         await Promise.all([
             carregarEstatisticasGerais(dataInicio, dataFim),
             carregarGraficosDiaSemana(dataInicio, dataFim),
             carregarGraficosHorario(dataInicio, dataFim),
             carregarGraficosEvolucao(),
-            carregarGraficosContrato(dataInicio, dataFim),
             carregarTopLavadores(dataInicio, dataFim),
             carregarTopVeiculos(dataInicio, dataFim),
-            carregarTopMotoristas(dataInicio, dataFim),
             carregarHeatmap(dataInicio, dataFim),
             carregarTabelaLavadores(dataInicio, dataFim),
             carregarTabelaVeiculos(dataInicio, dataFim)
@@ -266,41 +270,6 @@ async function carregarGraficosEvolucao() {
     }
 }
 
-async function carregarGraficosContrato(dataInicio, dataFim) {
-    try {
-        const response = await fetch(`/api/DashboardLavagem/LavagensPorContrato?dataInicio=${dataInicio}&dataFim=${dataFim}`);
-        const result = await response.json();
-
-        if (result.success && result.data) {
-            if (chartContrato) chartContrato.destroy();
-
-            chartContrato = new ej.charts.AccumulationChart({
-                series: [{
-                    dataSource: result.data,
-                    xName: 'contrato',
-                    yName: 'quantidade',
-                    type: 'Pie',
-                    innerRadius: '40%',
-                    palettes: CORES_LAV.gradient,
-                    dataLabel: {
-                        visible: true,
-                        position: 'Outside',
-                        name: 'contrato',
-                        font: { fontWeight: '600' }
-                    }
-                }],
-                legendSettings: { visible: true, position: 'Bottom' },
-                tooltip: { enable: true },
-                background: 'transparent'
-            });
-
-            chartContrato.appendTo('#chartContrato');
-        }
-    } catch (error) {
-        console.error('Erro ao carregar grafico contrato:', error);
-    }
-}
-
 async function carregarTopLavadores(dataInicio, dataFim) {
     try {
         const response = await fetch(`/api/DashboardLavagem/TopLavadores?dataInicio=${dataInicio}&dataFim=${dataFim}&top=10`);
@@ -374,44 +343,6 @@ async function carregarTopVeiculos(dataInicio, dataFim) {
         }
     } catch (error) {
         console.error('Erro ao carregar top veiculos:', error);
-    }
-}
-
-async function carregarTopMotoristas(dataInicio, dataFim) {
-    try {
-        const response = await fetch(`/api/DashboardLavagem/TopMotoristas?dataInicio=${dataInicio}&dataFim=${dataFim}&top=10`);
-        const result = await response.json();
-
-        if (result.success && result.data) {
-            if (chartTopMotoristas) chartTopMotoristas.destroy();
-
-            chartTopMotoristas = new ej.charts.Chart({
-                primaryXAxis: {
-                    valueType: 'Category',
-                    labelStyle: { color: '#6B7280' }
-                },
-                primaryYAxis: {
-                    labelStyle: { color: '#6B7280' },
-                    minimum: 0
-                },
-                series: [{
-                    dataSource: result.data.reverse(),
-                    xName: 'nome',
-                    yName: 'quantidade',
-                    type: 'Bar',
-                    fill: CORES_LAV.dark,
-                    cornerRadius: { topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 },
-                    marker: { dataLabel: { visible: true, position: 'Top', font: { fontWeight: '600' } } }
-                }],
-                tooltip: { enable: true },
-                chartArea: { border: { width: 0 } },
-                background: 'transparent'
-            });
-
-            chartTopMotoristas.appendTo('#chartTopMotoristas');
-        }
-    } catch (error) {
-        console.error('Erro ao carregar top motoristas:', error);
     }
 }
 

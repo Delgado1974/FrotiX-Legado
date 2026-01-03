@@ -102,20 +102,20 @@
         margin-bottom: 8px;
     }
 
-    /* Botoes de Periodo Rapido */
+    /* Botoes de Periodo Rapido - Escurecidos 20% para destaque */
     .btn-period-lav {
         border-radius: 20px;
         padding: 8px 20px;
         font-weight: 600;
         transition: all 0.2s;
-        border: 2px solid rgba(255,255,255,0.3);
-        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.2);
         color: white;
     }
 
     .btn-period-lav:hover {
         transform: scale(1.05);
-        background: rgba(255,255,255,0.25);
+        background: rgba(0,0,0,0.35);
         border-color: rgba(255,255,255,0.5);
         color: white;
     }
@@ -124,6 +124,7 @@
         background: white;
         color: var(--lav-primary);
         border-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     /* Containers de Graficos */
@@ -374,13 +375,18 @@
         color: #6c757d;
     }
 
-    /* Card Destaque */
+    /* Card Destaque - Altura equalizada */
     .card-destaque-lav {
         background: linear-gradient(135deg, var(--lav-light) 0%, #f0fdfa 100%);
         border: 1px solid var(--lav-accent);
         border-radius: 8px;
         padding: 16px;
         text-align: center;
+        height: 100%;
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .card-destaque-lav .destaque-label {
@@ -401,6 +407,37 @@
         font-size: 0.8rem;
         color: var(--lav-primary);
         font-weight: 600;
+        min-height: 1.2em; /* Reserva espaço mesmo quando vazio */
+    }
+
+    /* Legenda do Heatmap */
+    .heatmap-legend-info {
+        padding: 10px 0;
+    }
+
+    .legend-color-scale {
+        gap: 0;
+    }
+
+    .legend-color {
+        flex: 1;
+        height: 24px;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .legend-color:first-child {
+        border-radius: 4px 0 0 4px;
+    }
+
+    .legend-color:last-child {
+        border-radius: 0 4px 4px 0;
+    }
+
+    .insight-box {
+        background: var(--lav-light);
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 3px solid var(--lav-primary);
     }
 </style>
 
@@ -482,19 +519,30 @@
 <!-- Filtros -->
 <div class="filter-card-lav">
     <div class="row align-items-end">
-        <div class="col-md-2">
+        <!-- Data Inicial -->
+        <div class="col-auto">
             <label class="form-label">
                 <i class="fa-duotone fa-calendar-days me-1"></i> Data Inicial
             </label>
-            <input type="date" id="dataInicio" class="form-control" />
+            <input type="date" id="dataInicio" class="form-control" style="width: 160px;" />
         </div>
-        <div class="col-md-2">
+        <!-- Data Final -->
+        <div class="col-auto">
             <label class="form-label">
                 <i class="fa-duotone fa-calendar-check me-1"></i> Data Final
             </label>
-            <input type="date" id="dataFim" class="form-control" />
+            <input type="date" id="dataFim" class="form-control" style="width: 160px;" />
         </div>
-        <div class="col-md-6">
+        <!-- Botao Filtrar -->
+        <div class="col-auto">
+            <button id="btnFiltrar" class="btn btn-filtrar-lav">
+                <i class="fa-duotone fa-filter me-2"></i> Filtrar
+            </button>
+        </div>
+        <!-- Espacador -->
+        <div class="col"></div>
+        <!-- Periodos Rapidos (alinhado a direita) -->
+        <div class="col-auto">
             <label class="form-label">Periodo Rapido</label>
             <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-period-lav" data-dias="7">7 dias</button>
@@ -504,11 +552,6 @@
                 <button class="btn btn-period-lav" data-dias="90">90 dias</button>
                 <button class="btn btn-period-lav" data-dias="365">1 ano</button>
             </div>
-        </div>
-        <div class="col-md-2 text-end">
-            <button id="btnFiltrar" class="btn btn-filtrar-lav">
-                <i class="fa-duotone fa-filter me-2"></i> Filtrar
-            </button>
         </div>
     </div>
 </div>
@@ -613,7 +656,7 @@
 
 <!-- Graficos - Linha 2 -->
 <div class="row g-4 mb-4">
-    <div class="col-md-8">
+    <div class="col-12">
         <div class="chart-container-lav">
             <h5 class="chart-title-lav">
                 <i class="fa-duotone fa-chart-line"></i> Evolucao Mensal
@@ -621,19 +664,11 @@
             <div id="chartEvolucao" style="height: 300px;"></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="chart-container-lav">
-            <h5 class="chart-title-lav">
-                <i class="fa-duotone fa-chart-pie"></i> Lavagens por Contrato
-            </h5>
-            <div id="chartContrato" style="height: 300px;"></div>
-        </div>
-    </div>
 </div>
 
 <!-- Graficos - Linha 3 (Top 10) -->
 <div class="row g-4 mb-4">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="chart-container-lav">
             <h5 class="chart-title-lav">
                 <i class="fa-duotone fa-ranking-star"></i> Top 10 Lavadores
@@ -641,7 +676,7 @@
             <div id="chartTopLavadores" style="height: 350px;"></div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="chart-container-lav">
             <h5 class="chart-title-lav">
                 <i class="fa-duotone fa-cars"></i> Top 10 Veiculos
@@ -649,24 +684,49 @@
             <div id="chartTopVeiculos" style="height: 350px;"></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="chart-container-lav">
-            <h5 class="chart-title-lav">
-                <i class="fa-duotone fa-user-helmet-safety"></i> Top 10 Motoristas
-            </h5>
-            <div id="chartTopMotoristas" style="height: 350px;"></div>
-        </div>
-    </div>
 </div>
 
-<!-- Heatmap -->
+<!-- Heatmap e Legenda -->
 <div class="row g-4 mb-4">
-    <div class="col-12">
+    <div class="col-md-8">
         <div class="chart-container-lav">
             <h5 class="chart-title-lav">
                 <i class="fa-duotone fa-grid-2"></i> Mapa de Calor - Dia x Horario
             </h5>
             <div id="heatmapContainer" class="heatmap-container"></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container-lav">
+            <h5 class="chart-title-lav">
+                <i class="fa-duotone fa-lightbulb"></i> Interpretacao do Mapa
+            </h5>
+            <div class="heatmap-legend-info">
+                <div class="legend-item mb-3">
+                    <div class="legend-color-scale d-flex mb-2">
+                        <div class="legend-color" style="background: #ecfeff;"></div>
+                        <div class="legend-color" style="background: #a5f3fc;"></div>
+                        <div class="legend-color" style="background: #67e8f9;"></div>
+                        <div class="legend-color" style="background: #22d3ee;"></div>
+                        <div class="legend-color" style="background: #06b6d4;"></div>
+                        <div class="legend-color" style="background: #0891b2;"></div>
+                        <div class="legend-color" style="background: #0e7490;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
+                        <span>Menos lavagens</span>
+                        <span>Mais lavagens</span>
+                    </div>
+                </div>
+                <hr />
+                <div class="insight-box">
+                    <p class="mb-2"><i class="fa-duotone fa-circle-info text-info me-2"></i><strong>Como interpretar:</strong></p>
+                    <ul class="ps-3 mb-0" style="font-size: 0.85rem; color: #6B7280;">
+                        <li>Celulas mais escuras = maior volume de lavagens</li>
+                        <li>Identifique horarios de pico para melhor alocacao</li>
+                        <li>Dias com baixa demanda podem ser usados para manutencao</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
