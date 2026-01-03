@@ -18,8 +18,11 @@ namespace FrotiX.Models
         [Display(Name = "Data")]
         public DateTime? Data { get; set; }
 
-        [Display(Name = "Horário")]
-        public DateTime? Horario { get; set; }
+        [Display(Name = "Horário Início")]
+        public DateTime? HorarioInicio { get; set; }
+
+        [Display(Name = "Horário Fim")]
+        public DateTime? HorarioFim { get; set; }
 
         [Display(Name = "Veículo Lavado")]
         public Guid VeiculoId { get; set; }

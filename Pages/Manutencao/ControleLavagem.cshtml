@@ -458,10 +458,14 @@
                                             <input id="txtDataLavagem" class="form-control" type="date" />
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="ftx-label">Hora</label>
+                                            <label class="ftx-label">Hora Início</label>
                                             <input id="txtHoraLavagem" class="form-control" type="time" />
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-2">
+                                            <label class="ftx-label">Hora Fim</label>
+                                            <input id="txtHoraFimLavagem" class="form-control" type="time" />
+                                        </div>
+                                        <div class="col-md-3">
                                             <label class="ftx-label">Veículo Lavado</label>
                                             <ejs-combobox id="lstVeiculoLavagem"
                                                           placeholder="Selecione um Veículo"
@@ -474,7 +478,7 @@
                                                 <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
                                             </ejs-combobox>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="ftx-label">Condutor do Veículo</label>
                                             <ejs-combobox id="lstMotoristaLavagem"
                                                           placeholder="Selecione um Motorista"
@@ -807,7 +811,14 @@
 
                 var HoraLavagem = $("#txtHoraLavagem").val();
                 if (!HoraLavagem) {
-                    Alerta.Erro("Erro na Hora", "A hora da lavagem é obrigatória!");
+                    Alerta.Erro("Erro na Hora", "A hora de início da lavagem é obrigatória!");
+                    return;
+                }
+
+                var HoraFimLavagem = $("#txtHoraFimLavagem").val();
+                // HorarioFim é opcional, mas se preenchido deve ser posterior ao início
+                if (HoraFimLavagem && HoraFimLavagem <= HoraLavagem) {
+                    Alerta.Erro("Erro na Hora", "A hora de fim deve ser posterior à hora de início!");
                     return;
                 }
 
@@ -831,7 +842,8 @@
 
                 var objLavagem = JSON.stringify({
                     "Data": DataLavagem,
-                    "Horario": HoraLavagem,
+                    "HorarioInicio": HoraLavagem,
+                    "HorarioFim": HoraFimLavagem || null,
                     "VeiculoId": veiculo.value,
                     "MotoristaId": motorista.value
                 });
@@ -892,6 +904,7 @@
             try {
                 $("#txtDataLavagem").val("");
                 $("#txtHoraLavagem").val("");
+                $("#txtHoraFimLavagem").val("");
 
                 var veiculo = document.getElementById('lstVeiculoLavagem').ej2_instances[0]; veiculo.value = null;
                 var motorista = document.getElementById('lstMotoristaLavagem').ej2_instances[0]; motorista.value = null;

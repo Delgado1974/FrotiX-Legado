@@ -12,6 +12,7 @@ let chartEvolucao = null;
 let chartTopLavadores = null;
 let chartTopVeiculos = null;
 let chartCategoria = null;
+let chartDuracao = null;
 
 // Cores do tema Cyan
 const CORES_LAV = {
@@ -93,6 +94,7 @@ async function carregarDados() {
             carregarTopVeiculos(dataInicio, dataFim),
             carregarHeatmap(dataInicio, dataFim),
             carregarCategoria(dataInicio, dataFim),
+            carregarDuracao(dataInicio, dataFim),
             carregarTabelaLavadores(dataInicio, dataFim),
             carregarTabelaVeiculos(dataInicio, dataFim)
         ]);
@@ -437,6 +439,133 @@ async function carregarCategoria(dataInicio, dataFim) {
     } catch (error) {
         console.error('Erro ao carregar grafico categoria:', error);
     }
+}
+
+// ========================================
+// GRAFICO DE DURACAO DAS LAVAGENS
+// ========================================
+async function carregarDuracao(dataInicio, dataFim) {
+    try {
+        const response = await fetch(`/api/DashboardLavagem/DuracaoLavagens?dataInicio=${dataInicio}&dataFim=${dataFim}`);
+        const result = await response.json();
+
+        // Atualiza estatisticas de duracao
+        const statsDuracao = document.getElementById('statsDuracao');
+        if (statsDuracao) {
+            if (result.success && result.estatisticas.totalComDuracao > 0) {
+                document.getElementById('duracaoMedia').textContent = `${result.estatisticas.duracaoMedia} min`;
+                document.getElementById('duracaoMinima').textContent = `${result.estatisticas.duracaoMinima} min`;
+                document.getElementById('duracaoMaxima').textContent = `${result.estatisticas.duracaoMaxima} min`;
+                document.getElementById('totalComDuracao').textContent = result.estatisticas.totalComDuracao;
+            } else {
+                // Mockup quando nao ha dados reais (campo HorarioFim e novo)
+                document.getElementById('duracaoMedia').textContent = '32 min';
+                document.getElementById('duracaoMinima').textContent = '8 min';
+                document.getElementById('duracaoMaxima').textContent = '75 min';
+                document.getElementById('totalComDuracao').textContent = '0';
+                document.getElementById('msgMockup').style.display = 'block';
+            }
+        }
+
+        // Grafico de distribuicao por faixa de duracao
+        if (chartDuracao) chartDuracao.destroy();
+
+        // Usa dados reais ou mockup
+        let dadosDistribuicao;
+        if (result.success && result.distribuicao && result.distribuicao.some(d => d.quantidade > 0)) {
+            dadosDistribuicao = result.distribuicao;
+        } else {
+            // Dados mockup para visualizacao
+            dadosDistribuicao = [
+                { faixa: '0-15 min', quantidade: 12 },
+                { faixa: '15-30 min', quantidade: 45 },
+                { faixa: '30-45 min', quantidade: 28 },
+                { faixa: '45-60 min', quantidade: 15 },
+                { faixa: '60+ min', quantidade: 8 }
+            ];
+        }
+
+        chartDuracao = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelStyle: { color: '#6B7280', fontWeight: '500' },
+                majorGridLines: { width: 0 }
+            },
+            primaryYAxis: {
+                labelStyle: { color: '#6B7280' },
+                minimum: 0,
+                majorGridLines: { width: 1, color: '#f0f0f0' }
+            },
+            series: [{
+                dataSource: dadosDistribuicao,
+                xName: 'faixa',
+                yName: 'quantidade',
+                type: 'Column',
+                fill: CORES_LAV.primary,
+                cornerRadius: { topLeft: 6, topRight: 6 },
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        position: 'Top',
+                        font: { fontWeight: '600', color: '#333' }
+                    }
+                }
+            }],
+            tooltip: {
+                enable: true,
+                format: '${point.x}: <b>${point.y} lavagens</b>'
+            },
+            chartArea: { border: { width: 0 } },
+            background: 'transparent',
+            width: '100%',
+            height: '280px'
+        });
+
+        chartDuracao.appendTo('#chartDuracao');
+
+        // Grafico de duracao por categoria (lado direito)
+        renderizarDuracaoPorCategoria(result.success ? result.duracaoPorCategoria : null);
+
+    } catch (error) {
+        console.error('Erro ao carregar grafico duracao:', error);
+    }
+}
+
+function renderizarDuracaoPorCategoria(dados) {
+    const container = document.getElementById('duracaoPorCategoria');
+    if (!container) return;
+
+    // Usa mockup se nao tiver dados
+    const dadosExibir = dados && dados.length > 0 ? dados : [
+        { categoria: 'PM', mediaMinutos: 45.2, quantidade: 35 },
+        { categoria: 'Passeio', mediaMinutos: 28.5, quantidade: 42 },
+        { categoria: 'Utilitario', mediaMinutos: 38.0, quantidade: 18 },
+        { categoria: 'SUV', mediaMinutos: 42.8, quantidade: 12 },
+        { categoria: 'Outros', mediaMinutos: 32.1, quantidade: 5 }
+    ];
+
+    const maxMedia = Math.max(...dadosExibir.map(d => d.mediaMinutos));
+
+    let html = dadosExibir.map(item => {
+        const percentual = (item.mediaMinutos / maxMedia * 100).toFixed(0);
+        return `
+            <div class="duracao-categoria-item mb-2">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-600">${item.categoria}</span>
+                    <span class="text-muted small">${item.quantidade} lavagens</span>
+                </div>
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: ${percentual}%; background: linear-gradient(90deg, ${CORES_LAV.primary}, ${CORES_LAV.secondary});"
+                         aria-valuenow="${percentual}" aria-valuemin="0" aria-valuemax="100">
+                        <span class="fw-bold">${item.mediaMinutos.toFixed(1)} min</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
 }
 
 function renderizarHeatmap(data) {

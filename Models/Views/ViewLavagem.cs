@@ -24,7 +24,11 @@ namespace FrotiX.Models
 
         public string? Data { get; set; }
 
-        public string? Horario { get; set; }
+        public string? HorarioInicio { get; set; }
+
+        public string? HorarioFim { get; set; }
+
+        public int? DuracaoMinutos { get; set; }
 
         public string? Lavadores { get; set; }
 
