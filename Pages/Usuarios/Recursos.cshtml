@@ -428,6 +428,19 @@
 						}
 					});
 
+					// Abrir modal de Controle de Acesso (elementos dinâmicos)
+					$(document).on('click', '.ftx-btn-acesso', function (e) {
+						try {
+							e.preventDefault();
+							var recursoId = $(this).data('id');
+							$('#txtRecursoId').val(recursoId);
+							var modal = new bootstrap.Modal(document.getElementById('modalControleAcesso'));
+							modal.show();
+						} catch (error) {
+							Alerta.TratamentoErroComLinha("Recursos.cshtml", "ftx-btn-acesso.click", error);
+						}
+					});
+
 				} catch (error) {
 					Alerta.TratamentoErroComLinha("Recursos.cshtml", "document.ready", error);
 				}
@@ -468,7 +481,7 @@
 											<a class="btn-delete btn ftx-btn-icon ftx-btn-apagar" data-ejtip="Excluir Recurso" aria-label="Excluir Recurso" role="button" data-id='${data}'>
 												<i class="fa-duotone fa-trash-alt"></i>
 											</a>
-											<a class="btn ftx-btn-icon ftx-btn-acesso" data-bs-toggle="modal" data-bs-target="#modalControleAcesso" data-ejtip="Controle de Acesso" aria-label="Controle de Acesso" role="button" data-id='${data}'>
+											<a class="btn ftx-btn-icon ftx-btn-acesso" data-ejtip="Controle de Acesso" aria-label="Controle de Acesso" role="button" data-id='${data}'>
 												<i class="fa-duotone fa-users-gear"></i>
 											</a>
 										</div>`;
