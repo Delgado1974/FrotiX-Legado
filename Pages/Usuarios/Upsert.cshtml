@@ -163,7 +163,7 @@
                             <i class="fa-duotone fa-user-pen"></i>
                             @(isEdicao ? "Editar" : "Criar") Usuário
                         </h2>
-                        <a asp-page="./Index" class="btn btn-fundo-laranja" data-ejtip="Voltar para lista de usuários">
+                        <a asp-page="./Index" class="btn btn-header-orange" data-ejtip="Voltar para lista de usuários">
                             <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Voltar à Lista
                         </a>
                     </div>
@@ -312,26 +312,26 @@
                         <div class="d-flex gap-2">
                             @if (isEdicao)
                             {
-                                <button type="submit" 
-                                        asp-page-handler="Edit" 
-                                        asp-route-id="@Model.UsuarioObj.AspNetUsers.Id" 
-                                        class="btn btn-azul" 
+                                <button type="submit"
+                                        asp-page-handler="Edit"
+                                        asp-route-id="@Model.UsuarioObj.AspNetUsers.Id"
+                                        class="btn btn-azul btn-submit-spin"
                                         data-ejtip="Atualizar dados do usuário">
-                                    <i class="fa-duotone fa-floppy-disk icon-space"></i> Atualizar
+                                    <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar
                                 </button>
                             }
                             else
                             {
-                                <button type="submit" 
-                                        asp-page-handler="Submit" 
-                                        class="btn btn-fundo-laranja" 
+                                <button type="submit"
+                                        asp-page-handler="Submit"
+                                        class="btn btn-fundo-laranja btn-submit-spin"
                                         data-ejtip="Criar novo usuário">
-                                    <i class="fa-duotone fa-user-plus icon-space icon-pulse"></i> Criar Usuário
+                                    <i class="fa-duotone fa-user-plus icon-space icon-pulse"></i> Criar
                                 </button>
                             }
 
-                            <a asp-page="./Index" class="btn btn-vinho" data-ejtip="Cancelar e voltar">
-                                <i class="fa-duotone fa-xmark icon-space"></i> Cancelar
+                            <a asp-page="./Index" class="btn btn-ftx-fechar" data-ejtip="Fechar e voltar à lista">
+                                <i class="fa-duotone fa-circle-xmark icon-space"></i> Fechar
                             </a>
                         </div>
 
@@ -554,6 +554,24 @@
                         }
                     });
                 }
+
+                // =====================================================
+                // ANIMAÇÃO: Spinning nos botões de submit ao clicar
+                // =====================================================
+                document.querySelectorAll('.btn-submit-spin').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        try {
+                            const icon = btn.querySelector('i');
+                            if (icon) {
+                                // Remove pulse e adiciona spin
+                                icon.classList.remove('icon-pulse');
+                                icon.classList.add('icon-spin');
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "btn-submit-spin.click", error);
+                        }
+                    });
+                });
 
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Upsert.cshtml", "script.init", error);
