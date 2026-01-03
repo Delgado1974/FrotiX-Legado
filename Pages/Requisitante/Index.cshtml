@@ -235,4 +235,59 @@
 
 @section ScriptsBlock {
 	<script src="~/js/cadastros/requisitante.js" asp-append-version="true"></script>
+
+	<script>
+		// ========== RIPPLE LOCAL PARA TESTE ==========
+		(function() {
+			'use strict';
+
+			function createLocalRipple(event, element) {
+				if (element.disabled || element.classList.contains('disabled')) return;
+
+				// Remove ripples anteriores
+				element.querySelectorAll('.ftx-ripple-circle').forEach(r => r.remove());
+
+				const rect = element.getBoundingClientRect();
+				const x = event.clientX - rect.left;
+				const y = event.clientY - rect.top;
+				const size = Math.max(rect.width, rect.height) * 2.5;
+
+				const ripple = document.createElement('span');
+				ripple.className = 'ftx-ripple-circle';
+				ripple.style.cssText = `
+					position: absolute;
+					border-radius: 50%;
+					pointer-events: none;
+					transform: scale(0);
+					animation: ftxRippleAnim 800ms ease-out forwards;
+					background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 40%, transparent 70%);
+					width: ${size}px;
+					height: ${size}px;
+					left: ${x}px;
+					top: ${y}px;
+					margin-left: -${size/2}px;
+					margin-top: -${size/2}px;
+				`;
+
+				element.appendChild(ripple);
+				setTimeout(() => ripple.remove(), 800);
+			}
+
+			// Captura cliques nos botões laranja
+			document.addEventListener('click', function(e) {
+				const btn = e.target.closest('.btn-fundo-laranja, .btn-header-orange');
+				if (btn) {
+					createLocalRipple(e, btn);
+				}
+			}, true);
+		})();
+	</script>
+
+	<style>
+		/* Keyframe para animação do ripple */
+		@@keyframes ftxRippleAnim {
+			0% { transform: scale(0); opacity: 1; }
+			100% { transform: scale(1); opacity: 0; }
+		}
+	</style>
 }
