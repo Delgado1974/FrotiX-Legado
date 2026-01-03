@@ -939,12 +939,40 @@
                         var item = encontrarItemPorId(editingItemId, treeData);
                         if (item) {
                             var oldNomeMenu = item.nomeMenu;
+                            var oldParentId = item.parentId || '';
+                            var newParentId = parentId || '';
+
+                            // Atualiza propriedades do item
                             item.text = nomeMenu;
                             item.title = title;
                             item.nomeMenu = nomeMenu;
                             item.href = href;
                             item.icon = icon;
                             item.iconCss = icon;
+
+                            // Verifica se o pai mudou
+                            if (oldParentId !== newParentId) {
+                                // Remove o item da posição atual (preservando os filhos)
+                                var itemComFilhos = JSON.parse(JSON.stringify(item)); // Clone profundo
+                                removerItemPorId(editingItemId, treeData);
+
+                                // Atualiza o parentId
+                                itemComFilhos.parentId = newParentId;
+
+                                // Adiciona na nova posição
+                                if (newParentId) {
+                                    // Adiciona como filho do novo pai
+                                    var novoPai = encontrarItemPorId(newParentId, treeData);
+                                    if (novoPai) {
+                                        if (!novoPai.items) novoPai.items = [];
+                                        novoPai.items.push(itemComFilhos);
+                                        novoPai.hasChild = true;
+                                    }
+                                } else {
+                                    // Adiciona na raiz
+                                    treeData.push(itemComFilhos);
+                                }
+                            }
 
                             // Sincroniza com BD
                             $.ajax({
