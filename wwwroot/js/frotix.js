@@ -418,28 +418,49 @@ function createRipple(event, element)
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Calcula o tamanho do ripple baseado no elemento
-        const size = Math.max(rect.width, rect.height) * 2;
+        // Verifica se é botão laranja (ripple externo maior)
+        const isOrangeButton = element.classList.contains('btn-fundo-laranja') ||
+                               element.classList.contains('btn-header-orange');
 
-        // Cria o elemento do ripple
+        // Tamanho: 1.0x para botões laranja (externo), 2x para outros
+        const multiplier = isOrangeButton ? 1.0 : 2;
+        const size = Math.max(rect.width, rect.height) * multiplier;
+        const duration = isOrangeButton ? 900 : 600;
+
+        // Cria o elemento do ripple com estilos inline (garante funcionamento)
         const ripple = document.createElement('span');
         ripple.className = 'ftx-ripple-circle';
-        ripple.style.width = size + 'px';
-        ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.style.marginLeft = -(size / 2) + 'px';
-        ripple.style.marginTop = -(size / 2) + 'px';
+
+        // Gradiente mais intenso para botões laranja
+        const gradient = isOrangeButton
+            ? 'radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.3) 50%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 40%, transparent 70%)';
+
+        ripple.style.cssText = `
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: scale(0);
+            animation: ftxRippleAnim ${duration}ms ease-out forwards;
+            background: ${gradient};
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            margin-left: -${size / 2}px;
+            margin-top: -${size / 2}px;
+            z-index: 9999;
+        `;
 
         // Adiciona o ripple ao elemento
         element.appendChild(ripple);
 
-        // Remove o ripple após a animação (600ms)
+        // Remove o ripple após a animação
         setTimeout(() =>
         {
             ripple.dataset.removing = 'true';
             ripple.remove();
-        }, 600);
+        }, duration);
 
     } catch (error)
     {
