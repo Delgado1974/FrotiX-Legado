@@ -566,7 +566,7 @@
     <!-- ABA 1: CONSUMO GERAL -->
     <!-- ========================================== -->
     <div id="tab-consumo-geral" class="dash-content active">
-        <div class="filter-card-terracota">
+        <div class="filter-card-abast">
             <div class="row align-items-end g-3">
                 <div class="col-md-3">
                     <label class="form-label">
@@ -581,51 +581,51 @@
 
         <div class="row g-2">
             <div class="col-lg col-md-6">
-                <div class="stat-card-compact terracota">
-                    <div class="stat-icon"><i class="fa-duotone fa-sack-dollar"></i></div>
-                    <div class="stat-label">Valor Total</div>
-                    <div class="stat-value" id="valorTotalGeral">R$ 0</div>
+                <div class="card-estatistica-abast amber">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-sack-dollar"></i></div>
+                    <div class="texto-metrica-abast">Valor Total</div>
+                    <div class="valor-metrica-abast" id="valorTotalGeral">R$ 0</div>
                 </div>
             </div>
             <div class="col-lg col-md-6">
-                <div class="stat-card-compact marrom">
-                    <div class="stat-icon"><i class="fa-duotone fa-gas-pump"></i></div>
-                    <div class="stat-label">Total de Litros</div>
-                    <div class="stat-value" id="litrosTotalGeral">0</div>
+                <div class="card-estatistica-abast orange">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-gas-pump"></i></div>
+                    <div class="texto-metrica-abast">Total de Litros</div>
+                    <div class="valor-metrica-abast" id="litrosTotalGeral">0</div>
                 </div>
             </div>
             <div class="col-lg col-md-6">
-                <div class="stat-card-compact laranja">
-                    <div class="stat-icon"><i class="fa-duotone fa-gauge-high"></i></div>
-                    <div class="stat-label">Abastecimentos</div>
-                    <div class="stat-value" id="qtdAbastecimentosGeral">0</div>
+                <div class="card-estatistica-abast yellow">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-gauge-high"></i></div>
+                    <div class="texto-metrica-abast">Abastecimentos</div>
+                    <div class="valor-metrica-abast" id="qtdAbastecimentosGeral">0</div>
                 </div>
             </div>
             <div class="col-lg col-md-6">
-                <div class="stat-card-compact bronze">
-                    <div class="stat-icon"><i class="fa-duotone fa-droplet"></i></div>
-                    <div class="stat-label">Diesel S-10</div>
-                    <div class="stat-value" id="mediaDieselGeral">R$ 0</div>
+                <div class="card-estatistica-abast brown">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-droplet"></i></div>
+                    <div class="texto-metrica-abast">Diesel S-10</div>
+                    <div class="valor-metrica-abast" id="mediaDieselGeral">R$ 0</div>
                 </div>
             </div>
             <div class="col-lg col-md-6">
-                <div class="stat-card-compact chocolate">
-                    <div class="stat-icon"><i class="fa-duotone fa-droplet"></i></div>
-                    <div class="stat-label">Gasolina</div>
-                    <div class="stat-value" id="mediaGasolinaGeral">R$ 0</div>
+                <div class="card-estatistica-abast gold">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-droplet"></i></div>
+                    <div class="texto-metrica-abast">Gasolina</div>
+                    <div class="valor-metrica-abast" id="mediaGasolinaGeral">R$ 0</div>
                 </div>
             </div>
         </div>
 
         <div class="row g-3 mt-1">
             <div class="col-lg-3">
-                <div class="chart-card" style="min-height: 360px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 360px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-calendar-lines"></i>
                         Resumo por Ano
                     </h5>
                     <div class="table-responsive">
-                        <table class="table table-sm table-dash mb-0">
+                        <table class="table table-sm table-abast mb-0">
                             <thead>
                                 <tr>
                                     <th>Ano</th>
@@ -640,8 +640,8 @@
                 </div>
             </div>
             <div class="col-lg-5">
-                <div class="chart-card" style="min-height: 360px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 360px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-chart-bar"></i>
                         Valor Total por Categoria
                     </h5>
@@ -649,8 +649,8 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="chart-card" style="min-height: 360px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 360px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-chart-line"></i>
                         Valor do Litro por Mês
                     </h5>
@@ -661,8 +661,8 @@
 
         <div class="row g-3 mt-1">
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 340px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 340px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-chart-area"></i>
                         Litros por Mês
                     </h5>
@@ -670,8 +670,8 @@
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 340px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 340px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-chart-column"></i>
                         Consumo Geral por Mês
                     </h5>
@@ -686,7 +686,7 @@
     <!-- ========================================== -->
     <div id="tab-consumo-mensal" class="dash-content">
         <!-- Filtros -->
-        <div class="filter-card-terracota">
+        <div class="filter-card-abast">
             <div class="row align-items-end g-3">
                 <div class="col-md-3">
                     <label class="form-label">
@@ -715,7 +715,7 @@
                     </select>
                 </div>
                 <div class="col-md-2 text-end">
-                    <button type="button" class="btn btn-light btn-sm" id="btnFiltrarMensal">
+                    <button type="button" class="btn btn-filtrar-abast" id="btnFiltrarMensal">
                         <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
                     </button>
                 </div>
@@ -726,7 +726,7 @@
         <div class="row g-3">
             <!-- Card 1: Valor Total -->
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card-mensal">
+                <div class="stat-card-mensal-abast">
                     <div class="card-header-custom">
                         <i class="fa-duotone fa-sack-dollar"></i>
                         <span>Valor Total</span>
@@ -737,7 +737,7 @@
 
             <!-- Card 2: Litros -->
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card-mensal">
+                <div class="stat-card-mensal-abast">
                     <div class="card-header-custom">
                         <i class="fa-duotone fa-gas-pump"></i>
                         <span>Total de Litros</span>
@@ -748,13 +748,13 @@
 
             <!-- Card 3: Média do Litro -->
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card-mensal">
+                <div class="stat-card-mensal-abast">
                     <div class="card-header-custom">
                         <i class="fa-duotone fa-dollar-sign"></i>
                         <span>Média do Litro</span>
                     </div>
                     <div class="table-responsive" style="flex: 1;">
-                        <table class="table table-media-litro mb-0">
+                        <table class="table table-media-litro-abast mb-0">
                             <tbody id="tabelaMediaLitroMensal">
                                 <tr><td colspan="2" class="text-center py-3"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
                             </tbody>
@@ -765,7 +765,7 @@
 
             <!-- Card 4: Combustíveis (Pizza COM LEGENDA) -->
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card-mensal" style="min-height: 220px;">
+                <div class="stat-card-mensal-abast" style="min-height: 220px;">
                     <div class="card-header-custom">
                         <i class="fa-duotone fa-chart-pie"></i>
                         <span>Combustíveis</span>
@@ -778,8 +778,8 @@
         <!-- LINHA 2: Litros por Dia (largura total) -->
         <div class="row g-3 mt-2">
             <div class="col-12">
-                <div class="chart-card">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-chart-area"></i>
                         Litros por Dia
                     </h5>
@@ -792,14 +792,14 @@
         <div class="row g-3 mt-2">
             <!-- Por Tipo de Veículo (Modelo) -->
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 480px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 480px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-layer-group"></i>
                         Top 15 por Tipo de Veículo
                         <span class="chart-subtitle">Soma de todos os veículos do mesmo modelo</span>
                     </h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-top15">
+                        <table class="table table-abast">
                             <thead>
                                 <tr>
                                     <th>Tipo Veículo</th>
@@ -816,14 +816,14 @@
 
             <!-- Por Placa Individual -->
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 480px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 480px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-rectangle-barcode"></i>
                         Top 15 por Placa Individual
                         <span class="chart-subtitle">Cada veículo separadamente</span>
                     </h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-top15">
+                        <table class="table table-abast">
                             <thead>
                                 <tr>
                                     <th>Placa</th>
@@ -843,8 +843,8 @@
         <!-- LINHA 4: Consumo por Categoria REAL -->
         <div class="row g-3 mt-2">
             <div class="col-12">
-                <div class="chart-card">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-tags"></i>
                         Consumo por Categoria
                         <span class="chart-subtitle">Ambulância, Carga Leve, Carga Pesada, Coletivos Pequenos, Depol, Mesa, Ônibus/Microônibus, Passeio</span>
@@ -859,7 +859,7 @@
     <!-- ABA 3: CONSUMO POR VEÍCULO -->
     <!-- ========================================== -->
     <div id="tab-consumo-veiculo" class="dash-content">
-        <div class="filter-card-terracota">
+        <div class="filter-card-abast">
             <div class="row align-items-end g-3">
                 <div class="col-md-2">
                     <label class="form-label">
@@ -904,7 +904,7 @@
                     </select>
                 </div>
                 <div class="col-md-2 text-end">
-                    <button type="button" class="btn btn-light btn-sm" id="btnFiltrarVeiculo">
+                    <button type="button" class="btn btn-filtrar-abast" id="btnFiltrarVeiculo">
                         <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
                     </button>
                 </div>
@@ -913,14 +913,14 @@
 
         <div class="row g-3">
             <div class="col-lg-12">
-                <div class="chart-card mb-3">
+                <div class="chart-container-abast mb-3">
                     <div class="text-center py-2">
                         <div style="font-size: 0.75rem; color: #64748b;">Veículo Selecionado</div>
-                        <h3 id="descricaoVeiculoSelecionado" style="font-size: 1.3rem; font-weight: 700; color: var(--dash-marrom-dark); margin: 0.4rem 0;">
+                        <h3 id="descricaoVeiculoSelecionado" style="font-size: 1.3rem; font-weight: 700; color: var(--abast-dark); margin: 0.4rem 0;">
                             Selecione um veículo
                         </h3>
                         <div style="font-size: 0.75rem; color: #64748b;">Categoria</div>
-                        <h4 id="categoriaVeiculoSelecionado" style="font-size: 1rem; font-weight: 600; color: var(--dash-terracota-dark); margin: 0.2rem 0;">-</h4>
+                        <h4 id="categoriaVeiculoSelecionado" style="font-size: 1rem; font-weight: 600; color: var(--abast-primary); margin: 0.2rem 0;">-</h4>
                     </div>
                 </div>
             </div>
@@ -928,22 +928,22 @@
 
         <div class="row g-3">
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card-compact terracota">
-                    <div class="stat-icon"><i class="fa-duotone fa-sack-dollar"></i></div>
-                    <div class="stat-label">Valor Total</div>
-                    <div class="stat-value" id="valorTotalVeiculo">R$ 0</div>
+                <div class="card-estatistica-abast amber">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-sack-dollar"></i></div>
+                    <div class="texto-metrica-abast">Valor Total</div>
+                    <div class="valor-metrica-abast" id="valorTotalVeiculo">R$ 0</div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card-compact marrom">
-                    <div class="stat-icon"><i class="fa-duotone fa-gas-pump"></i></div>
-                    <div class="stat-label">Total de Litros</div>
-                    <div class="stat-value" id="litrosTotalVeiculo">0</div>
+                <div class="card-estatistica-abast orange">
+                    <div class="icone-card-abast"><i class="fa-duotone fa-gas-pump"></i></div>
+                    <div class="texto-metrica-abast">Total de Litros</div>
+                    <div class="valor-metrica-abast" id="litrosTotalVeiculo">0</div>
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 120px;">
-                    <h5 class="chart-title" style="font-size: 0.8rem;">
+                <div class="chart-container-abast" style="min-height: 120px;">
+                    <h5 class="chart-title-abast" style="font-size: 0.8rem;">
                         <i class="fa-duotone fa-chart-line"></i>
                         Consumo Mensal de Litros
                     </h5>
@@ -954,8 +954,8 @@
 
         <div class="row g-3 mt-1">
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 340px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 340px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-chart-bar"></i>
                         Valor Total Mensal
                     </h5>
@@ -963,8 +963,8 @@
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="chart-card" style="min-height: 340px;">
-                    <h5 class="chart-title">
+                <div class="chart-container-abast" style="min-height: 340px;">
+                    <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-ranking-star"></i>
                         Ranking de Veículos (Top 10)
                         <span class="chart-subtitle">Por placa individual</span>
@@ -974,6 +974,26 @@
             </div>
         </div>
     </div>
+    </div>
+</div>
+
+<!-- Modal de Loading -->
+<div class="modal fade" id="modalLoadingAbast" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-gas-pump"></i>
+                    Carregando Dados
+                </h5>
+            </div>
+            <div class="modal-body">
+                <img src="/images/logo-frotix.png" alt="FrotiX" class="ftx-loading-logo">
+                <div class="ftx-loading-bar"></div>
+                <div class="ftx-loading-text-abast">Processando informações...</div>
+                <div class="ftx-loading-subtext-abast">Por favor, aguarde</div>
+            </div>
+        </div>
     </div>
 </div>
 

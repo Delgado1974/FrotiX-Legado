@@ -1,13 +1,14 @@
 /**
  * Dashboard de Abastecimentos - Refatorado
  * FrotiX - Câmara dos Deputados
- * Paleta: Marrom/Laranja/Terracota em tons pastéis
+ * Paleta: Âmbar/Dourado
  */
 
 // ====== VARIÁVEIS GLOBAIS ======
 let dadosGerais = null;
 let dadosMensais = null;
 let dadosVeiculo = null;
+let modalLoading = null;
 
 // Instâncias dos gráficos
 let chartValorCategoria = null;
@@ -25,14 +26,33 @@ let chartRankingVeiculos = null;
 const MESES = ['', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESES_COMPLETOS = ['', 'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
-// Paleta de cores MARROM/LARANJA/TERRACOTA
+// Paleta de cores ÂMBAR/DOURADO
 const CORES = {
-    terracota: ['#D4A373', '#C08B7E', '#A97B6E', '#9D6B5B', '#8B5A48'],
-    marrom: ['#B08968', '#A67C52', '#8B6F47', '#7F5539', '#6B4423'],
-    laranja: ['#E9C46A', '#F4A261', '#E76F51', '#D4A574', '#CD7F32'],
-    multi: ['#D4A373', '#B08968', '#E9C46A', '#F4A261', '#A97B6E', '#E76F51', '#8B6F47', '#CD7F32'],
-    categorias: ['#3498db', '#e74c3c', '#27ae60', '#9b59b6', '#f39c12', '#1abc9c', '#34495e', '#e67e22', '#2ecc71', '#8e44ad']
+    amber: ['#d97706', '#b45309', '#92400e', '#78350f', '#451a03'],
+    gold: ['#fbbf24', '#f59e0b', '#d97706', '#ca8a04', '#a16207'],
+    warm: ['#ea580c', '#f97316', '#fb923c', '#fdba74', '#fed7aa'],
+    multi: ['#d97706', '#f59e0b', '#fbbf24', '#ea580c', '#b45309', '#ca8a04', '#92400e', '#a16207'],
+    categorias: ['#d97706', '#ea580c', '#ca8a04', '#b45309', '#f59e0b', '#78350f', '#92400e', '#a16207', '#fbbf24', '#451a03']
 };
+
+// ====== MODAL DE LOADING ======
+function mostrarLoading() {
+    if (!modalLoading) {
+        const modalEl = document.getElementById('modalLoadingAbast');
+        if (modalEl) {
+            modalLoading = new bootstrap.Modal(modalEl);
+        }
+    }
+    if (modalLoading) {
+        modalLoading.show();
+    }
+}
+
+function esconderLoading() {
+    if (modalLoading) {
+        modalLoading.hide();
+    }
+}
 
 // ====== INICIALIZAÇÃO ======
 document.addEventListener('DOMContentLoaded', function () {
@@ -111,6 +131,7 @@ function inicializarTabs() {
 
 function carregarDadosGerais() {
     try {
+        mostrarLoading();
         const ano = document.getElementById('filtroAnoGeral')?.value || '';
 
         $.ajax({
@@ -124,20 +145,25 @@ function carregarDadosGerais() {
                     renderizarAbaGeral(data);
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGerais.success", error);
+                } finally {
+                    esconderLoading();
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Erro ao carregar dados gerais:', error);
                 AppToast.show('red', 'Erro ao carregar dados do dashboard', 5000);
+                esconderLoading();
             }
         });
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGerais", error);
+        esconderLoading();
     }
 }
 
 function carregarDadosMensais() {
     try {
+        mostrarLoading();
         const ano = document.getElementById('filtroAnoMensal')?.value || new Date().getFullYear();
         const mes = document.getElementById('filtroMesMensal')?.value || '';
 
@@ -151,20 +177,25 @@ function carregarDadosMensais() {
                     renderizarAbaMensal(data);
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosMensais.success", error);
+                } finally {
+                    esconderLoading();
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Erro ao carregar dados mensais:', error);
                 AppToast.show('red', 'Erro ao carregar dados mensais', 5000);
+                esconderLoading();
             }
         });
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosMensais", error);
+        esconderLoading();
     }
 }
 
 function carregarDadosVeiculo() {
     try {
+        mostrarLoading();
         const ano = document.getElementById('filtroAnoVeiculo')?.value || new Date().getFullYear();
         const mes = document.getElementById('filtroMesVeiculo')?.value || '';
         const modelo = document.getElementById('filtroModeloVeiculo')?.value || '';
@@ -187,15 +218,19 @@ function carregarDadosVeiculo() {
                     renderizarAbaVeiculo(data);
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosVeiculo.success", error);
+                } finally {
+                    esconderLoading();
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Erro ao carregar dados por veículo:', error);
                 AppToast.show('red', 'Erro ao carregar dados por veículo', 5000);
+                esconderLoading();
             }
         });
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosVeiculo", error);
+        esconderLoading();
     }
 }
 
