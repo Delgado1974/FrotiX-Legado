@@ -477,7 +477,7 @@
                 }
 
                 // =====================================================
-                // VALIDAÇÃO: Email minúsculo com @camara.leg.br
+                // VALIDAÇÃO: Email minúsculo com @@camara.leg.br
                 // =====================================================
                 const txtEmail = document.getElementById('txtEmail');
                 if (txtEmail) {
@@ -486,12 +486,12 @@
                             let valor = txtEmail.value.trim().toLowerCase();
 
                             if (valor) {
-                                // Remove @camara.leg.br se já existir para evitar duplicação
-                                valor = valor.replace(/@camara\.leg\.br$/i, '');
-                                // Remove qualquer @ que possa existir no final
-                                valor = valor.replace(/@+$/, '');
+                                // Remove @@camara.leg.br se já existir para evitar duplicação
+                                valor = valor.replace(/@@camara\.leg\.br$/i, '');
+                                // Remove qualquer @@ que possa existir no final
+                                valor = valor.replace(/@@+$/, '');
                                 // Adiciona o domínio
-                                valor = valor + '@camara.leg.br';
+                                valor = valor + '@@camara.leg.br';
                             }
 
                             txtEmail.value = valor;
