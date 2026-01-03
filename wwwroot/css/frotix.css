@@ -454,7 +454,7 @@ body {
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), /* Borda branca 2px */
                 0 0 12px rgba(160, 82, 45, 0.4);
     position: relative;
-    overflow: hidden; /* Para o ripple */
+    overflow: visible !important; /* Ripple externo */
 }
 
 .ftx-card-header .btn-header-orange:hover,
@@ -1918,7 +1918,7 @@ td > div.text-center {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Ripple externo */
 }
 
 .btn-icon-28:hover:not(.disabled):not(:disabled),
@@ -2780,7 +2780,7 @@ h3.modal-title,
     border-radius: 6px;
     transition: all 0.2s ease;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Ripple externo */
 }
 
 .modal-body .btn-icon-28:hover:not(.disabled) {
