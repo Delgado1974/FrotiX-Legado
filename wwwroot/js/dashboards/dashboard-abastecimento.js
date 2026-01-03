@@ -26,13 +26,13 @@ let chartRankingVeiculos = null;
 const MESES = ['', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESES_COMPLETOS = ['', 'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
-// Paleta de cores ÂMBAR/DOURADO
+// Paleta de cores CARAMELO SUAVE
 const CORES = {
-    amber: ['#d97706', '#b45309', '#92400e', '#78350f', '#451a03'],
-    gold: ['#fbbf24', '#f59e0b', '#d97706', '#ca8a04', '#a16207'],
-    warm: ['#ea580c', '#f97316', '#fb923c', '#fdba74', '#fed7aa'],
-    multi: ['#d97706', '#f59e0b', '#fbbf24', '#ea580c', '#b45309', '#ca8a04', '#92400e', '#a16207'],
-    categorias: ['#d97706', '#ea580c', '#ca8a04', '#b45309', '#f59e0b', '#78350f', '#92400e', '#a16207', '#fbbf24', '#451a03']
+    amber: ['#a8784c', '#8b5e3c', '#6d472c', '#5a3a24', '#4a2f1d'],
+    gold: ['#d4a574', '#c4956a', '#a8784c', '#9a7045', '#8b6340'],
+    warm: ['#c49a6c', '#b8916a', '#a88565', '#9a785a', '#8c6c50'],
+    multi: ['#a8784c', '#c4956a', '#d4a574', '#b8916a', '#8b5e3c', '#9a7045', '#6d472c', '#8b6340'],
+    categorias: ['#a8784c', '#c49a6c', '#9a7045', '#8b5e3c', '#c4956a', '#5a3a24', '#6d472c', '#8b6340', '#d4a574', '#4a2f1d']
 };
 
 // ====== MODAL DE LOADING ======

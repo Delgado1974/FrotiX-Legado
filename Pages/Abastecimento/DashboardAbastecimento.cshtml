@@ -11,17 +11,17 @@
 @section HeadBlock {
 <style>
     /* ========================================
-       PALETA DE CORES - TEMA ÂMBAR/DOURADO
+       PALETA DE CORES - TEMA CARAMELO SUAVE
        ======================================== */
     :root {
-        --abast-primary: #d97706;
-        --abast-secondary: #f59e0b;
-        --abast-accent: #fbbf24;
-        --abast-dark: #b45309;
-        --abast-darker: #92400e;
-        --abast-light: #fffbeb;
-        --abast-cream: #fef3c7;
-        --abast-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+        --abast-primary: #a8784c;
+        --abast-secondary: #c4956a;
+        --abast-accent: #d4a574;
+        --abast-dark: #8b5e3c;
+        --abast-darker: #6d472c;
+        --abast-light: #faf6f1;
+        --abast-cream: #f5ebe0;
+        --abast-gradient: linear-gradient(135deg, #a8784c 0%, #c4956a 100%);
     }
 
     /* Header do Dashboard */
@@ -31,7 +31,7 @@
         padding: 20px 24px;
         border-radius: 10px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 15px rgba(217, 119, 6, 0.35);
+        box-shadow: 0 4px 15px rgba(168, 120, 76, 0.35);
         position: relative;
         overflow: hidden;
     }
@@ -107,7 +107,7 @@
     .dash-tab.active {
         background: var(--abast-gradient);
         color: white;
-        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+        box-shadow: 0 4px 12px rgba(168, 120, 76, 0.35);
     }
 
     .dash-tab i { font-size: 1.1rem; }
@@ -139,7 +139,7 @@
         border-radius: 12px;
         padding: 20px 24px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+        box-shadow: 0 4px 12px rgba(168, 120, 76, 0.25);
     }
 
     .filter-card-abast .form-label {
@@ -373,7 +373,7 @@
 
     .badge-rank-abast.top3 {
         background: var(--abast-primary);
-        box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4);
+        box-shadow: 0 2px 6px rgba(168, 120, 76, 0.4);
     }
 
     /* Tabela Média Litro */
@@ -405,7 +405,7 @@
     }
 
     #modalLoadingAbast .modal-header {
-        background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #f59e0b 100%);
+        background: linear-gradient(135deg, #a8784c 0%, #8b5e3c 50%, #c4956a 100%);
         background-size: 200% 200%;
         animation: headerGradientShift 4s ease infinite;
         border-bottom: none;
@@ -468,17 +468,17 @@
         height: 115px;
         margin: 0 auto 1.25rem;
         animation: ftxLogoPulseAbast 1.5s ease-in-out infinite;
-        filter: drop-shadow(0 4px 8px rgba(217, 119, 6, 0.3));
+        filter: drop-shadow(0 4px 8px rgba(168, 120, 76, 0.3));
     }
 
     @@keyframes ftxLogoPulseAbast {
         0%, 100% {
             transform: scale(1);
-            filter: drop-shadow(0 4px 8px rgba(217, 119, 6, 0.3));
+            filter: drop-shadow(0 4px 8px rgba(168, 120, 76, 0.3));
         }
         50% {
             transform: scale(1.08);
-            filter: drop-shadow(0 6px 12px rgba(217, 119, 6, 0.5));
+            filter: drop-shadow(0 6px 12px rgba(168, 120, 76, 0.5));
         }
     }
 
@@ -496,7 +496,7 @@
         display: block;
         width: 40%;
         height: 100%;
-        background: linear-gradient(90deg, #d97706, #fbbf24, #d97706);
+        background: linear-gradient(90deg, #a8784c, #d4a574, #a8784c);
         background-size: 200% 100%;
         border-radius: 2px;
         animation: ftxBarSlide 1.5s ease-in-out infinite;
