@@ -42,7 +42,7 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 
 #### Botão Criar (novo registro):
 - Classe: `btn btn-azul btn-submit-spin`
-- Ícone: `fa-duotone fa-[icone-apropriado] icon-space icon-pulse` (pulsa continuamente, gira ao clicar)
+- Ícone: `fa-duotone fa-floppy-disk icon-space icon-pulse` (pulsa continuamente, gira ao clicar)
 - Texto: **"Criar"** (NÃO incluir o nome da entidade, ex: NÃO usar "Criar Usuário")
 
 #### Botão Atualizar (edição):
