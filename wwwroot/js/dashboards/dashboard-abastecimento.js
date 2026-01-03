@@ -390,7 +390,7 @@ function renderizarChartValorLitro(dados) {
             tooltip: { enable: true, format: '${series.name}: R$ ${point.y}' },
             height: '300px',
             chartArea: { border: { width: 0 } },
-            palettes: [CORES.terracota[2], CORES.laranja[1]]
+            palettes: [CORES.amber[2], CORES.gold[1]]
         });
         chartValorLitro.appendTo('#chartValorLitro');
     } catch (error) {
@@ -448,7 +448,7 @@ function renderizarChartLitrosMes(dados) {
             },
             height: '280px',
             chartArea: { border: { width: 0 } },
-            palettes: [CORES.marrom[1], CORES.laranja[1]]
+            palettes: [CORES.amber[1], CORES.gold[1]]
         });
         chartLitrosMes.appendTo('#chartLitrosMes');
     } catch (error) {
@@ -475,7 +475,7 @@ function renderizarChartConsumoMes(dados) {
             dataSource.push({
                 x: MESES[m],
                 y: item ? item.valor : 0,
-                color: CORES.terracota[m % CORES.terracota.length]
+                color: CORES.amber[m % CORES.amber.length]
             });
         }
 
@@ -687,7 +687,7 @@ function renderizarChartLitrosDia(dados) {
             },
             height: '220px',
             chartArea: { border: { width: 0 } },
-            palettes: [CORES.marrom[2], CORES.laranja[2]]
+            palettes: [CORES.amber[2], CORES.gold[2]]
         });
         chartLitrosDia.appendTo('#chartLitrosDia');
     } catch (error) {
@@ -920,7 +920,7 @@ function renderizarChartConsumoMensalVeiculo(dados) {
             },
             height: '160px',
             chartArea: { border: { width: 0 } },
-            palettes: [CORES.marrom[1], CORES.laranja[1]]
+            palettes: [CORES.amber[1], CORES.gold[1]]
         });
         chartConsumoMensalVeiculo.appendTo('#chartConsumoMensalVeiculo');
     } catch (error) {
@@ -947,7 +947,7 @@ function renderizarChartValorMensalVeiculo(dados) {
             dataSource.push({
                 x: MESES_COMPLETOS[m],
                 y: item ? item.valor : 0,
-                color: CORES.terracota[m % CORES.terracota.length]
+                color: CORES.amber[m % CORES.amber.length]
             });
         }
 
