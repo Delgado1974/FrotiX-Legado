@@ -253,32 +253,125 @@
         margin: 1px;
     }
 
-    /* Loading */
-    .loading-overlay-lav {
-        position: fixed;
+    /* ================================================================
+       MODAL DE LOADING - PADRÃO FROTIX (Tema Cyan)
+       ================================================================ */
+    #modalLoadingLavagem .modal-dialog {
+        max-width: 360px;
+    }
+
+    #modalLoadingLavagem .modal-content {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    #modalLoadingLavagem .modal-header {
+        background: linear-gradient(135deg, #0891b2 0%, #0e7490 50%, #06b6d4 100%);
+        background-size: 200% 200%;
+        animation: headerGradientShift 4s ease infinite;
+        border-bottom: none;
+        padding: 1rem 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #modalLoadingLavagem .modal-header::before {
+        content: '';
+        position: absolute;
         top: 0;
-        left: 0;
+        left: -100%;
         width: 100%;
         height: 100%;
-        background: rgba(255, 255, 255, 0.9);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+        animation: ftxModalShine 5s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes ftxModalShine {
+        0%, 100% { left: -100%; }
+        50% { left: 100%; }
+    }
+
+    @@keyframes headerGradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    #modalLoadingLavagem .modal-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #fff;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        z-index: 9999;
+        gap: 0.5rem;
     }
 
-    .spinner-lav {
-        width: 50px;
-        height: 50px;
-        border: 4px solid var(--lav-light);
-        border-top-color: var(--lav-primary);
+    #modalLoadingLavagem .modal-title i {
+        font-size: 1.3rem;
+        --fa-primary-color: #ffd700;
+        --fa-secondary-color: #ffffff;
+        --fa-secondary-opacity: 0.8;
+        animation: ftxLoadingIconPulse 2s ease-in-out infinite;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    @@keyframes ftxLoadingIconPulse {
+        0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        50% {
+            transform: scale(1.12);
+            filter: drop-shadow(0 3px 6px rgba(255, 215, 0, 0.4));
+        }
+    }
+
+    #modalLoadingLavagem .modal-body {
+        padding: 2rem 1.5rem;
+        text-align: center;
+        background: #fff;
+    }
+
+    /* Spinner duplo estilizado - Tema Cyan */
+    .ftx-loading-spinner-lav {
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        border: 5px solid transparent;
+        border-top-color: #0891b2;
+        animation: ftxLoadingSpin 1s linear infinite;
+        margin: 0 auto 1.25rem;
+        position: relative;
     }
 
-    @@keyframes spin {
+    .ftx-loading-spinner-lav::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border-radius: 50%;
+        border: 5px solid transparent;
+        border-right-color: #22d3ee;
+        animation: ftxLoadingSpin 0.75s linear infinite reverse;
+    }
+
+    @@keyframes ftxLoadingSpin {
         to { transform: rotate(360deg); }
+    }
+
+    .ftx-loading-text-lav {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .ftx-loading-subtext-lav {
+        font-size: 0.85rem;
+        color: #6c757d;
     }
 
     /* Card Destaque */
@@ -311,11 +404,72 @@
     }
 </style>
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="loading-overlay-lav">
-    <div class="spinner-lav"></div>
-    <p class="mt-3 text-muted">Carregando dados...</p>
+@*=========================================================================
+   MODAL DE LOADING - PADRÃO FROTIX
+   =========================================================================*@
+<div class="modal fade" id="modalLoadingLavagem" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-car-wash"></i>
+                    <span>Carregando Dashboard</span>
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="ftx-loading-spinner-lav"></div>
+                <div class="ftx-loading-text-lav" id="loadingLavagemMensagem">Aguarde enquanto carregamos os dados...</div>
+                <div class="ftx-loading-subtext-lav">Isso pode levar alguns segundos</div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@* =========================================================================
+   SCRIPT INLINE - MOSTRA MODAL DE LOADING IMEDIATAMENTE
+   Este script roda ANTES do dashboard-lavagem.js carregar
+   ========================================================================= *@
+<script>
+(function() {
+    'use strict';
+
+    function mostrarModalLoading() {
+        var modalEl = document.getElementById('modalLoadingLavagem');
+        if (!modalEl) return;
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            var existingModal = bootstrap.Modal.getInstance(modalEl);
+            if (existingModal) {
+                existingModal.show();
+            } else {
+                var modal = new bootstrap.Modal(modalEl, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                modal.show();
+            }
+        } else {
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.removeAttribute('aria-hidden');
+            document.body.classList.add('modal-open');
+
+            if (!document.getElementById('ftx-loading-backdrop')) {
+                var backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.id = 'ftx-loading-backdrop';
+                document.body.appendChild(backdrop);
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mostrarModalLoading);
+    } else {
+        mostrarModalLoading();
+    }
+})();
+</script>
 
 <!-- Header do Dashboard -->
 <div class="header-dashboard-lav">

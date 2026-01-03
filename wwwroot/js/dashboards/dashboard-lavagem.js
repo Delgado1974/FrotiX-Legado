@@ -539,12 +539,45 @@ function formatarDataInput(data) {
     return `${ano}-${mes}-${dia}`;
 }
 
-function mostrarLoading() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) overlay.style.display = 'flex';
+function mostrarLoading(mensagem) {
+    var modalEl = document.getElementById('modalLoadingLavagem');
+    if (!modalEl) return;
+
+    // Atualiza mensagem se fornecida
+    if (mensagem) {
+        var msgEl = document.getElementById('loadingLavagemMensagem');
+        if (msgEl) msgEl.textContent = mensagem;
+    }
+
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var existingModal = bootstrap.Modal.getInstance(modalEl);
+        if (existingModal) {
+            existingModal.show();
+        } else {
+            var modal = new bootstrap.Modal(modalEl, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+        }
+    }
 }
 
 function ocultarLoading() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) overlay.style.display = 'none';
+    var modalEl = document.getElementById('modalLoadingLavagem');
+    if (!modalEl) return;
+
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        }
+    }
+
+    // Remove backdrop manual se existir
+    var backdrop = document.getElementById('ftx-loading-backdrop');
+    if (backdrop) {
+        backdrop.remove();
+        document.body.classList.remove('modal-open');
+    }
 }
