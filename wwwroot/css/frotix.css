@@ -1373,14 +1373,6 @@ body.loading {
     animation-duration: .85s
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .btn-azul, .btn-fundo-laranja, .btn-vinho, .fundo-vermelho, .fundo-cinza, .fundo-roxo, .fundo-chocolate, .fundo-ebony, .btn-fundo-chocolate, .btn-nfs, .btn-editar, .btn-foto, .btn-verde, .btn-preto, .btn-marrom, .icon-float, .icon-spin {
-        transition: none;
-        animation: none !important;
-        transform: none !important
-    }
-}
-
 /* Links com classe .btn não sublinham */
 a.btn {
     text-decoration: none
