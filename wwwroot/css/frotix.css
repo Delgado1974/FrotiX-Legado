@@ -1100,6 +1100,45 @@ a.btn.btn-vinho i {
     display: inline-block !important;
 }
 
+/* Botão Voltar à Lista (Marrom Terracota) */
+.btn.btn-voltar, a.btn.btn-voltar, button.btn-voltar, a.btn-voltar {
+    background-color: #68432C !important;
+    border-color: #553721 !important;
+    color: white !important;
+    box-shadow: 0 0 8px rgba(104,67,44,.5), 0 2px 4px rgba(104,67,44,.3) !important;
+    border-radius: .375rem !important;
+    transition: all .3s ease, transform .2s ease !important;
+    border: none;
+    position: relative;
+    text-decoration: none !important;
+}
+
+    .btn.btn-voltar:hover, a.btn.btn-voltar:hover, button.btn-voltar:hover, a.btn-voltar:hover {
+        background-color: #553721 !important;
+        border-color: #422a1a !important;
+        animation: buttonWiggle .5s ease-in-out !important;
+        box-shadow: 0 0 20px rgba(104,67,44,.8), 0 6px 12px rgba(104,67,44,.5) !important;
+        color: white !important
+    }
+
+    .btn.btn-voltar:active, .btn.btn-voltar:focus, a.btn.btn-voltar:active, a.btn.btn-voltar:focus, button.btn-voltar:active, button.btn-voltar:focus, a.btn-voltar:active, a.btn-voltar:focus {
+        background-color: #422a1a !important;
+        border-color: #351f14 !important;
+        transform: translateY(0) scale(1) !important;
+        box-shadow: 0 0 0 .2rem rgba(104,67,44,.25) !important;
+        color: white !important
+    }
+
+/* Animação icon-pulse automática para ícones em botões Voltar */
+.btn-voltar i,
+.btn.btn-voltar i,
+button.btn-voltar i,
+a.btn.btn-voltar i,
+a.btn-voltar i {
+    animation: ftxHeaderBtnIconPulse 1.5s ease-in-out infinite !important;
+    display: inline-block !important;
+}
+
 /* Botío Fundo Vermelho */
 .btn.fundo-vermelho, a.btn.fundo-vermelho, button.fundo-vermelho {
     background-color: #dc3545 !important;

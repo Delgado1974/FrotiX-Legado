@@ -18,3 +18,15 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 ### Onde colocar alterações de CSS:
 - **CSS Local (no arquivo .cshtml da página)**: Quando o estilo será usado em apenas UMA página
 - **CSS Global (frotix.css)**: Quando o estilo será usado em MAIS DE UMA página
+
+## Regras de Ícones
+
+### Ícone padrão para botões "Voltar à Lista":
+- O ícone dos botões "Voltar à Lista" e semelhantes é **sempre**: `fa-duotone fa-rotate-left icon-space icon-rotate-left`
+- **NUNCA** alterar este ícone para outro (como fa-arrow-left)
+
+## Regras de Botões
+
+### Botão "Voltar à Lista" - Localização determina a classe:
+- **No Header da página** (dentro de `ftx-card-header`, `ftx-card-actions`, ou similar): usar `btn btn-fundo-laranja`
+- **No rodapé/corpo do formulário**: usar `btn btn-voltar` (cor marrom #68432C)
