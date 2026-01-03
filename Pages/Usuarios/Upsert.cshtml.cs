@@ -143,10 +143,11 @@ namespace FrotiX.Pages.Usuarios
                 var user = new Models.AspNetUsers
                 {
                     UserName = UsuarioObj.AspNetUsers.UserName,
-                    Email = "a.degas@gmail.com",
+                    Email = UsuarioObj.AspNetUsers.Email,
                     NomeCompleto = UsuarioObj.AspNetUsers.NomeCompleto,
                     Ponto = UsuarioObj.AspNetUsers.Ponto,
                     Ramal = UsuarioObj.AspNetUsers.Ramal,
+                    PhoneNumber = UsuarioObj.AspNetUsers.PhoneNumber,
                     DetentorCargaPatrimonial = UsuarioObj.AspNetUsers.DetentorCargaPatrimonial,
                     Status = UsuarioObj.AspNetUsers.Status,
                     Foto = fotoBytes

@@ -194,7 +194,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.NomeCompleto">Nome Completo</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.NomeCompleto"></span>
-                                            <input class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" />
+                                            <input id="txtNomeCompleto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" />
                                         </div>
                                     </div>
 
@@ -213,6 +213,24 @@
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.UserName">Login</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.UserName"></span>
                                             <input id="txtUserName" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.UserName" disabled style="background-color: #e9ecef;" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Email">Email</label>
+                                            <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Email"></span>
+                                            <input id="txtEmail" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Email" placeholder="usuario@camara.leg.br" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Celular -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.PhoneNumber">Celular</label>
+                                            <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.PhoneNumber"></span>
+                                            <input id="txtCelular" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.PhoneNumber" placeholder="(xx) xxxx-xxxx" maxlength="14" />
                                         </div>
                                     </div>
                                 </div>
@@ -378,7 +396,47 @@
                     });
                 }
 
-                // Auto-preenche login baseado no ponto
+                // =====================================================
+                // FUNÇÃO: Converter para Camel Case (exceto conectores)
+                // =====================================================
+                function toCamelCase(str) {
+                    // Lista de conectores que devem permanecer em minúsculo
+                    const conectores = ['da', 'de', 'do', 'das', 'dos', 'e', 'ou', 'a', 'o', 'as', 'os', 'em', 'na', 'no', 'nas', 'nos', 'para', 'por', 'com'];
+
+                    return str
+                        .toLowerCase()
+                        .split(' ')
+                        .map(function (palavra, index) {
+                            if (!palavra) return '';
+                            // Primeira palavra sempre em Camel Case, demais verificar se é conector
+                            if (index === 0 || !conectores.includes(palavra)) {
+                                return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+                            }
+                            return palavra;
+                        })
+                        .join(' ');
+                }
+
+                // =====================================================
+                // VALIDAÇÃO: Nome Completo em Camel Case
+                // =====================================================
+                const txtNomeCompleto = document.getElementById('txtNomeCompleto');
+                if (txtNomeCompleto) {
+                    txtNomeCompleto.addEventListener('blur', function () {
+                        try {
+                            const valor = txtNomeCompleto.value.trim();
+                            if (valor) {
+                                txtNomeCompleto.value = toCamelCase(valor);
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtNomeCompleto.blur", error);
+                        }
+                    });
+                }
+
+                // =====================================================
+                // VALIDAÇÃO: Ponto com prefixo P_
+                // =====================================================
                 const txtPonto = document.getElementById('txtPonto');
                 const txtUserName = document.getElementById('txtUserName');
 
@@ -388,7 +446,10 @@
                             let valor = txtPonto.value.trim();
 
                             if (valor && !valor.toLowerCase().startsWith('p_')) {
-                                valor = 'p_' + valor;
+                                valor = 'P_' + valor;
+                            } else if (valor) {
+                                // Garante que o P_ esteja em maiúsculo
+                                valor = 'P_' + valor.substring(2);
                             }
 
                             txtUserName.value = valor;
@@ -403,15 +464,97 @@
                             let valor = txtPonto.value.trim();
 
                             if (valor && !valor.toLowerCase().startsWith('p_')) {
-                                txtUserName.value = 'p_' + valor;
+                                txtUserName.value = 'P_' + valor;
+                            } else if (valor) {
+                                txtUserName.value = 'P_' + valor.substring(2);
                             } else {
-                                txtUserName.value = valor;
+                                txtUserName.value = '';
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.input", error);
                         }
                     });
                 }
+
+                // =====================================================
+                // VALIDAÇÃO: Email minúsculo com @camara.leg.br
+                // =====================================================
+                const txtEmail = document.getElementById('txtEmail');
+                if (txtEmail) {
+                    txtEmail.addEventListener('blur', function () {
+                        try {
+                            let valor = txtEmail.value.trim().toLowerCase();
+
+                            if (valor) {
+                                // Remove @camara.leg.br se já existir para evitar duplicação
+                                valor = valor.replace(/@camara\.leg\.br$/i, '');
+                                // Remove qualquer @ que possa existir no final
+                                valor = valor.replace(/@+$/, '');
+                                // Adiciona o domínio
+                                valor = valor + '@camara.leg.br';
+                            }
+
+                            txtEmail.value = valor;
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.blur", error);
+                        }
+                    });
+
+                    // Força minúsculo enquanto digita
+                    txtEmail.addEventListener('input', function () {
+                        try {
+                            txtEmail.value = txtEmail.value.toLowerCase();
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.input", error);
+                        }
+                    });
+                }
+
+                // =====================================================
+                // VALIDAÇÃO: Celular com máscara (xx) xxxx-xxxx
+                // =====================================================
+                const txtCelular = document.getElementById('txtCelular');
+                if (txtCelular) {
+                    txtCelular.addEventListener('input', function (e) {
+                        try {
+                            // Remove tudo que não é número
+                            let valor = txtCelular.value.replace(/\D/g, '');
+
+                            // Limita a 10 dígitos
+                            valor = valor.substring(0, 10);
+
+                            // Aplica a máscara (xx) xxxx-xxxx
+                            if (valor.length > 6) {
+                                valor = '(' + valor.substring(0, 2) + ') ' + valor.substring(2, 6) + '-' + valor.substring(6);
+                            } else if (valor.length > 2) {
+                                valor = '(' + valor.substring(0, 2) + ') ' + valor.substring(2);
+                            } else if (valor.length > 0) {
+                                valor = '(' + valor;
+                            }
+
+                            txtCelular.value = valor;
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtCelular.input", error);
+                        }
+                    });
+
+                    // Valida formato completo ao sair do campo
+                    txtCelular.addEventListener('blur', function () {
+                        try {
+                            const valor = txtCelular.value;
+                            const regex = /^\(\d{2}\) \d{4}-\d{4}$/;
+
+                            if (valor && !regex.test(valor)) {
+                                txtCelular.classList.add('is-invalid');
+                            } else {
+                                txtCelular.classList.remove('is-invalid');
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtCelular.blur", error);
+                        }
+                    });
+                }
+
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Upsert.cshtml", "script.init", error);
             }
