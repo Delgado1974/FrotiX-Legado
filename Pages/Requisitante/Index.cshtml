@@ -240,7 +240,7 @@
 				const rect = element.getBoundingClientRect();
 				const x = event.clientX - rect.left;
 				const y = event.clientY - rect.top;
-				const size = Math.max(rect.width, rect.height) * 3; // Maior para efeito externo
+				const size = Math.max(rect.width, rect.height) * 1.5; // Efeito externo moderado
 
 				const ripple = document.createElement('span');
 				ripple.className = 'ftx-ripple-circle';
