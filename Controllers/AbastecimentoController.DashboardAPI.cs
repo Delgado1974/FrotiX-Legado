@@ -400,6 +400,209 @@ namespace FrotiX.Controllers
 
         #endregion
 
+        #region Dashboard - Detalhes dos Abastecimentos
+
+        /// <summary>
+        /// Retorna lista detalhada de abastecimentos para exibir no modal ao clicar em gráficos
+        /// </summary>
+        [Route("DashboardDetalhes")]
+        [HttpGet]
+        public IActionResult DashboardDetalhes(int? ano, int? mes, string? categoria, string? tipoVeiculo, string? placa, int? diaSemana, int? hora)
+        {
+            try
+            {
+                var query = _unitOfWork.ViewAbastecimentos.GetAll()
+                    .Where(a => a.DataHora.HasValue);
+
+                if (ano.HasValue && ano > 0)
+                    query = query.Where(a => a.DataHora.Value.Year == ano.Value);
+
+                if (mes.HasValue && mes > 0)
+                    query = query.Where(a => a.DataHora.Value.Month == mes.Value);
+
+                if (!string.IsNullOrEmpty(tipoVeiculo))
+                    query = query.Where(a => a.TipoVeiculo == tipoVeiculo);
+
+                if (!string.IsNullOrEmpty(placa))
+                    query = query.Where(a => a.Placa == placa);
+
+                if (diaSemana.HasValue)
+                    query = query.Where(a => (int)a.DataHora.Value.DayOfWeek == diaSemana.Value);
+
+                if (hora.HasValue)
+                    query = query.Where(a => a.DataHora.Value.Hour == hora.Value);
+
+                var dados = query.OrderByDescending(a => a.DataHora).Take(100).ToList();
+
+                // Filtro por categoria real do veículo (requer join com ViewVeiculos)
+                if (!string.IsNullOrEmpty(categoria))
+                {
+                    var veiculosCategorias = _unitOfWork.ViewVeiculos.GetAll()
+                        .Where(v => v.Categoria == categoria)
+                        .Select(v => v.VeiculoId)
+                        .ToHashSet();
+
+                    dados = dados.Where(a => veiculosCategorias.Contains(a.VeiculoId)).ToList();
+                }
+
+                var resultado = new
+                {
+                    registros = dados.Select(a => new
+                    {
+                        data = a.DataHora?.ToString("dd/MM/yyyy HH:mm") ?? "-",
+                        placa = a.Placa ?? "-",
+                        tipoVeiculo = a.TipoVeiculo ?? "-",
+                        litros = ParseDecimal(a.Litros),
+                        valorUnitario = ParseDecimal(a.ValorUnitario),
+                        valorTotal = ParseDecimal(a.ValorTotal)
+                    }).ToList(),
+                    totais = new
+                    {
+                        quantidade = dados.Count,
+                        litros = dados.Sum(a => ParseDecimal(a.Litros)),
+                        valor = dados.Sum(a => ParseDecimal(a.ValorTotal))
+                    }
+                };
+
+                return Ok(resultado);
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DashboardDetalhes", error);
+                return StatusCode(500, new { message = "Erro ao carregar detalhes" });
+            }
+        }
+
+        #endregion
+
+        #region Dashboard - Mapas de Calor
+
+        /// <summary>
+        /// Retorna dados para o Mapa de Calor: Dia da Semana x Hora
+        /// </summary>
+        [Route("DashboardHeatmapHora")]
+        [HttpGet]
+        public IActionResult DashboardHeatmapHora(int? ano, int? mes)
+        {
+            try
+            {
+                var query = _unitOfWork.ViewAbastecimentos.GetAll()
+                    .Where(a => a.DataHora.HasValue);
+
+                if (ano.HasValue && ano > 0)
+                    query = query.Where(a => a.DataHora.Value.Year == ano.Value);
+
+                if (mes.HasValue && mes > 0)
+                    query = query.Where(a => a.DataHora.Value.Month == mes.Value);
+
+                var dados = query.ToList();
+
+                // Agrupar por Dia da Semana (0-6) e Hora (0-23)
+                var agrupado = dados
+                    .GroupBy(a => new { DiaSemana = (int)a.DataHora.Value.DayOfWeek, Hora = a.DataHora.Value.Hour })
+                    .Select(g => new
+                    {
+                        diaSemana = g.Key.DiaSemana,
+                        hora = g.Key.Hora,
+                        valor = g.Sum(a => ParseDecimal(a.ValorTotal)),
+                        quantidade = g.Count()
+                    })
+                    .ToList();
+
+                // Nomes dos dias da semana em português
+                var diasSemana = new[] { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
+
+                // Criar matriz 7x24 (dias x horas)
+                var matriz = new decimal[7, 24];
+                foreach (var item in agrupado)
+                {
+                    matriz[item.diaSemana, item.hora] = item.valor;
+                }
+
+                // Converter para formato que o HeatMap do Syncfusion espera
+                var heatmapData = new List<object>();
+                for (int dia = 0; dia < 7; dia++)
+                {
+                    for (int hora = 0; hora < 24; hora++)
+                    {
+                        heatmapData.Add(new { x = diasSemana[dia], y = hora.ToString("00") + "h", value = matriz[dia, hora] });
+                    }
+                }
+
+                return Ok(new
+                {
+                    xLabels = diasSemana,
+                    yLabels = Enumerable.Range(0, 24).Select(h => h.ToString("00") + "h").ToArray(),
+                    data = heatmapData
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DashboardHeatmapHora", error);
+                return StatusCode(500, new { message = "Erro ao carregar mapa de calor" });
+            }
+        }
+
+        /// <summary>
+        /// Retorna dados para o Mapa de Calor: Categoria x Mês
+        /// </summary>
+        [Route("DashboardHeatmapCategoria")]
+        [HttpGet]
+        public IActionResult DashboardHeatmapCategoria(int ano)
+        {
+            try
+            {
+                var dados = _unitOfWork.ViewAbastecimentos.GetAll()
+                    .Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano)
+                    .ToList();
+
+                // Buscar categorias dos veículos
+                var veiculosCategorias = _unitOfWork.ViewVeiculos.GetAll()
+                    .Where(v => !string.IsNullOrEmpty(v.Categoria))
+                    .ToDictionary(v => v.VeiculoId, v => v.Categoria ?? "Sem Categoria");
+
+                // Agrupar por Categoria e Mês
+                var agrupado = dados
+                    .Where(a => veiculosCategorias.ContainsKey(a.VeiculoId))
+                    .GroupBy(a => new { Categoria = veiculosCategorias[a.VeiculoId], Mes = a.DataHora.Value.Month })
+                    .Select(g => new
+                    {
+                        categoria = g.Key.Categoria,
+                        mes = g.Key.Mes,
+                        valor = g.Sum(a => ParseDecimal(a.ValorTotal))
+                    })
+                    .ToList();
+
+                var categorias = agrupado.Select(a => a.categoria).Distinct().OrderBy(c => c).ToList();
+                var meses = new[] { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
+
+                // Converter para formato do HeatMap
+                var heatmapData = new List<object>();
+                foreach (var cat in categorias)
+                {
+                    for (int mes = 1; mes <= 12; mes++)
+                    {
+                        var item = agrupado.FirstOrDefault(a => a.categoria == cat && a.mes == mes);
+                        heatmapData.Add(new { x = cat, y = meses[mes - 1], value = item?.valor ?? 0 });
+                    }
+                }
+
+                return Ok(new
+                {
+                    xLabels = categorias.ToArray(),
+                    yLabels = meses,
+                    data = heatmapData
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DashboardHeatmapCategoria", error);
+                return StatusCode(500, new { message = "Erro ao carregar mapa de calor" });
+            }
+        }
+
+        #endregion
+
         #region Helpers
 
         private static decimal ParseDecimal(string? valor)

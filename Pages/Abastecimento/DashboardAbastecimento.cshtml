@@ -546,6 +546,143 @@
         color: #6c757d;
     }
 
+    /* ================================================================
+       MODAL DE DETALHES - Tema Caramelo/Creme
+       ================================================================ */
+    #modalDetalhesAbast .modal-dialog {
+        max-width: 900px;
+    }
+
+    #modalDetalhesAbast .modal-content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    }
+
+    #modalDetalhesAbast .modal-header {
+        background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%);
+        border-bottom: none;
+        padding: 1rem 1.5rem;
+    }
+
+    #modalDetalhesAbast .modal-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #modalDetalhesAbast .modal-title i {
+        font-size: 1.2rem;
+    }
+
+    #modalDetalhesAbast .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+    #modalDetalhesAbast .btn-close:hover {
+        opacity: 1;
+    }
+
+    #modalDetalhesAbast .modal-body {
+        background: var(--abast-cream);
+        padding: 1.5rem;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    #modalDetalhesAbast .detalhes-resumo {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    #modalDetalhesAbast .detalhes-resumo-item {
+        text-align: center;
+    }
+
+    #modalDetalhesAbast .detalhes-resumo-label {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    #modalDetalhesAbast .detalhes-resumo-valor {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--abast-dark);
+    }
+
+    #modalDetalhesAbast .detalhes-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #modalDetalhesAbast .detalhes-grid-header {
+        background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        padding: 10px 12px;
+    }
+
+    #modalDetalhesAbast .detalhes-grid-cell {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    #modalDetalhesAbast .detalhes-grid-cell:nth-child(10n+6),
+    #modalDetalhesAbast .detalhes-grid-cell:nth-child(10n+7),
+    #modalDetalhesAbast .detalhes-grid-cell:nth-child(10n+8),
+    #modalDetalhesAbast .detalhes-grid-cell:nth-child(10n+9),
+    #modalDetalhesAbast .detalhes-grid-cell:nth-child(10n+10) {
+        background: var(--abast-light);
+    }
+
+    #modalDetalhesAbast .modal-footer {
+        background: var(--abast-cream);
+        border-top: 1px solid rgba(168, 120, 76, 0.2);
+        padding: 1rem 1.5rem;
+    }
+
+    #modalDetalhesAbast .btn-fechar-modal {
+        background: var(--abast-primary);
+        border: none;
+        color: white;
+        padding: 8px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    #modalDetalhesAbast .btn-fechar-modal:hover {
+        background: var(--abast-dark);
+    }
+
+    /* ================================================================
+       MAPA DE CALOR
+       ================================================================ */
+    .heatmap-container {
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
     /* Responsividade */
     @@media (max-width: 992px) {
         .valor-metrica-abast { font-size: 1.3rem; }
@@ -594,19 +731,19 @@
     <div id="tab-consumo-geral" class="dash-content active">
         <div class="filter-card-abast">
             <div class="row align-items-end g-3">
-                <div class="col-md-3">
+                <div class="col-auto">
                     <label class="form-label">
                         <i class="fa-duotone fa-calendar me-1"></i> Ano
                     </label>
-                    <select id="filtroAnoGeral" class="form-select">
+                    <select id="filtroAnoGeral" class="form-select" style="min-width: 120px;">
                         <option value="">Todos os Anos</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-auto">
                     <label class="form-label">
                         <i class="fa-duotone fa-calendar-day me-1"></i> Mês
                     </label>
-                    <select id="filtroMesGeral" class="form-select">
+                    <select id="filtroMesGeral" class="form-select" style="min-width: 150px;">
                         <option value="">Todos os Meses</option>
                         <option value="1">Janeiro</option>
                         <option value="2">Fevereiro</option>
@@ -622,8 +759,9 @@
                         <option value="12">Dezembro</option>
                     </select>
                 </div>
-                <div class="col-md-2 text-end">
-                    <button type="button" class="btn btn-filtrar-abast" id="btnFiltrarGeral">
+                <div class="col-auto ps-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-filtrar-abast d-block" id="btnFiltrarGeral">
                         <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
                     </button>
                 </div>
@@ -725,6 +863,22 @@
                         Consumo Geral por Mês
                     </h5>
                     <div id="chartConsumoMes" style="height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de Calor - Dia da Semana x Hora -->
+        <div class="row g-3 mt-2">
+            <div class="col-12">
+                <div class="chart-container-abast">
+                    <h5 class="chart-title-abast">
+                        <i class="fa-duotone fa-grid-2"></i>
+                        Mapa de Calor - Consumo por Dia/Hora
+                        <span class="chart-subtitle">Visualize quando ocorrem mais abastecimentos</span>
+                    </h5>
+                    <div class="heatmap-container">
+                        <div id="heatmapDiaHora" style="height: 320px;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -898,6 +1052,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Mapa de Calor - Categoria x Mês -->
+        <div class="row g-3 mt-2">
+            <div class="col-12">
+                <div class="chart-container-abast">
+                    <h5 class="chart-title-abast">
+                        <i class="fa-duotone fa-grid-2"></i>
+                        Mapa de Calor - Consumo por Categoria
+                        <span class="chart-subtitle">Visualize o consumo por categoria ao longo do ano</span>
+                    </h5>
+                    <div class="heatmap-container">
+                        <div id="heatmapCategoria" style="height: 320px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ========================================== -->
@@ -1042,6 +1212,54 @@
     </div>
 </div>
 
+<!-- Modal de Detalhes dos Abastecimentos -->
+<div class="modal fade" id="modalDetalhesAbast" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-list-check"></i>
+                    <span id="modalDetalhesTitulo">Detalhes dos Abastecimentos</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="detalhes-resumo" id="detalhesResumo">
+                    <div class="detalhes-resumo-item">
+                        <div class="detalhes-resumo-label">Registros</div>
+                        <div class="detalhes-resumo-valor" id="detalhesQtd">0</div>
+                    </div>
+                    <div class="detalhes-resumo-item">
+                        <div class="detalhes-resumo-label">Total Litros</div>
+                        <div class="detalhes-resumo-valor" id="detalhesLitros">0</div>
+                    </div>
+                    <div class="detalhes-resumo-item">
+                        <div class="detalhes-resumo-label">Valor Total</div>
+                        <div class="detalhes-resumo-valor" id="detalhesValor">R$ 0</div>
+                    </div>
+                </div>
+                <div class="detalhes-grid" id="detalhesGrid">
+                    <div class="detalhes-grid-header">Data</div>
+                    <div class="detalhes-grid-header">Veículo</div>
+                    <div class="detalhes-grid-header">Litros</div>
+                    <div class="detalhes-grid-header">R$/Litro</div>
+                    <div class="detalhes-grid-header">Total</div>
+                    <!-- Linhas serão adicionadas via JavaScript -->
+                </div>
+                <div id="detalhesVazio" class="text-center py-4 text-muted" style="display: none;">
+                    <i class="fa-duotone fa-inbox fa-2x mb-2"></i>
+                    <div>Nenhum registro encontrado</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-fechar-modal" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-xmark me-1"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section ScriptsBlock {
     <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-base/dist/global/ej2-base.min.js" asp-append-version="true"></script>
     <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-data/dist/global/ej2-data.min.js" asp-append-version="true"></script>
@@ -1050,5 +1268,6 @@
     <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-file-utils/dist/global/ej2-file-utils.min.js" asp-append-version="true"></script>
     <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-compression/dist/global/ej2-compression.min.js" asp-append-version="true"></script>
     <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-charts/dist/global/ej2-charts.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-heatmap/dist/global/ej2-heatmap.min.js" asp-append-version="true"></script>
     <script src="~/js/dashboards/dashboard-abastecimento.js" asp-append-version="true"></script>
 }

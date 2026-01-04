@@ -395,6 +395,11 @@ function renderizarAbaGeral(data) {
         renderizarChartValorLitro(data.valorLitroPorMes);
         renderizarChartLitrosMes(data.litrosPorMes);
         renderizarChartConsumoMes(data.consumoPorMes);
+
+        // Mapa de Calor Dia/Hora
+        const anoGeral = document.getElementById('filtroAnoGeral')?.value || '';
+        const mesGeral = document.getElementById('filtroMesGeral')?.value || '';
+        renderizarHeatmapDiaHora(anoGeral, mesGeral);
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarAbaGeral", error);
     }
@@ -670,9 +675,15 @@ function renderizarAbaMensal(data) {
         // TABELAS TOP 15
         renderizarTabelaValorPorTipo(data.valorPorTipo);
         renderizarTabelaValorPorPlaca(data.valorPorPlaca);
-        
+
         // Gráfico de consumo por CATEGORIA REAL
         renderizarChartConsumoCategoria(data.consumoPorCategoria);
+
+        // Mapa de Calor Categoria/Mês
+        const anoMensal = document.getElementById('filtroAnoMensal')?.value || '';
+        if (anoMensal) {
+            renderizarHeatmapCategoria(anoMensal);
+        }
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarAbaMensal", error);
     }
@@ -1327,4 +1338,301 @@ function formatarLabelNumero(valor) {
         return Math.round(valor).toLocaleString('pt-BR');
     }
     return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ====== MAPAS DE CALOR ======
+
+var heatmapDiaHora = null;
+var heatmapCategoria = null;
+var modalDetalhes = null;
+
+/**
+ * Renderiza o Mapa de Calor: Dia da Semana x Hora (Aba 1 - Consumo Geral)
+ */
+function renderizarHeatmapDiaHora(ano, mes) {
+    try {
+        const container = document.getElementById('heatmapDiaHora');
+        if (!container) return;
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardHeatmapHora',
+            type: 'GET',
+            data: { ano: ano || null, mes: mes || null },
+            success: function (data) {
+                try {
+                    if (heatmapDiaHora) {
+                        heatmapDiaHora.destroy();
+                        heatmapDiaHora = null;
+                    }
+                    container.innerHTML = '';
+
+                    // Preparar dados para o HeatMap
+                    var heatmapData = [];
+                    var diasSemana = data.xLabels;
+                    var horas = data.yLabels;
+
+                    // Criar matriz de dados
+                    for (var i = 0; i < diasSemana.length; i++) {
+                        var row = [];
+                        for (var j = 0; j < horas.length; j++) {
+                            var item = data.data.find(d => d.x === diasSemana[i] && d.y === horas[j]);
+                            row.push(item ? item.value : 0);
+                        }
+                        heatmapData.push(row);
+                    }
+
+                    heatmapDiaHora = new ej.heatmap.HeatMap({
+                        titleSettings: { text: '' },
+                        xAxis: {
+                            labels: diasSemana,
+                            textStyle: { size: '11px', fontFamily: 'Outfit' }
+                        },
+                        yAxis: {
+                            labels: horas,
+                            textStyle: { size: '9px', fontFamily: 'Outfit' }
+                        },
+                        dataSource: heatmapData,
+                        cellSettings: {
+                            showLabel: false,
+                            border: { width: 1, color: 'white' }
+                        },
+                        paletteSettings: {
+                            palette: [
+                                { color: '#f5ebe0' },
+                                { color: '#d4a574' },
+                                { color: '#c4956a' },
+                                { color: '#a8784c' },
+                                { color: '#8b5e3c' },
+                                { color: '#6d472c' }
+                            ],
+                            type: 'Gradient'
+                        },
+                        legendSettings: {
+                            visible: true,
+                            position: 'Bottom',
+                            textStyle: { size: '10px', fontFamily: 'Outfit' }
+                        },
+                        tooltipRender: function(args) {
+                            args.content = [diasSemana[args.xValue] + ' às ' + horas[args.yValue] + ': ' + formatarMoeda(args.value)];
+                        },
+                        cellClick: function(args) {
+                            var diaSemana = args.xValue;
+                            var hora = parseInt(horas[args.yValue]);
+                            abrirModalDetalhes({
+                                titulo: 'Abastecimentos - ' + diasSemana[diaSemana] + ' às ' + horas[args.yValue],
+                                ano: ano,
+                                mes: mes,
+                                diaSemana: diaSemana,
+                                hora: hora
+                            });
+                        }
+                    });
+                    heatmapDiaHora.appendTo('#heatmapDiaHora');
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapDiaHora.success", error);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao carregar mapa de calor:', error);
+                container.innerHTML = '<div class="text-center text-muted py-4">Erro ao carregar mapa de calor</div>';
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapDiaHora", error);
+    }
+}
+
+/**
+ * Renderiza o Mapa de Calor: Categoria x Mês (Aba 2 - Consumo Mensal)
+ */
+function renderizarHeatmapCategoria(ano) {
+    try {
+        const container = document.getElementById('heatmapCategoria');
+        if (!container) return;
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardHeatmapCategoria',
+            type: 'GET',
+            data: { ano: ano },
+            success: function (data) {
+                try {
+                    if (heatmapCategoria) {
+                        heatmapCategoria.destroy();
+                        heatmapCategoria = null;
+                    }
+                    container.innerHTML = '';
+
+                    if (!data.xLabels || data.xLabels.length === 0) {
+                        container.innerHTML = '<div class="text-center text-muted py-4">Sem dados de categorias</div>';
+                        return;
+                    }
+
+                    // Preparar dados para o HeatMap
+                    var categorias = data.xLabels;
+                    var meses = data.yLabels;
+                    var heatmapData = [];
+
+                    for (var i = 0; i < categorias.length; i++) {
+                        var row = [];
+                        for (var j = 0; j < meses.length; j++) {
+                            var item = data.data.find(d => d.x === categorias[i] && d.y === meses[j]);
+                            row.push(item ? item.value : 0);
+                        }
+                        heatmapData.push(row);
+                    }
+
+                    heatmapCategoria = new ej.heatmap.HeatMap({
+                        titleSettings: { text: '' },
+                        xAxis: {
+                            labels: categorias,
+                            textStyle: { size: '10px', fontFamily: 'Outfit' }
+                        },
+                        yAxis: {
+                            labels: meses,
+                            textStyle: { size: '10px', fontFamily: 'Outfit' }
+                        },
+                        dataSource: heatmapData,
+                        cellSettings: {
+                            showLabel: false,
+                            border: { width: 1, color: 'white' }
+                        },
+                        paletteSettings: {
+                            palette: [
+                                { color: '#f5ebe0' },
+                                { color: '#d4a574' },
+                                { color: '#c4956a' },
+                                { color: '#a8784c' },
+                                { color: '#8b5e3c' },
+                                { color: '#6d472c' }
+                            ],
+                            type: 'Gradient'
+                        },
+                        legendSettings: {
+                            visible: true,
+                            position: 'Bottom',
+                            textStyle: { size: '10px', fontFamily: 'Outfit' }
+                        },
+                        tooltipRender: function(args) {
+                            args.content = [categorias[args.xValue] + ' - ' + meses[args.yValue] + ': ' + formatarMoeda(args.value)];
+                        },
+                        cellClick: function(args) {
+                            var categoria = categorias[args.xValue];
+                            var mesNum = args.yValue + 1;
+                            abrirModalDetalhes({
+                                titulo: 'Abastecimentos - ' + categoria + ' em ' + meses[args.yValue],
+                                ano: ano,
+                                mes: mesNum,
+                                categoria: categoria
+                            });
+                        }
+                    });
+                    heatmapCategoria.appendTo('#heatmapCategoria');
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapCategoria.success", error);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao carregar mapa de calor:', error);
+                container.innerHTML = '<div class="text-center text-muted py-4">Erro ao carregar mapa de calor</div>';
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapCategoria", error);
+    }
+}
+
+// ====== MODAL DE DETALHES ======
+
+/**
+ * Abre o modal de detalhes com os abastecimentos filtrados
+ */
+function abrirModalDetalhes(filtros) {
+    try {
+        if (!modalDetalhes) {
+            modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhesAbast'));
+        }
+
+        document.getElementById('modalDetalhesTitulo').textContent = filtros.titulo || 'Detalhes dos Abastecimentos';
+        document.getElementById('detalhesGrid').innerHTML = `
+            <div class="detalhes-grid-header">Data</div>
+            <div class="detalhes-grid-header">Veículo</div>
+            <div class="detalhes-grid-header">Litros</div>
+            <div class="detalhes-grid-header">R$/Litro</div>
+            <div class="detalhes-grid-header">Total</div>
+            <div style="grid-column: span 5; text-align: center; padding: 30px;">
+                <i class="fa-duotone fa-spinner-third fa-spin fa-2x"></i>
+            </div>
+        `;
+        document.getElementById('detalhesVazio').style.display = 'none';
+        document.getElementById('detalhesQtd').textContent = '...';
+        document.getElementById('detalhesLitros').textContent = '...';
+        document.getElementById('detalhesValor').textContent = '...';
+
+        modalDetalhes.show();
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardDetalhes',
+            type: 'GET',
+            data: {
+                ano: filtros.ano || null,
+                mes: filtros.mes || null,
+                categoria: filtros.categoria || null,
+                tipoVeiculo: filtros.tipoVeiculo || null,
+                placa: filtros.placa || null,
+                diaSemana: filtros.diaSemana !== undefined ? filtros.diaSemana : null,
+                hora: filtros.hora !== undefined ? filtros.hora : null
+            },
+            success: function (data) {
+                try {
+                    document.getElementById('detalhesQtd').textContent = data.totais.quantidade.toLocaleString('pt-BR');
+                    document.getElementById('detalhesLitros').textContent = formatarNumero(data.totais.litros) + ' L';
+                    document.getElementById('detalhesValor').textContent = formatarMoeda(data.totais.valor);
+
+                    var gridHtml = `
+                        <div class="detalhes-grid-header">Data</div>
+                        <div class="detalhes-grid-header">Veículo</div>
+                        <div class="detalhes-grid-header">Litros</div>
+                        <div class="detalhes-grid-header">R$/Litro</div>
+                        <div class="detalhes-grid-header">Total</div>
+                    `;
+
+                    if (data.registros && data.registros.length > 0) {
+                        data.registros.forEach(function(reg) {
+                            gridHtml += `
+                                <div class="detalhes-grid-cell">${reg.data}</div>
+                                <div class="detalhes-grid-cell">${reg.placa}</div>
+                                <div class="detalhes-grid-cell">${formatarNumero(reg.litros)}</div>
+                                <div class="detalhes-grid-cell">${formatarMoeda(reg.valorUnitario)}</div>
+                                <div class="detalhes-grid-cell">${formatarMoeda(reg.valorTotal)}</div>
+                            `;
+                        });
+                        document.getElementById('detalhesVazio').style.display = 'none';
+                    } else {
+                        document.getElementById('detalhesVazio').style.display = 'block';
+                    }
+
+                    document.getElementById('detalhesGrid').innerHTML = gridHtml;
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "abrirModalDetalhes.success", error);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao carregar detalhes:', error);
+                document.getElementById('detalhesGrid').innerHTML = `
+                    <div class="detalhes-grid-header">Data</div>
+                    <div class="detalhes-grid-header">Veículo</div>
+                    <div class="detalhes-grid-header">Litros</div>
+                    <div class="detalhes-grid-header">R$/Litro</div>
+                    <div class="detalhes-grid-header">Total</div>
+                `;
+                document.getElementById('detalhesVazio').style.display = 'block';
+                document.getElementById('detalhesVazio').innerHTML = '<i class="fa-duotone fa-circle-exclamation fa-2x mb-2"></i><div>Erro ao carregar detalhes</div>';
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "abrirModalDetalhes", error);
+    }
 }
