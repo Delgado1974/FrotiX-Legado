@@ -118,6 +118,40 @@
             flex-shrink: 0;
         }
 
+        /* Ícones com cores diferentes por nível */
+        .tree-item[data-nivel="1"] .nav-item-icon {
+            background: linear-gradient(135deg, #5a7a8a, #4a6a7a);
+        }
+
+        .tree-item[data-nivel="2"] .nav-item-icon {
+            background: linear-gradient(135deg, #7a9a8a, #6a8a7a);
+        }
+
+        /* Indicador de seleção (bolinha) */
+        .selection-indicator {
+            width: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tree-item.selected > .tree-node-content .selection-indicator {
+            color: #3D5771;
+        }
+
+        .tree-node-content:hover .selection-indicator {
+            color: #ccc;
+        }
+
+        .tree-item.selected > .tree-node-content {
+            background: #e8f0f5;
+            border-left: 3px solid #3D5771;
+            margin-left: -3px;
+        }
+
         .nav-item-text {
             flex: 1;
             font-weight: 500;
@@ -679,6 +713,9 @@
                         html += '<span class="expand-icon-placeholder" style="width:16px;"></span>';
                     }
 
+                    // Indicador de seleção (bolinha)
+                    html += '<span class="selection-indicator"><i class="fa-solid fa-circle"></i></span>';
+
                     // Ícone do menu
                     html += '<span class="nav-item-icon"><i class="' + iconClass + '"></i></span>';
 
@@ -740,8 +777,13 @@
             }
 
             // ====== ATUALIZAR TREEDATA A PARTIR DO DOM ======
+            // IMPORTANTE: Guarda uma cópia dos dados originais antes de reconstruir
+            var treeDataBackup = [];
+
             function atualizarTreeDataFromDOM() {
                 try {
+                    // Faz backup dos dados atuais ANTES de limpar
+                    treeDataBackup = JSON.parse(JSON.stringify(treeData));
                     treeData = [];
 
                     $('#treeNav > .tree-list > .tree-item').each(function() {
@@ -757,7 +799,8 @@
             function extrairItemDoDOM($li) {
                 try {
                     var id = $li.data('id');
-                    var itemOriginal = encontrarItemPorId(id, treeData) || {};
+                    // Busca nos dados de backup para não perder as propriedades originais
+                    var itemOriginal = encontrarItemPorId(id, treeDataBackup) || encontrarItemPorId(id, treeData) || {};
 
                     var item = {
                         id: id,
@@ -1279,6 +1322,17 @@
                     // Atualizar preview ao digitar
                     $('#txtIcon').on('input', function() {
                         atualizarPreviewIcone($(this).val());
+                    });
+
+                    // Clique no item para selecionar
+                    $(document).on('click', '.tree-node-content', function(e) {
+                        // Não seleciona se clicou em botões de ação
+                        if ($(e.target).closest('.tree-actions, .expand-icon').length > 0) return;
+
+                        // Remove seleção anterior
+                        $('.tree-item.selected').removeClass('selected');
+                        // Seleciona o item clicado
+                        $(this).closest('.tree-item').addClass('selected');
                     });
 
                     // Botão Editar (delegação)

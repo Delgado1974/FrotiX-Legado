@@ -5,26 +5,72 @@
 
 <style>
 
-.nav-menu i {
-    color: #b1d4e0 !important; /* text-warning cor do Bootstrap */
+/* ====== CORES DOS ÍCONES DUOTONE ====== */
+/* Primary: cinza claro | Secondary: laranja sóbrio */
+.nav-menu .fa-duotone {
+    --fa-primary-color: #a0aec0;      /* Cinza claro */
+    --fa-secondary-color: #c67750;    /* Laranja sóbrio (FrotiX) */
+    --fa-primary-opacity: 1;
+    --fa-secondary-opacity: 1;
+}
+
+/* Ícones dos subitens - cores um pouco mais suaves */
+.nav-menu .subitem-icon.fa-duotone {
+    --fa-primary-color: #b0bcc8;
+    --fa-secondary-color: #d4917a;
 }
 
 .dropdown-toggle::after {
-  color: #b1d4e0; /* ou qualquer cor desejada */
+  color: #b1d4e0;
 }
 
 .fa-chevron-down {
-  color: #b1d4e0; /* ou qualquer cor desejada */
+  color: #b1d4e0;
 }
 
 .collapse-sign > em:before {
-    color: #b1d4e0; /* ou qualquer outra */
+    color: #b1d4e0;
 }
 
 .fa-circle,
 [class^="base-"],
 [class*=" icon-stack"] {
-    color: #b1d4e0;/* exemplo de cor */
+    color: #b1d4e0;
+}
+
+/* ====== INDICADOR DE SELEÇÃO (BOLINHA) - LADO DIREITO ====== */
+/* Links do menu precisam ser position relative para a bolinha absoluta */
+.nav-menu li > a {
+    position: relative;
+}
+
+/* Bolinha oculta por padrão */
+.nav-menu .selection-dot {
+    display: none;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.45rem;
+    color: #ffc107;
+}
+
+/* Bolinha visível quando item está ativo */
+.nav-menu li.active > a .selection-dot {
+    display: block;
+}
+
+/* Ícones dos subitens */
+.nav-menu .subitem-icon {
+    font-size: 0.85rem;
+    margin-right: 8px;
+    opacity: 0.8;
+}
+
+/* Item ativo com destaque - SEM deslocar o texto */
+.nav-menu li.active > a {
+    background: rgba(255, 193, 7, 0.15) !important;
+    border-left: 3px solid #ffc107;
 }
 
 </style>
@@ -83,11 +129,16 @@
                             }
                             <text>
                                 <a href="@item.Route" title="@item.Title" data-filter-tags="@item.Tags">
+                                    @if (!string.IsNullOrEmpty(item.Icon))
+                                    {
+                                        <i class="@item.Icon subitem-icon"></i>
+                                    }
                                     <span class="nav-link-text" data-i18n="@item.I18n">@item.Text.AsRaw()</span>
                                     @if (item.Span.HasValue())
                                     {
                                         <span class="@item.Span.Class">@item.Span.Text.AsRaw()</span>
                                     }
+                                    <i class="fa-solid fa-circle selection-dot"></i>
                                 </a>
                             </text>
                             if (item.Items?.Any() == true)
@@ -109,7 +160,12 @@
                                 </text>
                             }
                             <a href="@subItem.Route" title="@subItem.Title" data-filter-tags="@subItem.Tags">
+                                @if (!string.IsNullOrEmpty(subItem.Icon))
+                                {
+                                    <i class="@subItem.Icon subitem-icon"></i>
+                                }
                                 <span class="nav-link-text" data-i18n="@subItem.I18n">@subItem.Text.AsRaw()</span>
+                                <i class="fa-solid fa-circle selection-dot"></i>
                             </a>
                         @:</li>
                     }
@@ -134,6 +190,7 @@
                     <a href="@group.Route" title="@group.Title" data-filter-tags="@group.Tags">
                         <i class="@group.Icon" text-warning></i>
                         <span class="nav-link-text" data-i18n="@group.I18n">@group.Title.AsRaw()</span>
+                        <i class="fa-solid fa-circle selection-dot"></i>
                     </a>
                 </li>
             }
