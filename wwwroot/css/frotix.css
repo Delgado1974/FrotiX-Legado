@@ -3284,17 +3284,31 @@ table thead th {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Exceção: Tabelas do Dashboard de Abastecimento usam paleta caramelo */
+/* Exceção: Tabelas com .table-abast usam cor própria (não azul) */
 .table-abast thead,
 table.table-abast thead,
-.table.table-abast thead {
+.table.table-abast thead,
+table.table.table-abast thead,
+table.table.table-sm.table-abast thead,
+.table.table-sm.table-abast thead,
+.table-responsive .table-abast thead,
+.table-responsive table.table-abast thead,
+.table-responsive .table.table-abast thead,
+.table-responsive table.table.table-sm.table-abast thead {
     background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;
     background-color: #a8784c !important;
 }
 
 .table-abast thead th,
 table.table-abast thead th,
-.table.table-abast thead th {
+.table.table-abast thead th,
+table.table.table-abast thead th,
+table.table.table-sm.table-abast thead th,
+.table.table-sm.table-abast thead th,
+.table-responsive .table-abast thead th,
+.table-responsive table.table-abast thead th,
+.table-responsive .table.table-abast thead th,
+.table-responsive table.table.table-sm.table-abast thead th {
     background: transparent !important;
     background-color: transparent !important;
     color: #ffffff !important;
