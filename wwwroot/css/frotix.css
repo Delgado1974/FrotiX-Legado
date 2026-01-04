@@ -3284,31 +3284,20 @@ table thead th {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Exceção: Tabelas com .table-abast usam cor própria (não azul) */
-.table-abast thead,
-table.table-abast thead,
-.table.table-abast thead,
-table.table.table-abast thead,
-table.table.table-sm.table-abast thead,
-.table.table-sm.table-abast thead,
-.table-responsive .table-abast thead,
-.table-responsive table.table-abast thead,
-.table-responsive .table.table-abast thead,
-.table-responsive table.table.table-sm.table-abast thead {
+/* Exceção: Tabelas com .ftx-tabela-caramelo (Dashboard Abastecimento) */
+.ftx-tabela-caramelo thead,
+.ftx-tabela-caramelo thead tr,
+table.ftx-tabela-caramelo thead,
+table.ftx-tabela-caramelo thead tr,
+.table-responsive .ftx-tabela-caramelo thead,
+.table-responsive .ftx-tabela-caramelo thead tr {
     background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;
     background-color: #a8784c !important;
 }
 
-.table-abast thead th,
-table.table-abast thead th,
-.table.table-abast thead th,
-table.table.table-abast thead th,
-table.table.table-sm.table-abast thead th,
-.table.table-sm.table-abast thead th,
-.table-responsive .table-abast thead th,
-.table-responsive table.table-abast thead th,
-.table-responsive .table.table-abast thead th,
-.table-responsive table.table.table-sm.table-abast thead th {
+.ftx-tabela-caramelo thead th,
+table.ftx-tabela-caramelo thead th,
+.table-responsive .ftx-tabela-caramelo thead th {
     background: transparent !important;
     background-color: transparent !important;
     color: #ffffff !important;

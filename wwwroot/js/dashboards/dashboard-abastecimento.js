@@ -58,11 +58,135 @@ function esconderLoading() {
 document.addEventListener('DOMContentLoaded', function () {
     try {
         inicializarTabs();
-        carregarDadosGerais();
+        // Primeiro busca anos disponíveis, depois carrega com filtros
+        inicializarFiltrosECarregar();
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "DOMContentLoaded", error);
     }
 });
+
+/**
+ * Inicializa os filtros buscando anos disponíveis e depois carrega os dados filtrados
+ */
+function inicializarFiltrosECarregar() {
+    try {
+        mostrarLoading();
+
+        // Busca rápida só para obter anos disponíveis
+        $.ajax({
+            url: '/api/abastecimento/DashboardDados',
+            type: 'GET',
+            data: { ano: null, mes: null },
+            success: function (data) {
+                try {
+                    const anos = data.anosDisponiveis || [];
+                    const mesAtual = new Date().getMonth() + 1;
+
+                    // Ano mais recente disponível
+                    const anoMaisRecente = anos.length > 0 ? anos[0] : new Date().getFullYear();
+
+                    // Preencher selects de ano
+                    const selectGeral = document.getElementById('filtroAnoGeral');
+                    const selectMensal = document.getElementById('filtroAnoMensal');
+                    const selectVeiculo = document.getElementById('filtroAnoVeiculo');
+
+                    [selectGeral, selectMensal, selectVeiculo].forEach(select => {
+                        if (!select) return;
+                        const isGeral = select.id === 'filtroAnoGeral';
+                        select.innerHTML = isGeral ? '<option value="">Todos os Anos</option>' : '';
+                        anos.forEach(ano => {
+                            const option = document.createElement('option');
+                            option.value = ano;
+                            option.textContent = ano;
+                            select.appendChild(option);
+                        });
+                        select.value = anoMaisRecente.toString();
+                        select.dataset.initialized = 'true';
+                    });
+
+                    // Determinar o mês: mês atual se tiver dados, senão último mês com dados
+                    let mesSelecionado = '';
+                    const consumoPorMes = data.consumoPorMes || [];
+
+                    if (consumoPorMes.length > 0) {
+                        // Filtrar consumo do ano mais recente
+                        const temDadosMesAtual = consumoPorMes.some(item => item.mes === mesAtual && item.valor > 0);
+
+                        if (temDadosMesAtual) {
+                            mesSelecionado = mesAtual.toString();
+                        } else {
+                            // Último mês com dados
+                            const mesesComDados = consumoPorMes
+                                .filter(item => item.valor > 0)
+                                .map(item => item.mes)
+                                .sort((a, b) => b - a);
+
+                            if (mesesComDados.length > 0) {
+                                mesSelecionado = mesesComDados[0].toString();
+                            }
+                        }
+                    }
+
+                    const selectMesGeral = document.getElementById('filtroMesGeral');
+                    if (selectMesGeral) {
+                        selectMesGeral.value = mesSelecionado;
+                        selectMesGeral.dataset.initialized = 'true';
+                    }
+
+                    // Agora carrega os dados com os filtros aplicados
+                    carregarDadosGeraisComFiltros();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar.success", error);
+                    esconderLoading();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao inicializar filtros:', error);
+                esconderLoading();
+                // Tenta carregar sem filtros
+                carregarDadosGerais();
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar", error);
+        esconderLoading();
+    }
+}
+
+/**
+ * Carrega dados gerais usando os filtros já selecionados (sem repreencher filtros)
+ */
+function carregarDadosGeraisComFiltros() {
+    try {
+        const ano = document.getElementById('filtroAnoGeral')?.value || '';
+        const mes = document.getElementById('filtroMesGeral')?.value || '';
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardDados',
+            type: 'GET',
+            data: { ano: ano || null, mes: mes || null },
+            success: function (data) {
+                try {
+                    dadosGerais = data;
+                    renderizarAbaGeral(data);
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGeraisComFiltros.success", error);
+                } finally {
+                    esconderLoading();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao carregar dados gerais:', error);
+                AppToast.show('red', 'Erro ao carregar dados do dashboard', 5000);
+                esconderLoading();
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGeraisComFiltros", error);
+        esconderLoading();
+    }
+}
 
 // ====== NAVEGAÇÃO DE ABAS ======
 function inicializarTabs() {
@@ -142,7 +266,7 @@ function carregarDadosGerais() {
             success: function (data) {
                 try {
                     dadosGerais = data;
-                    preencherFiltroAnos(data.anosDisponiveis, data.consumoPorMes);
+                    // Não repreenche os filtros, apenas renderiza
                     renderizarAbaGeral(data);
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGerais.success", error);
