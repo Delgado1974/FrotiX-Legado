@@ -319,62 +319,52 @@
         margin-bottom: auto;
     }
 
-    /* Tabelas */
-    .table-abast {
+    /* =====================================================
+       TABELAS CUSTOMIZADAS - SEM CLASSE .table DO BOOTSTRAP
+       Evita conflito com frotix.css que aplica azul em .table
+       ===================================================== */
+    .ftx-tabela-caramelo {
+        width: 100%;
         font-size: 0.8rem;
-        margin-bottom: 0;
+        border-collapse: collapse;
     }
 
-    /* Sobrescreve o estilo global azul do frotix.css */
-    .chart-container-abast table thead,
-    .chart-container-abast .table-responsive table thead,
-    .chart-container-abast .table-responsive .table thead,
-    .stat-card-mensal-abast table thead,
-    .stat-card-mensal-abast .table-responsive table thead {
-        background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;
-        background-color: #a8784c !important;
-        color: white !important;
+    .ftx-tabela-caramelo thead {
+        background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%);
     }
 
-    .chart-container-abast table thead th,
-    .chart-container-abast .table-responsive table thead th,
-    .chart-container-abast .table-responsive .table thead th,
-    .stat-card-mensal-abast table thead th,
-    .stat-card-mensal-abast .table-responsive table thead th {
-        font-weight: 600 !important;
-        font-size: 0.75rem !important;
+    .ftx-tabela-caramelo thead tr {
+        background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%);
+    }
+
+    .ftx-tabela-caramelo thead th {
+        background: transparent;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.3px;
-        padding: 10px 12px !important;
-        border: none !important;
-        border-bottom: none !important;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        background: transparent !important;
-        background-color: transparent !important;
-        color: white !important;
-        text-shadow: none !important;
+        padding: 10px 12px;
+        border: none;
+        text-shadow: none;
     }
 
-    .chart-container-abast table thead tr,
-    .chart-container-abast .table-responsive table thead tr,
-    .stat-card-mensal-abast table thead tr {
-        background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;
-    }
-
-    .table-abast tbody tr {
+    .ftx-tabela-caramelo tbody tr {
         border-bottom: 1px solid #f3f4f6;
         transition: background-color 0.15s;
     }
 
-    .table-abast tbody tr:hover {
-        background-color: var(--abast-light) !important;
+    .ftx-tabela-caramelo tbody tr:hover {
+        background-color: var(--abast-light);
     }
 
-    .table-abast tbody td {
+    .ftx-tabela-caramelo tbody td {
         padding: 10px 12px;
         vertical-align: middle;
+    }
+
+    .ftx-tabela-caramelo .text-end {
+        text-align: right;
     }
 
     /* Badge de Ranking */
@@ -671,15 +661,15 @@
                         Resumo por Ano
                     </h5>
                     <div class="table-responsive">
-                        <table class="table table-sm table-abast mb-0">
-                            <thead style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
-                                <tr style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
-                                    <th style="background: transparent !important; color: white !important;">Ano</th>
-                                    <th class="text-end" style="background: transparent !important; color: white !important;">Valor (R$)</th>
+                        <table class="ftx-tabela-caramelo">
+                            <thead>
+                                <tr>
+                                    <th>Ano</th>
+                                    <th class="text-end">Valor (R$)</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaResumoPorAno">
-                                <tr><td colspan="2" class="text-center py-4"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
+                                <tr><td colspan="2" style="text-align: center; padding: 20px;"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -845,15 +835,15 @@
                         <span class="chart-subtitle">Soma de todos os veículos do mesmo modelo</span>
                     </h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-abast">
-                            <thead style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
-                                <tr style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
-                                    <th style="background: transparent !important; color: white !important;">Tipo Veículo</th>
-                                    <th class="text-end" style="background: transparent !important; color: white !important;">Valor</th>
+                        <table class="ftx-tabela-caramelo">
+                            <thead>
+                                <tr>
+                                    <th>Tipo Veículo</th>
+                                    <th class="text-end">Valor</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaValorPorTipo">
-                                <tr><td colspan="2" class="text-center py-4"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
+                                <tr><td colspan="2" style="text-align: center; padding: 20px;"><i class="fa-duotone fa-spinner-third fa-spin"></i></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -869,12 +859,12 @@
                         <span class="chart-subtitle">Cada veículo separadamente</span>
                     </h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-abast">
-                            <thead style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
-                                <tr style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
-                                    <th style="background: transparent !important; color: white !important;">Placa</th>
-                                    <th style="background: transparent !important; color: white !important;">Tipo</th>
-                                    <th class="text-end" style="background: transparent !important; color: white !important;">Valor</th>
+                        <table class="ftx-tabela-caramelo">
+                            <thead>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Tipo</th>
+                                    <th class="text-end">Valor</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaValorPorPlaca">
