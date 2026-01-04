@@ -1092,13 +1092,15 @@ function preencherFiltroAnos(anos) {
         const selectMesGeral = document.getElementById('filtroMesGeral');
 
         const anoAtual = new Date().getFullYear();
-        const mesAtual = new Date().getMonth() + 1; // getMonth() retorna 0-11
+        // Ano mais recente disponível nos dados (primeiro da lista, pois vem ordenado desc)
+        const anoMaisRecente = anos && anos.length > 0 ? anos[0] : anoAtual;
 
         [selectGeral, selectMensal, selectVeiculo].forEach(select => {
             if (!select) return;
 
             const valorAtual = select.value;
             const isGeral = select.id === 'filtroAnoGeral';
+            const jáInicializado = select.dataset.initialized === 'true';
 
             select.innerHTML = isGeral ? '<option value="">Todos os Anos</option>' : '';
 
@@ -1106,20 +1108,21 @@ function preencherFiltroAnos(anos) {
                 const option = document.createElement('option');
                 option.value = ano;
                 option.textContent = ano;
-                // Seleciona o ano atual por padrão em todos os filtros
-                if (ano === anoAtual) option.selected = true;
                 select.appendChild(option);
             });
 
-            // Mantém o valor selecionado se já havia um
-            if (valorAtual) select.value = valorAtual;
+            // Na primeira carga, seleciona o ano mais recente disponível
+            if (!jáInicializado && !valorAtual) {
+                select.value = anoMaisRecente.toString();
+                select.dataset.initialized = 'true';
+            } else if (valorAtual) {
+                // Mantém o valor selecionado se já havia um
+                select.value = valorAtual;
+            }
         });
 
-        // Define o mês atual no filtro de mês geral (apenas na primeira carga)
-        if (selectMesGeral && !selectMesGeral.dataset.initialized) {
-            selectMesGeral.value = mesAtual.toString();
-            selectMesGeral.dataset.initialized = 'true';
-        }
+        // Define "Todos os Meses" no filtro de mês geral (não seleciona mês específico)
+        // Usuário deve clicar em Filtrar para aplicar
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "preencherFiltroAnos", error);
     }
