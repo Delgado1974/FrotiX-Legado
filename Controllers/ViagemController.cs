@@ -1,5 +1,6 @@
 using FrotiX.Data;
 using FrotiX.Models;
+using FrotiX.Models.DTO;
 using FrotiX.Repository.IRepository;
 using FrotiX.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +37,7 @@ namespace FrotiX.Controllers
         private readonly IMemoryCache _cache;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ViagemEstatisticaService _viagemEstatisticaService;
+        private readonly VeiculoEstatisticaService _veiculoEstatisticaService;
 
         [ActivatorUtilitiesConstructor]
         public ViagemController(
@@ -57,6 +59,7 @@ namespace FrotiX.Controllers
                 _serviceScopeFactory = serviceScopeFactory;
                 _context = context;
                 _viagemEstatisticaService = new ViagemEstatisticaService(_context , viagemEstatisticaRepository , unitOfWork);
+                _veiculoEstatisticaService = new VeiculoEstatisticaService(_context , cache);
             }
             catch (Exception error)
             {
@@ -2447,6 +2450,44 @@ namespace FrotiX.Controllers
             {
                 Alerta.TratamentoErroComLinha("ViagemController.cs" , "SaveImage" , error);
                 return StatusCode(500);
+            }
+        }
+
+        /// <summary>
+        /// Obtém estatísticas de viagens de um veículo para validação inteligente
+        /// Usado pela IA evolutiva para calibrar alertas baseados no histórico
+        /// </summary>
+        [HttpGet]
+        [Route("EstatisticasVeiculo")]
+        public async Task<IActionResult> GetEstatisticasVeiculo([FromQuery] Guid veiculoId)
+        {
+            try
+            {
+                if (veiculoId == Guid.Empty)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "VeiculoId é obrigatório"
+                    });
+                }
+
+                var estatisticas = await _veiculoEstatisticaService.ObterEstatisticasAsync(veiculoId);
+
+                return Json(new
+                {
+                    success = true,
+                    data = estatisticas
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("ViagemController.cs", "GetEstatisticasVeiculo", error);
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro ao obter estatísticas do veículo"
+                });
             }
         }
 

@@ -1000,6 +1000,13 @@ $("#modalFinalizaViagem").on("shown.bs.modal", function (event)
 {
     try
     {
+        // Reset do validador IA ao abrir o modal
+        if (window.ValidadorFinalizacaoIA && window.ValidadorFinalizacaoIA.resetarConfirmacoes)
+        {
+            window.ValidadorFinalizacaoIA.resetarConfirmacoes();
+            console.log("🔄 ValidadorFinalizacaoIA: confirmações resetadas");
+        }
+
         // 1) tenta pegar do clique
         let $btn = $(event.relatedTarget || []);
         // 2) fallback: pegar do atributo gravado no modal
@@ -2071,11 +2078,11 @@ $("#btnFinalizarViagem").click(async function (e)
     try
     {
         e.preventDefault();
-        console.log("🔵 [1/8] Botão Finalizar Viagem clicado");
+        console.log("🔵 [1/9] Botão Finalizar Viagem clicado");
 
-        // VALIDAÇÃO 1: Data Final
+        // VALIDAÇÃO 1: Data Final (obrigatória)
         const DataFinal = $("#txtDataFinal").val();
-        console.log("🔵 [2/8] Verificando Data Final:", DataFinal);
+        console.log("🔵 [2/9] Verificando Data Final:", DataFinal);
         if (DataFinal === "")
         {
             console.log("❌ Data Final vazia - parando execução");
@@ -2083,32 +2090,9 @@ $("#btnFinalizarViagem").click(async function (e)
             return;
         }
 
-        // VALIDAÇÃO: Data Final não pode ser superior à data atual
-        const dataFinalParsed = parseDataBR(DataFinal);
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        if (dataFinalParsed > hoje)
-        {
-            console.log("❌ Data Final superior a hoje - parando execução");
-            $("#txtDataFinal").val("");
-            $("#txtDataFinal").focus();
-            AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
-            return;
-        }
-
-        // VALIDAÇÃO 2: Validação Assíncrona de Datas
-        console.log("🔵 [3/8] Validando datas...");
-        const datasOk = await validarDatasSimples();
-        console.log("🔵 [3/8] Resultado validarDatasSimples:", datasOk);
-        if (!datasOk)
-        {
-            console.log("❌ Validação de datas falhou - parando execução");
-            return;
-        }
-
-        // VALIDAÇÃO 3: Hora Final
+        // VALIDAÇÃO 2: Hora Final (obrigatória)
         const HoraFinal = $("#txtHoraFinal").val();
-        console.log("🔵 [4/8] Verificando Hora Final:", HoraFinal);
+        console.log("🔵 [3/9] Verificando Hora Final:", HoraFinal);
         if (HoraFinal === "")
         {
             console.log("❌ Hora Final vazia - parando execução");
@@ -2116,9 +2100,9 @@ $("#btnFinalizarViagem").click(async function (e)
             return;
         }
 
-        // VALIDAÇÃO 4: KM Final
+        // VALIDAÇÃO 3: KM Final (obrigatório)
         const KmFinal = $("#txtKmFinal").val();
-        console.log("🔵 [5/8] Verificando KM Final:", KmFinal);
+        console.log("🔵 [4/9] Verificando KM Final:", KmFinal);
         if (KmFinal === "")
         {
             console.log("❌ KM Final vazio - parando execução");
@@ -2126,20 +2110,75 @@ $("#btnFinalizarViagem").click(async function (e)
             return;
         }
 
-        // VALIDAÇÃO 5: Validação Assíncrona de KM
-        console.log("🔵 [6/8] Validando quilometragem...");
-        const kmOk = await validarKmInicialFinal();
-        console.log("🔵 [6/8] Resultado validarKmInicialFinal:", kmOk);
-        if (!kmOk)
+        // VALIDAÇÃO 4: IA EVOLUTIVA - Validação Inteligente
+        console.log("🔵 [5/9] Validação Inteligente (IA)...");
+        if (typeof validarFinalizacaoComIA === 'function')
         {
-            console.log("❌ Validação de KM falhou - parando execução");
-            return;
+            // Obter dados do modal
+            const modalEl = document.getElementById('modalFinalizaViagem');
+            const veiculoId = modalEl?.getAttribute('data-veiculo-id') || '';
+            const DataInicial = $("#txtDataInicial").val();
+            const HoraInicial = $("#txtHoraInicial").val();
+            const KmInicial = $("#txtKmInicial").val();
+
+            console.log("🔵 [5/9] Dados para validação IA:", {
+                dataInicial: DataInicial,
+                horaInicial: HoraInicial,
+                dataFinal: DataFinal,
+                horaFinal: HoraFinal,
+                kmInicial: KmInicial,
+                kmFinal: KmFinal,
+                veiculoId: veiculoId
+            });
+
+            const iaValida = await validarFinalizacaoComIA({
+                dataInicial: DataInicial,
+                horaInicial: HoraInicial,
+                dataFinal: DataFinal,
+                horaFinal: HoraFinal,
+                kmInicial: KmInicial,
+                kmFinal: KmFinal,
+                veiculoId: veiculoId
+            });
+
+            if (!iaValida)
+            {
+                console.log("❌ Validação IA falhou - parando execução");
+                return;
+            }
+            console.log("✅ Validação IA passou!");
+        }
+        else
+        {
+            // Fallback: validações antigas (compatibilidade)
+            console.log("⚠️ ValidadorFinalizacaoIA não disponível, usando validações antigas");
+
+            // VALIDAÇÃO: Data Final não pode ser superior à data atual
+            const dataFinalParsed = parseDataBR(DataFinal);
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            if (dataFinalParsed > hoje)
+            {
+                console.log("❌ Data Final superior a hoje - parando execução");
+                $("#txtDataFinal").val("");
+                $("#txtDataFinal").focus();
+                AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+                return;
+            }
+
+            // Validação de datas
+            const datasOk = await validarDatasSimples();
+            if (!datasOk) return;
+
+            // Validação de KM
+            const kmOk = await validarKmInicialFinal();
+            if (!kmOk) return;
         }
 
-        // VALIDAÇÃO 6: Nível de Combustível Final
-        console.log("🔵 [7/8] Verificando nível de combustível...");
+        // VALIDAÇÃO 5: Nível de Combustível Final
+        console.log("🔵 [6/9] Verificando nível de combustível...");
         var niveisElement = document.getElementById("ddtCombustivelFinal");
-        console.log("🔵 [7/8] Elemento ddtCombustivelFinal:", niveisElement);
+        console.log("🔵 [6/9] Elemento ddtCombustivelFinal:", niveisElement);
 
         if (!niveisElement)
         {

@@ -610,6 +610,173 @@ window.SweetAlertInterop = {
         {
             notify.style.display = "none";
         }, 3000);
+    },
+
+    // =====================================================================
+    // VALIDAÇÃO IA - Design específico para alertas de validação inteligente
+    // =====================================================================
+
+    /**
+     * Mostra alerta de validação IA (erro bloqueante)
+     * Design: Fundo escuro com destaque em vermelho/laranja
+     */
+    ShowValidacaoIAErro: async function (titulo, mensagem, confirmButtonText = "Entendi")
+    {
+        const iconHtml = `
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #ff416c, #ff4b2b); margin-bottom: 15px; box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);">
+                <i class="fa-duotone fa-triangle-exclamation" style="font-size: 36px; color: white;"></i>
+            </div>`;
+
+        const msg = `
+        <div style="background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: #e0e0e0; border: 1px solid #ff416c40;">
+          <div style="background: linear-gradient(135deg, #1a1a2e, #0f0f23); padding: 25px; text-align: center; border-bottom: 2px solid #ff416c;">
+            ${iconHtml}
+            <div style="font-size: 22px; color: #ff6b6b; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${titulo}</div>
+          </div>
+
+          <div style="padding: 25px; font-size: 15px; line-height: 1.7; text-align: left; background: #16213e;">
+            <div style="background: #1a1a2e; border-radius: 8px; padding: 15px; border-left: 4px solid #ff416c;">
+              ${mensagem}
+            </div>
+          </div>
+
+          <div style="background: #0f0f23; padding: 20px; text-align: center; border-top: 1px solid #ffffff10;">
+            <button id="btnConfirmIA" style="
+              background: linear-gradient(135deg, #ff416c, #ff4b2b);
+              border: none;
+              color: #fff;
+              padding: 12px 30px;
+              font-size: 15px;
+              font-weight: bold;
+              border-radius: 8px;
+              cursor: pointer;
+              box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3);
+              transition: all 0.3s ease;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 65, 108, 0.4)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 65, 108, 0.3)';">
+              <i class="fa-duotone fa-check" style="margin-right: 8px;"></i>${confirmButtonText}
+            </button>
+          </div>
+        </div>`;
+
+        return new Promise((resolve) =>
+        {
+            Swal.fire({
+                showConfirmButton: false,
+                html: msg,
+                backdrop: 'rgba(0,0,0,0.85)',
+                heightAuto: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                focusConfirm: false,
+                customClass: {
+                    popup: 'swal2-popup swal2-no-border swal2-no-shadow'
+                },
+                didOpen: () =>
+                {
+                    const popup = document.querySelector('.swal2-popup');
+                    if (popup)
+                    {
+                        popup.style.border = 'none';
+                        popup.style.boxShadow = '0 0 50px rgba(255, 65, 108, 0.2)';
+                        popup.style.background = 'transparent';
+                    }
+                    const confirmBtn = document.getElementById('btnConfirmIA');
+                    if (confirmBtn) confirmBtn.onclick = () => { Swal.close(); resolve(true); };
+                }
+            });
+        });
+    },
+
+    /**
+     * Mostra alerta de validação IA (confirmação)
+     * Design: Fundo escuro com destaque em amarelo/laranja
+     */
+    ShowValidacaoIAConfirmar: async function (titulo, mensagem, confirmButtonText = "Confirmar", cancelButtonText = "Corrigir")
+    {
+        const iconHtml = `
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f7971e, #ffd200); margin-bottom: 15px; box-shadow: 0 4px 15px rgba(247, 151, 30, 0.4);">
+                <i class="fa-duotone fa-brain-circuit" style="font-size: 36px; color: #1a1a2e;"></i>
+            </div>`;
+
+        const msg = `
+        <div style="background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: #e0e0e0; border: 1px solid #f7971e40;">
+          <div style="background: linear-gradient(135deg, #1a1a2e, #0f0f23); padding: 25px; text-align: center; border-bottom: 2px solid #f7971e;">
+            ${iconHtml}
+            <div style="font-size: 22px; color: #ffd200; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${titulo}</div>
+            <div style="font-size: 12px; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px;">
+              <i class="fa-duotone fa-robot" style="margin-right: 5px;"></i>Análise Inteligente
+            </div>
+          </div>
+
+          <div style="padding: 25px; font-size: 15px; line-height: 1.7; text-align: left; background: #16213e;">
+            <div style="background: #1a1a2e; border-radius: 8px; padding: 15px; border-left: 4px solid #f7971e;">
+              ${mensagem}
+            </div>
+          </div>
+
+          <div style="background: #0f0f23; padding: 20px; text-align: center; border-top: 1px solid #ffffff10; display: flex; justify-content: center; gap: 15px;">
+            <button id="btnCancelIA" style="
+              background: #3d3d5c;
+              border: 1px solid #555;
+              color: #ccc;
+              padding: 12px 25px;
+              font-size: 15px;
+              font-weight: 500;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.3s ease;
+            " onmouseover="this.style.background='#4d4d6c'; this.style.borderColor='#777';"
+               onmouseout="this.style.background='#3d3d5c'; this.style.borderColor='#555';">
+              <i class="fa-duotone fa-pen-to-square" style="margin-right: 8px;"></i>${cancelButtonText}
+            </button>
+            <button id="btnConfirmIA" style="
+              background: linear-gradient(135deg, #f7971e, #ffd200);
+              border: none;
+              color: #1a1a2e;
+              padding: 12px 25px;
+              font-size: 15px;
+              font-weight: bold;
+              border-radius: 8px;
+              cursor: pointer;
+              box-shadow: 0 4px 15px rgba(247, 151, 30, 0.3);
+              transition: all 0.3s ease;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(247, 151, 30, 0.4)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(247, 151, 30, 0.3)';">
+              <i class="fa-duotone fa-check-double" style="margin-right: 8px;"></i>${confirmButtonText}
+            </button>
+          </div>
+        </div>`;
+
+        return new Promise((resolve) =>
+        {
+            Swal.fire({
+                showConfirmButton: false,
+                html: msg,
+                backdrop: 'rgba(0,0,0,0.85)',
+                heightAuto: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                focusConfirm: false,
+                customClass: {
+                    popup: 'swal2-popup swal2-no-border swal2-no-shadow'
+                },
+                didOpen: () =>
+                {
+                    const popup = document.querySelector('.swal2-popup');
+                    if (popup)
+                    {
+                        popup.style.border = 'none';
+                        popup.style.boxShadow = '0 0 50px rgba(247, 151, 30, 0.2)';
+                        popup.style.background = 'transparent';
+                    }
+                    const confirmBtn = document.getElementById('btnConfirmIA');
+                    if (confirmBtn) confirmBtn.onclick = () => { Swal.close(); resolve(true); };
+                    const cancelBtn = document.getElementById('btnCancelIA');
+                    if (cancelBtn) cancelBtn.onclick = () => { Swal.close(); resolve(false); };
+                }
+            });
+        });
     }
 };
 

@@ -235,6 +235,7 @@ namespace FrotiX
 
                 services.AddScoped<IViagemEstatisticaRepository, ViagemEstatisticaRepository>();
                 services.AddScoped<ViagemEstatisticaService>();
+                services.AddScoped<VeiculoEstatisticaService>();
 
                 // Repositórios de Alertas
                 services.AddScoped<IAlertasFrotiXRepository, AlertasFrotiXRepository>();

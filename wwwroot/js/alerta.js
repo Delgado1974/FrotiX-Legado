@@ -81,6 +81,45 @@
         return Promise.resolve(false);
     };
 
+    // ===== VALIDAÇÃO IA - Alertas com design específico para validação inteligente =====
+
+    /**
+     * Alerta de erro da validação IA (bloqueante)
+     * @param {string} titulo - Título do alerta
+     * @param {string} mensagem - Mensagem com HTML suportado
+     * @param {string} confirm - Texto do botão de confirmação
+     * @returns {Promise}
+     */
+    window.Alerta.ValidacaoIAErro = window.Alerta.ValidacaoIAErro || function (titulo, mensagem, confirm = "Entendi")
+    {
+        if (window.SweetAlertInterop?.ShowValidacaoIAErro)
+        {
+            return SweetAlertInterop.ShowValidacaoIAErro(titulo, mensagem, confirm);
+        }
+        // Fallback para alerta padrão
+        console.warn("SweetAlertInterop.ShowValidacaoIAErro não disponível, usando fallback.");
+        return window.Alerta.Erro(titulo, mensagem, confirm);
+    };
+
+    /**
+     * Alerta de confirmação da validação IA
+     * @param {string} titulo - Título do alerta
+     * @param {string} mensagem - Mensagem com HTML suportado
+     * @param {string} confirm - Texto do botão de confirmação
+     * @param {string} cancel - Texto do botão de cancelamento
+     * @returns {Promise<boolean>} true se confirmou, false se cancelou
+     */
+    window.Alerta.ValidacaoIAConfirmar = window.Alerta.ValidacaoIAConfirmar || function (titulo, mensagem, confirm = "Confirmar", cancel = "Corrigir")
+    {
+        if (window.SweetAlertInterop?.ShowValidacaoIAConfirmar)
+        {
+            return SweetAlertInterop.ShowValidacaoIAConfirmar(titulo, mensagem, confirm, cancel);
+        }
+        // Fallback para confirmação padrão
+        console.warn("SweetAlertInterop.ShowValidacaoIAConfirmar não disponível, usando fallback.");
+        return window.Alerta.Confirmar(titulo, mensagem, confirm, cancel);
+    };
+
     // ===== FUNÇÃO MELHORADA: Tratamento de Erros =====
     function _TratamentoErroComLinha(classeOuArquivo, metodo, erro)
     {
