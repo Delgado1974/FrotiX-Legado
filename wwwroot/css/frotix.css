@@ -3284,6 +3284,23 @@ table thead th {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
+/* Exceção: Tabelas do Dashboard de Abastecimento usam paleta caramelo */
+.table-abast thead,
+table.table-abast thead,
+.table.table-abast thead {
+    background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;
+    background-color: #a8784c !important;
+}
+
+.table-abast thead th,
+table.table-abast thead th,
+.table.table-abast thead th {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
 /* Ícones de ordenação do DataTable - brancos */
 table.dataTable thead .sorting::before,
 table.dataTable thead .sorting::after,
