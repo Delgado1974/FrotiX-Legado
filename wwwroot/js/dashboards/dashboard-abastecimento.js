@@ -99,7 +99,7 @@ function inicializarTabs() {
             });
         });
 
-        document.getElementById('filtroAnoGeral')?.addEventListener('change', function () {
+        document.getElementById('btnFiltrarGeral')?.addEventListener('click', function () {
             carregarDadosGerais();
         });
 
@@ -133,11 +133,12 @@ function carregarDadosGerais() {
     try {
         mostrarLoading();
         const ano = document.getElementById('filtroAnoGeral')?.value || '';
+        const mes = document.getElementById('filtroMesGeral')?.value || '';
 
         $.ajax({
             url: '/api/abastecimento/DashboardDados',
             type: 'GET',
-            data: { ano: ano || null },
+            data: { ano: ano || null, mes: mes || null },
             success: function (data) {
                 try {
                     dadosGerais = data;
@@ -1088,8 +1089,10 @@ function preencherFiltroAnos(anos) {
         const selectGeral = document.getElementById('filtroAnoGeral');
         const selectMensal = document.getElementById('filtroAnoMensal');
         const selectVeiculo = document.getElementById('filtroAnoVeiculo');
+        const selectMesGeral = document.getElementById('filtroMesGeral');
 
         const anoAtual = new Date().getFullYear();
+        const mesAtual = new Date().getMonth() + 1; // getMonth() retorna 0-11
 
         [selectGeral, selectMensal, selectVeiculo].forEach(select => {
             if (!select) return;
@@ -1103,12 +1106,20 @@ function preencherFiltroAnos(anos) {
                 const option = document.createElement('option');
                 option.value = ano;
                 option.textContent = ano;
-                if (!isGeral && ano === anoAtual) option.selected = true;
+                // Seleciona o ano atual por padrão em todos os filtros
+                if (ano === anoAtual) option.selected = true;
                 select.appendChild(option);
             });
 
+            // Mantém o valor selecionado se já havia um
             if (valorAtual) select.value = valorAtual;
         });
+
+        // Define o mês atual no filtro de mês geral (apenas na primeira carga)
+        if (selectMesGeral && !selectMesGeral.dataset.initialized) {
+            selectMesGeral.value = mesAtual.toString();
+            selectMesGeral.dataset.initialized = 'true';
+        }
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "preencherFiltroAnos", error);
     }
