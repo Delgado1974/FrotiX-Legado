@@ -52,6 +52,30 @@ function esconderLoading() {
     if (modalLoading) {
         modalLoading.hide();
     }
+    // Força cor caramelo nos headers das tabelas após fechar modal
+    forcarCorCarameloTabelas();
+}
+
+/**
+ * Força a cor caramelo nos headers das tabelas .ftx-tabela-caramelo
+ * Necessário porque algum handler global muda a cor para azul
+ */
+function forcarCorCarameloTabelas() {
+    setTimeout(function() {
+        document.querySelectorAll('.ftx-tabela-caramelo thead').forEach(thead => {
+            thead.style.setProperty('background', 'linear-gradient(135deg, #a8784c 0%, #c4956a 100%)', 'important');
+            thead.style.setProperty('background-color', '#a8784c', 'important');
+        });
+        document.querySelectorAll('.ftx-tabela-caramelo thead tr').forEach(tr => {
+            tr.style.setProperty('background', 'linear-gradient(135deg, #a8784c 0%, #c4956a 100%)', 'important');
+            tr.style.setProperty('background-color', '#a8784c', 'important');
+        });
+        document.querySelectorAll('.ftx-tabela-caramelo thead th').forEach(th => {
+            th.style.setProperty('background', 'transparent', 'important');
+            th.style.setProperty('background-color', 'transparent', 'important');
+            th.style.setProperty('color', '#ffffff', 'important');
+        });
+    }, 100);
 }
 
 // ====== INICIALIZAÇÃO ======
