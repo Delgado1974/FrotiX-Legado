@@ -356,12 +356,17 @@ function carregarDadosVeiculo() {
                     preencherFiltrosVeiculo(data);
                     renderizarAbaVeiculo(data);
 
-                    // Renderizar heatmap do veículo se uma placa foi selecionada
+                    // Renderizar heatmap: por placa específica ou por modelo
                     const placaSelecionada = placaSelect?.options[placaSelect.selectedIndex]?.text;
                     if (veiculoId && placaSelecionada && placaSelecionada !== 'Todas') {
-                        renderizarHeatmapVeiculo(ano || null, placaSelecionada);
+                        // Placa específica selecionada
+                        renderizarHeatmapVeiculo(ano || null, placaSelecionada, null);
+                    } else if (modelo) {
+                        // Modelo selecionado, sem placa específica
+                        renderizarHeatmapVeiculo(ano || null, null, modelo);
                     } else {
-                        renderizarHeatmapVeiculo(null, null);
+                        // Nenhum filtro específico
+                        renderizarHeatmapVeiculo(null, null, null);
                     }
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosVeiculo.success", error);
@@ -1606,17 +1611,19 @@ function renderizarHeatmapCategoria(ano) {
 }
 
 /**
- * Renderiza o Mapa de Calor: Dia da Semana x Hora de um Veículo específico (Aba 3)
+ * Renderiza o Mapa de Calor: Dia da Semana x Hora de um Veículo ou Modelo específico (Aba 3)
  */
-function renderizarHeatmapVeiculo(ano, placa) {
+function renderizarHeatmapVeiculo(ano, placa, tipoVeiculo) {
     try {
         const container = document.getElementById('heatmapVeiculo');
         const containerVazio = document.getElementById('heatmapVeiculoVazio');
+        const legendaContainer = document.getElementById('legendaHeatmapVeiculo');
         if (!container) return;
 
-        // Se não tem placa selecionada, mostrar mensagem
-        if (!placa) {
+        // Se não tem placa nem modelo selecionado, mostrar mensagem
+        if (!placa && !tipoVeiculo) {
             container.style.display = 'none';
+            if (legendaContainer) legendaContainer.innerHTML = '';
             if (containerVazio) containerVazio.style.display = 'block';
             return;
         }
@@ -1627,7 +1634,7 @@ function renderizarHeatmapVeiculo(ano, placa) {
         $.ajax({
             url: '/api/abastecimento/DashboardHeatmapVeiculo',
             type: 'GET',
-            data: { ano: ano || null, placa: placa },
+            data: { ano: ano || null, placa: placa || null, tipoVeiculo: tipoVeiculo || null },
             success: function (data) {
                 try {
                     if (heatmapVeiculo) {
@@ -1691,10 +1698,12 @@ function renderizarHeatmapVeiculo(ano, placa) {
                         cellClick: function(args) {
                             var diaSemana = args.xValue;
                             var hora = parseInt(horas[args.yValue]);
+                            var filtroLabel = placa || tipoVeiculo || 'Veículo';
                             abrirModalDetalhes({
-                                titulo: 'Abastecimentos - ' + placa + ' - ' + diasSemana[diaSemana] + ' às ' + horas[args.yValue],
+                                titulo: 'Abastecimentos - ' + filtroLabel + ' - ' + diasSemana[diaSemana] + ' às ' + horas[args.yValue],
                                 ano: ano,
-                                placa: placa,
+                                placa: placa || null,
+                                tipoVeiculo: tipoVeiculo || null,
                                 diaSemana: diaSemana,
                                 hora: hora
                             });

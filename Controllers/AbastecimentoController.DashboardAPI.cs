@@ -602,21 +602,32 @@ namespace FrotiX.Controllers
         }
 
         /// <summary>
-        /// Retorna dados para o Mapa de Calor: Dia da Semana x Hora de um veículo específico
+        /// Retorna dados para o Mapa de Calor: Dia da Semana x Hora de um veículo ou modelo específico
         /// </summary>
         [Route("DashboardHeatmapVeiculo")]
         [HttpGet]
-        public IActionResult DashboardHeatmapVeiculo(int? ano, string? placa)
+        public IActionResult DashboardHeatmapVeiculo(int? ano, string? placa, string? tipoVeiculo)
         {
             try
             {
-                if (string.IsNullOrEmpty(placa))
+                // Se não tem placa nem modelo, retorna vazio
+                if (string.IsNullOrEmpty(placa) && string.IsNullOrEmpty(tipoVeiculo))
                 {
                     return Ok(new { xLabels = new string[0], yLabels = new string[0], data = new object[0] });
                 }
 
                 var query = _unitOfWork.ViewAbastecimentos.GetAll()
-                    .Where(a => a.DataHora.HasValue && a.Placa == placa);
+                    .Where(a => a.DataHora.HasValue);
+
+                // Filtrar por placa específica ou por modelo
+                if (!string.IsNullOrEmpty(placa))
+                {
+                    query = query.Where(a => a.Placa == placa);
+                }
+                else if (!string.IsNullOrEmpty(tipoVeiculo))
+                {
+                    query = query.Where(a => a.TipoVeiculo == tipoVeiculo);
+                }
 
                 if (ano.HasValue && ano > 0)
                     query = query.Where(a => a.DataHora.Value.Year == ano.Value);
