@@ -67,12 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /**
  * Inicializa os filtros buscando anos disponíveis e depois carrega os dados filtrados
+ * Lógica: Ano com último registro -> Mês daquele ano com último registro
  */
 function inicializarFiltrosECarregar() {
     try {
         mostrarLoading();
 
-        // Busca rápida só para obter anos disponíveis
+        // Busca para obter anos disponíveis
         $.ajax({
             url: '/api/abastecimento/DashboardDados',
             type: 'GET',
@@ -81,8 +82,14 @@ function inicializarFiltrosECarregar() {
                 try {
                     const anos = data.anosDisponiveis || [];
 
-                    // Ano mais recente disponível
-                    const anoMaisRecente = anos.length > 0 ? anos[0] : new Date().getFullYear();
+                    if (anos.length === 0) {
+                        // Sem dados disponíveis
+                        esconderLoading();
+                        return;
+                    }
+
+                    // Ano com último registro (primeiro da lista, ordenado desc)
+                    const anoUltimoRegistro = anos[0];
 
                     // Preencher selects de ano
                     const selectGeral = document.getElementById('filtroAnoGeral');
@@ -99,37 +106,29 @@ function inicializarFiltrosECarregar() {
                             option.textContent = ano;
                             select.appendChild(option);
                         });
-                        select.value = anoMaisRecente.toString();
+                        select.value = anoUltimoRegistro.toString();
                         select.dataset.initialized = 'true';
                     });
 
-                    // Buscar dados DO ANO MAIS RECENTE para determinar o mês correto
+                    // Buscar dados DO ANO COM ÚLTIMO REGISTRO para determinar o mês
                     $.ajax({
                         url: '/api/abastecimento/DashboardDados',
                         type: 'GET',
-                        data: { ano: anoMaisRecente, mes: null },
+                        data: { ano: anoUltimoRegistro, mes: null },
                         success: function (dataAno) {
                             try {
-                                const mesAtual = new Date().getMonth() + 1;
                                 let mesSelecionado = '';
                                 const consumoPorMes = dataAno.consumoPorMes || [];
 
+                                // Encontrar o último mês com dados (maior número de mês com valor > 0)
                                 if (consumoPorMes.length > 0) {
-                                    // Verificar se o mês atual tem dados NO ANO SELECIONADO
-                                    const temDadosMesAtual = consumoPorMes.some(item => item.mes === mesAtual && item.valor > 0);
+                                    const mesesComDados = consumoPorMes
+                                        .filter(item => item.valor > 0)
+                                        .map(item => item.mes)
+                                        .sort((a, b) => b - a); // Ordenar decrescente
 
-                                    if (temDadosMesAtual) {
-                                        mesSelecionado = mesAtual.toString();
-                                    } else {
-                                        // Último mês com dados no ano selecionado
-                                        const mesesComDados = consumoPorMes
-                                            .filter(item => item.valor > 0)
-                                            .map(item => item.mes)
-                                            .sort((a, b) => b - a);
-
-                                        if (mesesComDados.length > 0) {
-                                            mesSelecionado = mesesComDados[0].toString();
-                                        }
+                                    if (mesesComDados.length > 0) {
+                                        mesSelecionado = mesesComDados[0].toString();
                                     }
                                 }
 
@@ -161,8 +160,6 @@ function inicializarFiltrosECarregar() {
             error: function (xhr, status, error) {
                 console.error('Erro ao inicializar filtros:', error);
                 esconderLoading();
-                // Tenta carregar sem filtros
-                carregarDadosGerais();
             }
         });
     } catch (error) {
@@ -306,7 +303,7 @@ function carregarDadosGerais() {
 function carregarDadosMensais() {
     try {
         mostrarLoading();
-        const ano = document.getElementById('filtroAnoMensal')?.value || new Date().getFullYear();
+        const ano = document.getElementById('filtroAnoMensal')?.value || '';
         const mes = document.getElementById('filtroMesMensal')?.value || '';
 
         $.ajax({
@@ -338,7 +335,7 @@ function carregarDadosMensais() {
 function carregarDadosVeiculo() {
     try {
         mostrarLoading();
-        const ano = document.getElementById('filtroAnoVeiculo')?.value || new Date().getFullYear();
+        const ano = document.getElementById('filtroAnoVeiculo')?.value || '';
         const mes = document.getElementById('filtroMesVeiculo')?.value || '';
         const modelo = document.getElementById('filtroModeloVeiculo')?.value || '';
         const placaSelect = document.getElementById('filtroPlacaVeiculo');
@@ -1220,76 +1217,6 @@ function destruirGraficosVeiculo() {
 }
 
 // ====== FUNÇÕES AUXILIARES ======
-
-function preencherFiltroAnos(anos, consumoPorMes) {
-    try {
-        const selectGeral = document.getElementById('filtroAnoGeral');
-        const selectMensal = document.getElementById('filtroAnoMensal');
-        const selectVeiculo = document.getElementById('filtroAnoVeiculo');
-        const selectMesGeral = document.getElementById('filtroMesGeral');
-
-        const anoAtual = new Date().getFullYear();
-        const mesAtual = new Date().getMonth() + 1; // 1-12
-
-        // Ano mais recente disponível nos dados (primeiro da lista, pois vem ordenado desc)
-        const anoMaisRecente = anos && anos.length > 0 ? anos[0] : anoAtual;
-
-        [selectGeral, selectMensal, selectVeiculo].forEach(select => {
-            if (!select) return;
-
-            const valorAtual = select.value;
-            const isGeral = select.id === 'filtroAnoGeral';
-            const jáInicializado = select.dataset.initialized === 'true';
-
-            select.innerHTML = isGeral ? '<option value="">Todos os Anos</option>' : '';
-
-            anos.forEach(ano => {
-                const option = document.createElement('option');
-                option.value = ano;
-                option.textContent = ano;
-                select.appendChild(option);
-            });
-
-            // Na primeira carga, seleciona o ano mais recente disponível
-            if (!jáInicializado && !valorAtual) {
-                select.value = anoMaisRecente.toString();
-                select.dataset.initialized = 'true';
-            } else if (valorAtual) {
-                // Mantém o valor selecionado se já havia um
-                select.value = valorAtual;
-            }
-        });
-
-        // Posicionar o mês: mês atual se tiver dados, senão último mês com dados
-        if (selectMesGeral && selectMesGeral.dataset.initialized !== 'true') {
-            let mesSelecionado = '';
-
-            if (consumoPorMes && consumoPorMes.length > 0) {
-                // Verificar se o mês atual tem dados
-                const temDadosMesAtual = consumoPorMes.some(item => item.mes === mesAtual && item.valor > 0);
-
-                if (temDadosMesAtual) {
-                    mesSelecionado = mesAtual.toString();
-                } else {
-                    // Encontrar o último mês com dados (maior número de mês com valor > 0)
-                    const mesesComDados = consumoPorMes
-                        .filter(item => item.valor > 0)
-                        .map(item => item.mes)
-                        .sort((a, b) => b - a); // Ordenar decrescente
-
-                    if (mesesComDados.length > 0) {
-                        mesSelecionado = mesesComDados[0].toString();
-                    }
-                }
-            }
-
-            selectMesGeral.value = mesSelecionado;
-            selectMesGeral.dataset.initialized = 'true';
-        }
-    } catch (error) {
-        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "preencherFiltroAnos", error);
-    }
-}
 
 function preencherFiltrosVeiculo(data) {
     try {
