@@ -2,7 +2,7 @@
 @model FrotiX.Pages.Abastecimento.DashboardAbastecimentoModel
 @{
     ViewData["Title"] = "Dashboard de Abastecimentos";
-    ViewData["PageName"] = "abastecimento_dashboard";
+    ViewData["PageName"] = "abastecimento_dashboardabastecimento";
     ViewData["Heading"] = "<i class='fa-duotone fa-gas-pump'></i> Dashboard: <span class='fw-300'>Abastecimentos</span>";
     ViewData["Category1"] = "Dashboards";
     ViewData["PageIcon"] = "fa-duotone fa-chart-line";
@@ -672,10 +672,10 @@
                     </h5>
                     <div class="table-responsive">
                         <table class="table table-sm table-abast mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Ano</th>
-                                    <th class="text-end">Valor (R$)</th>
+                            <thead style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
+                                <tr style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
+                                    <th style="background: transparent !important; color: white !important;">Ano</th>
+                                    <th class="text-end" style="background: transparent !important; color: white !important;">Valor (R$)</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaResumoPorAno">
@@ -846,10 +846,10 @@
                     </h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-abast">
-                            <thead>
-                                <tr>
-                                    <th>Tipo Veículo</th>
-                                    <th class="text-end">Valor</th>
+                            <thead style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
+                                <tr style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
+                                    <th style="background: transparent !important; color: white !important;">Tipo Veículo</th>
+                                    <th class="text-end" style="background: transparent !important; color: white !important;">Valor</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaValorPorTipo">
@@ -870,11 +870,11 @@
                     </h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-abast">
-                            <thead>
-                                <tr>
-                                    <th>Placa</th>
-                                    <th>Tipo</th>
-                                    <th class="text-end">Valor</th>
+                            <thead style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
+                                <tr style="background: linear-gradient(135deg, #a8784c 0%, #c4956a 100%) !important;">
+                                    <th style="background: transparent !important; color: white !important;">Placa</th>
+                                    <th style="background: transparent !important; color: white !important;">Tipo</th>
+                                    <th class="text-end" style="background: transparent !important; color: white !important;">Valor</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaValorPorPlaca">
