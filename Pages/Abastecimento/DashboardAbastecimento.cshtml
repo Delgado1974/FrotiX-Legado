@@ -683,6 +683,39 @@
         padding: 10px;
     }
 
+    /* Legenda customizada com faixas de valores */
+    .heatmap-legenda-custom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        flex-wrap: wrap;
+    }
+
+    .heatmap-legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.72rem;
+        color: #555;
+    }
+
+    .heatmap-legenda-cor {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1px solid #ddd;
+    }
+
+    .heatmap-legenda-range {
+        font-family: 'Outfit', sans-serif;
+        white-space: nowrap;
+    }
+
     /* Responsividade */
     @@media (max-width: 992px) {
         .valor-metrica-abast { font-size: 1.3rem; }
@@ -874,10 +907,11 @@
                     <h5 class="chart-title-abast">
                         <i class="fa-duotone fa-grid-2"></i>
                         Mapa de Calor - Consumo por Dia/Hora
-                        <span class="chart-subtitle">Visualize quando ocorrem mais abastecimentos</span>
+                        <span class="chart-subtitle">Visualize quando ocorrem mais abastecimentos (clique para ver detalhes)</span>
                     </h5>
                     <div class="heatmap-container">
-                        <div id="heatmapDiaHora" style="height: 320px;"></div>
+                        <div id="heatmapDiaHora" style="height: 450px;"></div>
+                        <div id="legendaHeatmapDiaHora" class="heatmap-legenda-custom"></div>
                     </div>
                 </div>
             </div>
@@ -1064,6 +1098,7 @@
                     </h5>
                     <div class="heatmap-container">
                         <div id="heatmapCategoria" style="height: 320px;"></div>
+                        <div id="legendaHeatmapCategoria" class="heatmap-legenda-custom"></div>
                     </div>
                 </div>
             </div>
@@ -1185,6 +1220,25 @@
                         <span class="chart-subtitle">Por placa individual</span>
                     </h5>
                     <div id="chartRankingVeiculos" style="height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-lg-12">
+                <div class="chart-container-abast">
+                    <h5 class="chart-title-abast">
+                        <i class="fa-duotone fa-fire-flame-simple"></i>
+                        Mapa de Calor - Dia da Semana x Hora
+                        <span class="chart-subtitle">Padrão de abastecimento do veículo selecionado</span>
+                    </h5>
+                    <div class="heatmap-container">
+                        <div id="heatmapVeiculo" style="height: 380px;"></div>
+                        <div id="legendaHeatmapVeiculo" class="heatmap-legenda-custom"></div>
+                    </div>
+                    <div id="heatmapVeiculoVazio" class="text-center text-muted py-4" style="display: none;">
+                        Selecione um veículo para visualizar o padrão de abastecimento
+                    </div>
                 </div>
             </div>
         </div>

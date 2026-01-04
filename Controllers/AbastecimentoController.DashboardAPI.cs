@@ -601,6 +601,79 @@ namespace FrotiX.Controllers
             }
         }
 
+        /// <summary>
+        /// Retorna dados para o Mapa de Calor: Dia da Semana x Hora de um veículo específico
+        /// </summary>
+        [Route("DashboardHeatmapVeiculo")]
+        [HttpGet]
+        public IActionResult DashboardHeatmapVeiculo(int? ano, string? placa)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(placa))
+                {
+                    return Ok(new { xLabels = new string[0], yLabels = new string[0], data = new object[0] });
+                }
+
+                var query = _unitOfWork.ViewAbastecimentos.GetAll()
+                    .Where(a => a.DataHora.HasValue && a.Placa == placa);
+
+                if (ano.HasValue && ano > 0)
+                    query = query.Where(a => a.DataHora.Value.Year == ano.Value);
+
+                var dados = query.ToList();
+
+                if (!dados.Any())
+                {
+                    return Ok(new { xLabels = new string[0], yLabels = new string[0], data = new object[0] });
+                }
+
+                // Agrupar por Dia da Semana (0-6) e Hora (0-23)
+                var agrupado = dados
+                    .GroupBy(a => new { DiaSemana = (int)a.DataHora.Value.DayOfWeek, Hora = a.DataHora.Value.Hour })
+                    .Select(g => new
+                    {
+                        diaSemana = g.Key.DiaSemana,
+                        hora = g.Key.Hora,
+                        valor = g.Sum(a => ParseDecimal(a.ValorTotal)),
+                        quantidade = g.Count()
+                    })
+                    .ToList();
+
+                // Nomes dos dias da semana em português
+                var diasSemana = new[] { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
+
+                // Criar matriz 7x24 (dias x horas)
+                var matriz = new decimal[7, 24];
+                foreach (var item in agrupado)
+                {
+                    matriz[item.diaSemana, item.hora] = item.valor;
+                }
+
+                // Converter para formato que o HeatMap do Syncfusion espera
+                var heatmapData = new List<object>();
+                for (int dia = 0; dia < 7; dia++)
+                {
+                    for (int hora = 0; hora < 24; hora++)
+                    {
+                        heatmapData.Add(new { x = diasSemana[dia], y = hora.ToString("00") + "h", value = matriz[dia, hora] });
+                    }
+                }
+
+                return Ok(new
+                {
+                    xLabels = diasSemana,
+                    yLabels = Enumerable.Range(0, 24).Select(h => h.ToString("00") + "h").ToArray(),
+                    data = heatmapData
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DashboardHeatmapVeiculo", error);
+                return StatusCode(500, new { message = "Erro ao carregar mapa de calor do veículo" });
+            }
+        }
+
         #endregion
 
         #region Helpers

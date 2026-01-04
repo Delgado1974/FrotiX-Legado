@@ -355,6 +355,14 @@ function carregarDadosVeiculo() {
                     dadosVeiculo = data;
                     preencherFiltrosVeiculo(data);
                     renderizarAbaVeiculo(data);
+
+                    // Renderizar heatmap do veículo se uma placa foi selecionada
+                    const placaSelecionada = placaSelect?.options[placaSelect.selectedIndex]?.text;
+                    if (veiculoId && placaSelecionada && placaSelecionada !== 'Todas') {
+                        renderizarHeatmapVeiculo(ano || null, placaSelecionada);
+                    } else {
+                        renderizarHeatmapVeiculo(null, null);
+                    }
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosVeiculo.success", error);
                 } finally {
@@ -1344,7 +1352,59 @@ function formatarLabelNumero(valor) {
 
 var heatmapDiaHora = null;
 var heatmapCategoria = null;
+var heatmapVeiculo = null;
 var modalDetalhes = null;
+
+// Paleta de cores do heatmap (mesma ordem usada no paletteSettings)
+const HEATMAP_CORES = ['#f5ebe0', '#d4a574', '#c4956a', '#a8784c', '#8b5e3c', '#6d472c'];
+
+/**
+ * Cria a legenda customizada com faixas de valores para o heatmap
+ * @param {string} containerId - ID do container da legenda
+ * @param {Array} dados - Array de valores do heatmap
+ */
+function criarLegendaHeatmap(containerId, dados) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Extrair todos os valores
+    const valores = dados.flat().filter(v => v > 0);
+    if (valores.length === 0) {
+        container.innerHTML = '<span class="text-muted" style="font-size: 0.75rem;">Sem dados para exibir legenda</span>';
+        return;
+    }
+
+    const min = Math.min(...valores);
+    const max = Math.max(...valores);
+    const range = max - min;
+    const steps = HEATMAP_CORES.length;
+    const stepSize = range / (steps - 1);
+
+    // Criar os itens da legenda
+    let html = '';
+    for (let i = 0; i < steps; i++) {
+        const valorInicio = i === 0 ? 0 : min + (stepSize * (i - 0.5));
+        const valorFim = i === steps - 1 ? max : min + (stepSize * (i + 0.5));
+
+        let label;
+        if (i === 0) {
+            label = 'R$ 0';
+        } else if (i === steps - 1) {
+            label = '> R$ ' + formatarNumeroK(valorFim * 0.8);
+        } else {
+            label = 'R$ ' + formatarNumeroK(valorInicio) + ' - ' + formatarNumeroK(valorFim);
+        }
+
+        html += `
+            <div class="heatmap-legenda-item">
+                <div class="heatmap-legenda-cor" style="background-color: ${HEATMAP_CORES[i]};"></div>
+                <span class="heatmap-legenda-range">${label}</span>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
 
 /**
  * Renderiza o Mapa de Calor: Dia da Semana x Hora (Aba 1 - Consumo Geral)
@@ -1408,9 +1468,7 @@ function renderizarHeatmapDiaHora(ano, mes) {
                             type: 'Gradient'
                         },
                         legendSettings: {
-                            visible: true,
-                            position: 'Bottom',
-                            textStyle: { size: '10px', fontFamily: 'Outfit' }
+                            visible: false
                         },
                         tooltipRender: function(args) {
                             args.content = [diasSemana[args.xValue] + ' às ' + horas[args.yValue] + ': ' + formatarMoeda(args.value)];
@@ -1428,6 +1486,9 @@ function renderizarHeatmapDiaHora(ano, mes) {
                         }
                     });
                     heatmapDiaHora.appendTo('#heatmapDiaHora');
+
+                    // Criar legenda customizada com faixas de valores
+                    criarLegendaHeatmap('legendaHeatmapDiaHora', heatmapData);
 
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapDiaHora.success", error);
@@ -1509,9 +1570,7 @@ function renderizarHeatmapCategoria(ano) {
                             type: 'Gradient'
                         },
                         legendSettings: {
-                            visible: true,
-                            position: 'Bottom',
-                            textStyle: { size: '10px', fontFamily: 'Outfit' }
+                            visible: false
                         },
                         tooltipRender: function(args) {
                             args.content = [categorias[args.xValue] + ' - ' + meses[args.yValue] + ': ' + formatarMoeda(args.value)];
@@ -1529,6 +1588,9 @@ function renderizarHeatmapCategoria(ano) {
                     });
                     heatmapCategoria.appendTo('#heatmapCategoria');
 
+                    // Criar legenda customizada com faixas de valores
+                    criarLegendaHeatmap('legendaHeatmapCategoria', heatmapData);
+
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapCategoria.success", error);
                 }
@@ -1540,6 +1602,120 @@ function renderizarHeatmapCategoria(ano) {
         });
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapCategoria", error);
+    }
+}
+
+/**
+ * Renderiza o Mapa de Calor: Dia da Semana x Hora de um Veículo específico (Aba 3)
+ */
+function renderizarHeatmapVeiculo(ano, placa) {
+    try {
+        const container = document.getElementById('heatmapVeiculo');
+        const containerVazio = document.getElementById('heatmapVeiculoVazio');
+        if (!container) return;
+
+        // Se não tem placa selecionada, mostrar mensagem
+        if (!placa) {
+            container.style.display = 'none';
+            if (containerVazio) containerVazio.style.display = 'block';
+            return;
+        }
+
+        container.style.display = 'block';
+        if (containerVazio) containerVazio.style.display = 'none';
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardHeatmapVeiculo',
+            type: 'GET',
+            data: { ano: ano || null, placa: placa },
+            success: function (data) {
+                try {
+                    if (heatmapVeiculo) {
+                        heatmapVeiculo.destroy();
+                        heatmapVeiculo = null;
+                    }
+                    container.innerHTML = '';
+
+                    if (!data.xLabels || data.xLabels.length === 0 || !data.data || data.data.length === 0) {
+                        container.innerHTML = '<div class="text-center text-muted py-4">Sem dados de abastecimento para este veículo</div>';
+                        return;
+                    }
+
+                    // Preparar dados para o HeatMap
+                    var heatmapData = [];
+                    var diasSemana = data.xLabels;
+                    var horas = data.yLabels;
+
+                    // Criar matriz de dados
+                    for (var i = 0; i < diasSemana.length; i++) {
+                        var row = [];
+                        for (var j = 0; j < horas.length; j++) {
+                            var item = data.data.find(d => d.x === diasSemana[i] && d.y === horas[j]);
+                            row.push(item ? item.value : 0);
+                        }
+                        heatmapData.push(row);
+                    }
+
+                    heatmapVeiculo = new ej.heatmap.HeatMap({
+                        titleSettings: { text: '' },
+                        xAxis: {
+                            labels: diasSemana,
+                            textStyle: { size: '11px', fontFamily: 'Outfit' }
+                        },
+                        yAxis: {
+                            labels: horas,
+                            textStyle: { size: '9px', fontFamily: 'Outfit' }
+                        },
+                        dataSource: heatmapData,
+                        cellSettings: {
+                            showLabel: false,
+                            border: { width: 1, color: 'white' }
+                        },
+                        paletteSettings: {
+                            palette: [
+                                { color: '#f5ebe0' },
+                                { color: '#d4a574' },
+                                { color: '#c4956a' },
+                                { color: '#a8784c' },
+                                { color: '#8b5e3c' },
+                                { color: '#6d472c' }
+                            ],
+                            type: 'Gradient'
+                        },
+                        legendSettings: {
+                            visible: false
+                        },
+                        tooltipRender: function(args) {
+                            args.content = [diasSemana[args.xValue] + ' às ' + horas[args.yValue] + ': ' + formatarMoeda(args.value)];
+                        },
+                        cellClick: function(args) {
+                            var diaSemana = args.xValue;
+                            var hora = parseInt(horas[args.yValue]);
+                            abrirModalDetalhes({
+                                titulo: 'Abastecimentos - ' + placa + ' - ' + diasSemana[diaSemana] + ' às ' + horas[args.yValue],
+                                ano: ano,
+                                placa: placa,
+                                diaSemana: diaSemana,
+                                hora: hora
+                            });
+                        }
+                    });
+                    heatmapVeiculo.appendTo('#heatmapVeiculo');
+
+                    // Criar legenda customizada com faixas de valores
+                    criarLegendaHeatmap('legendaHeatmapVeiculo', heatmapData);
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapVeiculo.success", error);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao carregar mapa de calor do veículo:', error);
+                container.innerHTML = '<div class="text-center text-muted py-4">Erro ao carregar mapa de calor</div>';
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarHeatmapVeiculo", error);
     }
 }
 
