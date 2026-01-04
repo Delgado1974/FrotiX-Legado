@@ -52,30 +52,6 @@ function esconderLoading() {
     if (modalLoading) {
         modalLoading.hide();
     }
-    // Força cor caramelo nos headers das tabelas após fechar modal
-    forcarCorCarameloTabelas();
-}
-
-/**
- * Força a cor caramelo nos headers das tabelas .ftx-tabela-caramelo
- * Necessário porque algum handler global muda a cor para azul
- */
-function forcarCorCarameloTabelas() {
-    setTimeout(function() {
-        document.querySelectorAll('.ftx-tabela-caramelo thead').forEach(thead => {
-            thead.style.setProperty('background', 'linear-gradient(135deg, #a8784c 0%, #c4956a 100%)', 'important');
-            thead.style.setProperty('background-color', '#a8784c', 'important');
-        });
-        document.querySelectorAll('.ftx-tabela-caramelo thead tr').forEach(tr => {
-            tr.style.setProperty('background', 'linear-gradient(135deg, #a8784c 0%, #c4956a 100%)', 'important');
-            tr.style.setProperty('background-color', '#a8784c', 'important');
-        });
-        document.querySelectorAll('.ftx-tabela-caramelo thead th').forEach(th => {
-            th.style.setProperty('background', 'transparent', 'important');
-            th.style.setProperty('background-color', 'transparent', 'important');
-            th.style.setProperty('color', '#ffffff', 'important');
-        });
-    }, 100);
 }
 
 // ====== INICIALIZAÇÃO ======
@@ -104,7 +80,6 @@ function inicializarFiltrosECarregar() {
             success: function (data) {
                 try {
                     const anos = data.anosDisponiveis || [];
-                    const mesAtual = new Date().getMonth() + 1;
 
                     // Ano mais recente disponível
                     const anoMaisRecente = anos.length > 0 ? anos[0] : new Date().getFullYear();
@@ -128,37 +103,55 @@ function inicializarFiltrosECarregar() {
                         select.dataset.initialized = 'true';
                     });
 
-                    // Determinar o mês: mês atual se tiver dados, senão último mês com dados
-                    let mesSelecionado = '';
-                    const consumoPorMes = data.consumoPorMes || [];
+                    // Buscar dados DO ANO MAIS RECENTE para determinar o mês correto
+                    $.ajax({
+                        url: '/api/abastecimento/DashboardDados',
+                        type: 'GET',
+                        data: { ano: anoMaisRecente, mes: null },
+                        success: function (dataAno) {
+                            try {
+                                const mesAtual = new Date().getMonth() + 1;
+                                let mesSelecionado = '';
+                                const consumoPorMes = dataAno.consumoPorMes || [];
 
-                    if (consumoPorMes.length > 0) {
-                        // Filtrar consumo do ano mais recente
-                        const temDadosMesAtual = consumoPorMes.some(item => item.mes === mesAtual && item.valor > 0);
+                                if (consumoPorMes.length > 0) {
+                                    // Verificar se o mês atual tem dados NO ANO SELECIONADO
+                                    const temDadosMesAtual = consumoPorMes.some(item => item.mes === mesAtual && item.valor > 0);
 
-                        if (temDadosMesAtual) {
-                            mesSelecionado = mesAtual.toString();
-                        } else {
-                            // Último mês com dados
-                            const mesesComDados = consumoPorMes
-                                .filter(item => item.valor > 0)
-                                .map(item => item.mes)
-                                .sort((a, b) => b - a);
+                                    if (temDadosMesAtual) {
+                                        mesSelecionado = mesAtual.toString();
+                                    } else {
+                                        // Último mês com dados no ano selecionado
+                                        const mesesComDados = consumoPorMes
+                                            .filter(item => item.valor > 0)
+                                            .map(item => item.mes)
+                                            .sort((a, b) => b - a);
 
-                            if (mesesComDados.length > 0) {
-                                mesSelecionado = mesesComDados[0].toString();
+                                        if (mesesComDados.length > 0) {
+                                            mesSelecionado = mesesComDados[0].toString();
+                                        }
+                                    }
+                                }
+
+                                const selectMesGeral = document.getElementById('filtroMesGeral');
+                                if (selectMesGeral) {
+                                    selectMesGeral.value = mesSelecionado;
+                                    selectMesGeral.dataset.initialized = 'true';
+                                }
+
+                                // Agora carrega os dados com os filtros aplicados
+                                carregarDadosGeraisComFiltros();
+
+                            } catch (error) {
+                                Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar.inner.success", error);
+                                esconderLoading();
                             }
+                        },
+                        error: function () {
+                            // Em caso de erro, carrega sem mês específico
+                            carregarDadosGeraisComFiltros();
                         }
-                    }
-
-                    const selectMesGeral = document.getElementById('filtroMesGeral');
-                    if (selectMesGeral) {
-                        selectMesGeral.value = mesSelecionado;
-                        selectMesGeral.dataset.initialized = 'true';
-                    }
-
-                    // Agora carrega os dados com os filtros aplicados
-                    carregarDadosGeraisComFiltros();
+                    });
 
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar.success", error);
@@ -412,11 +405,11 @@ function renderizarAbaGeral(data) {
 
 function renderizarTabelaResumoPorAno(dados) {
     try {
-        const tbody = document.getElementById('tabelaResumoPorAno');
-        if (!tbody) return;
+        const container = document.getElementById('tabelaResumoPorAno');
+        if (!container) return;
 
         if (!dados || dados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-4">Sem dados</td></tr>';
+            container.innerHTML = '<div class="grid-row" style="justify-content: center; padding: 20px; color: #6c757d;">Sem dados</div>';
             return;
         }
 
@@ -426,21 +419,21 @@ function renderizarTabelaResumoPorAno(dados) {
         dados.forEach(item => {
             totalValor += item.valor;
             html += `
-                <tr>
-                    <td style="font-weight: 600;">${item.ano}</td>
-                    <td class="text-end">${formatarMoeda(item.valor)}</td>
-                </tr>
+                <div class="grid-row">
+                    <div class="grid-cell" style="font-weight: 600;">${item.ano}</div>
+                    <div class="grid-cell text-end">${formatarMoeda(item.valor)}</div>
+                </div>
             `;
         });
 
         html += `
-            <tr style="background: var(--dash-bg-terracota); font-weight: 700;">
-                <td>TOTAL</td>
-                <td class="text-end">${formatarMoeda(totalValor)}</td>
-            </tr>
+            <div class="grid-row grid-row-total">
+                <div class="grid-cell">TOTAL</div>
+                <div class="grid-cell text-end">${formatarMoeda(totalValor)}</div>
+            </div>
         `;
 
-        tbody.innerHTML = html;
+        container.innerHTML = html;
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarTabelaResumoPorAno", error);
     }
@@ -845,17 +838,15 @@ function renderizarChartLitrosDia(dados) {
 }
 
 /**
- * Tabela TOP 15 por TIPO de veículo (modelo)
+ * Tabela TOP 15 por TIPO de veículo (modelo) - Usando DIVs
  */
 function renderizarTabelaValorPorTipo(dados) {
     try {
         const container = document.getElementById('tabelaValorPorTipo');
         if (!container) return;
 
-        console.log('valorPorTipo:', dados); // Debug
-
         if (!dados || dados.length === 0) {
-            container.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-4">Sem dados</td></tr>';
+            container.innerHTML = '<div class="grid-row" style="justify-content: center; padding: 20px; color: #6c757d;">Sem dados</div>';
             return;
         }
 
@@ -864,21 +855,21 @@ function renderizarTabelaValorPorTipo(dados) {
 
         dados.forEach((item, idx) => {
             totalValor += item.valor;
-            const badgeClass = idx < 3 ? 'badge-rank top3' : 'badge-rank';
+            const badgeClass = idx < 3 ? 'badge-rank-abast top3' : 'badge-rank-abast';
             html += `
-                <tr>
-                    <td><span class="${badgeClass}">${idx + 1}</span> ${item.tipoVeiculo}</td>
-                    <td class="text-end" style="color: #4a7c59; font-weight: 600;">${formatarMoedaTabela(item.valor)}</td>
-                </tr>
+                <div class="grid-row">
+                    <div class="grid-cell"><span class="${badgeClass}">${idx + 1}</span> ${item.tipoVeiculo}</div>
+                    <div class="grid-cell text-end" style="color: #4a7c59; font-weight: 600;">${formatarMoedaTabela(item.valor)}</div>
+                </div>
             `;
         });
 
         // Linha de total
         html += `
-            <tr class="linha-total">
-                <td><strong>Total (Top 15)</strong></td>
-                <td class="text-end" style="color: #2d5a3d; font-weight: 700;">${formatarMoedaTabela(totalValor)}</td>
-            </tr>
+            <div class="grid-row grid-row-total">
+                <div class="grid-cell"><strong>Total (Top 15)</strong></div>
+                <div class="grid-cell text-end" style="color: #2d5a3d; font-weight: 700;">${formatarMoedaTabela(totalValor)}</div>
+            </div>
         `;
 
         container.innerHTML = html;
@@ -888,17 +879,15 @@ function renderizarTabelaValorPorTipo(dados) {
 }
 
 /**
- * Tabela TOP 15 por PLACA individual
+ * Tabela TOP 15 por PLACA individual - Usando DIVs
  */
 function renderizarTabelaValorPorPlaca(dados) {
     try {
         const container = document.getElementById('tabelaValorPorPlaca');
         if (!container) return;
 
-        console.log('valorPorPlaca:', dados); // Debug
-
         if (!dados || dados.length === 0) {
-            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">Sem dados</td></tr>';
+            container.innerHTML = '<div class="grid-row" style="justify-content: center; padding: 20px; color: #6c757d;">Sem dados</div>';
             return;
         }
 
@@ -907,22 +896,22 @@ function renderizarTabelaValorPorPlaca(dados) {
 
         dados.forEach((item, idx) => {
             totalValor += item.valor;
-            const badgeClass = idx < 3 ? 'badge-rank top3' : 'badge-rank';
+            const badgeClass = idx < 3 ? 'badge-rank-abast top3' : 'badge-rank-abast';
             html += `
-                <tr>
-                    <td><span class="${badgeClass}">${idx + 1}</span> <strong>${item.placa}</strong></td>
-                    <td style="font-size: 0.7rem; color: #666;">${item.tipoVeiculo || '-'}</td>
-                    <td class="text-end" style="color: #4a7c59; font-weight: 600;">${formatarMoedaTabela(item.valor)}</td>
-                </tr>
+                <div class="grid-row">
+                    <div class="grid-cell"><span class="${badgeClass}">${idx + 1}</span> <strong>${item.placa}</strong></div>
+                    <div class="grid-cell" style="font-size: 0.7rem; color: #666;">${item.tipoVeiculo || '-'}</div>
+                    <div class="grid-cell text-end" style="color: #4a7c59; font-weight: 600;">${formatarMoedaTabela(item.valor)}</div>
+                </div>
             `;
         });
 
         // Linha de total
         html += `
-            <tr class="linha-total">
-                <td colspan="2"><strong>Total (Top 15)</strong></td>
-                <td class="text-end" style="color: #2d5a3d; font-weight: 700;">${formatarMoedaTabela(totalValor)}</td>
-            </tr>
+            <div class="grid-row grid-row-total">
+                <div class="grid-cell" style="grid-column: span 2;"><strong>Total (Top 15)</strong></div>
+                <div class="grid-cell text-end" style="color: #2d5a3d; font-weight: 700;">${formatarMoedaTabela(totalValor)}</div>
+            </div>
         `;
 
         container.innerHTML = html;
