@@ -142,7 +142,7 @@ function carregarDadosGerais() {
             success: function (data) {
                 try {
                     dadosGerais = data;
-                    preencherFiltroAnos(data.anosDisponiveis);
+                    preencherFiltroAnos(data.anosDisponiveis, data.consumoPorMes);
                     renderizarAbaGeral(data);
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGerais.success", error);
@@ -1084,7 +1084,7 @@ function destruirGraficosVeiculo() {
 
 // ====== FUNÇÕES AUXILIARES ======
 
-function preencherFiltroAnos(anos) {
+function preencherFiltroAnos(anos, consumoPorMes) {
     try {
         const selectGeral = document.getElementById('filtroAnoGeral');
         const selectMensal = document.getElementById('filtroAnoMensal');
@@ -1092,6 +1092,8 @@ function preencherFiltroAnos(anos) {
         const selectMesGeral = document.getElementById('filtroMesGeral');
 
         const anoAtual = new Date().getFullYear();
+        const mesAtual = new Date().getMonth() + 1; // 1-12
+
         // Ano mais recente disponível nos dados (primeiro da lista, pois vem ordenado desc)
         const anoMaisRecente = anos && anos.length > 0 ? anos[0] : anoAtual;
 
@@ -1121,8 +1123,32 @@ function preencherFiltroAnos(anos) {
             }
         });
 
-        // Define "Todos os Meses" no filtro de mês geral (não seleciona mês específico)
-        // Usuário deve clicar em Filtrar para aplicar
+        // Posicionar o mês: mês atual se tiver dados, senão último mês com dados
+        if (selectMesGeral && selectMesGeral.dataset.initialized !== 'true') {
+            let mesSelecionado = '';
+
+            if (consumoPorMes && consumoPorMes.length > 0) {
+                // Verificar se o mês atual tem dados
+                const temDadosMesAtual = consumoPorMes.some(item => item.mes === mesAtual && item.valor > 0);
+
+                if (temDadosMesAtual) {
+                    mesSelecionado = mesAtual.toString();
+                } else {
+                    // Encontrar o último mês com dados (maior número de mês com valor > 0)
+                    const mesesComDados = consumoPorMes
+                        .filter(item => item.valor > 0)
+                        .map(item => item.mes)
+                        .sort((a, b) => b - a); // Ordenar decrescente
+
+                    if (mesesComDados.length > 0) {
+                        mesSelecionado = mesesComDados[0].toString();
+                    }
+                }
+            }
+
+            selectMesGeral.value = mesSelecionado;
+            selectMesGeral.dataset.initialized = 'true';
+        }
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "preencherFiltroAnos", error);
     }
