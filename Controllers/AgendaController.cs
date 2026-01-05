@@ -828,7 +828,10 @@ namespace FrotiX.Controllers
                 // Agora: uma única query otimizada com cálculos no banco
                 var viagens = _context.ViewViagensAgenda
                     .AsNoTracking() // Não rastreia mudanças (mais rápido)
-                    .Where(v => v.DataInicial >= startMenos3 && v.DataInicial < endMenos3)
+                    .Where(v => v.DataInicial.HasValue
+                        && v.HoraInicio.HasValue
+                        && v.DataInicial >= startMenos3
+                        && v.DataInicial < endMenos3)
                     .Select(v => new
                     {
                         id = v.ViagemId,
