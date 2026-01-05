@@ -463,27 +463,17 @@
     <!-- /Modal de Detalhamento de Custos -->
 
     <!-- ============================================
-         MODAL DE LOADING - PADRÃO FROTIX
+         OVERLAY DE LOADING - PADRÃO FROTIX
          ============================================ -->
-    <div class="modal fade ftx-modal-loading" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-duotone fa-calendar-star"></i>
-                        <span>Carregando Eventos</span>
-                    </h5>
-                </div>
-                <div class="modal-body">
-                    <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
-                    <div class="ftx-loading-bar"></div>
-                    <div class="ftx-loading-text" id="loadingMessage">Carregando Eventos...</div>
-                    <div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
-                </div>
-            </div>
+    <div id="loadingOverlayEventos" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+        <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+            <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+            <div class="ftx-loading-bar"></div>
+            <div class="ftx-loading-text" id="loadingMessage">Carregando Eventos...</div>
+            <div class="ftx-loading-subtext">Aguarde, por favor</div>
         </div>
     </div>
-    <!-- /Modal de Loading -->
+    <!-- /Overlay de Loading -->
 
 </form>
 
@@ -612,9 +602,7 @@
                         carregarDadosEvento(eventoId);
 
                         // Mostra loading padrão FrotiX
-                        $('#loadingMessage').text('Carregando Viagens Associadas...');
-                        $('#modalLoading').addClass('show').css({'display': 'block', 'z-index': '1060'});
-                        $('body').addClass('modal-open');
+                        mostrarLoading('Carregando Viagens Associadas...');
 
                         // Inicializa ou recarrega a tabela de viagens
                         if (tabelaViagensModal) {
@@ -644,24 +632,20 @@
     </script>
 
     <script>
-        // Funções do Modal de Loading
+        // Funções de Loading - Padrão FrotiX (Overlay)
         function mostrarLoading(mensagem = 'Carregando Eventos...') {
             $('#loadingMessage').text(mensagem);
-            $('#modalLoading').modal('show');
+            $('#loadingOverlayEventos').css('display', 'flex');
         }
 
         function esconderLoading() {
-            $('#modalLoading').modal('hide');
+            $('#loadingOverlayEventos').css('display', 'none');
         }
 
         function ListaTodosEventos() {
             try {
-                // Mostra loading IMEDIATAMENTE (sem animação)
-                $('#modalLoading').addClass('show').css('display', 'block');
-                $('body').addClass('modal-open');
-                if (!$('.modal-backdrop').length) {
-                    $('body').append('<div class="modal-backdrop fade show"></div>');
-                }
+                // Mostra loading IMEDIATAMENTE
+                mostrarLoading('Carregando Eventos...');
 
                 // Reset DataTable se já existir
                 const dtExists = $.fn.DataTable.isDataTable('#tblEventos');
@@ -724,9 +708,7 @@
                         error: function (xhr, error, thrown) {
                             try {
                                 // Esconde loading em caso de erro
-                                $('#modalLoading').removeClass('show').css('display', 'none');
-                                $('.modal-backdrop').remove();
-                                $('body').removeClass('modal-open');
+                                esconderLoading();
                                 console.error('Erro no DataTable:', error);
                                 AppToast.show('Vermelho', 'Erro ao carregar dados', 3000);
                             } catch (err) {
@@ -736,9 +718,7 @@
                     },
                     initComplete: function() {
                         // Esconde loading quando DataTable terminar
-                        $('#modalLoading').removeClass('show').css('display', 'none');
-                        $('.modal-backdrop').remove();
-                        $('body').removeClass('modal-open');
+                        esconderLoading();
                     },
                     columns: [
                         { data: "nome" },
@@ -963,9 +943,7 @@
 
             } catch (error) {
                 // Esconde loading em caso de erro
-                $('#modalLoading').removeClass('show').css('display', 'none');
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
+                esconderLoading();
                 Alerta.TratamentoErroComLinha("ListaEventos.cshtml", "ListaTodosEventos", error);
             }
         }
@@ -1056,7 +1034,7 @@
                                 carregarEstatisticasViagensModal();
                                 
                                 // Esconde loading padrão FrotiX
-                                $('#modalLoading').removeClass('show').css('display', 'none');
+                                esconderLoading();
                                 
                                 // Garante que o backdrop do modalCusto permaneça
                                 setTimeout(function() {
@@ -1073,7 +1051,7 @@
                                 console.error('Erro ao carregar viagens:', error);
                                 
                                 // Esconde loading mesmo em caso de erro
-                                $('#modalLoading').removeClass('show').css('display', 'none');
+                                esconderLoading();
                                 
                                 // Garante que o backdrop do modalCusto permaneça
                                 setTimeout(function() {

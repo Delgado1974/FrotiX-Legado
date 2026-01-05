@@ -13,7 +13,32 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(done)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(xargs findstr:*)",
+      "Bash(powershell -Command \"dotnet build 2>&1 | Select-String ''Navigation|error''\")",
+      "Bash(copy /Y nav.json.bak nav.json)",
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Models\" /AD /B)",
+      "Bash(Select-String \"error|warning\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(del \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\PLANO_VALIDACAO_INTELIGENTE.md\")",
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Models\\\\Cadastros\" /B)",
+      "Bash(Select-String -Pattern \"error|warning|Build succeeded\")",
+      "Bash(Select-String \"error|warning|succeeded|failed\")",
+      "Bash(wc:*)",
+      "Bash(cp:*)",
+      "Bash(Select-Object -First 30)",
+      "Bash(powershell -Command \"cd ''C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site''; dotnet build 2>&1 | Select-String ''error|warning|succeeded|failed'' | Select-Object -First 20\")",
+      "Bash(powershell -Command \"cd ''C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site''; dotnet build 2>&1 | Select-String -Pattern ''error CS'' | Select-Object -First 10\")",
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\wwwroot\\\\js\\\\dashboards\" /B)",
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\wwwroot\\\\images\" /B)",
+      "Bash(findstr:*)",
+      "Bash(Select-String -Pattern \"error CS|Build succeeded|Build FAILED\")",
+      "Bash(powershell -Command \"cd ''C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site''; dotnet build 2>&1 | Select-String -Pattern ''error CS|Build succeeded|Build FAILED'' | Select-Object -First 15\")",
+      "Bash(powershell:*)",
+      "Bash(del:*)",
+      "Bash(Select-Object -First 15)",
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Pages\" /B)",
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Pages\\\\Veiculo\" /B)"
     ]
   }
 }

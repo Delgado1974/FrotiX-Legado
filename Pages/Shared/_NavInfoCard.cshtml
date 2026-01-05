@@ -1,4 +1,33 @@
+<style>
+    .info-card-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #c67750 100%);
+        z-index: 0;
+    }
+    .info-card {
+        position: relative;
+    }
+    .info-card .info-card-text {
+        position: relative;
+        z-index: 1;
+        font-family: 'Outfit', sans-serif;
+        font-size: calc(1rem + 10px);
+        text-align: center;
+    }
+    .info-card .info-card-text span.d-inline-block {
+        display: block !important;
+        margin-bottom: 1rem;
+    }
+    .info-card .info-card-text span.d-inline-block:last-child {
+        margin-bottom: 0;
+    }
+</style>
 <div class="info-card">
+    <div class="info-card-gradient"></div>
 	@*<img src="~/img/demo/avatars/@(Settings.Theme.Avatar)" class="profile-image rounded-circle" alt="@(Settings.Theme.User)">*@
     <div class="info-card-text">
         <a id="aUser" href="#" class="d-flex align-items-center text-white">
@@ -10,7 +39,6 @@
         <span class="d-inline-block">Coordena&ccedil;&atilde;o de Transportes</span>
         <span class="d-inline-block">C&acirc;mara dos Deputados</span>
     </div>
-	<img src="~/img/card-backgrounds/cover-5-lg.png" class="cover" alt="cover">
 @* 	<a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-bs-target=".page-sidebar" data-focus="nav_filter_input">
 		<i class="@(Settings.Theme.IconPrefix) fa-angle-down"></i>
 	</a> *@

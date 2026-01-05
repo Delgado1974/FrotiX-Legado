@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace FrotiX.Controllers
@@ -139,14 +140,18 @@ namespace FrotiX.Controllers
                     });
                 }
 
-                // Cria novo Recurso no BD
+                // Cria novo Recurso no BD (com valores padrão para campos obrigatórios)
                 var recurso = new Recurso
                 {
                     RecursoId = Guid.NewGuid(),
-                    Nome = item.Title,
-                    NomeMenu = item.NomeMenu,
+                    Nome = !string.IsNullOrEmpty(item.Title) ? item.Title : "Novo Item",
+                    NomeMenu = !string.IsNullOrEmpty(item.NomeMenu) ? item.NomeMenu : $"menu_{Guid.NewGuid():N}",
                     Descricao = $"Menu: {item.NomeMenu}",
-                    Ordem = GetNextOrdem()
+                    Ordem = GetNextOrdem(),
+                    Icon = !string.IsNullOrEmpty(item.Icon) ? item.Icon : "fa-regular fa-folder",
+                    Href = !string.IsNullOrEmpty(item.Href) ? item.Href : "javascript:void(0);",
+                    Ativo = true,
+                    Nivel = 0
                 };
                 _unitOfWork.Recurso.Add(recurso);
 
@@ -255,6 +260,482 @@ namespace FrotiX.Controllers
                 });
             }
         }
+
+        #region Endpoints para Navegação via Banco de Dados (Syncfusion)
+
+        /// <summary>
+        /// Retorna árvore de navegação do banco filtrada por usuário logado
+        /// </summary>
+        [HttpGet]
+        [Route("GetTreeFromDb")]
+        public IActionResult GetTreeFromDb()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                // Busca todos os recursos ativos ordenados
+                var todosRecursos = _unitOfWork.Recurso.GetAll(r => r.Ativo)
+                    .OrderBy(r => r.Ordem)
+                    .ToList();
+
+                // Filtra por controle de acesso do usuário
+                var recursosComAcesso = todosRecursos.Where(r =>
+                {
+                    var acesso = _unitOfWork.ControleAcesso.GetFirstOrDefault(
+                        ca => ca.UsuarioId == userId && ca.RecursoId == r.RecursoId);
+                    return acesso?.Acesso == true;
+                }).ToList();
+
+                // Monta árvore hierárquica
+                var arvore = MontarArvoreRecursiva(recursosComAcesso, null);
+
+                return Json(new { success = true, data = arvore });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetTreeFromDb", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Retorna árvore completa para administração (sem filtro de acesso)
+        /// </summary>
+        [HttpGet]
+        [Route("GetTreeAdmin")]
+        public IActionResult GetTreeAdmin()
+        {
+            try
+            {
+                var todosRecursos = _unitOfWork.Recurso.GetAll()
+                    .OrderBy(r => r.Ordem)
+                    .ToList();
+
+                var arvore = MontarArvoreRecursiva(todosRecursos, null);
+
+                return Json(new { success = true, data = arvore });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetTreeAdmin", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Salva alterações na árvore (reordenação, hierarquia) no banco de dados
+        /// </summary>
+        [HttpPost]
+        [Route("SaveTreeToDb")]
+        public IActionResult SaveTreeToDb([FromBody] List<RecursoTreeDTO> items)
+        {
+            try
+            {
+                // Atualiza recursos recursivamente
+                AtualizarRecursosRecursivamente(items, null, 0, 0);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Navegação salva com sucesso!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveTreeToDb", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Migra dados do nav.json para a tabela Recurso no banco de dados
+        /// </summary>
+        [HttpPost]
+        [Route("MigrateFromJson")]
+        public IActionResult MigrateFromJson()
+        {
+            try
+            {
+                if (!System.IO.File.Exists(NavJsonPath))
+                {
+                    return Json(new { success = false, message = "Arquivo nav.json não encontrado!" });
+                }
+
+                var jsonText = System.IO.File.ReadAllText(NavJsonPath);
+                var navigation = NavigationBuilder.FromJson(jsonText);
+
+                int ordem = 0;
+                int atualizados = 0;
+                int criados = 0;
+
+                ProcessarItensParaMigracao(navigation.Lists, null, 0, ref ordem, ref atualizados, ref criados);
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Migração concluída! {criados} recursos criados, {atualizados} atualizados.",
+                    criados,
+                    atualizados
+                });
+            }
+            catch (Exception error)
+            {
+                // Captura erro detalhado incluindo inner exception
+                var mensagem = error.Message;
+                if (error.InnerException != null)
+                {
+                    mensagem += " | Inner: " + error.InnerException.Message;
+                    if (error.InnerException.InnerException != null)
+                    {
+                        mensagem += " | Inner2: " + error.InnerException.InnerException.Message;
+                    }
+                }
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "MigrateFromJson", error);
+                return Json(new { success = false, message = mensagem });
+            }
+        }
+
+        /// <summary>
+        /// Adiciona ou atualiza um recurso no banco (para a tela unificada)
+        /// </summary>
+        [HttpPost]
+        [Route("SaveRecurso")]
+        public IActionResult SaveRecurso([FromBody] RecursoTreeDTO dto)
+        {
+            try
+            {
+                Recurso recurso;
+                bool isNew = false;
+
+                if (!string.IsNullOrEmpty(dto.Id) && Guid.TryParse(dto.Id, out var recursoId))
+                {
+                    recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                    if (recurso == null)
+                    {
+                        recurso = new Recurso { RecursoId = recursoId };
+                        isNew = true;
+                    }
+                }
+                else
+                {
+                    recurso = new Recurso { RecursoId = Guid.NewGuid() };
+                    isNew = true;
+                }
+
+                // Atualiza propriedades (com valores padrão para campos obrigatórios)
+                recurso.Nome = !string.IsNullOrEmpty(dto.Text) ? dto.Text : "Novo Item";
+                recurso.NomeMenu = !string.IsNullOrEmpty(dto.NomeMenu) ? dto.NomeMenu : $"menu_{Guid.NewGuid():N}";
+                recurso.Icon = !string.IsNullOrEmpty(dto.Icon) ? dto.Icon : "fa-duotone fa-folder";
+                recurso.Href = !string.IsNullOrEmpty(dto.Href) ? dto.Href : "javascript:void(0);";
+                recurso.Descricao = dto.Descricao;
+                recurso.Ordem = dto.Ordem > 0 ? dto.Ordem : GetNextOrdem();
+                recurso.Nivel = dto.Nivel;
+                recurso.Ativo = dto.Ativo;
+                recurso.ParentId = Guid.TryParse(dto.ParentId, out var parentId) ? parentId : null;
+
+                if (isNew)
+                {
+                    _unitOfWork.Recurso.Add(recurso);
+                    CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                }
+                else
+                {
+                    _unitOfWork.Recurso.Update(recurso);
+                }
+
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true,
+                    recursoId = recurso.RecursoId,
+                    message = isNew ? "Recurso criado com sucesso!" : "Recurso atualizado com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveRecurso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Remove um recurso e seus controles de acesso
+        /// </summary>
+        [HttpPost]
+        [Route("DeleteRecurso")]
+        public IActionResult DeleteRecurso([FromBody] DeleteRecursoRequest request)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RecursoId, out var recursoId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                if (recurso == null)
+                {
+                    return Json(new { success = false, message = "Recurso não encontrado!" });
+                }
+
+                // Verifica se tem filhos
+                var temFilhos = _unitOfWork.Recurso.GetAll(r => r.ParentId == recursoId).Any();
+                if (temFilhos)
+                {
+                    return Json(new { success = false, message = "Não é possível excluir recurso que possui subitens!" });
+                }
+
+                // Remove controles de acesso
+                var controlesAcesso = _unitOfWork.ControleAcesso.GetAll(ca => ca.RecursoId == recursoId);
+                foreach (var ca in controlesAcesso)
+                {
+                    _unitOfWork.ControleAcesso.Remove(ca);
+                }
+
+                // Remove o recurso
+                _unitOfWork.Recurso.Remove(recurso);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Recurso removido com sucesso!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "DeleteRecurso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Retorna lista de usuários com status de acesso para um recurso
+        /// </summary>
+        [HttpGet]
+        [Route("GetUsuariosAcesso")]
+        public IActionResult GetUsuariosAcesso(string recursoId)
+        {
+            try
+            {
+                if (!Guid.TryParse(recursoId, out var recId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                var usuarios = _unitOfWork.AspNetUsers.GetAll(u => u.Status == true)
+                    .OrderBy(u => u.NomeCompleto)
+                    .Select(u => new
+                    {
+                        UsuarioId = u.Id,
+                        Nome = u.NomeCompleto ?? u.UserName,
+                        Acesso = _unitOfWork.ControleAcesso
+                            .GetFirstOrDefault(ca => ca.UsuarioId == u.Id && ca.RecursoId == recId)?.Acesso ?? false
+                    })
+                    .ToList();
+
+                return Json(new { success = true, data = usuarios });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetUsuariosAcesso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Atualiza o acesso de um usuário a um recurso
+        /// </summary>
+        [HttpPost]
+        [Route("UpdateAcesso")]
+        public IActionResult UpdateAcesso([FromBody] UpdateAcessoRequest request)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RecursoId, out var recursoId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                var controle = _unitOfWork.ControleAcesso.GetFirstOrDefault(ca =>
+                    ca.UsuarioId == request.UsuarioId && ca.RecursoId == recursoId);
+
+                if (controle == null)
+                {
+                    controle = new ControleAcesso
+                    {
+                        UsuarioId = request.UsuarioId,
+                        RecursoId = recursoId,
+                        Acesso = request.Acesso
+                    };
+                    _unitOfWork.ControleAcesso.Add(controle);
+                }
+                else
+                {
+                    controle.Acesso = request.Acesso;
+                    _unitOfWork.ControleAcesso.Update(controle);
+                }
+
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Acesso atualizado!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "UpdateAcesso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        #endregion
+
+        #region Métodos Auxiliares para Banco de Dados
+
+        /// <summary>
+        /// Monta árvore recursiva a partir de lista de recursos
+        /// </summary>
+        private List<RecursoTreeDTO> MontarArvoreRecursiva(List<Recurso> recursos, Guid? parentId)
+        {
+            return recursos
+                .Where(r => r.ParentId == parentId)
+                .OrderBy(r => r.Ordem)
+                .Select(r =>
+                {
+                    var dto = RecursoTreeDTO.FromRecurso(r);
+                    dto.Items = MontarArvoreRecursiva(recursos, r.RecursoId);
+                    dto.HasChild = dto.Items.Any();
+                    return dto;
+                })
+                .ToList();
+        }
+
+        /// <summary>
+        /// Atualiza recursos recursivamente a partir da árvore
+        /// </summary>
+        private void AtualizarRecursosRecursivamente(List<RecursoTreeDTO> items, Guid? parentId, int nivel, double ordemBase)
+        {
+            double ordem = ordemBase;
+
+            foreach (var item in items)
+            {
+                if (Guid.TryParse(item.Id, out var recursoId))
+                {
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                    if (recurso != null)
+                    {
+                        recurso.ParentId = parentId;
+                        recurso.Nivel = nivel;
+                        recurso.Ordem = ordem;
+                        recurso.Icon = item.Icon;
+                        recurso.Href = item.Href;
+                        _unitOfWork.Recurso.Update(recurso);
+                    }
+                }
+
+                ordem++;
+
+                if (item.Items?.Any() == true)
+                {
+                    AtualizarRecursosRecursivamente(item.Items, recursoId, nivel + 1, ordem * 100);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Processa itens do nav.json para migração
+        /// Usa ordenação hierárquica: Pai=1, Filhos=101-199, Netos=10101-10199
+        /// </summary>
+        private void ProcessarItensParaMigracao(List<ListItem> items, Guid? parentId, int nivel, ref int ordem, ref int atualizados, ref int criados, double ordemPai = 0)
+        {
+            if (items == null) return;
+
+            int indiceLocal = 1; // Contador local para este nível
+
+            foreach (var item in items)
+            {
+                try
+                {
+                    // Pula itens sem identificador
+                    if (string.IsNullOrEmpty(item.NomeMenu) && string.IsNullOrEmpty(item.Title)) continue;
+
+                    // Usa NomeMenu se existir, senão usa Title como fallback
+                    var nomeMenuBusca = !string.IsNullOrEmpty(item.NomeMenu) ? item.NomeMenu : item.Title;
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.NomeMenu == nomeMenuBusca);
+                    bool isNew = false;
+
+                // Calcula ordem hierárquica:
+                // Nível 0: 1, 2, 3...
+                // Nível 1: ordemPai * 100 + índice = 101, 102, 201, 202...
+                // Nível 2: ordemPai * 100 + índice = 10101, 10102, 20101...
+                double ordemCalculada;
+                if (nivel == 0)
+                {
+                    ordemCalculada = indiceLocal;
+                }
+                else
+                {
+                    ordemCalculada = (ordemPai * 100) + indiceLocal;
+                }
+
+                if (recurso == null)
+                    {
+                        // Cria novo recurso (com valores padrão para campos obrigatórios)
+                        recurso = new Recurso
+                        {
+                            RecursoId = Guid.NewGuid(),
+                            Nome = item.Title ?? item.NomeMenu ?? "Sem Nome",
+                            NomeMenu = nomeMenuBusca ?? $"menu_{Guid.NewGuid():N}",
+                            Descricao = $"Menu: {nomeMenuBusca}",
+                        Ordem = ordemCalculada,
+                        ParentId = parentId,
+                        Icon = item.Icon ?? "fa-duotone fa-folder",
+                        Href = item.Href ?? "javascript:void(0);",
+                        Ativo = true,
+                        Nivel = nivel
+                    };
+                    _unitOfWork.Recurso.Add(recurso);
+                    isNew = true;
+                    criados++;
+                }
+                else
+                {
+                    // Atualiza campos (com valores padrão para campos obrigatórios)
+                    recurso.ParentId = parentId;
+                    recurso.Icon = item.Icon ?? "fa-regular fa-folder";
+                    recurso.Href = item.Href ?? "javascript:void(0);";
+                    recurso.Nivel = nivel;
+                    recurso.Ativo = true;
+                    recurso.Ordem = ordemCalculada;
+                    _unitOfWork.Recurso.Update(recurso);
+                    atualizados++;
+                }
+
+                // IMPORTANTE: Salva o Recurso ANTES de criar ControleAcesso
+                _unitOfWork.Save();
+
+                // Cria ControleAcesso apenas para novos recursos
+                if (isNew)
+                {
+                    CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                    _unitOfWork.Save();
+                }
+
+                // Processa filhos recursivamente passando a ordem do pai atual
+                if (item.Items?.Any() == true)
+                {
+                    ProcessarItensParaMigracao(item.Items, recurso.RecursoId, nivel + 1, ref ordem, ref atualizados, ref criados, ordemCalculada);
+                }
+
+                indiceLocal++;
+                ordem++;
+                }
+                catch (Exception ex)
+                {
+                    // Log do erro mas continua com os próximos itens
+                    Console.WriteLine($"Erro ao migrar item '{item.NomeMenu ?? item.Title}': {ex.Message}");
+                    indiceLocal++;
+                    ordem++;
+                }
+            }
+        }
+
+        #endregion
 
         #region Métodos Auxiliares
 
@@ -412,9 +893,9 @@ namespace FrotiX.Controllers
         /// </summary>
         private double GetNextOrdem()
         {
-            var maxOrdem = _unitOfWork.Recurso.GetAll()
-                .Max(r => r.Ordem) ?? 0;
-            return maxOrdem + 1;
+            var recursos = _unitOfWork.Recurso.GetAll().ToList();
+            if (!recursos.Any()) return 1;
+            return recursos.Max(r => r.Ordem) + 1;
         }
 
         /// <summary>

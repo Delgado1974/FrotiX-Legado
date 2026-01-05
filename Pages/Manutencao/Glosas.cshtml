@@ -154,6 +154,16 @@
 	</div>
 </div>
 
+<!-- OVERLAY DE LOADING - PADRÃO FROTIX -->
+<div id="loadingOverlayGlosas" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Glosas...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
+</div>
+
 <script id="tmplGlosa" type="text/x-template">
 	${if(data.glosa && data.glosa != 0)}
 		${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.glosa)}
@@ -171,6 +181,33 @@
 	<ejs-scripts></ejs-scripts>
 
 	<script>
+		// ========== FUNÇÕES DE LOADING - PADRÃO FROTIX ==========
+		function mostrarLoading() {
+			const overlay = document.getElementById('loadingOverlayGlosas');
+			if (overlay) overlay.style.display = 'flex';
+		}
+
+		function esconderLoading() {
+			const overlay = document.getElementById('loadingOverlayGlosas');
+			if (overlay) overlay.style.display = 'none';
+		}
+
+		// Contador para controlar múltiplos grids carregando simultaneamente
+		let gridsCarregando = 0;
+
+		function iniciarCarregamentoGrid() {
+			gridsCarregando++;
+			mostrarLoading();
+		}
+
+		function finalizarCarregamentoGrid() {
+			gridsCarregando--;
+			if (gridsCarregando <= 0) {
+				gridsCarregando = 0;
+				esconderLoading();
+			}
+		}
+
 		/** Handler GLOBAL do dataBound – robusto */
 		window.onResumoDataBound = function (args) {
 			try {
@@ -195,7 +232,28 @@
 		/** Handler GLOBAL do created – apenas conecta eventos, sem chamar dataBound manualmente */
 		window.onGridCreated = function () {
 			try {
-				this.dataBound = window.onResumoDataBound;
+				const gridInstance = this;
+
+				// Conecta o dataBound original com esconder loading
+				const originalDataBound = window.onResumoDataBound;
+				this.dataBound = function (args) {
+					try {
+						if (typeof originalDataBound === 'function') {
+							originalDataBound.call(this, args);
+						}
+						finalizarCarregamentoGrid();
+					} catch (error) {
+						finalizarCarregamentoGrid();
+						Alerta.TratamentoErroComLinha("Glosas.cshtml", "dataBound", error);
+					}
+				};
+
+				// Handler para erros de carregamento
+				this.actionFailure = function (args) {
+					finalizarCarregamentoGrid();
+					Alerta.TratamentoErroComLinha("Glosas.cshtml", "actionFailure", args.error || args);
+				};
+
 				this.dataBind();
 			} catch (error) {
 				Alerta.TratamentoErroComLinha("Glosas.cshtml", "onGridCreated", error);
@@ -234,6 +292,24 @@
 				});
 				grid.appendTo('#gridResumo');
 
+				// --- Conectar eventos de loading ao gridDetalhes (criado via TagHelper) ---
+				setTimeout(function () {
+					try {
+						const gridDetalhes = document.getElementById('gridDetalhes')?.ej2_instances?.[0];
+						if (gridDetalhes) {
+							gridDetalhes.dataBound = function (args) {
+								finalizarCarregamentoGrid();
+							};
+							gridDetalhes.actionFailure = function (args) {
+								finalizarCarregamentoGrid();
+								Alerta.TratamentoErroComLinha("Glosas.cshtml", "gridDetalhes.actionFailure", args.error || args);
+							};
+						}
+					} catch (error) {
+						Alerta.TratamentoErroComLinha("Glosas.cshtml", "conectar gridDetalhes eventos", error);
+					}
+				}, 100);
+
 				// --- Helpers / atalhos ---
 				const $ej = (id) => document.getElementById(id)?.ej2_instances?.[0];
 				const toCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
@@ -265,10 +341,18 @@
 						const query = buildQuery();
 						const gridResumo = $ej('gridResumo');
 						const gridDetalhe = $ej('gridDetalhes');
+
+						// Mostrar loading antes de iniciar o carregamento
+						if (gridResumo || gridDetalhe) {
+							if (gridResumo) iniciarCarregamentoGrid();
+							if (gridDetalhe) iniciarCarregamentoGrid();
+						}
+
 						if (gridResumo) { gridResumo.query = query; gridResumo.refresh(); }
 						if (gridDetalhe) { gridDetalhe.query = query; gridDetalhe.refresh(); }
 						updateCardTotals();
 					} catch (error) {
+						esconderLoading();
 						Alerta.TratamentoErroComLinha("Glosas.cshtml", "applyQuery", error);
 					}
 				}

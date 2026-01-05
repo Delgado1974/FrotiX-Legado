@@ -21,6 +21,12 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
   1. **O que eu fiz de errado** (ex: usei nome de propriedade incorreto)
   2. **O que fiz para consertar** (ex: corrigi para o nome correto da propriedade)
 
+## Regras de API/Controllers
+
+### Authorize em Endpoints:
+- **NUNCA** usar `[Authorize]` em APIs de Endpoint (Controllers com `[ApiController]`)
+- A autenticação/autorização deve ser tratada de outra forma, não via atributo nos endpoints
+
 ## Regras de CSS
 
 ### Onde colocar alterações de CSS:
@@ -89,3 +95,54 @@ document.querySelectorAll('.btn-submit-spin').forEach(function (btn) {
     });
 });
 ```
+
+## Padrão FrotiX para Modal de Espera (Loading Overlay)
+
+### SEMPRE usar este padrão para modais de espera/carregamento:
+- **Overlay**: Cinza escuro semi-transparente com blur (`ftx-spin-overlay`)
+- **Caixa central**: Fundo escuro translúcido com bordas arredondadas (`ftx-spin-box`)
+- **Logo**: Logotipo FrotiX pulsando (`ftx-loading-logo`)
+- **Barra de progresso**: Barra animada deslizante (`ftx-loading-bar`)
+- **Textos**: Título e subtítulo estilizados (`ftx-loading-text`, `ftx-loading-subtext`)
+
+### HTML do Modal de Espera padrão:
+```html
+<div id="meu-loading-overlay" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Mensagem principal...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
+</div>
+```
+
+### JavaScript para controlar o Modal de Espera:
+```javascript
+// Mostrar
+function mostrarLoading(mensagem = 'Carregando...') {
+    $('#meu-loading-overlay').remove(); // Remove anterior se existir
+    const html = `
+        <div id="meu-loading-overlay" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait;">
+            <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+                <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+                <div class="ftx-loading-bar"></div>
+                <div class="ftx-loading-text">${mensagem}</div>
+                <div class="ftx-loading-subtext">Aguarde, por favor</div>
+            </div>
+        </div>
+    `;
+    $('body').append(html);
+}
+
+// Esconder
+function esconderLoading() {
+    $('#meu-loading-overlay').fadeOut(300, function() { $(this).remove(); });
+}
+```
+
+### NUNCA usar:
+- Spinner Bootstrap genérico (`spinner-border`)
+- Fundo branco em modais de loading
+- FontAwesome `fa-spinner fa-spin` como indicador principal
+- Loading inline na página (sempre usar overlay fullscreen)

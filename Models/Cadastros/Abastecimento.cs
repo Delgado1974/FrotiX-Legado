@@ -53,28 +53,36 @@ namespace FrotiX.Models
         [Key]
         public Guid AbastecimentoId { get; set; }
 
+        [Required(ErrorMessage = "A quantidade de litros é obrigatória")]
         public double? Litros { get; set; }
 
+        [Required(ErrorMessage = "O valor unitário é obrigatório")]
         public double? ValorUnitario { get; set; }
 
+        [Required(ErrorMessage = "A data/hora é obrigatória")]
         public DateTime? DataHora { get; set; }
 
         public int? KmRodado { get; set; }
 
+        [Required(ErrorMessage = "O hodômetro é obrigatório")]
         public int? Hodometro { get; set; }
 
+        [Required(ErrorMessage = "A autorização QCard é obrigatória")]
         public int? AutorizacaoQCard { get; set; }
 
+        [Required(ErrorMessage = "O veículo é obrigatório")]
         public Guid VeiculoId { get; set; }
 
         [ForeignKey("VeiculoId")]
         public virtual Veiculo Veiculo { get; set; }
 
+        [Required(ErrorMessage = "O tipo de combustível é obrigatório")]
         public Guid CombustivelId { get; set; }
 
         [ForeignKey("CombustivelId")]
         public virtual Combustivel Combustivel { get; set; }
 
+        [Required(ErrorMessage = "O motorista é obrigatório")]
         public Guid MotoristaId { get; set; }
 
         [ForeignKey("MotoristaId")]

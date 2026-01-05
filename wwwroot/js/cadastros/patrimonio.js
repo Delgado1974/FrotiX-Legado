@@ -364,6 +364,39 @@ if (path == "/patrimonio/index" || path == "/patrimonio")
 {
     console.log("Página: Index/Listagem");
 
+    // ============================================
+    // FUNÇÕES DE LOADING OVERLAY - PADRÃO FROTIX
+    // ============================================
+    function mostrarLoading()
+    {
+        try
+        {
+            var overlay = document.getElementById('loadingOverlayPatrimonio');
+            if (overlay)
+            {
+                overlay.style.display = 'flex';
+            }
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("patrimonio.js", "mostrarLoading", error);
+        }
+    }
+
+    function esconderLoading()
+    {
+        try
+        {
+            var overlay = document.getElementById('loadingOverlayPatrimonio');
+            if (overlay)
+            {
+                overlay.style.display = 'none';
+            }
+        } catch (error)
+        {
+            Alerta.TratamentoErroComLinha("patrimonio.js", "esconderLoading", error);
+        }
+    }
+
     $(document).ready(function ()
     {
         try
@@ -514,9 +547,11 @@ if (path == "/patrimonio/index" || path == "/patrimonio")
                     try
                     {
                         console.log("🔍 Aplicando filtros...");
+                        mostrarLoading();
                         aplicarFiltros();
                     } catch (error)
                     {
+                        esconderLoading();
                         Alerta.TratamentoErroComLinha("patrimonio.js", "btnFiltrarPatrimonios.click", error);
                     }
                 });
@@ -589,6 +624,7 @@ if (path == "/patrimonio/index" || path == "/patrimonio")
                 {
                     try
                     {
+                        esconderLoading();
                         // Verificar se não há registros
                         if (json && json.data && json.data.length === 0)
                         {
@@ -600,12 +636,14 @@ if (path == "/patrimonio/index" || path == "/patrimonio")
                         }
                     } catch (error)
                     {
+                        esconderLoading();
                         Alerta.TratamentoErroComLinha("patrimonio.js", "aplicarFiltros.load.callback", error);
                     }
                 });
             }
         } catch (error)
         {
+            esconderLoading();
             Alerta.TratamentoErroComLinha("patrimonio.js", "aplicarFiltros", error);
         }
     }
@@ -615,6 +653,7 @@ if (path == "/patrimonio/index" || path == "/patrimonio")
         try
         {
             console.log("Carregando grid de patrimônios");
+            mostrarLoading();
             dataTable = $("#tblPatrimonio").DataTable({
                 columnDefs: [
                     { targets: 0, className: "text-center", width: "6%" },
@@ -635,13 +674,23 @@ if (path == "/patrimonio/index" || path == "/patrimonio")
                     {
                         try
                         {
+                            esconderLoading();
                             console.error("Erro ao carregar os dados:", error);
                             AppToast.show('Vermelho', 'Erro ao carregar dados da tabela', 3000);
                         } catch (err)
                         {
+                            esconderLoading();
                             Alerta.TratamentoErroComLinha("patrimonio.js", "loadGrid.ajax.error", err);
                         }
                     }
+                },
+                initComplete: function ()
+                {
+                    esconderLoading();
+                },
+                drawCallback: function ()
+                {
+                    esconderLoading();
                 },
                 columns: [
                     { data: "npr" },

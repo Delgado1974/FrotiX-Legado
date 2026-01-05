@@ -20,6 +20,13 @@ namespace FrotiX.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ControleAcesso>().HasKey(ca => new { ca.UsuarioId, ca.RecursoId});
+
+            // Configuração da hierarquia de Recursos (auto-relacionamento)
+            modelBuilder.Entity<Recurso>()
+                .HasOne(r => r.Parent)
+                .WithMany(r => r.Children)
+                .HasForeignKey(r => r.ParentId)
+                .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
         }
 
 

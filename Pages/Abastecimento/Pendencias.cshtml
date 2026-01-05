@@ -688,17 +688,38 @@
     </div>
 </div>
 
+<!-- OVERLAY DE LOADING - PADRÃO FROTIX -->
+<div id="loadingOverlayPendencias" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Pendências...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
+</div>
+
 @section ScriptsBlock {
     <script asp-append-version="true">
         var tblPendencias = null;
         var pendenciaAtual = null;
         var filtroAtivo = 'total';
 
+        // ====== FUNÇÕES DE LOADING OVERLAY ======
+        function mostrarLoading() {
+            $('#loadingOverlayPendencias').css('display', 'flex');
+        }
+
+        function esconderLoading() {
+            $('#loadingOverlayPendencias').css('display', 'none');
+        }
+
         $(document).ready(function () {
             try {
+                mostrarLoading();
                 carregarEstatisticas();
                 carregarPendencias();
             } catch (error) {
+                esconderLoading();
                 Alerta.TratamentoErroComLinha("Pendencias.cshtml", "document.ready", error);
             }
         });
@@ -706,6 +727,7 @@
         // ====== FILTRAR POR CARD ======
         function filtrarPorCard(tipo) {
             try {
+                mostrarLoading();
                 filtroAtivo = tipo;
 
                 // Atualizar visual dos cards
@@ -731,8 +753,10 @@
 
                 // Aplicar filtro no DataTable
                 aplicarFiltroDataTable();
+                esconderLoading();
 
             } catch (error) {
+                esconderLoading();
                 Alerta.TratamentoErroComLinha("Pendencias.cshtml", "filtrarPorCard", error);
             }
         }
@@ -812,7 +836,11 @@
                     ajax: {
                         url: "/api/Abastecimento/ListarPendencias",
                         type: "GET",
-                        datatype: "json"
+                        datatype: "json",
+                        error: function (xhr, error, code) {
+                            esconderLoading();
+                            console.error("Erro ao carregar pendências:", error);
+                        }
                     },
                     columns: [
                         { data: "autorizacaoQCard" },
@@ -845,6 +873,7 @@
                     pageLength: 25,
                     dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
                     initComplete: function () {
+                        esconderLoading();
                         // Reaplicar filtro se havia um ativo
                         if (filtroAtivo !== 'total') {
                             aplicarFiltroDataTable();

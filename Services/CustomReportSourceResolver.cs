@@ -33,6 +33,15 @@ namespace FrotiX.Services
                 Uri = reportPath
             };
 
+            // CRÍTICO: Passar os parâmetros recebidos do front-end para o relatório
+            if (currentParameterValues != null)
+            {
+                foreach (var param in currentParameterValues)
+                {
+                    reportPackageSource.Parameters.Add(param.Key, param.Value);
+                }
+            }
+
             return reportPackageSource;
         }
     }

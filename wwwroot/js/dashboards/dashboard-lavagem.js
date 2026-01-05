@@ -26,10 +26,179 @@ const CORES_LAV = {
 };
 
 // ========================================
+// FUNCOES DE FILTRO ANO/MES
+// ========================================
+
+/**
+ * Popula o select de anos com anos disponíveis (último ano até 5 anos atrás)
+ */
+function popularAnosDisponiveis() {
+    try {
+        const selectAno = document.getElementById('filtroAno');
+        if (!selectAno) return;
+
+        const anoAtual = new Date().getFullYear();
+        selectAno.innerHTML = '<option value="">&lt;Todos os Anos&gt;</option>';
+
+        for (let ano = anoAtual; ano >= anoAtual - 5; ano--) {
+            const option = document.createElement('option');
+            option.value = ano;
+            option.textContent = ano;
+            selectAno.appendChild(option);
+        }
+    } catch (error) {
+        console.error('Erro ao popular anos:', error);
+    }
+}
+
+/**
+ * Atualiza o label do período atual
+ */
+function atualizarLabelPeriodo() {
+    try {
+        const label = document.getElementById('periodoAtualLabel');
+        if (!label) return;
+
+        const ano = document.getElementById('filtroAno')?.value;
+        const mes = document.getElementById('filtroMes')?.value;
+        const dataInicio = document.getElementById('dataInicio')?.value;
+        const dataFim = document.getElementById('dataFim')?.value;
+
+        const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        if (dataInicio && dataFim) {
+            const dtIni = new Date(dataInicio + 'T00:00:00');
+            const dtFim = new Date(dataFim + 'T23:59:59');
+            label.textContent = `Período: ${dtIni.toLocaleDateString('pt-BR')} a ${dtFim.toLocaleDateString('pt-BR')}`;
+        } else if (ano && mes) {
+            label.textContent = `Período: ${meses[parseInt(mes)]}/${ano}`;
+        } else if (ano && !mes) {
+            label.textContent = `Período: Ano ${ano} (todos os meses)`;
+        } else if (!ano && mes) {
+            label.textContent = `Período: ${meses[parseInt(mes)]} (todos os anos)`;
+        } else {
+            label.textContent = 'Exibindo todos os dados';
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar label de período:', error);
+    }
+}
+
+/**
+ * Filtra dados por Ano/Mês
+ * Permite combinar: Ano+Mês, só Ano, só Mês, ou nenhum (todos os dados)
+ */
+function filtrarPorAnoMes() {
+    try {
+        const ano = document.getElementById('filtroAno')?.value;
+        const mes = document.getElementById('filtroMes')?.value;
+
+        // Limpa período personalizado
+        document.getElementById('dataInicio').value = '';
+        document.getElementById('dataFim').value = '';
+        document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
+
+        // Se não selecionou nada, mostra todos os dados (últimos 5 anos)
+        if (!ano && !mes) {
+            const anoAtual = new Date().getFullYear();
+            const dataInicio = new Date(anoAtual - 5, 0, 1);
+            const dataFim = new Date(anoAtual, 11, 31);
+
+            document.getElementById('dataInicio').value = formatarDataInput(dataInicio);
+            document.getElementById('dataFim').value = formatarDataInput(dataFim);
+
+            atualizarLabelPeriodo();
+            carregarDados();
+            return;
+        }
+
+        const anoNum = ano ? parseInt(ano) : null;
+        const mesNum = mes ? parseInt(mes) : null;
+
+        let dataInicio, dataFim;
+
+        if (anoNum && mesNum) {
+            // Filtro: Ano específico + Mês específico
+            dataInicio = new Date(anoNum, mesNum - 1, 1);
+            dataFim = new Date(anoNum, mesNum, 0);
+        } else if (anoNum && !mesNum) {
+            // Filtro: Ano específico + Todos os meses
+            dataInicio = new Date(anoNum, 0, 1);
+            dataFim = new Date(anoNum, 11, 31);
+        } else if (!anoNum && mesNum) {
+            // Filtro: Todos os anos + Mês específico (últimos 5 anos)
+            const anoAtual = new Date().getFullYear();
+
+            // Define período do primeiro ano até o último ano
+            dataInicio = new Date(anoAtual - 5, mesNum - 1, 1);
+            dataFim = new Date(anoAtual, mesNum, 0);
+        }
+
+        document.getElementById('dataInicio').value = formatarDataInput(dataInicio);
+        document.getElementById('dataFim').value = formatarDataInput(dataFim);
+
+        atualizarLabelPeriodo();
+        carregarDados();
+    } catch (error) {
+        console.error('Erro ao filtrar por ano/mês:', error);
+        AppToast.show('Vermelho', 'Erro ao filtrar por ano/mês.', 3000);
+    }
+}
+
+/**
+ * Limpa filtro de Ano/Mês
+ */
+function limparFiltroAnoMes() {
+    try {
+        document.getElementById('filtroAno').value = '';
+        document.getElementById('filtroMes').value = '';
+
+        // Define período padrão (últimos 30 dias)
+        const hoje = new Date();
+        const inicio = new Date();
+        inicio.setDate(hoje.getDate() - 30);
+
+        document.getElementById('dataInicio').value = formatarDataInput(inicio);
+        document.getElementById('dataFim').value = formatarDataInput(hoje);
+
+        atualizarLabelPeriodo();
+        carregarDados();
+    } catch (error) {
+        console.error('Erro ao limpar filtro ano/mês:', error);
+    }
+}
+
+/**
+ * Limpa filtro de Período Personalizado
+ */
+function limparFiltroPeriodo() {
+    try {
+        document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
+
+        // Define período padrão (últimos 30 dias)
+        const hoje = new Date();
+        const inicio = new Date();
+        inicio.setDate(hoje.getDate() - 30);
+
+        document.getElementById('dataInicio').value = formatarDataInput(inicio);
+        document.getElementById('dataFim').value = formatarDataInput(hoje);
+
+        atualizarLabelPeriodo();
+        carregarDados();
+    } catch (error) {
+        console.error('Erro ao limpar filtro de período:', error);
+    }
+}
+
+// ========================================
 // INICIALIZACAO
 // ========================================
 document.addEventListener('DOMContentLoaded', function () {
     try {
+        // Popula anos disponíveis
+        popularAnosDisponiveis();
+
         // Define periodo padrao (ultimos 30 dias)
         const hoje = new Date();
         const inicio = new Date();
@@ -38,20 +207,35 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('dataInicio').value = formatarDataInput(inicio);
         document.getElementById('dataFim').value = formatarDataInput(hoje);
 
-        // Event listeners
-        document.getElementById('btnFiltrar').addEventListener('click', carregarDados);
+        // Event listeners - Filtros Ano/Mês
+        document.getElementById('btnFiltrarAnoMes')?.addEventListener('click', filtrarPorAnoMes);
+        document.getElementById('btnLimparAnoMes')?.addEventListener('click', limparFiltroAnoMes);
+
+        // Event listeners - Filtros Período
+        document.getElementById('btnFiltrarPeriodo')?.addEventListener('click', carregarDados);
+        document.getElementById('btnLimparPeriodo')?.addEventListener('click', limparFiltroPeriodo);
 
         // Desmarcar periodos rapidos ao editar datas manualmente
         document.getElementById('dataInicio').addEventListener('change', function() {
             document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
+            // Limpa ano/mês ao alterar período personalizado
+            document.getElementById('filtroAno').value = '';
+            document.getElementById('filtroMes').value = '';
         });
         document.getElementById('dataFim').addEventListener('change', function() {
             document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
+            // Limpa ano/mês ao alterar período personalizado
+            document.getElementById('filtroAno').value = '';
+            document.getElementById('filtroMes').value = '';
         });
 
         // Botoes de periodo rapido
         document.querySelectorAll('.btn-period-lav').forEach(btn => {
             btn.addEventListener('click', function () {
+                // Limpa filtros de ano/mês
+                document.getElementById('filtroAno').value = '';
+                document.getElementById('filtroMes').value = '';
+
                 document.querySelectorAll('.btn-period-lav').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
@@ -62,6 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('dataInicio').value = formatarDataInput(novoInicio);
                 document.getElementById('dataFim').value = formatarDataInput(hoje);
 
+                atualizarLabelPeriodo();
                 carregarDados();
             });
         });
@@ -754,8 +939,8 @@ function formatarDataInput(data) {
 }
 
 function mostrarLoading(mensagem) {
-    var modalEl = document.getElementById('modalLoadingLavagem');
-    if (!modalEl) return;
+    var overlayEl = document.getElementById('loadingOverlayLavagem');
+    if (!overlayEl) return;
 
     // Atualiza mensagem se fornecida
     if (mensagem) {
@@ -763,35 +948,12 @@ function mostrarLoading(mensagem) {
         if (msgEl) msgEl.textContent = mensagem;
     }
 
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        var existingModal = bootstrap.Modal.getInstance(modalEl);
-        if (existingModal) {
-            existingModal.show();
-        } else {
-            var modal = new bootstrap.Modal(modalEl, {
-                backdrop: 'static',
-                keyboard: false
-            });
-            modal.show();
-        }
-    }
+    overlayEl.style.display = 'flex';
 }
 
 function ocultarLoading() {
-    var modalEl = document.getElementById('modalLoadingLavagem');
-    if (!modalEl) return;
-
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        var modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) {
-            modal.hide();
-        }
-    }
-
-    // Remove backdrop manual se existir
-    var backdrop = document.getElementById('ftx-loading-backdrop');
-    if (backdrop) {
-        backdrop.remove();
-        document.body.classList.remove('modal-open');
+    var overlayEl = document.getElementById('loadingOverlayLavagem');
+    if (overlayEl) {
+        overlayEl.style.display = 'none';
     }
 }

@@ -11,7 +11,7 @@
     'use strict';
 
     // ================================================================
-    // OVERLAY DE LOADING COM CURSOR DE AMPULHETA
+    // OVERLAY DE LOADING COM LOGO FROTIX PISCANDO (PADRÃO FROTIX)
     // ================================================================
     window.mostrarLoadingRelatorio = function ()
     {
@@ -20,35 +20,14 @@
         // Remover anterior
         $('#modal-relatorio-loading-overlay').remove();
 
-        // Criar HTML simples
+        // Criar HTML com padrão FrotiX (logo piscando)
         const html = `
-        <div id="modal-relatorio-loading-overlay" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 999999;
-            cursor: wait;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        ">
-            <div style="
-                background: white;
-                padding: 40px;
-                border-radius: 10px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-                text-align: center;
-            ">
-                <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
-                <div style="margin-top: 20px; font-size: 18px; font-weight: 600;">
-                    Carregando a Ficha do Agendamento/Viagem...
-                </div>
-                <div style="margin-top: 10px; color: #666;">
-                    Aguarde, por favor
-                </div>
+        <div id="modal-relatorio-loading-overlay" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait;">
+            <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+                <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+                <div class="ftx-loading-bar"></div>
+                <div class="ftx-loading-text">Carregando a Ficha...</div>
+                <div class="ftx-loading-subtext">Aguarde, por favor</div>
             </div>
         </div>
     `;
@@ -520,44 +499,50 @@
     {
         if (!data)
         {
-            console.warn("⚠️ Dados vazios, usando relatório padrío");
+            console.warn("⚠️ Dados vazios, usando relatório padrão");
             return "FichaAberta.trdp";
         }
+
+        // Normaliza propriedades (suporta PascalCase e camelCase)
+        const status = data.status || data.Status;
+        const finalidade = data.finalidade || data.Finalidade;
+        const statusAgendamento = data.statusAgendamento ?? data.StatusAgendamento;
 
         let relatorioAsString = "FichaAberta.trdp"; // Default
 
         // Lógica de seleção do relatório
-        if (data.status === "Cancelada" || data.status === "Cancelado")
+        if (status === "Cancelada" || status === "Cancelado")
         {
-            relatorioAsString = data.finalidade !== "Evento"
+            relatorioAsString = finalidade !== "Evento"
                 ? "FichaCancelada.trdp"
                 : "FichaEventoCancelado.trdp";
         }
-        else if (data.finalidade === "Evento" && data.status !== "Cancelada")
+        else if (finalidade === "Evento" && status !== "Cancelada")
         {
             relatorioAsString = "FichaEvento.trdp";
         }
-        else if (data.status === "Aberta" && data.finalidade !== "Evento")
+        else if (status === "Aberta" && finalidade !== "Evento")
         {
             relatorioAsString = "FichaAberta.trdp";
         }
-        else if (data.status === "Realizada")
+        else if (status === "Realizada")
         {
-            relatorioAsString = data.finalidade !== "Evento"
+            relatorioAsString = finalidade !== "Evento"
                 ? "FichaRealizada.trdp"
                 : "FichaEventoRealizado.trdp";
         }
-        else if (data.statusAgendamento === true)
+        else if (statusAgendamento === true)
         {
-            relatorioAsString = data.finalidade !== "Evento"
+            relatorioAsString = finalidade !== "Evento"
                 ? "FichaAgendamento.trdp"
                 : "FichaEventoAgendado.trdp";
         }
 
         console.log("📄 Relatório selecionado:", relatorioAsString);
-        console.log("   - Status:", data.status);
-        console.log("   - Finalidade:", data.finalidade);
-        console.log("   - StatusAgendamento:", data.statusAgendamento);
+        console.log("   - Status:", status);
+        console.log("   - Finalidade:", finalidade);
+        console.log("   - StatusAgendamento:", statusAgendamento);
+        console.log("   - Dados originais:", JSON.stringify(data).substring(0, 500));
 
         return relatorioAsString;
     }

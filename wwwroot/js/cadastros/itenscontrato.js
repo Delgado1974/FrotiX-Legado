@@ -192,6 +192,25 @@ function ocultarShimmer() {
 }
 
 // ============================================================
+// LOADING OVERLAY - PADRÃO FROTIX
+// ============================================================
+function mostrarLoading() {
+    try {
+        $('#loadingOverlayContrato').css('display', 'flex');
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("itenscontrato.js", "mostrarLoading", error);
+    }
+}
+
+function esconderLoading() {
+    try {
+        $('#loadingOverlayContrato').css('display', 'none');
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("itenscontrato.js", "esconderLoading", error);
+    }
+}
+
+// ============================================================
 // CARREGAMENTO DE LISTAS
 // ============================================================
 function loadContratos(status, contratoIdParaSelecionar) {
@@ -560,7 +579,7 @@ function loadTblVeiculos(contratoId) {
     try {
         // Limpa filtro ao carregar nova tabela
         $('#ddlFiltroItem').val('');
-        
+
         if (dtVeiculos) {
             dtVeiculos.destroy();
             $('#tblVeiculos tbody').empty();
@@ -568,6 +587,9 @@ function loadTblVeiculos(contratoId) {
 
         // Carrega itens para o filtro
         carregarFiltroItens(contratoId);
+
+        // Mostra loading
+        mostrarLoading();
 
         dtVeiculos = $('#tblVeiculos').DataTable({
             ajax: {
@@ -589,6 +611,10 @@ function loadTblVeiculos(contratoId) {
                         Alerta.TratamentoErroComLinha("itenscontrato.js", "loadTblVeiculos.dataSrc", error);
                         return [];
                     }
+                },
+                error: function (xhr, error, thrown) {
+                    esconderLoading();
+                    Alerta.TratamentoErroComLinha("itenscontrato.js", "loadTblVeiculos.ajax.error", error);
                 }
             },
             columns: [
@@ -625,10 +651,17 @@ function loadTblVeiculos(contratoId) {
             language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json' },
             order: [[1, 'asc']],
             responsive: true,
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+            initComplete: function () {
+                esconderLoading();
+            },
+            drawCallback: function () {
+                esconderLoading();
+            }
         });
 
     } catch (error) {
+        esconderLoading();
         Alerta.TratamentoErroComLinha("itenscontrato.js", "loadTblVeiculos", error);
     }
 }
@@ -639,6 +672,9 @@ function loadTblVeiculosAta(ataId) {
             dtVeiculos.destroy();
             $('#tblVeiculos tbody').empty();
         }
+
+        // Mostra loading
+        mostrarLoading();
 
         dtVeiculos = $('#tblVeiculos').DataTable({
             ajax: {
@@ -660,6 +696,10 @@ function loadTblVeiculosAta(ataId) {
                         Alerta.TratamentoErroComLinha("itenscontrato.js", "loadTblVeiculosAta.dataSrc", error);
                         return [];
                     }
+                },
+                error: function (xhr, error, thrown) {
+                    esconderLoading();
+                    Alerta.TratamentoErroComLinha("itenscontrato.js", "loadTblVeiculosAta.ajax.error", error);
                 }
             },
             columns: [
@@ -694,10 +734,17 @@ function loadTblVeiculosAta(ataId) {
             language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json' },
             order: [[1, 'asc']],
             responsive: true,
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+            initComplete: function () {
+                esconderLoading();
+            },
+            drawCallback: function () {
+                esconderLoading();
+            }
         });
 
     } catch (error) {
+        esconderLoading();
         Alerta.TratamentoErroComLinha("itenscontrato.js", "loadTblVeiculosAta", error);
     }
 }
@@ -737,12 +784,15 @@ function carregarFiltroItens(contratoId) {
 function filtrarPorItem() {
     try {
         var valorFiltro = $('#ddlFiltroItem').val();
-        
+
         if (dtVeiculos) {
+            // Mostra loading durante o filtro
+            mostrarLoading();
             // Filtra pela coluna 0 (ITEM)
             dtVeiculos.column(0).search(valorFiltro).draw();
         }
     } catch (error) {
+        esconderLoading();
         Alerta.TratamentoErroComLinha("itenscontrato.js", "filtrarPorItem", error);
     }
 }
@@ -750,11 +800,14 @@ function filtrarPorItem() {
 function limparFiltroItem() {
     try {
         $('#ddlFiltroItem').val('');
-        
+
         if (dtVeiculos) {
+            // Mostra loading durante o filtro
+            mostrarLoading();
             dtVeiculos.column(0).search('').draw();
         }
     } catch (error) {
+        esconderLoading();
         Alerta.TratamentoErroComLinha("itenscontrato.js", "limparFiltroItem", error);
     }
 }

@@ -3803,5 +3803,127 @@ table.dataTable thead .sorting_desc::after {
 }
 
 /* ================================================================
+   NAVEGAÇÃO SYNCFUSION TREEVIEW - ESTILOS GLOBAIS
+   ================================================================ */
+
+/* Container da navegação Syncfusion */
+.nav-syncfusion {
+    padding: 0;
+    margin: 0;
+}
+
+/* Remove estilos padrão do TreeView Syncfusion */
+.nav-syncfusion .e-treeview {
+    background: transparent !important;
+    border: none !important;
+}
+
+.nav-syncfusion .e-treeview .e-ul {
+    padding: 0;
+    margin: 0;
+    background: transparent !important;
+}
+
+.nav-syncfusion .e-treeview .e-list-item {
+    padding: 0;
+    margin: 0;
+    background: transparent !important;
+}
+
+.nav-syncfusion .e-treeview .e-text-content {
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* Link do menu Syncfusion */
+.nav-syncfusion .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.nav-syncfusion .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    color: #fff;
+}
+
+/* Ícones duotone na navegação Syncfusion */
+.nav-syncfusion .nav-icon.fa-duotone {
+    --fa-primary-color: #a0aec0;
+    --fa-secondary-color: #c67750;
+    --fa-primary-opacity: 1;
+    --fa-secondary-opacity: 1;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* Ícones de subitens (níveis 1 e 2) */
+.nav-syncfusion .nivel-1 .nav-icon.fa-duotone,
+.nav-syncfusion .nivel-2 .nav-icon.fa-duotone {
+    --fa-primary-color: #b0bcc8;
+    --fa-secondary-color: #d4917a;
+    font-size: 0.95rem;
+}
+
+/* Indentação hierárquica */
+.nav-syncfusion .nivel-0 .nav-link { padding-left: 15px; }
+.nav-syncfusion .nivel-1 .nav-link { padding-left: 30px; }
+.nav-syncfusion .nivel-2 .nav-link { padding-left: 45px; }
+
+/* Seta de expansão */
+.nav-syncfusion .e-treeview .e-icons.e-icon-collapsible,
+.nav-syncfusion .e-treeview .e-icons.e-icon-expandable {
+    color: #b1d4e0 !important;
+    font-size: 0.8rem;
+}
+
+/* Bolinha de seleção - lado direito */
+.nav-syncfusion .selection-dot {
+    display: none;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.35rem;
+    color: #c67750 !important;
+}
+
+.nav-syncfusion .e-list-item.e-active .selection-dot,
+.nav-syncfusion .e-list-item.ftx-active .selection-dot,
+.nav-syncfusion .nav-link.active .selection-dot {
+    display: inline-block;
+}
+
+/* Item ativo - fundo amarelo translúcido com borda */
+.nav-syncfusion .e-list-item.e-active > .e-text-content > .nav-link,
+.nav-syncfusion .e-list-item.ftx-active > .e-text-content > .nav-link,
+.nav-syncfusion .nav-link.active {
+    background: rgba(255, 193, 7, 0.15) !important;
+    border-left: 3px solid #ffc107;
+}
+
+/* Texto do menu */
+.nav-syncfusion .nav-text {
+    flex: 1;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 20px;
+}
+
+/* Remove fullRow highlight padrão do Syncfusion */
+.nav-syncfusion .e-treeview .e-fullrow {
+    display: none !important;
+}
+
+/* ================================================================
    FIM DO ARQUIVO FROTIX.CSS
    ================================================================ */

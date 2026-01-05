@@ -1,24 +1,35 @@
-﻿function showLoading()
-{
-    document.getElementById('loading-overlay').style.display = 'flex';
+﻿// ===== FUNÇÕES DE LOADING - PADRÃO FROTIX =====
+function mostrarLoading(texto) {
+    const overlay = document.getElementById('loadingOverlayHigienizar');
+    if (overlay) {
+        if (texto) {
+            const loadingText = overlay.querySelector('.ftx-loading-text');
+            if (loadingText) loadingText.textContent = texto;
+        }
+        overlay.style.display = 'flex';
+    }
     // Desabilita todos os botões da tela
-    document.querySelectorAll('button, input[type="button"], input[type="submit"]').forEach(btn =>
-    {
+    document.querySelectorAll('button, input[type="button"], input[type="submit"]').forEach(btn => {
         btn.disabled = true;
         btn.classList.add('btn-disabled-loading');
     });
 }
 
-function hideLoading()
-{
-    document.getElementById('loading-overlay').style.display = 'none';
+function esconderLoading() {
+    const overlay = document.getElementById('loadingOverlayHigienizar');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
     // Reabilita todos os botões
-    document.querySelectorAll('button, input[type="button"], input[type="submit"]').forEach(btn =>
-    {
+    document.querySelectorAll('button, input[type="button"], input[type="submit"]').forEach(btn => {
         btn.disabled = false;
         btn.classList.remove('btn-disabled-loading');
     });
 }
+
+// Alias para compatibilidade com código existente
+function showLoading() { mostrarLoading(); }
+function hideLoading() { esconderLoading(); }
 
 function normalizarTexto(texto)
 {

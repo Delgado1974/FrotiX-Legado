@@ -1,0 +1,1168 @@
+@page
+@model FrotiX.Pages.Veiculo.DashboardVeiculosModel
+@{
+    ViewData["Title"] = "Dashboard de Veículos";
+    ViewData["PageName"] = "veiculo_dashboardveiculos";
+    ViewData["Heading"] = "<i class='fa-duotone fa-cars'></i> Dashboard: <span class='fw-300'>Veículos</span>";
+    ViewData["Category1"] = "Dashboards";
+    ViewData["PageIcon"] = "fa-duotone fa-chart-line";
+}
+
+@section HeadBlock {
+<style>
+    /* ========================================
+       PALETA DE CORES - TEMA VERDE SAGE/OLIVA
+       ======================================== */
+    :root {
+        --veic-primary: #5f8575;
+        --veic-secondary: #7aa390;
+        --veic-accent: #8fb8a4;
+        --veic-dark: #4a6b5c;
+        --veic-darker: #3a5548;
+        --veic-light: #f0f7f4;
+        --veic-cream: #e8f2ed;
+        --veic-gradient: linear-gradient(135deg, #5f8575 0%, #7aa390 100%);
+    }
+
+    /* Header do Dashboard */
+    .header-dashboard-veic {
+        background: var(--veic-gradient);
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 15px rgba(95, 133, 117, 0.35);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-dashboard-veic::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        animation: veicHeaderShine 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes veicHeaderShine {
+        0%, 100% { left: -100%; }
+        50% { left: 100%; }
+    }
+
+    .header-dashboard-titulo-veic {
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-dashboard-titulo-veic i {
+        font-size: 1.75rem;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+    }
+
+    /* Navegação de Abas */
+    .dash-tabs-veic {
+        background: white;
+        border-radius: 12px;
+        padding: 6px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        display: flex;
+        gap: 6px;
+    }
+
+    .dash-tab-veic {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .dash-tab-veic:hover {
+        background: var(--veic-light);
+        color: var(--veic-dark);
+    }
+
+    .dash-tab-veic.active {
+        background: var(--veic-gradient);
+        color: white;
+        box-shadow: 0 4px 12px rgba(95, 133, 117, 0.35);
+    }
+
+    .dash-tab-veic i { font-size: 1.1rem; }
+
+    .dash-content-veic {
+        display: none !important;
+        visibility: hidden;
+        position: absolute;
+        left: -9999px;
+    }
+
+    .dash-content-veic.active {
+        display: block !important;
+        visibility: visible;
+        position: relative;
+        left: 0;
+        animation: fadeInVeic 0.3s ease;
+    }
+
+    @@keyframes fadeInVeic {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Container de Filtros */
+    .filter-card-veic {
+        background: var(--veic-gradient);
+        color: white;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(95, 133, 117, 0.25);
+    }
+
+    .filter-card-veic .form-label {
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+
+    .filter-card-veic .form-control,
+    .filter-card-veic .form-select {
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.35);
+        color: white;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+
+    .filter-card-veic .form-control::placeholder { color: rgba(255,255,255,0.7); }
+
+    .filter-card-veic .form-control:focus,
+    .filter-card-veic .form-select:focus {
+        background: rgba(255,255,255,0.28);
+        border-color: rgba(255,255,255,0.6);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .filter-card-veic .form-select option {
+        background: var(--veic-dark);
+        color: white;
+    }
+
+    /* Botões de Filtro - Base comum */
+    .btn-filtrar-veic, .btn-limpar-veic {
+        padding: 8px 20px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Botão Filtrar */
+    .btn-filtrar-veic {
+        background: rgba(255,255,255,0.2) !important;
+        border: 2px solid rgba(255,255,255,0.5) !important;
+        color: white !important;
+    }
+
+    .btn-filtrar-veic:hover {
+        background: rgba(255,255,255,0.35) !important;
+        border-color: white !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Botão Limpar */
+    .btn-limpar-veic {
+        background: transparent !important;
+        border: 2px solid rgba(255,255,255,0.4) !important;
+        color: rgba(255,255,255,0.9) !important;
+    }
+
+    .btn-limpar-veic:hover {
+        background: rgba(255,255,255,0.15) !important;
+        border-color: rgba(255,255,255,0.7) !important;
+        color: white !important;
+    }
+
+    /* Botões de Período Rápido */
+    .btn-period-veic {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.35);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        cursor: pointer;
+    }
+
+    .btn-period-veic:hover {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.6);
+        transform: scale(1.05);
+    }
+
+    .btn-period-veic.active {
+        background: white;
+        color: var(--veic-dark);
+        border-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Indicador de Período Atual */
+    .periodo-atual-veic {
+        background: rgba(255,255,255,0.15);
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: rgba(255,255,255,0.95);
+    }
+
+    .periodo-atual-veic i {
+        color: rgba(255,255,255,0.8);
+    }
+
+    /* Cards de Estatísticas */
+    .card-estatistica-veic {
+        background: white;
+        border-radius: 10px;
+        padding: 16px 20px;
+        border-left: 4px solid;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+        min-height: 90px;
+    }
+
+    .card-estatistica-veic:hover {
+        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+
+    .card-estatistica-veic.sage { border-left-color: var(--veic-primary); }
+    .card-estatistica-veic.olive { border-left-color: var(--veic-dark); }
+    .card-estatistica-veic.mint { border-left-color: var(--veic-accent); }
+    .card-estatistica-veic.forest { border-left-color: var(--veic-darker); }
+    .card-estatistica-veic.teal { border-left-color: #14b8a6; }
+    .card-estatistica-veic.emerald { border-left-color: #10b981; }
+    .card-estatistica-veic.cyan { border-left-color: #06b6d4; }
+    .card-estatistica-veic.amber { border-left-color: #f59e0b; }
+
+    .icone-card-veic {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+    }
+
+    .card-estatistica-veic.sage .icone-card-veic { color: var(--veic-primary); }
+    .card-estatistica-veic.olive .icone-card-veic { color: var(--veic-dark); }
+    .card-estatistica-veic.mint .icone-card-veic { color: var(--veic-accent); }
+    .card-estatistica-veic.forest .icone-card-veic { color: var(--veic-darker); }
+    .card-estatistica-veic.teal .icone-card-veic { color: #14b8a6; }
+    .card-estatistica-veic.emerald .icone-card-veic { color: #10b981; }
+    .card-estatistica-veic.cyan .icone-card-veic { color: #06b6d4; }
+    .card-estatistica-veic.amber .icone-card-veic { color: #f59e0b; }
+
+    .texto-metrica-veic {
+        font-size: 0.7rem;
+        color: #6B7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+
+    .valor-metrica-veic {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.1;
+    }
+
+    /* Cards de Gráficos */
+    .chart-container-veic {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: box-shadow 0.3s ease;
+        height: 100%;
+    }
+
+    .chart-container-veic:hover {
+        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    .chart-title-veic {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--veic-cream);
+    }
+
+    .chart-title-veic i {
+        color: var(--veic-primary);
+        font-size: 1.1rem;
+    }
+
+    .chart-subtitle {
+        font-size: 0.7rem;
+        color: #9ca3af;
+        font-weight: 400;
+        margin-left: auto;
+    }
+
+    /* =====================================================
+       GRID-TABELAS - Usando DIVs para evitar CSS global de table
+       ===================================================== */
+    .ftx-grid-tabela-veic {
+        width: 100%;
+        font-size: 0.8rem;
+    }
+
+    .ftx-grid-tabela-veic .grid-header {
+        display: grid;
+        background: linear-gradient(135deg, #5f8575 0%, #7aa390 100%);
+        border-radius: 6px 6px 0 0;
+    }
+
+    .ftx-grid-tabela-veic .grid-header-cell {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 10px 12px;
+    }
+
+    .ftx-grid-tabela-veic .grid-body {
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .ftx-grid-tabela-veic .grid-row {
+        display: grid;
+        border-bottom: 1px solid #f3f4f6;
+        transition: background-color 0.15s;
+    }
+
+    .ftx-grid-tabela-veic .grid-row:hover {
+        background-color: var(--veic-light);
+    }
+
+    .ftx-grid-tabela-veic .grid-cell {
+        padding: 10px 12px;
+    }
+
+    .ftx-grid-tabela-veic .text-end {
+        text-align: right;
+    }
+
+    .ftx-grid-tabela-veic .text-center {
+        text-align: center;
+    }
+
+    /* Layout 2 colunas */
+    .ftx-grid-tabela-veic.cols-2 .grid-header,
+    .ftx-grid-tabela-veic.cols-2 .grid-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    /* Layout 3 colunas */
+    .ftx-grid-tabela-veic.cols-3 .grid-header,
+    .ftx-grid-tabela-veic.cols-3 .grid-row {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    /* Layout 4 colunas */
+    .ftx-grid-tabela-veic.cols-4 .grid-header,
+    .ftx-grid-tabela-veic.cols-4 .grid-row {
+        grid-template-columns: auto 1fr auto auto;
+    }
+
+    .ftx-grid-tabela-veic .grid-row-total {
+        background: var(--veic-cream);
+        font-weight: 700;
+    }
+
+    /* Badge de Ranking */
+    .badge-rank-veic {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--veic-secondary);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-right: 8px;
+    }
+
+    .badge-rank-veic.top3 {
+        background: var(--veic-primary);
+        box-shadow: 0 2px 6px rgba(95, 133, 117, 0.4);
+    }
+
+    /* Card Destaque */
+    .card-destaque-veic {
+        background: linear-gradient(135deg, var(--veic-light) 0%, #e0ebe6 100%);
+        border: 1px solid var(--veic-accent);
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+        height: 100%;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .card-destaque-veic .destaque-label {
+        font-size: 0.7rem;
+        color: #6B7280;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .card-destaque-veic .destaque-valor {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--veic-dark);
+    }
+
+    .card-destaque-veic .destaque-info {
+        font-size: 0.8rem;
+        color: var(--veic-primary);
+        font-weight: 600;
+    }
+
+    /* Tabelas Estatísticas - Estilo específico */
+    .table-veic {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+
+    .table-veic thead {
+        background: var(--veic-gradient);
+        color: white;
+    }
+
+    .table-veic thead th {
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 10px 12px;
+        border: none;
+    }
+
+    .table-veic tbody tr:hover {
+        background-color: var(--veic-light) !important;
+    }
+
+    .table-veic tbody td {
+        padding: 8px 12px;
+        vertical-align: middle;
+    }
+
+    /* Responsividade */
+    @@media (max-width: 992px) {
+        .valor-metrica-veic { font-size: 1.3rem; }
+        .chart-container-veic { margin-bottom: 1rem; }
+        .dash-tab-veic { font-size: 0.85rem; padding: 10px 16px; }
+        .header-dashboard-titulo-veic { font-size: 1.4rem; }
+    }
+
+    @@media (max-width: 768px) {
+        .dash-tabs-veic { flex-direction: column; }
+        .card-estatistica-veic { margin-bottom: 12px; }
+        .header-dashboard-veic { padding: 16px 20px; }
+    }
+</style>
+}
+
+<div class="container-fluid">
+    <!-- HEADER -->
+    <div class="header-dashboard-veic">
+        <h2 class="header-dashboard-titulo-veic">
+            <i class="fa-duotone fa-cars"></i>
+            Dashboard de Veículos
+        </h2>
+    </div>
+
+    <!-- NAVEGAÇÃO DE ABAS -->
+    <div class="dash-tabs-veic">
+        <button class="dash-tab-veic active" data-tab="visao-geral">
+            <i class="fa-duotone fa-house"></i>
+            <span>Visão Geral</span>
+        </button>
+        <button class="dash-tab-veic" data-tab="uso-veiculos">
+            <i class="fa-duotone fa-route"></i>
+            <span>Uso dos Veículos</span>
+        </button>
+        <button class="dash-tab-veic" data-tab="custos">
+            <i class="fa-duotone fa-sack-dollar"></i>
+            <span>Custos</span>
+        </button>
+    </div>
+
+    <div class="dash-tabs-container-veic">
+    <!-- ========================================== -->
+    <!-- ABA 1: VISÃO GERAL -->
+    <!-- ========================================== -->
+    <div id="tab-visao-geral" class="dash-content-veic active">
+        <!-- Cards KPI - Linha 1 -->
+        <div class="row g-2 mb-3">
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic sage">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-cars"></i></div>
+                    <div class="texto-metrica-veic">Total da Frota</div>
+                    <div class="valor-metrica-veic" id="totalVeiculos">0</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic emerald">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-circle-check"></i></div>
+                    <div class="texto-metrica-veic">Ativos</div>
+                    <div class="valor-metrica-veic" id="veiculosAtivos">0</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic forest">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-circle-xmark"></i></div>
+                    <div class="texto-metrica-veic">Inativos</div>
+                    <div class="valor-metrica-veic" id="veiculosInativos">0</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic mint">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-car-garage"></i></div>
+                    <div class="texto-metrica-veic">Reserva</div>
+                    <div class="valor-metrica-veic" id="veiculosReserva">0</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic olive">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-calendar-clock"></i></div>
+                    <div class="texto-metrica-veic">Idade Média</div>
+                    <div class="valor-metrica-veic" id="idadeMedia">0 anos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards KPI - Linha 2 -->
+        <div class="row g-2 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic teal">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-car-side"></i></div>
+                    <div class="texto-metrica-veic">Efetivos</div>
+                    <div class="valor-metrica-veic" id="veiculosEfetivos">0</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic cyan">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-building"></i></div>
+                    <div class="texto-metrica-veic">Próprios</div>
+                    <div class="valor-metrica-veic" id="veiculosProprios">0</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic amber">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-file-contract"></i></div>
+                    <div class="texto-metrica-veic">Locados</div>
+                    <div class="valor-metrica-veic" id="veiculosLocados">0</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic sage">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-money-bill-wave"></i></div>
+                    <div class="texto-metrica-veic">Valor Mensal</div>
+                    <div class="valor-metrica-veic" id="valorMensalTotal">R$ 0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos - Linha 1 -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 360px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-pie"></i>
+                        Por Categoria
+                    </h5>
+                    <div id="chartCategoria" style="height: 300px;"></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 360px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-pie"></i>
+                        Por Status
+                    </h5>
+                    <div id="chartStatus" style="height: 300px;"></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 360px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-pie"></i>
+                        Por Origem
+                    </h5>
+                    <div id="chartOrigem" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos - Linha 2 -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 400px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-bar"></i>
+                        Top 15 Modelos
+                        <span class="chart-subtitle">Por quantidade de veículos</span>
+                    </h5>
+                    <div id="chartModelos" style="height: 350px;"></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 400px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-column"></i>
+                        Idade da Frota
+                        <span class="chart-subtitle">Por ano de fabricação</span>
+                    </h5>
+                    <div id="chartAnoFabricacao" style="height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabelas Estatísticas - Linha 3 -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 380px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-layer-group"></i>
+                        Estatísticas por Categoria
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-2">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">Categoria</div>
+                            <div class="grid-header-cell text-end">Qtd</div>
+                        </div>
+                        <div class="grid-body" id="tabelaCategoria">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 380px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-gas-pump"></i>
+                        Por Combustível
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-2">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">Combustível</div>
+                            <div class="grid-header-cell text-end">Qtd</div>
+                        </div>
+                        <div class="grid-body" id="tabelaCombustivel">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 380px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-building"></i>
+                        Por Unidade (Top 10)
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-2">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">Unidade</div>
+                            <div class="grid-header-cell text-end">Qtd</div>
+                        </div>
+                        <div class="grid-body" id="tabelaUnidade">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela Top KM -->
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="chart-container-veic">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-gauge-high"></i>
+                        Top 10 Veículos por Quilometragem
+                        <span class="chart-subtitle">Veículos com maior KM registrado</span>
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-3">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">#</div>
+                            <div class="grid-header-cell">Veículo</div>
+                            <div class="grid-header-cell text-end">KM</div>
+                        </div>
+                        <div class="grid-body" id="tabelaTopKm">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 2: USO DOS VEÍCULOS -->
+    <!-- ========================================== -->
+    <div id="tab-uso-veiculos" class="dash-content-veic">
+        <!-- Filtros Completos -->
+        <div class="filter-card-veic">
+            <!-- Linha 1: Ano, Mês -->
+            <div class="row align-items-end g-3 mb-3">
+                <div class="col-auto">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar me-1"></i> Ano
+                    </label>
+                    <select id="filtroAnoUso" class="form-select" style="min-width: 120px;">
+                        <option value="">Todos os Anos</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar-day me-1"></i> Mês
+                    </label>
+                    <select id="filtroMesUso" class="form-select" style="min-width: 150px;">
+                        <option value="">Todos os Meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-filtrar-veic d-block" id="btnFiltrarAnoMesUso">
+                        <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-limpar-veic d-block" id="btnLimparAnoMesUso">
+                        <i class="fa-duotone fa-eraser me-1"></i> Limpar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Linha 2: Período Personalizado + Períodos Rápidos -->
+            <div class="row align-items-end g-3">
+                <div class="col-auto">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar-range me-1"></i> Período Personalizado
+                    </label>
+                    <div class="d-flex gap-2 align-items-center">
+                        <div>
+                            <label class="form-label small mb-1">De:</label>
+                            <input type="date" id="dataInicioUso" class="form-control" style="width: 140px;" />
+                        </div>
+                        <div>
+                            <label class="form-label small mb-1">Até:</label>
+                            <input type="date" id="dataFimUso" class="form-control" style="width: 140px;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-filtrar-veic d-block" id="btnFiltrarPeriodoUso">
+                        <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-limpar-veic d-block" id="btnLimparPeriodoUso">
+                        <i class="fa-duotone fa-eraser me-1"></i> Limpar
+                    </button>
+                </div>
+                <div class="col">
+                    <label class="form-label">Períodos Rápidos</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn-period-veic" data-dias="7">7 dias</button>
+                        <button type="button" class="btn-period-veic" data-dias="15">15 dias</button>
+                        <button type="button" class="btn-period-veic" data-dias="30">30 dias</button>
+                        <button type="button" class="btn-period-veic" data-dias="60">60 dias</button>
+                        <button type="button" class="btn-period-veic" data-dias="90">90 dias</button>
+                        <button type="button" class="btn-period-veic" data-dias="180">180 dias</button>
+                        <button type="button" class="btn-period-veic" data-dias="365">1 ano</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicador do período atual -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="periodo-atual-veic d-flex align-items-center">
+                        <i class="fa-duotone fa-info-circle me-2"></i>
+                        <span id="periodoAtualLabelUso">Exibindo todos os dados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards KPI -->
+        <div class="row g-2 mb-4">
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic sage">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-route"></i></div>
+                    <div class="texto-metrica-veic">Total de Viagens</div>
+                    <div class="valor-metrica-veic" id="totalViagensUso">0</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic olive">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-road"></i></div>
+                    <div class="texto-metrica-veic">KM Total Rodado</div>
+                    <div class="valor-metrica-veic" id="kmTotalRodado">0 km</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic mint">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-gas-pump"></i></div>
+                    <div class="texto-metrica-veic">Abastecimentos</div>
+                    <div class="valor-metrica-veic" id="totalAbastecimentosUso">0</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic teal">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-droplet"></i></div>
+                    <div class="texto-metrica-veic">Litros Totais</div>
+                    <div class="valor-metrica-veic" id="totalLitrosUso">0 L</div>
+                </div>
+            </div>
+            <div class="col-lg col-md-6">
+                <div class="card-estatistica-veic amber">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-sack-dollar"></i></div>
+                    <div class="texto-metrica-veic">Valor Abastecimento</div>
+                    <div class="valor-metrica-veic" id="valorAbastecimentoUso">R$ 0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos - Evolução Mensal -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 350px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-line"></i>
+                        Viagens por Mês
+                    </h5>
+                    <div id="chartViagensMes" style="height: 300px;"></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 350px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-area"></i>
+                        Abastecimento por Mês (R$)
+                    </h5>
+                    <div id="chartAbastecimentoMes" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabelas Top Veículos -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 450px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-ranking-star"></i>
+                        Top 10 Veículos por Viagens
+                        <span class="chart-subtitle">Quantidade de viagens realizadas</span>
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-4">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">#</div>
+                            <div class="grid-header-cell">Veículo</div>
+                            <div class="grid-header-cell text-center">Viagens</div>
+                            <div class="grid-header-cell text-end">KM</div>
+                        </div>
+                        <div class="grid-body" id="tabelaTopViagens" style="max-height: 380px;">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 450px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-gas-pump"></i>
+                        Top 10 Veículos por Abastecimento
+                        <span class="chart-subtitle">Valor total em abastecimentos</span>
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-4">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">#</div>
+                            <div class="grid-header-cell">Veículo</div>
+                            <div class="grid-header-cell text-end">Litros</div>
+                            <div class="grid-header-cell text-end">Valor</div>
+                        </div>
+                        <div class="grid-body" id="tabelaTopAbastecimento" style="max-height: 380px;">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabelas de Litros e Consumo -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 450px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-droplet"></i>
+                        Top 10 por Litros Abastecidos
+                        <span class="chart-subtitle">Maior volume abastecido</span>
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-4">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">#</div>
+                            <div class="grid-header-cell">Veículo</div>
+                            <div class="grid-header-cell text-end">Litros</div>
+                            <div class="grid-header-cell text-center">Abast.</div>
+                        </div>
+                        <div class="grid-body" id="tabelaTopLitros" style="max-height: 380px;">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 450px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-arrow-trend-down" style="color: #ef4444;"></i>
+                        Top 10 Menos Eficientes
+                        <span class="chart-subtitle">Menor km/l = mais gastam</span>
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-4">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">#</div>
+                            <div class="grid-header-cell">Veículo</div>
+                            <div class="grid-header-cell text-end">km/L</div>
+                            <div class="grid-header-cell text-end">KM</div>
+                        </div>
+                        <div class="grid-body" id="tabelaTopConsumo" style="max-height: 380px;">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container-veic" style="min-height: 450px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-arrow-trend-up" style="color: #10b981;"></i>
+                        Top 10 Mais Eficientes
+                        <span class="chart-subtitle">Maior km/l = mais econômicos</span>
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-4">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">#</div>
+                            <div class="grid-header-cell">Veículo</div>
+                            <div class="grid-header-cell text-end">km/L</div>
+                            <div class="grid-header-cell text-end">KM</div>
+                        </div>
+                        <div class="grid-body" id="tabelaTopEficiencia" style="max-height: 380px;">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 3: CUSTOS -->
+    <!-- ========================================== -->
+    <div id="tab-custos" class="dash-content-veic">
+        <!-- Filtros -->
+        <div class="filter-card-veic">
+            <div class="row align-items-end g-3">
+                <div class="col-auto">
+                    <label class="form-label">
+                        <i class="fa-duotone fa-calendar me-1"></i> Ano
+                    </label>
+                    <select id="filtroAnoCusto" class="form-select" style="min-width: 120px;">
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-filtrar-veic" id="btnFiltrarCusto">
+                        <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards KPI -->
+        <div class="row g-2 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic amber">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-gas-pump"></i></div>
+                    <div class="texto-metrica-veic">Custo Abastecimento</div>
+                    <div class="valor-metrica-veic" id="custoAbastecimento">R$ 0</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic sage">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-wrench"></i></div>
+                    <div class="texto-metrica-veic">Custo Manutenção</div>
+                    <div class="valor-metrica-veic" id="custoManutencao">R$ 0</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic olive">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-receipt"></i></div>
+                    <div class="texto-metrica-veic">Qtd Abastecimentos</div>
+                    <div class="valor-metrica-veic" id="qtdAbastecimentosCusto">0</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card-estatistica-veic mint">
+                    <div class="icone-card-veic"><i class="fa-duotone fa-screwdriver-wrench"></i></div>
+                    <div class="texto-metrica-veic">Qtd Manutenções</div>
+                    <div class="valor-metrica-veic" id="qtdManutencoesCusto">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico Comparativo Mensal -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="chart-container-veic" style="min-height: 380px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-mixed"></i>
+                        Comparativo Mensal: Abastecimento x Manutenção
+                    </h5>
+                    <div id="chartComparativoMensal" style="height: 320px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custo por Categoria -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 380px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-chart-bar"></i>
+                        Custo Abastecimento por Categoria
+                    </h5>
+                    <div id="chartCustoCategoria" style="height: 320px;"></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container-veic" style="min-height: 380px;">
+                    <h5 class="chart-title-veic">
+                        <i class="fa-duotone fa-table"></i>
+                        Custo por Categoria (Tabela)
+                    </h5>
+                    <div class="ftx-grid-tabela-veic cols-2">
+                        <div class="grid-header">
+                            <div class="grid-header-cell">Categoria</div>
+                            <div class="grid-header-cell text-end">Valor Abast.</div>
+                        </div>
+                        <div class="grid-body" id="tabelaCustoCategoria" style="max-height: 280px;">
+                            <div class="grid-row" style="justify-content: center; padding: 20px;">
+                                <i class="fa-duotone fa-spinner-third fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- Overlay de Loading - Padrão FrotiX -->
+<div id="loadingOverlayVeic" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Dashboard de Veículos</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-base/dist/global/ej2-base.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-data/dist/global/ej2-data.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-svg-base/dist/global/ej2-svg-base.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-pdf-export/dist/global/ej2-pdf-export.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-file-utils/dist/global/ej2-file-utils.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-compression/dist/global/ej2-compression.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-charts/dist/global/ej2-charts.min.js" asp-append-version="true"></script>
+    <script src="~/js/dashboards/dashboard-veiculos.js" asp-append-version="true"></script>
+}

@@ -23,96 +23,48 @@ const FTX_MAX_CONCURRENT = 4;
 let FtxFotoCurrent = 0;
 
 /* =========================================================================================
-   MÓDULO DE LOADING DE VIAGENS - PADRÃO FROTIX
-   Substitui o spinner de bolinhas por um modal elegante
+   MÓDULO DE LOADING DE VIAGENS - PADRÃO FROTIX (Overlay simples)
+   Usa o padrão visual FrotiX com overlay cinza escuro e logo pulsando
    ========================================================================================= */
 const FtxViagens = (function() {
     'use strict';
 
-    let _modalLoading = null;
     let _primeiroCarregamento = true;
 
-    // Inicializa referência ao modal
-    function _initModal() {
-        try {
-            const modalEl = document.getElementById('modalLoadingViagens');
-            if (modalEl) {
-                _modalLoading = new bootstrap.Modal(modalEl, {
-                    backdrop: 'static',
-                    keyboard: false
-                });
-            }
-        } catch (error) {
-            Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens._initModal", error);
-        }
-    }
-
-    // Mostra o modal de loading
+    // Mostra o overlay de loading
     function mostrarLoading(mensagem) {
         try {
-            // Esconde o spinner global de bolinhas (data-ftx-spin) se existir
+            // Esconde o spinner global se existir
             if (window.FTXSpinner) {
                 window.FTXSpinner.hide();
             }
             if (window.FtxSpin) {
                 window.FtxSpin.hide();
             }
-            // Remove overlay do spinner global se existir
-            $('.ftx-spin-overlay').remove();
-
-            // Inicializa referência ao modal se ainda não foi feito
-            if (!_modalLoading) {
-                _initModal();
-            }
 
             // Atualiza mensagem
             const msgEl = document.getElementById('loadingViagensMensagem');
             if (msgEl) {
-                msgEl.textContent = mensagem || 'Aguarde enquanto carregamos as viagens...';
+                msgEl.textContent = mensagem || 'Carregando Viagens...';
             }
 
-            // Verifica se o modal já está aberto (pelo script inline)
-            var modalEl = document.getElementById('modalLoadingViagens');
-            if (modalEl && modalEl.classList.contains('show')) {
-                // Modal já está aberto, apenas atualiza a referência
-                if (!_modalLoading && typeof bootstrap !== 'undefined') {
-                    _modalLoading = bootstrap.Modal.getInstance(modalEl);
-                }
-                return;
-            }
-
-            // Abre o modal
-            if (_modalLoading) {
-                _modalLoading.show();
+            // Mostra o overlay
+            const overlayEl = document.getElementById('loadingOverlayViagens');
+            if (overlayEl) {
+                overlayEl.style.display = 'flex';
             }
         } catch (error) {
             Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens.mostrarLoading", error);
         }
     }
 
-    // Esconde o modal de loading
+    // Esconde o overlay de loading
     function esconderLoading() {
         try {
-            var modalEl = document.getElementById('modalLoadingViagens');
-            
-            if (_modalLoading) {
-                _modalLoading.hide();
-            } else if (modalEl) {
-                // Fallback: fecha manualmente se foi aberto sem Bootstrap
-                modalEl.classList.remove('show');
-                modalEl.style.display = 'none';
-                modalEl.setAttribute('aria-hidden', 'true');
+            const overlayEl = document.getElementById('loadingOverlayViagens');
+            if (overlayEl) {
+                overlayEl.style.display = 'none';
             }
-            
-            // Remove backdrop e restaura scroll do body (Bootstrap 5 adiciona overflow:hidden inline)
-            setTimeout(() => {
-                $('.modal-backdrop').remove();
-                $('#ftx-loading-backdrop').remove();
-                $('body').removeClass('modal-open').css({
-                    'padding-right': '',
-                    'overflow': ''
-                });
-            }, 150);
         } catch (error) {
             Alerta.TratamentoErroComLinha("ViagemIndex.js", "FtxViagens.esconderLoading", error);
         }
@@ -1231,120 +1183,140 @@ function parseDataBR(dataBR)
     return new Date(partes[2], partes[1] - 1, partes[0]);
 }
 
-$("#txtDataFinal").focusout(function ()
+// =====================================================================
+// VALIDAÇÃO IA NO FOCUSOUT DOS CAMPOS
+// =====================================================================
+
+$("#txtDataFinal").focusout(async function ()
 {
     try
     {
-        const rawDataInicial = document.getElementById("txtDataInicial")?.value;
-        const horaInicial = document.getElementById("txtHoraInicial")?.value;
-        const rawDataFinal = document.getElementById("txtDataFinal")?.value;
-        const horaFinal = document.getElementById("txtHoraFinal")?.value;
+        const rawDataFinal = $(this).val();
+        if (!rawDataFinal) return;
 
-        //const dataInicial = formatDateBR(rawDataInicial);
-        //const dataFinal = formatDateBR(rawDataFinal);
+        // Calcular duração primeiro (visual)
+        calcularDuracaoViagem();
 
-        // Converter para Date objects
-        const dataInicial = parseDataBR(rawDataInicial);
-        const dataFinal = parseDataBR(rawDataFinal);
+        // Obter dados para validação IA
+        const modalEl = document.getElementById('modalFinalizaViagem');
+        const veiculoId = modalEl?.getAttribute('data-veiculo-id') || '';
+        const DataInicial = $("#txtDataInicial").val();
+        const HoraInicial = $("#txtHoraInicial").val();
+        const HoraFinal = $("#txtHoraFinal").val();
 
-        var inicio = moment(`${dataInicial}`, "DD/MM/YYYY HH:mm");
-        var fim = moment(`${dataFinal}`, "DD/MM/YYYY HH:mm");
-
-        if (!inicio.isValid() || !fim.isValid()) return;
-
-        // VALIDAÇÃO: Data Final não pode ser superior à data atual
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        if (dataFinal > hoje)
+        // Validação IA
+        if (typeof window.ValidadorFinalizacaoIA !== 'undefined')
         {
-            $("#txtDataFinal").val("");
-            $("#txtDuracao").val("");
-            $("#txtDataFinal").focus();
-            AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
-            return;
-        }
+            const validador = window.ValidadorFinalizacaoIA;
 
-        if (dataFinal < dataInicial)
-        {
-            $("#txtDataFinal").val("");
-            $("#txtDuracao").val("");
-            Alerta.Erro("Erro na Data", "A data final deve ser maior que a inicial!");
-            return;
-        }
-
-        validarDatasSimples(dataInicial, dataFinal);
-
-        if (dataFinal === dataInicial)
-        {
-            const horaInicial = $("#txtHoraInicial").val();
-            const horaFinal = $("#txtHoraFinal").val();
-
-            if (!horaInicial || !horaFinal) return;
-
-            const [hI, mI] = horaInicial.split(":").map(Number);
-            const [hF, mF] = horaFinal.split(":").map(Number);
-            const minIni = hI * 60 + mI;
-            const minFin = hF * 60 + mF;
-
-            if (minFin <= minIni)
+            // Validar data não futura
+            const validacaoData = await validador.validarDataNaoFutura(rawDataFinal);
+            if (!validacaoData.valido)
             {
-                $("#txtHoraFinal").val("");
+                $("#txtDataFinal").val("");
                 $("#txtDuracao").val("");
-                Alerta.Erro("Erro na Hora", "A hora final deve ser maior que a inicial quando as datas forem iguais!");
+                await mostrarErroValidacaoIA(validacaoData.mensagem);
+                $("#txtDataFinal").focus();
                 return;
             }
-        }
 
-        calcularDuracaoViagem();
+            // Analisar datas/horas se todos os campos estiverem preenchidos
+            if (DataInicial && HoraInicial && HoraFinal)
+            {
+                const analiseDatas = await validador.analisarDatasHoras({
+                    dataInicial: DataInicial,
+                    horaInicial: HoraInicial,
+                    dataFinal: rawDataFinal,
+                    horaFinal: HoraFinal,
+                    veiculoId: veiculoId
+                });
+
+                if (!analiseDatas.valido)
+                {
+                    $("#txtDataFinal").val("");
+                    $("#txtDuracao").val("");
+                    await mostrarErroValidacaoIA(analiseDatas.mensagem);
+                    return;
+                }
+
+                if (analiseDatas.requerConfirmacao)
+                {
+                    const confirmou = await mostrarConfirmacaoValidacaoIA(analiseDatas.mensagem, analiseDatas.nivel);
+                    if (!confirmou)
+                    {
+                        $("#txtDataFinal").val("");
+                        $("#txtDuracao").val("");
+                        return;
+                    }
+                    validador._duracaoConfirmada = true;
+                }
+            }
+        }
     } catch (error)
     {
         TratamentoErroComLinha("ViagemIndex.js", "focusout.txtDataFinal", error);
     }
 });
 
-$("#txtHoraFinal").focusout(function ()
+$("#txtHoraFinal").focusout(async function ()
 {
     try
     {
-        if ($("#txtDataFinal").val() === "" && $("#txtHoraFinal").val() != "")
-        {
-            Alerta.Erro("Erro na Hora", "A hora final só pode ser preenchida depois de Data Final!");
-            $("#txtHoraFinal").val("");
-            $("#txtDuracao").val("");
-        }
+        const horaFinal = $(this).val();
+        if (!horaFinal) return;
 
-        const horaInicial = $("#txtHoraInicial").val();
-        const horaFinal = $("#txtHoraFinal").val();
-
-        const dataInicialParts = $("#txtDataInicial").val().split("/");
-        const dataInicial = `${dataInicialParts[2]}-${dataInicialParts[1]}-${dataInicialParts[0]}`;
         const dataFinal = $("#txtDataFinal").val();
 
+        // Verificar se Data Final foi preenchida
         if (!dataFinal)
         {
             $("#txtHoraFinal").val("");
-            Alerta.Erro("Erro na Hora Final", "Preencha a Data Final para poder preencher a Hora Final!");
+            await Alerta.Erro("Campo Obrigatório", "Preencha a <strong>Data Final</strong> antes de preencher a Hora Final.");
             return;
         }
 
-        if (dataInicial === dataFinal)
+        // Calcular duração primeiro (visual)
+        calcularDuracaoViagem();
+
+        // Obter dados para validação IA
+        const modalEl = document.getElementById('modalFinalizaViagem');
+        const veiculoId = modalEl?.getAttribute('data-veiculo-id') || '';
+        const DataInicial = $("#txtDataInicial").val();
+        const HoraInicial = $("#txtHoraInicial").val();
+
+        // Validação IA
+        if (typeof window.ValidadorFinalizacaoIA !== 'undefined' && DataInicial && HoraInicial)
         {
-            if (!horaInicial || !horaFinal) return;
+            const validador = window.ValidadorFinalizacaoIA;
 
-            const [hIni, mIni] = horaInicial.split(":").map(Number);
-            const [hFin, mFin] = horaFinal.split(":").map(Number);
+            const analiseDatas = await validador.analisarDatasHoras({
+                dataInicial: DataInicial,
+                horaInicial: HoraInicial,
+                dataFinal: dataFinal,
+                horaFinal: horaFinal,
+                veiculoId: veiculoId
+            });
 
-            const minutosInicial = hIni * 60 + mIni;
-            const minutosFinal = hFin * 60 + mFin;
-
-            if (minutosFinal <= minutosInicial)
+            if (!analiseDatas.valido)
             {
                 $("#txtHoraFinal").val("");
-                Alerta.Erro("Erro na Hora", "A hora final deve ser maior que a inicial quando as datas forem iguais!");
+                $("#txtDuracao").val("");
+                await mostrarErroValidacaoIA(analiseDatas.mensagem);
+                return;
+            }
+
+            if (analiseDatas.requerConfirmacao && !validador._duracaoConfirmada)
+            {
+                const confirmou = await mostrarConfirmacaoValidacaoIA(analiseDatas.mensagem, analiseDatas.nivel);
+                if (!confirmou)
+                {
+                    $("#txtHoraFinal").val("");
+                    $("#txtDuracao").val("");
+                    return;
+                }
+                validador._duracaoConfirmada = true;
             }
         }
-
-        calcularDuracaoViagem();
     } catch (error)
     {
         TratamentoErroComLinha("ViagemIndex.js", "focusout.txtHoraFinal", error);
@@ -1396,14 +1368,15 @@ $("#txtKmInicial").focusout(function ()
     }
 });
 
-$("#txtKmFinal").focusout(function ()
+$("#txtKmFinal").focusout(async function ()
 {
     try
     {
-        const kmInicialStr = $("#txtKmInicial").val();
-        const kmFinalStr = $("#txtKmFinal").val();
+        const kmFinalStr = $(this).val();
+        if (!kmFinalStr) return;
 
-        if (!kmInicialStr || !kmFinalStr)
+        const kmInicialStr = $("#txtKmInicial").val();
+        if (!kmInicialStr)
         {
             $("#txtKmPercorrido").val("");
             return;
@@ -1418,23 +1391,46 @@ $("#txtKmFinal").focusout(function ()
             return;
         }
 
-        if (kmFinal < kmInicial)
-        {
-            $("#txtKmFinal").val("");
-            $("#txtKmPercorrido").val("");
-            Alerta.Erro("Erro na Quilometragem", "A quilometragem <strong>final</strong> deve ser maior que a <strong>inicial</strong>!");
-            return;
-        }
-
+        // Calcular km percorrido (visual)
         const kmPercorrido = (kmFinal - kmInicial).toFixed(2);
         $("#txtKmPercorrido").val(kmPercorrido);
-
-        if (kmPercorrido > 100)
-        {
-            Alerta.Alerta("Alerta na Quilometragem", "A quilometragem <strong>final</strong> excede em 100km a <strong>inicial</strong>!");
-        }
-
         calcularDistanciaViagem();
+
+        // Obter dados para validação IA
+        const modalEl = document.getElementById('modalFinalizaViagem');
+        const veiculoId = modalEl?.getAttribute('data-veiculo-id') || '';
+
+        // Validação IA
+        if (typeof window.ValidadorFinalizacaoIA !== 'undefined')
+        {
+            const validador = window.ValidadorFinalizacaoIA;
+
+            const analiseKm = await validador.analisarKm({
+                kmInicial: kmInicialStr,
+                kmFinal: kmFinalStr,
+                veiculoId: veiculoId
+            });
+
+            if (!analiseKm.valido)
+            {
+                $("#txtKmFinal").val("");
+                $("#txtKmPercorrido").val("");
+                await mostrarErroValidacaoIA(analiseKm.mensagem);
+                return;
+            }
+
+            if (analiseKm.requerConfirmacao && !validador._kmConfirmado)
+            {
+                const confirmou = await mostrarConfirmacaoValidacaoIA(analiseKm.mensagem, analiseKm.nivel);
+                if (!confirmou)
+                {
+                    $("#txtKmFinal").val("");
+                    $("#txtKmPercorrido").val("");
+                    return;
+                }
+                validador._kmConfirmado = true;
+            }
+        }
     } catch (error)
     {
         TratamentoErroComLinha("ViagemIndex.js", "focusout.txtKmFinal", error);
@@ -2078,11 +2074,11 @@ $("#btnFinalizarViagem").click(async function (e)
     try
     {
         e.preventDefault();
-        console.log("🔵 [1/9] Botão Finalizar Viagem clicado");
+        console.log("🔵 [1/6] Botão Finalizar Viagem clicado");
 
         // VALIDAÇÃO 1: Data Final (obrigatória)
         const DataFinal = $("#txtDataFinal").val();
-        console.log("🔵 [2/9] Verificando Data Final:", DataFinal);
+        console.log("🔵 [2/6] Verificando Data Final:", DataFinal);
         if (DataFinal === "")
         {
             console.log("❌ Data Final vazia - parando execução");
@@ -2092,7 +2088,7 @@ $("#btnFinalizarViagem").click(async function (e)
 
         // VALIDAÇÃO 2: Hora Final (obrigatória)
         const HoraFinal = $("#txtHoraFinal").val();
-        console.log("🔵 [3/9] Verificando Hora Final:", HoraFinal);
+        console.log("🔵 [3/6] Verificando Hora Final:", HoraFinal);
         if (HoraFinal === "")
         {
             console.log("❌ Hora Final vazia - parando execução");
@@ -2102,7 +2098,7 @@ $("#btnFinalizarViagem").click(async function (e)
 
         // VALIDAÇÃO 3: KM Final (obrigatório)
         const KmFinal = $("#txtKmFinal").val();
-        console.log("🔵 [4/9] Verificando KM Final:", KmFinal);
+        console.log("🔵 [4/6] Verificando KM Final:", KmFinal);
         if (KmFinal === "")
         {
             console.log("❌ KM Final vazio - parando execução");
@@ -2110,28 +2106,18 @@ $("#btnFinalizarViagem").click(async function (e)
             return;
         }
 
-        // VALIDAÇÃO 4: IA EVOLUTIVA - Validação Inteligente
-        console.log("🔵 [5/9] Validação Inteligente (IA)...");
-        if (typeof validarFinalizacaoComIA === 'function')
+        // VALIDAÇÃO 4: Verificação de Segurança IA (consolidada)
+        // Caso o usuário tenha desprezado os avisos nos focusout, verificamos novamente
+        if (typeof window.validarFinalizacaoConsolidadaIA === 'function')
         {
-            // Obter dados do modal
+            console.log("🔵 [5/7] Executando validação consolidada IA...");
             const modalEl = document.getElementById('modalFinalizaViagem');
             const veiculoId = modalEl?.getAttribute('data-veiculo-id') || '';
             const DataInicial = $("#txtDataInicial").val();
             const HoraInicial = $("#txtHoraInicial").val();
             const KmInicial = $("#txtKmInicial").val();
 
-            console.log("🔵 [5/9] Dados para validação IA:", {
-                dataInicial: DataInicial,
-                horaInicial: HoraInicial,
-                dataFinal: DataFinal,
-                horaFinal: HoraFinal,
-                kmInicial: KmInicial,
-                kmFinal: KmFinal,
-                veiculoId: veiculoId
-            });
-
-            const iaValida = await validarFinalizacaoComIA({
+            const iaValida = await validarFinalizacaoConsolidadaIA({
                 dataInicial: DataInicial,
                 horaInicial: HoraInicial,
                 dataFinal: DataFinal,
@@ -2143,42 +2129,16 @@ $("#btnFinalizarViagem").click(async function (e)
 
             if (!iaValida)
             {
-                console.log("❌ Validação IA falhou - parando execução");
+                console.log("❌ Validação consolidada IA falhou - usuário optou por corrigir");
                 return;
             }
-            console.log("✅ Validação IA passou!");
-        }
-        else
-        {
-            // Fallback: validações antigas (compatibilidade)
-            console.log("⚠️ ValidadorFinalizacaoIA não disponível, usando validações antigas");
-
-            // VALIDAÇÃO: Data Final não pode ser superior à data atual
-            const dataFinalParsed = parseDataBR(DataFinal);
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            if (dataFinalParsed > hoje)
-            {
-                console.log("❌ Data Final superior a hoje - parando execução");
-                $("#txtDataFinal").val("");
-                $("#txtDataFinal").focus();
-                AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
-                return;
-            }
-
-            // Validação de datas
-            const datasOk = await validarDatasSimples();
-            if (!datasOk) return;
-
-            // Validação de KM
-            const kmOk = await validarKmInicialFinal();
-            if (!kmOk) return;
+            console.log("✅ Validação consolidada IA passou!");
         }
 
         // VALIDAÇÃO 5: Nível de Combustível Final
-        console.log("🔵 [6/9] Verificando nível de combustível...");
+        console.log("🔵 [6/7] Verificando nível de combustível...");
         var niveisElement = document.getElementById("ddtCombustivelFinal");
-        console.log("🔵 [6/9] Elemento ddtCombustivelFinal:", niveisElement);
+        console.log("🔵 [6/7] Elemento ddtCombustivelFinal:", niveisElement);
 
         if (!niveisElement)
         {
@@ -2188,8 +2148,8 @@ $("#btnFinalizarViagem").click(async function (e)
         }
 
         var niveis = niveisElement.ej2_instances?.[0];
-        console.log("🔵 [7/8] Instância Syncfusion niveis:", niveis);
-        console.log("🔵 [7/8] Valor do nível:", niveis?.value);
+        console.log("🔵 [6/7] Instância Syncfusion niveis:", niveis);
+        console.log("🔵 [6/7] Valor do nível:", niveis?.value);
 
         if (!niveis)
         {
@@ -2206,10 +2166,10 @@ $("#btnFinalizarViagem").click(async function (e)
         }
 
         var nivelcombustivel = niveis.value.toString();
-        console.log("🔵 [7/7] Nível de combustível validado:", nivelcombustivel);
+        console.log("🔵 [6/7] Nível de combustível validado:", nivelcombustivel);
 
-        // ✅ VALIDAÇÃO 8: Ocorrências Múltiplas
-        console.log("🔵 [8/8] Validando ocorrências múltiplas...");
+        // ✅ VALIDAÇÃO 6: Ocorrências Múltiplas
+        console.log("🔵 [7/7] Validando ocorrências múltiplas...");
         if (typeof OcorrenciaViagem !== 'undefined' && OcorrenciaViagem.temOcorrencias && OcorrenciaViagem.temOcorrencias())
         {
             if (!OcorrenciaViagem.validarOcorrencias())

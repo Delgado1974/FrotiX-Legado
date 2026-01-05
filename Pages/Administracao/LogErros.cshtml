@@ -403,11 +403,30 @@
     </div>
 </div>
 
+<!-- OVERLAY DE LOADING - PADRÃO FROTIX -->
+<div id="loadingOverlayLogErros" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Logs...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
+</div>
+
 @section ScriptsBlock {
     <script>
         // Variáveis globais
         var blocosParsed = [];
         var dataLogAtual = '';
+
+        // ====== FUNÇÕES DE LOADING OVERLAY ======
+        function mostrarLoading() {
+            $('#loadingOverlayLogErros').css('display', 'flex');
+        }
+
+        function esconderLoading() {
+            $('#loadingOverlayLogErros').css('display', 'none');
+        }
 
         $(document).ready(function () {
             try {
@@ -461,6 +480,7 @@
 
         function carregarLogs() {
             try {
+                mostrarLoading();
                 $('#logsContainer').html('<div class="text-center text-muted py-5"><i class="fa-duotone fa-spinner fa-spin fa-2x mb-3"></i><p>Carregando logs...</p></div>');
 
                 // Usa fetch nativo para evitar interceptadores do jQuery
@@ -489,6 +509,7 @@
                         console.error('[LogErros] Erro ao parsear JSON:', parseErr);
                         console.error('[LogErros] Texto completo:', textoResposta);
                         $('#logsContainer').html('<div class="text-danger p-3">Erro ao processar resposta JSON</div>');
+                        esconderLoading();
                         return;
                     }
                     
@@ -512,22 +533,26 @@
                         blocosParsed = parsearLogsEmBlocos(logsTexto);
                         
                         console.log('[LogErros] Blocos parseados:', blocosParsed.length);
-                        
+
                         // Renderiza
                         aplicarFiltros();
+                        esconderLoading();
                     } else {
                         console.error('[LogErros] Resposta não sucesso:', res);
                         $('#logsContainer').html('<div class="text-warning p-3">Erro ao carregar logs: ' + (res && res.error ? res.error : 'desconhecido') + '</div>');
+                        esconderLoading();
                     }
                 })
                 .catch(function(error) {
                     console.error('[LogErros] Erro fetch:', error);
                     $('#logsContainer').html('<div class="text-danger p-3">Erro ao conectar: ' + error.message + '</div>');
+                    esconderLoading();
                 });
-                
+
             } catch (error) {
                 console.error('[LogErros] Erro geral:', error);
                 Alerta.TratamentoErroComLinha("LogErros.cshtml", "carregarLogs", error);
+                esconderLoading();
             }
         }
 

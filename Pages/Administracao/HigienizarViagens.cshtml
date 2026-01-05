@@ -198,27 +198,6 @@
 			color: #fffbe8 !important;
 		}
 
-	#loading-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100vw;
-		height: 100vh;
-		background: rgba(0,0,0,0.25);
-		z-index: 99999;
-		display: none;
-		justify-content: center;
-		align-items: center;
-	}
-
-		#loading-overlay .spinner {
-			border: 6px solid #f3f3f3;
-			border-top: 6px solid #007bff;
-			border-radius: 50%;
-			width: 60px;
-			height: 60px;
-			animation: spin 1s linear infinite;
-		}
 </style>
 
 @section HeadBlock {
@@ -352,8 +331,14 @@
 	</div>
 </div>
 
-<div id="loading-overlay">
-	<div class="spinner"></div>
+<!-- OVERLAY DE LOADING - PADRÃO FROTIX -->
+<div id="loadingOverlayHigienizar" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Viagens...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
 </div>
 
 @section ScriptsBlock {

@@ -2037,8 +2037,8 @@ function mostrarLoadingGeral(mensagem)
             return;
         }
 
-        // Atualiza mensagem se fornecida
-        const textoLoading = elemento.querySelector('.loading-text');
+        // Atualiza mensagem se fornecida (padrão FrotiX usa .ftx-loading-text)
+        const textoLoading = elemento.querySelector('.ftx-loading-text');
         if (textoLoading && mensagem)
         {
             textoLoading.textContent = mensagem;
@@ -2058,7 +2058,7 @@ function esconderLoadingGeral()
 {
     try
     {
-        // Pequeno delay para suavizar a transição (800ms em vez de instantâneo)
+        // Pequeno delay para suavizar a transição
         setTimeout(() =>
         {
             const elemento = document.getElementById('loadingInicialDashboard');
@@ -2068,12 +2068,12 @@ function esconderLoadingGeral()
                 setTimeout(() => {
                     elemento.classList.add('d-none');
                     elemento.style.display = 'none';
-                    
-                    // Restaura mensagem padrão
-                    const textoLoading = elemento.querySelector('.loading-text');
+
+                    // Restaura mensagem padrão (padrão FrotiX usa .ftx-loading-text)
+                    const textoLoading = elemento.querySelector('.ftx-loading-text');
                     if (textoLoading)
                     {
-                        textoLoading.textContent = 'Carregando Dashboard';
+                        textoLoading.textContent = 'Carregando Dashboard de Viagens';
                     }
                 }, 300);
             }
@@ -3068,6 +3068,200 @@ function gravarViagemDashboard()
 }
 
 // ========================================
+// FUNÇÕES DE FILTRO ANO/MÊS
+// ========================================
+
+/**
+ * Popula o select de anos com anos disponíveis (último ano até 5 anos atrás)
+ */
+function popularAnosDisponiveis()
+{
+    try
+    {
+        const selectAno = document.getElementById('filtroAno');
+        if (!selectAno) return;
+
+        const anoAtual = new Date().getFullYear();
+        selectAno.innerHTML = '<option value="">&lt;Todos os Anos&gt;</option>';
+
+        for (let ano = anoAtual; ano >= anoAtual - 5; ano--)
+        {
+            const option = document.createElement('option');
+            option.value = ano;
+            option.textContent = ano;
+            selectAno.appendChild(option);
+        }
+    } catch (error)
+    {
+        console.error('Erro ao popular anos:', error);
+    }
+}
+
+/**
+ * Atualiza o label do período atual
+ */
+function atualizarLabelPeriodo()
+{
+    try
+    {
+        const label = document.getElementById('periodoAtualLabel');
+        if (!label) return;
+
+        const ano = document.getElementById('filtroAno')?.value;
+        const mes = document.getElementById('filtroMes')?.value;
+        const dataInicio = document.getElementById('dataInicio')?.value;
+        const dataFim = document.getElementById('dataFim')?.value;
+
+        const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        if (dataInicio && dataFim)
+        {
+            const dtIni = new Date(dataInicio + 'T00:00:00');
+            const dtFim = new Date(dataFim + 'T23:59:59');
+            label.textContent = `Período: ${dtIni.toLocaleDateString('pt-BR')} a ${dtFim.toLocaleDateString('pt-BR')}`;
+        }
+        else if (ano && mes)
+        {
+            label.textContent = `Período: ${meses[parseInt(mes)]}/${ano}`;
+        }
+        else if (ano && !mes)
+        {
+            label.textContent = `Período: Ano ${ano} (todos os meses)`;
+        }
+        else if (!ano && mes)
+        {
+            label.textContent = `Período: ${meses[parseInt(mes)]} (todos os anos)`;
+        }
+        else
+        {
+            label.textContent = 'Exibindo todos os dados';
+        }
+    } catch (error)
+    {
+        console.error('Erro ao atualizar label de período:', error);
+    }
+}
+
+/**
+ * Filtra dados por Ano/Mês
+ * Permite combinar: Ano+Mês, só Ano, só Mês, ou nenhum (todos os dados)
+ */
+function filtrarPorAnoMes()
+{
+    try
+    {
+        const ano = document.getElementById('filtroAno')?.value;
+        const mes = document.getElementById('filtroMes')?.value;
+
+        // Limpa período personalizado
+        document.getElementById('dataInicio').value = '';
+        document.getElementById('dataFim').value = '';
+        $('.btn-period').removeClass('active');
+
+        // Se não selecionou nada, mostra todos os dados (últimos 5 anos)
+        if (!ano && !mes)
+        {
+            const anoAtual = new Date().getFullYear();
+            periodoAtual.dataInicio = new Date(anoAtual - 5, 0, 1, 0, 0, 0);
+            periodoAtual.dataFim = new Date(anoAtual, 11, 31, 23, 59, 59);
+
+            atualizarLabelPeriodo();
+            carregarDadosDashboard();
+            return;
+        }
+
+        const anoNum = ano ? parseInt(ano) : null;
+        const mesNum = mes ? parseInt(mes) : null;
+
+        if (anoNum && mesNum)
+        {
+            // Filtro: Ano específico + Mês específico
+            periodoAtual.dataInicio = new Date(anoNum, mesNum - 1, 1, 0, 0, 0);
+            periodoAtual.dataFim = new Date(anoNum, mesNum, 0, 23, 59, 59);
+        }
+        else if (anoNum && !mesNum)
+        {
+            // Filtro: Ano específico + Todos os meses
+            periodoAtual.dataInicio = new Date(anoNum, 0, 1, 0, 0, 0);
+            periodoAtual.dataFim = new Date(anoNum, 11, 31, 23, 59, 59);
+        }
+        else if (!anoNum && mesNum)
+        {
+            // Filtro: Todos os anos + Mês específico (últimos 5 anos)
+            const anoAtual = new Date().getFullYear();
+            const anosParaBuscar = [];
+
+            // Busca dados do mês nos últimos 5 anos
+            for (let a = anoAtual; a >= anoAtual - 5; a--)
+            {
+                anosParaBuscar.push(a);
+            }
+
+            // Define período do primeiro ano até o último ano
+            periodoAtual.dataInicio = new Date(anoAtual - 5, mesNum - 1, 1, 0, 0, 0);
+            periodoAtual.dataFim = new Date(anoAtual, mesNum, 0, 23, 59, 59);
+        }
+
+        atualizarLabelPeriodo();
+        carregarDadosDashboard();
+    } catch (error)
+    {
+        console.error('Erro ao filtrar por ano/mês:', error);
+        AppToast.show('Vermelho', 'Erro ao filtrar por ano/mês.', 3000);
+    }
+}
+
+/**
+ * Limpa filtro de Ano/Mês
+ */
+function limparFiltroAnoMes()
+{
+    try
+    {
+        document.getElementById('filtroAno').value = '';
+        document.getElementById('filtroMes').value = '';
+
+        // Define período padrão (últimos 30 dias)
+        const hoje = new Date();
+        periodoAtual.dataFim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
+        periodoAtual.dataInicio = new Date(periodoAtual.dataFim);
+        periodoAtual.dataInicio.setDate(periodoAtual.dataInicio.getDate() - 30);
+
+        atualizarLabelPeriodo();
+        carregarDadosDashboard();
+    } catch (error)
+    {
+        console.error('Erro ao limpar filtro ano/mês:', error);
+    }
+}
+
+/**
+ * Limpa filtro de Período Personalizado
+ */
+function limparFiltroPeriodo()
+{
+    try
+    {
+        document.getElementById('dataInicio').value = '';
+        document.getElementById('dataFim').value = '';
+        $('.btn-period').removeClass('active');
+
+        // Define período padrão (últimos 30 dias)
+        const hoje = new Date();
+        periodoAtual.dataFim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
+        periodoAtual.dataInicio = new Date(periodoAtual.dataFim);
+        periodoAtual.dataInicio.setDate(periodoAtual.dataInicio.getDate() - 30);
+
+        atualizarLabelPeriodo();
+        carregarDadosDashboard();
+    } catch (error)
+    {
+        console.error('Erro ao limpar filtro de período:', error);
+    }
+}
+
+// ========================================
 // EVENTOS
 // ========================================
 
@@ -3075,19 +3269,30 @@ $(document).ready(function ()
 {
     try
     {
+        popularAnosDisponiveis();
         inicializarDashboard();
 
-        // Eventos dos botões de período rápido
-        $('#btn7Dias').on('click', () => aplicarFiltroPeriodo(7));
-        $('#btn15Dias').on('click', () => aplicarFiltroPeriodo(15));
-        $('#btn30Dias').on('click', () => aplicarFiltroPeriodo(30));
-        $('#btn60Dias').on('click', () => aplicarFiltroPeriodo(60));
-        $('#btn90Dias').on('click', () => aplicarFiltroPeriodo(90));
-        $('#btn180Dias').on('click', () => aplicarFiltroPeriodo(180));
-        $('#btn365Dias').on('click', () => aplicarFiltroPeriodo(365));
+        // Eventos dos botões de filtro Ano/Mês
+        $('#btnFiltrarAnoMes').on('click', filtrarPorAnoMes);
+        $('#btnLimparAnoMes').on('click', limparFiltroAnoMes);
 
-        // Evento do botão Filtrar (datas personalizadas)
-        $('#btnFiltrar').on('click', aplicarFiltroPersonalizado);
+        // Eventos dos botões de filtro Período
+        $('#btnFiltrarPeriodo').on('click', aplicarFiltroPersonalizado);
+        $('#btnLimparPeriodo').on('click', limparFiltroPeriodo);
+
+        // Eventos dos botões de período rápido com data-dias
+        $('.btn-period').on('click', function() {
+            const dias = parseInt($(this).data('dias'));
+            if (dias) {
+                // Limpa filtros de ano/mês
+                document.getElementById('filtroAno').value = '';
+                document.getElementById('filtroMes').value = '';
+
+                $('.btn-period').removeClass('active');
+                $(this).addClass('active');
+                aplicarFiltroPeriodo(dias);
+            }
+        });
 
         // Evento do botão atualizar
         $('#btnAtualizar').on('click', atualizarDashboard);

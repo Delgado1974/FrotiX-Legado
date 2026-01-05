@@ -502,123 +502,7 @@
 		padding-bottom: 0 !important;
 	}
 
-	/* ================================================================
-	   MODAL DE LOADING - PADRÃO FROTIX
-	   ================================================================ */
-	#modalLoadingViagens .modal-dialog {
-		max-width: 360px;
-	}
-
-	#modalLoadingViagens .modal-content {
-		border: none;
-		border-radius: 16px;
-		overflow: hidden;
-		box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-	}
-
-	#modalLoadingViagens .modal-header {
-		background: linear-gradient(135deg, #325d88 0%, #2a4d73 50%, #3d6f9e 100%);
-		background-size: 200% 200%;
-		animation: headerGradientShift 4s ease infinite;
-		border-bottom: none;
-		padding: 1rem 1.25rem;
-		position: relative;
-		overflow: hidden;
-	}
-
-	/* Efeito de brilho no header do modal */
-	#modalLoadingViagens .modal-header::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-		animation: ftxModalShine 5s ease-in-out infinite;
-		pointer-events: none;
-	}
-
-	@@keyframes ftxModalShine {
-		0%, 100% { left: -100%; }
-		50% { left: 100%; }
-	}
-
-	#modalLoadingViagens .modal-title {
-		font-family: 'Outfit', sans-serif;
-		font-weight: 700;
-		font-size: 1.1rem;
-		color: #fff;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	/* Ícone duotone com cores amarelo/branco e animação pulsante */
-	#modalLoadingViagens .modal-title i {
-		font-size: 1.3rem;
-		--fa-primary-color: #ffd700;
-		--fa-secondary-color: #ffffff;
-		--fa-secondary-opacity: 0.8;
-		animation: ftxLoadingIconPulse 2s ease-in-out infinite;
-		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-	}
-
-	@@keyframes ftxLoadingIconPulse {
-		0%, 100% { 
-			transform: scale(1); 
-			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-		}
-		50% { 
-			transform: scale(1.12); 
-			filter: drop-shadow(0 3px 6px rgba(255, 215, 0, 0.4));
-		}
-	}
-
-	#modalLoadingViagens .modal-body {
-		padding: 2rem 1.5rem;
-		text-align: center;
-		background: #fff;
-	}
-
-	/* Spinner duplo estilizado */
-	.ftx-loading-spinner {
-		width: 64px;
-		height: 64px;
-		border-radius: 50%;
-		border: 5px solid transparent;
-		border-top-color: #325d88;
-		animation: ftxLoadingSpin 1s linear infinite;
-		margin: 0 auto 1.25rem;
-		position: relative;
-	}
-
-	.ftx-loading-spinner::before {
-		content: "";
-		position: absolute;
-		inset: 5px;
-		border-radius: 50%;
-		border: 5px solid transparent;
-		border-right-color: #22d3ee;
-		animation: ftxLoadingSpin 0.75s linear infinite reverse;
-	}
-
-	@@keyframes ftxLoadingSpin {
-		to { transform: rotate(360deg); }
-	}
-
-	.ftx-loading-text {
-		font-family: 'Outfit', sans-serif;
-		font-size: 1rem;
-		font-weight: 600;
-		color: #333;
-		margin-bottom: 0.5rem;
-	}
-
-	.ftx-loading-subtext {
-		font-size: 0.85rem;
-		color: #6c757d;
-	}
+	/* Loading - Usa padrão FrotiX global (ftx-spin-overlay) */
 
 	/* ================================================================
 	   AVISO DE FILTRO DO DATATABLE
@@ -685,78 +569,16 @@
 </script>
 
 @*=========================================================================
-   MODAL DE LOADING - PADRÃO FROTIX (usa classes globais de frotix.css)
+   OVERLAY DE LOADING - PADRÃO FROTIX (usa classes globais de frotix.css)
    =========================================================================*@
-<div class="modal fade ftx-modal-loading" id="modalLoadingViagens" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">
-					<i class="fa-duotone fa-route"></i>
-					<span>Carregando Viagens</span>
-				</h5>
-			</div>
-			<div class="modal-body">
-				<img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
-				<div class="ftx-loading-bar"></div>
-				<div class="ftx-loading-text" id="loadingViagensMensagem">Aguarde enquanto carregamos as viagens...</div>
-				<div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
-			</div>
-		</div>
-	</div>
+<div id="loadingOverlayViagens" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text" id="loadingViagensMensagem">Carregando Viagens...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
 </div>
-
-@* =========================================================================
-   SCRIPT INLINE - MOSTRA MODAL DE LOADING IMEDIATAMENTE
-   Este script roda ANTES do ViagemIndex.js carregar
-   ========================================================================= *@
-<script>
-(function() {
-    'use strict';
-    
-    // Mostra o modal de loading assim que possível
-    function mostrarModalLoading() {
-        var modalEl = document.getElementById('modalLoadingViagens');
-        if (!modalEl) return;
-        
-        // Verifica se Bootstrap está disponível
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            var existingModal = bootstrap.Modal.getInstance(modalEl);
-            if (existingModal) {
-                existingModal.show();
-            } else {
-                var modal = new bootstrap.Modal(modalEl, {
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                modal.show();
-            }
-        } else {
-            // Fallback: mostra manualmente se Bootstrap ainda não carregou
-            modalEl.classList.add('show');
-            modalEl.style.display = 'block';
-            modalEl.removeAttribute('aria-hidden');
-            document.body.classList.add('modal-open');
-            
-            // Cria backdrop manualmente se não existir
-            if (!document.getElementById('ftx-loading-backdrop')) {
-                var backdrop = document.createElement('div');
-                backdrop.className = 'modal-backdrop fade show';
-                backdrop.id = 'ftx-loading-backdrop';
-                document.body.appendChild(backdrop);
-            }
-        }
-    }
-    
-    // Mostra modal quando DOM estiver minimamente pronto
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', mostrarModalLoading);
-    } else {
-        // DOM já está pronto
-        mostrarModalLoading();
-    }
-})();
-</script>
 
 <form>
 	<div class="row">

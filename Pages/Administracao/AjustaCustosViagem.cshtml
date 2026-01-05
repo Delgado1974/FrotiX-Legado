@@ -368,24 +368,14 @@
 	</div>
 </div>
 
-@* ================ Modal Loading - PADRÃO FROTIX ================ *@
-<div class="modal fade ftx-modal-loading" id="modalLoading" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">
-					<i class="fa-duotone fa-calculator-simple"></i>
-					<span>Carregando Dados</span>
-				</h5>
-			</div>
-			<div class="modal-body">
-				<img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
-				<div class="ftx-loading-bar"></div>
-				<div class="ftx-loading-text" id="txtLoadingMessage">Carregando Dados de Viagens...</div>
-				<div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
-			</div>
-		</div>
-	</div>
+@* ================ Overlay Loading - PADRÃO FROTIX ================ *@
+<div id="loadingOverlayCustos" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text" id="txtLoadingMessage">Carregando Dados de Viagens...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
 </div>
 
 @section ScriptsBlock {

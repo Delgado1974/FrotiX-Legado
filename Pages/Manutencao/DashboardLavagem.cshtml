@@ -226,6 +226,17 @@
         filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
     }
 
+    /* Botões de Filtro - Base comum */
+    .btn-filtrar-lav, .btn-limpar-lav {
+        padding: 8px 20px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
+    }
+
     /* Botao Filtrar - Mesma cor dos botões de período */
     .filter-card-lav .btn-filtrar-lav,
     button.btn-filtrar-lav {
@@ -234,10 +245,6 @@
         background-image: none !important;
         border: 2px solid rgba(255, 255, 255, 0.6) !important;
         color: white !important;
-        padding: 10px 20px !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
         box-shadow: 0 2px 8px rgba(8, 145, 178, 0.4) !important;
     }
 
@@ -250,6 +257,37 @@
         color: white !important;
         transform: translateY(-1px) !important;
         box-shadow: 0 4px 12px rgba(8, 145, 178, 0.5) !important;
+    }
+
+    /* Botão Limpar Filtro */
+    .btn-limpar-lav {
+        background: linear-gradient(135deg, #B28767 0%, #9a7254 100%) !important;
+        border: 2px solid rgba(255, 255, 255, 0.6) !important;
+        color: white !important;
+        box-shadow: 0 2px 8px rgba(178, 135, 103, 0.4);
+    }
+
+    .btn-limpar-lav:hover {
+        background: linear-gradient(135deg, #9a7254 0%, #825d43 100%) !important;
+        border-color: rgba(255, 255, 255, 0.9) !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(178, 135, 103, 0.5);
+    }
+
+    /* Indicador de Período Atual */
+    .periodo-atual-lav {
+        background: rgba(8, 145, 178, 0.1);
+        border-left: 4px solid #0891b2;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0891b2;
+    }
+
+    .periodo-atual-lav i {
+        font-size: 1.1rem;
     }
 
     /* Tabelas */
@@ -284,146 +322,7 @@
         margin: 1px;
     }
 
-    /* ================================================================
-       MODAL DE LOADING - PADRÃO FROTIX (Tema Cyan)
-       ================================================================ */
-    #modalLoadingLavagem .modal-dialog {
-        max-width: 360px;
-    }
-
-    #modalLoadingLavagem .modal-content {
-        border: none;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    }
-
-    #modalLoadingLavagem .modal-header {
-        background: linear-gradient(135deg, #0891b2 0%, #0e7490 50%, #06b6d4 100%);
-        background-size: 200% 200%;
-        animation: headerGradientShift 4s ease infinite;
-        border-bottom: none;
-        padding: 1rem 1.25rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    #modalLoadingLavagem .modal-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-        animation: ftxModalShine 5s ease-in-out infinite;
-        pointer-events: none;
-    }
-
-    @@keyframes ftxModalShine {
-        0%, 100% { left: -100%; }
-        50% { left: 100%; }
-    }
-
-    @@keyframes headerGradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-
-    #modalLoadingLavagem .modal-title {
-        font-family: 'Outfit', sans-serif;
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #fff;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    #modalLoadingLavagem .modal-title i {
-        font-size: 1.3rem;
-        --fa-primary-color: #ffd700;
-        --fa-secondary-color: #ffffff;
-        --fa-secondary-opacity: 0.8;
-        animation: ftxLoadingIconPulse 2s ease-in-out infinite;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    }
-
-    @@keyframes ftxLoadingIconPulse {
-        0%, 100% {
-            transform: scale(1);
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-        50% {
-            transform: scale(1.12);
-            filter: drop-shadow(0 3px 6px rgba(255, 215, 0, 0.4));
-        }
-    }
-
-    #modalLoadingLavagem .modal-body {
-        padding: 2rem 1.5rem;
-        text-align: center;
-        background: #fff;
-    }
-
-    /* Logo FrotiX animado no Loading (+15% = 115px) */
-    .ftx-loading-logo {
-        width: 115px;
-        height: 115px;
-        margin: 0 auto 1.25rem;
-        animation: ftxLogoPulse 1.5s ease-in-out infinite;
-        filter: drop-shadow(0 4px 8px rgba(8, 145, 178, 0.3));
-    }
-
-    @@keyframes ftxLogoPulse {
-        0%, 100% {
-            transform: scale(1);
-            filter: drop-shadow(0 4px 8px rgba(8, 145, 178, 0.3));
-        }
-        50% {
-            transform: scale(1.08);
-            filter: drop-shadow(0 6px 12px rgba(8, 145, 178, 0.5));
-        }
-    }
-
-    /* Barra de progresso animada */
-    .ftx-loading-bar {
-        width: 120px;
-        height: 4px;
-        background: #e5e7eb;
-        border-radius: 2px;
-        margin: 0 auto 1rem;
-        overflow: hidden;
-    }
-
-    .ftx-loading-bar::after {
-        content: "";
-        display: block;
-        width: 40%;
-        height: 100%;
-        background: linear-gradient(90deg, #0891b2, #22d3ee, #0891b2);
-        background-size: 200% 100%;
-        border-radius: 2px;
-        animation: ftxBarSlide 1.5s ease-in-out infinite;
-    }
-
-    @@keyframes ftxBarSlide {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(350%); }
-    }
-
-    .ftx-loading-text-lav {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 0.5rem;
-    }
-
-    .ftx-loading-subtext-lav {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
+    /* Loading - Usa padrão FrotiX global (ftx-spin-overlay) */
 
     /* Card Destaque - Altura equalizada */
     .card-destaque-lav {
@@ -493,72 +392,16 @@
 }
 
 @*=========================================================================
-   MODAL DE LOADING - PADRÃO FROTIX
+   OVERLAY DE LOADING - PADRÃO FROTIX
    =========================================================================*@
-<div class="modal fade" id="modalLoadingLavagem" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fa-duotone fa-car-wash"></i>
-                    <span>Carregando Dashboard</span>
-                </h5>
-            </div>
-            <div class="modal-body">
-                <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
-                <div class="ftx-loading-bar"></div>
-                <div class="ftx-loading-text-lav" id="loadingLavagemMensagem">Aguarde enquanto carregamos os dados...</div>
-                <div class="ftx-loading-subtext-lav">Isso pode levar alguns segundos</div>
-            </div>
-        </div>
+<div id="loadingOverlayLavagem" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text" id="loadingLavagemMensagem">Carregando Dashboard de Lavagem</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
     </div>
 </div>
-
-@* =========================================================================
-   SCRIPT INLINE - MOSTRA MODAL DE LOADING IMEDIATAMENTE
-   Este script roda ANTES do dashboard-lavagem.js carregar
-   ========================================================================= *@
-<script>
-(function() {
-    'use strict';
-
-    function mostrarModalLoading() {
-        var modalEl = document.getElementById('modalLoadingLavagem');
-        if (!modalEl) return;
-
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            var existingModal = bootstrap.Modal.getInstance(modalEl);
-            if (existingModal) {
-                existingModal.show();
-            } else {
-                var modal = new bootstrap.Modal(modalEl, {
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                modal.show();
-            }
-        } else {
-            modalEl.classList.add('show');
-            modalEl.style.display = 'block';
-            modalEl.removeAttribute('aria-hidden');
-            document.body.classList.add('modal-open');
-
-            if (!document.getElementById('ftx-loading-backdrop')) {
-                var backdrop = document.createElement('div');
-                backdrop.className = 'modal-backdrop fade show';
-                backdrop.id = 'ftx-loading-backdrop';
-                document.body.appendChild(backdrop);
-            }
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', mostrarModalLoading);
-    } else {
-        mostrarModalLoading();
-    }
-})();
-</script>
 
 <!-- Header do Dashboard -->
 <div class="header-dashboard-lav">
@@ -570,39 +413,99 @@
 
 <!-- Filtros -->
 <div class="filter-card-lav">
-    <div class="row align-items-end">
-        <!-- Data Inicial -->
+    <!-- Linha 1: Ano/Mês -->
+    <div class="row align-items-end g-3 mb-3">
         <div class="col-auto">
             <label class="form-label">
-                <i class="fa-duotone fa-calendar-days me-1"></i> Data Inicial
+                <i class="fa-duotone fa-calendar-days me-1"></i> Ano
             </label>
-            <input type="date" id="dataInicio" class="form-control" style="width: 160px;" />
+            <select id="filtroAno" class="form-select" style="min-width: 120px;">
+                <option value="">&lt;Todos os Anos&gt;</option>
+            </select>
         </div>
-        <!-- Data Final -->
         <div class="col-auto">
             <label class="form-label">
-                <i class="fa-duotone fa-calendar-check me-1"></i> Data Final
+                <i class="fa-duotone fa-calendar-day me-1"></i> Mês
             </label>
-            <input type="date" id="dataFim" class="form-control" style="width: 160px;" />
+            <select id="filtroMes" class="form-select" style="min-width: 150px;">
+                <option value="">&lt;Todos os Meses&gt;</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
         </div>
-        <!-- Botao Filtrar -->
         <div class="col-auto">
-            <button id="btnFiltrar" class="btn btn-filtrar-lav">
-                <i class="fa-duotone fa-filter me-2"></i> Filtrar
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn btn-filtrar-lav d-block" id="btnFiltrarAnoMes">
+                <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
             </button>
         </div>
-        <!-- Espacador -->
-        <div class="col"></div>
-        <!-- Periodos Rapidos (alinhado a direita) -->
         <div class="col-auto">
-            <label class="form-label">Periodo Rapido</label>
-            <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-period-lav" data-dias="7">7 dias</button>
-                <button class="btn btn-period-lav" data-dias="15">15 dias</button>
-                <button class="btn btn-period-lav active" data-dias="30">30 dias</button>
-                <button class="btn btn-period-lav" data-dias="60">60 dias</button>
-                <button class="btn btn-period-lav" data-dias="90">90 dias</button>
-                <button class="btn btn-period-lav" data-dias="365">1 ano</button>
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn btn-limpar-lav d-block" id="btnLimparAnoMes">
+                <i class="fa-duotone fa-eraser me-1"></i> Limpar
+            </button>
+        </div>
+    </div>
+
+    <!-- Linha 2: Período Personalizado + Períodos Rápidos -->
+    <div class="row align-items-end g-3">
+        <div class="col-auto">
+            <label class="form-label">
+                <i class="fa-duotone fa-calendar-range me-1"></i> Período Personalizado
+            </label>
+            <div class="d-flex gap-2 align-items-center">
+                <div>
+                    <label class="form-label small mb-1">De:</label>
+                    <input type="date" id="dataInicio" class="form-control" style="width: 140px;" />
+                </div>
+                <div>
+                    <label class="form-label small mb-1">Até:</label>
+                    <input type="date" id="dataFim" class="form-control" style="width: 140px;" />
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn btn-filtrar-lav d-block" id="btnFiltrarPeriodo">
+                <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+            </button>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn btn-limpar-lav d-block" id="btnLimparPeriodo">
+                <i class="fa-duotone fa-eraser me-1"></i> Limpar
+            </button>
+        </div>
+        <div class="col">
+            <label class="form-label">Períodos Rápidos</label>
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-period-lav" data-dias="7">7 dias</button>
+                <button type="button" class="btn btn-period-lav" data-dias="15">15 dias</button>
+                <button type="button" class="btn btn-period-lav" data-dias="30">30 dias</button>
+                <button type="button" class="btn btn-period-lav" data-dias="60">60 dias</button>
+                <button type="button" class="btn btn-period-lav" data-dias="90">90 dias</button>
+                <button type="button" class="btn btn-period-lav" data-dias="180">180 dias</button>
+                <button type="button" class="btn btn-period-lav" data-dias="365">1 ano</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador do período atual -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="periodo-atual-lav d-flex align-items-center">
+                <i class="fa-duotone fa-info-circle me-2"></i>
+                <span id="periodoAtualLabel">Exibindo todos os dados</span>
             </div>
         </div>
     </div>

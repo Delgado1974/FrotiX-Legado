@@ -481,23 +481,13 @@
     </div>
 </div>
 
-<!-- MODAL DE LOADING PADRÃO FROTIX -->
-<div class="modal fade ftx-modal-loading" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fa-duotone fa-building-user"></i>
-                    <span>Carregando</span>
-                </h5>
-            </div>
-            <div class="modal-body">
-                <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
-                <div class="ftx-loading-bar"></div>
-                <div class="ftx-loading-text" id="txtLoadingMessage">Carregando...</div>
-                <div class="ftx-loading-subtext">Isso pode levar alguns segundos</div>
-            </div>
-        </div>
+<!-- OVERLAY DE LOADING PADRÃO FROTIX -->
+<div id="loadingOverlayLotacoes" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text" id="txtLoadingMessage">Carregando...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
     </div>
 </div>
 
@@ -727,21 +717,13 @@
 
 @section ScriptsBlock {
     <script>
-        // Funções auxiliares para loading - Padrão FrotiX (Bootstrap Modal)
-        var modalLoadingInstance = null;
-
+        // Funções auxiliares para loading - Padrão FrotiX (Overlay)
         function mostrarLoading(mensagem) {
             try {
                 $('#txtLoadingMessage').text(mensagem || 'Carregando...');
-                var modalEl = document.getElementById('modalLoading');
-                if (modalEl) {
-                    if (!modalLoadingInstance) {
-                        modalLoadingInstance = new bootstrap.Modal(modalEl, {
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                    }
-                    modalLoadingInstance.show();
+                var overlay = document.getElementById('loadingOverlayLotacoes');
+                if (overlay) {
+                    overlay.style.display = 'flex';
                 }
             } catch (error) {
                 console.warn("Erro ao mostrar loading:", error);
@@ -750,8 +732,9 @@
 
         function esconderLoading() {
             try {
-                if (modalLoadingInstance) {
-                    modalLoadingInstance.hide();
+                var overlay = document.getElementById('loadingOverlayLotacoes');
+                if (overlay) {
+                    overlay.style.display = 'none';
                 }
             } catch (error) {
                 console.warn("Erro ao esconder loading:", error);

@@ -35,22 +35,18 @@ const CORES = {
     categorias: ['#a8784c', '#c49a6c', '#9a7045', '#8b5e3c', '#c4956a', '#5a3a24', '#6d472c', '#8b6340', '#d4a574', '#4a2f1d']
 };
 
-// ====== MODAL DE LOADING ======
+// ====== OVERLAY DE LOADING - Padrão FrotiX ======
 function mostrarLoading() {
-    if (!modalLoading) {
-        const modalEl = document.getElementById('modalLoadingAbast');
-        if (modalEl) {
-            modalLoading = new bootstrap.Modal(modalEl);
-        }
-    }
-    if (modalLoading) {
-        modalLoading.show();
+    const el = document.getElementById('loadingOverlayAbast');
+    if (el) {
+        el.style.display = 'flex';
     }
 }
 
 function esconderLoading() {
-    if (modalLoading) {
-        modalLoading.hide();
+    const el = document.getElementById('loadingOverlayAbast');
+    if (el) {
+        el.style.display = 'none';
     }
 }
 
@@ -176,6 +172,9 @@ function carregarDadosGeraisComFiltros() {
         const ano = document.getElementById('filtroAnoGeral')?.value || '';
         const mes = document.getElementById('filtroMesGeral')?.value || '';
 
+        // Atualiza a label do período com os filtros selecionados
+        atualizarLabelPeriodoGeral();
+
         $.ajax({
             url: '/api/abastecimento/DashboardDados',
             type: 'GET',
@@ -237,23 +236,156 @@ function inicializarTabs() {
             });
         });
 
-        document.getElementById('btnFiltrarGeral')?.addEventListener('click', function () {
+        // ====== ABA GERAL - Filtros ======
+        document.getElementById('btnFiltrarAnoMesGeral')?.addEventListener('click', function () {
+            // Limpa período personalizado ao usar ano/mês
+            document.getElementById('dataInicioGeral').value = '';
+            document.getElementById('dataFimGeral').value = '';
+            document.querySelectorAll('.btn-period-abast').forEach(b => b.classList.remove('active'));
             carregarDadosGerais();
         });
 
+        document.getElementById('btnLimparAnoMesGeral')?.addEventListener('click', function () {
+            document.getElementById('filtroAnoGeral').value = '';
+            document.getElementById('filtroMesGeral').value = '';
+            atualizarLabelPeriodoGeral();
+            carregarDadosGerais();
+        });
+
+        document.getElementById('btnFiltrarPeriodoGeral')?.addEventListener('click', function () {
+            const dataInicio = document.getElementById('dataInicioGeral').value;
+            const dataFim = document.getElementById('dataFimGeral').value;
+            if (dataInicio && dataFim) {
+                // Limpa ano/mês ao usar período personalizado
+                document.getElementById('filtroAnoGeral').value = '';
+                document.getElementById('filtroMesGeral').value = '';
+                document.querySelectorAll('.btn-period-abast').forEach(b => b.classList.remove('active'));
+                carregarDadosGeraisPeriodo(dataInicio, dataFim);
+            } else {
+                Alerta.Warning('Preencha as datas de início e fim');
+            }
+        });
+
+        document.getElementById('btnLimparPeriodoGeral')?.addEventListener('click', function () {
+            document.getElementById('dataInicioGeral').value = '';
+            document.getElementById('dataFimGeral').value = '';
+            document.querySelectorAll('.btn-period-abast').forEach(b => b.classList.remove('active'));
+            atualizarLabelPeriodoGeral();
+            carregarDadosGerais();
+        });
+
+        // Períodos Rápidos
+        document.querySelectorAll('.btn-period-abast').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const dias = parseInt(this.dataset.dias);
+                const dataFim = new Date();
+                const dataInicio = new Date();
+                dataInicio.setDate(dataInicio.getDate() - dias);
+
+                document.getElementById('dataInicioGeral').value = dataInicio.toISOString().split('T')[0];
+                document.getElementById('dataFimGeral').value = dataFim.toISOString().split('T')[0];
+                document.getElementById('filtroAnoGeral').value = '';
+                document.getElementById('filtroMesGeral').value = '';
+
+                document.querySelectorAll('.btn-period-abast').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                carregarDadosGeraisPeriodo(
+                    document.getElementById('dataInicioGeral').value,
+                    document.getElementById('dataFimGeral').value
+                );
+            });
+        });
+
+        // ====== ABA MENSAL - Filtros ======
         document.getElementById('btnFiltrarMensal')?.addEventListener('click', function () {
             carregarDadosMensais();
         });
 
-        document.getElementById('btnFiltrarVeiculo')?.addEventListener('click', function () {
+        document.getElementById('btnLimparMensal')?.addEventListener('click', function () {
+            const selectAno = document.getElementById('filtroAnoMensal');
+            if (selectAno && selectAno.options.length > 0) {
+                selectAno.selectedIndex = 0;
+            }
+            document.getElementById('filtroMesMensal').value = '';
+            carregarDadosMensais();
+        });
+
+        // ====== ABA VEÍCULO - Filtros ======
+        document.getElementById('btnFiltrarAnoMesVeiculo')?.addEventListener('click', function () {
+            // Limpa período personalizado ao usar ano/mês
+            document.getElementById('dataInicioVeiculo').value = '';
+            document.getElementById('dataFimVeiculo').value = '';
+            document.querySelectorAll('.btn-period-abast-veiculo').forEach(b => b.classList.remove('active'));
             carregarDadosVeiculo();
+        });
+
+        document.getElementById('btnLimparAnoMesVeiculo')?.addEventListener('click', function () {
+            const selectAno = document.getElementById('filtroAnoVeiculo');
+            if (selectAno && selectAno.options.length > 0) {
+                selectAno.selectedIndex = 0;
+            }
+            document.getElementById('filtroMesVeiculo').value = '';
+            document.getElementById('filtroModeloVeiculo').value = '';
+            document.getElementById('filtroPlacaVeiculo').value = '';
+            atualizarLabelPeriodoVeiculo();
+            carregarDadosVeiculo();
+        });
+
+        document.getElementById('btnFiltrarPeriodoVeiculo')?.addEventListener('click', function () {
+            const dataInicio = document.getElementById('dataInicioVeiculo').value;
+            const dataFim = document.getElementById('dataFimVeiculo').value;
+            if (dataInicio && dataFim) {
+                // Limpa ano/mês ao usar período personalizado
+                document.getElementById('filtroAnoVeiculo').value = '';
+                document.getElementById('filtroMesVeiculo').value = '';
+                document.getElementById('filtroModeloVeiculo').value = '';
+                document.getElementById('filtroPlacaVeiculo').value = '';
+                document.querySelectorAll('.btn-period-abast-veiculo').forEach(b => b.classList.remove('active'));
+                carregarDadosVeiculoPeriodo(dataInicio, dataFim);
+            } else {
+                Alerta.Warning('Preencha as datas de início e fim');
+            }
+        });
+
+        document.getElementById('btnLimparPeriodoVeiculo')?.addEventListener('click', function () {
+            document.getElementById('dataInicioVeiculo').value = '';
+            document.getElementById('dataFimVeiculo').value = '';
+            document.querySelectorAll('.btn-period-abast-veiculo').forEach(b => b.classList.remove('active'));
+            atualizarLabelPeriodoVeiculo();
+            carregarDadosVeiculo();
+        });
+
+        // Períodos Rápidos - Veículo
+        document.querySelectorAll('.btn-period-abast-veiculo').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const dias = parseInt(this.dataset.dias);
+                const dataFim = new Date();
+                const dataInicio = new Date();
+                dataInicio.setDate(dataInicio.getDate() - dias);
+
+                document.getElementById('dataInicioVeiculo').value = dataInicio.toISOString().split('T')[0];
+                document.getElementById('dataFimVeiculo').value = dataFim.toISOString().split('T')[0];
+                document.getElementById('filtroAnoVeiculo').value = '';
+                document.getElementById('filtroMesVeiculo').value = '';
+                document.getElementById('filtroModeloVeiculo').value = '';
+                document.getElementById('filtroPlacaVeiculo').value = '';
+
+                document.querySelectorAll('.btn-period-abast-veiculo').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                carregarDadosVeiculoPeriodo(
+                    document.getElementById('dataInicioVeiculo').value,
+                    document.getElementById('dataFimVeiculo').value
+                );
+            });
         });
 
         document.getElementById('filtroModeloVeiculo')?.addEventListener('change', function () {
             document.getElementById('filtroPlacaVeiculo').value = '';
             carregarDadosVeiculo();
         });
-        
+
         document.getElementById('filtroPlacaVeiculo')?.addEventListener('change', function () {
             if (this.value) {
                 document.getElementById('filtroModeloVeiculo').value = '';
@@ -265,11 +397,136 @@ function inicializarTabs() {
     }
 }
 
+// ====== FUNÇÕES AUXILIARES DE FILTRO ======
+
+function atualizarLabelPeriodoGeral() {
+    const label = document.getElementById('periodoAtualLabelGeral');
+    if (!label) return;
+
+    const ano = document.getElementById('filtroAnoGeral')?.value;
+    const mes = document.getElementById('filtroMesGeral')?.value;
+    const dataInicio = document.getElementById('dataInicioGeral')?.value;
+    const dataFim = document.getElementById('dataFimGeral')?.value;
+
+    if (dataInicio && dataFim) {
+        const di = new Date(dataInicio + 'T00:00:00');
+        const df = new Date(dataFim + 'T00:00:00');
+        label.textContent = `Período: ${di.toLocaleDateString('pt-BR')} a ${df.toLocaleDateString('pt-BR')}`;
+    } else if (ano && mes) {
+        label.textContent = `Período: ${MESES_COMPLETOS[parseInt(mes)]} de ${ano}`;
+    } else if (ano) {
+        label.textContent = `Período: Ano de ${ano}`;
+    } else {
+        label.textContent = 'Exibindo todos os dados';
+    }
+}
+
+function carregarDadosGeraisPeriodo(dataInicio, dataFim) {
+    try {
+        mostrarLoading();
+        atualizarLabelPeriodoGeral();
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardDadosPeriodo',
+            type: 'GET',
+            data: { dataInicio: dataInicio, dataFim: dataFim },
+            success: function (data) {
+                try {
+                    dadosGerais = data;
+                    renderizarAbaGeral(data);
+                    esconderLoading();
+                } catch (error) {
+                    esconderLoading();
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGeraisPeriodo.success", error);
+                }
+            },
+            error: function (xhr, status, error) {
+                esconderLoading();
+                console.error('Erro ao carregar dados por período:', error);
+                // Fallback: usar filtro por ano/mês se endpoint não existir
+                carregarDadosGerais();
+            }
+        });
+    } catch (error) {
+        esconderLoading();
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosGeraisPeriodo", error);
+    }
+}
+
+function atualizarLabelPeriodoVeiculo() {
+    const label = document.getElementById('periodoAtualLabelVeiculo');
+    if (!label) return;
+
+    const ano = document.getElementById('filtroAnoVeiculo')?.value;
+    const mes = document.getElementById('filtroMesVeiculo')?.value;
+    const modelo = document.getElementById('filtroModeloVeiculo')?.value;
+    const placa = document.getElementById('filtroPlacaVeiculo')?.value;
+    const dataInicio = document.getElementById('dataInicioVeiculo')?.value;
+    const dataFim = document.getElementById('dataFimVeiculo')?.value;
+
+    let partes = [];
+
+    if (dataInicio && dataFim) {
+        const di = new Date(dataInicio + 'T00:00:00');
+        const df = new Date(dataFim + 'T00:00:00');
+        partes.push(`${di.toLocaleDateString('pt-BR')} a ${df.toLocaleDateString('pt-BR')}`);
+    } else if (ano && mes) {
+        partes.push(`${MESES_COMPLETOS[parseInt(mes)]} de ${ano}`);
+    } else if (ano) {
+        partes.push(`Ano de ${ano}`);
+    }
+
+    if (placa) {
+        partes.push(`Placa: ${placa}`);
+    } else if (modelo) {
+        partes.push(`Modelo: ${modelo}`);
+    }
+
+    if (partes.length > 0) {
+        label.textContent = `Período: ${partes.join(' | ')}`;
+    } else {
+        label.textContent = 'Exibindo todos os dados';
+    }
+}
+
+function carregarDadosVeiculoPeriodo(dataInicio, dataFim) {
+    try {
+        mostrarLoading();
+        atualizarLabelPeriodoVeiculo();
+
+        $.ajax({
+            url: '/api/abastecimento/DashboardDadosVeiculoPeriodo',
+            type: 'GET',
+            data: { dataInicio: dataInicio, dataFim: dataFim },
+            success: function (data) {
+                try {
+                    dadosVeiculo = data;
+                    renderizarAbaVeiculo(data, null, null);
+                    esconderLoading();
+                } catch (error) {
+                    esconderLoading();
+                    Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosVeiculoPeriodo.success", error);
+                }
+            },
+            error: function (xhr, status, error) {
+                esconderLoading();
+                console.error('Erro ao carregar dados de veículo por período:', error);
+                // Fallback: usar filtro por ano/mês se endpoint não existir
+                carregarDadosVeiculo();
+            }
+        });
+    } catch (error) {
+        esconderLoading();
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "carregarDadosVeiculoPeriodo", error);
+    }
+}
+
 // ====== CARREGAMENTO DE DADOS ======
 
 function carregarDadosGerais() {
     try {
         mostrarLoading();
+        atualizarLabelPeriodoGeral();
         const ano = document.getElementById('filtroAnoGeral')?.value || '';
         const mes = document.getElementById('filtroMesGeral')?.value || '';
 
@@ -335,6 +592,7 @@ function carregarDadosMensais() {
 function carregarDadosVeiculo() {
     try {
         mostrarLoading();
+        atualizarLabelPeriodoVeiculo();
         const ano = document.getElementById('filtroAnoVeiculo')?.value || '';
         const mes = document.getElementById('filtroMesVeiculo')?.value || '';
         const modelo = document.getElementById('filtroModeloVeiculo')?.value || '';

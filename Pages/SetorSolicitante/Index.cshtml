@@ -336,10 +336,29 @@
 	</div>
 </div>
 
+<!-- OVERLAY DE LOADING - PADRAO FROTIX -->
+<div id="loadingOverlaySetor" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Setores...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
+</div>
+
 @section ScriptsBlock {
 	<script asp-append-version="true">
 		var modalUpsert = null;
 		var treeGridObj = null;
+
+		// Funcoes de controle do overlay de loading
+		function mostrarLoading() {
+			$('#loadingOverlaySetor').css('display', 'flex');
+		}
+
+		function esconderLoading() {
+			$('#loadingOverlaySetor').css('display', 'none');
+		}
 
 		$(document).ready(function () {
 			try {
@@ -418,6 +437,7 @@
 
 		function carregarSetores() {
 			try {
+				mostrarLoading();
 				$.ajax({
 					url: "/api/SetorSolicitante/GetAll",
 					type: "GET",
@@ -425,12 +445,15 @@
 					success: function (data) {
 						try {
 							inicializarTreeGrid(data);
+							esconderLoading();
 						} catch (error) {
+							esconderLoading();
 							Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores.success", error);
 						}
 					},
 					error: function (err) {
 						try {
+							esconderLoading();
 							console.log(err);
 							AppToast.show('Vermelho', 'Erro ao carregar setores.', 2000);
 						} catch (error) {
@@ -439,6 +462,7 @@
 					}
 				});
 			} catch (error) {
+				esconderLoading();
 				Alerta.TratamentoErroComLinha("Index.cshtml", "carregarSetores", error);
 			}
 		}

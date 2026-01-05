@@ -97,6 +97,39 @@
                             return;
                         }
 
+                        // VALIDAÇÃO IA CONSOLIDADA - Verifica se há alertas pendentes ao registrar viagem
+                        const isRegistraViagem = $("#btnConfirma").text().includes("Registra Viagem");
+                        if (isRegistraViagem && typeof window.validarFinalizacaoConsolidadaIA === 'function')
+                        {
+                            const DataInicial = document.getElementById("txtDataInicial")?.ej2_instances?.[0]?.value;
+                            const HoraInicial = $("#txtHoraInicial").val();
+                            const DataFinal = $("#txtDataFinal").val();
+                            const HoraFinal = $("#txtHoraFinal").val();
+                            const KmInicial = parseInt($("#txtKmInicial").val()) || 0;
+                            const KmFinal = parseInt($("#txtKmFinal").val()) || 0;
+                            const veiculoId = document.getElementById("lstVeiculo")?.ej2_instances?.[0]?.value || '';
+
+                            // Só valida se temos dados de finalização
+                            if (DataFinal && HoraFinal && KmFinal > 0)
+                            {
+                                const iaValida = await window.validarFinalizacaoConsolidadaIA({
+                                    dataInicial: DataInicial,
+                                    horaInicial: HoraInicial,
+                                    dataFinal: DataFinal,
+                                    horaFinal: HoraFinal,
+                                    kmInicial: KmInicial,
+                                    kmFinal: KmFinal,
+                                    veiculoId: veiculoId
+                                });
+
+                                if (!iaValida)
+                                {
+                                    $btn.prop("disabled", false);
+                                    return;
+                                }
+                            }
+                        }
+
                         window.dataInicial = moment(document.getElementById("txtDataInicial").ej2_instances[0].value).toISOString().split("T")[0];
                         const periodoRecorrente = document.getElementById("lstPeriodos").ej2_instances[0].value;
 
@@ -800,23 +833,78 @@
     {
         try
         {
-            // Data Final
-            $("#txtDataFinal").focusout(function ()
+            // Data Final - VALIDAÇÃO IA
+            $("#txtDataFinal").focusout(async function ()
             {
                 try
                 {
-                    const DataInicial = document.getElementById("txtDataInicial").ej2_instances[0].value;
                     const DataFinal = $("#txtDataFinal").val();
-
                     if (DataFinal === "") return;
 
-                    if (DataFinal < DataInicial)
-                    {
-                        Alerta.Erro("Atenção", "A data final deve ser maior que a inicial");
-                        $("#txtDataFinal").val("");
-                    }
-
+                    // Calcular duração primeiro
                     window.calcularDuracaoViagem();
+
+                    // Validação IA (se disponível)
+                    if (typeof ValidadorFinalizacaoIA !== 'undefined')
+                    {
+                        const validador = ValidadorFinalizacaoIA.obterInstancia();
+
+                        // Validar data não futura (bloqueante)
+                        const resultadoDataFutura = await validador.validarDataNaoFutura(DataFinal);
+                        if (!resultadoDataFutura.valido)
+                        {
+                            await Alerta.Erro(resultadoDataFutura.titulo, resultadoDataFutura.mensagem);
+                            $("#txtDataFinal").val("");
+                            return;
+                        }
+
+                        // Validar datas e horas com IA (não bloqueante - apenas aviso)
+                        const DataInicial = document.getElementById("txtDataInicial").ej2_instances?.[0]?.value;
+                        const HoraInicial = $("#txtHoraInicial").val();
+                        const HoraFinal = $("#txtHoraFinal").val();
+
+                        if (DataInicial && HoraInicial && HoraFinal)
+                        {
+                            const dadosDatas = {
+                                dataInicial: DataInicial,
+                                horaInicial: HoraInicial,
+                                dataFinal: DataFinal,
+                                horaFinal: HoraFinal
+                            };
+
+                            const resultadoDatas = await validador.analisarDatasHoras(dadosDatas);
+                            if (!resultadoDatas.valido && resultadoDatas.nivel === 'erro')
+                            {
+                                await Alerta.Erro(resultadoDatas.titulo, resultadoDatas.mensagem);
+                                $("#txtDataFinal").val("");
+                                return;
+                            }
+                            else if (!resultadoDatas.valido && resultadoDatas.nivel === 'aviso')
+                            {
+                                const confirma = await Alerta.ValidacaoIAConfirmar(
+                                    resultadoDatas.titulo,
+                                    resultadoDatas.mensagem,
+                                    "Manter Data",
+                                    "Corrigir"
+                                );
+                                if (!confirma)
+                                {
+                                    $("#txtDataFinal").val("");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: validação simples
+                        const DataInicial = document.getElementById("txtDataInicial").ej2_instances?.[0]?.value;
+                        if (DataFinal < DataInicial)
+                        {
+                            Alerta.Erro("Atenção", "A data final deve ser maior que a inicial");
+                            $("#txtDataFinal").val("");
+                        }
+                    }
                 } catch (error)
                 {
                     Alerta.TratamentoErroComLinha("main.js", "txtDataFinal_focusout", error);
@@ -858,14 +946,12 @@
                 }
             });
 
-            // Hora Final
-            $("#txtHoraFinal").focusout(function ()
+            // Hora Final - VALIDAÇÃO IA
+            $("#txtHoraFinal").focusout(async function ()
             {
                 try
                 {
-                    const HoraInicial = $("#txtHoraInicial").val();
                     const HoraFinal = $("#txtHoraFinal").val();
-                    const DataInicial = document.getElementById("txtDataInicial").ej2_instances[0].value;
                     const DataFinal = $("#txtDataFinal").val();
 
                     if (DataFinal === "")
@@ -875,13 +961,63 @@
                         return;
                     }
 
-                    if (HoraFinal < HoraInicial && DataInicial === DataFinal)
-                    {
-                        $("#txtHoraFinal").val("");
-                        Alerta.Erro("Atenção", "A hora final deve ser maior que a inicial");
-                    }
+                    if (HoraFinal === "") return;
 
+                    // Calcular duração primeiro
                     window.calcularDuracaoViagem();
+
+                    // Validação IA (se disponível)
+                    if (typeof ValidadorFinalizacaoIA !== 'undefined')
+                    {
+                        const validador = ValidadorFinalizacaoIA.obterInstancia();
+
+                        const DataInicial = document.getElementById("txtDataInicial").ej2_instances?.[0]?.value;
+                        const HoraInicial = $("#txtHoraInicial").val();
+
+                        if (DataInicial && HoraInicial)
+                        {
+                            const dadosDatas = {
+                                dataInicial: DataInicial,
+                                horaInicial: HoraInicial,
+                                dataFinal: DataFinal,
+                                horaFinal: HoraFinal
+                            };
+
+                            const resultadoDatas = await validador.analisarDatasHoras(dadosDatas);
+                            if (!resultadoDatas.valido && resultadoDatas.nivel === 'erro')
+                            {
+                                await Alerta.Erro(resultadoDatas.titulo, resultadoDatas.mensagem);
+                                $("#txtHoraFinal").val("");
+                                return;
+                            }
+                            else if (!resultadoDatas.valido && resultadoDatas.nivel === 'aviso')
+                            {
+                                const confirma = await Alerta.ValidacaoIAConfirmar(
+                                    resultadoDatas.titulo,
+                                    resultadoDatas.mensagem,
+                                    "Manter Hora",
+                                    "Corrigir"
+                                );
+                                if (!confirma)
+                                {
+                                    $("#txtHoraFinal").val("");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: validação simples
+                        const HoraInicial = $("#txtHoraInicial").val();
+                        const DataInicial = document.getElementById("txtDataInicial").ej2_instances?.[0]?.value;
+
+                        if (HoraFinal < HoraInicial && DataInicial === DataFinal)
+                        {
+                            $("#txtHoraFinal").val("");
+                            Alerta.Erro("Atenção", "A hora final deve ser maior que a inicial");
+                        }
+                    }
                 } catch (error)
                 {
                     Alerta.TratamentoErroComLinha("main.js", "txtHoraFinal_focusout", error);
@@ -961,15 +1097,20 @@
                 }
             });
 
-            // KM Final
-            $("#txtKmFinal").focusout(function ()
+            // KM Final - VALIDAÇÃO IA
+            $("#txtKmFinal").focusout(async function ()
             {
                 try
                 {
-                    const kmInicial = parseInt($("#txtKmInicial").val());
-                    const kmFinal = parseInt($("#txtKmFinal").val());
+                    const kmInicialStr = $("#txtKmInicial").val();
+                    const kmFinalStr = $("#txtKmFinal").val();
 
-                    // Validação básica - só limpa se inválido (validação completa é no submit)
+                    if (!kmFinalStr) return;
+
+                    const kmInicial = parseInt(kmInicialStr) || 0;
+                    const kmFinal = parseInt(kmFinalStr) || 0;
+
+                    // Validação básica: KM final < inicial (bloqueante)
                     if (kmFinal < kmInicial)
                     {
                         $("#txtKmFinal").val("");
@@ -977,8 +1118,53 @@
                         return;
                     }
 
-                    // Calcular distância (exibe alerta visual se > 100km)
+                    // Calcular distância
                     window.calcularDistanciaViagem();
+
+                    // Validação IA (se disponível)
+                    if (typeof ValidadorFinalizacaoIA !== 'undefined')
+                    {
+                        const validador = ValidadorFinalizacaoIA.obterInstancia();
+
+                        // Obter veiculoId do modal
+                        const veiculoId = document.getElementById("lstVeiculo")?.ej2_instances?.[0]?.value || '';
+
+                        if (veiculoId && kmInicial > 0 && kmFinal > 0)
+                        {
+                            const dadosKm = {
+                                kmInicial: kmInicial,
+                                kmFinal: kmFinal,
+                                veiculoId: veiculoId
+                            };
+
+                            const resultadoKm = await validador.analisarKm(dadosKm);
+                            if (!resultadoKm.valido)
+                            {
+                                if (resultadoKm.nivel === 'erro')
+                                {
+                                    await Alerta.Erro(resultadoKm.titulo, resultadoKm.mensagem);
+                                    $("#txtKmFinal").val("");
+                                    window.calcularDistanciaViagem();
+                                    return;
+                                }
+                                else if (resultadoKm.nivel === 'aviso')
+                                {
+                                    const confirma = await Alerta.ValidacaoIAConfirmar(
+                                        resultadoKm.titulo,
+                                        resultadoKm.mensagem,
+                                        "Manter KM",
+                                        "Corrigir"
+                                    );
+                                    if (!confirma)
+                                    {
+                                        $("#txtKmFinal").val("");
+                                        window.calcularDistanciaViagem();
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } catch (error)
                 {
                     Alerta.TratamentoErroComLinha("main.js", "txtKmFinal_focusout", error);

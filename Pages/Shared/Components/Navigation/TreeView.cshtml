@@ -1,0 +1,481 @@
+@model List<FrotiX.Models.RecursoTreeDTO>
+@using System.Text.Json
+@{
+    var pageName = ViewData["PageName"]?.ToString().ToLower();
+    var jsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
+    var jsonData = JsonSerializer.Serialize(Model, jsonOptions);
+}
+
+<style>
+/* ====== NAVEGAÇÃO SYNCFUSION TREEVIEW ====== */
+
+/* Container principal */
+.nav-syncfusion {
+    padding: 0;
+    margin: 0;
+}
+
+/* Remove estilos padrão do TreeView */
+.nav-syncfusion .e-treeview {
+    background: transparent !important;
+    border: none !important;
+}
+
+.nav-syncfusion .e-treeview .e-ul {
+    padding: 0;
+    margin: 0;
+    background: transparent !important;
+    list-style: none;
+}
+
+/* Indentação para listas aninhadas (filhos) */
+.nav-syncfusion .e-treeview .e-list-item > .e-ul {
+    padding-left: 15px !important;
+}
+
+.nav-syncfusion .e-treeview .e-list-item {
+    padding: 0;
+    margin: 0;
+    background: transparent !important;
+}
+
+/* Texto/conteúdo do item */
+.nav-syncfusion .e-treeview .e-text-content {
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* Link do menu */
+.nav-syncfusion .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.nav-syncfusion .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ====== CORES DOS ÍCONES DUOTONE ====== */
+.nav-syncfusion .nav-icon.fa-duotone {
+    --fa-primary-color: #a0aec0;      /* Cinza claro */
+    --fa-secondary-color: #c67750;    /* Laranja sóbrio */
+    --fa-primary-opacity: 1;
+    --fa-secondary-opacity: 1;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* Ícones dos subitens - cores um pouco mais suaves */
+.nav-syncfusion .nivel-1 .nav-icon.fa-duotone,
+.nav-syncfusion .nivel-2 .nav-icon.fa-duotone {
+    --fa-primary-color: #b0bcc8;
+    --fa-secondary-color: #d4917a;
+    font-size: 0.95rem;
+}
+
+/* ====== INDENTAÇÃO POR NÍVEL ====== */
+/* A indentação principal é feita pelo TreeView via .e-ul aninhado */
+/* Estas classes adicionam padding interno ao link */
+.nav-syncfusion .nivel-0 .nav-link { padding-left: 15px; }
+.nav-syncfusion .nivel-1 .nav-link { padding-left: 10px; }
+.nav-syncfusion .nivel-2 .nav-link { padding-left: 10px; }
+
+/* ====== SETA DE EXPANSÃO - POSICIONADA À DIREITA ====== */
+.nav-syncfusion .e-treeview .e-text-content {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.nav-syncfusion .e-treeview .e-icons.e-icon-collapsible,
+.nav-syncfusion .e-treeview .e-icons.e-icon-expandable {
+    color: #c67750 !important;
+    font-size: 0.75rem;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    transition: transform 0.2s ease;
+}
+
+/* Seta para BAIXO quando fechado (expandable) - Font Awesome Pro 7 */
+.nav-syncfusion .e-treeview .e-icons.e-icon-expandable::before {
+    content: "\f078" !important; /* fa-chevron-down */
+    font-family: "Font Awesome 7 Pro", "Font Awesome 6 Pro", "FontAwesome" !important;
+    font-weight: 900;
+}
+
+/* Seta para CIMA quando aberto (collapsible) - Font Awesome Pro 7 */
+.nav-syncfusion .e-treeview .e-icons.e-icon-collapsible::before {
+    content: "\f077" !important; /* fa-chevron-up */
+    font-family: "Font Awesome 7 Pro", "Font Awesome 6 Pro", "FontAwesome" !important;
+    font-weight: 900;
+}
+
+/* ====== INDICADOR DE SELEÇÃO (BOLINHA LARANJA) ====== */
+.nav-syncfusion .selection-dot {
+    display: none;
+    position: absolute;
+    right: 28px; /* À direita, antes da seta */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.5rem;
+    color: #c67750 !important; /* Laranja */
+}
+
+/* Bolinha visível APENAS no link com classe ftx-page-active */
+.nav-syncfusion .nav-link.ftx-page-active .selection-dot {
+    display: inline-block !important;
+}
+
+/* IMPORTANTE: Garante que bolinha NÃO apareça em itens .e-active do Syncfusion */
+.nav-syncfusion .e-list-item.e-active .selection-dot,
+.nav-syncfusion .e-list-item.e-node-focus .selection-dot {
+    display: none !important;
+}
+
+/* Só mostra bolinha se o LINK tiver ftx-page-active (não o list-item) */
+.nav-syncfusion .e-list-item.e-active .nav-link:not(.ftx-page-active) .selection-dot {
+    display: none !important;
+}
+
+/* ====== ITEM ATIVO (apenas página atual) ====== */
+/* Aplica APENAS ao link com ftx-page-active (definido via JS baseado na URL) */
+.nav-syncfusion .nav-link.ftx-page-active {
+    background: rgba(255, 193, 7, 0.15) !important;
+    border-left: 3px solid #ffc107;
+}
+
+/* Remove destaque do Syncfusion ao clicar (não queremos isso) */
+.nav-syncfusion .e-list-item.e-active > .e-text-content > .nav-link {
+    background: transparent !important;
+    border-left: none !important;
+}
+
+/* Texto do item - permite quebra de linha */
+.nav-syncfusion .nav-text {
+    flex: 1;
+    font-size: 0.875rem;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.3;
+    padding-right: 30px; /* Espaço para a seta e bolinha */
+}
+
+/* Remove fullRow highlight padrão do Syncfusion */
+.nav-syncfusion .e-treeview .e-fullrow {
+    display: none !important;
+}
+
+/* Cursor pointer em todos os itens */
+.nav-syncfusion .e-treeview .e-list-item {
+    cursor: pointer;
+}
+
+/* OCULTA ícones padrão do Syncfusion (usamos apenas os do template) */
+.nav-syncfusion .e-treeview .e-list-icon {
+    display: none !important;
+}
+
+/* Garante que filhos expandidos sejam visíveis */
+.nav-syncfusion .e-treeview .e-list-item.e-node-collapsed > .e-ul {
+    display: none;
+}
+
+.nav-syncfusion .e-treeview .e-list-item:not(.e-node-collapsed) > .e-ul {
+    display: block !important;
+}
+
+/* Estilo para itens pai (com filhos) */
+.nav-syncfusion .e-treeview .e-list-item.e-has-child > .e-text-content {
+    font-weight: 500;
+}
+</style>
+
+<nav class="nav-syncfusion">
+    <div id="navTreeView"></div>
+</nav>
+
+<script>
+// Aguarda o Syncfusion carregar E a licença ser registrada antes de inicializar
+(function initNavTreeView() {
+    var currentPage = '@pageName';
+    var navData = @Html.Raw(jsonData);
+
+    // Verifica se o Syncfusion está carregado
+    if (typeof ej === 'undefined' || typeof ej.navigations === 'undefined') {
+        // Aguarda e tenta novamente
+        setTimeout(initNavTreeView, 100);
+        return;
+    }
+
+    // Verifica se a licença já foi registrada
+    if (!window.syncfusionLicenseReady) {
+        // Aguarda o evento de licença pronta
+        document.addEventListener('syncfusion-license-ready', initNavTreeView, { once: true });
+        return;
+    }
+
+    // Função para converter URL de formato antigo para novo
+    // Ex: "administracao_gerenciadornavegacao.html" -> "/Administracao/GerenciadorNavegacao"
+    function convertHref(href) {
+        if (!href || href === 'javascript:void(0);' || href.startsWith('/')) {
+            return href; // Já está no formato correto ou é placeholder
+        }
+
+        // Remove .html se existir
+        var converted = href.replace('.html', '');
+
+        // Converte underscore para barra e capitaliza cada parte
+        var parts = converted.split('_');
+        var capitalizedParts = parts.map(function(part) {
+            return part.charAt(0).toUpperCase() + part.slice(1);
+        });
+
+        return '/' + capitalizedParts.join('/');
+    }
+
+    // Função recursiva para converter URLs em toda a árvore
+    function convertUrlsRecursive(items) {
+        if (!items) return items;
+        return items.map(function(item) {
+            var newItem = Object.assign({}, item);
+            newItem.href = convertHref(item.href);
+            if (item.items && item.items.length > 0) {
+                newItem.items = convertUrlsRecursive(item.items);
+            }
+            return newItem;
+        });
+    }
+
+    // Converte todas as URLs
+    navData = convertUrlsRecursive(navData);
+
+    // Função para encontrar item ativo baseado na URL
+    function findActiveItem(items, href) {
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.href && item.href.toLowerCase().indexOf(href) > -1) {
+                return item.id;
+            }
+            if (item.items && item.items.length > 0) {
+                var found = findActiveItem(item.items, href);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    // Template personalizado para os itens
+    // NOTA: Não usamos classe 'active' no template - a marcação é feita via 'ftx-page-active' no JS após renderização
+    function nodeTemplate(data) {
+        var nivelClass = 'nivel-' + (data.nivel || 0);
+
+        var html = '<a class="nav-link ' + nivelClass + '" href="' + (data.href || 'javascript:void(0);') + '">';
+        html += '<i class="' + (data.icon || 'fa-regular fa-file') + ' nav-icon"></i>';
+        html += '<span class="nav-text">' + data.text + '</span>';
+        html += '<i class="fa-solid fa-circle selection-dot"></i>';
+        html += '</a>';
+
+        return html;
+    }
+
+    // Inicializa o TreeView - COMEÇA FECHADO
+    var treeObj = new ej.navigations.TreeView({
+        fields: {
+            dataSource: navData,
+            id: 'id',
+            text: 'text',
+            child: 'items',
+            hasChildren: 'hasChild'
+            // NÃO usar expanded para iniciar fechado
+        },
+        nodeTemplate: nodeTemplate,
+        cssClass: 'nav-menu-tree',
+        expandOn: 'None', // Expande apenas pela seta, não pelo clique no item
+        nodeClicked: function(args) {
+            // Previne navegação padrão do link - controlamos manualmente
+            args.event.preventDefault();
+
+            // Verifica se clicou na seta de expansão
+            var clickedElement = args.event.target;
+            if (clickedElement.classList.contains('e-icons') ||
+                clickedElement.classList.contains('e-icon-expandable') ||
+                clickedElement.classList.contains('e-icon-collapsible')) {
+                // Se clicou na seta, expande/colapsa
+                if (args.node.classList.contains('e-node-collapsed')) {
+                    treeObj.expandAll([args.nodeData.id]);
+                } else {
+                    treeObj.collapseAll([args.nodeData.id]);
+                }
+                return;
+            }
+
+            // Se o item tem filhos (é um grupo), apenas expande/colapsa - NUNCA navega
+            if (args.nodeData.hasChild) {
+                if (args.node.classList.contains('e-node-collapsed')) {
+                    treeObj.expandAll([args.nodeData.id]);
+                } else {
+                    treeObj.collapseAll([args.nodeData.id]);
+                }
+                return;
+            }
+
+            // Se não tem filhos, navega para o link (se existir)
+            var link = args.node.querySelector('.nav-link');
+            if (link) {
+                var href = link.getAttribute('href');
+                if (href && href !== 'javascript:void(0);') {
+                    window.location.href = href;
+                }
+            }
+        }
+    });
+
+    treeObj.appendTo('#navTreeView');
+
+    // Função para expandir manualmente um nó pai via DOM
+    function expandirPaiManualmente(nodeElement) {
+        if (!nodeElement) return;
+        nodeElement.classList.remove('e-node-collapsed');
+        var childUl = nodeElement.querySelector(':scope > .e-ul');
+        if (childUl) {
+            childUl.style.display = 'block';
+        }
+        var expandIcon = nodeElement.querySelector(':scope > .e-text-content .e-icons');
+        if (expandIcon) {
+            expandIcon.classList.remove('e-icon-expandable');
+            expandIcon.classList.add('e-icon-collapsible');
+        }
+    }
+
+    // Função para encontrar o melhor match de URL
+    function encontrarItemAtivo() {
+        var currentUrl = window.location.pathname.toLowerCase();
+        if (currentUrl.endsWith('/')) {
+            currentUrl = currentUrl.slice(0, -1);
+        }
+
+        var allLinks = document.querySelectorAll('#navTreeView .nav-link');
+        var bestMatch = null;
+        var bestMatchLength = 0;
+
+        allLinks.forEach(function(link) {
+            var href = link.getAttribute('href');
+            if (!href || href === 'javascript:void(0);') {
+                return;
+            }
+
+            var hrefLower = href.toLowerCase();
+            if (hrefLower.endsWith('/')) {
+                hrefLower = hrefLower.slice(0, -1);
+            }
+
+            if (currentUrl === hrefLower || currentUrl.endsWith(hrefLower)) {
+                if (hrefLower.length > bestMatchLength) {
+                    bestMatch = link;
+                    bestMatchLength = hrefLower.length;
+                }
+            }
+        });
+
+        return bestMatch;
+    }
+
+    // Função para coletar IDs dos pais de um elemento
+    function coletarIdsPais(listItem) {
+        var ids = [];
+        if (!listItem) return ids;
+
+        var parentUl = listItem.parentElement;
+        while (parentUl) {
+            var parentItem = parentUl.closest('.e-list-item');
+            if (parentItem) {
+                var nodeId = parentItem.getAttribute('data-uid');
+                if (!nodeId) {
+                    var nodeData = treeObj.getNode(parentItem);
+                    if (nodeData && nodeData.id) {
+                        nodeId = nodeData.id;
+                    }
+                }
+                if (nodeId) {
+                    ids.push(nodeId);
+                }
+                parentUl = parentItem.parentElement;
+            } else {
+                break;
+            }
+        }
+        return ids;
+    }
+
+    // Após renderização: Encontra item ativo PRIMEIRO, depois colapsa e expande seletivamente
+    setTimeout(function() {
+        // PRIMEIRO: Encontra o item ativo ANTES de colapsar
+        var itemAtivo = encontrarItemAtivo();
+        var idsPaisParaExpandir = [];
+
+        if (itemAtivo) {
+            itemAtivo.classList.add('ftx-page-active');
+
+            // Coleta IDs dos pais para expandir depois
+            var listItem = itemAtivo.closest('.e-list-item');
+            idsPaisParaExpandir = coletarIdsPais(listItem);
+        }
+
+        // SEGUNDO: Colapsa TUDO
+        treeObj.collapseAll();
+
+        // TERCEIRO: Expande os pais do item ativo via API
+        setTimeout(function() {
+            if (idsPaisParaExpandir.length > 0) {
+                idsPaisParaExpandir.reverse().forEach(function(parentId) {
+                    treeObj.expandAll([parentId]);
+                });
+            }
+        }, 100);
+
+        // QUARTO: Garantia final via DOM após tudo carregar (backup)
+        setTimeout(function() {
+            if (itemAtivo) {
+                var listItem = itemAtivo.closest('.e-list-item');
+                if (listItem) {
+                    var parentUl = listItem.parentElement;
+                    while (parentUl) {
+                        var parentItem = parentUl.closest('.e-list-item');
+                        if (parentItem) {
+                            // Força expansão via DOM
+                            parentItem.classList.remove('e-node-collapsed');
+                            var childUl = parentItem.querySelector(':scope > .e-ul');
+                            if (childUl) {
+                                childUl.style.display = 'block';
+                            }
+                            var expandIcon = parentItem.querySelector(':scope > .e-text-content .e-icons');
+                            if (expandIcon) {
+                                expandIcon.classList.remove('e-icon-expandable');
+                                expandIcon.classList.add('e-icon-collapsible');
+                            }
+                            parentUl = parentItem.parentElement;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }, 500);
+    }, 250);
+})();
+</script>

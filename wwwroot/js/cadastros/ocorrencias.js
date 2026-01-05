@@ -8,6 +8,33 @@
    Variáveis Globais
    ========================== */
 var dataTable = null;
+
+/* ==========================
+   Funções de Loading - Padrão FrotiX
+   ========================== */
+function mostrarLoadingOcorrencias(mensagem) {
+    try {
+        var overlay = document.getElementById('loadingOverlayOcorrencias');
+        if (overlay) {
+            var msgEl = overlay.querySelector('.ftx-loading-text');
+            if (msgEl && mensagem) msgEl.textContent = mensagem;
+            overlay.style.display = 'flex';
+        }
+    } catch (error) {
+        console.warn("Erro ao mostrar loading:", error);
+    }
+}
+
+function esconderLoadingOcorrencias() {
+    try {
+        var overlay = document.getElementById('loadingOverlayOcorrencias');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    } catch (error) {
+        console.warn("Erro ao esconder loading:", error);
+    }
+}
 var imagemOcorrenciaAlterada = false;
 var novaImagemOcorrencia = "";
 
@@ -90,6 +117,9 @@ function BuildGridOcorrencias(params)
 {
     try
     {
+        // Mostra loading padrão FrotiX
+        mostrarLoadingOcorrencias('Carregando Ocorrências...');
+
         if ($.fn.DataTable.isDataTable("#tblOcorrencia"))
         {
             $("#tblOcorrencia").DataTable().destroy();
@@ -160,6 +190,7 @@ function BuildGridOcorrencias(params)
                 {
                     try
                     {
+                        esconderLoadingOcorrencias();
                         console.error("Erro ao carregar ocorrências:", error, thrown);
                         AppToast.show("Vermelho", "Erro ao carregar ocorrências", 3000);
                     }
@@ -277,6 +308,8 @@ function BuildGridOcorrencias(params)
                 try
                 {
                     console.log("[ocorrencias.js] Grid carregada com", this.api().rows().count(), "registros");
+                    // Esconde loading quando a grid terminar de desenhar
+                    esconderLoadingOcorrencias();
                 }
                 catch (error)
                 {
@@ -287,6 +320,7 @@ function BuildGridOcorrencias(params)
     }
     catch (error)
     {
+        esconderLoadingOcorrencias();
         Alerta.TratamentoErroComLinha("ocorrencias.js", "BuildGridOcorrencias", error);
     }
 }

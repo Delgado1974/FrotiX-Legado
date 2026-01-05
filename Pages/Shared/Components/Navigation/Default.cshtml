@@ -32,7 +32,7 @@
     color: #b1d4e0;
 }
 
-.fa-circle,
+/* Ícones de stack - NÃO incluir .fa-circle aqui pois afeta a bolinha */
 [class^="base-"],
 [class*=" icon-stack"] {
     color: #b1d4e0;
@@ -52,12 +52,23 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.45rem;
-    color: #ffc107;
+    color: #ffc107 !important; /* Amarelo - importante para sobrescrever regras gerais */
 }
 
 /* Bolinha visível quando item está ativo */
 .nav-menu li.active > a .selection-dot {
     display: block;
+}
+
+/* ====== INDENTAÇÃO DOS SUBITENS ====== */
+/* Nível 2 - subitens: adiciona indentação extra */
+.nav-menu > li > ul > li > a .subitem-icon {
+    margin-left: 5px !important;
+}
+
+/* Nível 3 - sub-subitens: adiciona ainda mais indentação */
+.nav-menu > li > ul > li > ul > li > a .subitem-icon {
+    margin-left: 15px !important;
 }
 
 /* Ícones dos subitens */
@@ -92,7 +103,7 @@
                 }
             });
             <li class="@(groups.Contains(pageName) ? "active open" : "")">
-                <a href="#" title="@group.Title" data-filter-tags="@group.Tags">
+                <a href="#" data-filter-tags="@group.Tags">
                     <i class="@group.Icon"></i>
                     <span class="nav-link-text" data-i18n="@group.I18n">@group.Text.AsRaw()</span>
                     @if (group.Span.HasValue())
@@ -128,7 +139,7 @@
                                 }
                             }
                             <text>
-                                <a href="@item.Route" title="@item.Title" data-filter-tags="@item.Tags">
+                                <a href="@item.Route" data-filter-tags="@item.Tags">
                                     @if (!string.IsNullOrEmpty(item.Icon))
                                     {
                                         <i class="@item.Icon subitem-icon"></i>
@@ -159,7 +170,7 @@
                                 <li class="@(pageName == subItem.Href.ToPage() ? "active" : "")">
                                 </text>
                             }
-                            <a href="@subItem.Route" title="@subItem.Title" data-filter-tags="@subItem.Tags">
+                            <a href="@subItem.Route" data-filter-tags="@subItem.Tags">
                                 @if (!string.IsNullOrEmpty(subItem.Icon))
                                 {
                                     <i class="@subItem.Icon subitem-icon"></i>
@@ -187,7 +198,7 @@
             else
             {
                 <li class="@(pageName == group.Href.ToPage() ? "active" : "")">
-                    <a href="@group.Route" title="@group.Title" data-filter-tags="@group.Tags">
+                    <a href="@group.Route" data-filter-tags="@group.Tags">
                         <i class="@group.Icon" text-warning></i>
                         <span class="nav-link-text" data-i18n="@group.I18n">@group.Title.AsRaw()</span>
                         <i class="fa-solid fa-circle selection-dot"></i>

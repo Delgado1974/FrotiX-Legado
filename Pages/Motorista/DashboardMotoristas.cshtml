@@ -1,0 +1,1097 @@
+@page
+@model FrotiX.Pages.Motorista.DashboardMotoristasModel
+@using Syncfusion.EJ2
+
+@{
+    ViewData["Title"] = "Dashboard de Motoristas";
+    ViewData["PageName"] = "motoristas_dashboardmotoristas";
+}
+
+<style>
+    /* ================================================================
+       DASHBOARD MOTORISTAS - PALETA VERDE ESMERALDA PASTEL
+       ================================================================ */
+    :root {
+        --mot-primary: #059669;
+        --mot-secondary: #10b981;
+        --mot-accent: #34d399;
+        --mot-dark: #047857;
+        --mot-darker: #065f46;
+        --mot-light: #ecfdf5;
+        --mot-cream: #d1fae5;
+        --mot-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        --mot-gradient-dark: linear-gradient(135deg, #047857 0%, #059669 100%);
+    }
+
+    /* Header do Dashboard Motoristas */
+    .header-dashboard-motoristas {
+        background: var(--mot-gradient);
+        color: white;
+        padding: 20px 24px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-dashboard-motoristas::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        animation: ftxHeaderShine 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes ftxHeaderShine {
+        0%, 100% { left: -100%; }
+        50% { left: 100%; }
+    }
+
+    .header-dashboard-titulo-mot {
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-dashboard-titulo-mot i {
+        font-size: 1.75rem;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+    }
+
+    /* Container de Filtros - Estilo Motoristas */
+    .filter-card-mot {
+        background: var(--mot-gradient);
+        color: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+
+    .filter-card-mot .form-label {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    /* Botões de Período Rápido - Motoristas */
+    .btn-period-mot {
+        border-radius: 20px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.15);
+        color: white;
+    }
+
+    .btn-period-mot:hover {
+        transform: scale(1.05);
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+        color: white;
+    }
+
+    .btn-period-mot.active {
+        background: white;
+        color: var(--mot-primary);
+        border-color: white;
+    }
+
+    /* Botões de Filtro - Base comum */
+    .btn-filtrar-mot, .btn-limpar-filtro {
+        padding: 8px 20px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Botão Filtrar - Motoristas */
+    .btn-filtrar-mot {
+        background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%) !important;
+        border: 2px solid rgba(255, 255, 255, 0.6) !important;
+        color: white !important;
+        box-shadow: 0 2px 8px rgba(160, 82, 45, 0.4);
+    }
+
+    .btn-filtrar-mot:hover {
+        background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%) !important;
+        border-color: rgba(255, 255, 255, 0.9) !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(160, 82, 45, 0.5);
+    }
+
+    .btn-limpar-filtro {
+        background: linear-gradient(135deg, #B28767 0%, #9a7254 100%) !important;
+        border: 2px solid rgba(255, 255, 255, 0.6) !important;
+        color: white !important;
+        box-shadow: 0 2px 8px rgba(178, 135, 103, 0.4);
+    }
+
+    .btn-limpar-filtro:hover {
+        background: linear-gradient(135deg, #9a7254 0%, #825d43 100%) !important;
+        border-color: rgba(255, 255, 255, 0.9) !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(75, 85, 99, 0.5);
+    }
+
+    /* Cards de Estatísticas */
+    .card-estatistica-mot {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        border-left: 4px solid;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-estatistica-mot:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+
+    /* Cores dos Cards */
+    .card-borda-esmeralda { border-left-color: #059669; }
+    .card-borda-verde { border-left-color: #16a34a; }
+    .card-borda-azul { border-left-color: #0D47A1; }
+    .card-borda-laranja { border-left-color: #d97706; }
+    .card-borda-amarelo { border-left-color: #f59e0b; }
+    .card-borda-roxo { border-left-color: #9d4edd; }
+    .card-borda-vermelho { border-left-color: #dc2626; }
+    .card-borda-ciano { border-left-color: #22d3ee; }
+    .card-borda-rosa { border-left-color: #ec4899; }
+
+    .icone-card-mot {
+        font-size: 24px;
+        margin-bottom: 12px;
+        opacity: 0.85;
+    }
+
+    .icone-esmeralda { color: #059669; }
+    .icone-verde { color: #16a34a; }
+    .icone-azul { color: #0D47A1; }
+    .icone-laranja { color: #d97706; }
+    .icone-amarelo { color: #f59e0b; }
+    .icone-roxo { color: #9d4edd; }
+    .icone-vermelho { color: #dc2626; }
+    .icone-ciano { color: #22d3ee; }
+    .icone-rosa { color: #ec4899; }
+
+    .texto-metrica-mot {
+        font-size: 0.75rem;
+        color: #6B7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .valor-metrica-mot {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.2;
+    }
+
+    .variacao-metrica-mot {
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 8px;
+    }
+
+    .variacao-positiva { color: #16a34a; }
+    .variacao-negativa { color: #dc2626; }
+    .variacao-neutra { color: #6B7280; }
+
+    /* Cards Individuais do Motorista (quando selecionado) */
+    .cards-motorista-individual {
+        display: none;
+    }
+
+    .cards-motorista-individual.visible {
+        display: block;
+    }
+
+    .card-perfil-motorista {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .foto-motorista {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .foto-motorista-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        color: white;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .nome-motorista-perfil {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #065f46;
+        margin: 0;
+    }
+
+    .info-motorista-perfil {
+        color: #6B7280;
+        font-size: 0.9rem;
+    }
+
+    /* Card CNH com Status */
+    .card-cnh {
+        position: relative;
+    }
+
+    .badge-cnh-vencida {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc2626;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-cnh-vencendo {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #f59e0b;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-cnh-ok {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #16a34a;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    /* Containers de Gráficos */
+    .chart-container-mot {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .chart-container-mot:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .chart-title-mot {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Tabela TOP 10 */
+    .table-top10-mot {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-top10-mot thead {
+        background: var(--mot-gradient);
+        color: white;
+    }
+
+    .table-top10-mot tbody tr:hover {
+        background-color: #f0fdf4 !important;
+    }
+
+    .table-top10-mot tbody tr {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    /* Loading Inicial - Usa padrão FrotiX global (ftx-spin-overlay) */
+
+    /* Seção de Cards Individuais */
+    .secao-cards-individuais {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .titulo-secao-individual {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #065f46;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Card de Tipo de Motorista */
+    .badge-tipo-motorista {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+
+    .badge-efetivo {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white;
+    }
+
+    .badge-ferista {
+        background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+        color: white;
+    }
+
+    .badge-cobertura {
+        background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+        color: white;
+    }
+
+    /* Grid de Cards Resumo */
+    .grid-cards-resumo {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+    }
+
+    /* Alertas de CNH */
+    .alerta-cnh-vencida {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border: 1px solid #fca5a5;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+
+    .alerta-cnh-vencendo {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border: 1px solid #fcd34d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+
+    /* Linha destacada do motorista selecionado nas tabelas comparativas */
+    .linha-motorista-selecionado {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+        font-weight: 700 !important;
+        border-left: 4px solid var(--mot-primary) !important;
+    }
+
+    .linha-motorista-selecionado td {
+        color: #065f46 !important;
+    }
+
+    /* Medalhas nas tabelas comparativas */
+    .medalha-posicao {
+        font-size: 1.1rem;
+    }
+
+    /* Posição fora do Top 10 - Marrom Negrito */
+    .posicao-fora-top10 {
+        color: #92400e;
+        font-size: 0.95rem;
+        font-weight: 800;
+    }
+
+    /* Separador visual entre Top 10 e posição do motorista */
+    .linha-separador-comparativa td {
+        background: #f9fafb !important;
+        padding: 4px !important;
+        border-top: 2px dashed #d1d5db !important;
+        border-bottom: 2px dashed #d1d5db !important;
+    }
+</style>
+
+<!-- Loading Inicial da Página - Padrão FrotiX -->
+<div id="loadingInicialDashboardMot" class="ftx-spin-overlay" style="z-index: 9999;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Dashboard de Motoristas</div>
+        <div class="ftx-loading-subtext">Aguarde enquanto os dados são processados...</div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="header-dashboard-motoristas">
+        <h1 class="header-dashboard-titulo-mot">
+            <i class="fa-duotone fa-id-card-clip"></i>
+            Dashboard de Motoristas
+        </h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card-mot">
+        <!-- Linha 1: Motorista -->
+        <div class="row g-3 align-items-end mb-3">
+            <div class="col-md-4">
+                <label class="form-label">
+                    <i class="fa-duotone fa-user-tie me-1"></i> Motorista
+                </label>
+                <select id="filtroMotorista" class="form-select">
+                    <option value="">Todos os Motoristas</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-filtrar-mot" id="btnFiltrarMotorista" title="Filtrar por motorista">
+                    <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-limpar-filtro" id="btnLimparMotorista" title="Limpar seleção de motorista">
+                    <i class="fa-duotone fa-eraser me-1"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Linha 2: Ano, Mês -->
+        <div class="row g-3 align-items-end mb-3">
+            <div class="col-auto">
+                <label class="form-label">
+                    <i class="fa-duotone fa-calendar me-1"></i> Ano
+                </label>
+                <select id="filtroAno" class="form-select" style="min-width: 120px;">
+                    <option value="">Carregando...</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">
+                    <i class="fa-duotone fa-calendar-day me-1"></i> Mês
+                </label>
+                <select id="filtroMes" class="form-select" style="min-width: 150px;">
+                    <option value="">Todos os Meses</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-filtrar-mot" id="btnFiltrarAnoMes" title="Filtrar por ano/mês">
+                    <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-limpar-filtro" id="btnLimparAnoMes" title="Limpar filtro de período">
+                    <i class="fa-duotone fa-eraser me-1"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Linha 3: Período Personalizado + Períodos Rápidos -->
+        <div class="row g-3 align-items-end">
+            <div class="col-auto">
+                <label class="form-label">
+                    <i class="fa-duotone fa-calendar-range me-1"></i> Período Personalizado
+                </label>
+                <div class="d-flex gap-2 align-items-center">
+                    <div>
+                        <label class="form-label small mb-1">De:</label>
+                        <input type="date" id="dataInicio" class="form-control" style="width: 140px;" />
+                    </div>
+                    <div>
+                        <label class="form-label small mb-1">Até:</label>
+                        <input type="date" id="dataFim" class="form-control" style="width: 140px;" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-filtrar-mot" id="btnFiltrar" title="Filtrar por período">
+                    <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-limpar-filtro" id="btnLimparPeriodo" title="Limpar período personalizado">
+                    <i class="fa-duotone fa-eraser me-1"></i> Limpar
+                </button>
+            </div>
+            <div class="col">
+                <label class="form-label">Períodos Rápidos</label>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn-period-mot" id="btn7Dias">7 dias</button>
+                    <button type="button" class="btn-period-mot" id="btn15Dias">15 dias</button>
+                    <button type="button" class="btn-period-mot" id="btn30Dias">30 dias</button>
+                    <button type="button" class="btn-period-mot" id="btn60Dias">60 dias</button>
+                    <button type="button" class="btn-period-mot" id="btn90Dias">90 dias</button>
+                    <button type="button" class="btn-period-mot" id="btn180Dias">180 dias</button>
+                    <button type="button" class="btn-period-mot" id="btn365Dias">1 ano</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador do período atual -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-light py-2 mb-0 d-flex align-items-center" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fa-duotone fa-info-circle me-2"></i>
+                    <span id="periodoAtualLabel">Carregando período...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         SEÇÃO: Cards Individuais do Motorista
+         (Visível apenas quando um motorista é selecionado)
+         ============================================ -->
+    <div id="secaoMotoristaIndividual" class="secao-cards-individuais cards-motorista-individual">
+        <h4 class="titulo-secao-individual">
+            <i class="fa-duotone fa-user-check"></i>
+            <span id="tituloMotoristaIndividual">Dados do Motorista</span>
+        </h4>
+
+        <!-- Perfil do Motorista -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card-perfil-motorista">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div id="fotoMotorista" class="foto-motorista-placeholder">
+                                <i class="fa-duotone fa-user"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h3 class="nome-motorista-perfil" id="nomeMotoristaIndividual">-</h3>
+                            <div class="info-motorista-perfil">
+                                <span id="cpfMotoristaIndividual">CPF: -</span> |
+                                <span id="pontoMotoristaIndividual">Ponto: -</span>
+                            </div>
+                            <div class="mt-2">
+                                <span id="badgeTipoMotorista" class="badge-tipo-motorista badge-efetivo">Efetivo</span>
+                                <span id="badgeStatusMotorista" class="badge ms-2 bg-success">Ativo</span>
+                            </div>
+                        </div>
+                        <div class="col-auto text-end">
+                            <div class="text-muted small">Data de Ingresso</div>
+                            <div class="fw-bold fs-5" id="dataIngressoIndividual">-</div>
+                            <div class="text-muted small mt-2">Tempo na Empresa</div>
+                            <div class="fw-bold" id="tempoEmpresaIndividual">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Individuais -->
+        <div class="row g-3">
+            <!-- Card CNH -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-esmeralda card-cnh">
+                    <span id="badgeCnhStatus" class="badge-cnh-ok">OK</span>
+                    <div class="icone-card-mot icone-esmeralda"><i class="fa-duotone fa-id-card"></i></div>
+                    <small class="texto-metrica-mot">Vencimento CNH</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statVencimentoCnhIndividual">-</h3>
+                    <small class="variacao-metrica-mot variacao-neutra" id="diasParaVencerCnh">-</small>
+                </div>
+            </div>
+
+            <!-- Card Viagens -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-azul">
+                    <div class="icone-card-mot icone-azul"><i class="fa-duotone fa-route"></i></div>
+                    <small class="texto-metrica-mot">Total de Viagens</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statViagensIndividual">0</h3>
+                    <small class="variacao-metrica-mot variacao-neutra" id="variacaoViagensIndividual">no período</small>
+                </div>
+            </div>
+
+            <!-- Card KM -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-laranja">
+                    <div class="icone-card-mot icone-laranja"><i class="fa-duotone fa-gauge-high"></i></div>
+                    <small class="texto-metrica-mot">KM Percorrido</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statKmIndividual">0 km</h3>
+                    <small class="variacao-metrica-mot variacao-neutra" id="variacaoKmIndividual">no período</small>
+                </div>
+            </div>
+
+            <!-- Card Horas Dirigidas -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-roxo">
+                    <div class="icone-card-mot icone-roxo"><i class="fa-duotone fa-clock"></i></div>
+                    <small class="texto-metrica-mot">Horas Dirigidas</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statHorasDirigidasIndividual">0h</h3>
+                    <small class="variacao-metrica-mot variacao-neutra" id="variacaoHorasIndividual">no período</small>
+                </div>
+            </div>
+
+            <!-- Card Abastecimentos -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-amarelo">
+                    <div class="icone-card-mot icone-amarelo"><i class="fa-duotone fa-gas-pump"></i></div>
+                    <small class="texto-metrica-mot">Abastecimentos</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statAbastecimentosIndividual">0</h3>
+                    <small class="variacao-metrica-mot variacao-neutra" id="variacaoAbastIndividual">no período</small>
+                </div>
+            </div>
+
+            <!-- Card Multas -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-vermelho">
+                    <div class="icone-card-mot icone-vermelho"><i class="fa-duotone fa-triangle-exclamation"></i></div>
+                    <small class="texto-metrica-mot">Multas</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statMultasIndividual">0</h3>
+                    <small class="variacao-metrica-mot variacao-neutra" id="valorMultasIndividual">R$ 0,00</small>
+                </div>
+            </div>
+
+            <!-- Card Categoria CNH -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-ciano">
+                    <div class="icone-card-mot icone-ciano"><i class="fa-duotone fa-id-badge"></i></div>
+                    <small class="texto-metrica-mot">Categoria CNH</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statCategoriaCnhIndividual">-</h3>
+                    <small class="variacao-metrica-mot variacao-neutra">habilitação</small>
+                </div>
+            </div>
+
+            <!-- Card Média KM/Viagem -->
+            <div class="col-md-3">
+                <div class="card-estatistica-mot card-borda-rosa">
+                    <div class="icone-card-mot icone-rosa"><i class="fa-duotone fa-chart-line"></i></div>
+                    <small class="texto-metrica-mot">Média KM/Viagem</small>
+                    <h3 class="valor-metrica-mot mb-0" id="statMediaKmViagemIndividual">0 km</h3>
+                    <small class="variacao-metrica-mot variacao-neutra">por viagem</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabelas Comparativas: Motorista vs Top 10 -->
+        <div class="row g-3 mt-3">
+            <!-- Tabela Comparativa de Viagens -->
+            <div class="col-md-6">
+                <div class="chart-container-mot">
+                    <h5 class="chart-title-mot">
+                        <i class="fa-duotone fa-route text-primary"></i>
+                        Viagens: Motorista vs Top 10
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-top10-mot mb-0" id="tabelaComparativaViagens">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" width="50">#</th>
+                                    <th>Motorista</th>
+                                    <th class="text-center">Viagens</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaComparativaViagensBody">
+                                <tr>
+                                    <td colspan="3" class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <span class="ms-2">Carregando...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela Comparativa de KM -->
+            <div class="col-md-6">
+                <div class="chart-container-mot">
+                    <h5 class="chart-title-mot">
+                        <i class="fa-duotone fa-gauge-high text-warning"></i>
+                        Quilometragem: Motorista vs Top 10
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-top10-mot mb-0" id="tabelaComparativaKm">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" width="50">#</th>
+                                    <th>Motorista</th>
+                                    <th class="text-center">KM Rodado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaComparativaKmBody">
+                                <tr>
+                                    <td colspan="3" class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <span class="ms-2">Carregando...</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         SEÇÃO: Cards Globais (ocultos quando motorista selecionado)
+         ============================================ -->
+    <div id="secaoCardsColetivos">
+
+    <!-- LINHA 1: Cards Resumo Geral -->
+    <div class="row g-3 mb-4">
+        <div class="col">
+            <div class="card-estatistica-mot card-borda-esmeralda">
+                <div class="icone-card-mot icone-esmeralda"><i class="fa-duotone fa-users"></i></div>
+                <small class="texto-metrica-mot">Total de Motoristas</small>
+                <h3 class="valor-metrica-mot mb-0" id="statTotalMotoristas">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="variacaoTotalMotoristas">cadastrados</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-mot card-borda-verde">
+                <div class="icone-card-mot icone-verde"><i class="fa-duotone fa-user-check"></i></div>
+                <small class="texto-metrica-mot">Motoristas Ativos</small>
+                <h3 class="valor-metrica-mot mb-0" id="statMotoristasAtivos">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="percentualAtivos">-</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-mot card-borda-azul">
+                <div class="icone-card-mot icone-azul"><i class="fa-duotone fa-route"></i></div>
+                <small class="texto-metrica-mot">Total de Viagens</small>
+                <h3 class="valor-metrica-mot mb-0" id="statTotalViagens">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="variacaoViagens">no período</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-mot card-borda-laranja">
+                <div class="icone-card-mot icone-laranja"><i class="fa-duotone fa-gauge-high"></i></div>
+                <small class="texto-metrica-mot">KM Total</small>
+                <h3 class="valor-metrica-mot mb-0" id="statKmTotal">0 km</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="variacaoKmTotal">no período</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-estatistica-mot card-borda-roxo">
+                <div class="icone-card-mot icone-roxo"><i class="fa-duotone fa-clock"></i></div>
+                <small class="texto-metrica-mot">Horas Dirigidas</small>
+                <h3 class="valor-metrica-mot mb-0" id="statHorasTotais">0h</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="variacaoHoras">no período</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- LINHA 2: Cards por Tipo de Motorista -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card-estatistica-mot card-borda-esmeralda">
+                <div class="icone-card-mot icone-esmeralda"><i class="fa-duotone fa-user-tie"></i></div>
+                <small class="texto-metrica-mot">Efetivos</small>
+                <h3 class="valor-metrica-mot mb-0" id="statEfetivos">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="percentualEfetivos">-</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-estatistica-mot card-borda-ciano">
+                <div class="icone-card-mot icone-ciano"><i class="fa-duotone fa-calendar-star"></i></div>
+                <small class="texto-metrica-mot">Feristas</small>
+                <h3 class="valor-metrica-mot mb-0" id="statFeristas">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="percentualFeristas">-</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-estatistica-mot card-borda-roxo">
+                <div class="icone-card-mot icone-roxo"><i class="fa-duotone fa-user-shield"></i></div>
+                <small class="texto-metrica-mot">Cobertura</small>
+                <h3 class="valor-metrica-mot mb-0" id="statCobertura">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="percentualCobertura">-</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-estatistica-mot card-borda-vermelho">
+                <div class="icone-card-mot icone-vermelho"><i class="fa-duotone fa-user-xmark"></i></div>
+                <small class="texto-metrica-mot">Inativos</small>
+                <h3 class="valor-metrica-mot mb-0" id="statInativos">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="percentualInativos">-</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- LINHA 3: Alertas CNH e Multas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card-estatistica-mot card-borda-vermelho">
+                <div class="icone-card-mot icone-vermelho"><i class="fa-duotone fa-id-card-clip"></i></div>
+                <small class="texto-metrica-mot">CNH Vencidas</small>
+                <h3 class="valor-metrica-mot mb-0" id="statCnhVencidas">0</h3>
+                <small class="variacao-metrica-mot variacao-negativa" id="alertaCnhVencidas">requer atenção!</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-estatistica-mot card-borda-amarelo">
+                <div class="icone-card-mot icone-amarelo"><i class="fa-duotone fa-id-card-clip"></i></div>
+                <small class="texto-metrica-mot">CNH Vencendo em 30 dias</small>
+                <h3 class="valor-metrica-mot mb-0" id="statCnhVencendo">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="alertaCnhVencendo">-</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-estatistica-mot card-borda-vermelho">
+                <div class="icone-card-mot icone-vermelho"><i class="fa-duotone fa-triangle-exclamation"></i></div>
+                <small class="texto-metrica-mot">Total de Multas</small>
+                <h3 class="valor-metrica-mot mb-0" id="statTotalMultas">0</h3>
+                <small class="variacao-metrica-mot variacao-neutra" id="valorTotalMultas">R$ 0,00</small>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- Fim secaoCardsColetivos -->
+
+    <!-- GRÁFICOS COLETIVOS (ocultos quando motorista selecionado) -->
+    <div id="secaoGraficosColetivos">
+
+    <!-- GRÁFICOS - Linha 1: Viagens por Motorista (Bar) + Km por Motorista (Bar) -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-chart-column text-primary"></i> Top 10 Motoristas por Viagens</h5>
+                <div id="chartViagensPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-gauge-high text-warning"></i> Top 10 Motoristas por Quilometragem</h5>
+                <div id="chartKmPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS - Linha 2: Distribuição por Tipo + Distribuição por Status -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-chart-pie text-success"></i> Distribuição por Tipo</h5>
+                <div id="chartDistribuicaoTipo" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-chart-pie text-info"></i> Distribuição por Status</h5>
+                <div id="chartDistribuicaoStatus" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- Fim secaoGraficosColetivos -->
+
+    <!-- GRÁFICOS - Evolução de Viagens (Visível para todos e para motorista individual) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot">
+                    <i class="fa-duotone fa-chart-line text-primary"></i>
+                    Evolução de Viagens no Período
+                    <span id="evolucaoSubtitle" class="ms-2 text-muted small fw-normal"></span>
+                </h5>
+                <div id="chartEvolucaoViagens" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS COLETIVOS 2 (ocultos quando motorista selecionado) -->
+    <div id="secaoGraficosColetivos2">
+
+    <!-- GRÁFICOS - Linha 4: Horas por Motorista + Abastecimentos por Motorista -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-clock text-purple" style="color: #9d4edd;"></i> Top 10 Motoristas por Horas Dirigidas</h5>
+                <div id="chartHorasPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-gas-pump text-warning"></i> Top 10 Motoristas por Abastecimentos</h5>
+                <div id="chartAbastecimentosPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS - Linha 5: Multas por Motorista -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-triangle-exclamation text-danger"></i> Motoristas com Mais Multas</h5>
+                <div id="chartMultasPorMotorista" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container-mot" style="min-height: 400px;">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-calendar-days text-info"></i> Distribuição por Tempo de Empresa</h5>
+                <div id="chartTempoEmpresa" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- Fim secaoGraficosColetivos2 -->
+
+    <!-- MAPA DE CALOR: Viagens por Dia da Semana e Hora (Visível para todos e para motorista individual) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="chart-container-mot" style="min-height: 450px;">
+                <h5 class="chart-title-mot">
+                    <i class="fa-duotone fa-fire text-warning"></i>
+                    Mapa de Calor: Viagens por Dia da Semana e Hora
+                    <span id="heatmapSubtitle" class="ms-2 text-muted small fw-normal">(Todos os Motoristas)</span>
+                </h5>
+                <div class="heatmap-container">
+                    <div id="heatmapViagens" style="height: 380px;"></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">Menos viagens</span>
+                            <div style="display: flex; gap: 2px;">
+                                <div style="width: 20px; height: 20px; background: #ecfdf5; border: 1px solid #d1d5db; border-radius: 3px;"></div>
+                                <div style="width: 20px; height: 20px; background: #a7f3d0; border: 1px solid #d1d5db; border-radius: 3px;"></div>
+                                <div style="width: 20px; height: 20px; background: #34d399; border: 1px solid #d1d5db; border-radius: 3px;"></div>
+                                <div style="width: 20px; height: 20px; background: #059669; border: 1px solid #d1d5db; border-radius: 3px;"></div>
+                                <div style="width: 20px; height: 20px; background: #047857; border: 1px solid #d1d5db; border-radius: 3px;"></div>
+                            </div>
+                            <span class="text-muted small">Mais viagens</span>
+                        </div>
+                    </div>
+                    <div class="col text-end">
+                        <span class="text-muted small" id="heatmapTotalViagens">Total: 0 viagens no período</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELAS COLETIVAS (ocultas quando motorista selecionado) -->
+    <div id="secaoTabelasColetivas">
+
+    <!-- TABELA: Motoristas com CNH Vencendo/Vencida -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="chart-container-mot">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-id-card-clip text-warning"></i> Motoristas com CNH Vencida ou Vencendo em 30 dias</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-top10-mot mb-0">
+                        <thead>
+                            <tr>
+                                <th>Motorista</th>
+                                <th class="text-center">CNH</th>
+                                <th class="text-center">Categoria</th>
+                                <th class="text-center">Vencimento</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Dias</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCnhBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    <span class="ms-2">Carregando dados...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELA: TOP 10 Motoristas por Performance -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="chart-container-mot">
+                <h5 class="chart-title-mot"><i class="fa-duotone fa-trophy text-warning"></i> TOP 10 Motoristas por Performance</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-top10-mot mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center" width="60">#</th>
+                                <th>Motorista</th>
+                                <th class="text-center">Tipo</th>
+                                <th class="text-center">Viagens</th>
+                                <th class="text-center">KM Rodado</th>
+                                <th class="text-center">Horas</th>
+                                <th class="text-center">Multas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaTop10Body">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    <span class="ms-2">Carregando dados...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- Fim secaoTabelasColetivas -->
+</div>
+
+@section ScriptsBlock {
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-base/dist/global/ej2-base.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-data/dist/global/ej2-data.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-svg-base/dist/global/ej2-svg-base.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-pdf-export/dist/global/ej2-pdf-export.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-file-utils/dist/global/ej2-file-utils.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-compression/dist/global/ej2-compression.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-charts/dist/global/ej2-charts.min.js"></script>
+    <script src="~/js/dashboards/dashboard-motoristas.js" asp-append-version="true"></script>
+}

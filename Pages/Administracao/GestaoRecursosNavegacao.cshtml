@@ -1,0 +1,942 @@
+@page
+@model FrotiX.Pages.Administracao.GestaoRecursosNavegacaoModel
+
+@{
+    ViewData["Title"] = "Gestão de Recursos e Navegação";
+    ViewData["PageName"] = "administracao_gestaorecursosnavegacao";
+    ViewData["Heading"] = "<i class='fa-duotone fa-sitemap'></i> Administração: <span class='fw-300'>Gestão de Recursos e Navegação</span>";
+    ViewData["Category1"] = "Administração";
+    ViewData["PageIcon"] = "fa-duotone fa-sitemap";
+}
+
+@section HeadBlock {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ====== HEADER AZUL PADRAO FROTIX ====== */
+        .ftx-card-header {
+            background-color: #3D5771;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ftx-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .ftx-card-header .titulo-paginas {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 900 !important;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .ftx-card-header .titulo-paginas i.fa-duotone {
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .ftx-card-header .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ====== LAYOUT PRINCIPAL ====== */
+        .gestao-container {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* ====== COLUNA ESQUERDA - TREEVIEW ====== */
+        .tree-panel {
+            flex: 0 0 400px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tree-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tree-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #3D5771;
+        }
+
+        .tree-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            max-height: calc(100vh - 350px);
+        }
+
+        .tree-actions {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* ====== COLUNA DIREITA - PROPRIEDADES ====== */
+        .props-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Card de propriedades */
+        .props-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .props-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .props-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #3D5771;
+        }
+
+        .props-body {
+            padding: 1.5rem;
+        }
+
+        /* ====== FORMULARIO DE PROPRIEDADES ====== */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .form-group .form-control {
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .form-group .form-control:focus {
+            border-color: #3D5771;
+            box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15);
+        }
+
+        /* Preview de icone */
+        .icon-preview-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .icon-preview {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            font-size: 1.25rem;
+        }
+
+        .icon-preview i.fa-duotone {
+            --fa-primary-color: #a0aec0;
+            --fa-secondary-color: #c67750;
+        }
+
+        /* ====== CARD DE CONTROLE DE ACESSO ====== */
+        .acesso-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .acesso-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .acesso-item:last-child {
+            border-bottom: none;
+        }
+
+        .acesso-item label {
+            flex: 1;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* ====== TREEVIEW CUSTOMIZADO ====== */
+        #gestaoTreeView .e-treeview {
+            background: transparent;
+        }
+
+        /* REMOVE o ícone padrão do Syncfusion (evita duplicação) */
+        #gestaoTreeView .e-treeview .e-list-icon {
+            display: none !important;
+        }
+
+        /* REMOVE o fundo azul de seleção padrão do Syncfusion */
+        #gestaoTreeView .e-treeview .e-list-item.e-active,
+        #gestaoTreeView .e-treeview .e-list-item.e-node-focus,
+        #gestaoTreeView .e-treeview .e-list-item:focus,
+        #gestaoTreeView .e-treeview .e-fullrow.e-active,
+        #gestaoTreeView .e-treeview .e-text-content.e-active {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Remove fullrow highlight */
+        #gestaoTreeView .e-treeview .e-fullrow {
+            display: none !important;
+        }
+
+        #gestaoTreeView .e-list-item {
+            padding: 2px 0;
+            background: transparent !important;
+        }
+
+        #gestaoTreeView .e-text-content {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        #gestaoTreeView .tree-node {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        #gestaoTreeView .tree-node:hover {
+            background: #f1f3f5;
+        }
+
+        #gestaoTreeView .tree-node.selected {
+            background: rgba(61, 87, 113, 0.15) !important;
+            border-left: 3px solid #3D5771;
+        }
+
+        /* Garante que o texto NÃO desaparece ao selecionar */
+        #gestaoTreeView .tree-node .node-text,
+        #gestaoTreeView .tree-node.selected .node-text,
+        #gestaoTreeView .e-list-item .tree-node .node-text,
+        #gestaoTreeView .e-list-item.e-active .tree-node .node-text,
+        #gestaoTreeView .e-list-item.e-node-focus .tree-node .node-text {
+            color: #333 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        /* Texto em NEGRITO quando item está selecionado */
+        #gestaoTreeView .tree-node.selected .node-text {
+            font-weight: 700 !important;
+        }
+
+        /* FORÇA texto visível em TODOS os estados do Syncfusion */
+        #gestaoTreeView .e-treeview .e-list-text,
+        #gestaoTreeView .e-treeview .e-text-content,
+        #gestaoTreeView .e-treeview .e-list-item span,
+        #gestaoTreeView .e-treeview .e-active .e-list-text,
+        #gestaoTreeView .e-treeview .e-node-focus .e-list-text {
+            color: #333 !important;
+        }
+
+        /* Ícones duotone com cores FrotiX */
+        #gestaoTreeView .tree-node i,
+        #gestaoTreeView .tree-node i.fa-duotone {
+            --fa-primary-color: #a0aec0;
+            --fa-secondary-color: #c67750;
+            --fa-primary-opacity: 1;
+            --fa-secondary-opacity: 1;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Ícone do item selecionado destaca com cor primária laranja */
+        #gestaoTreeView .tree-node.selected i,
+        #gestaoTreeView .tree-node.selected i.fa-duotone {
+            --fa-primary-color: #c67750;
+            --fa-secondary-color: #3D5771;
+        }
+
+        #gestaoTreeView .tree-node .node-text {
+            flex: 1;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        #gestaoTreeView .tree-node .node-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        /* Drag and drop */
+        #gestaoTreeView .e-drag-item {
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px;
+        }
+
+        /* ====== BOTOES ====== */
+        /* Os botões usam classes globais do FrotiX: btn-azul, btn-ftx-fechar, btn-voltar */
+
+        /* Estado vazio */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+        /* ====== MENSAGENS ====== */
+        .alert-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @@keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+}
+
+<div class="ftx-card-header">
+    <h2 class="titulo-paginas mb-0">
+        <i class="fa-duotone fa-sitemap"></i>
+        Gestão de Recursos e Navegação
+    </h2>
+    <div class="header-actions">
+        <button type="button" class="btn btn-header-orange" onclick="migrarDadosJson()">
+            <i class="fa-duotone fa-database icon-space"></i> Migrar do JSON
+        </button>
+        <a asp-page="/Index" class="btn btn-header-orange">
+            <i class="fa-duotone fa-rotate-left icon-space icon-rotate-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="gestao-container">
+    <!-- Coluna Esquerda: TreeView -->
+    <div class="tree-panel">
+        <div class="tree-header">
+            <h5><i class="fa-duotone fa-folder-tree"></i> Estrutura do Menu</h5>
+            <span id="itemCount" class="badge bg-secondary">0 itens</span>
+        </div>
+        <div class="tree-content" id="gestaoTreeView">
+            <div class="empty-state" id="emptyTreeState">
+                <i class="fa-duotone fa-folder-open"></i>
+                <p>Nenhum recurso encontrado.<br>Clique em "Migrar do JSON" para importar ou adicione novos itens.</p>
+            </div>
+        </div>
+        <div class="tree-actions">
+            <button type="button" class="btn btn-azul btn-submit-spin" onclick="adicionarNovoItem()">
+                <i class="fa-duotone fa-plus icon-space icon-pulse"></i> Novo Item
+            </button>
+            <button type="button" class="btn btn-azul btn-submit-spin" onclick="salvarOrdenacao()">
+                <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Salvar Ordenação
+            </button>
+        </div>
+    </div>
+
+    <!-- Coluna Direita: Propriedades -->
+    <div class="props-panel">
+        <!-- Card: Propriedades do Item -->
+        <div class="props-card">
+            <div class="props-header">
+                <h5><i class="fa-duotone fa-sliders"></i> Propriedades do Item <span id="modoEdicao" class="badge bg-secondary ms-2">Selecione</span></h5>
+                <span id="selectedItemName" class="text-muted">Nenhum item selecionado</span>
+            </div>
+            <div class="props-body">
+                <form id="formPropriedades">
+                    <input type="hidden" id="recursoId" />
+                    <input type="hidden" id="parentId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtNome">Nome (exibido no menu)</label>
+                                <input type="text" class="form-control" id="txtNome" placeholder="Ex: Veiculos" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtNomeMenu">NomeMenu (identificador único)</label>
+                                <input type="text" class="form-control" id="txtNomeMenu" placeholder="Ex: veiculo" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="txtHref">URL da Página</label>
+                                <input type="text" class="form-control" id="txtHref" placeholder="Ex: /Veiculos/Index ou javascript:void(0);" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtOrdem">Ordem</label>
+                                <input type="number" class="form-control" id="txtOrdem" value="0" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="txtIcon">Classe do Ícone (FontAwesome)</label>
+                                <div class="icon-preview-container">
+                                    <div class="icon-preview" id="iconPreview">
+                                        <i class="fa-duotone fa-folder"></i>
+                                    </div>
+                                    <input type="text" class="form-control flex-grow-1" id="txtIcon"
+                                           placeholder="fa-duotone fa-car ou fa-solid fa-car"
+                                           oninput="atualizarPreviewIcone()" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="chkAtivo">Status</label>
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" class="form-check-input" id="chkAtivo" checked />
+                                    <label class="form-check-label" for="chkAtivo">Ativo no menu</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtDescricao">Descrição</label>
+                        <textarea class="form-control" id="txtDescricao" rows="2" placeholder="Descrição do recurso..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="button" class="btn btn-azul btn-submit-spin" onclick="salvarPropriedades()">
+                            <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Salvar Propriedades
+                        </button>
+                        <button type="button" class="btn btn-ftx-fechar" onclick="excluirItem()">
+                            <i class="fa-duotone fa-trash icon-space icon-pulse"></i> Excluir
+                        </button>
+                        <button type="button" class="btn btn-voltar" onclick="limparFormulario()">
+                            <i class="fa-duotone fa-eraser icon-space icon-pulse"></i> Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Card: Controle de Acesso -->
+        <div class="props-card">
+            <div class="props-header">
+                <h5><i class="fa-duotone fa-users"></i> Controle de Acesso</h5>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selecionarTodosAcessos()">
+                    Marcar Todos
+                </button>
+            </div>
+            <div class="props-body">
+                <div class="acesso-list" id="listaAcessos">
+                    <div class="empty-state">
+                        <p class="text-muted mb-0">Selecione um item para gerenciar acessos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ScriptsBlock {
+<script>
+    var treeData = [];
+    var treeObj = null;
+    var selectedItem = null;
+
+    // Carrega dados ao iniciar
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarArvore();
+    });
+
+    // Carrega arvore do banco de dados
+    function carregarArvore() {
+        fetch('/api/Navigation/GetTreeAdmin')
+            .then(r => r.json())
+            .then(result => {
+                console.log('Dados recebidos da API:', result);
+                if (result.success && result.data && result.data.length > 0) {
+                    treeData = result.data;
+                    document.getElementById('emptyTreeState').style.display = 'none';
+                    renderizarTreeView();
+                    atualizarContagem();
+                } else {
+                    document.getElementById('emptyTreeState').style.display = 'block';
+                    document.getElementById('itemCount').textContent = '0 itens';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar arvore:', error);
+                mostrarAlerta('Erro ao carregar dados', 'danger');
+            });
+    }
+
+    // Renderiza TreeView com Syncfusion
+    function renderizarTreeView() {
+        var container = document.getElementById('gestaoTreeView');
+        container.innerHTML = '<div id="treeViewControl"></div>';
+
+        treeObj = new ej.navigations.TreeView({
+            fields: {
+                dataSource: treeData,
+                id: 'id',
+                text: 'text',
+                child: 'items',
+                parentID: 'parentId'
+            },
+            nodeTemplate: function(data) {
+                var badge = data.href && data.href !== 'javascript:void(0);' ? 'Página' : 'Grupo';
+                var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
+                return '<div class="tree-node" data-id="' + data.id + '">' +
+                       '<i class="' + (data.icon || 'fa-duotone fa-folder') + '"></i>' +
+                       '<span class="node-text">' + data.text + '</span>' +
+                       '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
+                       '</div>';
+            },
+            allowDragAndDrop: true,
+            allowMultiSelection: false,
+            // Permite soltar em qualquer nó (criar hierarquia)
+            dropAction: 'child',
+            nodeClicked: function(args) {
+                // Busca o ID do nó clicado
+                var nodeId = args.nodeData.id;
+                console.log('Node clicado - ID:', nodeId);
+
+                // Busca dados completos no treeData
+                var itemCompleto = buscarItemPorId(treeData, nodeId);
+                console.log('Item encontrado:', itemCompleto);
+
+                if (itemCompleto) {
+                    selecionarItem(itemCompleto);
+                }
+            },
+            nodeDragStart: function(args) {
+                console.log('Drag iniciado:', args.draggedNodeData);
+            },
+            nodeDragging: function(args) {
+                // Permite arrastar para qualquer lugar
+            },
+            nodeDragStop: function(args) {
+                console.log('Drag finalizado:', args);
+                // Atualiza hierarquia apos drag-drop
+                setTimeout(function() {
+                    // Recarrega dados atualizados do TreeView
+                    treeData = treeObj.fields.dataSource;
+                    atualizarContagem();
+                    mostrarAlerta('Arraste concluído. Clique em "Salvar Ordenação" para persistir.', 'info');
+                }, 200);
+            },
+            nodeDropped: function(args) {
+                console.log('Node solto:', args);
+                console.log('Destino:', args.droppedNode);
+                console.log('Posição:', args.dropLevel, args.dropIndex);
+            },
+            expandOn: 'Click'
+        });
+
+        treeObj.appendTo('#treeViewControl');
+    }
+
+    // Seleciona item e carrega propriedades
+    function selecionarItem(itemData) {
+        selectedItem = itemData;
+        console.log('Selecionando item:', selectedItem);
+
+        // Marca visualmente
+        document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+        var node = document.querySelector('.tree-node[data-id="' + selectedItem.id + '"]');
+        if (node) node.classList.add('selected');
+
+        // Preenche formulario - usa os nomes corretos das propriedades (camelCase do JSON)
+        document.getElementById('recursoId').value = selectedItem.id || '';
+        document.getElementById('parentId').value = selectedItem.parentId || '';
+        document.getElementById('txtNome').value = selectedItem.text || '';
+        document.getElementById('txtNomeMenu').value = selectedItem.nomeMenu || '';
+        document.getElementById('txtHref').value = selectedItem.href || '';
+        document.getElementById('txtIcon').value = selectedItem.icon || '';
+        document.getElementById('txtOrdem').value = selectedItem.ordem || 0;
+        document.getElementById('txtDescricao').value = selectedItem.descricao || '';
+        document.getElementById('chkAtivo').checked = selectedItem.ativo !== false;
+
+        document.getElementById('selectedItemName').textContent = selectedItem.text;
+
+        // Atualiza indicador de modo
+        document.getElementById('modoEdicao').textContent = 'Editar';
+        document.getElementById('modoEdicao').className = 'badge bg-warning text-dark ms-2';
+
+        atualizarPreviewIcone();
+
+        // Carrega controle de acesso
+        carregarControleAcesso(selectedItem.id);
+    }
+
+    // Busca item por ID recursivamente no treeData
+    function buscarItemPorId(items, id) {
+        if (!items || !id) return null;
+
+        for (var i = 0; i < items.length; i++) {
+            // Compara como string para garantir
+            if (String(items[i].id) === String(id)) {
+                return items[i];
+            }
+            if (items[i].items && items[i].items.length > 0) {
+                var found = buscarItemPorId(items[i].items, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    // Atualiza preview do icone
+    function atualizarPreviewIcone() {
+        var iconClass = document.getElementById('txtIcon').value || 'fa-regular fa-file';
+        document.getElementById('iconPreview').innerHTML = '<i class="' + iconClass + '"></i>';
+    }
+
+    // Carrega lista de usuarios com acesso
+    function carregarControleAcesso(recursoId) {
+        if (!recursoId) {
+            document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
+            return;
+        }
+
+        fetch('/api/Navigation/GetUsuariosAcesso?recursoId=' + recursoId)
+            .then(r => r.json())
+            .then(result => {
+                console.log('Acessos carregados:', result);
+                var container = document.getElementById('listaAcessos');
+                if (result.success && result.data && result.data.length > 0) {
+                    container.innerHTML = result.data.map(u =>
+                        '<div class="acesso-item">' +
+                        '<input type="checkbox" class="form-check-input me-2" ' +
+                        'id="acesso_' + u.usuarioId + '" ' +
+                        (u.acesso ? 'checked' : '') +
+                        ' onchange="atualizarAcesso(\'' + u.usuarioId + '\', this.checked)" />' +
+                        '<label for="acesso_' + u.usuarioId + '">' + u.nome + '</label>' +
+                        '</div>'
+                    ).join('');
+                } else {
+                    container.innerHTML = '<p class="text-muted text-center">Nenhum usuário encontrado</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar acessos:', error);
+            });
+    }
+
+    // Atualiza acesso de usuario
+    function atualizarAcesso(usuarioId, acesso) {
+        if (!selectedItem) return;
+
+        fetch('/api/Navigation/UpdateAcesso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuarioId: usuarioId,
+                recursoId: selectedItem.id,
+                acesso: acesso
+            })
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                mostrarAlerta('Acesso atualizado!', 'success');
+            } else {
+                mostrarAlerta('Erro ao atualizar acesso: ' + result.message, 'danger');
+            }
+        });
+    }
+
+    // Salva propriedades do item
+    function salvarPropriedades() {
+        var dto = {
+            id: document.getElementById('recursoId').value,
+            text: document.getElementById('txtNome').value,
+            nomeMenu: document.getElementById('txtNomeMenu').value,
+            href: document.getElementById('txtHref').value,
+            icon: document.getElementById('txtIcon').value,
+            ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
+            descricao: document.getElementById('txtDescricao').value,
+            ativo: document.getElementById('chkAtivo').checked,
+            parentId: document.getElementById('parentId').value
+        };
+
+        if (!dto.text || !dto.nomeMenu) {
+            mostrarAlerta('Preencha Nome e NomeMenu!', 'warning');
+            return;
+        }
+
+        fetch('/api/Navigation/SaveRecurso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                mostrarAlerta(result.message, 'success');
+                carregarArvore();
+            } else {
+                mostrarAlerta('Erro: ' + result.message, 'danger');
+            }
+        });
+    }
+
+    // Adiciona novo item
+    function adicionarNovoItem() {
+        limparFormulario();
+        document.getElementById('txtNome').focus();
+        document.getElementById('selectedItemName').textContent = 'Novo Item';
+
+        // Atualiza indicador de modo para "Criar"
+        document.getElementById('modoEdicao').textContent = 'Criar';
+        document.getElementById('modoEdicao').className = 'badge bg-success ms-2';
+    }
+
+    // Exclui item selecionado
+    function excluirItem() {
+        if (!selectedItem || !selectedItem.id) {
+            mostrarAlerta('Selecione um item para excluir!', 'warning');
+            return;
+        }
+
+        if (!confirm('Tem certeza que deseja excluir "' + selectedItem.text + '"?')) {
+            return;
+        }
+
+        fetch('/api/Navigation/DeleteRecurso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recursoId: selectedItem.id })
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                mostrarAlerta(result.message, 'success');
+                limparFormulario();
+                carregarArvore();
+            } else {
+                mostrarAlerta('Erro: ' + result.message, 'danger');
+            }
+        });
+    }
+
+    // Limpa formulario
+    function limparFormulario() {
+        selectedItem = null;
+        document.getElementById('formPropriedades').reset();
+        document.getElementById('recursoId').value = '';
+        document.getElementById('parentId').value = '';
+        document.getElementById('selectedItemName').textContent = 'Nenhum item selecionado';
+        document.getElementById('iconPreview').innerHTML = '<i class="fa-duotone fa-folder"></i>';
+        document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
+        document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+
+        // Reseta indicador de modo
+        document.getElementById('modoEdicao').textContent = 'Selecione';
+        document.getElementById('modoEdicao').className = 'badge bg-secondary ms-2';
+    }
+
+    // Salva ordenacao apos drag-drop
+    function salvarOrdenacao() {
+        if (!treeObj) return;
+
+        // Pega o dataSource atualizado do TreeView
+        var dataSource = treeObj.getTreeData();
+        console.log('Dados para salvar:', dataSource);
+
+        var items = extrairItensDoTreeView(dataSource, null, 0);
+        console.log('Itens extraídos:', items);
+
+        fetch('/api/Navigation/SaveTreeToDb', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(items)
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                mostrarAlerta('Ordenação salva com sucesso!', 'success');
+                carregarArvore(); // Recarrega para refletir as mudanças
+            } else {
+                mostrarAlerta('Erro: ' + result.message, 'danger');
+            }
+        });
+    }
+
+    // Extrai itens do TreeView para salvar
+    function extrairItensDoTreeView(items, parentId, nivel) {
+        if (!items) return [];
+
+        var result = [];
+
+        items.forEach(function(item, index) {
+            result.push({
+                id: item.id,
+                text: item.text,
+                nomeMenu: item.nomeMenu,
+                icon: item.icon,
+                href: item.href,
+                parentId: parentId,
+                ordem: (nivel * 100) + index + 1,
+                nivel: nivel,
+                ativo: item.ativo !== false,
+                descricao: item.descricao,
+                items: []
+            });
+
+            if (item.items && item.items.length > 0) {
+                result = result.concat(extrairItensDoTreeView(item.items, item.id, nivel + 1));
+            }
+        });
+
+        return result;
+    }
+
+    // Atualiza contagem de itens
+    function atualizarContagem() {
+        var total = contarItens(treeData);
+        document.getElementById('itemCount').textContent = total + ' itens';
+    }
+
+    function contarItens(items) {
+        if (!items) return 0;
+        var count = items.length;
+        items.forEach(function(item) {
+            if (item.items && item.items.length > 0) {
+                count += contarItens(item.items);
+            }
+        });
+        return count;
+    }
+
+    // Migra dados do JSON
+    function migrarDadosJson() {
+        if (!confirm('Isso irá migrar os dados do nav.json para o banco de dados. Continuar?')) {
+            return;
+        }
+
+        mostrarAlerta('Migrando dados...', 'info');
+
+        fetch('/api/Navigation/MigrateFromJson', {
+            method: 'POST'
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                mostrarAlerta(result.message, 'success');
+                carregarArvore();
+            } else {
+                mostrarAlerta('Erro: ' + result.message, 'danger');
+            }
+        });
+    }
+
+    // Seleciona todos os acessos
+    function selecionarTodosAcessos() {
+        document.querySelectorAll('#listaAcessos input[type="checkbox"]').forEach(function(cb) {
+            if (!cb.checked) {
+                cb.checked = true;
+                cb.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    // Mostra alerta toast
+    function mostrarAlerta(mensagem, tipo) {
+        var existente = document.querySelector('.alert-toast');
+        if (existente) existente.remove();
+
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-' + tipo + ' alert-toast alert-dismissible fade show';
+        alert.innerHTML = mensagem + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+        document.body.appendChild(alert);
+
+        setTimeout(function() {
+            alert.remove();
+        }, 5000);
+    }
+</script>
+}

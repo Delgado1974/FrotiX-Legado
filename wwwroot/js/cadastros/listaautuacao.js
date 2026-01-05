@@ -1,5 +1,40 @@
 /* global $, DTBetterErrors, Alerta */
 
+// ====================================================================
+// FUNÇÕES DE LOADING - OVERLAY PADRÃO FROTIX
+// ====================================================================
+function mostrarLoadingAutuacao()
+{
+    try
+    {
+        const overlay = document.getElementById('loadingOverlayAutuacao');
+        if (overlay)
+        {
+            overlay.style.display = 'flex';
+        }
+    }
+    catch (error)
+    {
+        try { Alerta.TratamentoErroComLinha("listaautuacao.js", "mostrarLoadingAutuacao", error); } catch (_) { }
+    }
+}
+
+function esconderLoadingAutuacao()
+{
+    try
+    {
+        const overlay = document.getElementById('loadingOverlayAutuacao');
+        if (overlay)
+        {
+            overlay.style.display = 'none';
+        }
+    }
+    catch (error)
+    {
+        try { Alerta.TratamentoErroComLinha("listaautuacao.js", "esconderLoadingAutuacao", error); } catch (_) { }
+    }
+}
+
 // Inicialização
 $(document).ready(function ()
 {
@@ -16,14 +51,8 @@ function ListaTodasNotificacoes()
 {
     try
     {
-        // Loading spinner
-        $('#divNotificacoes').LoadingScript('method_12', {
-            background_image: 'img/loading7.png',
-            main_width: 200,
-            animation_speed: 10,
-            additional_style: '',
-            after_element: false
-        });
+        // ✅ Mostrar overlay de loading FrotiX
+        mostrarLoadingAutuacao();
 
         // ===== Coleta filtros =====
         const veiculos = document.getElementById('lstVeiculos')?.ej2_instances?.[0];
@@ -234,7 +263,19 @@ function ListaTodasNotificacoes()
                     infracao: tipoMultaId,
                     status: statusId
                 },
-                datatype: "json"
+                datatype: "json",
+                error: function (xhr, error, thrown)
+                {
+                    try
+                    {
+                        esconderLoadingAutuacao();
+                        console.error('Erro ao carregar autuações:', error, thrown);
+                    }
+                    catch (e)
+                    {
+                        try { Alerta.TratamentoErroComLinha("listaautuacao.js", "ajax.error", e); } catch (_) { }
+                    }
+                }
             },
             columns: [
                 { data: "numInfracao" }, { data: "data" }, { data: "hora" }, { data: "nome" },
@@ -273,6 +314,9 @@ function ListaTodasNotificacoes()
             {
                 try
                 {
+                    // ✅ Esconder overlay de loading FrotiX
+                    esconderLoadingAutuacao();
+
                     if (window.FTXTooltip)
                     {
                         window.FTXTooltip.refresh();
@@ -281,17 +325,24 @@ function ListaTodasNotificacoes()
                 {
                     try { Alerta.TratamentoErroComLinha("listaautuacao.js", "drawCallback", error); } catch (_) { }
                 }
+            },
+            initComplete: function (settings, json)
+            {
+                try
+                {
+                    // ✅ Esconder overlay de loading FrotiX após inicialização completa
+                    esconderLoadingAutuacao();
+                } catch (error)
+                {
+                    try { Alerta.TratamentoErroComLinha("listaautuacao.js", "initComplete", error); } catch (_) { }
+                }
             }
         });
     } catch (error)
     {
+        // ✅ Esconder loading em caso de erro
+        esconderLoadingAutuacao();
         try { Alerta.TratamentoErroComLinha("listaautuacao.js", "ListaTodasNotificacoes", error); } catch (_) { }
-    } finally
-    {
-        try
-        {
-            $('#divNotificacoes').LoadingScript('destroy');
-        } catch (_) { }
     }
 }
 

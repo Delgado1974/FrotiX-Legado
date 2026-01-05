@@ -49,4 +49,22 @@ namespace FrotiX.Models
     {
         public string NomeMenu { get; set; }
     }
+
+    /// <summary>
+    /// Request para deletar um recurso por ID
+    /// </summary>
+    public class DeleteRecursoRequest
+    {
+        public string RecursoId { get; set; }
+    }
+
+    /// <summary>
+    /// Request para atualizar acesso de usuário a um recurso
+    /// </summary>
+    public class UpdateAcessoRequest
+    {
+        public string UsuarioId { get; set; }
+        public string RecursoId { get; set; }
+        public bool Acesso { get; set; }
+    }
 }

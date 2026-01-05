@@ -2380,24 +2380,14 @@ ViewData["valueTemplate"] = @"
 </div>
 
 @* ===============================================================================
-   MODAL LOADING - GRAVANDO VIAGEM (PADRÃO FROTIX)
+   OVERLAY LOADING - GRAVANDO VIAGEM (PADRÃO FROTIX)
    =============================================================================== *@
-<div class="modal fade ftx-modal-loading" id="modalSalvandoViagem" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fa-duotone fa-floppy-disk"></i>
-                    <span>Gravando Viagem</span>
-                </h5>
-            </div>
-            <div class="modal-body">
-                <img src="~/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" />
-                <div class="ftx-loading-bar"></div>
-                <div class="ftx-loading-text">Gravando Viagem...</div>
-                <div class="ftx-loading-subtext">Aguarde um momento</div>
-            </div>
-        </div>
+<div id="loadingOverlaySalvando" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Gravando Viagem...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
     </div>
 </div>
 
@@ -2810,6 +2800,9 @@ ViewData["valueTemplate"] = @"
 
 	<!-- Kendo Editor Helper - Compatibilidade -->
 	<script src="~/js/viagens/kendo-editor-upsert.js" asp-append-version="true"></script>
+
+	<!-- Validação IA - Validador Evolutivo de Finalização -->
+	<script src="~/js/validacao/ValidadorFinalizacaoIA.js" asp-append-version="true"></script>
 
 	<script src="~/js/cadastros/ViagemUpsert.js" asp-append-version="true"></script>
 

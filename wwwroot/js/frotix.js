@@ -58,22 +58,25 @@ function trimTransparentPNG(img, targetWidth, targetHeight)
     return resultCanvas;
 }
 
-// Módulo global para controlar o Spinner
+// Módulo global para controlar o Spinner - Padrão FrotiX com Logo Pulsando
 (function ()
 {
     const KEY = 'ftx:spin:next';
 
-    // Core minimalista
+    // Core com padrão FrotiX (logo pulsando + barra de progresso)
     window.FtxSpin = {
         _el: null,
         show(msg)
         {
             if (this._el) { this.setMsg(msg); this._el.style.display = 'flex'; return; }
-            const ov = document.createElement('div'); ov.className = 'ftx-spin-overlay';
+            const ov = document.createElement('div');
+            ov.className = 'ftx-spin-overlay';
             ov.innerHTML = `
-        <div class="ftx-spin-box" role="status" aria-live="assertive">
-          <div class="ftx-spinner" aria-hidden="true"></div>
-          <div class="ftx-spin-msg">${msg || 'Carregando…'}</div>
+        <div class="ftx-spin-box" role="status" aria-live="assertive" style="text-align: center; min-width: 300px;">
+          <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+          <div class="ftx-loading-bar"></div>
+          <div class="ftx-loading-text ftx-spin-msg">${msg || 'Carregando…'}</div>
+          <div class="ftx-loading-subtext">Aguarde, por favor</div>
         </div>`;
             document.body.appendChild(ov);
             this._el = ov;

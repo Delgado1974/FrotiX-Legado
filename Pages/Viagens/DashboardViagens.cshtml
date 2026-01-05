@@ -225,21 +225,28 @@
     }
 
     /* ========================================
-       BOTÃO FILTRAR - Padrão FrotiX com borda branca
+       BOTÕES DE FILTRO - Base comum
        ======================================== */
+    .btn-filtrar-frotix, .btn-limpar-viagem {
+        padding: 8px 20px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Botão Filtrar */
     .btn-filtrar-frotix {
-        background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+        background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%) !important;
         border: 2px solid rgba(255, 255, 255, 0.6) !important;
         color: white !important;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
         box-shadow: 0 2px 8px rgba(160, 82, 45, 0.4);
     }
 
     .btn-filtrar-frotix:hover {
-        background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%);
+        background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%) !important;
         border-color: rgba(255, 255, 255, 0.9) !important;
         color: white !important;
         transform: translateY(-1px);
@@ -248,6 +255,37 @@
 
     .btn-filtrar-frotix:active {
         transform: translateY(0);
+    }
+
+    /* Botão Limpar Filtro */
+    .btn-limpar-viagem {
+        background: linear-gradient(135deg, #B28767 0%, #9a7254 100%) !important;
+        border: 2px solid rgba(255, 255, 255, 0.6) !important;
+        color: white !important;
+        box-shadow: 0 2px 8px rgba(178, 135, 103, 0.4);
+    }
+
+    .btn-limpar-viagem:hover {
+        background: linear-gradient(135deg, #9a7254 0%, #825d43 100%) !important;
+        border-color: rgba(255, 255, 255, 0.9) !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(178, 135, 103, 0.5);
+    }
+
+    /* Indicador de Período Atual */
+    .periodo-atual-viagem {
+        background: rgba(102, 126, 234, 0.1);
+        border-left: 4px solid #667eea;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    .periodo-atual-viagem i {
+        font-size: 1.1rem;
     }
 
     /* ========================================
@@ -303,62 +341,16 @@
         display: none;
     }
 
-    /* ========================================
-       LOADING INICIAL DA PÁGINA
-       ======================================== */
-    #loadingInicialDashboard {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.3s ease;
-    }
-
-    #loadingInicialDashboard .loading-content {
-        text-align: center;
-    }
-
-    #loadingInicialDashboard .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 4px solid #e0e0e0;
-        border-top: 4px solid #325d88;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 20px;
-    }
-
-    #loadingInicialDashboard .loading-text {
-        font-size: 1.2rem;
-        color: #325d88;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    #loadingInicialDashboard .loading-subtext {
-        font-size: 0.9rem;
-        color: #6c757d;
-    }
-
-    @@keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+    /* Loading Inicial - Usa padrão FrotiX global (ftx-spin-overlay) */
 </style>
 
-<!-- Loading Inicial da Página -->
-<div id="loadingInicialDashboard">
-    <div class="loading-content">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Carregando Dashboard</div>
-        <div class="loading-subtext">Aguarde enquanto os dados são processados...</div>
+<!-- Loading Inicial da Página - Padrão FrotiX -->
+<div id="loadingInicialDashboard" class="ftx-spin-overlay" style="z-index: 9999;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Dashboard de Viagens</div>
+        <div class="ftx-loading-subtext">Aguarde enquanto os dados são processados...</div>
     </div>
 </div>
 
@@ -373,38 +365,99 @@
 
     <!-- Filtros -->
     <div class="filter-card">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-3">
+        <!-- Linha 1: Ano/Mês -->
+        <div class="row align-items-end g-3 mb-3">
+            <div class="col-auto">
                 <label class="form-label">
-                    <i class="fa-duotone fa-calendar-range me-2"></i>
-                    Período de Análise
+                    <i class="fa-duotone fa-calendar-days me-1"></i> Ano
                 </label>
-                <div class="row g-2">
-                    <div class="col-6">
+                <select id="filtroAno" class="form-select" style="min-width: 120px;">
+                    <option value="">&lt;Todos os Anos&gt;</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">
+                    <i class="fa-duotone fa-calendar-day me-1"></i> Mês
+                </label>
+                <select id="filtroMes" class="form-select" style="min-width: 150px;">
+                    <option value="">&lt;Todos os Meses&gt;</option>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-filtrar-frotix d-block" id="btnFiltrarAnoMes">
+                    <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-limpar-viagem d-block" id="btnLimparAnoMes">
+                    <i class="fa-duotone fa-eraser me-1"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Linha 2: Período Personalizado + Períodos Rápidos -->
+        <div class="row align-items-end g-3">
+            <div class="col-auto">
+                <label class="form-label">
+                    <i class="fa-duotone fa-calendar-range me-1"></i> Período Personalizado
+                </label>
+                <div class="d-flex gap-2 align-items-center">
+                    <div>
                         <label class="form-label small mb-1">De:</label>
-                        <input type="date" id="dataInicio" class="form-control" />
+                        <input type="date" id="dataInicio" class="form-control" style="width: 140px;" />
                     </div>
-                    <div class="col-6">
+                    <div>
                         <label class="form-label small mb-1">Até:</label>
-                        <input type="date" id="dataFim" class="form-control" />
+                        <input type="date" id="dataFim" class="form-control" style="width: 140px;" />
                     </div>
                 </div>
             </div>
             <div class="col-auto">
-                <button type="button" class="btn btn-filtrar-frotix" id="btnFiltrar">
-                    <i class="fa-duotone fa-filter me-1"></i> Filtrar
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-filtrar-frotix d-block" id="btnFiltrarPeriodo">
+                    <i class="fa-duotone fa-magnifying-glass me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-limpar-viagem d-block" id="btnLimparPeriodo">
+                    <i class="fa-duotone fa-eraser me-1"></i> Limpar
                 </button>
             </div>
             <div class="col">
                 <label class="form-label">Períodos Rápidos</label>
                 <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn-period" id="btn7Dias">7 dias</button>
-                    <button type="button" class="btn-period" id="btn15Dias">15 dias</button>
-                    <button type="button" class="btn-period" id="btn30Dias">30 dias</button>
-                    <button type="button" class="btn-period" id="btn60Dias">60 dias</button>
-                    <button type="button" class="btn-period" id="btn90Dias">90 dias</button>
-                    <button type="button" class="btn-period" id="btn180Dias">180 dias</button>
-                    <button type="button" class="btn-period" id="btn365Dias">1 ano</button>
+                    <button type="button" class="btn-period" data-dias="7">7 dias</button>
+                    <button type="button" class="btn-period" data-dias="15">15 dias</button>
+                    <button type="button" class="btn-period" data-dias="30">30 dias</button>
+                    <button type="button" class="btn-period" data-dias="60">60 dias</button>
+                    <button type="button" class="btn-period" data-dias="90">90 dias</button>
+                    <button type="button" class="btn-period" data-dias="180">180 dias</button>
+                    <button type="button" class="btn-period" data-dias="365">1 ano</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador do período atual -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="periodo-atual-viagem d-flex align-items-center">
+                    <i class="fa-duotone fa-info-circle me-2"></i>
+                    <span id="periodoAtualLabel">Exibindo todos os dados</span>
                 </div>
             </div>
         </div>

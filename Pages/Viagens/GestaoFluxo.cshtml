@@ -186,6 +186,17 @@
 <script>
 	let dataTable; // DataTable principal
 
+	// Funções de controle do overlay de loading - Padrão FrotiX
+	function mostrarLoading() {
+		const overlay = document.getElementById('loadingOverlayGestaoFluxo');
+		if (overlay) overlay.style.display = 'flex';
+	}
+
+	function esconderLoading() {
+		const overlay = document.getElementById('loadingOverlayGestaoFluxo');
+		if (overlay) overlay.style.display = 'none';
+	}
+
 	$(document).ready(function () {
 		try {
 			// 1) Preencher a data atual no campo de filtros
@@ -236,16 +247,18 @@
 					},
 					beforeSend: function() {
 						try {
-							// Adiciona cursor wait
+							// Adiciona cursor wait e mostra overlay
 							$('body').addClass('datatable-loading');
+							mostrarLoading();
 						} catch (error) {
 							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.beforeSend", error);
 						}
 					},
 					complete: function() {
 						try {
-							// Remove cursor wait
+							// Remove cursor wait e esconde overlay
 							$('body').removeClass('datatable-loading');
+							esconderLoading();
 						} catch (error) {
 							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.complete", error);
 						}
@@ -255,6 +268,7 @@
 							console.error('Erro no DataTable:', error);
 							AppToast.show('Vermelho', 'Erro ao carregar dados', 3000);
 							$('body').removeClass('datatable-loading');
+							esconderLoading();
 						} catch (err) {
 							Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "dataTable.ajax.error", err);
 						}
@@ -525,16 +539,17 @@
 		}
 	});
 
-	// 6) Aplicar filtros -> reload com spinner
+	// 6) Aplicar filtros -> reload com spinner e overlay
 	function AplicarFiltros() {
 		try {
 			const btn = document.getElementById('btnAplicarFiltro');
 			const iconOriginal = btn.querySelector('i');
 			const iconClasses = iconOriginal.className;
-			
-			// Adiciona spinner
+
+			// Adiciona spinner no botão e mostra overlay
 			iconOriginal.className = 'fa-duotone fa-spinner fa-spin icon-space';
 			btn.disabled = true;
+			mostrarLoading();
 
 			if (dataTable) {
 				dataTable.ajax.reload(function() {
@@ -552,7 +567,7 @@
 		}
 	}
 
-	// 7) Limpar filtros -> zera e reload
+	// 7) Limpar filtros -> zera e reload com overlay
 	function LimparFiltros() {
 		try {
 			$('#txtData').val("");
@@ -560,6 +575,7 @@
 			const motoristas = document.getElementById('lstMotorista')?.ej2_instances?.[0];
 			if (veiculos) veiculos.value = null;
 			if (motoristas) motoristas.value = null;
+			mostrarLoading();
 			if (dataTable) dataTable.ajax.reload();
 		} catch (error) {
 			Alerta.TratamentoErroComLinha("GestaoFluxo.cshtml", "LimparFiltros", error);
@@ -772,6 +788,16 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+<!-- OVERLAY DE LOADING - PADRÃO FROTIX -->
+<div id="loadingOverlayGestaoFluxo" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+    <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+        <div class="ftx-loading-bar"></div>
+        <div class="ftx-loading-text">Carregando Fluxo de Viagens...</div>
+        <div class="ftx-loading-subtext">Aguarde, por favor</div>
+    </div>
 </div>
 
 @section ScriptsBlock {

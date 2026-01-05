@@ -15,28 +15,16 @@
 })();
 
 // ===============================================================================
-// MODAL DE LOADING - GRAVANDO VIAGEM
+// OVERLAY DE LOADING - GRAVANDO VIAGEM (Padrão FrotiX)
 // ===============================================================================
-let _modalSalvando = null;
-
 function mostrarModalSalvando()
 {
     try
     {
-        if (!_modalSalvando)
+        const el = document.getElementById('loadingOverlaySalvando');
+        if (el)
         {
-            const el = document.getElementById('modalSalvandoViagem');
-            if (el)
-            {
-                _modalSalvando = new bootstrap.Modal(el, {
-                    backdrop: 'static',
-                    keyboard: false
-                });
-            }
-        }
-        if (_modalSalvando)
-        {
-            _modalSalvando.show();
+            el.style.display = 'flex';
         }
     }
     catch (error)
@@ -49,9 +37,10 @@ function esconderModalSalvando()
 {
     try
     {
-        if (_modalSalvando)
+        const el = document.getElementById('loadingOverlaySalvando');
+        if (el)
         {
-            _modalSalvando.hide();
+            el.style.display = 'none';
         }
     }
     catch (error)
@@ -458,7 +447,8 @@ $("#txtKmInicial").focusout(function ()
     }
 });
 
-$("#txtKmFinal").focusout(function ()
+// txtKmFinal - VALIDAÇÃO IA
+$("#txtKmFinal").focusout(async function ()
 {
     try
     {
@@ -509,12 +499,50 @@ $("#txtKmFinal").focusout(function ()
         const kmPercorrido = Math.round(kmFinal - kmInicial);
         $("#txtKmPercorrido").val(kmPercorrido);
 
-        //if (kmPercorrido > 100)
-        //{
-        //    Alerta.Alerta("Alerta na Quilometragem", "A quilometragem final excede em 100km a inicial!");
-        //}
-
         calcularKmPercorrido();
+
+        // VALIDAÇÃO IA: Análise de quilometragem (se disponível)
+        if (typeof ValidadorFinalizacaoIA !== 'undefined')
+        {
+            const veiculoId = document.getElementById("cmbVeiculo")?.ej2_instances?.[0]?.value || '';
+
+            if (veiculoId && kmInicial > 0 && kmFinal > 0)
+            {
+                const validador = ValidadorFinalizacaoIA.obterInstancia();
+                const dadosKm = {
+                    kmInicial: kmInicial,
+                    kmFinal: kmFinal,
+                    veiculoId: veiculoId
+                };
+
+                const resultadoKm = await validador.analisarKm(dadosKm);
+                if (!resultadoKm.valido)
+                {
+                    if (resultadoKm.nivel === 'erro')
+                    {
+                        await Alerta.Erro(resultadoKm.titulo, resultadoKm.mensagem);
+                        $("#txtKmFinal").val("");
+                        $("#txtKmPercorrido").val("");
+                        return;
+                    }
+                    else if (resultadoKm.nivel === 'aviso')
+                    {
+                        const confirma = await Alerta.ValidacaoIAConfirmar(
+                            resultadoKm.titulo,
+                            resultadoKm.mensagem,
+                            "Manter KM",
+                            "Corrigir"
+                        );
+                        if (!confirma)
+                        {
+                            $("#txtKmFinal").val("");
+                            $("#txtKmPercorrido").val("");
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
     catch (error)
     {
@@ -601,7 +629,8 @@ $("#txtDataInicial").focusout(function ()
 
 let evitandoLoop = false;
 
-$("#txtDataFinal").focusout(function ()
+// txtDataFinal - VALIDAÇÃO IA
+$("#txtDataFinal").focusout(async function ()
 {
     try
     {
@@ -651,20 +680,35 @@ $("#txtDataFinal").focusout(function ()
                             error,
                         );
                     }
-                }, 1500); // tempo suficiente para o alerta fechar
+                }, 1500);
 
                 return;
             }
 
-            // VALIDAÇÃO: Data Final não pode ser superior à data atual
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            if (data > hoje)
+            // VALIDAÇÃO IA: Data Final não pode ser superior à data atual
+            if (typeof ValidadorFinalizacaoIA !== 'undefined')
             {
-                document.getElementById("txtDataFinal").value = "";
-                document.getElementById("txtDataFinal").focus();
-                AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
-                return;
+                const validador = ValidadorFinalizacaoIA.obterInstancia();
+                const resultadoDataFutura = await validador.validarDataNaoFutura(rawDataFinal);
+                if (!resultadoDataFutura.valido)
+                {
+                    await Alerta.Erro(resultadoDataFutura.titulo, resultadoDataFutura.mensagem);
+                    document.getElementById("txtDataFinal").value = "";
+                    return;
+                }
+            }
+            else
+            {
+                // Fallback: validação simples
+                const hoje = new Date();
+                hoje.setHours(0, 0, 0, 0);
+                if (data > hoje)
+                {
+                    document.getElementById("txtDataFinal").value = "";
+                    document.getElementById("txtDataFinal").focus();
+                    AppToast.show("Amarelo", "A Data Final não pode ser superior à data atual.", 4000);
+                    return;
+                }
             }
 
             const dataInicial = rawDataInicial.replace(/-/g, "/");
@@ -710,6 +754,40 @@ $("#txtDataFinal").focusout(function ()
             }
 
             calcularDuracaoViagem();
+
+            // VALIDAÇÃO IA: Análise de duração (se disponível)
+            if (typeof ValidadorFinalizacaoIA !== 'undefined')
+            {
+                const horaInicial = $("#txtHoraInicial").val();
+                const horaFinal = $("#txtHoraFinal").val();
+
+                if (rawDataInicial && horaInicial && horaFinal)
+                {
+                    const validador = ValidadorFinalizacaoIA.obterInstancia();
+                    const dadosDatas = {
+                        dataInicial: rawDataInicial,
+                        horaInicial: horaInicial,
+                        dataFinal: rawDataFinal,
+                        horaFinal: horaFinal
+                    };
+
+                    const resultadoDatas = await validador.analisarDatasHoras(dadosDatas);
+                    if (!resultadoDatas.valido && resultadoDatas.nivel === 'aviso')
+                    {
+                        const confirma = await Alerta.ValidacaoIAConfirmar(
+                            resultadoDatas.titulo,
+                            resultadoDatas.mensagem,
+                            "Manter Data",
+                            "Corrigir"
+                        );
+                        if (!confirma)
+                        {
+                            document.getElementById("txtDataFinal").value = "";
+                            return;
+                        }
+                    }
+                }
+            }
         }
         catch (error)
         {
@@ -724,7 +802,8 @@ $("#txtDataFinal").focusout(function ()
 
 //================================================
 
-$("#txtHoraFinal").focusout(function ()
+// txtHoraFinal - VALIDAÇÃO IA
+$("#txtHoraFinal").focusout(async function ()
 {
     try
     {
@@ -736,6 +815,7 @@ $("#txtHoraFinal").focusout(function ()
             );
             $("#txtHoraFinal").val("");
             $("#txtDuracao").val("");
+            return;
         }
 
         const dataInicialStr = $("#txtDataInicial").val();
@@ -768,6 +848,35 @@ $("#txtHoraFinal").focusout(function ()
         }
 
         calcularDuracaoViagem();
+
+        // VALIDAÇÃO IA: Análise de duração (se disponível)
+        if (typeof ValidadorFinalizacaoIA !== 'undefined')
+        {
+            const validador = ValidadorFinalizacaoIA.obterInstancia();
+            const dadosDatas = {
+                dataInicial: dataInicialStr,
+                horaInicial: horaInicial,
+                dataFinal: dataFinalStr,
+                horaFinal: horaFinal
+            };
+
+            const resultadoDatas = await validador.analisarDatasHoras(dadosDatas);
+            if (!resultadoDatas.valido && resultadoDatas.nivel === 'aviso')
+            {
+                const confirma = await Alerta.ValidacaoIAConfirmar(
+                    resultadoDatas.titulo,
+                    resultadoDatas.mensagem,
+                    "Manter Hora",
+                    "Corrigir"
+                );
+                if (!confirma)
+                {
+                    $("#txtHoraFinal").val("");
+                    $("#txtDuracao").val("");
+                    return;
+                }
+            }
+        }
     }
     catch (error)
     {
@@ -2594,6 +2703,27 @@ $("#btnSubmit").click(async function (event)
         if (!kmOk)
         {
             return;
+        }
+
+        // VALIDAÇÃO IA CONSOLIDADA - Verifica se há alertas pendentes ao finalizar viagem
+        if (todosFinalPreenchidos && typeof window.validarFinalizacaoConsolidadaIA === 'function')
+        {
+            const veiculoId = document.getElementById("cmbVeiculo")?.ej2_instances?.[0]?.value || '';
+
+            const iaValida = await window.validarFinalizacaoConsolidadaIA({
+                dataInicial: $("#txtDataInicial").val(),
+                horaInicial: $("#txtHoraInicial").val(),
+                dataFinal: dataFinal,
+                horaFinal: horaFinal,
+                kmInicial: parseInt($("#txtKmInicial").val()) || 0,
+                kmFinal: parseInt(kmFinal) || 0,
+                veiculoId: veiculoId
+            });
+
+            if (!iaValida)
+            {
+                return;
+            }
         }
 
         $("#btnSubmit").prop("disabled", true);

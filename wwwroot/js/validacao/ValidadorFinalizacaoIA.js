@@ -544,16 +544,12 @@ window.ValidadorFinalizacaoIA = new ValidadorFinalizacaoIA();
 // =====================================================================
 
 /**
- * Mostra alerta de erro IA (bloqueante) com design especial
+ * Mostra alerta de erro simples (bloqueante)
+ * Usa o alerta padrão do sistema para erros de validação simples
  */
 async function mostrarErroValidacaoIA(mensagem) {
-    // Usar o novo design de Validação IA
-    if (window.Alerta?.ValidacaoIAErro) {
-        await Alerta.ValidacaoIAErro("Erro de Validação", mensagem, "Entendi");
-    } else {
-        // Fallback
-        await Alerta.Erro("Erro de Validação", mensagem);
-    }
+    // Usa o alerta padrão para erros simples
+    await Alerta.Erro("Erro de Validação", mensagem);
 }
 
 /**
@@ -611,3 +607,127 @@ async function validarFinalizacaoComIA(dados) {
         return true;
     }
 }
+
+/**
+ * Validação consolidada de segurança para o submit (Update/Insert/Finalizar)
+ * Verifica novamente se há alertas IA pendentes e mostra um alerta único consolidado
+ * @param {Object} dados - {dataInicial, horaInicial, dataFinal, horaFinal, kmInicial, kmFinal, veiculoId}
+ * @returns {Promise<boolean>} true se pode prosseguir, false se deve parar
+ */
+async function validarFinalizacaoConsolidadaIA(dados) {
+    try {
+        const validador = window.ValidadorFinalizacaoIA;
+        if (!validador) {
+            console.warn('[ValidadorIA] Validador não disponível');
+            return true; // Fail-safe
+        }
+
+        const alertasPendentes = [];
+        let temErros = false;
+
+        // 1. Validar data não futura (bloqueante)
+        if (dados.dataFinal) {
+            const resultadoDataFutura = await validador.validarDataNaoFutura(dados.dataFinal);
+            if (!resultadoDataFutura.valido) {
+                await Alerta.Erro("Data Inválida", resultadoDataFutura.mensagem);
+                return false;
+            }
+        }
+
+        // 2. Analisar data/hora (avisos)
+        if (dados.dataInicial && dados.horaInicial && dados.dataFinal && dados.horaFinal) {
+            const resultadoDatas = await validador.analisarDatasHoras(dados);
+
+            if (!resultadoDatas.valido && resultadoDatas.nivel === 'erro') {
+                await Alerta.Erro("Erro de Data/Hora", resultadoDatas.mensagem);
+                return false;
+            }
+
+            if (resultadoDatas.nivel === 'moderado' || resultadoDatas.nivel === 'severo') {
+                alertasPendentes.push({
+                    tipo: 'duracao',
+                    nivel: resultadoDatas.nivel,
+                    titulo: '⏱️ DURAÇÃO DA VIAGEM',
+                    mensagem: resultadoDatas.mensagem
+                });
+            }
+        }
+
+        // 3. Analisar KM (avisos)
+        if (dados.kmInicial && dados.kmFinal && dados.veiculoId) {
+            const kmInicial = parseInt(dados.kmInicial) || 0;
+            const kmFinal = parseInt(dados.kmFinal) || 0;
+
+            // Validação básica bloqueante
+            if (kmFinal <= kmInicial) {
+                await Alerta.Erro("Erro de Quilometragem", "A quilometragem final deve ser maior que a inicial.");
+                return false;
+            }
+
+            const resultadoKm = await validador.analisarKm({
+                kmInicial: kmInicial,
+                kmFinal: kmFinal,
+                veiculoId: dados.veiculoId
+            });
+
+            if (!resultadoKm.valido && resultadoKm.nivel === 'erro') {
+                await Alerta.Erro("Erro de Quilometragem", resultadoKm.mensagem);
+                return false;
+            }
+
+            if (resultadoKm.nivel === 'moderado' || resultadoKm.nivel === 'severo') {
+                alertasPendentes.push({
+                    tipo: 'km',
+                    nivel: resultadoKm.nivel,
+                    titulo: '🚗 QUILOMETRAGEM',
+                    mensagem: resultadoKm.mensagem
+                });
+            }
+        }
+
+        // 4. Se há alertas pendentes, mostrar consolidado
+        if (alertasPendentes.length > 0) {
+            const nivelMaisAlto = alertasPendentes.some(a => a.nivel === 'severo') ? 'severo' : 'moderado';
+
+            let mensagemConsolidada = '';
+
+            if (alertasPendentes.length === 1) {
+                // Apenas um alerta
+                mensagemConsolidada = alertasPendentes[0].mensagem;
+            } else {
+                // Múltiplos alertas - consolidar
+                mensagemConsolidada = '<strong>A Análise Inteligente identificou os seguintes pontos:</strong>\n\n';
+
+                for (const alerta of alertasPendentes) {
+                    mensagemConsolidada += `<strong>${alerta.titulo}</strong>\n`;
+                    mensagemConsolidada += alerta.mensagem + '\n\n';
+                }
+
+                mensagemConsolidada += '<strong>Deseja prosseguir mesmo assim?</strong>';
+            }
+
+            const botaoConfirma = nivelMaisAlto === 'severo' ? "Sim, confirmo!" : "Está correto";
+            const botaoCancela = nivelMaisAlto === 'severo' ? "Deixa eu corrigir" : "Corrigir";
+
+            const confirmou = await Alerta.ValidacaoIAConfirmar(
+                "Verificação Final",
+                mensagemConsolidada,
+                botaoConfirma,
+                botaoCancela
+            );
+
+            if (!confirmou) {
+                return false;
+            }
+        }
+
+        return true;
+    } catch (error) {
+        console.error('[ValidadorIA] Erro na validação consolidada:', error);
+        // Em caso de erro, deixa prosseguir (fail-safe)
+        return true;
+    }
+}
+
+// Exportar função global
+window.validarFinalizacaoConsolidadaIA = validarFinalizacaoConsolidadaIA;

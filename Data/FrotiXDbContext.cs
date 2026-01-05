@@ -1,5 +1,6 @@
 using FrotiX.Models;
 using FrotiX.Models.Cadastros;
+using FrotiX.Models.Estatisticas;
 using FrotiX.Models.Views;
 
 using Microsoft.EntityFrameworkCore;
@@ -494,6 +495,27 @@ namespace FrotiX.Data
             get; set;
         }
 
+        // ================================================================
+        // TABELAS ESTATÍSTICAS - Dashboard Motoristas
+        // ================================================================
+        public DbSet<EstatisticaMotoristasMensal> EstatisticaMotoristasMensal { get; set; }
+        public DbSet<EstatisticaGeralMensal> EstatisticaGeralMensal { get; set; }
+        public DbSet<RankingMotoristasMensal> RankingMotoristasMensal { get; set; }
+        public DbSet<HeatmapViagensMensal> HeatmapViagensMensal { get; set; }
+        public DbSet<EvolucaoViagensDiaria> EvolucaoViagensDiaria { get; set; }
+
+        // ================================================================
+        // TABELAS ESTATÍSTICAS - Dashboard Abastecimentos
+        // ================================================================
+        public DbSet<EstatisticaAbastecimentoMensal> EstatisticaAbastecimentoMensal { get; set; }
+        public DbSet<EstatisticaAbastecimentoCombustivel> EstatisticaAbastecimentoCombustivel { get; set; }
+        public DbSet<EstatisticaAbastecimentoCategoria> EstatisticaAbastecimentoCategoria { get; set; }
+        public DbSet<EstatisticaAbastecimentoTipoVeiculo> EstatisticaAbastecimentoTipoVeiculo { get; set; }
+        public DbSet<EstatisticaAbastecimentoVeiculo> EstatisticaAbastecimentoVeiculo { get; set; }
+        public DbSet<EstatisticaAbastecimentoVeiculoMensal> EstatisticaAbastecimentoVeiculoMensal { get; set; }
+        public DbSet<HeatmapAbastecimentoMensal> HeatmapAbastecimentoMensal { get; set; }
+        public DbSet<AnosDisponiveisAbastecimento> AnosDisponiveisAbastecimento { get; set; }
+
         // Recurso para tabelas com múltiplas chaves primárias
         //====================================================
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -534,6 +556,7 @@ namespace FrotiX.Data
             {
                 entity.ToTable(tb =>
                 {
+                    tb.HasTrigger("trg_Abastecimento_AtualizarEstatisticas");
                     tb.UseSqlOutputClause(false); // CRÍTICO: evita erro OUTPUT com trigger
                 });
             });

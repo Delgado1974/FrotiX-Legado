@@ -1,3 +1,4 @@
+using FrotiX.Data;
 using FrotiX.Hubs;
 using FrotiX.Models;
 using FrotiX.Repository.IRepository;
@@ -26,12 +27,14 @@ namespace FrotiX.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubContext<ImportacaoHub> _hubContext;
+        private readonly FrotiXDbContext _context;
 
         public AbastecimentoController(
             ILogger<AbastecimentoController> logger ,
             IWebHostEnvironment hostingEnvironment ,
             IUnitOfWork unitOfWork ,
-            IHubContext<ImportacaoHub> hubContext
+            IHubContext<ImportacaoHub> hubContext,
+            FrotiXDbContext context
         )
         {
             try
@@ -40,6 +43,7 @@ namespace FrotiX.Controllers
                 _hostingEnvironment = hostingEnvironment;
                 _unitOfWork = unitOfWork;
                 _hubContext = hubContext;
+                _context = context;
             }
             catch (Exception error)
             {

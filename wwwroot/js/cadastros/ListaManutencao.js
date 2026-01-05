@@ -8,6 +8,39 @@
 var URLapi = "";
 var IDapi = "";
 
+/* =========================
+   Bloco: Overlay de Loading - Padrao FrotiX
+   ========================= */
+function mostrarLoadingManutencao()
+{
+    try
+    {
+        var overlay = document.getElementById('loadingOverlayManutencao');
+        if (overlay)
+        {
+            overlay.style.display = 'flex';
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ListaManutencao.js", "mostrarLoadingManutencao", error);
+    }
+}
+
+function esconderLoadingManutencao()
+{
+    try
+    {
+        var overlay = document.getElementById('loadingOverlayManutencao');
+        if (overlay)
+        {
+            overlay.style.display = 'none';
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("ListaManutencao.js", "esconderLoadingManutencao", error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function ()
 {
     try
@@ -45,6 +78,9 @@ function carregaManutencaoInicial()
 {
     try
     {
+        // Mostra loading antes de carregar
+        mostrarLoadingManutencao();
+
         // Registra formatos de data
         if ($.fn.dataTable && $.fn.dataTable.moment)
         {
@@ -83,7 +119,16 @@ function carregaManutencaoInicial()
                     ano: "",
                     dataInicial: "",
                     dataFinal: ""
+                },
+                error: function (xhr, error, thrown)
+                {
+                    esconderLoadingManutencao();
+                    Alerta.TratamentoErroComLinha("ListaManutencao.js", "ajax.error@carregaManutencaoInicial", thrown);
                 }
+            },
+            initComplete: function ()
+            {
+                esconderLoadingManutencao();
             },
             columns: [
                 { data: "numOS" },
@@ -271,6 +316,9 @@ $("#btnDatas").click(function ()
             $.fn.dataTable.moment("DD/MM/YYYY");
         }
 
+        // Mostra loading antes de carregar
+        mostrarLoadingManutencao();
+
         // Recria o DataTable
         var dt = $("#tblManutencao").DataTable();
         dt.destroy();
@@ -307,7 +355,16 @@ $("#btnDatas").click(function ()
                     ano: Ano || "",
                     dataInicial: temIni && temFim ? dataInicial : "",
                     dataFinal: temIni && temFim ? dataFinal : ""
+                },
+                error: function (xhr, error, thrown)
+                {
+                    esconderLoadingManutencao();
+                    Alerta.TratamentoErroComLinha("ListaManutencao.js", "ajax.error@btnDatas", thrown);
                 }
+            },
+            initComplete: function ()
+            {
+                esconderLoadingManutencao();
             },
             columns: [
                 { data: "numOS" },

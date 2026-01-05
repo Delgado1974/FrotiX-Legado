@@ -6,7 +6,6 @@
 // Variáveis globais para instâncias dos modais
 let modalAjustaCustos = null;
 let modalFicha = null;
-let modalLoading = null;
 
 $(document).ready(function () {
     try {
@@ -74,15 +73,6 @@ function inicializarModais() {
             });
         }
 
-        // Modal Loading
-        const modalLoadingEl = document.getElementById("modalLoading");
-        if (modalLoadingEl) {
-            modalLoading = new bootstrap.Modal(modalLoadingEl, {
-                keyboard: false,
-                backdrop: "static"
-            });
-        }
-
         // Botão Ajustar Viagem
         const btnAjustarViagem = document.getElementById("btnAjustarViagem");
         if (btnAjustarViagem) {
@@ -97,15 +87,16 @@ function inicializarModais() {
 }
 
 // ============================================================
-// FUNÇÕES DE LOADING
+// FUNÇÕES DE LOADING - Padrão FrotiX (Overlay)
 // ============================================================
 function mostrarLoading(mensagem) {
     try {
         if (mensagem) {
             document.getElementById("txtLoadingMessage").textContent = mensagem;
         }
-        if (modalLoading) {
-            modalLoading.show();
+        const overlay = document.getElementById("loadingOverlayCustos");
+        if (overlay) {
+            overlay.style.display = "flex";
         }
     }
     catch (error) {
@@ -115,8 +106,9 @@ function mostrarLoading(mensagem) {
 
 function esconderLoading() {
     try {
-        if (modalLoading) {
-            modalLoading.hide();
+        const overlay = document.getElementById("loadingOverlayCustos");
+        if (overlay) {
+            overlay.style.display = "none";
         }
     }
     catch (error) {

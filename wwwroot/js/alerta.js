@@ -81,30 +81,15 @@
         return Promise.resolve(false);
     };
 
-    // ===== VALIDAÇÃO IA - Alertas com design específico para validação inteligente =====
+    // ===== VALIDAÇÃO IA - Alerta para análises inteligentes baseadas em estatísticas =====
 
     /**
-     * Alerta de erro da validação IA (bloqueante)
+     * Alerta de confirmação da validação IA (com análise estatística)
+     * Usa o bonequinho padrão + badge de IA
+     * IMPORTANTE: Use apenas para análises complexas com Z-Score e histórico do veículo.
+     *             Para erros simples (data futura, km final < inicial), use Alerta.Erro
      * @param {string} titulo - Título do alerta
-     * @param {string} mensagem - Mensagem com HTML suportado
-     * @param {string} confirm - Texto do botão de confirmação
-     * @returns {Promise}
-     */
-    window.Alerta.ValidacaoIAErro = window.Alerta.ValidacaoIAErro || function (titulo, mensagem, confirm = "Entendi")
-    {
-        if (window.SweetAlertInterop?.ShowValidacaoIAErro)
-        {
-            return SweetAlertInterop.ShowValidacaoIAErro(titulo, mensagem, confirm);
-        }
-        // Fallback para alerta padrão
-        console.warn("SweetAlertInterop.ShowValidacaoIAErro não disponível, usando fallback.");
-        return window.Alerta.Erro(titulo, mensagem, confirm);
-    };
-
-    /**
-     * Alerta de confirmação da validação IA
-     * @param {string} titulo - Título do alerta
-     * @param {string} mensagem - Mensagem com HTML suportado
+     * @param {string} mensagem - Mensagem com análise detalhada (suporta HTML e \n)
      * @param {string} confirm - Texto do botão de confirmação
      * @param {string} cancel - Texto do botão de cancelamento
      * @returns {Promise<boolean>} true se confirmou, false se cancelou

@@ -883,23 +883,17 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
     </div> <!-- /.row -->
 
     <!-- ============================================
-         MODAL DE LOADING
+         OVERLAY DE LOADING - PADRÃO FROTIX
          ============================================ -->
-    <div class="modal fade" id="modalLoading" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
-                <div class="modal-body text-center p-4">
-                    <div class="bg-white rounded-3 p-4 shadow">
-                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                            <span class="visually-hidden">Carregando...</span>
-                        </div>
-                        <h5 class="mb-0 text-dark" id="loadingMessage">Carregando...</h5>
-                    </div>
-                </div>
-            </div>
+    <div id="loadingOverlayEvento" class="ftx-spin-overlay" style="z-index: 999999; cursor: wait; display: none;">
+        <div class="ftx-spin-box" style="text-align: center; min-width: 300px;">
+            <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" class="ftx-loading-logo" style="display: block;" />
+            <div class="ftx-loading-bar"></div>
+            <div class="ftx-loading-text" id="loadingMessage">Carregando...</div>
+            <div class="ftx-loading-subtext">Aguarde, por favor</div>
         </div>
     </div>
-    <!-- /Modal de Loading -->
+    <!-- /Overlay de Loading -->
 
     <!-- ============================================
          MODAL: DETALHAMENTO DE CUSTOS DA VIAGEM
@@ -1104,16 +1098,12 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
 
 <script>
     // ==========================================
-    // FUNÇÕES DE LOADING (deve vir ANTES do eventoupsert.js)
+    // FUNÇÕES DE LOADING - PADRÃO FROTIX (Overlay)
     // ==========================================
     function mostrarLoading(mensagem = 'Carregando...') {
         try {
             $('#loadingMessage').text(mensagem);
-            $('#modalLoading').addClass('show').css('display', 'block');
-            $('body').addClass('modal-open');
-            if (!$('.modal-backdrop').length) {
-                $('body').append('<div class="modal-backdrop fade show"></div>');
-            }
+            $('#loadingOverlayEvento').css('display', 'flex');
         } catch (error) {
             console.error('Erro ao mostrar loading:', error);
         }
@@ -1121,9 +1111,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-users";
 
     function esconderLoading() {
         try {
-            $('#modalLoading').removeClass('show').css('display', 'none');
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
+            $('#loadingOverlayEvento').css('display', 'none');
         } catch (error) {
             console.error('Erro ao esconder loading:', error);
         }

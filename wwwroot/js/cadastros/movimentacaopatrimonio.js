@@ -1,6 +1,39 @@
 /* movimentacaopatrimonio.js - Versão Refatorada com Ajax */
 var dataTable;
 
+// ============ FUNÇÕES DE LOADING OVERLAY ============
+function mostrarLoading()
+{
+    try
+    {
+        var overlay = document.getElementById('loadingOverlayMovPatrimonio');
+        if (overlay)
+        {
+            overlay.style.display = 'flex';
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("movimentacaopatrimonio.js", "mostrarLoading", error);
+    }
+}
+
+function esconderLoading()
+{
+    try
+    {
+        var overlay = document.getElementById('loadingOverlayMovPatrimonio');
+        if (overlay)
+        {
+            overlay.style.display = 'none';
+        }
+    }
+    catch (error)
+    {
+        Alerta.TratamentoErroComLinha("movimentacaopatrimonio.js", "esconderLoading", error);
+    }
+}
+
 $(document).ready(function ()
 {
     try
@@ -165,6 +198,7 @@ function loadList()
     try
     {
         console.log("Entrou na loadList");
+        mostrarLoading();
         dataTable = $("#tblMovimentacaoPatrimonio").DataTable({
             columnDefs: [
                 { targets: 0, className: "text-center", width: "8%" },
@@ -186,11 +220,13 @@ function loadList()
                 {
                     try
                     {
+                        esconderLoading();
                         console.error("Erro ao carregar os dados:", error);
                         AppToast.show("Vermelho", "Erro ao carregar dados da tabela", 3000);
                     }
                     catch (error)
                     {
+                        esconderLoading();
                         Alerta.TratamentoErroComLinha(
                             "movimentacaopatrimonio.js",
                             "loadList.ajax.error",
@@ -198,6 +234,10 @@ function loadList()
                         );
                     }
                 }
+            },
+            initComplete: function ()
+            {
+                esconderLoading();
             },
             columns: [
                 {
@@ -1311,6 +1351,8 @@ function aplicarFiltrosMovimentacoes()
 {
     try
     {
+        mostrarLoading();
+
         // Coletar valores dos filtros
         var drpDataMovimentacao = document.getElementById('drpDataMovimentacao');
         var ddtSetorSecaoOrigem = document.getElementById('ddtSetorSecaoOrigem');
@@ -1384,23 +1426,30 @@ function aplicarFiltrosMovimentacoes()
             {
                 try
                 {
+                    esconderLoading();
                     // Verificar se não há registros
                     if (json && json.data && json.data.length === 0)
                     {
-                        AppToast.show('Amarelo', 'Nenhuma movimentação encontrada com os filtros selecionados.', 3000);
+                        AppToast.show('Amarelo', 'Nenhuma movimentacao encontrada com os filtros selecionados.', 3000);
                     }
                     else if (json && json.data && json.data.length > 0)
                     {
-                        console.log(`✅ ${json.data.length} movimentação(ões) encontrada(s)`);
+                        console.log(`${json.data.length} movimentacao(oes) encontrada(s)`);
                     }
                 } catch (error)
                 {
+                    esconderLoading();
                     Alerta.TratamentoErroComLinha("movimentacaopatrimonio.js", "aplicarFiltrosMovimentacoes.load.callback", error);
                 }
             });
         }
+        else
+        {
+            esconderLoading();
+        }
     } catch (error)
     {
+        esconderLoading();
         Alerta.TratamentoErroComLinha("movimentacaopatrimonio.js", "aplicarFiltrosMovimentacoes", error);
     }
 }
