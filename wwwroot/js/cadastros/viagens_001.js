@@ -918,19 +918,6 @@ function ListaTodasViagens() {
                         }
                     },
                 },
-                {
-                    data: "viagemId",
-                    render: function (data, type, row, meta) {
-                        try
-                        {
-                            return meta.row + meta.settings._iDisplayStart + 1;
-                        }
-                        catch (error)
-                        {
-                            Alerta.TratamentoErroComLinha("viagens_<num>.js", "render", error);
-                        }
-                    },
-                },
                 { data: "kmInicial" },
                 { data: "combustivelInicial" },
                 { data: "dataFinal" },

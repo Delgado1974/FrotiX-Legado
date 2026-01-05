@@ -1929,20 +1929,6 @@ function ListaTodasViagens()
                         }
                     }
                 },
-                {
-                    data: "viagemId",
-                    render: function (data, type, row, meta)
-                    {
-                        try
-                        {
-                            return meta.row + meta.settings._iDisplayStart + 1;
-                        } catch (error)
-                        {
-                            Alerta.TratamentoErroComLinha("ViagemIndex.js", "render.rowNumber", error);
-                            return "";
-                        }
-                    }
-                },
                 { data: "kmInicial" },
                 { data: "combustivelInicial" },
                 { data: "dataFinal" },

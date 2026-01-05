@@ -242,13 +242,6 @@ function ListaTodasNotificacoes()
                 ${btnExibirPDF}
               </div>`;
                     }
-                },
-                {
-                    targets: 13, className: "text-right", width: "1%",
-                    render: function (data, type, row, meta)
-                    {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    }
                 }
             ],
 
@@ -281,7 +274,7 @@ function ListaTodasNotificacoes()
                 { data: "numInfracao" }, { data: "data" }, { data: "hora" }, { data: "nome" },
                 { data: "placa" }, { data: "sigla" }, { data: "artigo" }, { data: "localizacao" },
                 { data: "vencimento" }, { data: "valorAteVencimento" }, { data: "valorPosVencimento" },
-                { data: "status" }, { data: "multaId" }, { data: "multaId" }
+                { data: "status" }, { data: "multaId" }
             ],
 
             language: {
