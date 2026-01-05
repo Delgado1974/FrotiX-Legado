@@ -354,10 +354,13 @@ function carregarDadosVeiculo() {
                 try {
                     dadosVeiculo = data;
                     preencherFiltrosVeiculo(data);
-                    renderizarAbaVeiculo(data);
+
+                    // Obter placa selecionada para passar ao gráfico de ranking
+                    const placaSelecionada = placaSelect?.options[placaSelect.selectedIndex]?.text;
+                    const placaValida = veiculoId && placaSelecionada && placaSelecionada !== 'Todas';
+                    renderizarAbaVeiculo(data, placaValida ? veiculoId : null, placaValida ? placaSelecionada : null);
 
                     // Renderizar heatmap: por placa específica ou por modelo
-                    const placaSelecionada = placaSelect?.options[placaSelect.selectedIndex]?.text;
                     if (veiculoId && placaSelecionada && placaSelecionada !== 'Todas') {
                         // Placa específica selecionada
                         renderizarHeatmapVeiculo(ano || null, placaSelecionada, null);
@@ -390,7 +393,7 @@ function carregarDadosVeiculo() {
 function renderizarAbaGeral(data) {
     try {
         document.getElementById('valorTotalGeral').textContent = formatarMoeda(data.totais.valorTotal);
-        document.getElementById('litrosTotalGeral').textContent = formatarNumeroK(data.totais.litrosTotal);
+        document.getElementById('litrosTotalGeral').textContent = formatarLitros(data.totais.litrosTotal);
         document.getElementById('qtdAbastecimentosGeral').textContent = data.totais.qtdAbastecimentos.toLocaleString('pt-BR');
         
         const mediaDiesel = data.mediaLitro.find(m => m.combustivel.toLowerCase().includes('diesel'));
@@ -674,7 +677,7 @@ function renderizarAbaMensal(data) {
     try {
         // Cards de totais
         document.getElementById('valorTotalMensal').textContent = formatarMoeda(data.valorTotal);
-        document.getElementById('totalLitrosMensal').textContent = formatarNumeroK(data.litrosTotal);
+        document.getElementById('totalLitrosMensal').textContent = formatarLitros(data.litrosTotal);
 
         // Tabela média do litro
         renderizarTabelaMediaLitroMensal(data.mediaLitro);
@@ -1012,17 +1015,17 @@ function renderizarChartConsumoCategoria(dados) {
 }
 
 // ====== RENDERIZAÇÃO - ABA VEÍCULO ======
-function renderizarAbaVeiculo(data) {
+function renderizarAbaVeiculo(data, veiculoSelecionadoId, placaSelecionada) {
     try {
         document.getElementById('valorTotalVeiculo').textContent = formatarMoeda(data.valorTotal);
-        document.getElementById('litrosTotalVeiculo').textContent = formatarNumeroK(data.litrosTotal);
+        document.getElementById('litrosTotalVeiculo').textContent = formatarLitros(data.litrosTotal);
 
         document.getElementById('descricaoVeiculoSelecionado').textContent = data.descricaoVeiculo;
         document.getElementById('categoriaVeiculoSelecionado').textContent = data.categoriaVeiculo;
 
         renderizarChartConsumoMensalVeiculo(data.consumoMensalLitros);
         renderizarChartValorMensalVeiculo(data.valorMensal);
-        renderizarChartRankingVeiculos(data.veiculosComValor);
+        renderizarChartRankingVeiculos(data.veiculosComValor, veiculoSelecionadoId, placaSelecionada);
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarAbaVeiculo", error);
     }
@@ -1143,11 +1146,14 @@ function renderizarChartValorMensalVeiculo(dados) {
     }
 }
 
-function renderizarChartRankingVeiculos(dados) {
+function renderizarChartRankingVeiculos(dados, veiculoSelecionadoId, placaSelecionada) {
     try {
         const container = document.getElementById('chartRankingVeiculos');
+        const tituloEl = document.getElementById('tituloRankingVeiculos');
+        const subtituloEl = document.getElementById('subtituloRankingVeiculos');
+        const iconEl = document.getElementById('iconRankingVeiculos');
         if (!container) return;
-        
+
         if (chartRankingVeiculos) { chartRankingVeiculos.destroy(); chartRankingVeiculos = null; }
         container.innerHTML = '';
 
@@ -1156,51 +1162,128 @@ function renderizarChartRankingVeiculos(dados) {
             return;
         }
 
-        const top10 = dados.slice(0, 10);
-        const dataSource = top10.map((item, idx) => ({
-            x: item.placa + (item.tipoVeiculo ? '\n' + item.tipoVeiculo : ''),
-            y: item.valor,
-            color: CORES.multi[idx % CORES.multi.length],
-            veiculoId: item.veiculoId
-        }));
+        // Verificar se há veículo selecionado
+        const modoComparativo = veiculoSelecionadoId && placaSelecionada;
 
-        chartRankingVeiculos = new ej.charts.Chart({
-            primaryXAxis: { 
-                valueType: 'Category', 
-                labelStyle: { size: '8px' }
-            },
-            primaryYAxis: { 
-                labelFormat: 'R$ {value}', 
-                labelStyle: { size: '9px' }
-            },
-            series: [{
-                dataSource: dataSource,
-                xName: 'x',
-                yName: 'y',
-                pointColorMapping: 'color',
-                type: 'Bar',
-                cornerRadius: { topRight: 4, bottomRight: 4 }
-            }],
-            tooltip: { enable: true },
-            tooltipRender: function(args) {
-                const label = args.point.x.replace('\n', ' - ');
-                args.text = label + ': ' + formatarLabelMoeda(args.point.y);
-            },
-            axisLabelRender: function(args) {
-                if (args.axis.name === 'primaryYAxis') {
-                    const valor = parseFloat(args.text.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-                    args.text = formatarLabelMoeda(valor);
-                }
-            },
-            pointClick: function(args) {
-                const veiculoId = args.point.veiculoId;
-                if (veiculoId) {
-                    selecionarVeiculo(veiculoId);
-                }
-            },
-            height: '280px',
-            chartArea: { border: { width: 0 } }
-        });
+        if (modoComparativo) {
+            // Modo comparativo: veículo selecionado vs TOP 10
+            if (tituloEl) tituloEl.textContent = 'Comparativo de Consumo';
+            if (subtituloEl) subtituloEl.textContent = placaSelecionada + ' vs. Top 10';
+            if (iconEl) iconEl.className = 'fa-duotone fa-chart-mixed';
+
+            const top10 = dados.slice(0, 10);
+            const veiculoNoTop10 = top10.find(v => v.veiculoId == veiculoSelecionadoId);
+            const veiculoSelecionado = dados.find(v => v.veiculoId == veiculoSelecionadoId);
+
+            let dadosComparativo = [];
+
+            // Se o veículo selecionado não está no TOP 10, adiciona ele primeiro
+            if (veiculoSelecionado && !veiculoNoTop10) {
+                dadosComparativo.push({
+                    x: '★ ' + veiculoSelecionado.placa,
+                    y: veiculoSelecionado.valor,
+                    color: '#2563eb', // Azul destaque
+                    veiculoId: veiculoSelecionado.veiculoId,
+                    selecionado: true
+                });
+            }
+
+            // Adiciona TOP 10, destacando o selecionado se estiver nele
+            top10.forEach((item, idx) => {
+                const isSelecionado = item.veiculoId == veiculoSelecionadoId;
+                dadosComparativo.push({
+                    x: isSelecionado ? '★ ' + item.placa : item.placa,
+                    y: item.valor,
+                    color: isSelecionado ? '#2563eb' : CORES.multi[idx % CORES.multi.length],
+                    veiculoId: item.veiculoId,
+                    selecionado: isSelecionado
+                });
+            });
+
+            chartRankingVeiculos = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category',
+                    labelStyle: { size: '8px' }
+                },
+                primaryYAxis: {
+                    labelFormat: 'R$ {value}',
+                    labelStyle: { size: '9px' }
+                },
+                series: [{
+                    dataSource: dadosComparativo,
+                    xName: 'x',
+                    yName: 'y',
+                    pointColorMapping: 'color',
+                    type: 'Bar',
+                    cornerRadius: { topRight: 4, bottomRight: 4 }
+                }],
+                tooltip: { enable: true },
+                tooltipRender: function(args) {
+                    const label = args.point.x.replace('★ ', '');
+                    args.text = label + ': ' + formatarLabelMoeda(args.point.y);
+                },
+                axisLabelRender: function(args) {
+                    if (args.axis.name === 'primaryYAxis') {
+                        const valor = parseFloat(args.text.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
+                        args.text = formatarLabelMoeda(valor);
+                    }
+                },
+                height: '280px',
+                chartArea: { border: { width: 0 } }
+            });
+        } else {
+            // Modo ranking normal
+            if (tituloEl) tituloEl.textContent = 'Ranking de Veículos (Top 10)';
+            if (subtituloEl) subtituloEl.textContent = 'Por placa individual';
+            if (iconEl) iconEl.className = 'fa-duotone fa-ranking-star';
+
+            const top10 = dados.slice(0, 10);
+            const dataSource = top10.map((item, idx) => ({
+                x: item.placa + (item.tipoVeiculo ? '\n' + item.tipoVeiculo : ''),
+                y: item.valor,
+                color: CORES.multi[idx % CORES.multi.length],
+                veiculoId: item.veiculoId
+            }));
+
+            chartRankingVeiculos = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category',
+                    labelStyle: { size: '8px' }
+                },
+                primaryYAxis: {
+                    labelFormat: 'R$ {value}',
+                    labelStyle: { size: '9px' }
+                },
+                series: [{
+                    dataSource: dataSource,
+                    xName: 'x',
+                    yName: 'y',
+                    pointColorMapping: 'color',
+                    type: 'Bar',
+                    cornerRadius: { topRight: 4, bottomRight: 4 }
+                }],
+                tooltip: { enable: true },
+                tooltipRender: function(args) {
+                    const label = args.point.x.replace('\n', ' - ');
+                    args.text = label + ': ' + formatarLabelMoeda(args.point.y);
+                },
+                axisLabelRender: function(args) {
+                    if (args.axis.name === 'primaryYAxis') {
+                        const valor = parseFloat(args.text.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
+                        args.text = formatarLabelMoeda(valor);
+                    }
+                },
+                pointClick: function(args) {
+                    const veiculoId = args.point.veiculoId;
+                    if (veiculoId) {
+                        selecionarVeiculo(veiculoId);
+                    }
+                },
+                height: '280px',
+                chartArea: { border: { width: 0 } }
+            });
+        }
+
         chartRankingVeiculos.appendTo('#chartRankingVeiculos');
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "renderizarChartRankingVeiculos", error);
@@ -1335,6 +1418,12 @@ function formatarNumeroK(valor) {
         return num >= 100 ? num.toFixed(0) + 'K' : num.toFixed(2) + 'K';
     }
     return Math.round(valor).toLocaleString('pt-BR');
+}
+
+function formatarLitros(valor) {
+    if (!valor) return '0 lt';
+    // Formata número completo sem abreviação, com separador de milhar
+    return Math.round(valor).toLocaleString('pt-BR') + ' lt';
 }
 
 function formatarLabelMoeda(valor) {
