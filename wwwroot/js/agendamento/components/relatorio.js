@@ -72,7 +72,7 @@
         HIDDEN_ID: 'txtViagemIdRelatorio',
         SERVICE_URL: '/api/reports/',
         RECOVERY_URL: '/api/Agenda/RecuperaViagem',
-        TIMEOUT: 18000, // Aumentado de 14s para 18s (+8s total para carregamento da Ficha)
+        TIMEOUT: 20000, // Aumentado de 18s para 20s (+10s total para carregamento da Ficha)
         SHOW_DELAY: 500,
         // ✅ NOVA CONFIGURAÇÃO: Alturas fixas
         VIEWER_HEIGHT: '800px',
@@ -102,7 +102,7 @@
      * @param {number} interval - Intervalo de verificação em ms
      * @returns {Promise<boolean>}
      */
-    async function waitUntil(condition, timeout = 13000, interval = 100)
+    async function waitUntil(condition, timeout = 15000, interval = 100)
     {
         const startTime = Date.now();
 
