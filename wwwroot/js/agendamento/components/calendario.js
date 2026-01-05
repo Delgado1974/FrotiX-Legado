@@ -75,9 +75,9 @@ window.InitializeCalendar = function (URL)
             },
             buttonText: {
                 today: "Hoje",
-                month: "mensal",
-                week: "semanal",
-                day: "diário"
+                dayGridMonth: "mensal",
+                timeGridWeek: "semanal",
+                timeGridDay: "diário"
             },
             initialView: "diaSemana",
             views: {
