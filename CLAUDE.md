@@ -38,6 +38,40 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 - O Razor interpreta `@` como código C#, então precisa escapar com `@@`
 - Exemplo correto em CSHTML: `@@keyframes minhaAnimacao { ... }`
 
+### Tooltips Padrão FrotiX:
+**SEMPRE** usar a classe `tooltip-ftx-azul` para todas as tooltips do sistema.
+
+**Características do Padrão:**
+- **Cor de fundo**: Azul petróleo (#154c62)
+- **Texto**: Branco, fonte 0.75rem (letras menores)
+- **Borda**: 1px solid rgba(255, 255, 255, 0.3) - branca fina translúcida
+- **Border-radius**: 0.5rem (cantos bem arredondados)
+- **Sem setas**: `tooltip-arrow` sempre escondido
+- **Sombra**: 0 2px 8px rgba(0, 0, 0, 0.25)
+- **Padding**: 0.375rem 0.625rem (compacto)
+
+**Como usar em HTML:**
+```html
+<button data-bs-toggle="tooltip"
+        data-bs-custom-class="tooltip-ftx-azul"
+        data-bs-placement="top"
+        title="Texto da tooltip">
+    Botão
+</button>
+```
+
+**Como usar em JavaScript (Bootstrap):**
+```javascript
+new bootstrap.Tooltip(elemento, {
+    customClass: 'tooltip-ftx-azul'
+});
+```
+
+**IMPORTANTE:**
+- **NUNCA** criar tooltips com estilos diferentes
+- **SEMPRE** usar `tooltip-ftx-azul` para manter consistência visual
+- A classe está definida globalmente em `frotix.css`
+
 ## Regras de Ícones
 
 ### Ícone padrão para botões "Voltar à Lista":
