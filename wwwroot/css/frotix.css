@@ -60,10 +60,17 @@ body, html {
     border-radius: 0.375rem;
 }
 
-/* Garantir que a borda superior dos dropdowntree apareça */
+/* Garantir que todas as bordas dos dropdowntree apareçam */
 .e-dropdowntree .e-input-group,
-.e-dropdowntree .e-ddt {
+.e-dropdowntree.e-control-wrapper .e-input-group,
+ejs-dropdowntree .e-input-group,
+.e-dropdowntree .e-ddt,
+.e-dropdowntree.e-control-wrapper .e-ddt {
     border: 1px solid #ced4da !important;
+    border-top: 1px solid #ced4da !important;
+    border-bottom: 1px solid #ced4da !important;
+    border-left: 1px solid #ced4da !important;
+    border-right: 1px solid #ced4da !important;
 }
 
 /* ================================================================
@@ -3786,13 +3793,15 @@ table.dataTable thead .sorting_desc::after {
 }
 
 /* Logo FrotiX animado */
-.ftx-loading-logo {
-    display: block;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 1.25rem;
+.ftx-loading-logo,
+.ftx-spin-box img.ftx-loading-logo,
+img.ftx-loading-logo {
+    display: block !important;
+    width: 100px !important;
+    height: 100px !important;
+    margin: 0 auto 1.25rem !important;
     animation: ftxLogoPulse 1.5s ease-in-out infinite !important;
-    filter: drop-shadow(0 4px 8px rgba(50, 93, 136, 0.3));
+    filter: drop-shadow(0 4px 8px rgba(50, 93, 136, 0.3)) !important;
 }
 
 @keyframes ftxLogoPulse {
