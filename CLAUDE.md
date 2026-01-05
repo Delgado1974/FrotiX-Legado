@@ -33,6 +33,11 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 - **CSS Local (no arquivo .cshtml da página)**: Quando o estilo será usado em apenas UMA página
 - **CSS Global (frotix.css)**: Quando o estilo será usado em MAIS DE UMA página
 
+### Sintaxe de @keyframes em CSHTML:
+- Quando `@keyframes` for colocado no CSS dentro de arquivo `.cshtml`, **SEMPRE** escrever como `@@keyframes` (double @)
+- O Razor interpreta `@` como código C#, então precisa escapar com `@@`
+- Exemplo correto em CSHTML: `@@keyframes minhaAnimacao { ... }`
+
 ## Regras de Ícones
 
 ### Ícone padrão para botões "Voltar à Lista":
@@ -101,9 +106,16 @@ document.querySelectorAll('.btn-submit-spin').forEach(function (btn) {
 ### SEMPRE usar este padrão para modais de espera/carregamento:
 - **Overlay**: Cinza escuro semi-transparente com blur (`ftx-spin-overlay`)
 - **Caixa central**: Fundo escuro translúcido com bordas arredondadas (`ftx-spin-box`)
-- **Logo**: Logotipo FrotiX pulsando (`ftx-loading-logo`)
+- **Logo**: Logotipo FrotiX pulsando (`ftx-loading-logo`) - **DEVE SEMPRE PULSAR**
 - **Barra de progresso**: Barra animada deslizante (`ftx-loading-bar`)
 - **Textos**: Título e subtítulo estilizados (`ftx-loading-text`, `ftx-loading-subtext`)
+
+### **IMPORTANTE - Logo deve SEMPRE pulsar**:
+- O logo nos modais de espera **SEMPRE deve ter animação de pulse**
+- Usar a classe `ftx-loading-logo` que já contém a animação
+- A classe define: `animation: ftxLogoPulse 1.5s ease-in-out infinite !important;`
+- **NÃO** adicionar estilos inline que possam sobrescrever a animação
+- **VERIFICAR** se todos os modais de espera têm o logo pulsando corretamente
 
 ### HTML do Modal de Espera padrão:
 ```html

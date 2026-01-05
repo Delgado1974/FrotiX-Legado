@@ -3787,10 +3787,11 @@ table.dataTable thead .sorting_desc::after {
 
 /* Logo FrotiX animado */
 .ftx-loading-logo {
+    display: block;
     width: 100px;
     height: 100px;
     margin: 0 auto 1.25rem;
-    animation: ftxLogoPulse 1.5s ease-in-out infinite;
+    animation: ftxLogoPulse 1.5s ease-in-out infinite !important;
     filter: drop-shadow(0 4px 8px rgba(50, 93, 136, 0.3));
 }
 
