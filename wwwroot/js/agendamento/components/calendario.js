@@ -258,7 +258,7 @@ window.InitializeCalendar = function (URL)
 
                     info.el.setAttribute("title", description);
                     new bootstrap.Tooltip(info.el, {
-                        customClass: 'tooltip-agenda-azul'
+                        customClass: 'tooltip-ftx-azul'
                     });
                 } catch (error)
                 {

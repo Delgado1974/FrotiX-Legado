@@ -20,7 +20,9 @@ var OcorrenciaViagem = (function () {
         // Inicializar tooltips Bootstrap no card recém-adicionado
         var card = $(`.card-ocorrencia[data-index="${contadorOcorrencias}"]`);
         card.find('[data-bs-toggle="tooltip"]').each(function() {
-            new bootstrap.Tooltip(this);
+            new bootstrap.Tooltip(this, {
+                customClass: 'tooltip-ftx-azul'
+            });
         });
 
         atualizarContador();
