@@ -15,7 +15,7 @@ var OcorrenciaViagem = (function () {
     function adicionarOcorrencia() {
         contadorOcorrencias++;
         var html = criarCardOcorrencia(contadorOcorrencias);
-        $('#containerOcorrencias').append(html);
+        $('#listaOcorrencias').append(html);
         atualizarContador();
     }
 
@@ -203,7 +203,7 @@ var OcorrenciaViagem = (function () {
     }
 
     function limparOcorrencias() {
-        $('#containerOcorrencias').empty();
+        $('#listaOcorrencias').empty();
         contadorOcorrencias = 0;
         atualizarContador();
     }

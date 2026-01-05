@@ -329,6 +329,38 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
         font-weight: 700 !important;
     }
 
+    /* ======== Tooltips do Calendário - Padrão Azul Petróleo ======== */
+    .tooltip-agenda-azul {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .tooltip-agenda-azul .tooltip-inner {
+        background-color: #154c62 !important;
+        color: #ffffff !important;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.25rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        text-align: left;
+    }
+
+    .tooltip-agenda-azul.bs-tooltip-top .tooltip-arrow::before {
+        border-top-color: #154c62 !important;
+    }
+
+    .tooltip-agenda-azul.bs-tooltip-bottom .tooltip-arrow::before {
+        border-bottom-color: #154c62 !important;
+    }
+
+    .tooltip-agenda-azul.bs-tooltip-start .tooltip-arrow::before {
+        border-left-color: #154c62 !important;
+    }
+
+    .tooltip-agenda-azul.bs-tooltip-end .tooltip-arrow::before {
+        border-right-color: #154c62 !important;
+    }
+
 </style>
 
 }
@@ -339,6 +371,29 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
 @* ============================================
    CONTEÚDO DA PÁGINA (HTML DO BODY)
    ============================================ *@
+
+@* Modal de Espera - Visível desde o início *@
+<div id="agenda-loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999999; display: flex; align-items: center; justify-content: center;">
+    <div style="background: rgba(30,30,30,0.95); padding: 30px; border-radius: 8px; text-align: center; min-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <img src="/images/logo_gota_frotix_transparente.png" alt="FrotiX" style="width: 80px; height: 80px; margin: 0 auto 20px; display: block; animation: pulse 1.5s ease-in-out infinite;" />
+        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-bottom: 15px;">
+            <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #C67750, #ff9966); animation: loading-bar 1.5s ease-in-out infinite;"></div>
+        </div>
+        <div style="color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 5px;">Carregando Agenda...</div>
+        <div style="color: rgba(255,255,255,0.7); font-size: 14px;">Aguarde, por favor</div>
+    </div>
+</div>
+
+<style>
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(0.95); }
+    }
+    @@keyframes loading-bar {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+</style>
 
 <div class="row" align="center">
     <div class="col-xl-12">
@@ -753,7 +808,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                         <i class="fa-duotone fa-users"></i> Cadastrar Novo Evento
                                     </div>
                                     <div id="collapseEvento"
-                                         class="accordion-collapse collapse show" 
+                                         class="accordion-collapse collapse show"
                                          aria-labelledby="headingEvento">
                                         <div class="accordion-body">
                                             <!-- Nome do Evento -->
@@ -762,9 +817,9 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                                     Nome do Evento
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" 
-                                                       class="form-control" 
-                                                       id="txtNomeEvento" 
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="txtNomeEvento"
                                                        placeholder="Digite o nome do evento">
                                             </div>
 
@@ -773,9 +828,9 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                                 <label for="txtDescricaoEvento" class="form-label fw-bold">
                                                     Descrição do Evento
                                                 </label>
-                                                <textarea class="form-control" 
-                                                          id="txtDescricaoEvento" 
-                                                          rows="3" 
+                                                <textarea class="form-control"
+                                                          id="txtDescricaoEvento"
+                                                          rows="3"
                                                           placeholder="Descreva o evento"></textarea>
                                             </div>
 
@@ -786,7 +841,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                                         Data Início
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <ejs-datepicker id="txtDataInicialEvento" 
+                                                    <ejs-datepicker id="txtDataInicialEvento"
                                                                     placeholder="Selecione a data"
                                                                     format="dd/MM/yyyy"
                                                                     locale="pt-BR"
@@ -799,7 +854,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                                         Data Fim
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <ejs-datepicker id="txtDataFinalEvento" 
+                                                    <ejs-datepicker id="txtDataFinalEvento"
                                                                     placeholder="Selecione a data"
                                                                     format="dd/MM/yyyy"
                                                                     locale="pt-BR"
@@ -814,7 +869,7 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                                 <label for="txtQtdParticipantesEventoCadastro" class="form-label fw-bold">
                                                     Quantidade de Participantes
                                                 </label>
-                                                <ejs-numerictextbox id="txtQtdParticipantesEventoCadastro" 
+                                                <ejs-numerictextbox id="txtQtdParticipantesEventoCadastro"
                                                                     placeholder="Número de participantes"
                                                                     format="n0"
                                                                     min="0"
@@ -867,14 +922,14 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
 
                                             <!-- Botões de Ação -->
                                             <div class="d-flex justify-content-end gap-2 mt-4">
-                                                <button type="button" 
-                                                        id="btnCancelarEvento" 
+                                                <button type="button"
+                                                        id="btnCancelarEvento"
                                                         class="btn btn-secondary">
                                                     <i class="fa-duotone fa-times me-1"></i>
                                                     Cancelar
                                                 </button>
-                                                <button type="button" 
-                                                        id="btnInserirEvento" 
+                                                <button type="button"
+                                                        id="btnInserirEvento"
                                                         class="btn btn-verde">
                                                     <i class="fa-duotone fa-save me-1 icon-pulse"></i>
                                                     Salvar Evento
@@ -1376,15 +1431,15 @@ ViewData["PageIcon"] = "fa-duotone fa-calendar-alt";
                                     <div class="form-group mb-3 position-relative">
                                         <!-- Badge contador (similar ao calendário) -->
                                         <span id="badgeContadorDatasVariadas" class="badge">0</span>
-                                        
+
                                         <label class="label font-weight-bold">
                                             Datas Selecionadas para este Agendamento
                                             <i class="fa-duotone fa-list-check field-icon" style="font-size: 1.25em; cursor: pointer;"></i>
                                         </label>
-                                        
+
                                         <!-- ListBox Syncfusion será inicializado aqui via JavaScript -->
                                         <select id="lstDatasVariadas" class="form-control"></select>
-                                        
+
                                         <small class="form-text text-muted mt-2">
                                             <i class="fa-duotone fa-info-circle"></i>
                                             Lista de todas as datas vinculadas a este agendamento recorrente.

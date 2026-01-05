@@ -46,8 +46,6 @@ window.InitializeCalendar = function (URL)
             }
         }
 
-        if (window.FtxSpin) window.FtxSpin.show('Carregando agenda…');
-
         let firstPaintDone = false;
         const firstHide = () =>
         {
@@ -57,6 +55,12 @@ window.InitializeCalendar = function (URL)
                 {
                     firstPaintDone = true;
                     if (window.FtxSpin) window.FtxSpin.hide();
+
+                    // Esconder modal de espera da agenda
+                    const loadingOverlay = document.getElementById('agenda-loading-overlay');
+                    if (loadingOverlay) {
+                        loadingOverlay.style.display = 'none';
+                    }
                 }
             } catch (error)
             {
@@ -230,9 +234,32 @@ window.InitializeCalendar = function (URL)
             {
                 try
                 {
-                    const description = info.event.extendedProps.description || "Sem descrição";
+                    let description = info.event.extendedProps.description || "Sem descrição";
+
+                    // Formatar para Camel Case (primeira letra de cada palavra em maiúscula)
+                    description = description.replace(/\b[\wÀ-ÿ]+/g, function(palavra) {
+                        // Lista de palavras que devem ficar em minúscula (conectores)
+                        const conectores = ['a', 'e', 'o', 'de', 'da', 'do', 'das', 'dos', 'em', 'na', 'no', 'nas', 'nos', 'para', 'por', 'com', 'sem'];
+                        const palavraLower = palavra.toLowerCase();
+
+                        // Se for a primeira palavra da frase, sempre capitalizar
+                        const isPrimeiraPalavra = description.indexOf(palavra) === 0;
+
+                        if (!isPrimeiraPalavra && conectores.includes(palavraLower)) {
+                            return palavraLower;
+                        }
+
+                        // Capitalizar primeira letra
+                        return palavra.charAt(0).toUpperCase() + palavra.slice(1).toLowerCase();
+                    });
+
+                    // Corrigir "sem veicul" para "sem veículo" (DEPOIS do Camel Case)
+                    description = description.replace(/sem\s+veicul\b/gi, "sem veículo");
+
                     info.el.setAttribute("title", description);
-                    new bootstrap.Tooltip(info.el);
+                    new bootstrap.Tooltip(info.el, {
+                        customClass: 'tooltip-agenda-azul'
+                    });
                 } catch (error)
                 {
                     Alerta.TratamentoErroComLinha("calendario.js", "eventDidMount", error);

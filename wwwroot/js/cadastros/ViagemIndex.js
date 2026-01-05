@@ -1939,7 +1939,8 @@ function ListaTodasViagens()
                 { data: "descricaoOcorrencia" },
                 { data: "statusDocumento" },
                 { data: "statusCartaoAbastecimento" },
-                { data: "descricao" }
+                { data: "descricao" },
+                { data: "imagemOcorrencia" }
             ],
             rowCallback: function (row)
             {

@@ -647,6 +647,7 @@ namespace FrotiX.Controllers
                         x.Finalidade ,
                         x.HoraFim ,
                         x.HoraInicio ,
+                        x.ImagemOcorrencia ,
                         x.KmFinal ,
                         x.KmInicial ,
                         // NoFichaVistoria = 0 retorna como "(mobile)"
