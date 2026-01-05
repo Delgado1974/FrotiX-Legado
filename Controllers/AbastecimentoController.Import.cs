@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.SignalR;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using NPOI.HSSF.UserModel;
+using CsvHelper;
+using CsvHelper.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -124,6 +126,26 @@ namespace FrotiX.Controllers
             public string ValorTotal { get; set; }
             public string Consumo { get; set; }
             public string DataHora { get; set; }
+        }
+
+        // DTOs para importação dual (CSV + XLSX)
+        public class LinhaCsv
+        {
+            public int Autorizacao { get; set; }
+            public string Placa { get; set; }
+            public int Km { get; set; }
+            public string Produto { get; set; }
+            public double Qtde { get; set; }
+            public double VrUnitario { get; set; }
+            public int Rodado { get; set; }
+            public int CodMotorista { get; set; }
+            public int KmAnterior { get; set; }
+        }
+
+        public class LinhaXlsx
+        {
+            public int Autorizacao { get; set; }
+            public DateTime DataHora { get; set; }
         }
 
         private class MapeamentoColunas
@@ -1113,6 +1135,768 @@ namespace FrotiX.Controllers
             catch
             {
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// Lê arquivo CSV e retorna Dictionary com chave = Autorizacao
+        /// </summary>
+        private Dictionary<int, LinhaCsv> LerArquivoCsv(IFormFile file)
+        {
+            try
+            {
+                var resultado = new Dictionary<int, LinhaCsv>();
+
+                using (var reader = new StreamReader(file.OpenReadStream(), Encoding.GetEncoding("ISO-8859-1")))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    Delimiter = ",",
+                    MissingFieldFound = null,
+                    HeaderValidated = null,
+                    BadDataFound = null
+                }))
+                {
+                    var registros = csv.GetRecords<LinhaCsv>().ToList();
+
+                    foreach (var registro in registros)
+                    {
+                        if (registro.Autorizacao > 0 && !resultado.ContainsKey(registro.Autorizacao))
+                        {
+                            resultado[registro.Autorizacao] = registro;
+                        }
+                    }
+                }
+
+                return resultado;
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "LerArquivoCsv", error);
+                return new Dictionary<int, LinhaCsv>();
+            }
+        }
+
+        /// <summary>
+        /// Lê arquivo XLSX extraindo apenas Data+Hora e Autorizacao
+        /// </summary>
+        private Dictionary<int, LinhaXlsx> LerArquivoXlsx(IFormFile file)
+        {
+            try
+            {
+                var resultado = new Dictionary<int, LinhaXlsx>();
+                string sFileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                using (var stream = file.OpenReadStream())
+                {
+                    IWorkbook workbook;
+                    if (sFileExtension == ".xls")
+                    {
+                        workbook = new HSSFWorkbook(stream);
+                    }
+                    else if (sFileExtension == ".xlsx")
+                    {
+                        workbook = new XSSFWorkbook(stream);
+                    }
+                    else
+                    {
+                        return resultado;
+                    }
+
+                    ISheet sheet = workbook.GetSheetAt(0);
+                    if (sheet == null) return resultado;
+
+                    // Mapear colunas do header
+                    IRow headerRow = sheet.GetRow(0);
+                    if (headerRow == null) return resultado;
+
+                    int colData = -1, colAutorizacao = -1;
+
+                    for (int col = 0; col < headerRow.LastCellNum; col++)
+                    {
+                        var cell = headerRow.GetCell(col);
+                        if (cell == null) continue;
+
+                        string header = cell.ToString().Trim().ToLower();
+                        if (header.Contains("data")) colData = col;
+                        if (header.Contains("autori")) colAutorizacao = col;
+                    }
+
+                    if (colData < 0 || colAutorizacao < 0)
+                    {
+                        return resultado; // Colunas obrigatórias não encontradas
+                    }
+
+                    // Ler linhas de dados
+                    for (int row = 1; row <= sheet.LastRowNum; row++)
+                    {
+                        IRow dataRow = sheet.GetRow(row);
+                        if (dataRow == null) continue;
+
+                        int autorizacao = GetCellIntValue(dataRow.GetCell(colAutorizacao));
+                        DateTime? dataHora = GetCellDateTimeValue(dataRow.GetCell(colData));
+
+                        if (autorizacao > 0 && dataHora.HasValue && !resultado.ContainsKey(autorizacao))
+                        {
+                            resultado[autorizacao] = new LinhaXlsx
+                            {
+                                Autorizacao = autorizacao,
+                                DataHora = dataHora.Value
+                            };
+                        }
+                    }
+                }
+
+                return resultado;
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "LerArquivoXlsx", error);
+                return new Dictionary<int, LinhaXlsx>();
+            }
+        }
+
+        /// <summary>
+        /// Importação DUAL: recebe CSV + XLSX, faz JOIN em memória por Autorizacao
+        /// </summary>
+        [Route("ImportarDual")]
+        [HttpPost]
+        public async Task<ActionResult> ImportarDual()
+        {
+            string connectionId = null;
+            string nomeXlsx = "";
+            string nomeCsv = "";
+
+            try
+            {
+                // Blindagem: Remover validação das propriedades de navegação
+                ModelState.Remove("Veiculo");
+                ModelState.Remove("Motorista");
+                ModelState.Remove("Combustivel");
+
+                connectionId = Request.Form["connectionId"].FirstOrDefault();
+
+                // === ETAPA 1: Validar 2 arquivos (0-5%) ===
+                await EnviarProgresso(connectionId, 2, "Recebendo arquivos", "Verificando upload...");
+
+                if (Request.Form.Files.Count < 2)
+                {
+                    return Ok(new ResultadoImportacao
+                    {
+                        Sucesso = false,
+                        Mensagem = "É necessário enviar 2 arquivos (XLSX + CSV)"
+                    });
+                }
+
+                IFormFile arquivoXlsx = Request.Form.Files["arquivoXlsx"];
+                IFormFile arquivoCsv = Request.Form.Files["arquivoCsv"];
+
+                if (arquivoXlsx == null || arquivoCsv == null)
+                {
+                    return Ok(new ResultadoImportacao
+                    {
+                        Sucesso = false,
+                        Mensagem = "É necessário enviar ambos os arquivos: XLSX e CSV"
+                    });
+                }
+
+                nomeXlsx = arquivoXlsx.FileName;
+                nomeCsv = arquivoCsv.FileName;
+
+                await EnviarProgresso(connectionId, 5, "Arquivos recebidos", $"XLSX: {nomeXlsx}, CSV: {nomeCsv}");
+
+                // === ETAPA 2: Ler XLSX (5-10%) ===
+                await EnviarProgresso(connectionId, 7, "Lendo XLSX", "Extraindo Data/Hora e Autorizações...");
+
+                var dadosXlsx = LerArquivoXlsx(arquivoXlsx);
+                if (dadosXlsx.Count == 0)
+                {
+                    return Ok(new ResultadoImportacao
+                    {
+                        Sucesso = false,
+                        Mensagem = "Nenhum registro válido encontrado no arquivo XLSX. Verifique se contém as colunas 'Data' e 'Autorizacao'."
+                    });
+                }
+
+                await EnviarProgresso(connectionId, 10, "XLSX lido", $"{dadosXlsx.Count} autorizações encontradas");
+
+                // === ETAPA 3: Ler CSV (10-15%) ===
+                await EnviarProgresso(connectionId, 12, "Lendo CSV", "Extraindo dados de abastecimento...");
+
+                var dadosCsv = LerArquivoCsv(arquivoCsv);
+                if (dadosCsv.Count == 0)
+                {
+                    return Ok(new ResultadoImportacao
+                    {
+                        Sucesso = false,
+                        Mensagem = "Nenhum registro válido encontrado no arquivo CSV. Verifique se contém as colunas obrigatórias."
+                    });
+                }
+
+                await EnviarProgresso(connectionId, 15, "CSV lido", $"{dadosCsv.Count} abastecimentos encontrados");
+
+                // === ETAPA 4: INNER JOIN em memória (15-20%) ===
+                await EnviarProgresso(connectionId, 17, "Combinando dados", "Fazendo JOIN por Autorização...");
+
+                var mapaCombustivel = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Gasolina Comum", Guid.Parse("f668f660-8380-4df3-90cd-787db06fe734") },
+                    { "Diesel S-10", Guid.Parse("a69aa86a-9162-4242-ab9a-8b184e04c4da") }
+                };
+
+                var linhas = new List<LinhaImportacao>();
+                int matchCount = 0;
+
+                foreach (var kvpCsv in dadosCsv)
+                {
+                    int autorizacao = kvpCsv.Key;
+                    var dadoCsv = kvpCsv.Value;
+
+                    // INNER JOIN: só processa se existe no XLSX
+                    if (dadosXlsx.TryGetValue(autorizacao, out var dadoXlsx))
+                    {
+                        matchCount++;
+
+                        // Limpar e mapear produto
+                        var produtoLimpo = LimparProduto(dadoCsv.Produto);
+                        Guid? combustivelId = null;
+
+                        if (!string.IsNullOrEmpty(produtoLimpo) && mapaCombustivel.TryGetValue(produtoLimpo, out var combustivelGuid))
+                        {
+                            combustivelId = combustivelGuid;
+                        }
+
+                        linhas.Add(new LinhaImportacao
+                        {
+                            NumeroLinhaOriginal = matchCount,
+                            Autorizacao = autorizacao,
+                            DataHoraParsed = dadoXlsx.DataHora,
+                            Data = dadoXlsx.DataHora.ToString("dd/MM/yyyy"),
+                            Hora = dadoXlsx.DataHora.ToString("HH:mm"),
+                            Placa = dadoCsv.Placa,
+                            Km = dadoCsv.Km,
+                            Quantidade = dadoCsv.Qtde,
+                            ValorUnitario = dadoCsv.VrUnitario,
+                            KmRodado = dadoCsv.Rodado,
+                            CodMotorista = dadoCsv.CodMotorista,
+                            KmAnterior = dadoCsv.KmAnterior,
+                            Produto = produtoLimpo,
+                            CombustivelId = combustivelId
+                        });
+                    }
+                }
+
+                if (linhas.Count == 0)
+                {
+                    return Ok(new ResultadoImportacao
+                    {
+                        Sucesso = false,
+                        Mensagem = $"Nenhum registro com Autorização correspondente encontrado. CSV: {dadosCsv.Count} registros, XLSX: {dadosXlsx.Count} registros. Verifique se os números de Autorização correspondem nos dois arquivos."
+                    });
+                }
+
+                int totalLinhas = linhas.Count;
+                await EnviarProgresso(connectionId, 20, "Dados combinados", $"{totalLinhas} registros prontos para validação");
+
+                // === ETAPA 5: REUTILIZAR VALIDAÇÃO EXISTENTE (20-90%) ===
+                // Carregar dados de referência
+                await EnviarProgresso(connectionId, 21, "Carregando dados", "Buscando veículos cadastrados...");
+                var veiculos = _unitOfWork.Veiculo.GetAll().ToList();
+
+                await EnviarProgresso(connectionId, 22, "Carregando dados", "Buscando motoristas cadastrados...");
+                var motoristas = _unitOfWork.Motorista.GetAll().ToList();
+
+                await EnviarProgresso(connectionId, 23, "Carregando dados", "Verificando autorizações existentes...");
+                var autorizacoesExistentes = _unitOfWork.Abastecimento.GetAll()
+                    .Where(a => a.AutorizacaoQCard.HasValue)
+                    .Select(a => a.AutorizacaoQCard.Value)
+                    .ToHashSet();
+
+                await EnviarProgresso(connectionId, 24, "Carregando dados", "Calculando médias de consumo...");
+                var mediasConsumo = _unitOfWork.ViewMediaConsumo.GetAll()
+                    .ToDictionary(m => m.VeiculoId, m => m.ConsumoGeral ?? 0);
+
+                await EnviarProgresso(connectionId, 25, "Carregando dados", "Dados de referência carregados");
+
+                // Validar linhas (código idêntico ao ImportarNovo, linhas 338-489)
+                int linhaProcessada = 0;
+                int intervaloAtualizacao = Math.Max(1, totalLinhas / 50);
+
+                foreach (var linha in linhas)
+                {
+                    linhaProcessada++;
+
+                    if (linhaProcessada % intervaloAtualizacao == 0 || linhaProcessada == totalLinhas)
+                    {
+                        int porcentagemValidacao = 25 + (int)((linhaProcessada / (double)totalLinhas) * 45);
+                        await EnviarProgresso(connectionId, porcentagemValidacao, "Validando linhas",
+                            $"Processando linha {linhaProcessada} de {totalLinhas}...", linhaProcessada, totalLinhas);
+                    }
+
+                    // Validação de combustível
+                    if (!linha.CombustivelId.HasValue)
+                    {
+                        linha.Erros.Add($"Produto '{linha.Produto}' não reconhecido (aceitos: Gasolina Comum, Diesel S-10)");
+                        continue; // Produto não reconhecido, será ignorado
+                    }
+
+                    // Validação de autorização duplicada
+                    if (autorizacoesExistentes.Contains(linha.Autorizacao))
+                    {
+                        linha.Erros.Add($"Autorização '{linha.Autorizacao}' já foi importada anteriormente");
+                    }
+
+                    // Validação de veículo
+                    var veiculo = veiculos.FirstOrDefault(v =>
+                        v.Placa != null &&
+                        v.Placa.Equals(linha.Placa, StringComparison.OrdinalIgnoreCase));
+
+                    if (veiculo == null)
+                    {
+                        linha.Erros.Add($"Veículo de placa '{linha.Placa}' não cadastrado");
+                    }
+                    else
+                    {
+                        linha.VeiculoId = veiculo.VeiculoId;
+                    }
+
+                    // Validação de motorista
+                    var motorista = motoristas.FirstOrDefault(m =>
+                        m.CodMotoristaQCard == linha.CodMotorista);
+
+                    if (motorista == null)
+                    {
+                        linha.Erros.Add($"Motorista com código QCard '{linha.CodMotorista}' não cadastrado");
+                    }
+                    else
+                    {
+                        linha.MotoristaId = motorista.MotoristaId;
+                        linha.NomeMotorista = motorista.Nome;
+                    }
+
+                    // Validação de quantidade
+                    if (linha.Quantidade > 500)
+                    {
+                        linha.Erros.Add($"Quantidade de {linha.Quantidade:N2} litros excede o limite de 500 litros");
+                    }
+
+                    // Validação inteligente de quilometragem (código idêntico linhas 407-488)
+                    if (linha.VeiculoId.HasValue)
+                    {
+                        double mediaConsumo = 0;
+                        decimal mediaTemp;
+                        if (mediasConsumo.TryGetValue(linha.VeiculoId.Value, out mediaTemp))
+                        {
+                            mediaConsumo = (double)mediaTemp;
+                        }
+                        linha.MediaConsumoVeiculo = mediaConsumo;
+
+                        int kmRodadoEsperado = mediaConsumo > 0
+                            ? (int)(linha.Quantidade * mediaConsumo)
+                            : 150;
+
+                        if (linha.KmRodado < 0)
+                        {
+                            linha.Erros.Add($"Quilometragem negativa ({linha.KmRodado} km): Km Anterior maior que Km Atual");
+
+                            int kmAnteriorSugerido = linha.Km - kmRodadoEsperado;
+                            if (kmAnteriorSugerido > 0)
+                            {
+                                linha.TemSugestao = true;
+                                linha.CampoCorrecao = "KmAnterior";
+                                linha.ValorAtualErrado = linha.KmAnterior;
+                                linha.ValorSugerido = kmAnteriorSugerido;
+                                linha.JustificativaSugestao = mediaConsumo > 0
+                                    ? $"Baseado na média de {mediaConsumo:N1} km/l do veículo, o KM Anterior deveria ser aproximadamente {kmAnteriorSugerido:N0}"
+                                    : $"Baseado em consumo padrão, o KM Anterior deveria ser aproximadamente {kmAnteriorSugerido:N0}";
+                            }
+                        }
+                        else if (linha.KmRodado > 1000)
+                        {
+                            double consumoAtual = linha.Quantidade > 0 ? linha.KmRodado / linha.Quantidade : 0;
+                            double mediaReferencia = mediaConsumo > 0 ? mediaConsumo : 10;
+                            double limiteInferior = mediaReferencia * 0.6;
+                            double limiteSuperior = mediaReferencia * 1.4;
+                            bool consumoDentroDoEsperado = consumoAtual >= limiteInferior && consumoAtual <= limiteSuperior;
+
+                            if (consumoDentroDoEsperado)
+                            {
+                                // Viagem longa legítima - NÃO adiciona erro
+                            }
+                            else if (consumoAtual > limiteSuperior)
+                            {
+                                linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite e consumo de {consumoAtual:N1} km/l está muito acima da média ({mediaReferencia:N1} km/l)");
+
+                                int kmAnteriorSugerido = linha.Km - kmRodadoEsperado;
+                                if (kmAnteriorSugerido > 0)
+                                {
+                                    linha.TemSugestao = true;
+                                    linha.CampoCorrecao = "KmAnterior";
+                                    linha.ValorAtualErrado = linha.KmAnterior;
+                                    linha.ValorSugerido = kmAnteriorSugerido;
+                                    linha.JustificativaSugestao = $"Consumo de {consumoAtual:N1} km/l está muito acima da média ({mediaReferencia:N1} km/l). Provável erro no KM Anterior.";
+                                }
+                            }
+                            else
+                            {
+                                linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite e consumo de {consumoAtual:N1} km/l está muito abaixo da média ({mediaReferencia:N1} km/l)");
+
+                                int kmSugerido = linha.KmAnterior + kmRodadoEsperado;
+                                linha.TemSugestao = true;
+                                linha.CampoCorrecao = "Km";
+                                linha.ValorAtualErrado = linha.Km;
+                                linha.ValorSugerido = kmSugerido;
+                                linha.JustificativaSugestao = $"Consumo de {consumoAtual:N1} km/l está muito abaixo da média ({mediaReferencia:N1} km/l). Provável erro no KM Atual.";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (linha.KmRodado > 1000)
+                        {
+                            linha.Erros.Add($"Quilometragem de {linha.KmRodado} km excede o limite de 1.000 km");
+                        }
+                        if (linha.KmRodado < 0)
+                        {
+                            linha.Erros.Add($"Quilometragem negativa ({linha.KmRodado} km): Km Anterior maior que Km Atual");
+                        }
+                    }
+                }
+
+                await EnviarProgresso(connectionId, 70, "Validação concluída", "Preparando para gravar...");
+
+                // Separar linhas (código idêntico linhas 492-502)
+                var linhasIgnoradas = linhas.Where(l => !l.CombustivelId.HasValue).ToList();
+                var linhasParaProcessar = linhas.Where(l => l.CombustivelId.HasValue).ToList();
+                var linhasValidas = linhasParaProcessar.Where(l => l.Valido).ToList();
+                var linhasComErro = linhasParaProcessar.Where(l => !l.Valido).ToList();
+
+                int numeroLinhaErro = 1;
+                foreach (var linha in linhasComErro)
+                {
+                    linha.NumeroLinhaErro = ++numeroLinhaErro;
+                }
+
+                // === ETAPA 6: Salvar no banco (70-90%) ===
+                var linhasImportadas = new List<LinhaImportadaDTO>();
+                var veiculosParaAtualizar = new HashSet<Guid>();
+
+                if (linhasValidas.Any())
+                {
+                    await EnviarProgresso(connectionId, 72, "Gravando dados", $"Salvando {linhasValidas.Count} abastecimento(s)...");
+
+                    var autorizacoesAbastecimento = _unitOfWork.Abastecimento
+                        .GetAll()
+                        .Select(a => a.AutorizacaoQCard)
+                        .Where(a => a.HasValue)
+                        .Select(a => a.Value)
+                        .ToHashSet();
+
+                    var linhasParaGravar = linhasValidas
+                        .Where(l => l.Autorizacao <= 0 || !autorizacoesAbastecimento.Contains(l.Autorizacao))
+                        .ToList();
+
+                    int linhasIgnoradasDuplicadas = linhasValidas.Count - linhasParaGravar.Count;
+                    int linhaGravada = 0;
+                    int intervaloGravacao = Math.Max(1, linhasParaGravar.Count / 20);
+
+                    using (var scope = new TransactionScope(
+                        TransactionScopeOption.RequiresNew,
+                        new TimeSpan(0, 30, 0),
+                        TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        foreach (var linha in linhasParaGravar)
+                        {
+                            linhaGravada++;
+
+                            if (linhaGravada % intervaloGravacao == 0 || linhaGravada == linhasParaGravar.Count)
+                            {
+                                int porcentagemGravacao = 72 + (int)((linhaGravada / (double)linhasParaGravar.Count) * 15);
+                                await EnviarProgresso(connectionId, porcentagemGravacao, "Gravando dados",
+                                    $"Salvando registro {linhaGravada} de {linhasParaGravar.Count}...", linhaGravada, linhasParaGravar.Count);
+                            }
+
+                            var abastecimento = new Abastecimento
+                            {
+                                AbastecimentoId = Guid.NewGuid(),
+                                DataHora = linha.DataHoraParsed.Value,
+                                VeiculoId = linha.VeiculoId.Value,
+                                MotoristaId = linha.MotoristaId.Value,
+                                CombustivelId = linha.CombustivelId.Value,
+                                AutorizacaoQCard = linha.Autorizacao,
+                                Litros = linha.Quantidade,
+                                ValorUnitario = linha.ValorUnitario,
+                                Hodometro = linha.Km,
+                                KmRodado = linha.KmRodado
+                            };
+
+                            _unitOfWork.Abastecimento.Add(abastecimento);
+                            veiculosParaAtualizar.Add(linha.VeiculoId.Value);
+
+                            linhasImportadas.Add(new LinhaImportadaDTO
+                            {
+                                Placa = linha.Placa,
+                                Motorista = linha.NomeMotorista,
+                                Autorizacao = linha.Autorizacao,
+                                KmAnterior = linha.KmAnterior,
+                                Km = linha.Km,
+                                KmRodado = linha.KmRodado,
+                                Produto = linha.Produto,
+                                ValorUnitario = linha.ValorUnitario.ToString("C2", new CultureInfo("pt-BR")),
+                                Quantidade = linha.Quantidade.ToString("N2"),
+                                ValorTotal = (linha.ValorUnitario * linha.Quantidade).ToString("C2", new CultureInfo("pt-BR")),
+                                Consumo = (linha.Quantidade > 0 && linha.KmRodado > 0 ? linha.KmRodado / linha.Quantidade : 0).ToString("N2") + " km/l",
+                                DataHora = linha.DataHoraParsed.Value.ToString("dd/MM/yyyy HH:mm")
+                            });
+                        }
+
+                        await EnviarProgresso(connectionId, 88, "Gravando dados", "Salvando no banco de dados...");
+                        _unitOfWork.Save();
+
+                        await EnviarProgresso(connectionId, 90, "Atualizando veículos", "Recalculando consumo médio...");
+
+                        foreach (var veiculoId in veiculosParaAtualizar)
+                        {
+                            var mediaConsumo = _unitOfWork.ViewMediaConsumo.GetFirstOrDefault(v =>
+                                v.VeiculoId == veiculoId);
+
+                            if (mediaConsumo != null)
+                            {
+                                var veiculo = _unitOfWork.Veiculo.GetFirstOrDefault(v =>
+                                    v.VeiculoId == veiculoId);
+
+                                if (veiculo != null)
+                                {
+                                    veiculo.Consumo = (double?)mediaConsumo.ConsumoGeral;
+                                    _unitOfWork.Veiculo.Update(veiculo);
+                                }
+                            }
+                        }
+
+                        _unitOfWork.Save();
+                        scope.Complete();
+                    }
+                }
+
+                // === ETAPA 7: Salvar pendências (90-98%) ===
+                var erros = new List<ErroImportacao>();
+                int linhasCorrigiveis = 0;
+                int pendenciasGeradas = 0;
+
+                if (linhasComErro.Any())
+                {
+                    await EnviarProgresso(connectionId, 92, "Salvando pendências", $"Gravando {linhasComErro.Count} pendência(s)...");
+
+                    var autorizacoesPendentes = _unitOfWork.AbastecimentoPendente
+                        .GetAll(p => p.Status == 0)
+                        .Select(p => p.AutorizacaoQCard)
+                        .Where(a => a.HasValue)
+                        .Select(a => a.Value)
+                        .ToHashSet();
+
+                    foreach (var linha in linhasComErro)
+                    {
+                        if (linha.Autorizacao > 0 && autorizacoesPendentes.Contains(linha.Autorizacao))
+                        {
+                            continue;
+                        }
+
+                        bool linhaPossuiSugestao = linha.TemSugestao;
+                        if (linhaPossuiSugestao) linhasCorrigiveis++;
+
+                        string tipoPrincipal = DeterminarTipoPendencia(linha.Erros);
+                        string descricaoCompleta = string.Join("; ", linha.Erros);
+
+                        var pendencia = new AbastecimentoPendente
+                        {
+                            AbastecimentoPendenteId = Guid.NewGuid(),
+                            AutorizacaoQCard = linha.Autorizacao,
+                            Placa = linha.Placa,
+                            CodMotorista = linha.CodMotorista,
+                            NomeMotorista = linha.NomeMotorista,
+                            Produto = linha.Produto,
+                            DataHora = linha.DataHoraParsed,
+                            KmAnterior = linha.KmAnterior,
+                            Km = linha.Km,
+                            KmRodado = linha.KmRodado,
+                            Litros = linha.Quantidade,
+                            ValorUnitario = linha.ValorUnitario,
+                            VeiculoId = linha.VeiculoId,
+                            MotoristaId = linha.MotoristaId,
+                            CombustivelId = linha.CombustivelId,
+                            DescricaoPendencia = descricaoCompleta,
+                            TipoPendencia = tipoPrincipal,
+                            TemSugestao = linha.TemSugestao,
+                            CampoCorrecao = linha.CampoCorrecao,
+                            ValorAtualErrado = linha.ValorAtualErrado,
+                            ValorSugerido = linha.ValorSugerido,
+                            JustificativaSugestao = linha.JustificativaSugestao,
+                            MediaConsumoVeiculo = linha.MediaConsumoVeiculo,
+                            DataImportacao = DateTime.Now,
+                            NumeroLinhaOriginal = linha.NumeroLinhaOriginal,
+                            ArquivoOrigem = $"{nomeCsv} + {nomeXlsx}",
+                            Status = 0
+                        };
+
+                        _unitOfWork.AbastecimentoPendente.Add(pendencia);
+                        pendenciasGeradas++;
+
+                        foreach (var erro in linha.Erros)
+                        {
+                            string tipo = "erro";
+                            string icone = "fa-circle-xmark";
+                            bool erroCorrigivel = false;
+
+                            if (erro.Contains("Autorização"))
+                            {
+                                tipo = "autorizacao";
+                                icone = "fa-ban";
+                            }
+                            else if (erro.Contains("Motorista"))
+                            {
+                                tipo = "motorista";
+                                icone = "fa-user-xmark";
+                            }
+                            else if (erro.Contains("Veículo") || erro.Contains("placa"))
+                            {
+                                tipo = "veiculo";
+                                icone = "fa-car-burst";
+                            }
+                            else if (erro.Contains("litros"))
+                            {
+                                tipo = "litros";
+                                icone = "fa-gas-pump";
+                            }
+                            else if (erro.Contains("Quilometragem") || erro.Contains("km"))
+                            {
+                                tipo = "km";
+                                icone = "fa-gauge-high";
+                                erroCorrigivel = linhaPossuiSugestao;
+                            }
+                            else if (erro.Contains("Data") || erro.Contains("Hora"))
+                            {
+                                tipo = "data";
+                                icone = "fa-calendar-xmark";
+                            }
+
+                            erros.Add(new ErroImportacao
+                            {
+                                LinhaOriginal = linha.NumeroLinhaOriginal,
+                                LinhaArquivoErros = linha.NumeroLinhaErro,
+                                Tipo = tipo,
+                                Descricao = erro,
+                                Icone = icone,
+                                Corrigivel = erroCorrigivel,
+                                CampoCorrecao = erroCorrigivel ? linha.CampoCorrecao : null,
+                                ValorAtual = erroCorrigivel ? linha.ValorAtualErrado : 0,
+                                ValorSugerido = erroCorrigivel ? linha.ValorSugerido : 0,
+                                JustificativaSugestao = erroCorrigivel ? linha.JustificativaSugestao : null,
+                                Autorizacao = linha.Autorizacao,
+                                Placa = linha.Placa,
+                                KmAnterior = linha.KmAnterior,
+                                Km = linha.Km,
+                                KmRodado = linha.KmRodado,
+                                Litros = linha.Quantidade,
+                                VeiculoId = linha.VeiculoId?.ToString(),
+                                MotoristaId = linha.MotoristaId?.ToString(),
+                                CombustivelId = linha.CombustivelId?.ToString(),
+                                DataHora = linha.DataHoraParsed?.ToString("dd/MM/yyyy HH:mm"),
+                                ValorUnitario = linha.ValorUnitario,
+                                NomeMotorista = linha.NomeMotorista,
+                                Produto = linha.Produto
+                            });
+                        }
+                    }
+
+                    await EnviarProgresso(connectionId, 95, "Salvando pendências", "Gravando no banco de dados...");
+                    _unitOfWork.Save();
+                }
+
+                // === ETAPA 8: Finalizar (98-100%) ===
+                await EnviarProgresso(connectionId, 98, "Finalizando", "Preparando resultado...");
+
+                string mensagem;
+                bool sucesso;
+                int totalIgnoradas = linhasIgnoradas.Count + (linhasValidas.Count - linhasImportadas.Count);
+
+                if (linhasImportadas.Any() && linhasComErro.Any())
+                {
+                    mensagem = $"Importação parcial concluída! {linhasImportadas.Count} abastecimento(s) importado(s), " +
+                               $"{pendenciasGeradas} pendência(s) gerada(s). Acesse a tela de Pendências para resolver.";
+                    sucesso = true;
+                }
+                else if (linhasImportadas.Any())
+                {
+                    var msgIgnoradas = totalIgnoradas > 0
+                        ? $" ({totalIgnoradas} linha(s) ignorada(s) - produto não reconhecido ou duplicada)"
+                        : "";
+                    mensagem = $"Importação concluída com sucesso! {linhasImportadas.Count} abastecimento(s) registrado(s).{msgIgnoradas}";
+                    sucesso = true;
+                }
+                else
+                {
+                    mensagem = $"Nenhum registro importado. {pendenciasGeradas} pendência(s) gerada(s). Acesse a tela de Pendências para resolver.";
+                    sucesso = false;
+                }
+
+                await EnviarProgresso(connectionId, 100, "Concluído", sucesso ? "Importação finalizada!" : "Finalizado com pendências");
+
+                return Ok(new ResultadoImportacao
+                {
+                    Sucesso = sucesso,
+                    Mensagem = mensagem,
+                    TotalLinhas = linhas.Count,
+                    LinhasImportadas = linhasImportadas.Count,
+                    LinhasComErro = linhasComErro.Count,
+                    LinhasIgnoradas = totalIgnoradas,
+                    LinhasCorrigiveis = linhasCorrigiveis,
+                    Erros = erros.OrderBy(e => e.LinhaArquivoErros).ToList(),
+                    LinhasImportadasLista = linhasImportadas,
+                    PendenciasGeradas = pendenciasGeradas
+                });
+            }
+            catch (Exception error)
+            {
+                await EnviarProgresso(connectionId, 0, "Erro", error.Message);
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "ImportarDual", error);
+                return StatusCode(500, new ResultadoImportacao
+                {
+                    Sucesso = false,
+                    Mensagem = $"Erro interno ao processar importação: {error.Message}"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Helper para extrair DateTime de uma célula Excel (trata múltiplos formatos)
+        /// </summary>
+        private DateTime? GetCellDateTimeValue(ICell cell)
+        {
+            try
+            {
+                if (cell == null) return null;
+
+                // Se for célula numérica formatada como data
+                if (cell.CellType == CellType.Numeric && DateUtil.IsCellDateFormatted(cell))
+                {
+                    return cell.DateCellValue;
+                }
+
+                // Fallback: tentar parse de string
+                string valor = cell.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(valor))
+                {
+                    if (DateTime.TryParse(valor, new CultureInfo("pt-BR"), DateTimeStyles.None, out DateTime result))
+                    {
+                        return result;
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "GetCellDateTimeValue", error);
+                return null;
             }
         }
 

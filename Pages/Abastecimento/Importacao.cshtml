@@ -61,6 +61,25 @@
             color: #22c55e;
         }
 
+        /* ===== DROP ZONE SMALL (para dual upload) ===== */
+        .ftx-dropzone-small {
+            padding: 1.25rem;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ftx-dropzone-icon-small {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .ftx-dropzone-small.arquivo-ok .ftx-dropzone-icon-small {
+            color: #22c55e;
+        }
+
         /* ===== STAT CARDS ===== */
         .stat-card-ftx {
             background: linear-gradient(145deg, #ffffff, #f8f9fa);
@@ -585,26 +604,55 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <!-- Área de Drop -->
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold">
-                                            <i class="fa-duotone fa-file-excel text-success me-2"></i>
-                                            Arquivo Excel
-                                        </label>
-                                        <div id="dropZone" class="ftx-dropzone">
-                                            <input type="file" id="arquivoExcel" accept=".xlsx,.xls" class="ftx-dropzone-input" />
-                                            <div id="dropZoneContent">
-                                                <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon"></i>
-                                                <p class="mb-1 fw-semibold">Arraste o arquivo aqui</p>
-                                                <p class="text-muted small mb-2">ou clique para selecionar</p>
-                                                <span class="badge bg-light text-dark border">.xlsx ou .xls</span>
+                                    <!-- Área de Drop: 2 Arquivos -->
+                                    <div class="row g-3 mb-4">
+                                        <!-- Dropzone 1: XLSX (Data/Hora) -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">
+                                                <i class="fa-duotone fa-file-excel text-success me-2"></i>
+                                                Arquivo Excel
+                                            </label>
+                                            <div id="dropZoneXlsx" class="ftx-dropzone ftx-dropzone-small">
+                                                <input type="file" id="arquivoXlsx" accept=".xlsx,.xls" class="ftx-dropzone-input" />
+                                                <div id="dropZoneXlsxContent">
+                                                    <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon-small"></i>
+                                                    <p class="mb-1 fw-semibold small">Arraste aqui</p>
+                                                    <p class="text-muted small mb-2" style="font-size: 0.7rem;">ou clique</p>
+                                                    <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">.xlsx ou .xls</span>
+                                                    <p class="text-muted mt-2 mb-0" style="font-size: 0.65rem;"><strong>Contém:</strong> Data/Hora</p>
+                                                </div>
+                                                <div id="arquivoXlsxSelecionado" class="d-none">
+                                                    <i class="fa-duotone fa-file-excel ftx-dropzone-icon-small text-success"></i>
+                                                    <p class="mb-1 fw-semibold text-success small" id="nomeArquivoXlsx"></p>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="btnRemoverXlsx">
+                                                        <i class="fa-duotone fa-xmark me-1"></i>Remover
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div id="arquivoSelecionado" class="d-none">
-                                                <i class="fa-duotone fa-file-excel ftx-dropzone-icon"></i>
-                                                <p class="mb-1 fw-semibold text-success" id="nomeArquivo"></p>
-                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="btnRemoverArquivo">
-                                                    <i class="fa-duotone fa-xmark me-1"></i>Remover
-                                                </button>
+                                        </div>
+
+                                        <!-- Dropzone 2: CSV (Dados) -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">
+                                                <i class="fa-duotone fa-file-csv text-warning me-2"></i>
+                                                Arquivo CSV
+                                            </label>
+                                            <div id="dropZoneCsv" class="ftx-dropzone ftx-dropzone-small">
+                                                <input type="file" id="arquivoCsv" accept=".csv" class="ftx-dropzone-input" />
+                                                <div id="dropZoneCsvContent">
+                                                    <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon-small"></i>
+                                                    <p class="mb-1 fw-semibold small">Arraste aqui</p>
+                                                    <p class="text-muted small mb-2" style="font-size: 0.7rem;">ou clique</p>
+                                                    <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">.csv</span>
+                                                    <p class="text-muted mt-2 mb-0" style="font-size: 0.65rem;"><strong>Contém:</strong> Placa, KM, Litros...</p>
+                                                </div>
+                                                <div id="arquivoCsvSelecionado" class="d-none">
+                                                    <i class="fa-duotone fa-file-csv ftx-dropzone-icon-small text-warning"></i>
+                                                    <p class="mb-1 fw-semibold text-warning small" id="nomeArquivoCsv"></p>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="btnRemoverCsv">
+                                                        <i class="fa-duotone fa-xmark me-1"></i>Remover
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -621,14 +669,23 @@
                                             <i class="fa-duotone fa-lightbulb me-2"></i>Informações
                                         </h6>
                                         <hr class="my-2">
-                                        <ul>
-                                            <li>Colunas obrigatórias: Autorização, <strong>Data</strong>, <strong>Hora</strong>, Placa, KM, Produto, Qtde, Valor Unitário, Rodado, CodMotorista, KMAnterior</li>
+                                        <p class="small mb-2"><strong>📄 Arquivo XLSX (Excel):</strong></p>
+                                        <ul class="small mb-3">
+                                            <li>Colunas: <strong>Data</strong> (com hora), <strong>Autorizacao</strong></li>
+                                            <li>A data/hora deve estar no formato correto do Excel</li>
+                                        </ul>
+                                        <p class="small mb-2"><strong>📄 Arquivo CSV:</strong></p>
+                                        <ul class="small mb-3">
+                                            <li>Colunas: Autorizacao, Placa, KM, Produto, Qtde, VrUnitario, Rodado, CodMotorista, KMAnterior</li>
                                             <li>Produtos aceitos: <strong>Gasolina Comum</strong> e <strong>Diesel S-10</strong></li>
+                                        </ul>
+                                        <p class="small mb-2"><strong>✅ Regras:</strong></p>
+                                        <ul class="small">
+                                            <li>Os arquivos são combinados pelo número de <strong>Autorização</strong></li>
                                             <li>Outros produtos (ARLA, etc) serão ignorados</li>
-                                            <li>Limite máximo: 500 litros por abastecimento</li>
-                                            <li>Limite máximo: 1.000 km rodados</li>
-                                            <li><strong class="text-success">A data/hora é lida diretamente da planilha</strong></li>
-                                            <li>Linhas válidas são importadas, erros geram arquivo para correção</li>
+                                            <li>Limite: 500 litros por abastecimento</li>
+                                            <li>Limite: 1.000 km rodados</li>
+                                            <li>Erros geram pendências para correção</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -904,12 +961,22 @@
             'use strict';
 
             // ===== ELEMENTOS DO DOM =====
-            const arquivoExcel = document.getElementById('arquivoExcel');
-            const dropZone = document.getElementById('dropZone');
-            const dropZoneContent = document.getElementById('dropZoneContent');
-            const arquivoSelecionado = document.getElementById('arquivoSelecionado');
-            const nomeArquivo = document.getElementById('nomeArquivo');
-            const btnRemoverArquivo = document.getElementById('btnRemoverArquivo');
+            // Dropzone XLSX
+            const arquivoXlsx = document.getElementById('arquivoXlsx');
+            const dropZoneXlsx = document.getElementById('dropZoneXlsx');
+            const dropZoneXlsxContent = document.getElementById('dropZoneXlsxContent');
+            const arquivoXlsxSelecionado = document.getElementById('arquivoXlsxSelecionado');
+            const nomeArquivoXlsx = document.getElementById('nomeArquivoXlsx');
+            const btnRemoverXlsx = document.getElementById('btnRemoverXlsx');
+
+            // Dropzone CSV
+            const arquivoCsv = document.getElementById('arquivoCsv');
+            const dropZoneCsv = document.getElementById('dropZoneCsv');
+            const dropZoneCsvContent = document.getElementById('dropZoneCsvContent');
+            const arquivoCsvSelecionado = document.getElementById('arquivoCsvSelecionado');
+            const nomeArquivoCsv = document.getElementById('nomeArquivoCsv');
+            const btnRemoverCsv = document.getElementById('btnRemoverCsv');
+
             const btnImportar = document.getElementById('btnImportar');
 
             const estadoInicial = document.getElementById('estadoInicial');
@@ -933,7 +1000,8 @@
             const resumoDiesel = document.getElementById('resumoDiesel');
             const resumoOutros = document.getElementById('resumoOutros');
 
-            let arquivoAtual = null;
+            let arquivoXlsxAtual = null;
+            let arquivoCsvAtual = null;
 
             // ===== SIGNALR =====
             let hubConnection = null;
@@ -1015,33 +1083,65 @@
 
             function configurarEventos() {
                 try {
-                    dropZone.addEventListener('dragover', (e) => {
+                    // ===== DROPZONE XLSX =====
+                    dropZoneXlsx.addEventListener('dragover', (e) => {
                         e.preventDefault();
-                        dropZone.classList.add('dragover');
+                        dropZoneXlsx.classList.add('dragover');
                     });
 
-                    dropZone.addEventListener('dragleave', (e) => {
+                    dropZoneXlsx.addEventListener('dragleave', (e) => {
                         e.preventDefault();
-                        dropZone.classList.remove('dragover');
+                        dropZoneXlsx.classList.remove('dragover');
                     });
 
-                    dropZone.addEventListener('drop', (e) => {
+                    dropZoneXlsx.addEventListener('drop', (e) => {
                         e.preventDefault();
-                        dropZone.classList.remove('dragover');
+                        dropZoneXlsx.classList.remove('dragover');
 
                         const files = e.dataTransfer.files;
                         if (files.length > 0) {
-                            selecionarArquivo(files[0]);
+                            selecionarArquivoXlsx(files[0]);
                         }
                     });
 
-                    arquivoExcel.addEventListener('change', (e) => {
+                    arquivoXlsx.addEventListener('change', (e) => {
                         if (e.target.files.length > 0) {
-                            selecionarArquivo(e.target.files[0]);
+                            selecionarArquivoXlsx(e.target.files[0]);
                         }
                     });
 
-                    btnRemoverArquivo.addEventListener('click', removerArquivo);
+                    btnRemoverXlsx.addEventListener('click', removerArquivoXlsx);
+
+                    // ===== DROPZONE CSV =====
+                    dropZoneCsv.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        dropZoneCsv.classList.add('dragover');
+                    });
+
+                    dropZoneCsv.addEventListener('dragleave', (e) => {
+                        e.preventDefault();
+                        dropZoneCsv.classList.remove('dragover');
+                    });
+
+                    dropZoneCsv.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        dropZoneCsv.classList.remove('dragover');
+
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            selecionarArquivoCsv(files[0]);
+                        }
+                    });
+
+                    arquivoCsv.addEventListener('change', (e) => {
+                        if (e.target.files.length > 0) {
+                            selecionarArquivoCsv(e.target.files[0]);
+                        }
+                    });
+
+                    btnRemoverCsv.addEventListener('click', removerArquivoCsv);
+
+                    // ===== BOTÃO IMPORTAR =====
                     btnImportar.addEventListener('click', importar);
 
                 } catch (error) {
@@ -1242,7 +1342,8 @@
                 }
             }
 
-            function selecionarArquivo(file) {
+            // ===== SELEÇÃO E REMOÇÃO DE ARQUIVOS =====
+            function selecionarArquivoXlsx(file) {
                 try {
                     const extensao = file.name.split('.').pop().toLowerCase();
                     if (extensao !== 'xlsx' && extensao !== 'xls') {
@@ -1250,37 +1351,74 @@
                         return;
                     }
 
-                    arquivoAtual = file;
-                    nomeArquivo.textContent = file.name;
-                    dropZoneContent.classList.add('d-none');
-                    arquivoSelecionado.classList.remove('d-none');
-                    dropZone.classList.add('arquivo-ok');
+                    arquivoXlsxAtual = file;
+                    nomeArquivoXlsx.textContent = file.name;
+                    dropZoneXlsxContent.classList.add('d-none');
+                    arquivoXlsxSelecionado.classList.remove('d-none');
+                    dropZoneXlsx.classList.add('arquivo-ok');
 
                     atualizarBotaoImportar();
 
                 } catch (error) {
-                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'selecionarArquivo', error);
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'selecionarArquivoXlsx', error);
                 }
             }
 
-            function removerArquivo() {
+            function removerArquivoXlsx() {
                 try {
-                    arquivoAtual = null;
-                    arquivoExcel.value = '';
-                    dropZoneContent.classList.remove('d-none');
-                    arquivoSelecionado.classList.add('d-none');
-                    dropZone.classList.remove('arquivo-ok');
+                    arquivoXlsxAtual = null;
+                    arquivoXlsx.value = '';
+                    dropZoneXlsxContent.classList.remove('d-none');
+                    arquivoXlsxSelecionado.classList.add('d-none');
+                    dropZoneXlsx.classList.remove('arquivo-ok');
 
                     atualizarBotaoImportar();
 
                 } catch (error) {
-                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'removerArquivo', error);
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'removerArquivoXlsx', error);
+                }
+            }
+
+            function selecionarArquivoCsv(file) {
+                try {
+                    const extensao = file.name.split('.').pop().toLowerCase();
+                    if (extensao !== 'csv') {
+                        AppToast.show('Amarelo', 'Selecione um arquivo CSV (.csv)', 4000);
+                        return;
+                    }
+
+                    arquivoCsvAtual = file;
+                    nomeArquivoCsv.textContent = file.name;
+                    dropZoneCsvContent.classList.add('d-none');
+                    arquivoCsvSelecionado.classList.remove('d-none');
+                    dropZoneCsv.classList.add('arquivo-ok');
+
+                    atualizarBotaoImportar();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'selecionarArquivoCsv', error);
+                }
+            }
+
+            function removerArquivoCsv() {
+                try {
+                    arquivoCsvAtual = null;
+                    arquivoCsv.value = '';
+                    dropZoneCsvContent.classList.remove('d-none');
+                    arquivoCsvSelecionado.classList.add('d-none');
+                    dropZoneCsv.classList.remove('arquivo-ok');
+
+                    atualizarBotaoImportar();
+
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'removerArquivoCsv', error);
                 }
             }
 
             function atualizarBotaoImportar() {
                 try {
-                    btnImportar.disabled = arquivoAtual === null;
+                    // Botão só fica habilitado quando AMBOS os arquivos estão selecionados
+                    btnImportar.disabled = (arquivoXlsxAtual === null || arquivoCsvAtual === null);
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarBotaoImportar', error);
                 }
@@ -1288,19 +1426,26 @@
 
             async function importar() {
                 try {
+                    // Validar que ambos os arquivos estão selecionados
+                    if (!arquivoXlsxAtual || !arquivoCsvAtual) {
+                        AppToast.show('Amarelo', 'Selecione ambos os arquivos (XLSX e CSV)', 4000);
+                        return;
+                    }
+
                     mostrarEstado('loading');
                     ocultarResumoPlanilha(); // Resetar resumo para nova importação
-                    atualizarProgresso(0, 'Iniciando importação...', 'Preparando envio do arquivo...');
+                    atualizarProgresso(0, 'Iniciando importação...', 'Preparando envio dos arquivos...');
 
                     const formData = new FormData();
-                    formData.append('arquivo', arquivoAtual);
+                    formData.append('arquivoXlsx', arquivoXlsxAtual);
+                    formData.append('arquivoCsv', arquivoCsvAtual);
 
                     // Enviar connectionId do SignalR para o servidor
                     if (connectionId) {
                         formData.append('connectionId', connectionId);
                     }
 
-                    const response = await fetch('/api/Abastecimento/ImportarNovo', {
+                    const response = await fetch('/api/Abastecimento/ImportarDual', {
                         method: 'POST',
                         body: formData
                     });

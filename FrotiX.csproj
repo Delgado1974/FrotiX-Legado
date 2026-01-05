@@ -1450,6 +1450,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AspNetCoreHero.ToastNotification" Version="1.1.0" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
     <PackageReference Include="EPPlus" Version="8.2.1" />
     <PackageReference Include="Hangfire.Core" Version="1.8.21" />
