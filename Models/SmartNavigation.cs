@@ -61,6 +61,7 @@ namespace FrotiX.Models
         public string Tags { get; set; }
         public string I18n { get; set; }
         public bool Disabled { get; set; }
+        public bool HasChild { get; set; }
         public List<ListItem> Items { set; get; } = new List<ListItem>();
         public Span Span { get; set; } = new Span();
         public string[] Roles { get; set; }
