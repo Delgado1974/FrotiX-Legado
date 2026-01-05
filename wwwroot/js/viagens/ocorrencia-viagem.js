@@ -16,6 +16,13 @@ var OcorrenciaViagem = (function () {
         contadorOcorrencias++;
         var html = criarCardOcorrencia(contadorOcorrencias);
         $('#listaOcorrencias').append(html);
+
+        // Inicializar tooltips Bootstrap no card recém-adicionado
+        var card = $(`.card-ocorrencia[data-index="${contadorOcorrencias}"]`);
+        card.find('[data-bs-toggle="tooltip"]').each(function() {
+            new bootstrap.Tooltip(this);
+        });
+
         atualizarContador();
     }
 
@@ -26,10 +33,20 @@ var OcorrenciaViagem = (function () {
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <span class="badge bg-warning text-dark badge-status">Ocorrência #${index}</span>
                         <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-azul btn-confirmar-ocorrencia" onclick="OcorrenciaViagem.confirmarOcorrencia(${index})" title="Confirmar ocorrência">
+                            <button type="button" class="btn btn-azul btn-confirmar-ocorrencia"
+                                    onclick="OcorrenciaViagem.confirmarOcorrencia(${index})"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-custom-class="tooltip-ftx-azul"
+                                    data-bs-placement="top"
+                                    title="Confirmar ocorrência">
                                 <i class="fa-duotone fa-check"></i>
                             </button>
-                            <button type="button" class="btn btn-vinho" onclick="OcorrenciaViagem.removerOcorrencia(${index})" title="Remover ocorrência">
+                            <button type="button" class="btn btn-vinho"
+                                    onclick="OcorrenciaViagem.removerOcorrencia(${index})"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-custom-class="tooltip-ftx-azul"
+                                    data-bs-placement="top"
+                                    title="Remover ocorrência">
                                 <i class="fa-duotone fa-circle-xmark"></i>
                             </button>
                         </div>

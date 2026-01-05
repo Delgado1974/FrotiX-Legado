@@ -3987,5 +3987,39 @@ table.dataTable thead .sorting_desc::after {
 }
 
 /* ================================================================
+   TOOLTIPS PADRÃO FROTIX - AZUL PETRÓLEO
+   ================================================================ */
+.tooltip-ftx-azul {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.tooltip-ftx-azul .tooltip-inner {
+    background-color: #154c62 !important;
+    color: #ffffff !important;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    text-align: left;
+}
+
+.tooltip-ftx-azul.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #154c62 !important;
+}
+
+.tooltip-ftx-azul.bs-tooltip-bottom .tooltip-arrow::before {
+    border-bottom-color: #154c62 !important;
+}
+
+.tooltip-ftx-azul.bs-tooltip-start .tooltip-arrow::before {
+    border-left-color: #154c62 !important;
+}
+
+.tooltip-ftx-azul.bs-tooltip-end .tooltip-arrow::before {
+    border-right-color: #154c62 !important;
+}
+
+/* ================================================================
    FIM DO ARQUIVO FROTIX.CSS
    ================================================================ */

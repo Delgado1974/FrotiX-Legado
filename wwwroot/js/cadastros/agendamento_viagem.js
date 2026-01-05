@@ -4486,7 +4486,9 @@ function InitializeCalendar(URL)
                 {
                     const description = info.event.extendedProps.description || "Sem descrição";
                     info.el.setAttribute("title", description);
-                    new bootstrap.Tooltip(info.el);
+                    new bootstrap.Tooltip(info.el, {
+                        customClass: 'tooltip-ftx-azul'
+                    });
                 } catch (error)
                 {
                     Alerta.TratamentoErroComLinha("agendamento_viagem.js", "Agenda.eventDidMount", error);
