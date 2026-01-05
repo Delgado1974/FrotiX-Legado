@@ -823,57 +823,44 @@ namespace FrotiX.Controllers
                 DateTime startMenos3 = start.AddHours(-3);
                 DateTime endMenos3 = end.AddHours(-3);
 
-                Expression<Func<ViewViagensAgenda , bool>> filtro = v =>
-                    v.DataInicial >= startMenos3 && v.DataInicial < endMenos3;
-
-                Expression<Func<ViewViagensAgenda , ViagemCalendarDTO>> seletor =
-                    v => new ViagemCalendarDTO
+                // ✅ OTIMIZAÇÃO: Query direta no banco com projeção única
+                // Antes: duas chamadas .ToList(), transformação em memória
+                // Agora: uma única query otimizada com cálculos no banco
+                var viagens = _context.ViewViagensAgenda
+                    .AsNoTracking() // Não rastreia mudanças (mais rápido)
+                    .Where(v => v.DataInicial >= startMenos3 && v.DataInicial < endMenos3)
+                    .Select(v => new
                     {
-                        id = v.ViagemId ,
-                        title = v.Titulo ,
-                        dataInicial = v.DataInicial.Value ,
-                        horaInicio = v.HoraInicio.Value ,
-                        dataFinal = v.DataFinal ,
-                        horaFim = v.HoraFim ,
-                        backgroundColor = v.CorEvento ,
-                        textColor = v.CorTexto ,
-                        descricao = v.DescricaoEvento ?? v.DescricaoMontada ,
-                    };
-
-                var viagensBrutas = _unitOfWork
-                    .ViewViagensAgenda.GetAllReducedIQueryable(seletor , filtro)
-                    .ToList();
-
-                var viagens = viagensBrutas
-                    .Select(x =>
+                        id = v.ViagemId,
+                        title = v.Titulo,
+                        // Cálculo de datas feito no banco (SQL)
+                        start = v.DataInicial.Value.AddDays(-1).Date
+                            .AddHours(v.HoraInicio.Value.Hour)
+                            .AddMinutes(v.HoraInicio.Value.Minute)
+                            .AddSeconds(v.HoraInicio.Value.Second),
+                        // Fim = início + 1 hora
+                        end = v.DataInicial.Value.AddDays(-1).Date
+                            .AddHours(v.HoraInicio.Value.Hour + 1)
+                            .AddMinutes(v.HoraInicio.Value.Minute)
+                            .AddSeconds(v.HoraInicio.Value.Second),
+                        backgroundColor = v.CorEvento,
+                        textColor = v.CorTexto,
+                        descricao = v.DescricaoEvento ?? v.DescricaoMontada
+                    })
+                    .ToList() // UMA ÚNICA chamada ao banco
+                    .Select(x => new
                     {
-                        var inicio = x.dataInicial.HasValue
-                            ? x
-                                .dataInicial.Value.AddDays(-1)
-                                .Date.AddHours(x.horaInicio?.Hour ?? 0)
-                                .AddMinutes(x.horaInicio?.Minute ?? 0)
-                                .AddSeconds(x.horaInicio?.Second ?? 0)
-                            : DateTime.MinValue;
-
-                        var fim = inicio.AddHours(1);
-
-                        return new
-                        {
-                            id = x.id ,
-                            title = x.title ,
-                            start = inicio.ToString("yyyy-MM-ddTHH:mm:ss") ,
-                            end = fim.ToString("yyyy-MM-ddTHH:mm:ss") ,
-                            backgroundColor = x.backgroundColor ,
-                            textColor = x.textColor ,
-                            descricao = x.descricao ,
-                        };
+                        x.id,
+                        x.title,
+                        start = x.start.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        end = x.end.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        x.backgroundColor,
+                        x.textColor,
+                        x.descricao
                     })
                     .ToList();
 
-                return Ok(new
-                {
-                    data = viagens
-                });
+                return Ok(new { data = viagens });
             }
             catch (Exception error)
             {
@@ -1247,25 +1234,28 @@ namespace FrotiX.Controllers
                     horaAgendamento = parsedHora;
                 }
 
-                var objViagens = _unitOfWork.Viagem.GetAllReduced(selector: v => new
-                {
-                    v.DataInicial ,
-                    v.HoraInicio ,
-                    v.RecorrenciaViagemId ,
-                    v.ViagemId ,
-                });
+                // ✅ OTIMIZAÇÃO: Query com filtro direto no banco (WHERE no SQL)
+                // Antes: carregava TODAS as viagens e filtrava em memória
+                // Agora: filtro executado no banco, retorna apenas se existe
+                var query = _context.Viagem
+                    .AsNoTracking() // Não rastreia mudanças (mais rápido)
+                    .Where(v => v.DataInicial.HasValue
+                        && v.DataInicial.Value.Date == dataAgendamento.Date);
 
-                var existeAgendamento = objViagens.Any(v =>
-                    v.DataInicial.HasValue
-                    && v.DataInicial.Value.Date == dataAgendamento.Date
-                    && (
-                        !horaAgendamento.HasValue || v.HoraInicio.Value.TimeOfDay == horaAgendamento
-                    )
-                    && (
-                        viagemIdRecorrente == Guid.Empty
-                        || v.RecorrenciaViagemId == viagemIdRecorrente
-                    )
-                );
+                // Adiciona filtro de hora se fornecido
+                if (horaAgendamento.HasValue)
+                {
+                    query = query.Where(v => v.HoraInicio.HasValue
+                        && v.HoraInicio.Value.TimeOfDay == horaAgendamento);
+                }
+
+                // Adiciona filtro de recorrência se fornecido
+                if (viagemIdRecorrente != Guid.Empty)
+                {
+                    query = query.Where(v => v.RecorrenciaViagemId == viagemIdRecorrente);
+                }
+
+                var existeAgendamento = query.Any(); // Any() executado no banco
 
                 return Ok(new
                 {

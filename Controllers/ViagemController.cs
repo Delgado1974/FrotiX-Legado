@@ -615,24 +615,25 @@ namespace FrotiX.Controllers
                 var veiculoIdParam = GetParsedId(veiculoId);
                 var eventoIdParam = GetParsedId(eventoId);
 
-                var query = _unitOfWork.ViewViagens.GetAll(
-                    filter: viagemsFilters(
+                // ✅ OTIMIZAÇÃO: Ordenação e projeção no banco (SQL)
+                // Antes: ordenação em memória depois do .ToList()
+                // Agora: OrderBy executado como SQL ORDER BY antes de carregar dados
+                var result = _unitOfWork.ViewViagens
+                    .GetAll(filter: viagemsFilters(
                         veiculoIdParam ,
                         motoristaIdParam ,
                         dataViagem ,
                         statusId ,
                         eventoIdParam
-                    )
-                );
-
-                // Ordenação: NoFichaVistoria = 0 ou null primeiro (para serem preenchidos)
-                // depois por DataInicial DESC, HoraInicio DESC
-                // Registros com NoFichaVistoria > 0 vão depois, ordenados por número DESC
-                var result = query
-                    .OrderBy(x => x.NoFichaVistoria > 0 ? 1 : 0)  // 0 = sem número (primeiro), 1 = com número (depois)
-                    .ThenByDescending(x => x.DataInicial)
-                    .ThenByDescending(x => x.HoraInicio)
-                    .ThenByDescending(x => x.NoFichaVistoria)
+                    ))
+                    .AsNoTracking() // Não rastreia mudanças (mais rápido)
+                    // Ordenação: NoFichaVistoria = 0 ou null primeiro (para serem preenchidos)
+                    // depois por DataInicial DESC, HoraInicio DESC
+                    // Registros com NoFichaVistoria > 0 vão depois, ordenados por número DESC
+                    .OrderBy(x => x.NoFichaVistoria > 0 ? 1 : 0)  // SQL: CASE WHEN NoFichaVistoria > 0 THEN 1 ELSE 0 END
+                    .ThenByDescending(x => x.DataInicial)           // SQL: ORDER BY DataInicial DESC
+                    .ThenByDescending(x => x.HoraInicio)            // SQL: ORDER BY HoraInicio DESC
+                    .ThenByDescending(x => x.NoFichaVistoria)       // SQL: ORDER BY NoFichaVistoria DESC
                     .Select(x => new
                     {
                         x.CombustivelFinal ,
@@ -663,7 +664,7 @@ namespace FrotiX.Controllers
                         x.MotoristaId ,
                         x.VeiculoId ,
                     })
-                    .ToList();
+                    .ToList(); // UMA ÚNICA chamada ao banco com OrderBy já aplicado
 
                 return Json(new
                 {
