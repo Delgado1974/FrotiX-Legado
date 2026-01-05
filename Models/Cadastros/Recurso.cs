@@ -62,6 +62,9 @@ namespace FrotiX.Models
         [Display(Name = "Nível na Hierarquia")]
         public int Nivel { get; set; } = 0;
 
+        [Display(Name = "Tem Filhos")]
+        public bool HasChild { get; set; } = false;
+
         // Navegação EF Core
         public virtual Recurso? Parent { get; set; }
         public virtual ICollection<Recurso> Children { get; set; } = new List<Recurso>();

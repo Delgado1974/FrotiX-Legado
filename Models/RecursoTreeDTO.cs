@@ -69,7 +69,7 @@ namespace FrotiX.Models
                 Nivel = recurso.Nivel,
                 Descricao = recurso.Descricao,
                 Ativo = recurso.Ativo,
-                HasChild = false, // Será definido ao montar a árvore
+                HasChild = recurso.HasChild,
                 Expanded = true
             };
         }
@@ -90,7 +90,8 @@ namespace FrotiX.Models
                 Ordem = Ordem,
                 Nivel = Nivel,
                 Descricao = Descricao,
-                Ativo = Ativo
+                Ativo = Ativo,
+                HasChild = HasChild
             };
         }
     }

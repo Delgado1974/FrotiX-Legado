@@ -151,7 +151,8 @@ namespace FrotiX.Controllers
                     Icon = !string.IsNullOrEmpty(item.Icon) ? item.Icon : "fa-regular fa-folder",
                     Href = !string.IsNullOrEmpty(item.Href) ? item.Href : "javascript:void(0);",
                     Ativo = true,
-                    Nivel = 0
+                    Nivel = 0,
+                    HasChild = false // Novos itens não têm filhos inicialmente
                 };
                 _unitOfWork.Recurso.Add(recurso);
 
@@ -430,6 +431,7 @@ namespace FrotiX.Controllers
                 recurso.Ordem = dto.Ordem > 0 ? dto.Ordem : GetNextOrdem();
                 recurso.Nivel = dto.Nivel;
                 recurso.Ativo = dto.Ativo;
+                recurso.HasChild = dto.HasChild;
                 recurso.ParentId = Guid.TryParse(dto.ParentId, out var parentId) ? parentId : null;
 
                 if (isNew)
@@ -687,7 +689,8 @@ namespace FrotiX.Controllers
                         Icon = item.Icon ?? "fa-duotone fa-folder",
                         Href = item.Href ?? "javascript:void(0);",
                         Ativo = true,
-                        Nivel = nivel
+                        Nivel = nivel,
+                        HasChild = item.HasChild
                     };
                     _unitOfWork.Recurso.Add(recurso);
                     isNew = true;
@@ -702,6 +705,7 @@ namespace FrotiX.Controllers
                     recurso.Nivel = nivel;
                     recurso.Ativo = true;
                     recurso.Ordem = ordemCalculada;
+                    recurso.HasChild = item.HasChild;
                     _unitOfWork.Recurso.Update(recurso);
                     atualizados++;
                 }
@@ -792,7 +796,8 @@ namespace FrotiX.Controllers
                 {
                     { "title", EncodeHtmlEntities(item.Title ?? item.Text) },
                     { "nomeMenu", item.NomeMenu ?? item.Text },
-                    { "roles", new string[0] }
+                    { "roles", new string[0] },
+                    { "hasChild", item.HasChild }
                 };
 
                 if (!string.IsNullOrEmpty(item.Icon))
@@ -871,10 +876,17 @@ namespace FrotiX.Controllers
                             Nome = item.Title ?? item.Text,
                             NomeMenu = item.NomeMenu,
                             Descricao = $"Menu: {item.NomeMenu}",
-                            Ordem = GetNextOrdem()
+                            Ordem = GetNextOrdem(),
+                            HasChild = item.HasChild
                         };
                         _unitOfWork.Recurso.Add(recurso);
                         CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                    }
+                    else
+                    {
+                        // Atualiza HasChild em recursos existentes
+                        recurso.HasChild = item.HasChild;
+                        _unitOfWork.Recurso.Update(recurso);
                     }
                 }
 
