@@ -823,43 +823,33 @@ namespace FrotiX.Controllers
                 DateTime startMenos3 = start.AddHours(-3);
                 DateTime endMenos3 = end.AddHours(-3);
 
-                // ✅ OTIMIZAÇÃO: Query direta no banco com projeção única
-                // Antes: duas chamadas .ToList(), transformação em memória
-                // Agora: uma única query otimizada com cálculos no banco
-                var viagens = _context.ViewViagensAgenda
-                    .AsNoTracking() // Não rastreia mudanças (mais rápido)
+                // Buscar dados da view (usa o campo Start já calculado na view)
+                var viagensRaw = _context.ViewViagensAgenda
+                    .AsNoTracking()
                     .Where(v => v.DataInicial.HasValue
-                        && v.HoraInicio.HasValue
                         && v.DataInicial >= startMenos3
                         && v.DataInicial < endMenos3)
-                    .Select(v => new
+                    .ToList();
+
+                // Processar em memória
+                var viagens = viagensRaw
+                    .Select(v =>
                     {
-                        id = v.ViagemId,
-                        title = v.Titulo,
-                        // Cálculo de datas feito no banco (SQL)
-                        start = v.DataInicial.Value.AddDays(-1).Date
-                            .AddHours(v.HoraInicio.Value.Hour)
-                            .AddMinutes(v.HoraInicio.Value.Minute)
-                            .AddSeconds(v.HoraInicio.Value.Second),
-                        // Fim = início + 1 hora
-                        end = v.DataInicial.Value.AddDays(-1).Date
-                            .AddHours(v.HoraInicio.Value.Hour + 1)
-                            .AddMinutes(v.HoraInicio.Value.Minute)
-                            .AddSeconds(v.HoraInicio.Value.Second),
-                        backgroundColor = v.CorEvento,
-                        textColor = v.CorTexto,
-                        descricao = v.DescricaoEvento ?? v.DescricaoMontada
-                    })
-                    .ToList() // UMA ÚNICA chamada ao banco
-                    .Select(x => new
-                    {
-                        x.id,
-                        x.title,
-                        start = x.start.ToString("yyyy-MM-ddTHH:mm:ss"),
-                        end = x.end.ToString("yyyy-MM-ddTHH:mm:ss"),
-                        x.backgroundColor,
-                        x.textColor,
-                        x.descricao
+                        // A view já calcula o campo Start corretamente
+                        var startDate = v.Start ?? v.DataInicial ?? DateTime.Now;
+                        // End = Start + 1 hora
+                        var endDate = startDate.AddHours(1);
+
+                        return new
+                        {
+                            id = v.ViagemId,
+                            title = v.Titulo,
+                            start = startDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                            end = endDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                            backgroundColor = v.CorEvento,
+                            textColor = v.CorTexto,
+                            descricao = v.DescricaoEvento ?? v.DescricaoMontada
+                        };
                     })
                     .ToList();
 
