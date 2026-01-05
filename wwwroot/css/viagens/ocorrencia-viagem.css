@@ -22,6 +22,20 @@
     background-color: #f8fff9;
 }
 
+/* Botões de ação do card (confirmar e remover) */
+.card-ocorrencia .btn-group-sm .btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-ocorrencia .btn-group-sm {
+    gap: 4px;
+}
+
 /* Labels de visualização (após confirmar) */
 .label-resumo,
 .label-descricao {

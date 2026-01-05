@@ -60,6 +60,12 @@ body, html {
     border-radius: 0.375rem;
 }
 
+/* Garantir que a borda superior dos dropdowntree apareça */
+.e-dropdowntree .e-input-group,
+.e-dropdowntree .e-ddt {
+    border: 1px solid #ced4da !important;
+}
+
 /* ================================================================
    ALINHAMENTO VERTICAL CENTRALIZADO (GLOBAL FROTIX)
    Centraliza verticalmente o texto em todos os controles
