@@ -21,24 +21,31 @@ var OcorrenciaViagem = (function () {
 
     function criarCardOcorrencia(index) {
         return `
-            <div class="card card-ocorrencia mb-2" data-index="${index}">
+            <div class="card card-ocorrencia mb-2" data-index="${index}" data-confirmada="false">
                 <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="badge bg-warning text-dark">Ocorrência #${index}</span>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="OcorrenciaViagem.removerOcorrencia(${index})">
-                            <i class="fa fa-times"></i>
-                        </button>
+                        <span class="badge bg-warning text-dark badge-status">Ocorrência #${index}</span>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-azul btn-confirmar-ocorrencia" onclick="OcorrenciaViagem.confirmarOcorrencia(${index})" title="Confirmar ocorrência">
+                                <i class="fa-duotone fa-check"></i>
+                            </button>
+                            <button type="button" class="btn btn-vinho" onclick="OcorrenciaViagem.removerOcorrencia(${index})" title="Remover ocorrência">
+                                <i class="fa-duotone fa-circle-xmark"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="mb-2">
-                        <input type="text" class="form-control form-control-sm input-resumo" 
+                    <div class="mb-2 container-resumo">
+                        <input type="text" class="form-control form-control-sm input-resumo"
                                placeholder="Resumo da ocorrência *" maxlength="200" required>
+                        <div class="label-resumo" style="display: none;"></div>
                     </div>
-                    <div class="mb-2">
-                        <textarea class="form-control form-control-sm input-descricao" rows="2" 
+                    <div class="mb-2 container-descricao">
+                        <textarea class="form-control form-control-sm input-descricao" rows="2"
                                   placeholder="Descrição detalhada (opcional)"></textarea>
+                        <div class="label-descricao" style="display: none;"></div>
                     </div>
                     <div class="mb-2">
-                        <input type="file" class="form-control form-control-sm input-imagem" 
+                        <input type="file" class="form-control form-control-sm input-imagem"
                                accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.webm"
                                onchange="OcorrenciaViagem.previewImagem(this, ${index})">
                         <div class="preview-container mt-1" id="preview-${index}"></div>
@@ -51,6 +58,44 @@ var OcorrenciaViagem = (function () {
     function removerOcorrencia(index) {
         $(`.card-ocorrencia[data-index="${index}"]`).remove();
         atualizarContador();
+    }
+
+    function confirmarOcorrencia(index) {
+        var card = $(`.card-ocorrencia[data-index="${index}"]`);
+
+        // Validar se tem resumo
+        var resumo = card.find('.input-resumo').val().trim();
+        if (!resumo) {
+            card.find('.input-resumo').addClass('is-invalid');
+            card.addClass('shake');
+            setTimeout(function () {
+                card.removeClass('shake');
+                card.find('.input-resumo').removeClass('is-invalid');
+            }, 500);
+            return;
+        }
+
+        // Marcar como confirmada
+        card.attr('data-confirmada', 'true');
+
+        // Transformar inputs em labels
+        var descricao = card.find('.input-descricao').val().trim();
+
+        // Criar labels com os valores
+        card.find('.label-resumo').html('<strong>Resumo:</strong> ' + resumo).show();
+        card.find('.input-resumo').hide();
+
+        if (descricao) {
+            card.find('.label-descricao').html('<strong>Descrição:</strong> ' + descricao).show();
+        }
+        card.find('.input-descricao').hide();
+
+        // Desabilitar input de imagem
+        card.find('.input-imagem').prop('disabled', true).hide();
+
+        // Esconder botão de confirmar e mudar badge
+        card.find('.btn-confirmar-ocorrencia').hide();
+        card.find('.badge-status').removeClass('bg-warning text-dark').addClass('bg-success text-white').text('Confirmada #' + index);
     }
 
     function atualizarContador() {
@@ -212,10 +257,11 @@ var OcorrenciaViagem = (function () {
         init: init,
         adicionarOcorrencia: adicionarOcorrencia,
         removerOcorrencia: removerOcorrencia,
+        confirmarOcorrencia: confirmarOcorrencia,
         previewImagem: previewImagem,
         temOcorrencias: temOcorrencias,
         validarOcorrencias: validarOcorrencias,
-        coletarOcorrenciasSimples: coletarOcorrenciasSimples,  // ✅ NOVO
+        coletarOcorrenciasSimples: coletarOcorrenciasSimples,
         salvarOcorrencias: salvarOcorrencias,
         limparOcorrencias: limparOcorrencias
     };

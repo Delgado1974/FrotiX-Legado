@@ -16,6 +16,27 @@
     border-left-color: #dc3545 !important;
 }
 
+/* Card confirmado */
+.card-ocorrencia[data-confirmada="true"] {
+    border-left-color: #28a745 !important;
+    background-color: #f8fff9;
+}
+
+/* Labels de visualização (após confirmar) */
+.label-resumo,
+.label-descricao {
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.label-resumo strong,
+.label-descricao strong {
+    color: #495057;
+}
+
 /* Animação de shake para validação */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
@@ -41,26 +62,26 @@
 }
 
 /* Scrollbar customizada para container de ocorrências */
-#containerOcorrencias {
+#listaOcorrencias {
     max-height: 300px;
     overflow-y: auto;
 }
 
-#containerOcorrencias::-webkit-scrollbar {
+#listaOcorrencias::-webkit-scrollbar {
     width: 6px;
 }
 
-#containerOcorrencias::-webkit-scrollbar-track {
+#listaOcorrencias::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 3px;
 }
 
-#containerOcorrencias::-webkit-scrollbar-thumb {
+#listaOcorrencias::-webkit-scrollbar-thumb {
     background: #c1c1c1;
     border-radius: 3px;
 }
 
-#containerOcorrencias::-webkit-scrollbar-thumb:hover {
+#listaOcorrencias::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
 }
 
