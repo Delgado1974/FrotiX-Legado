@@ -118,7 +118,7 @@ namespace FrotiX.Repository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false
+            bool asNoTracking = true
         )
             {
             var q = PrepareQuery(filter , includeProperties , asNoTracking);
@@ -131,7 +131,7 @@ namespace FrotiX.Repository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false ,
+            bool asNoTracking = true ,
             int? take = null
         )
             {
@@ -152,7 +152,7 @@ namespace FrotiX.Repository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false
+            bool asNoTracking = true
         )
             {
             return GetAllReducedIQueryable(
@@ -170,7 +170,7 @@ namespace FrotiX.Repository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false
+            bool asNoTracking = true
         )
             {
             if (selector == null)

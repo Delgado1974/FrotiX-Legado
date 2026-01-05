@@ -618,6 +618,7 @@ namespace FrotiX.Controllers
                 // ✅ OTIMIZAÇÃO: Ordenação e projeção no banco (SQL)
                 // Antes: ordenação em memória depois do .ToList()
                 // Agora: OrderBy executado como SQL ORDER BY antes de carregar dados
+                // AsNoTracking agora é aplicado automaticamente pelo Repository (default = true)
                 var result = _unitOfWork.ViewViagens
                     .GetAll(filter: viagemsFilters(
                         veiculoIdParam ,
@@ -626,7 +627,6 @@ namespace FrotiX.Controllers
                         statusId ,
                         eventoIdParam
                     ))
-                    .AsNoTracking() // Não rastreia mudanças (mais rápido)
                     // Ordenação: NoFichaVistoria = 0 ou null primeiro (para serem preenchidos)
                     // depois por DataInicial DESC, HoraInicio DESC
                     // Registros com NoFichaVistoria > 0 vão depois, ordenados por número DESC

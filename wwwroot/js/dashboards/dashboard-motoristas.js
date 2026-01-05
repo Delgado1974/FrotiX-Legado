@@ -191,7 +191,7 @@ async function carregarAnosMesesDisponiveis() {
             const selectMes = document.getElementById('filtroMes');
 
             if (selectAno) {
-                selectAno.innerHTML = '';
+                selectAno.innerHTML = '<option value="">&lt;Todos os Anos&gt;</option>';
                 response.anos.forEach(ano => {
                     const option = document.createElement('option');
                     option.value = ano;

@@ -38,7 +38,14 @@
       "Bash(del:*)",
       "Bash(Select-Object -First 15)",
       "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Pages\" /B)",
-      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Pages\\\\Veiculo\" /B)"
+      "Bash(dir \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Pages\\\\Veiculo\" /B)",
+      "Bash(dir:*)",
+      "Bash(node -e:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(dotnet nuget list:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(Select-Object -First 10)"
     ]
   }
 }

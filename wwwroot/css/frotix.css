@@ -50,8 +50,6 @@ body, html {
 .form-control,
 .form-control-xs,
 .form-select,
-input.e-input,
-.e-input-group input.e-input,
 .e-ddl.e-input-group,
 .e-ddl.e-input-group.e-control-wrapper,
 .e-dropdowntree .e-input-group {
@@ -60,6 +58,63 @@ input.e-input,
     padding: 0.375rem 0.75rem !important;
     font-size: 0.875rem !important;
     border-radius: 0.375rem;
+}
+
+/* ================================================================
+   ALINHAMENTO VERTICAL CENTRALIZADO (GLOBAL FROTIX)
+   Centraliza verticalmente o texto em todos os controles
+   ================================================================ */
+
+/* Selects nativos HTML - usa line-height para centralizar */
+.form-select,
+select.form-control {
+    line-height: 38px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Inputs de texto nativos - centraliza com padding balanceado */
+input.form-control:not(.e-input),
+textarea.form-control {
+    line-height: 1.5 !important;
+}
+
+/* ================================================================
+   SYNCFUSION COMBOBOX/DROPDOWN - CENTRALIZAÇÃO VERTICAL
+   Corrige alinhamento de placeholder e texto selecionado
+   ================================================================ */
+
+/* Wrapper do Syncfusion - garante altura e layout */
+.e-input-group.e-control-wrapper,
+.e-ddl.e-input-group.e-control-wrapper,
+.e-combobox.e-input-group.e-control-wrapper {
+    height: var(--ftx-input-height) !important;
+    min-height: var(--ftx-input-height) !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Input do Syncfusion - centralização forçada */
+.e-input-group input.e-input,
+.e-ddl.e-input-group input.e-input,
+.e-combobox.e-input-group input.e-input,
+.e-dropdownbase input.e-input,
+.e-input-group.e-control-wrapper input.e-input,
+.e-control-wrapper input.e-input {
+    height: 38px !important;
+    line-height: normal !important;
+    padding: 0 0.75rem !important;
+    vertical-align: middle !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Placeholder do Syncfusion - centralizado */
+.e-input-group input.e-input::placeholder,
+.e-ddl.e-input-group input.e-input::placeholder,
+.e-combobox.e-input-group input.e-input::placeholder,
+.e-control-wrapper input.e-input::placeholder {
+    vertical-align: middle !important;
 }
 
 /* Foco nos controles */

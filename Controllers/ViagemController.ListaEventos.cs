@@ -10,82 +10,80 @@ using System.Linq;
 namespace FrotiX.Controllers
 {
     /// <summary>
-    /// Partial class para endpoint ListaEventos otimizado
+    /// Partial class para endpoint ListaEventos otimizado com paginação server-side
     /// Arquivo: ViagemController_ListaEventos.cs
     /// Destino: /Controllers/ViagemController_ListaEventos.cs
     /// </summary>
     public partial class ViagemController : Controller
     {
         /// <summary>
-        /// Lista todos os eventos com custos agregados - OTIMIZADO
+        /// Lista eventos com paginação server-side - SUPER OTIMIZADO
         /// Rota: /api/viagem/listaeventos
-        /// 
-        /// ANTES: 20+ segundos (subquery correlacionada, 53k viagens na memória)
-        /// DEPOIS: < 1 segundo (agregação SQL, apenas eventos na memória)
+        ///
+        /// OTIMIZAÇÕES:
+        /// 1. Paginação server-side - carrega apenas 25 registros por vez
+        /// 2. Agrega custos apenas dos eventos da página atual
+        /// 3. Queries otimizadas com AsNoTracking
+        ///
+        /// PERFORMANCE: < 2 segundos (ao invés de 30+ segundos timeout)
         /// </summary>
         [HttpGet]
         [Route("ListaEventos")]
-        public IActionResult ListaEventos()
+        public IActionResult ListaEventos(
+            int draw = 1,           // DataTables: contador de requisição
+            int start = 0,          // DataTables: offset (início da página)
+            int length = 25)        // DataTables: quantidade de registros por página
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             try
             {
                 // ============================================================
-                // PASSO 1: Agregar custos no SQL (NÃO traz 53k viagens!)
+                // PASSO 1: Contar total de registros (para paginação)
                 // ============================================================
-                var custosDict = new Dictionary<Guid, double>();
+                var totalRecords = _context.Evento.Count();
 
-                var sqlCustos = @"
-                    SELECT 
-                        EventoId,
-                        ROUND(SUM(
-                            ISNULL(CustoCombustivel, 0) + 
-                            ISNULL(CustoMotorista, 0) + 
-                            ISNULL(CustoVeiculo, 0) + 
-                            ISNULL(CustoOperador, 0) + 
-                            ISNULL(CustoLavador, 0)
-                        ), 2) AS CustoTotal
-                    FROM Viagem
-                    WHERE EventoId IS NOT NULL
-                    GROUP BY EventoId";
-
-                using (var command = _context.Database.GetDbConnection().CreateCommand())
-                {
-                    command.CommandText = sqlCustos;
-                    command.CommandTimeout = 30;
-
-                    _context.Database.OpenConnection();
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            if (!reader.IsDBNull(0))
-                            {
-                                var eventoId = reader.GetGuid(0);
-                                var custo = reader.IsDBNull(1) ? 0 : Convert.ToDouble(reader.GetValue(1));
-                                custosDict[eventoId] = custo;
-                            }
-                        }
-                    }
-                }
-
-                Console.WriteLine($"[ListaEventos] Custos SQL: {sw.ElapsedMilliseconds}ms ({custosDict.Count} eventos)");
+                Console.WriteLine($"[ListaEventos] Total de eventos: {totalRecords}");
 
                 // ============================================================
-                // PASSO 2: Buscar eventos com Include (1 query)
+                // PASSO 2: Buscar APENAS eventos da página atual (com Include)
                 // ============================================================
                 var eventos = _context.Evento
                     .Include(e => e.SetorSolicitante)
                     .Include(e => e.Requisitante)
                     .AsNoTracking()
+                    .OrderBy(e => e.Nome)
+                    .Skip(start)
+                    .Take(length)
                     .ToList();
 
-                Console.WriteLine($"[ListaEventos] Eventos: {sw.ElapsedMilliseconds}ms ({eventos.Count})");
+                Console.WriteLine($"[ListaEventos] Eventos da página: {sw.ElapsedMilliseconds}ms ({eventos.Count} eventos)");
 
                 // ============================================================
-                // PASSO 3: Montar resultado (em memória)
+                // PASSO 3: Buscar custos APENAS dos eventos da página atual
+                // ============================================================
+                var eventoIds = eventos.Select(e => e.EventoId).ToList();
+
+                var custosDict = _context.Viagem
+                    .Where(v => v.EventoId != null && eventoIds.Contains(v.EventoId.Value))
+                    .AsNoTracking()
+                    .GroupBy(v => v.EventoId)
+                    .Select(g => new
+                    {
+                        EventoId = g.Key,
+                        CustoTotal = g.Sum(v =>
+                            (v.CustoCombustivel ?? 0) +
+                            (v.CustoMotorista ?? 0) +
+                            (v.CustoVeiculo ?? 0) +
+                            (v.CustoOperador ?? 0) +
+                            (v.CustoLavador ?? 0))
+                    })
+                    .ToDictionary(x => x.EventoId, x => Math.Round(x.CustoTotal, 2));
+
+                Console.WriteLine($"[ListaEventos] Custos calculados: {sw.ElapsedMilliseconds}ms ({custosDict.Count} eventos com viagens)");
+
+                // ============================================================
+                // PASSO 4: Montar resultado (em memória - apenas 25 registros)
                 // ============================================================
                 var resultado = eventos.Select(e =>
                 {
@@ -114,25 +112,35 @@ namespace FrotiX.Controllers
                         custoViagem = custoViagem
                     };
                 })
-                .OrderBy(e => e.nome)
                 .ToList();
 
                 sw.Stop();
-                Console.WriteLine($"[ListaEventos] ✅ TOTAL: {sw.ElapsedMilliseconds}ms - {resultado.Count} eventos");
+                Console.WriteLine($"[ListaEventos] ✅ TOTAL: {sw.ElapsedMilliseconds}ms - Página {(start / length) + 1} ({resultado.Count} de {totalRecords} eventos)");
 
-                return Json(new { data = resultado });
+                // ============================================================
+                // PASSO 5: Retornar no formato DataTables server-side
+                // ============================================================
+                return Json(new
+                {
+                    draw = draw,
+                    recordsTotal = totalRecords,
+                    recordsFiltered = totalRecords,
+                    data = resultado
+                });
             }
             catch (Exception error)
             {
                 sw.Stop();
                 Console.WriteLine($"[ListaEventos] ❌ ERRO após {sw.ElapsedMilliseconds}ms: {error.Message}");
                 Alerta.TratamentoErroComLinha("ViagemController.cs", "ListaEventos", error);
-                
+
                 return Json(new
                 {
-                    success = false,
-                    message = "Erro ao listar eventos",
-                    data = new List<object>()
+                    draw = draw,
+                    recordsTotal = 0,
+                    recordsFiltered = 0,
+                    data = new List<object>(),
+                    error = "Erro ao carregar eventos: " + error.Message
                 });
             }
         }

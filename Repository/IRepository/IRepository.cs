@@ -34,7 +34,7 @@ namespace FrotiX.Repository.IRepository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false
+            bool asNoTracking = true
         );
 
         /// <summary>Retorna um conjunto materializado de entidades (assíncrono).</summary>
@@ -42,7 +42,7 @@ namespace FrotiX.Repository.IRepository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false ,
+            bool asNoTracking = true ,
             int? take = null
         );
 
@@ -55,7 +55,7 @@ namespace FrotiX.Repository.IRepository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false
+            bool asNoTracking = true
         );
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace FrotiX.Repository.IRepository
             Expression<Func<T , bool>> filter = null ,
             Func<IQueryable<T> , IOrderedQueryable<T>> orderBy = null ,
             string includeProperties = null ,
-            bool asNoTracking = false
+            bool asNoTracking = true
         );
 
         /// <summary>Adiciona a entidade ao contexto.</summary>

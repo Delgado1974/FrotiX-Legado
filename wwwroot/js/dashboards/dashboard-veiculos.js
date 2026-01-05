@@ -957,6 +957,9 @@ function preencherSelectAnos(seletor, anos, anoSelecionado) {
     const $select = $(seletor);
     $select.empty();
 
+    // Adiciona opção "Todos os Anos" primeiro
+    $select.append('<option value="">&lt;Todos os Anos&gt;</option>');
+
     if (anos && anos.length > 0) {
         anos.forEach(ano => {
             const selected = ano === anoSelecionado ? 'selected' : '';

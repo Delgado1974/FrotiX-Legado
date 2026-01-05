@@ -662,6 +662,8 @@
                 }
 
                 $('#tblEventos').DataTable({
+                    serverSide: true,  // ⭐ ATIVA PAGINAÇÃO SERVER-SIDE
+                    processing: true,  // ⭐ MOSTRA INDICADOR DE PROCESSAMENTO
                     order: [[1, 'desc']], // Ordenar por Data Inicial decrescente
                     autoWidth: false,
                     dom: 'Bfrtip',
@@ -678,6 +680,7 @@
                             pageSize: 'LEGAL'
                         }
                     ],
+                    pageLength: 25,  // ⭐ TAMANHO PADRÃO DA PÁGINA
                     columnDefs: [
                         { targets: 0, className: "text-left", width: "22%" }, // Evento
                         { targets: 1, className: "text-center", width: "3%" }, // Início

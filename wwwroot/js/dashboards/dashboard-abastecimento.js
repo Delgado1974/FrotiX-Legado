@@ -95,7 +95,7 @@ function inicializarFiltrosECarregar() {
                     [selectGeral, selectMensal, selectVeiculo].forEach(select => {
                         if (!select) return;
                         const isGeral = select.id === 'filtroAnoGeral';
-                        select.innerHTML = isGeral ? '<option value="">Todos os Anos</option>' : '';
+                        select.innerHTML = isGeral ? '<option value="">&lt;Todos os Anos&gt;</option>' : '';
                         anos.forEach(ano => {
                             const option = document.createElement('option');
                             option.value = ano;

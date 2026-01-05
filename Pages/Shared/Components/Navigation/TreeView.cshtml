@@ -308,15 +308,24 @@
         expandOn: 'None', // Expande apenas pela seta, não pelo clique no item
         nodeClicked: function(args) {
             // Previne navegação padrão do link - controlamos manualmente
-            args.event.preventDefault();
+            if (args.event) {
+                args.event.preventDefault();
+            }
+
+            // IMPORTANTE: Verifica se nodeData existe antes de acessar suas propriedades
+            if (!args.nodeData) {
+                console.warn('TreeView.nodeClicked: args.nodeData está undefined');
+                return;
+            }
 
             // Verifica se clicou na seta de expansão
-            var clickedElement = args.event.target;
-            if (clickedElement.classList.contains('e-icons') ||
-                clickedElement.classList.contains('e-icon-expandable') ||
-                clickedElement.classList.contains('e-icon-collapsible')) {
+            var clickedElement = args.event ? args.event.target : null;
+            if (clickedElement &&
+                (clickedElement.classList.contains('e-icons') ||
+                 clickedElement.classList.contains('e-icon-expandable') ||
+                 clickedElement.classList.contains('e-icon-collapsible'))) {
                 // Se clicou na seta, expande/colapsa
-                if (args.node.classList.contains('e-node-collapsed')) {
+                if (args.node && args.node.classList.contains('e-node-collapsed')) {
                     treeObj.expandAll([args.nodeData.id]);
                 } else {
                     treeObj.collapseAll([args.nodeData.id]);
@@ -326,7 +335,7 @@
 
             // Se o item tem filhos (é um grupo), apenas expande/colapsa - NUNCA navega
             if (args.nodeData.hasChild) {
-                if (args.node.classList.contains('e-node-collapsed')) {
+                if (args.node && args.node.classList.contains('e-node-collapsed')) {
                     treeObj.expandAll([args.nodeData.id]);
                 } else {
                     treeObj.collapseAll([args.nodeData.id]);
@@ -335,11 +344,13 @@
             }
 
             // Se não tem filhos, navega para o link (se existir)
-            var link = args.node.querySelector('.nav-link');
-            if (link) {
-                var href = link.getAttribute('href');
-                if (href && href !== 'javascript:void(0);') {
-                    window.location.href = href;
+            if (args.node) {
+                var link = args.node.querySelector('.nav-link');
+                if (link) {
+                    var href = link.getAttribute('href');
+                    if (href && href !== 'javascript:void(0);') {
+                        window.location.href = href;
+                    }
                 }
             }
         }
