@@ -53,52 +53,237 @@ namespace FrotiX.Controllers
         // Adicione temporariamente para verificar se está retornando dados
         // ====================================================================
 
-        [HttpGet("TestarBuscarViagensRecorrencia")]
-        public async Task<IActionResult> TestarBuscarViagensRecorrencia(Guid id)
+        [HttpGet("TesteView")]
+        public IActionResult TesteView()
         {
             try
             {
-                // Log detalhado para debug
-                var resultado = new
-                {
-                    idBuscado = id ,
-                    timestamp = DateTime.Now
-                };
+                _logger.LogInformation("[TesteView] Testando acesso à ViewViagensAgenda");
 
-                // Buscar usando o método do repositório
-                var viagens = await _unitOfWork.Viagem.BuscarViagensRecorrenciaAsync(id);
+                // Teste 1: Ver se a view existe
+                var count = _context.ViewViagensAgenda.Count();
 
-                // Informações de debug
-                var debug = new
+                _logger.LogInformation($"[TesteView] Total de registros na view: {count}");
+
+                // Teste 2: Buscar um registro
+                var primeiro = _context.ViewViagensAgenda
+                    .AsNoTracking()
+                    .FirstOrDefault();
+
+                return Ok(new
                 {
-                    idBuscado = id ,
-                    totalViagensEncontradas = viagens.Count ,
-                    viagens = viagens.Select(v => new
+                    totalRegistros = count,
+                    primeiroRegistro = primeiro != null ? new
                     {
-                        viagemId = v.ViagemId ,
-                        recorrenciaViagemId = v.RecorrenciaViagemId ,
-                        dataInicial = v.DataInicial ,
-                        horaInicio = v.HoraInicio ,
-                        origem = v.Origem ,
-                        destino = v.Destino ,
-                        status = v.Status ,
-                        intervalo = v.Intervalo ,
-                        recorrente = v.Recorrente
-                    }).ToList() ,
-                    mensagemDebug = viagens.Count == 0
-                        ? "NENHUMA VIAGEM ENCONTRADA - Verifique se o RecorrenciaViagemId está correto no banco"
-                        : $"Encontradas {viagens.Count} viagens"
-                };
-
-                return Ok(debug);
+                        viagemId = primeiro.ViagemId,
+                        titulo = primeiro.Titulo,
+                        dataInicial = primeiro.DataInicial,
+                        start = primeiro.Start,
+                        corEvento = primeiro.CorEvento,
+                        corTexto = primeiro.CorTexto
+                    } : null,
+                    mensagem = "Teste concluído com sucesso"
+                });
             }
             catch (Exception error)
             {
-                return StatusCode(500 , new
+                _logger.LogError(error, "[TesteView] Erro ao testar view");
+                return StatusCode(500, new
                 {
-                    sucesso = false ,
-                    mensagem = "Erro no teste" ,
-                    erro = error.Message ,
+                    sucesso = false,
+                    mensagem = "Erro no teste",
+                    erro = error.Message,
+                    innerException = error.InnerException?.Message,
+                    stack = error.StackTrace
+                });
+            }
+        }
+
+        [HttpGet("DiagnosticoAgenda")]
+        public IActionResult DiagnosticoAgenda(DateTime? start = null, DateTime? end = null)
+        {
+            try
+            {
+                // Se não passar datas, usa o mês atual
+                if (!start.HasValue)
+                {
+                    start = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                }
+                if (!end.HasValue)
+                {
+                    end = start.Value.AddMonths(1);
+                }
+
+                _logger.LogInformation($"[DiagnosticoAgenda] Período solicitado: {start} até {end}");
+
+                // Simular o que CarregaViagens faz
+                DateTime startMenos3 = start.Value.AddHours(-3);
+                DateTime endMenos3 = end.Value.AddHours(-3);
+
+                _logger.LogInformation($"[DiagnosticoAgenda] Período ajustado (timezone): {startMenos3} até {endMenos3}");
+
+                // 1. Total de registros na view
+                var totalGeral = _context.ViewViagensAgenda.Count();
+
+                // 2. Registros com DataInicial preenchida
+                var totalComData = _context.ViewViagensAgenda
+                    .Count(v => v.DataInicial.HasValue);
+
+                // 3. Registros no período (ANTES do filtro de timezone)
+                var noPeriodoSemAjuste = _context.ViewViagensAgenda
+                    .Where(v => v.DataInicial.HasValue
+                        && v.DataInicial >= start
+                        && v.DataInicial < end)
+                    .ToList();
+
+                // 4. Registros no período (COM ajuste de timezone - como o CarregaViagens faz)
+                var noPeriodoComAjuste = _context.ViewViagensAgenda
+                    .AsNoTracking()
+                    .Where(v => v.DataInicial.HasValue
+                        && v.DataInicial >= startMenos3
+                        && v.DataInicial < endMenos3)
+                    .ToList();
+
+                // 5. Primeiros 5 registros da view (para debug)
+                var primeiros5 = _context.ViewViagensAgenda
+                    .AsNoTracking()
+                    .Where(v => v.DataInicial.HasValue)
+                    .OrderByDescending(v => v.DataInicial)
+                    .Take(5)
+                    .Select(v => new
+                    {
+                        v.ViagemId,
+                        v.Titulo,
+                        v.DataInicial,
+                        v.Start,
+                        v.CorEvento,
+                        v.Status
+                    })
+                    .ToList();
+
+                return Ok(new
+                {
+                    periodoSolicitado = new
+                    {
+                        inicio = start,
+                        fim = end
+                    },
+                    periodoAjustado = new
+                    {
+                        inicio = startMenos3,
+                        fim = endMenos3,
+                        observacao = "Período com ajuste de -3 horas (timezone)"
+                    },
+                    contadores = new
+                    {
+                        totalRegistrosNaView = totalGeral,
+                        totalComDataInicial = totalComData,
+                        noPeriodoSemAjuste = noPeriodoSemAjuste.Count,
+                        noPeriodoComAjuste = noPeriodoComAjuste.Count
+                    },
+                    amostras = new
+                    {
+                        primeiros5RegistrosDaView = primeiros5,
+                        registrosNoPeriodoSemAjuste = noPeriodoSemAjuste.Take(3).Select(v => new
+                        {
+                            v.ViagemId,
+                            v.Titulo,
+                            v.DataInicial,
+                            v.Start
+                        }),
+                        registrosNoPeriodoComAjuste = noPeriodoComAjuste.Take(3).Select(v => new
+                        {
+                            v.ViagemId,
+                            v.Titulo,
+                            v.DataInicial,
+                            v.Start
+                        })
+                    },
+                    mensagem = "Diagnóstico concluído"
+                });
+            }
+            catch (Exception error)
+            {
+                _logger.LogError(error, "[DiagnosticoAgenda] Erro no diagnóstico");
+                return StatusCode(500, new
+                {
+                    sucesso = false,
+                    mensagem = "Erro no diagnóstico",
+                    erro = error.Message,
+                    innerException = error.InnerException?.Message,
+                    stack = error.StackTrace
+                });
+            }
+        }
+
+        [HttpGet("TesteCarregaViagens")]
+        public IActionResult TesteCarregaViagens(DateTime start, DateTime end)
+        {
+            try
+            {
+                _logger.LogInformation($"[TesteCarregaViagens] INÍCIO - Período: {start} até {end}");
+
+                DateTime startMenos3 = start.AddHours(-3);
+                DateTime endMenos3 = end.AddHours(-3);
+
+                _logger.LogInformation($"[TesteCarregaViagens] Período ajustado: {startMenos3} até {endMenos3}");
+
+                // Buscar dados da view (EXATAMENTE como CarregaViagens faz)
+                var viagensRaw = _context.ViewViagensAgenda
+                    .AsNoTracking()
+                    .Where(v => v.DataInicial.HasValue
+                        && v.DataInicial >= startMenos3
+                        && v.DataInicial < endMenos3)
+                    .ToList();
+
+                _logger.LogInformation($"[TesteCarregaViagens] Registros encontrados: {viagensRaw.Count}");
+
+                // Processar em memória com validações robustas de NULL (EXATAMENTE como CarregaViagens faz)
+                var viagens = viagensRaw
+                    .Select(v =>
+                    {
+                        // A view já calcula o campo Start corretamente
+                        var startDate = v.Start ?? v.DataInicial ?? DateTime.Now;
+                        // End = Start + 1 hora
+                        var endDate = startDate.AddHours(1);
+
+                        return new
+                        {
+                            id = v.ViagemId,
+                            title = v.Titulo ?? "Viagem",
+                            start = startDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                            end = endDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                            backgroundColor = v.CorEvento ?? "#808080",
+                            textColor = v.CorTexto ?? "#FFFFFF",
+                            descricao = v.DescricaoEvento ?? v.DescricaoMontada ?? ""
+                        };
+                    })
+                    .ToList();
+
+                _logger.LogInformation($"[TesteCarregaViagens] Viagens processadas: {viagens.Count}");
+
+                // Retornar EXATAMENTE como CarregaViagens retorna
+                return Ok(new {
+                    data = viagens,
+                    debug = new
+                    {
+                        periodoOriginal = new { start, end },
+                        periodoAjustado = new { startMenos3, endMenos3 },
+                        totalEncontrado = viagensRaw.Count,
+                        totalProcessado = viagens.Count,
+                        primeiros3 = viagens.Take(3)
+                    }
+                });
+            }
+            catch (Exception error)
+            {
+                _logger.LogError(error, "[TesteCarregaViagens] ERRO");
+                return StatusCode(500, new
+                {
+                    sucesso = false,
+                    mensagem = "Erro no teste",
+                    erro = error.Message,
+                    innerException = error.InnerException?.Message,
                     stack = error.StackTrace
                 });
             }
@@ -831,7 +1016,7 @@ namespace FrotiX.Controllers
                         && v.DataInicial < endMenos3)
                     .ToList();
 
-                // Processar em memória
+                // Processar em memória com validações robustas de NULL
                 var viagens = viagensRaw
                     .Select(v =>
                     {
@@ -843,12 +1028,12 @@ namespace FrotiX.Controllers
                         return new
                         {
                             id = v.ViagemId,
-                            title = v.Titulo,
+                            title = v.Titulo ?? "Viagem",
                             start = startDate.ToString("yyyy-MM-ddTHH:mm:ss"),
                             end = endDate.ToString("yyyy-MM-ddTHH:mm:ss"),
-                            backgroundColor = v.CorEvento,
-                            textColor = v.CorTexto,
-                            descricao = v.DescricaoEvento ?? v.DescricaoMontada
+                            backgroundColor = v.CorEvento ?? "#808080",
+                            textColor = v.CorTexto ?? "#FFFFFF",
+                            descricao = v.DescricaoEvento ?? v.DescricaoMontada ?? ""
                         };
                     })
                     .ToList();
@@ -861,7 +1046,10 @@ namespace FrotiX.Controllers
                 return StatusCode(500 , new
                 {
                     success = false ,
-                    error = "Erro interno do servidor"
+                    error = "Erro interno do servidor" ,
+                    mensagemDetalhada = error.Message ,
+                    stackTrace = error.StackTrace ,
+                    innerException = error.InnerException?.Message
                 });
             }
         }

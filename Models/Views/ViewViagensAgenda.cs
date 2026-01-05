@@ -24,19 +24,19 @@ namespace FrotiX.Models
 
         public string? Status { get; set; }
 
-        public bool StatusAgendamento { get; set; }
+        public bool? StatusAgendamento { get; set; }
 
-        public bool FoiAgendamento { get; set; }
+        public bool? FoiAgendamento { get; set; }
 
         public string? Finalidade { get; set; }
 
         public string? NomeEvento { get; set; }
 
-        public Guid VeiculoId { get; set; }
+        public Guid? VeiculoId { get; set; }
 
-        public Guid MotoristaId { get; set; }
+        public Guid? MotoristaId { get; set; }
 
-        public Guid EventoId { get; set; }
+        public Guid? EventoId { get; set; }
 
         public string? Titulo { get; set; }
 

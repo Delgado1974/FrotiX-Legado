@@ -125,8 +125,10 @@ window.InitializeCalendar = function (URL)
                                 var item = raw[i];
                                 try
                                 {
-                                    var start = window.addDaysLocal(item.start, 1);
-                                    var end = window.addDaysLocal(item.end, 1);
+                                    // CORREÇÃO: Usar as datas diretamente sem adicionar 1 dia
+                                    // O backend já retorna as datas corretas
+                                    var start = item.start;
+                                    var end = item.end;
 
                                     if (!start) continue;
 
