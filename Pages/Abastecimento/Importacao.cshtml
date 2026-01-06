@@ -1068,19 +1068,30 @@
 
             async function inicializarSignalR() {
                 try {
+                    console.log("🔧 Inicializando SignalR...");
+
                     hubConnection = new signalR.HubConnectionBuilder()
                         .withUrl("/hubs/importacao")
                         .withAutomaticReconnect()
                         .build();
 
+                    // Variável para resolver Promise externamente
+                    let resolverConexao = null;
+
                     // Criar Promise que resolve quando receber connectionId
                     const conexaoPromise = new Promise((resolve) => {
-                        // Evento: Conexão estabelecida
-                        hubConnection.on("Conectado", (connId) => {
-                            connectionId = connId;
-                            console.log("✅ SignalR conectado com sucesso! ConnectionID:", connectionId);
-                            resolve(); // Resolver a Promise quando connectionId chegar
-                        });
+                        resolverConexao = resolve;
+                    });
+
+                    // IMPORTANTE: Registrar handlers ANTES de chamar .start()
+                    // Evento: Conexão estabelecida
+                    hubConnection.on("Conectado", (connId) => {
+                        connectionId = connId;
+                        console.log("✅ SignalR conectado com sucesso! ConnectionID:", connectionId);
+                        atualizarBotaoImportar(); // Atualizar botão imediatamente
+                        if (resolverConexao) {
+                            resolverConexao(); // Resolver a Promise quando connectionId chegar
+                        }
                     });
 
                     // Evento: Receber progresso
@@ -1116,16 +1127,28 @@
                         }
                     });
 
-                    // Iniciar conexão e aguardar connectionId
+                    // Iniciar conexão
+                    console.log("🔄 Iniciando conexão SignalR...");
                     await hubConnection.start();
-                    console.log("🔄 SignalR iniciado, aguardando ConnectionID...");
+                    console.log("🔄 Conexão SignalR estabelecida, aguardando evento Conectado...");
 
-                    await conexaoPromise; // Aguardar até receber o connectionId
-                    console.log("🎯 SignalR completamente pronto para uso!");
+                    // Aguardar até receber o connectionId (com timeout de 5 segundos)
+                    const timeoutPromise = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error("Timeout aguardando ConnectionID")), 5000);
+                    });
+
+                    await Promise.race([conexaoPromise, timeoutPromise]);
+                    console.log("🎯 SignalR completamente pronto para uso! ConnectionID:", connectionId);
+
+                    // Atualizar botão agora que SignalR está pronto
+                    atualizarBotaoImportar();
 
                 } catch (error) {
                     console.error("❌ Erro ao conectar SignalR:", error);
-                    // Continua funcionando sem SignalR (fallback para progresso simulado)
+                    console.warn("⚠️ Página funcionará sem progresso em tempo real");
+
+                    // Mesmo com erro, atualizar o botão (permitirá importar sem progresso)
+                    atualizarBotaoImportar();
                 }
             }
 
@@ -1554,8 +1577,22 @@
 
             function atualizarBotaoImportar() {
                 try {
-                    // Botão só fica habilitado quando AMBOS os arquivos estão selecionados
-                    btnImportar.disabled = (arquivoXlsxAtual === null || arquivoCsvAtual === null);
+                    // Botão só fica habilitado quando:
+                    // 1. AMBOS os arquivos estão selecionados
+                    // 2. SignalR está conectado (connectionId disponível)
+                    const arquivosOk = arquivoXlsxAtual !== null && arquivoCsvAtual !== null;
+                    const signalROk = connectionId !== null;
+
+                    btnImportar.disabled = !(arquivosOk && signalROk);
+
+                    // Atualizar texto do botão baseado no status
+                    if (!signalROk) {
+                        btnImportar.innerHTML = '<i class="fa-duotone fa-spinner-third fa-spin me-2"></i>Conectando...';
+                    } else if (!arquivosOk) {
+                        btnImportar.innerHTML = '<i class="fa-duotone fa-file-import me-2"></i>Selecione os arquivos';
+                    } else {
+                        btnImportar.innerHTML = '<i class="fa-duotone fa-file-import me-2"></i>Importar Abastecimentos';
+                    }
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarBotaoImportar', error);
                 }
