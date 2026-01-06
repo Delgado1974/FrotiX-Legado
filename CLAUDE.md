@@ -306,3 +306,300 @@ Implementado dashboard completo de visualização de frotas com gráficos...
 ## Continuidade
 Esta conversa pode ser continuada para implementar as tarefas pendentes.
 ```
+
+## Sistema de Documentação de Funcionalidades
+
+### Objetivo:
+Documentar **cada página/funcionalidade do FrotiX Web** de forma completa e padronizada, facilitando manutenção, referência futura e onboarding de novos desenvolvedores.
+
+### Local de Armazenamento:
+- Pasta: **`Documentacao/`** na raiz do projeto
+- Um arquivo `.md` por funcionalidade/página
+
+### Nomenclatura de Arquivos:
+- Formato: **`Funcionalidade - [Módulo] - [Página].md`**
+- Exemplos:
+  - `Funcionalidade - Abastecimento - Dashboard.md`
+  - `Funcionalidade - Abastecimento - Gestao.md`
+  - `Funcionalidade - Abastecimento - Importacao.md`
+  - `Funcionalidade - Abastecimento - Pendencias.md`
+  - `Funcionalidade - Veiculo - Upsert.md`
+  - `Funcionalidade - Patrimonio - Index.md`
+
+### Quando Documentar:
+1. **Novas funcionalidades**: Sempre que criar uma nova página/módulo
+2. **Alterações significativas**: Quando modificar comportamento, adicionar features ou corrigir bugs importantes
+3. **Solicitação do usuário**: Quando o usuário pedir documentação de uma página específica
+
+### Quando Atualizar:
+- **SEMPRE** que uma funcionalidade documentada for alterada:
+  1. Atualizar as seções relevantes da **PARTE 1**
+  2. Adicionar nova entrada no **LOG de Modificações (PARTE 2)** no topo (ordem decrescente)
+  3. Atualizar **data de última atualização** e **incrementar versão** se necessário
+
+### Estrutura Obrigatória do Arquivo:
+
+#### Cabeçalho:
+```markdown
+# Documentação: [Nome da Funcionalidade]
+
+> **Última Atualização**: DD/MM/AAAA
+> **Versão Atual**: X.Y
+
+---
+```
+
+#### Divisão em DUAS PARTES:
+
+**PARTE 1: DOCUMENTAÇÃO DA FUNCIONALIDADE**
+- Documentação técnica completa e detalhada
+- Atualizada conforme a funcionalidade evolui
+
+**PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES**
+- Histórico cronológico de mudanças
+- Ordem **DECRESCENTE** (mais recente primeiro)
+- Formato: `## [Data/Hora] - Título da Modificação`
+
+---
+
+### PARTE 1 - Seções Obrigatórias:
+
+#### 1. Índice
+```markdown
+## Índice
+1. [Visão Geral](#visão-geral)
+2. [Arquitetura](#arquitetura)
+3. [Funcionalidades Específicas](#funcionalidades-específicas)
+4. [Endpoints API](#endpoints-api)
+5. [Frontend](#frontend)
+6. [Validações](#validações)
+7. [Troubleshooting](#troubleshooting)
+```
+
+#### 2. Visão Geral
+- Descrição clara do que a funcionalidade faz
+- **Características Principais** (lista com checkmarks ✅)
+- Informações gerais sobre os dados exibidos/manipulados
+- Exemplo de tabela descritiva quando aplicável
+
+#### 3. Arquitetura
+- **Estrutura de Arquivos**: Diagrama em texto mostrando organização
+  ```
+  FrotiX.Site/
+  ├── Pages/
+  │   └── [Módulo]/
+  │       └── [Página].cshtml
+  ├── Controllers/
+  │   └── [Controller].cs
+  └── wwwroot/
+      ├── css/
+      └── js/
+  ```
+- **Tecnologias Utilizadas**: Tabela com tecnologia e uso
+- **Padrão Arquitetônico**: Explicação do padrão usado (MVC, MVVM, etc.)
+
+#### 4. Funcionalidades Específicas
+- Detalhar **TODAS** as funcionalidades da página
+- Para cada funcionalidade:
+  - Descrição clara
+  - Localização no código
+  - Exemplo de código quando relevante
+  - Como funciona (passo a passo se necessário)
+
+#### 5. Endpoints API (se houver)
+- Documentar **TODOS** os endpoints usados pela página
+- Para cada endpoint:
+  - Método HTTP e rota
+  - Descrição
+  - Parâmetros (query, body, header)
+  - Response (com exemplo JSON)
+  - Erros possíveis
+  - Exemplo de código do controller
+
+Formato:
+```markdown
+### 1. GET `/api/[Controller]/[Action]`
+
+**Descrição**: O que este endpoint faz
+
+**Parâmetros**:
+- `param1` (tipo): Descrição
+
+**Response**:
+```json
+{
+  "campo": "valor"
+}
+```
+
+**Erro (500)**:
+- Descrição do erro
+```
+
+#### 6. Frontend
+- **Estrutura HTML**: Componentes principais da página
+- **JavaScript**: Funções importantes, eventos, ciclo de vida
+- **CSS/Estilos**: Classes importantes, animações, temas
+- **Modais**: Estrutura de modais usados
+- **Componentes**: DropDowns, DataTables, Charts, etc.
+
+#### 7. Validações
+- Listar **TODAS** as validações aplicadas
+- Para cada validação:
+  - Campo/dado validado
+  - Regra de validação
+  - Mensagem de erro
+  - Onde é validada (frontend, backend, ambos)
+
+#### 8. Troubleshooting
+- Listar problemas comuns e suas soluções
+- Para cada problema:
+  - Título claro do problema
+  - **Sintomas**: Como o problema se manifesta
+  - **Causas Possíveis**: Por que acontece
+  - **Solução**: Como resolver (passo a passo)
+  - Código de exemplo quando relevante
+
+---
+
+### PARTE 2 - LOG de Modificações:
+
+#### Estrutura:
+```markdown
+# PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
+
+> **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+> **PADRÃO**: `## [Data/Hora] - Título da Modificação`
+
+---
+
+## [DD/MM/AAAA HH:mm] - Título da Modificação Mais Recente
+
+**Descrição**:
+[O que foi feito, por que foi feito]
+
+**Problema Identificado** (se aplicável):
+[Descrição do problema que motivou a mudança]
+
+**Solução Implementada**:
+[Como foi resolvido]
+
+**Arquivos Modificados**:
+- `caminho/arquivo1.ext` (linhas X-Y)
+- `caminho/arquivo2.ext` (linhas A-B)
+
+**Commits Relacionados**:
+- Hash do commit: "Mensagem do commit"
+
+**Status**: ✅ **[Status]** (Implementado, Testado, Em Produção, etc.)
+
+**Notas Adicionais** (opcional):
+[Informações relevantes]
+
+---
+
+## [DD/MM/AAAA HH:mm] - Modificação Anterior
+
+[Mesmo formato...]
+
+---
+
+**Fim do LOG**
+
+---
+
+**Última atualização deste arquivo**: DD/MM/AAAA
+**Responsável pela documentação**: Claude (AI Assistant)
+**Versão do documento**: X.Y
+```
+
+---
+
+### Diretrizes de Formatação:
+
+1. **Tabelas**: Usar tabelas para organizar informações estruturadas
+   ```markdown
+   | Coluna 1 | Coluna 2 | Coluna 3 |
+   |----------|----------|----------|
+   | Valor A  | Valor B  | Valor C  |
+   ```
+
+2. **Blocos de Código**: Sempre especificar a linguagem
+   ```markdown
+   ```javascript
+   function exemplo() { ... }
+   ```
+   ```
+
+3. **Emojis para Status**:
+   - ✅ Implementado/Funcionando
+   - ❌ Erro/Não funciona
+   - ⚠️ Atenção/Cuidado
+   - 🔧 Em manutenção
+   - 📝 Documentado
+
+4. **Links Internos**: Usar âncoras para navegação
+   ```markdown
+   [Ir para Arquitetura](#arquitetura)
+   ```
+
+5. **Diagramas**: Usar texto ASCII quando necessário para fluxos
+   ```
+   ┌─────────────────┐
+   │ Etapa 1         │
+   └────────┬────────┘
+            │
+            ▼
+   ┌─────────────────┐
+   │ Etapa 2         │
+   └─────────────────┘
+   ```
+
+6. **Destaque de Código Inline**: Usar backticks simples
+   ```markdown
+   A função `nomeFuncao()` faz X
+   ```
+
+---
+
+### Nível de Detalhe Esperado:
+
+- **EXTREMAMENTE DETALHADO**: Não poupar detalhes
+- **Incluir exemplos de código** sempre que possível
+- **Documentar estrutura HTML completa** dos componentes principais
+- **Documentar CSS** com classes importantes e estilos
+- **Documentar JavaScript** com funções principais e fluxos
+- **Documentar endpoints API** com request/response completos
+- **Documentar validações** com regras e mensagens
+- **Documentar fluxos** de dados e operações
+- **Documentar troubleshooting** com problemas reais e soluções testadas
+
+---
+
+### Exemplo Completo:
+
+Ver arquivos de referência existentes:
+- `Documentacao/Funcionalidade - Abastecimento - Dashboard.md` (900+ linhas)
+- `Documentacao/Funcionalidade - Abastecimento - Gestao.md` (1000+ linhas)
+- `Documentacao/Funcionalidade - Abastecimento - Importacao.md` (1100+ linhas)
+- `Documentacao/Funcionalidade - Abastecimento - Pendencias.md` (1100+ linhas)
+
+Estes arquivos servem como **template de referência** para o nível de detalhe e estrutura esperados.
+
+---
+
+### Checklist Antes de Finalizar Documentação:
+
+- [ ] Cabeçalho com título, data e versão
+- [ ] Índice completo com links
+- [ ] Visão Geral com características principais
+- [ ] Arquitetura com estrutura de arquivos e tecnologias
+- [ ] Todas as funcionalidades documentadas
+- [ ] Todos os endpoints API documentados (se houver)
+- [ ] Frontend documentado (HTML, JS, CSS)
+- [ ] Validações listadas
+- [ ] Troubleshooting com problemas comuns
+- [ ] LOG de Modificações iniciado
+- [ ] Rodapé com data, responsável e versão
+- [ ] Revisão ortográfica e gramatical
+- [ ] Exemplos de código testados e funcionais
