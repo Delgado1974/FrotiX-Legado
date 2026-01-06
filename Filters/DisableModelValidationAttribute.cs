@@ -1,19 +1,37 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace FrotiX.Filters
 {
     /// <summary>
     /// Desabilita a validação automática do ModelState para endpoints específicos.
     /// Útil quando [ApiController] está presente mas queremos validar manualmente.
+    /// IMPORTANTE: Este filtro deve executar ANTES da validação do [ApiController].
     /// </summary>
-    public class DisableModelValidationAttribute : ActionFilterAttribute
+    public class DisableModelValidationAttribute : Attribute, IResourceFilter
     {
-        public override void OnActionExecuting(ActionExecutingContext context)
+        /// <summary>
+        /// Executa ANTES da validação automática do [ApiController]
+        /// </summary>
+        public void OnResourceExecuting(ResourceExecutingContext context)
         {
-            // Limpa o ModelState antes da validação automática
+            // Desabilita completamente o ModelState para este request
             context.ModelState.Clear();
-            base.OnActionExecuting(context);
+
+            // Remove todas as validações pendentes
+            foreach (var key in context.ModelState.Keys.ToList())
+            {
+                context.ModelState.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// Executa DEPOIS da action
+        /// </summary>
+        public void OnResourceExecuted(ResourceExecutedContext context)
+        {
+            // Nada a fazer aqui
         }
     }
 }
