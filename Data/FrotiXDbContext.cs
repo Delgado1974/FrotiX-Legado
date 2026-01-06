@@ -570,6 +570,15 @@ namespace FrotiX.Data
                 });
             });
 
+            // Veiculo - desabilita OUTPUT clause (tabela atualizada durante importação)
+            modelBuilder.Entity<Veiculo>(entity =>
+            {
+                entity.ToTable(tb =>
+                {
+                    tb.UseSqlOutputClause(false); // Evita erro se houver triggers
+                });
+            });
+
             // Requisitante - tem trigger
             modelBuilder.Entity<Requisitante>(entity =>
             {
