@@ -1301,10 +1301,55 @@ namespace FrotiX.Controllers
                     ISheet sheet = workbook.GetSheetAt(0);
                     if (sheet == null) return resultado;
 
-                    // Mapear colunas do header
-                    IRow headerRow = sheet.GetRow(0);
+                    // Detectar automaticamente qual linha contém o cabeçalho (primeiras 5 linhas)
+                    IRow headerRow = null;
+                    int headerRowIndex = -1;
+
+                    for (int r = 0; r < Math.Min(5, sheet.LastRowNum + 1); r++)
+                    {
+                        IRow row = sheet.GetRow(r);
+                        if (row == null) continue;
+
+                        // Verificar se a linha contém palavras-chave do cabeçalho
+                        bool temData = false;
+                        bool temAutorizacao = false;
+
+                        for (int c = 0; c < row.LastCellNum; c++)
+                        {
+                            var cell = row.GetCell(c);
+                            if (cell == null) continue;
+
+                            string cellValue = cell.ToString().Trim().ToLower();
+
+                            // Normalizar string removendo acentos para comparação
+                            string normalized = cellValue
+                                .Replace("ç", "c")
+                                .Replace("ã", "a")
+                                .Replace("õ", "o")
+                                .Replace("á", "a")
+                                .Replace("é", "e")
+                                .Replace("í", "i")
+                                .Replace("ó", "o")
+                                .Replace("ú", "u");
+
+                            if (normalized.Contains("data") && !normalized.Contains("relat"))
+                                temData = true;
+
+                            if (normalized.Contains("autoriz"))
+                                temAutorizacao = true;
+                        }
+
+                        if (temData && temAutorizacao)
+                        {
+                            headerRow = row;
+                            headerRowIndex = r;
+                            break;
+                        }
+                    }
+
                     if (headerRow == null) return resultado;
 
+                    // Mapear colunas do header
                     int colData = -1, colAutorizacao = -1;
 
                     for (int col = 0; col < headerRow.LastCellNum; col++)
@@ -1313,8 +1358,23 @@ namespace FrotiX.Controllers
                         if (cell == null) continue;
 
                         string header = cell.ToString().Trim().ToLower();
-                        if (header.Contains("data")) colData = col;
-                        if (header.Contains("autori")) colAutorizacao = col;
+
+                        // Normalizar string removendo acentos
+                        string normalized = header
+                            .Replace("ç", "c")
+                            .Replace("ã", "a")
+                            .Replace("õ", "o")
+                            .Replace("á", "a")
+                            .Replace("é", "e")
+                            .Replace("í", "i")
+                            .Replace("ó", "o")
+                            .Replace("ú", "u");
+
+                        if (normalized.Contains("data") && !normalized.Contains("relat"))
+                            colData = col;
+
+                        if (normalized.Contains("autoriz"))
+                            colAutorizacao = col;
                     }
 
                     if (colData < 0 || colAutorizacao < 0)
@@ -1322,8 +1382,8 @@ namespace FrotiX.Controllers
                         return resultado; // Colunas obrigatórias não encontradas
                     }
 
-                    // Ler linhas de dados
-                    for (int row = 1; row <= sheet.LastRowNum; row++)
+                    // Ler linhas de dados (começar DEPOIS do cabeçalho)
+                    for (int row = headerRowIndex + 1; row <= sheet.LastRowNum; row++)
                     {
                         IRow dataRow = sheet.GetRow(row);
                         if (dataRow == null) continue;
