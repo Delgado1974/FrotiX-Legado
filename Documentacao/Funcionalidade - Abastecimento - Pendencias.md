@@ -1,7 +1,7 @@
 # Documentação: Pendências de Abastecimento
 
 > **Última Atualização**: 06/01/2025
-> **Versão Atual**: 1.0
+> **Versão Atual**: 2.0
 
 ---
 
@@ -1151,6 +1151,116 @@ $("#txtKmRodado").val(kmAtual - kmAnt);
 
 ---
 
+## [06/01/2025 15:30-18:33] - Correções Completas de UI/UX e Funcionalidade
+
+**Descrição**:
+Implementadas 9 correções abrangentes na página de Pendências de Abastecimento, resolvendo problemas de interface, funcionalidade e padronização visual. Sessão de trabalho de 3 horas e 3 minutos com múltiplos commits incrementais.
+
+**Problemas Identificados e Soluções**:
+
+### Problema 1: Falta da Coluna DataImportacao
+**Identificado**: Coluna de data de importação não estava visível na tabela
+**Solução**:
+- Adicionada coluna `DataImportacao` como **primeira coluna** da DataTable
+- Header: `<th>Data Import.</th>` (linha 503 do Pendencias.cshtml)
+- JavaScript: `{ data: "dataImportacao" }` (linha 847)
+- **Arquivos**: `Pendencias.cshtml` (linhas 503-514, 847)
+
+### Problema 2: Ordenação Incorreta
+**Identificado**: Tabela ordenava apenas por Autorização decrescente
+**Solução**:
+- Alterada ordenação para **DataImportacao ASC** (mais antigas primeiro), depois **AutorizacaoQCard ASC**
+- JavaScript: `order: [[0, 'asc'], [1, 'asc']]` (linha 870)
+- **Arquivos**: `Pendencias.cshtml` (linha 870)
+
+### Problema 3: Botões de Ação sem Animação Wiggle
+**Identificado**: Botões Editar e Excluir não tinham animação de hover
+**Solução**:
+- Adicionado `animation: buttonWiggle .5s ease-in-out !important;` no hover
+- CSS aplicado a `.btn-editar-pendencia:hover` e `.btn-excluir-pendencia:hover`
+- Inclui também glow shadow aumentado
+- **Arquivos**: `Pendencias.cshtml` (linhas 133-154)
+
+### Problema 4: Listas de Veículo e Motorista Vazias no Modal
+**Identificado**: ViewData não estava sendo populado no OnGet()
+**Solução**:
+- Implementado método `OnGet()` em `Pendencias.cshtml.cs`
+- Populados 3 ViewData: `lstVeiculos`, `lstCombustivel`, `lstMotorista`
+- Reutilizadas classes helper de `Index.cshtml.cs`
+- **Arquivos**: `Pendencias.cshtml.cs` (linhas 36-50)
+
+### Problema 5: Dados não Apareciam nos Dropdowns
+**Identificado**: Mapeamento incorreto de campos (text="Text" value="Value")
+**Solução**:
+- Corrigido mapeamento para `text="Descricao" value="Id"`
+- Aplicado aos 3 dropdowns: Veículo, Motorista, Combustível
+- **Arquivos**: `Pendencias.cshtml` (linhas 568-595)
+
+### Problema 6: Botões Cancelar Fora do Padrão FrotiX
+**Identificado**: Botões usavam `btn btn-secondary` genérico
+**Solução**:
+- Alterado para `btn btn-ftx-fechar` (padrão FrotiX vinho)
+- Adicionado ícone `fa-duotone fa-circle-xmark icon-space`
+- Texto padronizado: "Cancelar Operação"
+- Aplicado aos 2 modais (Edição e Sugestão)
+- **Arquivos**: `Pendencias.cshtml` (linhas 636, 688)
+
+### Problema 7: Formato de Data/Hora Incorreto
+**Identificado**: API retornava formato ISO (2025-01-01T15:54)
+**Solução**:
+- Alterado formato para brasileiro: `dd/MM/yyyy HH:mm` (01/01/2025 15:54)
+- Modificado no método `ObterPendencia` da API
+- **Arquivos**: `AbastecimentoController.Pendencias.cs` (linha 201)
+
+### Problema 8: Dropdowns não Aceitavam Digitação
+**Identificado**: Componente `ejs-dropdownlist` não permite digitação por padrão
+**Solução**:
+- Migrados 3 dropdowns de `ejs-dropdownlist` para `ejs-combobox`
+- Tag helpers: `e-dropdownlist-fields` → `e-combobox-fields`
+- Adicionados atributos:
+  - `allowCustom="true"` (permite digitação livre)
+  - `width="100%"` (largura consistente)
+  - `showClearButton="true"` (botão X para limpar)
+- **Arquivos**: `Pendencias.cshtml` (linhas 568-595)
+- **Compatibilidade**: JavaScript existente mantido sem alterações (ej2_instances funciona em ambos)
+
+### Problema 9: Outline Inconsistente nos Botões do Header
+**Identificado**: Botões laranja com outline 2px (muito grosso), botão "Excluir Todas" sem outline
+**Solução**:
+- Reduzido outline dos botões laranja de 2px para **1px**
+- Adicionado outline 1px ao botão "Excluir Todas"
+- Padronizado `outline-offset: 1px` e `transition: all 0.2s ease`
+- **Arquivos**: `Pendencias.cshtml` (linhas 32, 38, 257-259, 268-269)
+
+**Arquivos Modificados**:
+- `Pages/Abastecimento/Pendencias.cshtml` (linhas 32, 38, 133-154, 257-259, 268-269, 503-514, 568-595, 636, 688, 847, 870)
+- `Pages/Abastecimento/Pendencias.cshtml.cs` (linhas 36-50)
+- `Controllers/AbastecimentoController.Pendencias.cs` (linha 201)
+
+**Commits Relacionados**:
+1. `62efadd` - "Corrige página Pendencias: adiciona coluna DataImportacao, ordena por data crescente, adiciona wiggle aos botões e popula listas no modal"
+2. `4d75327` - "Corrige mapeamento de dados nos dropdowns e padroniza botões Cancelar"
+3. `f406bda` - "Corrige formato DateTime e preenche dados no modal de edição"
+4. `b3f8c5b` - "Migra dropdowns de ejs-dropdownlist para ejs-combobox habilitando digitação"
+5. `9923794` - "Padroniza outline dos botões do header (reduz para 1px)"
+
+**Status**: ✅ **Implementado e Testado**
+
+**Impacto**:
+- **UX Melhorada**: Usuários podem agora filtrar dropdowns digitando
+- **Usabilidade**: Ordenação cronológica facilita identificar pendências antigas
+- **Consistência Visual**: Todos os componentes seguem padrão FrotiX
+- **Funcionalidade Completa**: Modais agora exibem todos os dados necessários
+- **Formato Localizado**: Datas em formato brasileiro facilita leitura
+
+**Notas Técnicas**:
+- Migração de `ejs-dropdownlist` para `ejs-combobox` é compatível com JavaScript existente
+- Propriedade `.value` e `.ej2_instances[0]` funcionam em ambos os componentes
+- `OnGet()` em Pendencias.cshtml.cs reutiliza classes de Index.cshtml.cs (ListaVeiculos, ListaMotorista, ListaCombustivel)
+- Formato DateTime alterado apenas na API, não afeta banco de dados
+
+---
+
 ## [06/01/2025] - Criação da Documentação Inicial
 
 **Descrição**:
@@ -1186,4 +1296,4 @@ Documentação completa da funcionalidade de Pendências de Abastecimento criada
 
 **Última atualização deste arquivo**: 06/01/2025
 **Responsável pela documentação**: Claude (AI Assistant)
-**Versão do documento**: 1.0
+**Versão do documento**: 2.0
