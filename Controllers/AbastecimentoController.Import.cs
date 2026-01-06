@@ -162,24 +162,22 @@ namespace FrotiX.Controllers
             public int CodMotorista { get; set; } = -1;
             public int KmAnterior { get; set; } = -1;
 
-            public bool TodosMapeados => Autorizacao >= 0 && Data >= 0 && Hora >= 0 && Placa >= 0 &&
-                                         Km >= 0 && Produto >= 0 && Quantidade >= 0 && ValorUnitario >= 0 &&
-                                         Rodado >= 0 && CodMotorista >= 0 && KmAnterior >= 0;
+            // Campos obrigatórios: Autorização, Data, Placa, Km, Produto, Quantidade, ValorUnitario
+            // Campos opcionais: Hora, Rodado, CodMotorista, KmAnterior
+            public bool TodosMapeados => Autorizacao >= 0 && Data >= 0 && Placa >= 0 &&
+                                         Km >= 0 && Produto >= 0 && Quantidade >= 0 && ValorUnitario >= 0;
 
             public List<string> ColunasFaltantes()
             {
                 var faltantes = new List<string>();
                 if (Autorizacao < 0) faltantes.Add("Autorização");
                 if (Data < 0) faltantes.Add("Data");
-                if (Hora < 0) faltantes.Add("Hora");
                 if (Placa < 0) faltantes.Add("Placa");
                 if (Km < 0) faltantes.Add("KM");
                 if (Produto < 0) faltantes.Add("Produto");
                 if (Quantidade < 0) faltantes.Add("Qtde");
                 if (ValorUnitario < 0) faltantes.Add("Valor Unitário");
-                if (Rodado < 0) faltantes.Add("Rodado");
-                if (CodMotorista < 0) faltantes.Add("CodMotorista");
-                if (KmAnterior < 0) faltantes.Add("KMAnterior");
+                // Não adiciona opcionais: Hora, Rodado, CodMotorista, KmAnterior
                 return faltantes;
             }
         }
@@ -963,15 +961,44 @@ namespace FrotiX.Controllers
                         return resultado;
                     }
 
-                    // Mapear colunas
-                    IRow headerRow = sheet.GetRow(0);
+                    // ===== DETECTAR LINHA DO CABEÇALHO AUTOMATICAMENTE =====
+                    int headerRowIndex = -1;
+                    IRow headerRow = null;
+
+                    // Procurar cabeçalho nas primeiras 5 linhas
+                    for (int r = 0; r < Math.Min(5, sheet.LastRowNum + 1); r++)
+                    {
+                        IRow row = sheet.GetRow(r);
+                        if (row == null) continue;
+
+                        // Verificar se a linha contém palavras-chave de cabeçalho
+                        for (int c = 0; c < row.LastCellNum; c++)
+                        {
+                            var cell = row.GetCell(c);
+                            if (cell == null) continue;
+
+                            string cellValue = cell.ToString().Trim().ToLower();
+
+                            if (cellValue.Contains("autori") ||
+                                (cellValue.Contains("data") && !cellValue.Contains("relat")))
+                            {
+                                headerRowIndex = r;
+                                headerRow = row;
+                                break;
+                            }
+                        }
+
+                        if (headerRowIndex >= 0) break;
+                    }
+
                     if (headerRow == null)
                     {
                         resultado.Sucesso = false;
-                        resultado.MensagemErro = "Cabeçalho não encontrado na planilha";
+                        resultado.MensagemErro = "Cabeçalho não encontrado na planilha. Verifique se contém as colunas: Data, Autorização, Placa, KM, Produto, Qtde, Valor Unitário";
                         return resultado;
                     }
 
+                    // ===== MAPEAR COLUNAS =====
                     var mapeamento = new MapeamentoColunas();
 
                     for (int col = 0; col < headerRow.LastCellNum; col++)
@@ -997,14 +1024,14 @@ namespace FrotiX.Controllers
                     if (!mapeamento.TodosMapeados)
                     {
                         resultado.Sucesso = false;
-                        resultado.MensagemErro = $"Colunas não encontradas na planilha: {string.Join(", ", mapeamento.ColunasFaltantes())}";
+                        resultado.MensagemErro = $"Colunas obrigatórias não encontradas na planilha: {string.Join(", ", mapeamento.ColunasFaltantes())}";
                         return resultado;
                     }
 
                     resultado.Mapeamento = mapeamento;
 
-                    // Ler linhas de dados
-                    for (int row = 1; row <= sheet.LastRowNum; row++)
+                    // ===== LER LINHAS DE DADOS =====
+                    for (int row = headerRowIndex + 1; row <= sheet.LastRowNum; row++)
                     {
                         IRow dataRow = sheet.GetRow(row);
                         if (dataRow == null) continue;
@@ -1013,20 +1040,51 @@ namespace FrotiX.Controllers
                         if (autorizacaoCell == null || string.IsNullOrWhiteSpace(autorizacaoCell.ToString()))
                             continue;
 
+                        // ===== EXTRAIR DATA E HORA =====
+                        string dataStr = null;
+                        string horaStr = null;
+
+                        var dataCellValue = GetCellStringValueWithDateTime(dataRow.GetCell(mapeamento.Data));
+                        if (dataCellValue != null && dataCellValue.Contains(" "))
+                        {
+                            // Data e Hora juntas (ex: "06/12/2024 10:10")
+                            var partes = dataCellValue.Split(' ');
+                            dataStr = partes[0];
+                            horaStr = partes.Length > 1 ? partes[1] : null;
+                        }
+                        else
+                        {
+                            dataStr = dataCellValue;
+                            horaStr = mapeamento.Hora >= 0 ? GetCellStringValue(dataRow.GetCell(mapeamento.Hora)) : null;
+                        }
+
+                        // ===== EXTRAIR PRODUTO (REMOVER PREFIXO) =====
+                        string produtoRaw = GetCellStringValue(dataRow.GetCell(mapeamento.Produto));
+                        string produtoLimpo = produtoRaw;
+
+                        if (!string.IsNullOrEmpty(produtoRaw))
+                        {
+                            // Remover prefixos como "01-", "14-", etc.
+                            if (System.Text.RegularExpressions.Regex.IsMatch(produtoRaw, @"^\d{1,2}-"))
+                            {
+                                produtoLimpo = System.Text.RegularExpressions.Regex.Replace(produtoRaw, @"^\d{1,2}-", "").Trim();
+                            }
+                        }
+
                         var linha = new LinhaImportacao
                         {
                             NumeroLinhaOriginal = row + 1,
                             Autorizacao = GetCellIntValue(dataRow.GetCell(mapeamento.Autorizacao)),
-                            Data = GetCellStringValue(dataRow.GetCell(mapeamento.Data)),
-                            Hora = GetCellStringValue(dataRow.GetCell(mapeamento.Hora)),
+                            Data = dataStr,
+                            Hora = horaStr,
                             Placa = GetCellStringValue(dataRow.GetCell(mapeamento.Placa))?.ToUpper(),
                             Km = GetCellIntValue(dataRow.GetCell(mapeamento.Km)),
-                            Produto = GetCellStringValue(dataRow.GetCell(mapeamento.Produto)),
+                            Produto = produtoLimpo,
                             Quantidade = GetCellDoubleValue(dataRow.GetCell(mapeamento.Quantidade)),
                             ValorUnitario = GetCellDoubleValue(dataRow.GetCell(mapeamento.ValorUnitario)),
-                            KmRodado = GetCellIntValue(dataRow.GetCell(mapeamento.Rodado)),
-                            CodMotorista = GetCellIntValue(dataRow.GetCell(mapeamento.CodMotorista)),
-                            KmAnterior = GetCellIntValue(dataRow.GetCell(mapeamento.KmAnterior))
+                            KmRodado = mapeamento.Rodado >= 0 ? GetCellIntValue(dataRow.GetCell(mapeamento.Rodado)) : 0,
+                            CodMotorista = mapeamento.CodMotorista >= 0 ? GetCellIntValue(dataRow.GetCell(mapeamento.CodMotorista)) : 0,
+                            KmAnterior = mapeamento.KmAnterior >= 0 ? GetCellIntValue(dataRow.GetCell(mapeamento.KmAnterior)) : 0
                         };
 
                         resultado.Linhas.Add(linha);
@@ -1059,6 +1117,44 @@ namespace FrotiX.Controllers
                         if (DateUtil.IsCellDateFormatted(cell))
                         {
                             return cell.DateCellValue.ToString("dd/MM/yyyy");
+                        }
+                        return cell.NumericCellValue.ToString();
+                    case CellType.String:
+                        return cell.StringCellValue?.Trim();
+                    case CellType.Boolean:
+                        return cell.BooleanCellValue.ToString();
+                    case CellType.Formula:
+                        try
+                        {
+                            return cell.StringCellValue?.Trim();
+                        }
+                        catch
+                        {
+                            return cell.NumericCellValue.ToString();
+                        }
+                    default:
+                        return cell.ToString()?.Trim();
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private string GetCellStringValueWithDateTime(ICell cell)
+        {
+            try
+            {
+                if (cell == null) return null;
+
+                switch (cell.CellType)
+                {
+                    case CellType.Numeric:
+                        if (DateUtil.IsCellDateFormatted(cell))
+                        {
+                            // Retorna com data E hora
+                            return cell.DateCellValue.ToString("dd/MM/yyyy HH:mm");
                         }
                         return cell.NumericCellValue.ToString();
                     case CellType.String:
