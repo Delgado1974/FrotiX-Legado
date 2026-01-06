@@ -1073,10 +1073,14 @@
                         .withAutomaticReconnect()
                         .build();
 
-                    // Evento: Conexão estabelecida
-                    hubConnection.on("Conectado", (connId) => {
-                        connectionId = connId;
-                        console.log("SignalR conectado:", connectionId);
+                    // Criar Promise que resolve quando receber connectionId
+                    const conexaoPromise = new Promise((resolve) => {
+                        // Evento: Conexão estabelecida
+                        hubConnection.on("Conectado", (connId) => {
+                            connectionId = connId;
+                            console.log("✅ SignalR conectado com sucesso! ConnectionID:", connectionId);
+                            resolve(); // Resolver a Promise quando connectionId chegar
+                        });
                     });
 
                     // Evento: Receber progresso
@@ -1112,12 +1116,15 @@
                         }
                     });
 
-                    // Iniciar conexão
+                    // Iniciar conexão e aguardar connectionId
                     await hubConnection.start();
-                    console.log("SignalR iniciado");
+                    console.log("🔄 SignalR iniciado, aguardando ConnectionID...");
+
+                    await conexaoPromise; // Aguardar até receber o connectionId
+                    console.log("🎯 SignalR completamente pronto para uso!");
 
                 } catch (error) {
-                    console.error("Erro ao conectar SignalR:", error);
+                    console.error("❌ Erro ao conectar SignalR:", error);
                     // Continua funcionando sem SignalR (fallback para progresso simulado)
                 }
             }
@@ -1144,9 +1151,10 @@
                 }
             }
 
-            function init() {
+            async function init() {
                 try {
-                    inicializarSignalR();
+                    // Aguardar SignalR conectar ANTES de permitir uso da página
+                    await inicializarSignalR();
                     configurarEventos();
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'init', error);
