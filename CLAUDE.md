@@ -221,8 +221,15 @@ Documentar **decisões técnicas** e **mudanças no projeto** realizadas em cada
 - Um arquivo `.md` por sessão de conversa
 
 ### Quando gravar:
-- **SEMPRE ao final de cada sessão de trabalho**
-- Quando o usuário pedir explicitamente "grave a conversa" ou "salve o log"
+- **AUTOMATICAMENTE e INCREMENTALMENTE** durante toda a sessão:
+  - **No início**: Criar arquivo com cabeçalho e hora de início (após `/rename` e pergunta sobre continuação)
+  - **Durante a sessão**: Atualizar o arquivo automaticamente a cada marco importante:
+    - Quando criar ou modificar arquivos
+    - Quando resolver problemas ou corrigir erros
+    - Quando tomar decisões técnicas importantes
+    - Quando fazer commits
+  - **Ao final**: Adicionar hora de término, duração e resumo executivo final
+- Quando o usuário pedir explicitamente "grave a conversa", "atualize a conversa" ou "salve o log"
 
 ### Conteúdo obrigatório do registro:
 
