@@ -1375,7 +1375,11 @@ var initApp = (function(app) {
                 // Tooltips (se usar)
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el)
                 {
+                    // Ler customClass do atributo data-bs-custom-class (padrão FrotiX)
+                    const customClass = el.getAttribute('data-bs-custom-class') || '';
+
                     new bootstrap.Tooltip(el, {
+                        customClass: customClass,
                         popperConfig: {
                             modifiers: [{ name: 'computeStyles', options: { gpuAcceleration: false } }]
                         }

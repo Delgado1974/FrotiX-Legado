@@ -612,7 +612,11 @@
                                                 <i class="fa-duotone fa-file-excel text-success me-2"></i>
                                                 Arquivo Excel
                                             </label>
-                                            <div id="dropZoneXlsx" class="ftx-dropzone ftx-dropzone-small">
+                                            <div id="dropZoneXlsx" class="ftx-dropzone ftx-dropzone-small"
+                                                 data-bs-toggle="tooltip"
+                                                 data-bs-custom-class="tooltip-ftx-azul"
+                                                 data-bs-placement="top"
+                                                 title="Nenhum arquivo escolhido">
                                                 <input type="file" id="arquivoXlsx" accept=".xlsx,.xls" class="ftx-dropzone-input" />
                                                 <div id="dropZoneXlsxContent">
                                                     <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon-small"></i>
@@ -637,7 +641,11 @@
                                                 <i class="fa-duotone fa-file-csv text-warning me-2"></i>
                                                 Arquivo CSV
                                             </label>
-                                            <div id="dropZoneCsv" class="ftx-dropzone ftx-dropzone-small">
+                                            <div id="dropZoneCsv" class="ftx-dropzone ftx-dropzone-small"
+                                                 data-bs-toggle="tooltip"
+                                                 data-bs-custom-class="tooltip-ftx-azul"
+                                                 data-bs-placement="top"
+                                                 title="Nenhum arquivo escolhido">
                                                 <input type="file" id="arquivoCsv" accept=".csv" class="ftx-dropzone-input" />
                                                 <div id="dropZoneCsvContent">
                                                     <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon-small"></i>
@@ -1357,6 +1365,12 @@
                     arquivoXlsxSelecionado.classList.remove('d-none');
                     dropZoneXlsx.classList.add('arquivo-ok');
 
+                    // Atualizar tooltip com nome do arquivo
+                    const tooltipInstance = bootstrap.Tooltip.getInstance(dropZoneXlsx);
+                    if (tooltipInstance) {
+                        tooltipInstance.setContent({ '.tooltip-inner': file.name });
+                    }
+
                     atualizarBotaoImportar();
 
                 } catch (error) {
@@ -1371,6 +1385,12 @@
                     dropZoneXlsxContent.classList.remove('d-none');
                     arquivoXlsxSelecionado.classList.add('d-none');
                     dropZoneXlsx.classList.remove('arquivo-ok');
+
+                    // Restaurar tooltip original
+                    const tooltipInstance = bootstrap.Tooltip.getInstance(dropZoneXlsx);
+                    if (tooltipInstance) {
+                        tooltipInstance.setContent({ '.tooltip-inner': 'Nenhum arquivo escolhido' });
+                    }
 
                     atualizarBotaoImportar();
 
@@ -1393,6 +1413,12 @@
                     arquivoCsvSelecionado.classList.remove('d-none');
                     dropZoneCsv.classList.add('arquivo-ok');
 
+                    // Atualizar tooltip com nome do arquivo
+                    const tooltipInstance = bootstrap.Tooltip.getInstance(dropZoneCsv);
+                    if (tooltipInstance) {
+                        tooltipInstance.setContent({ '.tooltip-inner': file.name });
+                    }
+
                     atualizarBotaoImportar();
 
                 } catch (error) {
@@ -1407,6 +1433,12 @@
                     dropZoneCsvContent.classList.remove('d-none');
                     arquivoCsvSelecionado.classList.add('d-none');
                     dropZoneCsv.classList.remove('arquivo-ok');
+
+                    // Restaurar tooltip original
+                    const tooltipInstance = bootstrap.Tooltip.getInstance(dropZoneCsv);
+                    if (tooltipInstance) {
+                        tooltipInstance.setContent({ '.tooltip-inner': 'Nenhum arquivo escolhido' });
+                    }
 
                     atualizarBotaoImportar();
 
