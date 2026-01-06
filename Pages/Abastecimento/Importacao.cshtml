@@ -1071,7 +1071,9 @@
                     console.log("🔧 Inicializando SignalR...");
 
                     hubConnection = new signalR.HubConnectionBuilder()
-                        .withUrl("/hubs/importacao")
+                        .withUrl("/hubs/importacao", {
+                            transport: signalR.HttpTransportType.LongPolling  // Forçar LongPolling como outros hubs
+                        })
                         .withAutomaticReconnect()
                         .build();
 
