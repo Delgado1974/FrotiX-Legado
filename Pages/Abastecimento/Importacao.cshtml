@@ -1577,6 +1577,15 @@
                 }
             }
 
+            function removerArquivo() {
+                try {
+                    removerArquivoXlsx();
+                    removerArquivoCsv();
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'removerArquivo', error);
+                }
+            }
+
             function atualizarBotaoImportar() {
                 try {
                     // Botão só fica habilitado quando:
