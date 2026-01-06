@@ -20,6 +20,7 @@ namespace FrotiX.Controllers
         /// <summary>
         /// Retorna todos os dados agregados para o Dashboard de Abastecimentos
         /// Usa tabelas estatísticas para carregamento rápido
+        /// IMPORTANTE: Se nenhum filtro for especificado, busca apenas o último mês com dados
         /// </summary>
         [Route("DashboardDados")]
         [HttpGet]
@@ -37,6 +38,21 @@ namespace FrotiX.Controllers
                 if (!anosDisponiveis.Any())
                 {
                     return DashboardDadosFallback(ano, mes);
+                }
+
+                // FILTRO PADRÃO: Se nenhum filtro foi especificado, buscar último mês com dados
+                if ((!ano.HasValue || ano == 0) && (!mes.HasValue || mes == 0))
+                {
+                    var ultimoMes = _context.EstatisticaAbastecimentoMensal
+                        .OrderByDescending(e => e.Ano)
+                        .ThenByDescending(e => e.Mes)
+                        .FirstOrDefault();
+
+                    if (ultimoMes != null)
+                    {
+                        ano = ultimoMes.Ano;
+                        mes = ultimoMes.Mes;
+                    }
                 }
 
                 // Resumo por ano - tabela pré-calculada
@@ -159,6 +175,7 @@ namespace FrotiX.Controllers
 
         /// <summary>
         /// Retorna dados agregados para o Dashboard filtrados por período personalizado (data início/fim)
+        /// IMPORTANTE: Data início e fim são obrigatórias
         /// </summary>
         [Route("DashboardDadosPeriodo")]
         [HttpGet]
@@ -168,7 +185,7 @@ namespace FrotiX.Controllers
             {
                 if (!dataInicio.HasValue || !dataFim.HasValue)
                 {
-                    return BadRequest(new { message = "Data início e fim são obrigatórias" });
+                    return BadRequest(new { message = "Data início e fim são obrigatórias para busca por período" });
                 }
 
                 var query = _unitOfWork.ViewAbastecimentos.GetAll()
@@ -176,10 +193,14 @@ namespace FrotiX.Controllers
 
                 var dados = query.ToList();
 
+                // Otimizar busca de anos disponíveis - buscar apenas dos últimos 3 anos
+                var anoAtual = DateTime.Now.Year;
+                var anosParaBuscar = Enumerable.Range(anoAtual - 2, 3).ToList();
+
                 var resultado = new
                 {
                     anosDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
-                        .Where(a => a.DataHora.HasValue)
+                        .Where(a => a.DataHora.HasValue && anosParaBuscar.Contains(a.DataHora.Value.Year))
                         .Select(a => a.DataHora.Value.Year)
                         .Distinct()
                         .OrderByDescending(a => a)
@@ -273,9 +294,26 @@ namespace FrotiX.Controllers
 
         /// <summary>
         /// Fallback para quando não há dados estatísticos pré-calculados
+        /// IMPORTANTE: Se nenhum filtro for especificado, busca apenas o último mês com dados
         /// </summary>
         private IActionResult DashboardDadosFallback(int? ano, int? mes)
         {
+            // FILTRO PADRÃO: Se nenhum filtro foi especificado, buscar último mês com dados
+            if ((!ano.HasValue || ano == 0) && (!mes.HasValue || mes == 0))
+            {
+                var ultimaData = _unitOfWork.ViewAbastecimentos.GetAll()
+                    .Where(a => a.DataHora.HasValue)
+                    .OrderByDescending(a => a.DataHora)
+                    .Select(a => a.DataHora!.Value)
+                    .FirstOrDefault();
+
+                if (ultimaData != default)
+                {
+                    ano = ultimaData.Year;
+                    mes = ultimaData.Month;
+                }
+            }
+
             var query = _unitOfWork.ViewAbastecimentos.GetAll().AsQueryable();
 
             if (ano.HasValue && ano > 0)
@@ -286,17 +324,21 @@ namespace FrotiX.Controllers
 
             var dados = query.ToList();
 
+            // Otimizar busca de anos disponíveis - buscar apenas dos últimos 3 anos
+            var anoAtual = DateTime.Now.Year;
+            var anosParaBuscar = Enumerable.Range(anoAtual - 2, 3).ToList();
+
             var resultado = new
             {
                 anosDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
-                    .Where(a => a.DataHora.HasValue)
+                    .Where(a => a.DataHora.HasValue && anosParaBuscar.Contains(a.DataHora.Value.Year))
                     .Select(a => a.DataHora.Value.Year)
                     .Distinct()
                     .OrderByDescending(a => a)
                     .ToList(),
 
                 resumoPorAno = _unitOfWork.ViewAbastecimentos.GetAll()
-                    .Where(a => a.DataHora.HasValue)
+                    .Where(a => a.DataHora.HasValue && anosParaBuscar.Contains(a.DataHora.Value.Year))
                     .GroupBy(a => a.DataHora.Value.Year)
                     .Select(g => new
                     {
