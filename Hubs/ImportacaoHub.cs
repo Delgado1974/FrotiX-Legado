@@ -51,7 +51,7 @@ namespace FrotiX.Hubs
         public string Detalhe { get; set; }
         public int LinhaAtual { get; set; }
         public int TotalLinhas { get; set; }
-        
+
         // Resumo da planilha (enviado após leitura)
         public bool ResumoDisponivel { get; set; }
         public int TotalRegistros { get; set; }
@@ -60,5 +60,13 @@ namespace FrotiX.Hubs
         public int RegistrosGasolina { get; set; }
         public int RegistrosDiesel { get; set; }
         public int RegistrosOutros { get; set; }
+
+        // Progresso detalhado por etapa (3 barras)
+        public int XlsxAtual { get; set; }
+        public int XlsxTotal { get; set; }
+        public int CsvAtual { get; set; }
+        public int CsvTotal { get; set; }
+        public int ProcessAtual { get; set; }
+        public int ProcessTotal { get; set; }
     }
 }

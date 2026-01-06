@@ -717,15 +717,58 @@
                                         <p class="text-muted mb-0">Selecione o arquivo para começar</p>
                                     </div>
 
-                                    <!-- Loading com Barra de Progresso -->
+                                    <!-- Loading com 3 Barras de Progresso Detalhadas -->
                                     <div id="estadoLoading" class="estado-aguardando d-none">
                                         <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
                                             <span class="visually-hidden">Processando...</span>
                                         </div>
                                         <h5 class="text-primary mb-1" id="progressEtapa">Iniciando importação...</h5>
                                         <p class="text-muted mb-3" id="progressDetail">Preparando...</p>
-                                        
-                                        <div class="ftx-progress-container">
+
+                                        <!-- Barra 1: XLSX -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small class="fw-semibold">
+                                                    <i class="fa-duotone fa-file-excel text-success me-1"></i>
+                                                    Leitura XLSX
+                                                </small>
+                                                <small class="text-muted" id="progressXlsxCounter">0/0</small>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-success" id="progressXlsxBar" role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Barra 2: CSV -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small class="fw-semibold">
+                                                    <i class="fa-duotone fa-file-csv text-warning me-1"></i>
+                                                    Leitura CSV
+                                                </small>
+                                                <small class="text-muted" id="progressCsvCounter">0/0</small>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" id="progressCsvBar" role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Barra 3: Processamento -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small class="fw-semibold">
+                                                    <i class="fa-duotone fa-cogs text-primary me-1"></i>
+                                                    Processamento
+                                                </small>
+                                                <small class="text-muted" id="progressProcessCounter">0/0</small>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-primary" id="progressProcessBar" role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Barra Geral (resumo) -->
+                                        <div class="ftx-progress-container mt-4">
                                             <div class="ftx-progress-bar">
                                                 <div class="ftx-progress-fill" id="progressFill" style="width: 0%"></div>
                                             </div>
@@ -993,11 +1036,19 @@
             const estadoParcial = document.getElementById('estadoParcial');
             const estadoErro = document.getElementById('estadoErro');
 
-            // Elementos da barra de progresso
+            // Elementos da barra de progresso geral
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
             const progressEtapa = document.getElementById('progressEtapa');
             const progressDetail = document.getElementById('progressDetail');
+
+            // Elementos das 3 barras detalhadas
+            const progressXlsxBar = document.getElementById('progressXlsxBar');
+            const progressXlsxCounter = document.getElementById('progressXlsxCounter');
+            const progressCsvBar = document.getElementById('progressCsvBar');
+            const progressCsvCounter = document.getElementById('progressCsvCounter');
+            const progressProcessBar = document.getElementById('progressProcessBar');
+            const progressProcessCounter = document.getElementById('progressProcessCounter');
 
             // Elementos do resumo da planilha
             const resumoPlanilha = document.getElementById('resumoPlanilha');
@@ -1032,8 +1083,20 @@
                     hubConnection.on("ProgressoImportacao", (progresso) => {
                         try {
                             console.log('[SignalR] Progresso recebido:', progresso);
-                            // Atualizar etapa (título) e progresso
+
+                            // Atualizar barra geral e etapa
                             atualizarProgresso(progresso.porcentagem, progresso.etapa, progresso.detalhe);
+
+                            // Atualizar barras detalhadas
+                            if (progresso.xlsxAtual !== undefined && progresso.xlsxTotal !== undefined) {
+                                atualizarBarraXlsx(progresso.xlsxAtual, progresso.xlsxTotal);
+                            }
+                            if (progresso.csvAtual !== undefined && progresso.csvTotal !== undefined) {
+                                atualizarBarraCsv(progresso.csvAtual, progresso.csvTotal);
+                            }
+                            if (progresso.processAtual !== undefined && progresso.processTotal !== undefined) {
+                                atualizarBarraProcessamento(progresso.processAtual, progresso.processTotal);
+                            }
 
                             // Se tem info de linhas, mostrar detalhes com contagem
                             if (progresso.totalLinhas > 0 && !progresso.resumoDisponivel) {
@@ -1336,18 +1399,51 @@
                     const porcentagem = Math.min(Math.round(pct), 100);
                     progressFill.style.width = porcentagem + '%';
                     progressText.textContent = porcentagem + '%';
-                    
+
                     // Atualizar título da etapa
                     if (etapa) {
                         progressEtapa.textContent = etapa;
                     }
-                    
+
                     // Atualizar detalhe
                     if (detalhe) {
                         progressDetail.textContent = detalhe;
                     }
                 } catch (error) {
                     Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarProgresso', error);
+                }
+            }
+
+            function atualizarBarraXlsx(atual, total) {
+                try {
+                    const percentual = total > 0 ? Math.round((atual / total) * 100) : 0;
+                    progressXlsxBar.style.width = percentual + '%';
+                    progressXlsxCounter.textContent = `${atual}/${total}`;
+                    console.log(`[XLSX] ${atual}/${total} (${percentual}%)`);
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarBarraXlsx', error);
+                }
+            }
+
+            function atualizarBarraCsv(atual, total) {
+                try {
+                    const percentual = total > 0 ? Math.round((atual / total) * 100) : 0;
+                    progressCsvBar.style.width = percentual + '%';
+                    progressCsvCounter.textContent = `${atual}/${total}`;
+                    console.log(`[CSV] ${atual}/${total} (${percentual}%)`);
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarBarraCsv', error);
+                }
+            }
+
+            function atualizarBarraProcessamento(atual, total) {
+                try {
+                    const percentual = total > 0 ? Math.round((atual / total) * 100) : 0;
+                    progressProcessBar.style.width = percentual + '%';
+                    progressProcessCounter.textContent = `${atual}/${total}`;
+                    console.log(`[PROCESS] ${atual}/${total} (${percentual}%)`);
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha('Importacao.cshtml', 'atualizarBarraProcessamento', error);
                 }
             }
 
