@@ -568,7 +568,7 @@
                             <ejs-dropdownlist id="cmbVeiculo" dataSource="@ViewData["lstVeiculos"]"
                                               placeholder="Selecione o Veículo" allowFiltering="true" filterType="Contains"
                                               popupHeight="250px">
-                                <e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+                                <e-dropdownlist-fields text="Descricao" value="Id"></e-dropdownlist-fields>
                             </ejs-dropdownlist>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -576,7 +576,7 @@
                             <ejs-dropdownlist id="cmbMotorista" dataSource="@ViewData["lstMotorista"]"
                                               placeholder="Selecione o Motorista" allowFiltering="true" filterType="Contains"
                                               popupHeight="250px">
-                                <e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+                                <e-dropdownlist-fields text="Descricao" value="Id"></e-dropdownlist-fields>
                             </ejs-dropdownlist>
                         </div>
                     </div>
@@ -591,7 +591,7 @@
                             <ejs-dropdownlist id="cmbCombustivel" dataSource="@ViewData["lstCombustivel"]"
                                               placeholder="Selecione o Combustível" allowFiltering="true" filterType="Contains"
                                               popupHeight="250px">
-                                <e-dropdownlist-fields text="Text" value="Value"></e-dropdownlist-fields>
+                                <e-dropdownlist-fields text="Descricao" value="Id"></e-dropdownlist-fields>
                             </ejs-dropdownlist>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -633,7 +633,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-ftx-fechar" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-circle-xmark icon-space"></i> Cancelar Operação
+                </button>
                 <button type="button" class="btn btn-azul" id="btnSalvarPendencia" onclick="salvarPendencia()">
                     <span class="btn-text"><i class="fa-duotone fa-floppy-disk icon-pulse"></i> Salvar</span>
                     <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Salvando...</span>
@@ -683,7 +685,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-ftx-fechar" data-bs-dismiss="modal">
+                    <i class="fa-duotone fa-circle-xmark icon-space"></i> Cancelar Operação
+                </button>
                 <button type="button" class="btn btn-verde" id="btnAplicarSugestao" onclick="confirmarAplicarSugestao()">
                     <span class="btn-text"><i class="fa-duotone fa-check"></i> Aplicar Correção</span>
                     <span class="btn-loading d-none"><i class="fa-duotone fa-spinner fa-spin"></i> Aplicando...</span>
