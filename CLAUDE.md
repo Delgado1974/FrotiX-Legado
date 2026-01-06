@@ -199,3 +199,102 @@ function esconderLoading() {
 - Fundo branco em modais de loading
 - FontAwesome `fa-spinner fa-spin` como indicador principal
 - Loading inline na página (sempre usar overlay fullscreen)
+
+## Regras de Gravação de Conversas
+
+### Objetivo:
+Documentar **decisões técnicas** e **mudanças no projeto** realizadas em cada sessão de trabalho com o Claude Code.
+
+### Início de cada conversa:
+1. **SEMPRE** pedir para o usuário fazer `/rename` para nomear a conversa
+2. **Formato do arquivo**: `AAAA.MM.DD-HH.mm - Nome da Conversa.md`
+   - Exemplo: `2026.01.06-14.57 - Implementação do Dashboard de Frotas.md`
+   - Substituir data/hora pelas atuais do início da conversa
+3. **Perguntar**: "Esta é uma conversa nova ou continuação de outra?"
+4. **Se for continuação**:
+   - Listar as últimas 15 conversas da pasta `Conversas/` para o usuário escolher
+   - Permitir opção "Nenhuma delas" se a conversa anterior não estiver na lista
+   - Registrar no arquivo qual conversa está sendo continuada
+
+### Local de armazenamento:
+- Pasta: **`Conversas/`** na raiz do projeto
+- Um arquivo `.md` por sessão de conversa
+
+### Quando gravar:
+- **SEMPRE ao final de cada sessão de trabalho**
+- Quando o usuário pedir explicitamente "grave a conversa" ou "salve o log"
+
+### Conteúdo obrigatório do registro:
+
+#### 1. Cabeçalho:
+```markdown
+# [Nome da Conversa]
+
+**Data/Hora de Início**: AAAA-MM-DD HH:mm:ss
+**Data/Hora de Término**: AAAA-MM-DD HH:mm:ss
+**Duração Total**: X horas Y minutos
+**Continuação de**: [Nome do arquivo da conversa anterior] ou "Conversa nova"
+```
+
+#### 2. Resumo Executivo:
+- Breve descrição do que foi realizado (2-4 parágrafos)
+- Principais decisões técnicas tomadas
+
+#### 3. Arquivos Criados/Modificados:
+- Lista completa de arquivos alterados
+- Para cada arquivo: breve descrição da mudança
+- Mensagens de commit associadas
+
+#### 4. Problemas Encontrados e Soluções:
+- Erros, bugs, warnings encontrados
+- Como foram diagnosticados
+- Soluções aplicadas (com código/comandos quando relevante)
+
+#### 5. Decisões Técnicas:
+- Escolhas arquiteturais feitas
+- Justificativas para as decisões
+- Alternativas consideradas (se houver)
+
+#### 6. Tarefas Pendentes (se houver):
+- O que ficou para fazer posteriormente
+- Sugestões de próximos passos
+
+#### 7. Continuidade:
+- Se a conversa pode ter continuação em outro chat, mencionar explicitamente
+- Indicar o contexto necessário para continuar
+
+### Exemplo de estrutura de arquivo:
+```markdown
+# Implementação do Dashboard de Frotas
+
+**Data/Hora de Início**: 2026-01-06 14:30:00
+**Data/Hora de Término**: 2026-01-06 16:45:00
+**Duração Total**: 2 horas 15 minutos
+**Continuação de**: Conversa nova
+
+## Resumo Executivo
+Implementado dashboard completo de visualização de frotas com gráficos...
+
+## Arquivos Criados/Modificados
+1. `Pages/Dashboard/Frotas.cshtml` - Criada página principal do dashboard
+   - Commit: "Adiciona dashboard de frotas com gráficos interativos"
+
+2. `wwwroot/css/frotix.css` - Adicionados estilos para cards de métricas
+   - Commit: "Adiciona estilos para cards de dashboard"
+
+## Problemas Encontrados e Soluções
+### Erro: Gráfico não renderizando
+**Problema**: Chart.js não carregava os dados corretamente...
+**Solução**: Ajustado o formato dos dados para...
+
+## Decisões Técnicas
+- Escolhido Chart.js para gráficos por ser mais leve que D3.js
+- Implementado refresh automático a cada 30 segundos
+
+## Tarefas Pendentes
+- Adicionar filtros por período
+- Implementar exportação para PDF
+
+## Continuidade
+Esta conversa pode ser continuada para implementar as tarefas pendentes.
+```
