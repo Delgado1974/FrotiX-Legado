@@ -479,6 +479,7 @@ namespace FrotiX
 
                     // *** Mapear o Hub do SignalR ***
                     endpoints.MapHub<AlertasHub>("/alertasHub");
+                    endpoints.MapHub<FrotiX.Hubs.ImportacaoHub>("/hubs/importacao");
                 });
 
                 // ========================================================
