@@ -198,7 +198,7 @@ namespace FrotiX.Controllers
                     Placa = pendencia.Placa,
                     NomeMotorista = pendencia.NomeMotorista,
                     Produto = pendencia.Produto,
-                    DataHora = pendencia.DataHora?.ToString("yyyy-MM-ddTHH:mm"),
+                    DataHora = pendencia.DataHora?.ToString("dd/MM/yyyy HH:mm"),
                     KmAnterior = pendencia.KmAnterior,
                     Km = pendencia.Km,
                     KmRodado = pendencia.KmRodado,
