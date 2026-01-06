@@ -1031,6 +1031,7 @@
                     // Evento: Receber progresso
                     hubConnection.on("ProgressoImportacao", (progresso) => {
                         try {
+                            console.log('[SignalR] Progresso recebido:', progresso);
                             // Atualizar etapa (título) e progresso
                             atualizarProgresso(progresso.porcentagem, progresso.etapa, progresso.detalhe);
 
@@ -1458,11 +1459,19 @@
 
             async function importar() {
                 try {
+                    console.log('[IMPORTAR] Iniciando importação...');
+                    console.log('[IMPORTAR] ConnectionID:', connectionId);
+
                     // Validar que ambos os arquivos estão selecionados
                     if (!arquivoXlsxAtual || !arquivoCsvAtual) {
                         AppToast.show('Amarelo', 'Selecione ambos os arquivos (XLSX e CSV)', 4000);
                         return;
                     }
+
+                    console.log('[IMPORTAR] Arquivos selecionados:', {
+                        xlsx: arquivoXlsxAtual.name,
+                        csv: arquivoCsvAtual.name
+                    });
 
                     mostrarEstado('loading');
                     ocultarResumoPlanilha(); // Resetar resumo para nova importação
@@ -1475,12 +1484,19 @@
                     // Enviar connectionId do SignalR para o servidor
                     if (connectionId) {
                         formData.append('connectionId', connectionId);
+                        console.log('[IMPORTAR] ConnectionID enviado ao servidor');
+                    } else {
+                        console.warn('[IMPORTAR] ATENÇÃO: ConnectionID não disponível!');
                     }
+
+                    console.log('[IMPORTAR] Enviando requisição para /api/Abastecimento/ImportarDual...');
 
                     const response = await fetch('/api/Abastecimento/ImportarDual', {
                         method: 'POST',
                         body: formData
                     });
+
+                    console.log('[IMPORTAR] Resposta recebida. Status:', response.status);
 
                     const result = await response.json();
 
