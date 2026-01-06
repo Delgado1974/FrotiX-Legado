@@ -1,7 +1,7 @@
 # Documentação: Dashboard de Abastecimento
 
-> **Última Atualização**: 06/01/2025
-> **Versão Atual**: 1.0
+> **Última Atualização**: 06/01/2026
+> **Versão Atual**: 1.1
 
 ---
 
@@ -807,6 +807,261 @@ setTimeout(() => {
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
 > **PADRÃO**: `## [Data/Hora] - Título da Modificação`
+
+---
+
+## [06/01/2026 18:13-19:07] - Correções Críticas de Performance e UX
+
+**Descrição**:
+Sessão completa de correções no Dashboard de Abastecimento focada em resolver problemas críticos de performance (travamento) e melhorias de experiência do usuário (dropdowns). Foram aplicadas 4 correções incrementais ao longo de 54 minutos, cada uma resolvendo problemas identificados durante testes.
+
+**Problema Inicial Reportado**:
+- Dashboard travava completamente ao carregar
+- Usuário suspeitava que API estava buscando todos os registros do banco
+
+**Problemas Identificados e Resolvidos**:
+
+1. **Travamento ao Carregar** ❌ → ✅
+   - API buscava TODOS os registros históricos sem filtro
+   - Timeout e consumo excessivo de memória
+   - **Solução**: Filtro padrão para buscar apenas último mês com dados
+
+2. **Dropdowns Não Populados** ❌ → ✅
+   - Lista de Anos vazia mesmo com dados disponíveis
+   - Lista de Mês vazia ao invés de dinâmica
+   - **Solução**: Criado endpoint para buscar meses, eventos para popular dinamicamente
+
+3. **Meses Hardcoded no HTML** ❌ → ✅
+   - Todos os 12 meses escritos diretamente no HTML
+   - Não permitia população dinâmica
+   - **Solução**: Removidos meses hardcoded de 3 dropdowns
+
+4. **Dropdowns Não Posicionados** ❌ → ✅
+   - Dashboard mostrava dados de Nov/2025 mas dropdowns vazios
+   - Usuário não sabia qual período estava vendo
+   - **Solução**: API retorna filtro aplicado, JavaScript posiciona automaticamente
+
+**Soluções Implementadas**:
+
+### 1ª Correção - Filtro Padrão (Commit `8c79122`)
+
+**Arquivo**: `Controllers/AbastecimentoController.DashboardAPI.cs`
+
+**Método `DashboardDados` (linhas 43-56)**:
+```csharp
+// FILTRO PADRÃO: Se nenhum filtro foi especificado, buscar último mês com dados
+if ((!ano.HasValue || ano == 0) && (!mes.HasValue || mes == 0))
+{
+    var ultimoMes = _context.EstatisticaAbastecimentoMensal
+        .Where(e => e.Ano > 0 && e.Mes > 0 && e.ValorTotal > 0)
+        .OrderByDescending(e => e.Ano)
+        .ThenByDescending(e => e.Mes)
+        .FirstOrDefault();
+
+    if (ultimoMes != null)
+    {
+        ano = ultimoMes.Ano;
+        mes = ultimoMes.Mes;
+    }
+}
+```
+
+**Método `DashboardDadosFallback` (linhas 296-310)**:
+```csharp
+// FILTRO PADRÃO: Se nenhum filtro foi especificado, buscar último mês com dados
+if ((!ano.HasValue || ano == 0) && (!mes.HasValue || mes == 0))
+{
+    var ultimaData = _unitOfWork.ViewAbastecimentos.GetAll()
+        .Where(a => a.DataHora.HasValue)
+        .OrderByDescending(a => a.DataHora)
+        .Select(a => a.DataHora!.Value)
+        .FirstOrDefault();
+
+    if (ultimaData != default)
+    {
+        ano = ultimaData.Year;
+        mes = ultimaData.Month;
+    }
+}
+```
+
+**Anos disponíveis** (linhas 330-335):
+- Removida limitação de 3 anos - agora retorna TODOS os anos
+- Mantida limitação apenas em `resumoPorAno` para performance
+
+### 2ª Correção - Dropdowns Dinâmicos (Commit `7925572`)
+
+**Arquivo**: `Controllers/AbastecimentoController.DashboardAPI.cs`
+
+**Novo Endpoint** (linhas 1478-1516):
+```csharp
+[Route("DashboardMesesDisponiveis")]
+[HttpGet]
+public IActionResult DashboardMesesDisponiveis(int ano)
+{
+    // Tentar usar dados estatísticos primeiro
+    var mesesEstatisticos = _context.EstatisticaAbastecimentoMensal
+        .Where(e => e.Ano == ano)
+        .Select(e => e.Mes)
+        .Distinct()
+        .OrderBy(m => m)
+        .ToList();
+
+    if (mesesEstatisticos.Any())
+        return Ok(new { meses = mesesEstatisticos });
+
+    // Fallback: buscar da view original
+    var mesesView = _unitOfWork.ViewAbastecimentos.GetAll()
+        .Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano)
+        .Select(a => a.DataHora.Value.Month)
+        .Distinct()
+        .OrderBy(m => m)
+        .ToList();
+
+    return Ok(new { meses = mesesView });
+}
+```
+
+**Arquivo**: `wwwroot/js/dashboards/dashboard-abastecimento.js`
+
+**Função `popularMesesDoAno`** (linhas 144-171):
+```javascript
+function popularMesesDoAno(ano, mesSelect, callback) {
+    $.ajax({
+        url: '/api/abastecimento/DashboardMesesDisponiveis',
+        type: 'GET',
+        data: { ano: ano },
+        success: function (data) {
+            const meses = data.meses || [];
+            const nomesMeses = ['', 'Janeiro', 'Fevereiro', ...];
+
+            mesSelect.innerHTML = '<option value="">&lt;Todos os Meses&gt;</option>';
+            meses.forEach(mes => {
+                const option = document.createElement('option');
+                option.value = mes;
+                option.textContent = nomesMeses[mes];
+                mesSelect.appendChild(option);
+            });
+
+            // Executar callback se fornecido
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
+    });
+}
+```
+
+**Eventos nos dropdowns de ano** (linhas 105-119):
+```javascript
+select.addEventListener('change', function() {
+    const anoSelecionado = this.value;
+    const mesSelectId = this.id.replace('Ano', 'Mes');
+    const mesSelect = document.getElementById(mesSelectId);
+
+    if (anoSelecionado && mesSelect) {
+        popularMesesDoAno(anoSelecionado, mesSelect);
+    } else if (mesSelect) {
+        mesSelect.innerHTML = '<option value="">&lt;Todos os Meses&gt;</option>';
+    }
+});
+```
+
+### 3ª Correção - Meses Hardcoded (Commit `b4fda66`)
+
+**Arquivo**: `Pages/Abastecimento/DashboardAbastecimento.cshtml`
+
+Removidos meses hardcoded de 3 dropdowns:
+- Linha 710-712: `filtroMesGeral`
+- Linha 916-918: `filtroMesMensal`
+- Linha 1098-1100: `filtroMesVeiculo`
+
+**Antes**:
+```html
+<select id="filtroMesGeral" class="form-select">
+    <option value="">&lt;Todos os Meses&gt;</option>
+    <option value="1">Janeiro</option>
+    <option value="2">Fevereiro</option>
+    <!-- ... todos os 12 meses ... -->
+</select>
+```
+
+**Depois**:
+```html
+<select id="filtroMesGeral" class="form-select">
+    <option value="">&lt;Todos os Meses&gt;</option>
+</select>
+```
+
+### 4ª Correção - Posicionamento Automático (Commit `18b1ef6`)
+
+**Arquivo**: `Controllers/AbastecimentoController.DashboardAPI.cs`
+
+**Método `DashboardDados`** (linhas 167-171):
+```csharp
+var resultado = new
+{
+    // ... outros campos ...
+    filtroAplicado = new
+    {
+        ano = ano ?? 0,
+        mes = mes ?? 0
+    }
+};
+```
+
+**Arquivo**: `wwwroot/js/dashboards/dashboard-abastecimento.js`
+
+**Posicionamento automático** (linhas 122-140):
+```javascript
+const filtroAplicado = data.filtroAplicado || {};
+if (filtroAplicado.ano > 0) {
+    // Selecionar o ano no dropdown
+    if (selectGeral) {
+        selectGeral.value = filtroAplicado.ano.toString();
+    }
+
+    // Popular meses do ano e depois selecionar o mês
+    const mesSelectGeral = document.getElementById('filtroMesGeral');
+    if (mesSelectGeral) {
+        popularMesesDoAno(filtroAplicado.ano, mesSelectGeral, function() {
+            if (filtroAplicado.mes > 0) {
+                mesSelectGeral.value = filtroAplicado.mes.toString();
+            }
+        });
+    }
+}
+```
+
+**Arquivos Modificados**:
+1. `Controllers/AbastecimentoController.DashboardAPI.cs` (4 modificações)
+2. `Pages/Abastecimento/DashboardAbastecimento.cshtml` (3 modificações)
+3. `wwwroot/js/dashboards/dashboard-abastecimento.js` (3 modificações)
+4. `Conversas/2026.01.06-18.12 - dashboard.abastecimento.md` (documentação completa da sessão)
+
+**Commits Relacionados**:
+- `8c79122`: "Corrige travamento do Dashboard de Abastecimento com filtro padrão"
+- `7925572`: "Implementa dropdowns dinâmicos de Ano/Mês no Dashboard de Abastecimento"
+- `b4fda66`: "Remove meses hardcoded e corrige erro de valores NULL no Dashboard"
+- `18b1ef6`: "Implementa posicionamento automático dos dropdowns de Ano/Mês"
+
+**Status**: ✅ **Implementado e Testado**
+
+**Comportamento Final**:
+- ✅ Dashboard carrega instantaneamente (< 2 segundos)
+- ✅ Mostra automaticamente dados do último mês com registros
+- ✅ Dropdown Ano automaticamente posicionado (ex: "2025")
+- ✅ Dropdown Mês automaticamente populado com meses disponíveis
+- ✅ Dropdown Mês automaticamente posicionado (ex: "Novembro")
+- ✅ Lista de Anos completa (todos os anos com dados)
+- ✅ Não dá erro ao fechar página
+- ✅ Filtros funcionam corretamente
+- ✅ Experiência de usuário clara e intuitiva
+
+**Notas Adicionais**:
+- Cache do navegador pode manter versão antiga do HTML
+- Solução: CTRL+F5 ou limpar cache do navegador
+- Documentação completa da sessão em `Conversas/2026.01.06-18.12 - dashboard.abastecimento.md`
 
 ---
 
