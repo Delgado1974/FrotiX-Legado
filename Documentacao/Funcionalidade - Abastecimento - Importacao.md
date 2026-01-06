@@ -1,7 +1,7 @@
 # Documentação: Importação de Abastecimento
 
-> **Última Atualização**: 06/01/2025
-> **Versão Atual**: 2.0
+> **Última Atualização**: 06/01/2026
+> **Versão Atual**: 2.1
 
 ---
 
@@ -279,6 +279,57 @@ foreach (var csvRecord in dadosCsv)
 ```
 
 **Response**: Mesmo formato do `ImportarNovo`.
+
+---
+
+### 3. GET `/api/Abastecimento/ExportarPendencias`
+
+**Descrição**: Exporta todas as pendências (Status = 0) para um arquivo Excel (.xlsx).
+
+**Request**:
+- Método: `GET`
+- Sem parâmetros
+
+**Response**:
+- `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- Download automático do arquivo
+
+**Nome do Arquivo**: `Pendencias_Abastecimento_yyyyMMdd_HHmmss.xlsx`
+
+**Colunas do Excel (16 colunas)**:
+| Coluna | Descrição |
+|--------|-----------|
+| Data Importação | Data/hora em que a pendência foi gerada |
+| Autorização QCard | Número da autorização |
+| Data/Hora Abast. | Data/hora do abastecimento |
+| Placa | Placa do veículo |
+| Cód. Motorista | Código do motorista no QCard |
+| Nome Motorista | Nome do motorista |
+| Produto | Tipo de combustível |
+| KM Anterior | Hodômetro anterior |
+| KM | Hodômetro atual |
+| KM Rodado | Quilômetros rodados |
+| Litros | Quantidade abastecida |
+| Valor Unitário | Preço por litro |
+| Tipo Pendência | Categoria do erro (veiculo, motorista, km, etc.) |
+| Descrição Pendência | Descrição completa do(s) erro(s) |
+| Arquivo Origem | Nome do arquivo de origem |
+| Linha Original | Número da linha na planilha original |
+
+**Formatação do Excel**:
+- Cabeçalho: Negrito, fundo cinza, bordas
+- Datas: Formato `dd/mm/yyyy hh:mm`
+- Colunas: Auto-ajustadas automaticamente
+
+**Ordenação**: Por Data de Importação (ASC) → Autorização QCard (ASC)
+
+**Exemplo de Uso (Frontend)**:
+```javascript
+function exportarPendencias() {
+    AppToast.show('Azul', 'Gerando arquivo Excel...', 3000);
+    window.location.href = '/api/Abastecimento/ExportarPendencias';
+}
+```
 
 ---
 
@@ -948,6 +999,91 @@ var mapaCombustivel = new Dictionary<string, Guid>
 
 ---
 
+## [06/01/2026 21:00] - Exportação de Pendências para Excel e Melhorias de UX
+
+**Descrição**:
+- Implementada funcionalidade completa de exportação de pendências para Excel
+- Corrigido erro JavaScript `removerArquivo is not defined`
+- Simplificada UI de progresso (3 barras → 1 barra)
+- Melhorias de UX: ícones intuitivos e desabilitação de botões durante importação
+- Padronização visual dos botões de ação
+
+**Correções Implementadas**:
+
+1. **Erro `removerArquivo is not defined`**:
+   - Arquivo: `Importacao.cshtml:1580-1587`
+   - Problema: Funções `mostrarSucesso()` e `mostrarParcial()` chamavam `removerArquivo()` que não existia
+   - Solução: Criada função que chama `removerArquivoXlsx()` + `removerArquivoCsv()`
+   - Commit: `fee5e05`
+
+2. **Barras de Progresso não funcionavam**:
+   - Arquivo: `Importacao.cshtml:720-734`
+   - Problema: 3 barras detalhadas (XLSX, CSV, Processamento) ficavam presas em `0/0`
+   - Causa: Eventos de progresso enviavam valores default que sobrescreviam valores corretos
+   - Solução: Removidas 3 barras detalhadas, mantida apenas barra geral
+   - Removidas: variáveis JS, funções de atualização, handlers SignalR
+   - Adicionado: ícone `fa-cogs fa-spin-pulse` no loading
+   - Commit: `94b2ae3`
+
+3. **Desabilitação de Botões durante Importação**:
+   - Arquivo: `Importacao.cshtml:1608-1628`
+   - Implementação: Botões Remover XLSX, Remover CSV e Importar desabilitados no estado 'loading'
+   - Reabilitação automática ao sair do loading (sucesso, parcial, erro)
+   - Commit: `44d78f7`
+
+4. **Ícones de Remoção**:
+   - Arquivo: `Importacao.cshtml:632, 661`
+   - Mudança: `fa-xmark` → `fa-trash-can` (lixeira mais intuitiva)
+   - Commit: `44d78f7`
+
+5. **Padronização de Botões**:
+   - Arquivo: `Importacao.cshtml:886-900, 939-953`
+   - Mudança: "Acessar Pendências" de link para botão + cores uniformes
+   - Classes aplicadas:
+     - `btn-azul` (azul-petróleo #3D5771) para "Acessar Pendências"
+     - `btn-verde-dinheiro` (verde militar #4B8B3B) para "Exportar Excel"
+   - Commit: `2635d02`
+
+**Nova Funcionalidade - Exportação Excel**:
+
+1. **Backend - Endpoint**:
+   - Arquivo: `AbastecimentoController.Import.cs:2163-2319`
+   - Rota: `GET /api/Abastecimento/ExportarPendencias`
+   - Biblioteca: NPOI (XSSFWorkbook)
+   - Busca pendências com `Status = 0` (Pendente)
+   - Ordenação: DataImportacao ASC → AutorizacaoQCard ASC
+   - Commit: `0629e1a`
+
+2. **Geração de Excel**:
+   - 16 colunas: Data Importação, Autorização QCard, Data/Hora Abast., Placa, Cód. Motorista, Nome Motorista, Produto, KM Anterior, KM, KM Rodado, Litros, Valor Unitário, Tipo Pendência, Descrição Pendência, Arquivo Origem, Linha Original
+   - Formatação:
+     - Cabeçalho: Negrito + fundo cinza + bordas
+     - Datas: Formato `dd/mm/yyyy hh:mm`
+     - Auto-ajuste de largura das colunas
+   - Nome arquivo: `Pendencias_Abastecimento_yyyyMMdd_HHmmss.xlsx`
+
+3. **Frontend - Botões**:
+   - Arquivo: `Importacao.cshtml:886-900, 939-953`
+   - Botão "Exportar Excel" adicionado ao lado de "Acessar Pendências"
+   - Presente em estados Parcial e Erro
+   - Função JS: `exportarPendencias()` (linhas 1736-1744)
+   - Toast de feedback: "Gerando arquivo Excel..."
+
+**Arquivos Modificados**:
+- `Pages/Abastecimento/Importacao.cshtml` (múltiplas correções)
+- `Controllers/AbastecimentoController.Import.cs` (novo endpoint de exportação)
+
+**Estatísticas**:
+- Commits: 5
+- Bugs corrigidos: 3
+- Nova funcionalidade: 1 (exportação Excel)
+- Linhas adicionadas: ~200
+- Linhas removidas: ~100
+
+**Status**: ✅ **Concluído e Testado**
+
+---
+
 ## [06/01/2025 06:48] - Correção de Erro de Validação ModelState no Endpoint ImportarDual
 
 **Problema Identificado**:
@@ -1154,6 +1290,6 @@ public class LinhaXlsx
 
 ---
 
-**Última atualização deste arquivo**: 06/01/2025 às 07:15
+**Última atualização deste arquivo**: 06/01/2026 às 21:00
 **Responsável pela documentação**: Claude (AI Assistant)
-**Versão do documento**: 2.0
+**Versão do documento**: 2.1
