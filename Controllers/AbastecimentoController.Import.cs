@@ -2159,5 +2159,164 @@ namespace FrotiX.Controllers
                 return StatusCode(500, new { success = false, message = error.Message });
             }
         }
+
+        [Route("ExportarPendencias")]
+        [HttpGet]
+        public IActionResult ExportarPendencias()
+        {
+            try
+            {
+                // Buscar todas as pendências (Status = 0 = Pendente)
+                var pendencias = _unitOfWork.AbastecimentoPendente
+                    .GetAll()
+                    .Where(p => p.Status == 0)
+                    .OrderBy(p => p.DataImportacao)
+                    .ThenBy(p => p.AutorizacaoQCard)
+                    .ToList();
+
+                if (!pendencias.Any())
+                {
+                    return NotFound(new { success = false, message = "Nenhuma pendência encontrada para exportar." });
+                }
+
+                // Criar workbook Excel
+                var workbook = new XSSFWorkbook();
+                var sheet = workbook.CreateSheet("Pendências");
+
+                // Criar estilo para o cabeçalho
+                var headerStyle = workbook.CreateCellStyle();
+                var headerFont = workbook.CreateFont();
+                headerFont.IsBold = true;
+                headerFont.FontHeightInPoints = 11;
+                headerStyle.SetFont(headerFont);
+                headerStyle.FillForegroundColor = NPOI.HSSF.Util.HSSFColor.Grey25Percent.Index;
+                headerStyle.FillPattern = FillPattern.SolidForeground;
+                headerStyle.BorderBottom = BorderStyle.Thin;
+                headerStyle.BorderTop = BorderStyle.Thin;
+                headerStyle.BorderLeft = BorderStyle.Thin;
+                headerStyle.BorderRight = BorderStyle.Thin;
+
+                // Criar estilo para células de data
+                var dateStyle = workbook.CreateCellStyle();
+                var dataFormat = workbook.CreateDataFormat();
+                dateStyle.DataFormat = dataFormat.GetFormat("dd/mm/yyyy hh:mm");
+
+                // Criar cabeçalho
+                var headerRow = sheet.CreateRow(0);
+                string[] headers = {
+                    "Data Importação",
+                    "Autorização QCard",
+                    "Data/Hora Abast.",
+                    "Placa",
+                    "Cód. Motorista",
+                    "Nome Motorista",
+                    "Produto",
+                    "KM Anterior",
+                    "KM",
+                    "KM Rodado",
+                    "Litros",
+                    "Valor Unitário",
+                    "Tipo Pendência",
+                    "Descrição Pendência",
+                    "Arquivo Origem",
+                    "Linha Original"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = headerRow.CreateCell(i);
+                    cell.SetCellValue(headers[i]);
+                    cell.CellStyle = headerStyle;
+                }
+
+                // Preencher dados
+                int rowIndex = 1;
+                foreach (var pendencia in pendencias)
+                {
+                    var row = sheet.CreateRow(rowIndex++);
+
+                    // Data Importação
+                    var cellDataImportacao = row.CreateCell(0);
+                    cellDataImportacao.SetCellValue(pendencia.DataImportacao);
+                    cellDataImportacao.CellStyle = dateStyle;
+
+                    // Autorização QCard
+                    row.CreateCell(1).SetCellValue(pendencia.AutorizacaoQCard ?? 0);
+
+                    // Data/Hora Abastecimento
+                    if (pendencia.DataHora.HasValue)
+                    {
+                        var cellDataHora = row.CreateCell(2);
+                        cellDataHora.SetCellValue(pendencia.DataHora.Value);
+                        cellDataHora.CellStyle = dateStyle;
+                    }
+                    else
+                    {
+                        row.CreateCell(2).SetCellValue("");
+                    }
+
+                    // Placa
+                    row.CreateCell(3).SetCellValue(pendencia.Placa ?? "");
+
+                    // Código Motorista
+                    row.CreateCell(4).SetCellValue(pendencia.CodMotorista ?? 0);
+
+                    // Nome Motorista
+                    row.CreateCell(5).SetCellValue(pendencia.NomeMotorista ?? "");
+
+                    // Produto
+                    row.CreateCell(6).SetCellValue(pendencia.Produto ?? "");
+
+                    // KM Anterior
+                    row.CreateCell(7).SetCellValue(pendencia.KmAnterior ?? 0);
+
+                    // KM
+                    row.CreateCell(8).SetCellValue(pendencia.Km ?? 0);
+
+                    // KM Rodado
+                    row.CreateCell(9).SetCellValue(pendencia.KmRodado ?? 0);
+
+                    // Litros
+                    row.CreateCell(10).SetCellValue(pendencia.Litros ?? 0);
+
+                    // Valor Unitário
+                    row.CreateCell(11).SetCellValue(pendencia.ValorUnitario ?? 0);
+
+                    // Tipo Pendência
+                    row.CreateCell(12).SetCellValue(pendencia.TipoPendencia ?? "");
+
+                    // Descrição Pendência
+                    row.CreateCell(13).SetCellValue(pendencia.DescricaoPendencia ?? "");
+
+                    // Arquivo Origem
+                    row.CreateCell(14).SetCellValue(pendencia.ArquivoOrigem ?? "");
+
+                    // Linha Original
+                    row.CreateCell(15).SetCellValue(pendencia.NumeroLinhaOriginal);
+                }
+
+                // Auto-ajustar largura das colunas
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    sheet.AutoSizeColumn(i);
+                }
+
+                // Converter para byte array
+                using (var memoryStream = new MemoryStream())
+                {
+                    workbook.Write(memoryStream);
+                    var excelBytes = memoryStream.ToArray();
+
+                    // Retornar arquivo
+                    string nomeArquivo = $"Pendencias_Abastecimento_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", nomeArquivo);
+                }
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "ExportarPendencias", error);
+                return StatusCode(500, new { success = false, message = error.Message });
+            }
+        }
     }
 }
