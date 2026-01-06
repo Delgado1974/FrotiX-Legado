@@ -561,6 +561,15 @@ namespace FrotiX.Data
                 });
             });
 
+            // AbastecimentoPendente - desabilita OUTPUT clause por segurança
+            modelBuilder.Entity<AbastecimentoPendente>(entity =>
+            {
+                entity.ToTable(tb =>
+                {
+                    tb.UseSqlOutputClause(false); // Evita erro se houver triggers
+                });
+            });
+
             // Requisitante - tem trigger
             modelBuilder.Entity<Requisitante>(entity =>
             {
