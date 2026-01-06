@@ -1356,6 +1356,7 @@ namespace FrotiX.Controllers
         /// </summary>
         [Route("ImportarDual")]
         [HttpPost]
+        [FrotiX.Filters.DisableModelValidation] // Desabilita validação automática do [ApiController]
         public async Task<ActionResult> ImportarDual()
         {
             string connectionId = null;
