@@ -44,6 +44,7 @@ namespace FrotiX.Controllers
                 if ((!ano.HasValue || ano == 0) && (!mes.HasValue || mes == 0))
                 {
                     var ultimoMes = _context.EstatisticaAbastecimentoMensal
+                        .Where(e => e.Ano > 0 && e.Mes > 0 && e.ValorTotal > 0)
                         .OrderByDescending(e => e.Ano)
                         .ThenByDescending(e => e.Mes)
                         .FirstOrDefault();
