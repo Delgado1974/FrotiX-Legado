@@ -1364,10 +1364,20 @@ namespace FrotiX.Controllers
 
             try
             {
-                // Blindagem: Remover validação das propriedades de navegação
+                // Blindagem: Remover validação de TODOS os campos que virão dos arquivos
+                // (na importação, os dados vêm do CSV/XLSX, não do formulário)
                 ModelState.Remove("Veiculo");
                 ModelState.Remove("Motorista");
                 ModelState.Remove("Combustivel");
+                ModelState.Remove("Litros");
+                ModelState.Remove("DataHora");
+                ModelState.Remove("Hodometro");
+                ModelState.Remove("AutorizacaoQCard");
+                ModelState.Remove("ValorUnitario");
+                ModelState.Remove("VeiculoId");
+                ModelState.Remove("MotoristaId");
+                ModelState.Remove("CombustivelId");
+                ModelState.Remove("KmRodado");
 
                 connectionId = Request.Form["connectionId"].FirstOrDefault();
 
