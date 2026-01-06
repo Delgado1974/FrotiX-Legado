@@ -132,7 +132,9 @@
 
         .btn-editar-pendencia:hover {
             background-color: #2d4559 !important;
-            box-shadow: 0 0 12px rgba(61,87,113,.6);
+            border-color: #1f3241 !important;
+            animation: buttonWiggle .5s ease-in-out !important;
+            box-shadow: 0 0 20px rgba(61,87,113,.8), 0 6px 12px rgba(61,87,113,.5) !important;
             color: #fff !important;
         }
 
@@ -145,7 +147,9 @@
 
         .btn-excluir-pendencia:hover {
             background-color: #5a252c !important;
-            box-shadow: 0 0 12px rgba(114,47,55,.6);
+            border-color: #4a1f24 !important;
+            animation: buttonWiggle .5s ease-in-out !important;
+            box-shadow: 0 0 20px rgba(114,47,55,.8), 0 6px 12px rgba(114,47,55,.5) !important;
             color: #fff !important;
         }
 
@@ -500,6 +504,7 @@
                             <table id="tblPendencias" class="table table-bordered table-striped" width="100%">
                                 <thead>
                                     <tr>
+                                        <th>Data Import.</th>
                                         <th>Autorização</th>
                                         <th>Data/Hora</th>
                                         <th>Placa</th>
@@ -843,6 +848,7 @@
                         }
                     },
                     columns: [
+                        { data: "dataImportacao" },
                         { data: "autorizacaoQCard" },
                         { data: "dataHora" },
                         { data: "placa" },
@@ -865,7 +871,7 @@
                             }
                         }
                     ],
-                    order: [[1, 'desc']],
+                    order: [[0, 'asc'], [1, 'asc']],
                     language: {
                         url: '/lib/DataTables/Portuguese-Brasil.json'
                     },

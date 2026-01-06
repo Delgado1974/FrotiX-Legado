@@ -37,6 +37,10 @@ namespace FrotiX.Pages.Abastecimento
         {
             try
             {
+                Initialize(_unitOfWork);
+                ViewData["lstVeiculos"] = new FrotiX.Pages.Abastecimento.ListaVeiculos(_unitOfWork).VeiculosList();
+                ViewData["lstCombustivel"] = new FrotiX.Pages.Abastecimento.ListaCombustivel(_unitOfWork).CombustivelList();
+                ViewData["lstMotorista"] = new FrotiX.Pages.Abastecimento.ListaMotorista(_unitOfWork).MotoristaList();
             }
             catch (Exception error)
             {
