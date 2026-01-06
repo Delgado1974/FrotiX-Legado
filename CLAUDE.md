@@ -206,15 +206,16 @@ function esconderLoading() {
 Documentar **decisões técnicas** e **mudanças no projeto** realizadas em cada sessão de trabalho com o Claude Code.
 
 ### Início de cada conversa:
-1. **SEMPRE** pedir para o usuário fazer `/rename` para nomear a conversa
-2. **Formato do arquivo**: `AAAA.MM.DD-HH.mm - Nome da Conversa.md`
-   - Exemplo: `2026.01.06-14.57 - Implementação do Dashboard de Frotas.md`
-   - Substituir data/hora pelas atuais do início da conversa
-3. **Perguntar**: "Esta é uma conversa nova ou continuação de outra?"
-4. **Se for continuação**:
+1. **PRIMEIRO**: Perguntar se é uma **conversa nova** ou **continuação** de outra
+2. **Se for CONTINUAÇÃO**:
    - Listar as últimas 15 conversas da pasta `Conversas/` para o usuário escolher
    - Permitir opção "Nenhuma delas" se a conversa anterior não estiver na lista
    - Registrar no arquivo qual conversa está sendo continuada
+3. **Se for NOVA**:
+   - Pedir apenas o **nome da conversa** (usuário fornece sem data/hora)
+   - Exemplo: Usuário diz: "Implementação do Dashboard de Frotas"
+   - EU (Claude) acrescento data/hora no formato: `AAAA.MM.DD-HH.mm - [Nome].md`
+   - Exemplo final do arquivo: `2026.01.06-14.57 - Implementação do Dashboard de Frotas.md`
 
 ### Local de armazenamento:
 - Pasta: **`Conversas/`** na raiz do projeto
