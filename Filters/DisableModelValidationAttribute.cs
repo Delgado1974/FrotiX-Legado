@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,6 +11,7 @@ namespace FrotiX.Filters
     /// Útil quando [ApiController] está presente mas queremos validar manualmente.
     /// IMPORTANTE: Este filtro deve executar ANTES da validação do [ApiController].
     /// </summary>
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public class DisableModelValidationAttribute : Attribute, IResourceFilter
     {
         /// <summary>

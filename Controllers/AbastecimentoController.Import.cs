@@ -1353,11 +1353,10 @@ namespace FrotiX.Controllers
 
         /// <summary>
         /// Importação DUAL: recebe CSV + XLSX, faz JOIN em memória por Autorizacao
+        /// NOTA: Este método é acessado via AbastecimentoImportController (sem [ApiController])
+        /// para evitar validação automática antes do processamento dos arquivos.
         /// </summary>
-        [Route("ImportarDual")]
-        [HttpPost]
-        [FrotiX.Filters.DisableModelValidation] // Desabilita validação automática do [ApiController]
-        public async Task<ActionResult> ImportarDual()
+        internal async Task<ActionResult> ImportarDualInternal()
         {
             string connectionId = null;
             string nomeXlsx = "";
