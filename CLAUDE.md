@@ -16,6 +16,13 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 - **NUNCA** incluir arquivos staged de sessões anteriores - ignorá-los completamente
 - Usar `git commit -- <arquivos>` para commitar apenas arquivos específicos da sessão quando necessário
 
+### Commit Automático após Criação/Alteração:
+- **SEMPRE** que eu criar ou alterar arquivos, **fazer commit e push automaticamente** para a branch `main` **SEM** esperar o usuário pedir
+- Incluir no commit **TODOS** os arquivos criados/modificados na tarefa atual
+- Usar mensagem de commit descritiva explicando o que foi feito
+- Aplicar esta regra para: criação de páginas, modificação de código, criação de documentação, alterações de CSS, etc.
+- **Exceções**: NÃO aplicar se o usuário explicitamente pedir para não commitar
+
 ### Commits de Correção de Erros Próprios:
 - Quando o commit for para corrigir erros que EU (Claude) gerei no próprio chat, o comentário do commit deve explicar:
   1. **O que eu fiz de errado** (ex: usei nome de propriedade incorreto)

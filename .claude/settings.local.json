@@ -45,7 +45,8 @@
       "Bash(pip install:*)",
       "Bash(dotnet nuget list:*)",
       "Bash(dotnet restore:*)",
-      "Bash(Select-Object -First 10)"
+      "Bash(Select-Object -First 10)",
+      "Bash(git branch:*)"
     ]
   }
 }

@@ -1,0 +1,1919 @@
+using FrotiX.Models;
+using FrotiX.Repository.IRepository;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Text.Json;
+
+namespace FrotiX.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class NavigationController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _env;
+
+        // Caminhos absolutos para garantir persistência correta
+        private string NavJsonPath => Path.Combine(_env.ContentRootPath, "nav.json");
+        private string NavJsonBackupPath => Path.Combine(_env.ContentRootPath, "nav.json.bak");
+
+        public NavigationController(IUnitOfWork unitOfWork, IWebHostEnvironment env)
+        {
+            try
+            {
+                _unitOfWork = unitOfWork;
+                _env = env;
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "NavigationController", error);
+            }
+        }
+
+        /// <summary>
+        /// Retorna a estrutura completa do nav.json para a TreeView
+        /// </summary>
+        [HttpGet]
+        [Route("GetTree")]
+        public IActionResult GetTree()
+        {
+            try
+            {
+                var jsonText = System.IO.File.ReadAllText(NavJsonPath);
+                var navigation = NavigationBuilder.FromJson(jsonText);
+
+                var treeData = TransformToTreeData(navigation.Lists, null);
+
+                return Json(new
+                {
+                    success = true,
+                    data = treeData
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetTree", error);
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro ao carregar navegação: " + error.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// Salva a estrutura completa e sincroniza com o BD
+        /// </summary>
+        [HttpPost]
+        [Route("SaveTree")]
+        public IActionResult SaveTree([FromBody] List<NavigationTreeItem> items)
+        {
+            try
+            {
+                // 1. Faz backup do arquivo atual
+                if (System.IO.File.Exists(NavJsonPath))
+                {
+                    System.IO.File.Copy(NavJsonPath, NavJsonBackupPath, true);
+                }
+
+                // 2. Reconstrói a estrutura do nav.json
+                var navigation = new
+                {
+                    version = "0.9",
+                    lists = TransformFromTreeData(items)
+                };
+
+                // 3. Salva o arquivo nav.json
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                var jsonText = JsonSerializer.Serialize(navigation, options);
+                System.IO.File.WriteAllText(NavJsonPath, jsonText);
+
+                // 4. Sincroniza com a tabela Recurso
+                SincronizarRecursos(items);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Navegação salva com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveTree", error);
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro ao salvar navegação: " + error.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// Adiciona novo item e cria Recurso correspondente no BD
+        /// </summary>
+        [HttpPost]
+        [Route("AddItem")]
+        public IActionResult AddItem([FromBody] NavigationItemDTO item)
+        {
+            try
+            {
+                // Verifica se já existe recurso com esse NomeMenu
+                var recursoExistente = _unitOfWork.Recurso.GetFirstOrDefault(r =>
+                    r.NomeMenu == item.NomeMenu);
+
+                if (recursoExistente != null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Já existe um recurso com este Nome de Menu!"
+                    });
+                }
+
+                // Cria novo Recurso no BD (com valores padrão para campos obrigatórios)
+                var recurso = new Recurso
+                {
+                    RecursoId = Guid.NewGuid(),
+                    Nome = !string.IsNullOrEmpty(item.Title) ? item.Title : "Novo Item",
+                    NomeMenu = !string.IsNullOrEmpty(item.NomeMenu) ? item.NomeMenu : $"menu_{Guid.NewGuid():N}",
+                    Descricao = $"Menu: {item.NomeMenu}",
+                    Ordem = GetNextOrdem(),
+                    Icon = !string.IsNullOrEmpty(item.Icon) ? item.Icon : "fa-regular fa-folder",
+                    Href = !string.IsNullOrEmpty(item.Href) ? item.Href : "javascript:void(0);",
+                    Ativo = true,
+                    Nivel = 0,
+                    HasChild = false // Novos itens não têm filhos inicialmente
+                };
+                _unitOfWork.Recurso.Add(recurso);
+
+                // Cria ControleAcesso para todos usuários ativos
+                CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true,
+                    recursoId = recurso.RecursoId,
+                    message = "Item adicionado com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "AddItem", error);
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro ao adicionar item: " + error.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// Atualiza item existente e sincroniza NomeMenu no BD
+        /// </summary>
+        [HttpPost]
+        [Route("UpdateItem")]
+        public IActionResult UpdateItem([FromBody] NavigationItemDTO item)
+        {
+            try
+            {
+                // Busca o Recurso pelo NomeMenu antigo
+                var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r =>
+                    r.NomeMenu == item.OldNomeMenu);
+
+                if (recurso != null)
+                {
+                    recurso.Nome = item.Title;
+                    recurso.NomeMenu = item.NomeMenu;
+                    _unitOfWork.Recurso.Update(recurso);
+                    _unitOfWork.Save();
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Item atualizado com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "UpdateItem", error);
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro ao atualizar item: " + error.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// Remove item e seus registros relacionados no BD
+        /// </summary>
+        [HttpPost]
+        [Route("DeleteItem")]
+        public IActionResult DeleteItem([FromBody] DeleteNavigationItemRequest request)
+        {
+            try
+            {
+                var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r =>
+                    r.NomeMenu == request.NomeMenu);
+
+                if (recurso != null)
+                {
+                    // Remove todos ControleAcesso deste recurso
+                    var controlesAcesso = _unitOfWork.ControleAcesso.GetAll(ca =>
+                        ca.RecursoId == recurso.RecursoId);
+
+                    foreach (var ca in controlesAcesso)
+                    {
+                        _unitOfWork.ControleAcesso.Remove(ca);
+                    }
+
+                    // Remove o Recurso
+                    _unitOfWork.Recurso.Remove(recurso);
+                    _unitOfWork.Save();
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Item removido com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "DeleteItem", error);
+                return Json(new
+                {
+                    success = false,
+                    message = "Erro ao remover item: " + error.Message
+                });
+            }
+        }
+
+        #region Endpoints para Navegação via Banco de Dados (Syncfusion)
+
+        /// <summary>
+        /// Retorna árvore de navegação do banco filtrada por usuário logado
+        /// </summary>
+        [HttpGet]
+        [Route("GetTreeFromDb")]
+        public IActionResult GetTreeFromDb()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                // Busca todos os recursos ativos ordenados
+                var todosRecursos = _unitOfWork.Recurso.GetAll(r => r.Ativo)
+                    .OrderBy(r => r.Ordem)
+                    .ToList();
+
+                // Filtra por controle de acesso do usuário
+                var recursosComAcesso = todosRecursos.Where(r =>
+                {
+                    var acesso = _unitOfWork.ControleAcesso.GetFirstOrDefault(
+                        ca => ca.UsuarioId == userId && ca.RecursoId == r.RecursoId);
+                    return acesso?.Acesso == true;
+                }).ToList();
+
+                // Monta árvore hierárquica
+                var arvore = MontarArvoreRecursiva(recursosComAcesso, null);
+
+                return Json(new { success = true, data = arvore });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetTreeFromDb", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Retorna árvore completa para administração (sem filtro de acesso)
+        /// </summary>
+        [HttpGet]
+        [Route("GetTreeAdmin")]
+        public IActionResult GetTreeAdmin()
+        {
+            try
+            {
+                var todosRecursos = _unitOfWork.Recurso.GetAll()
+                    .OrderBy(r => r.Ordem)
+                    .ToList();
+
+                var arvore = MontarArvoreRecursiva(todosRecursos, null);
+
+                return Json(new { success = true, data = arvore });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetTreeAdmin", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Salva alterações na árvore (reordenação, hierarquia) no banco de dados
+        /// </summary>
+        [HttpPost]
+        [Route("SaveTreeToDb")]
+        public IActionResult SaveTreeToDb([FromBody] List<RecursoTreeDTO> items)
+        {
+            try
+            {
+                // Atualiza recursos recursivamente
+                AtualizarRecursosRecursivamente(items, null, 0, 0);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Navegação salva com sucesso!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveTreeToDb", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Migra dados do nav.json para a tabela Recurso no banco de dados
+        /// </summary>
+        [HttpPost]
+        [Route("MigrateFromJson")]
+        public IActionResult MigrateFromJson()
+        {
+            try
+            {
+                if (!System.IO.File.Exists(NavJsonPath))
+                {
+                    return Json(new { success = false, message = "Arquivo nav.json não encontrado!" });
+                }
+
+                var jsonText = System.IO.File.ReadAllText(NavJsonPath);
+                var navigation = NavigationBuilder.FromJson(jsonText);
+
+                int ordem = 0;
+                int atualizados = 0;
+                int criados = 0;
+
+                ProcessarItensParaMigracao(navigation.Lists, null, 0, ref ordem, ref atualizados, ref criados);
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Migração concluída! {criados} recursos criados, {atualizados} atualizados.",
+                    criados,
+                    atualizados
+                });
+            }
+            catch (Exception error)
+            {
+                // Captura erro detalhado incluindo inner exception
+                var mensagem = error.Message;
+                if (error.InnerException != null)
+                {
+                    mensagem += " | Inner: " + error.InnerException.Message;
+                    if (error.InnerException.InnerException != null)
+                    {
+                        mensagem += " | Inner2: " + error.InnerException.InnerException.Message;
+                    }
+                }
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "MigrateFromJson", error);
+                return Json(new { success = false, message = mensagem });
+            }
+        }
+
+        /// <summary>
+        /// Adiciona ou atualiza um recurso no banco (para a tela unificada)
+        /// </summary>
+        [HttpPost]
+        [Route("SaveRecurso")]
+        public IActionResult SaveRecurso([FromBody] RecursoTreeDTO dto)
+        {
+            try
+            {
+                Recurso recurso;
+                bool isNew = false;
+
+                if (!string.IsNullOrEmpty(dto.Id) && Guid.TryParse(dto.Id, out var recursoId))
+                {
+                    recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                    if (recurso == null)
+                    {
+                        recurso = new Recurso { RecursoId = recursoId };
+                        isNew = true;
+                    }
+                }
+                else
+                {
+                    recurso = new Recurso { RecursoId = Guid.NewGuid() };
+                    isNew = true;
+                }
+
+                // Atualiza propriedades (com valores padrão para campos obrigatórios)
+                recurso.Nome = !string.IsNullOrEmpty(dto.Text) ? dto.Text : "Novo Item";
+                recurso.NomeMenu = !string.IsNullOrEmpty(dto.NomeMenu) ? dto.NomeMenu : $"menu_{Guid.NewGuid():N}";
+                recurso.Icon = !string.IsNullOrEmpty(dto.Icon) ? dto.Icon : "fa-duotone fa-folder";
+                recurso.Href = !string.IsNullOrEmpty(dto.Href) ? dto.Href : "javascript:void(0);";
+                recurso.Descricao = dto.Descricao;
+                recurso.Ordem = dto.Ordem > 0 ? dto.Ordem : GetNextOrdem();
+                recurso.Nivel = dto.Nivel;
+                recurso.Ativo = dto.Ativo;
+                recurso.HasChild = dto.HasChild;
+                recurso.ParentId = Guid.TryParse(dto.ParentId, out var parentId) ? parentId : null;
+
+                if (isNew)
+                {
+                    _unitOfWork.Recurso.Add(recurso);
+                    CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                }
+                else
+                {
+                    _unitOfWork.Recurso.Update(recurso);
+                }
+
+                _unitOfWork.Save();
+
+                return Json(new
+                {
+                    success = true,
+                    recursoId = recurso.RecursoId,
+                    message = isNew ? "Recurso criado com sucesso!" : "Recurso atualizado com sucesso!"
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveRecurso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Remove um recurso e seus controles de acesso
+        /// </summary>
+        [HttpPost]
+        [Route("DeleteRecurso")]
+        public IActionResult DeleteRecurso([FromBody] DeleteRecursoRequest request)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RecursoId, out var recursoId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                if (recurso == null)
+                {
+                    return Json(new { success = false, message = "Recurso não encontrado!" });
+                }
+
+                // Verifica se tem filhos
+                var temFilhos = _unitOfWork.Recurso.GetAll(r => r.ParentId == recursoId).Any();
+                if (temFilhos)
+                {
+                    return Json(new { success = false, message = "Não é possível excluir recurso que possui subitens!" });
+                }
+
+                // Remove controles de acesso
+                var controlesAcesso = _unitOfWork.ControleAcesso.GetAll(ca => ca.RecursoId == recursoId);
+                foreach (var ca in controlesAcesso)
+                {
+                    _unitOfWork.ControleAcesso.Remove(ca);
+                }
+
+                // Remove o recurso
+                _unitOfWork.Recurso.Remove(recurso);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Recurso removido com sucesso!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "DeleteRecurso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Retorna lista de usuários com status de acesso para um recurso
+        /// </summary>
+        [HttpGet]
+        [Route("GetUsuariosAcesso")]
+        public IActionResult GetUsuariosAcesso(string recursoId)
+        {
+            try
+            {
+                if (!Guid.TryParse(recursoId, out var recId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                var usuarios = _unitOfWork.AspNetUsers.GetAll(u => u.Status == true)
+                    .OrderBy(u => u.NomeCompleto)
+                    .Select(u => new
+                    {
+                        UsuarioId = u.Id,
+                        Nome = u.NomeCompleto ?? u.UserName,
+                        Status = (u.Status == true) ? 1 : 0,
+                        Acesso = _unitOfWork.ControleAcesso
+                            .GetFirstOrDefault(ca => ca.UsuarioId == u.Id && ca.RecursoId == recId)?.Acesso ?? false
+                    })
+                    .ToList();
+
+                return Json(new { success = true, data = usuarios });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetUsuariosAcesso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Atualiza o acesso de um usuário a um recurso
+        /// </summary>
+        [HttpPost]
+        [Route("UpdateAcesso")]
+        public IActionResult UpdateAcesso([FromBody] UpdateAcessoRequest request)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RecursoId, out var recursoId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                var controle = _unitOfWork.ControleAcesso.GetFirstOrDefault(ca =>
+                    ca.UsuarioId == request.UsuarioId && ca.RecursoId == recursoId);
+
+                if (controle == null)
+                {
+                    controle = new ControleAcesso
+                    {
+                        UsuarioId = request.UsuarioId,
+                        RecursoId = recursoId,
+                        Acesso = request.Acesso
+                    };
+                    _unitOfWork.ControleAcesso.Add(controle);
+                }
+                else
+                {
+                    controle.Acesso = request.Acesso;
+                    _unitOfWork.ControleAcesso.Update(controle);
+                }
+
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Acesso atualizado!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "UpdateAcesso", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lista todos os diretórios dentro de Pages/
+        /// </summary>
+        [HttpGet]
+        [Route("GetDiretoriosPaginas")]
+        public IActionResult GetDiretoriosPaginas()
+        {
+            try
+            {
+                var pagesPath = Path.Combine(_env.ContentRootPath, "Pages");
+
+                if (!Directory.Exists(pagesPath))
+                {
+                    return Json(new { success = false, message = "Diretório Pages não encontrado!" });
+                }
+
+                var diretorios = Directory.GetDirectories(pagesPath)
+                    .Select(d => new DirectoryInfo(d).Name)
+                    .Where(d => !d.StartsWith(".") && !d.Equals("Shared", StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(d => d)
+                    .ToList();
+
+                return Json(new { success = true, data = diretorios });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetDiretoriosPaginas", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lista todas as páginas .cshtml dentro de um diretório específico
+        /// </summary>
+        [HttpGet]
+        [Route("GetPaginasDoDiretorio")]
+        public IActionResult GetPaginasDoDiretorio(string diretorio)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(diretorio))
+                {
+                    return Json(new { success = false, message = "Diretório não informado!" });
+                }
+
+                var diretorioPath = Path.Combine(_env.ContentRootPath, "Pages", diretorio);
+
+                if (!Directory.Exists(diretorioPath))
+                {
+                    return Json(new { success = false, message = "Diretório não encontrado!" });
+                }
+
+                var paginas = Directory.GetFiles(diretorioPath, "*.cshtml")
+                    .Select(f => Path.GetFileNameWithoutExtension(f))
+                    .Where(p => !p.StartsWith("_"))
+                    .OrderBy(p => p)
+                    .ToList();
+
+                return Json(new { success = true, data = paginas });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetPaginasDoDiretorio", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lista ícones FontAwesome 7 Pro Duotone disponíveis em estrutura hierárquica
+        /// Inclui todos os ícones da versão PRO com licença organizados por categoria
+        /// </summary>
+        [HttpGet]
+        [Route("GetIconesFontAwesome")]
+        public IActionResult GetIconesFontAwesome()
+        {
+            try
+            {
+                // Estrutura hierárquica: Categorias -> Ícones
+                var categorias = new List<object>
+                {
+                    // === AÇÕES E OPERAÇÕES ===
+                    new {
+                        id = "cat_acoes",
+                        nome = "Ações e Operações",
+                        isCategory = true,
+                        hasChild = true,
+                        expanded = false,
+                        items = new List<object>
+                        {
+                            new { id = "fa-duotone fa-maximize", nome = "Maximizar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-minimize", nome = "Minimizar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-expand", nome = "Expandir", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-compress", nome = "Comprimir", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-clone", nome = "Clonar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-copy", nome = "Copiar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-paste", nome = "Colar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-cut", nome = "Recortar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-scissors", nome = "Cortar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-files-clipboard", nome = "Área de Transferência", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-shuffle", nome = "Embaralhar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-random", nome = "Aleatório", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-repeat", nome = "Repetir", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-redo", nome = "Refazer Ação", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-undo", nome = "Desfazer Ação", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-rotate-left", nome = "Desfazer", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-rotate-right", nome = "Refazer", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-arrows-rotate", nome = "Atualizar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-reply", nome = "Responder", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-reply-all", nome = "Responder Todos", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-forward", nome = "Encaminhar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-share", nome = "Compartilhar", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-download", nome = "Download", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-upload", nome = "Upload", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-cloud-arrow-down", nome = "Download Nuvem", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-cloud-arrow-up", nome = "Upload Nuvem", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-print", nome = "Imprimir", parentId = "cat_acoes" },
+                            new { id = "fa-duotone fa-floppy-disk", nome = "Salvar", parentId = "cat_acoes" }
+                        }.OrderBy(x => ((dynamic)x).nome).ToList()
+                    },
+
+                    // === ADMINISTRAÇÃO E GESTÃO ===
+                    new {
+                        id = "cat_admin",
+                        nome = "Administração e Gestão",
+                        isCategory = true,
+                        hasChild = true,
+                        expanded = false,
+                        items = new List<object>
+                        {
+                            new { id = "fa-duotone fa-gear", nome = "Configurações", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-sliders", nome = "Ajustes", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-wrench", nome = "Ferramentas", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-screwdriver-wrench", nome = "Manutenção", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-gauge", nome = "Painel", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-briefcase", nome = "Gestor", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-sitemap", nome = "Hierarquia", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-network-wired", nome = "Network", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-server", nome = "Servidor", parentId = "cat_admin" },
+                            new { id = "fa-duotone fa-database", nome = "Banco de Dados", parentId = "cat_admin" }
+                        }.OrderBy(x => ((dynamic)x).nome).ToList()
+                    },
+
+                    // === ALIMENTOS E BEBIDAS ===
+                    new {
+                        id = "cat_alimentos",
+                        nome = "Alimentos e Bebidas",
+                        isCategory = true,
+                        hasChild = true,
+                        expanded = false,
+                        items = new List<object>
+                        {
+                            new { id = "fa-duotone fa-pizza-slice", nome = "Pizza", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-burger", nome = "Hambúrguer", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-hotdog", nome = "Cachorro-Quente", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-coffee", nome = "Café", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-mug-hot", nome = "Caneca Café", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-mug-saucer", nome = "Xícara de Café", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-beer", nome = "Cerveja", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-wine-glass", nome = "Taça de Vinho", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-martini-glass", nome = "Martini", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-glass", nome = "Copo", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-glass-water", nome = "Copo Água", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-mug", nome = "Caneca", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-utensils", nome = "Talheres", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-cake-candles", nome = "Bolo", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-ice-cream", nome = "Sorvete", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-cookie", nome = "Biscoito", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-apple-whole", nome = "Maçã", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-lemon", nome = "Limão", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-carrot", nome = "Cenoura", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-pepper-hot", nome = "Pimenta", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-drumstick-bite", nome = "Frango", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-fish", nome = "Peixe", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-shrimp", nome = "Camarão", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-egg", nome = "Ovo", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-cheese", nome = "Queijo", parentId = "cat_alimentos" },
+                            new { id = "fa-duotone fa-bread-slice", nome = "Pão", parentId = "cat_alimentos" }
+                        }.OrderBy(x => ((dynamic)x).nome).ToList()
+                    },
+
+                    // === ANIMAIS ===
+                    new {
+                        id = "cat_animais",
+                        nome = "Animais",
+                        isCategory = true,
+                        hasChild = true,
+                        expanded = false,
+                        items = new List<object>
+                        {
+                            new { id = "fa-duotone fa-dog", nome = "Cachorro", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-cat", nome = "Gato", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-horse", nome = "Cavalo", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-cow", nome = "Vaca", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-dove", nome = "Pomba", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-crow", nome = "Corvo", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-kiwi-bird", nome = "Kiwi", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-dragon", nome = "Dragão", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-spider", nome = "Aranha", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-frog", nome = "Sapo", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-otter", nome = "Lontra", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-hippo", nome = "Hipopótamo", parentId = "cat_animais" },
+                            new { id = "fa-duotone fa-elephant", nome = "Elefante", parentId = "cat_animais" }
+                        }.OrderBy(x => ((dynamic)x).nome).ToList()
+                    },
+
+                    // === COMUM (Ícones Gerais e Mais Usados) ===
+                    new {
+                        id = "cat_comum",
+                        nome = "Comum (Mais Usados)",
+                        isCategory = true,
+                        hasChild = true,
+                        expanded = false,
+                        items = new List<object>
+                        {
+                            new { id = "fa-duotone fa-plus", nome = "Adicionar", parentId = "cat_comum" },
+                            new { id = "fa-duotone fa-circle-plus", nome = "Adicionar Circular", parentId = "cat_comum" },
+                            new { id = "fa-duotone fa-square-plus", nome = "Adicionar Quadrado", parentId = "cat_comum" },
+                            new { id = "fa-duotone fa-handshake", nome = "Acordo / Parceria", parentId = "cat_comum" },
+                            new { id = "fa-duotone fa-warehouse", nome = "Armazém", parentId = "cat_comum" },
+                    new { id = "fa-duotone fa-file", nome = "Arquivo" },
+                    new { id = "fa-duotone fa-file-signature", nome = "Assinatura" },
+                    new { id = "fa-duotone fa-triangle-exclamation", nome = "Atenção" },
+                    new { id = "fa-duotone fa-arrows-rotate", nome = "Atualizar" },
+                    new { id = "fa-duotone fa-circle-exclamation", nome = "Aviso" },
+                    new { id = "fa-duotone fa-database", nome = "Banco de Dados" },
+                    new { id = "fa-duotone fa-barcode", nome = "Barcode" },
+                    new { id = "fa-duotone fa-lock", nome = "Bloqueado" },
+                    new { id = "fa-duotone fa-magnifying-glass", nome = "Busca" },
+                    new { id = "fa-duotone fa-box", nome = "Caixa" },
+                    new { id = "fa-duotone fa-calculator", nome = "Calculadora" },
+                    new { id = "fa-duotone fa-calendar", nome = "Calendário" },
+                    new { id = "fa-duotone fa-calendar-days", nome = "Calendário Dias" },
+                    new { id = "fa-duotone fa-truck", nome = "Caminhão" },
+                    new { id = "fa-duotone fa-circle-xmark", nome = "Cancelar" },
+                    new { id = "fa-duotone fa-car", nome = "Carro" },
+                    new { id = "fa-duotone fa-credit-card", nome = "Cartão de Crédito" },
+                    new { id = "fa-duotone fa-wallet", nome = "Carteira" },
+                    new { id = "fa-duotone fa-house", nome = "Casa" },
+                    new { id = "fa-duotone fa-key", nome = "Chave" },
+                    new { id = "fa-duotone fa-check", nome = "Check" },
+                    new { id = "fa-duotone fa-circle-check", nome = "Check Circular" },
+                    new { id = "fa-duotone fa-clipboard-check", nome = "Checklist Concluído" },
+                    new { id = "fa-duotone fa-dollar-sign", nome = "Cifrão" },
+                    new { id = "fa-duotone fa-clipboard", nome = "Clipboard" },
+                    new { id = "fa-duotone fa-barcode", nome = "Código de Barras" },
+                    new { id = "fa-duotone fa-paste", nome = "Colar" },
+                    new { id = "fa-duotone fa-gas-pump", nome = "Combustível" },
+                    new { id = "fa-duotone fa-shopping-cart", nome = "Compras" },
+                    new { id = "fa-duotone fa-comment", nome = "Comentário" },
+                    new { id = "fa-duotone fa-comments", nome = "Comentários" },
+                    new { id = "fa-duotone fa-gear", nome = "Configurações" },
+                    new { id = "fa-duotone fa-check", nome = "Confirmar" },
+                    new { id = "fa-duotone fa-file-contract", nome = "Contrato" },
+                    new { id = "fa-duotone fa-copy", nome = "Copiar" },
+                    new { id = "fa-duotone fa-heart", nome = "Coração" },
+                    new { id = "fa-duotone fa-scissors", nome = "Cortar" },
+                    new { id = "fa-duotone fa-unlock", nome = "Desbloqueado" },
+                    new { id = "fa-duotone fa-arrow-down", nome = "Descer" },
+                    new { id = "fa-duotone fa-rotate-left", nome = "Desfazer" },
+                    new { id = "fa-duotone fa-money-bill", nome = "Dinheiro" },
+                    new { id = "fa-duotone fa-thumbs-down", nome = "Dislike" },
+                    new { id = "fa-duotone fa-file-pdf", nome = "Documento PDF" },
+                    new { id = "fa-duotone fa-file-word", nome = "Documento Word" },
+                    new { id = "fa-duotone fa-download", nome = "Download" },
+                    new { id = "fa-duotone fa-cloud-arrow-down", nome = "Download Nuvem" },
+                    new { id = "fa-duotone fa-building", nome = "Edifício" },
+                    new { id = "fa-duotone fa-pen", nome = "Editar" },
+                    new { id = "fa-duotone fa-pen-to-square", nome = "Editar Documento" },
+                    new { id = "fa-duotone fa-envelope", nome = "Email" },
+                    new { id = "fa-duotone fa-industry", nome = "Empresa" },
+                    new { id = "fa-duotone fa-gear", nome = "Engrenagem" },
+                    new { id = "fa-duotone fa-envelope-open", nome = "Envelope Aberto" },
+                    new { id = "fa-duotone fa-wrench", nome = "Ferramentas" },
+                    new { id = "fa-duotone fa-xmark", nome = "Fechar" },
+                    new { id = "fa-duotone fa-filter", nome = "Filtro" },
+                    new { id = "fa-duotone fa-flag", nome = "Flag" },
+                    new { id = "fa-duotone fa-folder", nome = "Folder" },
+                    new { id = "fa-duotone fa-folder-open", nome = "Folder Aberto" },
+                    new { id = "fa-duotone fa-briefcase", nome = "Gestor" },
+                    new { id = "fa-duotone fa-chart-bar", nome = "Gráfico Barras" },
+                    new { id = "fa-duotone fa-chart-line", nome = "Gráfico Linha" },
+                    new { id = "fa-duotone fa-chart-pie", nome = "Gráfico Pizza" },
+                    new { id = "fa-duotone fa-users", nome = "Grupo" },
+                    new { id = "fa-duotone fa-user-group", nome = "Grupo Usuários" },
+                    new { id = "fa-duotone fa-sitemap", nome = "Hierarquia" },
+                    new { id = "fa-duotone fa-clock", nome = "Horário" },
+                    new { id = "fa-duotone fa-id-card", nome = "Identificação" },
+                    new { id = "fa-duotone fa-print", nome = "Imprimir" },
+                    new { id = "fa-duotone fa-circle-info", nome = "Informação" },
+                    new { id = "fa-duotone fa-file-invoice", nome = "Invoice" },
+                    new { id = "fa-duotone fa-thumbs-up", nome = "Like" },
+                    new { id = "fa-duotone fa-list", nome = "Lista" },
+                    new { id = "fa-duotone fa-list-check", nome = "Lista Check" },
+                    new { id = "fa-duotone fa-clipboard-list", nome = "Lista Clipboard" },
+                    new { id = "fa-duotone fa-table-list", nome = "Lista Tabela" },
+                    new { id = "fa-duotone fa-location-dot", nome = "Localização" },
+                    new { id = "fa-duotone fa-briefcase", nome = "Maleta" },
+                    new { id = "fa-duotone fa-screwdriver-wrench", nome = "Manutenção" },
+                    new { id = "fa-duotone fa-map", nome = "Mapa" },
+                    new { id = "fa-duotone fa-map-location-dot", nome = "Mapa Localização" },
+                    new { id = "fa-duotone fa-envelope", nome = "Mensagem" },
+                    new { id = "fa-duotone fa-minus", nome = "Menos" },
+                    new { id = "fa-duotone fa-motorcycle", nome = "Moto" },
+                    new { id = "fa-duotone fa-network-wired", nome = "Network" },
+                    new { id = "fa-duotone fa-file-invoice", nome = "Nota Fiscal" },
+                    new { id = "fa-duotone fa-bell", nome = "Notificação" },
+                    new { id = "fa-duotone fa-cloud", nome = "Nuvem" },
+                    new { id = "fa-duotone fa-eye-slash", nome = "Ocultar" },
+                    new { id = "fa-duotone fa-bus", nome = "Ônibus" },
+                    new { id = "fa-duotone fa-oil-can", nome = "Óleo" },
+                    new { id = "fa-duotone fa-gauge", nome = "Painel" },
+                    new { id = "fa-duotone fa-folder", nome = "Pasta" },
+                    new { id = "fa-duotone fa-clipboard", nome = "Prancheta" },
+                    new { id = "fa-duotone fa-building", nome = "Prédio" },
+                    new { id = "fa-duotone fa-shield", nome = "Proteção" },
+                    new { id = "fa-duotone fa-qrcode", nome = "QR Code" },
+                    new { id = "fa-duotone fa-brazilian-real-sign", nome = "Real" },
+                    new { id = "fa-duotone fa-network-wired", nome = "Rede" },
+                    new { id = "fa-duotone fa-rotate-right", nome = "Refazer" },
+                    new { id = "fa-duotone fa-arrows-rotate", nome = "Refresh" },
+                    new { id = "fa-duotone fa-clock", nome = "Relógio" },
+                    new { id = "fa-duotone fa-circle-minus", nome = "Remover Circular" },
+                    new { id = "fa-duotone fa-square-minus", nome = "Remover Quadrado" },
+                    new { id = "fa-duotone fa-thumbs-down", nome = "Reprovado" },
+                    new { id = "fa-duotone fa-route", nome = "Rota" },
+                    new { id = "fa-duotone fa-floppy-disk", nome = "Salvar" },
+                    new { id = "fa-duotone fa-shield", nome = "Segurança" },
+                    new { id = "fa-duotone fa-shield-check", nome = "Segurança OK" },
+                    new { id = "fa-duotone fa-server", nome = "Servidor" },
+                    new { id = "fa-duotone fa-building-user", nome = "Setor" },
+                    new { id = "fa-duotone fa-bell", nome = "Sino" },
+                    new { id = "fa-duotone fa-sliders", nome = "Sliders" },
+                    new { id = "fa-duotone fa-star", nome = "Estrela" },
+                    new { id = "fa-duotone fa-boxes-stacked", nome = "Estoque" },
+                    new { id = "fa-duotone fa-table", nome = "Tabela" },
+                    new { id = "fa-duotone fa-phone", nome = "Telefone" },
+                    new { id = "fa-duotone fa-scissors", nome = "Tesoura" },
+                    new { id = "fa-duotone fa-briefcase", nome = "Trabalho" },
+                    new { id = "fa-duotone fa-route", nome = "Trajeto" },
+                    new { id = "fa-duotone fa-trash", nome = "Trash" },
+                    new { id = "fa-duotone fa-upload", nome = "Upload" },
+                    new { id = "fa-duotone fa-cloud-arrow-up", nome = "Upload Nuvem" },
+                    new { id = "fa-duotone fa-user", nome = "Usuário" },
+                    new { id = "fa-duotone fa-user-shield", nome = "Usuário Admin" },
+                    new { id = "fa-duotone fa-user-check", nome = "Usuário Verificado" },
+                    new { id = "fa-duotone fa-users", nome = "Usuários" },
+                    new { id = "fa-duotone fa-car", nome = "Veículo" },
+                    new { id = "fa-duotone fa-eye", nome = "Ver" },
+                    new { id = "fa-duotone fa-eye", nome = "Visualizar" },
+                    new { id = "fa-duotone fa-rotate-left", nome = "Voltar" },
+                    new { id = "fa-duotone fa-triangle-exclamation", nome = "Warning" },
+                    new { id = "fa-duotone fa-xmark", nome = "X" },
+
+                    // Ícones Adicionais
+                    new { id = "fa-duotone fa-anchor", nome = "Âncora" },
+                    new { id = "fa-duotone fa-tree", nome = "Árvore" },
+                    new { id = "fa-duotone fa-plane", nome = "Avião" },
+                    new { id = "fa-duotone fa-battery-full", nome = "Bateria" },
+                    new { id = "fa-duotone fa-bicycle", nome = "Bicicleta" },
+                    new { id = "fa-duotone fa-graduation-cap", nome = "Boné Formatura" },
+                    new { id = "fa-duotone fa-book", nome = "Book" },
+                    new { id = "fa-duotone fa-bookmark", nome = "Bookmark" },
+                    new { id = "fa-duotone fa-bomb", nome = "Bomba" },
+                    new { id = "fa-duotone fa-wifi", nome = "Wifi" },
+                    new { id = "fa-duotone fa-camera", nome = "Câmera" },
+                    new { id = "fa-duotone fa-mug-hot", nome = "Caneca Café" },
+                    new { id = "fa-duotone fa-bell-slash", nome = "Sino Desabilitado" },
+                    new { id = "fa-duotone fa-ticket", nome = "Ticket" },
+                    new { id = "fa-duotone fa-gifts", nome = "Presentes" },
+                    new { id = "fa-duotone fa-chart-simple", nome = "Gráfico Simples" },
+                    new { id = "fa-duotone fa-brain", nome = "Cérebro" },
+                    new { id = "fa-duotone fa-bug", nome = "Bug" },
+                    new { id = "fa-duotone fa-bullseye", nome = "Alvo" },
+                    new { id = "fa-duotone fa-certificate", nome = "Certificado" },
+                    new { id = "fa-duotone fa-chart-area", nome = "Gráfico Área" },
+                    new { id = "fa-duotone fa-chess", nome = "Xadrez" },
+                    new { id = "fa-duotone fa-circle", nome = "Círculo" },
+                    new { id = "fa-duotone fa-code", nome = "Código" },
+                    new { id = "fa-duotone fa-cog", nome = "Engrenagem Alt" },
+                    new { id = "fa-duotone fa-compass", nome = "Bússola" },
+                    new { id = "fa-duotone fa-crown", nome = "Coroa" },
+                    new { id = "fa-duotone fa-desktop", nome = "Desktop" },
+                    new { id = "fa-duotone fa-diagram-project", nome = "Diagrama Projeto" },
+                    new { id = "fa-duotone fa-envelope-circle-check", nome = "Email Verificado" },
+                    new { id = "fa-duotone fa-fire", nome = "Fogo" },
+                    new { id = "fa-duotone fa-globe", nome = "Globo" },
+                    new { id = "fa-duotone fa-hammer", nome = "Martelo" },
+                    new { id = "fa-duotone fa-hashtag", nome = "Hashtag" },
+                    new { id = "fa-duotone fa-headphones", nome = "Fone de Ouvido" },
+                    new { id = "fa-duotone fa-hospital", nome = "Hospital" },
+                    new { id = "fa-duotone fa-hourglass", nome = "Ampulheta" },
+                    new { id = "fa-duotone fa-image", nome = "Imagem" },
+                    new { id = "fa-duotone fa-inbox", nome = "Inbox" },
+                    new { id = "fa-duotone fa-laptop", nome = "Laptop" },
+                    new { id = "fa-duotone fa-lightbulb", nome = "Lâmpada" },
+                    new { id = "fa-duotone fa-link", nome = "Link" },
+                    new { id = "fa-duotone fa-medal", nome = "Medalha" },
+                    new { id = "fa-duotone fa-microphone", nome = "Microfone" },
+                    new { id = "fa-duotone fa-mobile", nome = "Celular" },
+                    new { id = "fa-duotone fa-moon", nome = "Lua" },
+                    new { id = "fa-duotone fa-music", nome = "Música" },
+                    new { id = "fa-duotone fa-newspaper", nome = "Jornal" },
+                    new { id = "fa-duotone fa-paint-brush", nome = "Pincel" },
+                    new { id = "fa-duotone fa-paperclip", nome = "Clipe" },
+                    new { id = "fa-duotone fa-pause", nome = "Pausar" },
+                    new { id = "fa-duotone fa-play", nome = "Play" },
+                    new { id = "fa-duotone fa-plug", nome = "Tomada" },
+                    new { id = "fa-duotone fa-puzzle-piece", nome = "Puzzle" },
+                    new { id = "fa-duotone fa-question", nome = "Pergunta" },
+                    new { id = "fa-duotone fa-recycle", nome = "Reciclar" },
+                    new { id = "fa-duotone fa-rocket", nome = "Foguete" },
+                    new { id = "fa-duotone fa-road", nome = "Estrada" },
+                    new { id = "fa-duotone fa-share", nome = "Compartilhar" },
+                    new { id = "fa-duotone fa-shopping-bag", nome = "Sacola" },
+                    new { id = "fa-duotone fa-sign-in", nome = "Entrar" },
+                    new { id = "fa-duotone fa-sign-out", nome = "Sair" },
+                    new { id = "fa-duotone fa-snowflake", nome = "Floco de Neve" },
+                    new { id = "fa-duotone fa-square", nome = "Quadrado" },
+                    new { id = "fa-duotone fa-stop", nome = "Parar" },
+                    new { id = "fa-duotone fa-sun", nome = "Sol" },
+                    new { id = "fa-duotone fa-sync", nome = "Sincronizar" },
+                    new { id = "fa-duotone fa-tablet", nome = "Tablet" },
+                    new { id = "fa-duotone fa-tag", nome = "Tag" },
+                    new { id = "fa-duotone fa-tags", nome = "Tags" },
+                    new { id = "fa-duotone fa-tasks", nome = "Tarefas" },
+                    new { id = "fa-duotone fa-terminal", nome = "Terminal" },
+                    new { id = "fa-duotone fa-thermometer", nome = "Termômetro" },
+                    new { id = "fa-duotone fa-thumbtack", nome = "Tachinha" },
+                    new { id = "fa-duotone fa-trophy", nome = "Troféu" },
+                    new { id = "fa-duotone fa-umbrella", nome = "Guarda-chuva" },
+                    new { id = "fa-duotone fa-video", nome = "Vídeo" },
+                    new { id = "fa-duotone fa-volume-up", nome = "Volume" },
+                    new { id = "fa-duotone fa-weight", nome = "Peso" },
+                    new { id = "fa-duotone fa-wrench", nome = "Chave Inglesa" },
+
+                    // === VEÍCULOS E TRANSPORTE ADICIONAL ===
+                    new { id = "fa-duotone fa-train", nome = "Trem" },
+                    new { id = "fa-duotone fa-ship", nome = "Navio" },
+                    new { id = "fa-duotone fa-helicopter", nome = "Helicóptero" },
+                    new { id = "fa-duotone fa-train-subway", nome = "Metrô" },
+                    new { id = "fa-duotone fa-train-tram", nome = "Bonde" },
+                    new { id = "fa-duotone fa-taxi", nome = "Táxi" },
+                    new { id = "fa-duotone fa-shuttle-van", nome = "Van" },
+                    new { id = "fa-duotone fa-caravan", nome = "Trailer" },
+                    new { id = "fa-duotone fa-truck-pickup", nome = "Picape" },
+                    new { id = "fa-duotone fa-truck-monster", nome = "Monster Truck" },
+                    new { id = "fa-duotone fa-tractor", nome = "Trator" },
+                    new { id = "fa-duotone fa-rv", nome = "Motorhome" },
+                    new { id = "fa-duotone fa-scooter", nome = "Scooter" },
+                    new { id = "fa-duotone fa-wheelchair", nome = "Cadeira de Rodas" },
+                    new { id = "fa-duotone fa-baby-carriage", nome = "Carrinho de Bebê" },
+                    new { id = "fa-duotone fa-sleigh", nome = "Trenó" },
+                    new { id = "fa-duotone fa-person-biking", nome = "Ciclista" },
+                    new { id = "fa-duotone fa-person-walking", nome = "Pedestre" },
+
+                    // === ALIMENTOS E BEBIDAS ===
+                    new { id = "fa-duotone fa-pizza-slice", nome = "Pizza" },
+                    new { id = "fa-duotone fa-burger", nome = "Hambúrguer" },
+                    new { id = "fa-duotone fa-coffee", nome = "Café" },
+                    new { id = "fa-duotone fa-mug-saucer", nome = "Xícara de Café" },
+                    new { id = "fa-duotone fa-beer", nome = "Cerveja" },
+                    new { id = "fa-duotone fa-wine-glass", nome = "Taça de Vinho" },
+                    new { id = "fa-duotone fa-martini-glass", nome = "Martini" },
+                    new { id = "fa-duotone fa-utensils", nome = "Talheres" },
+                    new { id = "fa-duotone fa-cake-candles", nome = "Bolo" },
+                    new { id = "fa-duotone fa-ice-cream", nome = "Sorvete" },
+                    new { id = "fa-duotone fa-cookie", nome = "Biscoito" },
+                    new { id = "fa-duotone fa-apple-whole", nome = "Maçã" },
+                    new { id = "fa-duotone fa-lemon", nome = "Limão" },
+                    new { id = "fa-duotone fa-carrot", nome = "Cenoura" },
+                    new { id = "fa-duotone fa-pepper-hot", nome = "Pimenta" },
+                    new { id = "fa-duotone fa-drumstick-bite", nome = "Frango" },
+                    new { id = "fa-duotone fa-fish", nome = "Peixe" },
+                    new { id = "fa-duotone fa-shrimp", nome = "Camarão" },
+                    new { id = "fa-duotone fa-egg", nome = "Ovo" },
+                    new { id = "fa-duotone fa-cheese", nome = "Queijo" },
+                    new { id = "fa-duotone fa-bread-slice", nome = "Pão" },
+                    new { id = "fa-duotone fa-hotdog", nome = "Cachorro-Quente" },
+
+                    // === ANIMAIS ===
+                    new { id = "fa-duotone fa-dog", nome = "Cachorro" },
+                    new { id = "fa-duotone fa-cat", nome = "Gato" },
+                    new { id = "fa-duotone fa-horse", nome = "Cavalo" },
+                    new { id = "fa-duotone fa-cow", nome = "Vaca" },
+                    new { id = "fa-duotone fa-dove", nome = "Pomba" },
+                    new { id = "fa-duotone fa-crow", nome = "Corvo" },
+                    new { id = "fa-duotone fa-kiwi-bird", nome = "Kiwi" },
+                    new { id = "fa-duotone fa-dragon", nome = "Dragão" },
+                    new { id = "fa-duotone fa-spider", nome = "Aranha" },
+                    new { id = "fa-duotone fa-frog", nome = "Sapo" },
+                    new { id = "fa-duotone fa-otter", nome = "Lontra" },
+                    new { id = "fa-duotone fa-hippo", nome = "Hipopótamo" },
+                    new { id = "fa-duotone fa-elephant", nome = "Elefante" },
+
+                    // === SAÚDE E MÉDICO ===
+                    new { id = "fa-duotone fa-heart-pulse", nome = "Batimento Cardíaco" },
+                    new { id = "fa-duotone fa-heart-circle-plus", nome = "Adicionar Saúde" },
+                    new { id = "fa-duotone fa-pills", nome = "Pílulas" },
+                    new { id = "fa-duotone fa-capsules", nome = "Cápsulas" },
+                    new { id = "fa-duotone fa-syringe", nome = "Seringa" },
+                    new { id = "fa-duotone fa-stethoscope", nome = "Estetoscópio" },
+                    new { id = "fa-duotone fa-thermometer", nome = "Termômetro" },
+                    new { id = "fa-duotone fa-prescription-bottle", nome = "Frasco de Remédio" },
+                    new { id = "fa-duotone fa-user-doctor", nome = "Médico" },
+                    new { id = "fa-duotone fa-user-nurse", nome = "Enfermeiro" },
+                    new { id = "fa-duotone fa-ambulance", nome = "Ambulância" },
+                    new { id = "fa-duotone fa-truck-medical", nome = "Caminhão Médico" },
+                    new { id = "fa-duotone fa-bed-pulse", nome = "Leito Hospital" },
+                    new { id = "fa-duotone fa-house-medical", nome = "Casa Médica" },
+                    new { id = "fa-duotone fa-bandage", nome = "Curativo" },
+                    new { id = "fa-duotone fa-dna", nome = "DNA" },
+                    new { id = "fa-duotone fa-lungs", nome = "Pulmões" },
+                    new { id = "fa-duotone fa-tooth", nome = "Dente" },
+                    new { id = "fa-duotone fa-x-ray", nome = "Raio-X" },
+                    new { id = "fa-duotone fa-microscope", nome = "Microscópio" },
+                    new { id = "fa-duotone fa-vial", nome = "Tubo de Ensaio" },
+                    new { id = "fa-duotone fa-flask", nome = "Frasco Laboratório" },
+
+                    // === ESPORTES ===
+                    new { id = "fa-duotone fa-football", nome = "Futebol Americano" },
+                    new { id = "fa-duotone fa-futbol", nome = "Futebol" },
+                    new { id = "fa-duotone fa-basketball", nome = "Basquete" },
+                    new { id = "fa-duotone fa-volleyball", nome = "Vôlei" },
+                    new { id = "fa-duotone fa-baseball", nome = "Baseball" },
+                    new { id = "fa-duotone fa-tennis-ball", nome = "Tênis" },
+                    new { id = "fa-duotone fa-golf-ball-tee", nome = "Golfe" },
+                    new { id = "fa-duotone fa-bowling-ball", nome = "Boliche" },
+                    new { id = "fa-duotone fa-hockey-puck", nome = "Hóquei" },
+                    new { id = "fa-duotone fa-table-tennis", nome = "Tênis de Mesa" },
+                    new { id = "fa-duotone fa-dumbbell", nome = "Haltere" },
+                    new { id = "fa-duotone fa-weight-scale", nome = "Balança" },
+                    new { id = "fa-duotone fa-person-running", nome = "Corrida" },
+                    new { id = "fa-duotone fa-person-swimming", nome = "Natação" },
+                    new { id = "fa-duotone fa-person-skiing", nome = "Esqui" },
+
+                    // === CLIMA E NATUREZA ===
+                    new { id = "fa-duotone fa-cloud-rain", nome = "Chuva" },
+                    new { id = "fa-duotone fa-cloud-sun", nome = "Parcialmente Nublado" },
+                    new { id = "fa-duotone fa-cloud-moon", nome = "Nublado Noite" },
+                    new { id = "fa-duotone fa-cloud-bolt", nome = "Tempestade" },
+                    new { id = "fa-duotone fa-cloud-showers-heavy", nome = "Chuva Forte" },
+                    new { id = "fa-duotone fa-rainbow", nome = "Arco-Íris" },
+                    new { id = "fa-duotone fa-tornado", nome = "Tornado" },
+                    new { id = "fa-duotone fa-wind", nome = "Vento" },
+                    new { id = "fa-duotone fa-icicles", nome = "Gelo" },
+                    new { id = "fa-duotone fa-temperature-high", nome = "Temperatura Alta" },
+                    new { id = "fa-duotone fa-temperature-low", nome = "Temperatura Baixa" },
+                    new { id = "fa-duotone fa-mountain", nome = "Montanha" },
+                    new { id = "fa-duotone fa-volcano", nome = "Vulcão" },
+                    new { id = "fa-duotone fa-water", nome = "Água" },
+                    new { id = "fa-duotone fa-droplet", nome = "Gota" },
+                    new { id = "fa-duotone fa-leaf", nome = "Folha" },
+                    new { id = "fa-duotone fa-seedling", nome = "Muda" },
+                    new { id = "fa-duotone fa-clover", nome = "Trevo" },
+
+                    // === FERRAMENTAS E CONSTRUÇÃO ===
+                    new { id = "fa-duotone fa-screwdriver", nome = "Chave de Fenda" },
+                    new { id = "fa-duotone fa-hammer-crash", nome = "Martelo Batendo" },
+                    new { id = "fa-duotone fa-toolbox", nome = "Caixa de Ferramentas" },
+                    new { id = "fa-duotone fa-drill", nome = "Furadeira" },
+                    new { id = "fa-duotone fa-saw", nome = "Serra" },
+                    new { id = "fa-duotone fa-ruler", nome = "Régua" },
+                    new { id = "fa-duotone fa-ruler-combined", nome = "Esquadro" },
+                    new { id = "fa-duotone fa-hard-hat", nome = "Capacete" },
+                    new { id = "fa-duotone fa-vest-patches", nome = "Colete" },
+                    new { id = "fa-duotone fa-house-crack", nome = "Casa Rachada" },
+                    new { id = "fa-duotone fa-triangle-person-digging", nome = "Construção" },
+
+                    // === NEGÓCIOS E ESCRITÓRIO ===
+                    new { id = "fa-duotone fa-address-card", nome = "Cartão de Visita" },
+                    new { id = "fa-duotone fa-building-columns", nome = "Banco" },
+                    new { id = "fa-duotone fa-landmark", nome = "Tribunal" },
+                    new { id = "fa-duotone fa-money-check", nome = "Cheque" },
+                    new { id = "fa-duotone fa-money-check-dollar", nome = "Cheque Dólar" },
+                    new { id = "fa-duotone fa-coins", nome = "Moedas" },
+                    new { id = "fa-duotone fa-sack-dollar", nome = "Saco de Dinheiro" },
+                    new { id = "fa-duotone fa-receipt", nome = "Recibo" },
+                    new { id = "fa-duotone fa-cash-register", nome = "Caixa Registradora" },
+                    new { id = "fa-duotone fa-calculator", nome = "Calculadora" },
+                    new { id = "fa-duotone fa-chart-mixed", nome = "Gráfico Misto" },
+                    new { id = "fa-duotone fa-chart-gantt", nome = "Gráfico Gantt" },
+                    new { id = "fa-duotone fa-presentation-screen", nome = "Apresentação" },
+                    new { id = "fa-duotone fa-chalkboard", nome = "Quadro Negro" },
+                    new { id = "fa-duotone fa-chalkboard-user", nome = "Professor" },
+
+                    // === COMUNICAÇÃO E REDE ===
+                    new { id = "fa-duotone fa-phone-flip", nome = "Telefone Virado" },
+                    new { id = "fa-duotone fa-phone-volume", nome = "Telefone Alto" },
+                    new { id = "fa-duotone fa-phone-slash", nome = "Telefone Desligado" },
+                    new { id = "fa-duotone fa-voicemail", nome = "Correio de Voz" },
+                    new { id = "fa-duotone fa-fax", nome = "Fax" },
+                    new { id = "fa-duotone fa-message", nome = "Mensagem" },
+                    new { id = "fa-duotone fa-messages", nome = "Mensagens" },
+                    new { id = "fa-duotone fa-comment-dots", nome = "Comentário Digitando" },
+                    new { id = "fa-duotone fa-comment-sms", nome = "SMS" },
+                    new { id = "fa-duotone fa-inbox-full", nome = "Inbox Cheio" },
+                    new { id = "fa-duotone fa-mailbox", nome = "Caixa de Correio" },
+                    new { id = "fa-duotone fa-tower-cell", nome = "Antena Celular" },
+                    new { id = "fa-duotone fa-satellite", nome = "Satélite" },
+                    new { id = "fa-duotone fa-satellite-dish", nome = "Antena Parabólica" },
+                    new { id = "fa-duotone fa-router", nome = "Roteador" },
+                    new { id = "fa-duotone fa-ethernet", nome = "Ethernet" },
+                    new { id = "fa-duotone fa-wifi-slash", nome = "Sem Wifi" },
+                    new { id = "fa-duotone fa-signal", nome = "Sinal" },
+                    new { id = "fa-duotone fa-signal-slash", nome = "Sem Sinal" },
+
+                    // === SEGURANÇA E PROTEÇÃO ===
+                    new { id = "fa-duotone fa-shield-halved", nome = "Escudo Meio" },
+                    new { id = "fa-duotone fa-shield-virus", nome = "Proteção Vírus" },
+                    new { id = "fa-duotone fa-lock-keyhole", nome = "Cadeado com Buraco" },
+                    new { id = "fa-duotone fa-lock-open", nome = "Cadeado Aberto" },
+                    new { id = "fa-duotone fa-key-skeleton", nome = "Chave Esqueleto" },
+                    new { id = "fa-duotone fa-fingerprint", nome = "Impressão Digital" },
+                    new { id = "fa-duotone fa-eye-low-vision", nome = "Visão Baixa" },
+                    new { id = "fa-duotone fa-user-secret", nome = "Usuário Secreto" },
+                    new { id = "fa-duotone fa-user-ninja", nome = "Ninja" },
+                    new { id = "fa-duotone fa-mask", nome = "Máscara" },
+                    new { id = "fa-duotone fa-hat-wizard", nome = "Chapéu Mago" },
+
+                    // === MÍDIA E ENTRETENIMENTO ===
+                    new { id = "fa-duotone fa-play-circle", nome = "Play Círculo" },
+                    new { id = "fa-duotone fa-pause-circle", nome = "Pause Círculo" },
+                    new { id = "fa-duotone fa-stop-circle", nome = "Stop Círculo" },
+                    new { id = "fa-duotone fa-forward", nome = "Avançar" },
+                    new { id = "fa-duotone fa-backward", nome = "Retroceder" },
+                    new { id = "fa-duotone fa-forward-fast", nome = "Avançar Rápido" },
+                    new { id = "fa-duotone fa-backward-fast", nome = "Retroceder Rápido" },
+                    new { id = "fa-duotone fa-circle-play", nome = "Círculo Play" },
+                    new { id = "fa-duotone fa-volume-high", nome = "Volume Alto" },
+                    new { id = "fa-duotone fa-volume-low", nome = "Volume Baixo" },
+                    new { id = "fa-duotone fa-volume-off", nome = "Volume Desligado" },
+                    new { id = "fa-duotone fa-volume-xmark", nome = "Volume Mudo" },
+                    new { id = "fa-duotone fa-film", nome = "Filme" },
+                    new { id = "fa-duotone fa-clapperboard", nome = "Claquete" },
+                    new { id = "fa-duotone fa-photo-film", nome = "Foto e Filme" },
+                    new { id = "fa-duotone fa-images", nome = "Imagens" },
+                    new { id = "fa-duotone fa-file-image", nome = "Arquivo de Imagem" },
+                    new { id = "fa-duotone fa-file-video", nome = "Arquivo de Vídeo" },
+                    new { id = "fa-duotone fa-file-audio", nome = "Arquivo de Áudio" },
+                    new { id = "fa-duotone fa-compact-disc", nome = "CD" },
+                    new { id = "fa-duotone fa-record-vinyl", nome = "Vinil" },
+                    new { id = "fa-duotone fa-guitar", nome = "Guitarra" },
+                    new { id = "fa-duotone fa-drum", nome = "Bateria" },
+
+                    // === TEMPO E DATA ===
+                    new { id = "fa-duotone fa-calendar-check", nome = "Calendário Check" },
+                    new { id = "fa-duotone fa-calendar-xmark", nome = "Calendário X" },
+                    new { id = "fa-duotone fa-calendar-plus", nome = "Calendário Mais" },
+                    new { id = "fa-duotone fa-calendar-minus", nome = "Calendário Menos" },
+                    new { id = "fa-duotone fa-calendar-star", nome = "Calendário Estrela" },
+                    new { id = "fa-duotone fa-calendar-week", nome = "Calendário Semana" },
+                    new { id = "fa-duotone fa-calendar-range", nome = "Calendário Intervalo" },
+                    new { id = "fa-duotone fa-clock-rotate-left", nome = "Relógio Histórico" },
+                    new { id = "fa-duotone fa-stopwatch", nome = "Cronômetro" },
+                    new { id = "fa-duotone fa-timer", nome = "Timer" },
+                    new { id = "fa-duotone fa-alarm-clock", nome = "Despertador" },
+                    new { id = "fa-duotone fa-hourglass-start", nome = "Ampulheta Início" },
+                    new { id = "fa-duotone fa-hourglass-half", nome = "Ampulheta Metade" },
+                    new { id = "fa-duotone fa-hourglass-end", nome = "Ampulheta Fim" },
+
+                    // === DOCUMENTOS E ARQUIVOS ===
+                    new { id = "fa-duotone fa-file-lines", nome = "Arquivo Texto" },
+                    new { id = "fa-duotone fa-file-code", nome = "Arquivo Código" },
+                    new { id = "fa-duotone fa-file-excel", nome = "Excel" },
+                    new { id = "fa-duotone fa-file-powerpoint", nome = "PowerPoint" },
+                    new { id = "fa-duotone fa-file-zipper", nome = "Arquivo ZIP" },
+                    new { id = "fa-duotone fa-file-csv", nome = "Arquivo CSV" },
+                    new { id = "fa-duotone fa-file-xml", nome = "Arquivo XML" },
+                    new { id = "fa-duotone fa-file-arrow-down", nome = "Baixar Arquivo" },
+                    new { id = "fa-duotone fa-file-arrow-up", nome = "Upload Arquivo" },
+                    new { id = "fa-duotone fa-file-import", nome = "Importar Arquivo" },
+                    new { id = "fa-duotone fa-file-export", nome = "Exportar Arquivo" },
+                    new { id = "fa-duotone fa-files", nome = "Arquivos" },
+                    new { id = "fa-duotone fa-folder-tree", nome = "Árvore de Pastas" },
+                    new { id = "fa-duotone fa-folders", nome = "Pastas" },
+                    new { id = "fa-duotone fa-folder-plus", nome = "Criar Pasta" },
+                    new { id = "fa-duotone fa-folder-minus", nome = "Remover Pasta" },
+
+                    // === SETAS E DIREÇÕES ===
+                    new { id = "fa-duotone fa-arrow-up", nome = "Seta Cima" },
+                    new { id = "fa-duotone fa-arrow-right", nome = "Seta Direita" },
+                    new { id = "fa-duotone fa-arrow-left", nome = "Seta Esquerda" },
+                    new { id = "fa-duotone fa-arrow-up-right", nome = "Seta Diagonal Cima Direita" },
+                    new { id = "fa-duotone fa-arrow-down-left", nome = "Seta Diagonal Baixo Esquerda" },
+                    new { id = "fa-duotone fa-arrows-up-down", nome = "Setas Cima Baixo" },
+                    new { id = "fa-duotone fa-arrows-left-right", nome = "Setas Esquerda Direita" },
+                    new { id = "fa-duotone fa-arrow-right-arrow-left", nome = "Setas Troca" },
+                    new { id = "fa-duotone fa-arrow-up-from-bracket", nome = "Exportar" },
+                    new { id = "fa-duotone fa-arrow-down-to-bracket", nome = "Importar" },
+                    new { id = "fa-duotone fa-angles-up", nome = "Ângulos Cima" },
+                    new { id = "fa-duotone fa-angles-down", nome = "Ângulos Baixo" },
+                    new { id = "fa-duotone fa-angles-left", nome = "Ângulos Esquerda" },
+                    new { id = "fa-duotone fa-angles-right", nome = "Ângulos Direita" },
+                    new { id = "fa-duotone fa-chevron-up", nome = "Chevron Cima" },
+                    new { id = "fa-duotone fa-chevron-down", nome = "Chevron Baixo" },
+                    new { id = "fa-duotone fa-chevron-left", nome = "Chevron Esquerda" },
+                    new { id = "fa-duotone fa-chevron-right", nome = "Chevron Direita" },
+                    new { id = "fa-duotone fa-caret-up", nome = "Caret Cima" },
+                    new { id = "fa-duotone fa-caret-down", nome = "Caret Baixo" },
+                    new { id = "fa-duotone fa-caret-left", nome = "Caret Esquerda" },
+                    new { id = "fa-duotone fa-caret-right", nome = "Caret Direita" },
+
+                    // === FORMAS E SÍMBOLOS ===
+                    new { id = "fa-duotone fa-square-full", nome = "Quadrado Cheio" },
+                    new { id = "fa-duotone fa-circle-dot", nome = "Círculo Ponto" },
+                    new { id = "fa-duotone fa-circle-half-stroke", nome = "Círculo Metade" },
+                    new { id = "fa-duotone fa-heart-crack", nome = "Coração Partido" },
+                    new { id = "fa-duotone fa-star-half", nome = "Estrela Metade" },
+                    new { id = "fa-duotone fa-star-half-stroke", nome = "Estrela Meio Traço" },
+                    new { id = "fa-duotone fa-diamond", nome = "Diamante" },
+                    new { id = "fa-duotone fa-hexagon", nome = "Hexágono" },
+                    new { id = "fa-duotone fa-octagon", nome = "Octógono" },
+                    new { id = "fa-duotone fa-badge", nome = "Emblema" },
+                    new { id = "fa-duotone fa-award", nome = "Prêmio" },
+
+                    // === SOCIAL MEDIA ===
+                    new { id = "fa-duotone fa-share-nodes", nome = "Compartilhar Rede" },
+                    new { id = "fa-duotone fa-hashtag", nome = "Hashtag Social" },
+                    new { id = "fa-duotone fa-at", nome = "Arroba" },
+                    new { id = "fa-duotone fa-rss", nome = "RSS Feed" },
+                    new { id = "fa-duotone fa-podcast", nome = "Podcast" },
+                    new { id = "fa-duotone fa-blog", nome = "Blog" },
+                    new { id = "fa-duotone fa-quote-left", nome = "Citação Esquerda" },
+                    new { id = "fa-duotone fa-quote-right", nome = "Citação Direita" },
+                    new { id = "fa-duotone fa-retweet", nome = "Retweet" },
+                    new { id = "fa-duotone fa-share-from-square", nome = "Compartilhar Externo" },
+
+                    // === EDUCAÇÃO ===
+                    new { id = "fa-duotone fa-school", nome = "Escola" },
+                    new { id = "fa-duotone fa-book-open", nome = "Livro Aberto" },
+                    new { id = "fa-duotone fa-book-bookmark", nome = "Livro Marcador" },
+                    new { id = "fa-duotone fa-books", nome = "Livros" },
+                    new { id = "fa-duotone fa-user-graduate", nome = "Graduado" },
+                    new { id = "fa-duotone fa-user-tie", nome = "Usuário Gravata" },
+                    new { id = "fa-duotone fa-apple-core", nome = "Maçã Professor" },
+                    new { id = "fa-duotone fa-pencil", nome = "Lápis" },
+                    new { id = "fa-duotone fa-pen-fancy", nome = "Caneta Elegante" },
+                    new { id = "fa-duotone fa-highlighter", nome = "Marca Texto" },
+                    new { id = "fa-duotone fa-eraser", nome = "Borracha" },
+                    new { id = "fa-duotone fa-ruler-horizontal", nome = "Régua Horizontal" },
+                    new { id = "fa-duotone fa-ruler-vertical", nome = "Régua Vertical" },
+                    new { id = "fa-duotone fa-ruler-triangle", nome = "Esquadro Triângulo" },
+                    new { id = "fa-duotone fa-square-root-variable", nome = "Matemática" },
+                    new { id = "fa-duotone fa-flask-vial", nome = "Química" },
+                    new { id = "fa-duotone fa-atom", nome = "Átomo" },
+                    new { id = "fa-duotone fa-microscope", nome = "Ciências" },
+                    new { id = "fa-duotone fa-globe-pointer", nome = "Geografia" },
+
+                    // === E-COMMERCE E COMPRAS ===
+                    new { id = "fa-duotone fa-store", nome = "Loja" },
+                    new { id = "fa-duotone fa-shop", nome = "Comércio" },
+                    new { id = "fa-duotone fa-cart-shopping", nome = "Carrinho Compras" },
+                    new { id = "fa-duotone fa-cart-plus", nome = "Adicionar Carrinho" },
+                    new { id = "fa-duotone fa-basket-shopping", nome = "Cesta Compras" },
+                    new { id = "fa-duotone fa-bag-shopping", nome = "Sacola Compras" },
+                    new { id = "fa-duotone fa-gift", nome = "Presente" },
+                    new { id = "fa-duotone fa-percent", nome = "Porcentagem" },
+                    new { id = "fa-duotone fa-tags", nome = "Etiquetas" },
+                    new { id = "fa-duotone fa-barcode-scan", nome = "Scanner Código" },
+                    new { id = "fa-duotone fa-credit-card-front", nome = "Cartão Frente" },
+                    new { id = "fa-duotone fa-money-bill-wave", nome = "Dinheiro Ondulado" },
+                    new { id = "fa-duotone fa-money-bills", nome = "Notas Dinheiro" },
+                    new { id = "fa-duotone fa-piggy-bank", nome = "Cofrinho" },
+                    new { id = "fa-duotone fa-wallet", nome = "Carteira Digital" },
+                    new { id = "fa-duotone fa-cash-register", nome = "Caixa" },
+
+                    // === UI/UX ELEMENTOS ===
+                    new { id = "fa-duotone fa-bars", nome = "Menu Hamburguer" },
+                    new { id = "fa-duotone fa-bars-staggered", nome = "Menu Escalonado" },
+                    new { id = "fa-duotone fa-ellipsis", nome = "Reticências" },
+                    new { id = "fa-duotone fa-ellipsis-vertical", nome = "Reticências Vertical" },
+                    new { id = "fa-duotone fa-grip", nome = "Grid" },
+                    new { id = "fa-duotone fa-grip-vertical", nome = "Grid Vertical" },
+                    new { id = "fa-duotone fa-toggle-on", nome = "Toggle Ligado" },
+                    new { id = "fa-duotone fa-toggle-off", nome = "Toggle Desligado" },
+                    new { id = "fa-duotone fa-square-check", nome = "Checkbox Marcado" },
+                    new { id = "fa-duotone fa-circle-check", nome = "Radio Marcado" },
+                    new { id = "fa-duotone fa-input-text", nome = "Campo Texto" },
+                    new { id = "fa-duotone fa-input-numeric", nome = "Campo Numérico" },
+                    new { id = "fa-duotone fa-list-ul", nome = "Lista Não Ordenada" },
+                    new { id = "fa-duotone fa-list-ol", nome = "Lista Ordenada" },
+                    new { id = "fa-duotone fa-indent", nome = "Indentar" },
+                    new { id = "fa-duotone fa-outdent", nome = "Desindentar" },
+                    new { id = "fa-duotone fa-align-left", nome = "Alinhar Esquerda" },
+                    new { id = "fa-duotone fa-align-center", nome = "Alinhar Centro" },
+                    new { id = "fa-duotone fa-align-right", nome = "Alinhar Direita" },
+                    new { id = "fa-duotone fa-align-justify", nome = "Justificar" },
+                    new { id = "fa-duotone fa-text-width", nome = "Largura Texto" },
+                    new { id = "fa-duotone fa-text-height", nome = "Altura Texto" },
+                    new { id = "fa-duotone fa-bold", nome = "Negrito" },
+                    new { id = "fa-duotone fa-italic", nome = "Itálico" },
+                    new { id = "fa-duotone fa-underline", nome = "Sublinhado" },
+                    new { id = "fa-duotone fa-strikethrough", nome = "Tachado" },
+                    new { id = "fa-duotone fa-font", nome = "Fonte" },
+                    new { id = "fa-duotone fa-text", nome = "Texto" },
+                    new { id = "fa-duotone fa-heading", nome = "Título" },
+                    new { id = "fa-duotone fa-paragraph", nome = "Parágrafo" },
+
+                    // === NAVEGAÇÃO E MENUS ===
+                    new { id = "fa-duotone fa-house-chimney", nome = "Home" },
+                    new { id = "fa-duotone fa-house-user", nome = "Home Usuário" },
+                    new { id = "fa-duotone fa-door-open", nome = "Porta Aberta" },
+                    new { id = "fa-duotone fa-door-closed", nome = "Porta Fechada" },
+                    new { id = "fa-duotone fa-arrow-right-to-bracket", nome = "Login" },
+                    new { id = "fa-duotone fa-arrow-right-from-bracket", nome = "Logout" },
+                    new { id = "fa-duotone fa-right-to-bracket", nome = "Entrar Sistema" },
+                    new { id = "fa-duotone fa-right-from-bracket", nome = "Sair Sistema" },
+                    new { id = "fa-duotone fa-breadcrumb", nome = "Breadcrumb" },
+                    new { id = "fa-duotone fa-location-crosshairs", nome = "Localizar" },
+                    new { id = "fa-duotone fa-location-pin", nome = "Pin Localização" },
+                    new { id = "fa-duotone fa-compass-drafting", nome = "Compasso" },
+                    new { id = "fa-duotone fa-layer-group", nome = "Camadas" },
+                    new { id = "fa-duotone fa-objects-column", nome = "Colunas" },
+                    new { id = "fa-duotone fa-sidebar", nome = "Barra Lateral" },
+                    new { id = "fa-duotone fa-sidebar-flip", nome = "Barra Lateral Inversa" },
+                    new { id = "fa-duotone fa-window", nome = "Janela" },
+                    new { id = "fa-duotone fa-window-maximize", nome = "Maximizar Janela" },
+                    new { id = "fa-duotone fa-window-minimize", nome = "Minimizar Janela" },
+                    new { id = "fa-duotone fa-window-restore", nome = "Restaurar Janela" },
+
+                    // === STATUS E INDICADORES ===
+                    new { id = "fa-duotone fa-circle-dot", nome = "Status Online" },
+                    new { id = "fa-duotone fa-signal-good", nome = "Sinal Bom" },
+                    new { id = "fa-duotone fa-signal-weak", nome = "Sinal Fraco" },
+                    new { id = "fa-duotone fa-battery-three-quarters", nome = "Bateria 75%" },
+                    new { id = "fa-duotone fa-battery-half", nome = "Bateria 50%" },
+                    new { id = "fa-duotone fa-battery-quarter", nome = "Bateria 25%" },
+                    new { id = "fa-duotone fa-battery-empty", nome = "Bateria Vazia" },
+                    new { id = "fa-duotone fa-spinner", nome = "Carregando" },
+                    new { id = "fa-duotone fa-circle-notch", nome = "Processando" },
+                    new { id = "fa-duotone fa-loader", nome = "Loader" },
+                    new { id = "fa-duotone fa-hourglass-clock", nome = "Aguardando" },
+                    new { id = "fa-duotone fa-circle-pause", nome = "Pausado" },
+                    new { id = "fa-duotone fa-ban", nome = "Proibido" },
+                    new { id = "fa-duotone fa-do-not-enter", nome = "Não Entre" },
+                    new { id = "fa-duotone fa-octagon-exclamation", nome = "Stop Aviso" },
+
+                    // === PESSOAS E USUÁRIOS ===
+                    new { id = "fa-duotone fa-user-plus", nome = "Adicionar Usuário" },
+                    new { id = "fa-duotone fa-user-minus", nome = "Remover Usuário" },
+                    new { id = "fa-duotone fa-user-xmark", nome = "Cancelar Usuário" },
+                    new { id = "fa-duotone fa-user-pen", nome = "Editar Usuário" },
+                    new { id = "fa-duotone fa-user-gear", nome = "Configurar Usuário" },
+                    new { id = "fa-duotone fa-user-lock", nome = "Usuário Bloqueado" },
+                    new { id = "fa-duotone fa-user-slash", nome = "Usuário Desabilitado" },
+                    new { id = "fa-duotone fa-user-large", nome = "Usuário Grande" },
+                    new { id = "fa-duotone fa-user-tag", nome = "Usuário Etiquetado" },
+                    new { id = "fa-duotone fa-users-gear", nome = "Configurar Usuários" },
+                    new { id = "fa-duotone fa-users-slash", nome = "Usuários Desabilitados" },
+                    new { id = "fa-duotone fa-people-group", nome = "Grupo Pessoas" },
+                    new { id = "fa-duotone fa-person", nome = "Pessoa" },
+                    new { id = "fa-duotone fa-person-dress", nome = "Pessoa Vestido" },
+
+                    // === TECNOLOGIA E DEV ===
+                    new { id = "fa-duotone fa-laptop-code", nome = "Laptop Código" },
+                    new { id = "fa-duotone fa-code-branch", nome = "Branch Git" },
+                    new { id = "fa-duotone fa-code-commit", nome = "Commit Git" },
+                    new { id = "fa-duotone fa-code-merge", nome = "Merge Git" },
+                    new { id = "fa-duotone fa-code-pull-request", nome = "Pull Request" },
+                    new { id = "fa-duotone fa-code-fork", nome = "Fork" },
+                    new { id = "fa-duotone fa-code-compare", nome = "Comparar Código" },
+                    new { id = "fa-duotone fa-bug-slash", nome = "Bug Corrigido" },
+                    new { id = "fa-duotone fa-laptop-binary", nome = "Laptop Binário" },
+                    new { id = "fa-duotone fa-brackets-curly", nome = "Chaves Código" },
+                    new { id = "fa-duotone fa-brackets-square", nome = "Colchetes" },
+                    new { id = "fa-duotone fa-microchip", nome = "Microchip" },
+                    new { id = "fa-duotone fa-microchip-ai", nome = "IA Chip" },
+                    new { id = "fa-duotone fa-memory", nome = "Memória RAM" },
+                    new { id = "fa-duotone fa-hard-drive", nome = "HD" },
+                    new { id = "fa-duotone fa-hdd", nome = "Disco Rígido" },
+                    new { id = "fa-duotone fa-usb-drive", nome = "Pen Drive" },
+                    new { id = "fa-duotone fa-sd-card", nome = "Cartão SD" },
+                    new { id = "fa-duotone fa-sim-card", nome = "SIM Card" },
+
+                    // === FINANÇAS ===
+                    new { id = "fa-duotone fa-chart-line-up", nome = "Gráfico Crescimento" },
+                    new { id = "fa-duotone fa-chart-line-down", nome = "Gráfico Queda" },
+                    new { id = "fa-duotone fa-arrow-trend-up", nome = "Tendência Alta" },
+                    new { id = "fa-duotone fa-arrow-trend-down", nome = "Tendência Baixa" },
+                    new { id = "fa-duotone fa-money-bill-trend-up", nome = "Lucro" },
+                    new { id = "fa-duotone fa-hand-holding-dollar", nome = "Receber Dinheiro" },
+                    new { id = "fa-duotone fa-hand-holding-heart", nome = "Doação" },
+                    new { id = "fa-duotone fa-file-invoice-dollar", nome = "Fatura Dólar" },
+                    new { id = "fa-duotone fa-balance-scale", nome = "Balança Justiça" },
+                    new { id = "fa-duotone fa-scale-balanced", nome = "Balanço" },
+                    new { id = "fa-duotone fa-scale-unbalanced", nome = "Desbalanço" },
+
+                    // === NOTIFICAÇÕES E ALERTAS ===
+                    new { id = "fa-duotone fa-bell-exclamation", nome = "Notificação Alerta" },
+                    new { id = "fa-duotone fa-bell-on", nome = "Notificação Ativa" },
+                    new { id = "fa-duotone fa-bell-plus", nome = "Nova Notificação" },
+                    new { id = "fa-duotone fa-bell-ring", nome = "Sino Tocando" },
+                    new { id = "fa-duotone fa-message-exclamation", nome = "Mensagem Urgente" },
+                    new { id = "fa-duotone fa-message-check", nome = "Mensagem Confirmada" },
+                    new { id = "fa-duotone fa-message-xmark", nome = "Mensagem Cancelada" },
+                    new { id = "fa-duotone fa-envelope-open-text", nome = "Email Lido" },
+                    new { id = "fa-duotone fa-inbox-in", nome = "Inbox Entrada" },
+                    new { id = "fa-duotone fa-inbox-out", nome = "Inbox Saída" },
+
+                    // === MAPAS E LOCALIZAÇÃO ===
+                    new { id = "fa-duotone fa-map-marker", nome = "Marcador Mapa" },
+                    new { id = "fa-duotone fa-map-marker-alt", nome = "Pin Mapa" },
+                    new { id = "fa-duotone fa-map-pin", nome = "Alfinete Mapa" },
+                    new { id = "fa-duotone fa-location-arrow", nome = "Seta Localização" },
+                    new { id = "fa-duotone fa-location-check", nome = "Localização Verificada" },
+                    new { id = "fa-duotone fa-location-exclamation", nome = "Localização Alerta" },
+                    new { id = "fa-duotone fa-map-location", nome = "Mapa Localização" },
+                    new { id = "fa-duotone fa-map-location-dot", nome = "Mapa Ponto" },
+                    new { id = "fa-duotone fa-compass-slash", nome = "Sem Direção" },
+                    new { id = "fa-duotone fa-route-highway", nome = "Rodovia" },
+                    new { id = "fa-duotone fa-route-interstate", nome = "Interestadual" },
+
+                    // === AÇÕES E OPERAÇÕES ===
+                    new { id = "fa-duotone fa-maximize", nome = "Maximizar" },
+                    new { id = "fa-duotone fa-minimize", nome = "Minimizar" },
+                    new { id = "fa-duotone fa-expand", nome = "Expandir" },
+                    new { id = "fa-duotone fa-compress", nome = "Comprimir" },
+                    new { id = "fa-duotone fa-clone", nome = "Clonar" },
+                    new { id = "fa-duotone fa-copy", nome = "Duplicar" },
+                    new { id = "fa-duotone fa-cut", nome = "Recortar" },
+                    new { id = "fa-duotone fa-files-clipboard", nome = "Área de Transferência" },
+                    new { id = "fa-duotone fa-shuffle", nome = "Embaralhar" },
+                    new { id = "fa-duotone fa-random", nome = "Aleatório" },
+                    new { id = "fa-duotone fa-repeat", nome = "Repetir" },
+                    new { id = "fa-duotone fa-redo", nome = "Refazer Ação" },
+                    new { id = "fa-duotone fa-undo", nome = "Desfazer Ação" },
+                    new { id = "fa-duotone fa-reply", nome = "Responder" },
+                    new { id = "fa-duotone fa-reply-all", nome = "Responder Todos" },
+                    new { id = "fa-duotone fa-forward", nome = "Encaminhar" },
+
+                    // === SEGURANÇA AVANÇADA ===
+                    new { id = "fa-duotone fa-user-shield-crown", nome = "Super Admin" },
+                    new { id = "fa-duotone fa-shield-keyhole", nome = "Segurança Chave" },
+                    new { id = "fa-duotone fa-shield-cross", nome = "Proteção Cruz" },
+                    new { id = "fa-duotone fa-shield-exclamation", nome = "Alerta Segurança" },
+                    new { id = "fa-duotone fa-shield-xmark", nome = "Segurança Falha" },
+                    new { id = "fa-duotone fa-unlock-keyhole", nome = "Desbloquear Buraco" },
+                    new { id = "fa-duotone fa-key-skeleton-left-right", nome = "Chave Mestra" },
+                    new { id = "fa-duotone fa-passport", nome = "Passaporte" },
+                    new { id = "fa-duotone fa-id-badge", nome = "Crachá" },
+                    new { id = "fa-duotone fa-id-card-clip", nome = "Crachá Clip" },
+
+                    // === OUTROS ÍCONES ÚTEIS ===
+                    new { id = "fa-duotone fa-sparkles", nome = "Brilho" },
+                    new { id = "fa-duotone fa-wand-magic-sparkles", nome = "Varinha Mágica" },
+                    new { id = "fa-duotone fa-star-christmas", nome = "Estrela Natal" },
+                    new { id = "fa-duotone fa-circle-star", nome = "Círculo Estrela" },
+                    new { id = "fa-duotone fa-sparkle", nome = "Faísca" },
+                    new { id = "fa-duotone fa-gem", nome = "Gema" },
+                    new { id = "fa-duotone fa-ring", nome = "Anel" },
+                    new { id = "fa-duotone fa-rings-wedding", nome = "Alianças" },
+                    new { id = "fa-duotone fa-mug", nome = "Caneca" },
+                    new { id = "fa-duotone fa-glass", nome = "Copo" },
+                    new { id = "fa-duotone fa-glass-water", nome = "Copo Água" },
+                    new { id = "fa-duotone fa-smoking", nome = "Fumar" },
+                    new { id = "fa-duotone fa-smoking-ban", nome = "Proibido Fumar" },
+                    new { id = "fa-duotone fa-parking", nome = "Estacionamento" },
+                    new { id = "fa-duotone fa-square-parking", nome = "Vaga" },
+                    new { id = "fa-duotone fa-restroom", nome = "Banheiro" },
+                    new { id = "fa-duotone fa-person-dress-simple", nome = "Feminino" },
+                    new { id = "fa-duotone fa-person-simple", nome = "Masculino" },
+                    new { id = "fa-duotone fa-wheelchair-move", nome = "Acessibilidade" },
+                    new { id = "fa-duotone fa-stairs", nome = "Escadas" },
+                    new { id = "fa-duotone fa-elevator", nome = "Elevador" }
+                };
+
+                // Ordena alfabeticamente pelo nome
+                icones = icones.OrderBy(x => ((dynamic)x).nome).ToList();
+
+                return Json(new { success = true, data = icones });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetIconesFontAwesome", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        #endregion
+
+        #region Métodos Auxiliares para Banco de Dados
+
+        /// <summary>
+        /// Monta árvore recursiva a partir de lista de recursos
+        /// </summary>
+        private List<RecursoTreeDTO> MontarArvoreRecursiva(List<Recurso> recursos, Guid? parentId)
+        {
+            return recursos
+                .Where(r => r.ParentId == parentId)
+                .OrderBy(r => r.Ordem)
+                .Select(r =>
+                {
+                    var dto = RecursoTreeDTO.FromRecurso(r);
+                    dto.Items = MontarArvoreRecursiva(recursos, r.RecursoId);
+                    dto.HasChild = dto.Items.Any();
+                    return dto;
+                })
+                .ToList();
+        }
+
+        /// <summary>
+        /// Atualiza recursos recursivamente a partir da árvore
+        /// </summary>
+        private void AtualizarRecursosRecursivamente(List<RecursoTreeDTO> items, Guid? parentId, int nivel, double ordemBase)
+        {
+            double ordem = ordemBase;
+
+            foreach (var item in items)
+            {
+                if (Guid.TryParse(item.Id, out var recursoId))
+                {
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                    if (recurso != null)
+                    {
+                        recurso.ParentId = parentId;
+                        recurso.Nivel = nivel;
+                        recurso.Ordem = ordem;
+                        recurso.Icon = item.Icon;
+                        recurso.Href = item.Href;
+                        _unitOfWork.Recurso.Update(recurso);
+                    }
+                }
+
+                ordem++;
+
+                if (item.Items?.Any() == true)
+                {
+                    AtualizarRecursosRecursivamente(item.Items, recursoId, nivel + 1, ordem * 100);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Processa itens do nav.json para migração
+        /// Usa ordenação hierárquica: Pai=1, Filhos=101-199, Netos=10101-10199
+        /// </summary>
+        private void ProcessarItensParaMigracao(List<ListItem> items, Guid? parentId, int nivel, ref int ordem, ref int atualizados, ref int criados, double ordemPai = 0)
+        {
+            if (items == null) return;
+
+            int indiceLocal = 1; // Contador local para este nível
+
+            foreach (var item in items)
+            {
+                try
+                {
+                    // Pula itens sem identificador
+                    if (string.IsNullOrEmpty(item.NomeMenu) && string.IsNullOrEmpty(item.Title)) continue;
+
+                    // Usa NomeMenu se existir, senão usa Title como fallback
+                    var nomeMenuBusca = !string.IsNullOrEmpty(item.NomeMenu) ? item.NomeMenu : item.Title;
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.NomeMenu == nomeMenuBusca);
+                    bool isNew = false;
+
+                // Calcula ordem hierárquica:
+                // Nível 0: 1, 2, 3...
+                // Nível 1: ordemPai * 100 + índice = 101, 102, 201, 202...
+                // Nível 2: ordemPai * 100 + índice = 10101, 10102, 20101...
+                double ordemCalculada;
+                if (nivel == 0)
+                {
+                    ordemCalculada = indiceLocal;
+                }
+                else
+                {
+                    ordemCalculada = (ordemPai * 100) + indiceLocal;
+                }
+
+                if (recurso == null)
+                    {
+                        // Cria novo recurso (com valores padrão para campos obrigatórios)
+                        recurso = new Recurso
+                        {
+                            RecursoId = Guid.NewGuid(),
+                            Nome = item.Title ?? item.NomeMenu ?? "Sem Nome",
+                            NomeMenu = nomeMenuBusca ?? $"menu_{Guid.NewGuid():N}",
+                            Descricao = $"Menu: {nomeMenuBusca}",
+                        Ordem = ordemCalculada,
+                        ParentId = parentId,
+                        Icon = item.Icon ?? "fa-duotone fa-folder",
+                        Href = item.Href ?? "javascript:void(0);",
+                        Ativo = true,
+                        Nivel = nivel,
+                        HasChild = item.HasChild
+                    };
+                    _unitOfWork.Recurso.Add(recurso);
+                    isNew = true;
+                    criados++;
+                }
+                else
+                {
+                    // Atualiza campos (com valores padrão para campos obrigatórios)
+                    recurso.ParentId = parentId;
+                    recurso.Icon = item.Icon ?? "fa-regular fa-folder";
+                    recurso.Href = item.Href ?? "javascript:void(0);";
+                    recurso.Nivel = nivel;
+                    recurso.Ativo = true;
+                    recurso.Ordem = ordemCalculada;
+                    recurso.HasChild = item.HasChild;
+                    _unitOfWork.Recurso.Update(recurso);
+                    atualizados++;
+                }
+
+                // IMPORTANTE: Salva o Recurso ANTES de criar ControleAcesso
+                _unitOfWork.Save();
+
+                // Cria ControleAcesso apenas para novos recursos
+                if (isNew)
+                {
+                    CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                    _unitOfWork.Save();
+                }
+
+                // Processa filhos recursivamente passando a ordem do pai atual
+                if (item.Items?.Any() == true)
+                {
+                    ProcessarItensParaMigracao(item.Items, recurso.RecursoId, nivel + 1, ref ordem, ref atualizados, ref criados, ordemCalculada);
+                }
+
+                indiceLocal++;
+                ordem++;
+                }
+                catch (Exception ex)
+                {
+                    // Log do erro mas continua com os próximos itens
+                    Console.WriteLine($"Erro ao migrar item '{item.NomeMenu ?? item.Title}': {ex.Message}");
+                    indiceLocal++;
+                    ordem++;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Métodos Auxiliares
+
+        /// <summary>
+        /// Transforma ListItem em NavigationTreeItem para a TreeView
+        /// </summary>
+        private List<NavigationTreeItem> TransformToTreeData(List<ListItem> items, string parentId)
+        {
+            var result = new List<NavigationTreeItem>();
+            int index = 0;
+
+            foreach (var item in items)
+            {
+                var id = string.IsNullOrEmpty(parentId)
+                    ? $"item_{index}"
+                    : $"{parentId}_{index}";
+
+                var treeItem = new NavigationTreeItem
+                {
+                    Id = id,
+                    Text = item.NomeMenu ?? item.Title,
+                    Title = item.Title,
+                    NomeMenu = item.NomeMenu,
+                    Href = item.Href,
+                    Icon = item.Icon,
+                    IconCss = item.Icon,
+                    ParentId = parentId,
+                    HasChild = item.Items != null && item.Items.Count > 0,
+                    Expanded = true
+                };
+
+                if (item.Items != null && item.Items.Count > 0)
+                {
+                    treeItem.Items = TransformToTreeData(item.Items, id);
+                }
+
+                result.Add(treeItem);
+                index++;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Transforma NavigationTreeItem de volta para ListItem
+        /// </summary>
+        private List<object> TransformFromTreeData(List<NavigationTreeItem> items)
+        {
+            var result = new List<object>();
+
+            foreach (var item in items)
+            {
+                var listItem = new Dictionary<string, object>
+                {
+                    { "title", EncodeHtmlEntities(item.Title ?? item.Text) },
+                    { "nomeMenu", item.NomeMenu ?? item.Text },
+                    { "roles", new string[0] },
+                    { "hasChild", item.HasChild }
+                };
+
+                if (!string.IsNullOrEmpty(item.Icon))
+                {
+                    listItem["icon"] = item.Icon;
+                }
+
+                if (!string.IsNullOrEmpty(item.Href))
+                {
+                    listItem["href"] = item.Href;
+                }
+
+                if (item.Items != null && item.Items.Count > 0)
+                {
+                    listItem["items"] = TransformFromTreeData(item.Items);
+                }
+
+                result.Add(listItem);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Codifica caracteres especiais para HTML entities
+        /// </summary>
+        private string EncodeHtmlEntities(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+
+            return text
+                .Replace("á", "&aacute;")
+                .Replace("à", "&agrave;")
+                .Replace("ã", "&atilde;")
+                .Replace("â", "&acirc;")
+                .Replace("é", "&eacute;")
+                .Replace("ê", "&ecirc;")
+                .Replace("í", "&iacute;")
+                .Replace("ó", "&oacute;")
+                .Replace("ô", "&ocirc;")
+                .Replace("õ", "&otilde;")
+                .Replace("ú", "&uacute;")
+                .Replace("ç", "&ccedil;")
+                .Replace("Á", "&Aacute;")
+                .Replace("À", "&Agrave;")
+                .Replace("Ã", "&Atilde;")
+                .Replace("Â", "&Acirc;")
+                .Replace("É", "&Eacute;")
+                .Replace("Ê", "&Ecirc;")
+                .Replace("Í", "&Iacute;")
+                .Replace("Ó", "&Oacute;")
+                .Replace("Ô", "&Ocirc;")
+                .Replace("Õ", "&Otilde;")
+                .Replace("Ú", "&Uacute;")
+                .Replace("Ç", "&Ccedil;");
+        }
+
+        /// <summary>
+        /// Sincroniza itens da TreeView com a tabela Recurso
+        /// </summary>
+        private void SincronizarRecursos(List<NavigationTreeItem> items)
+        {
+            foreach (var item in items)
+            {
+                if (!string.IsNullOrEmpty(item.NomeMenu))
+                {
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r =>
+                        r.NomeMenu == item.NomeMenu);
+
+                    if (recurso == null)
+                    {
+                        // Cria novo recurso se não existir
+                        recurso = new Recurso
+                        {
+                            RecursoId = Guid.NewGuid(),
+                            Nome = item.Title ?? item.Text,
+                            NomeMenu = item.NomeMenu,
+                            Descricao = $"Menu: {item.NomeMenu}",
+                            Ordem = GetNextOrdem(),
+                            HasChild = item.HasChild
+                        };
+                        _unitOfWork.Recurso.Add(recurso);
+                        CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                    }
+                    else
+                    {
+                        // Atualiza HasChild em recursos existentes
+                        recurso.HasChild = item.HasChild;
+                        _unitOfWork.Recurso.Update(recurso);
+                    }
+                }
+
+                // Processa subitens recursivamente
+                if (item.Items != null && item.Items.Count > 0)
+                {
+                    SincronizarRecursos(item.Items);
+                }
+            }
+
+            _unitOfWork.Save();
+        }
+
+        /// <summary>
+        /// Obtém a próxima ordem disponível para recursos
+        /// </summary>
+        private double GetNextOrdem()
+        {
+            var recursos = _unitOfWork.Recurso.GetAll().ToList();
+            if (!recursos.Any()) return 1;
+            return recursos.Max(r => r.Ordem) + 1;
+        }
+
+        /// <summary>
+        /// Cria ControleAcesso para todos os usuários ativos
+        /// </summary>
+        private void CriarControleAcessoParaTodosUsuarios(Guid recursoId)
+        {
+            var usuarios = _unitOfWork.AspNetUsers.GetAll(u => u.Status == true);
+
+            foreach (var usuario in usuarios)
+            {
+                var controleExistente = _unitOfWork.ControleAcesso.GetFirstOrDefault(ca =>
+                    ca.UsuarioId == usuario.Id && ca.RecursoId == recursoId);
+
+                if (controleExistente == null)
+                {
+                    var novoControle = new ControleAcesso
+                    {
+                        UsuarioId = usuario.Id,
+                        RecursoId = recursoId,
+                        Acesso = true
+                    };
+                    _unitOfWork.ControleAcesso.Add(novoControle);
+                }
+            }
+        }
+
+        #endregion
+    }
+}
