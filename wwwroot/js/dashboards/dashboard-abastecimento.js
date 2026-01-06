@@ -62,8 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * Inicializa os filtros buscando anos disponíveis e depois carrega os dados filtrados
- * Lógica: Ano com último registro -> Mês daquele ano com último registro
+ * Inicializa os filtros buscando anos disponíveis e deixa mês vazio até usuário selecionar ano
+ * Lógica: Popula anos disponíveis → Usuário seleciona ano → Popula meses daquele ano
  */
 function inicializarFiltrosECarregar() {
     try {
@@ -84,9 +84,6 @@ function inicializarFiltrosECarregar() {
                         return;
                     }
 
-                    // Ano com último registro (primeiro da lista, ordenado desc)
-                    const anoUltimoRegistro = anos[0];
-
                     // Preencher selects de ano
                     const selectGeral = document.getElementById('filtroAnoGeral');
                     const selectMensal = document.getElementById('filtroAnoMensal');
@@ -95,58 +92,35 @@ function inicializarFiltrosECarregar() {
                     [selectGeral, selectMensal, selectVeiculo].forEach(select => {
                         if (!select) return;
                         const isGeral = select.id === 'filtroAnoGeral';
-                        select.innerHTML = isGeral ? '<option value="">&lt;Todos os Anos&gt;</option>' : '';
+                        select.innerHTML = isGeral ? '<option value="">&lt;Todos os Anos&gt;</option>' : '<option value="">Selecione o Ano</option>';
                         anos.forEach(ano => {
                             const option = document.createElement('option');
                             option.value = ano;
                             option.textContent = ano;
                             select.appendChild(option);
                         });
-                        select.value = anoUltimoRegistro.toString();
                         select.dataset.initialized = 'true';
-                    });
 
-                    // Buscar dados DO ANO COM ÚLTIMO REGISTRO para determinar o mês
-                    $.ajax({
-                        url: '/api/abastecimento/DashboardDados',
-                        type: 'GET',
-                        data: { ano: anoUltimoRegistro, mes: null },
-                        success: function (dataAno) {
-                            try {
-                                let mesSelecionado = '';
-                                const consumoPorMes = dataAno.consumoPorMes || [];
+                        // Adicionar evento para popular meses quando ano for selecionado
+                        if (!select.dataset.eventAdded) {
+                            select.addEventListener('change', function() {
+                                const anoSelecionado = this.value;
+                                const mesSelectId = this.id.replace('Ano', 'Mes');
+                                const mesSelect = document.getElementById(mesSelectId);
 
-                                // Encontrar o último mês com dados (maior número de mês com valor > 0)
-                                if (consumoPorMes.length > 0) {
-                                    const mesesComDados = consumoPorMes
-                                        .filter(item => item.valor > 0)
-                                        .map(item => item.mes)
-                                        .sort((a, b) => b - a); // Ordenar decrescente
-
-                                    if (mesesComDados.length > 0) {
-                                        mesSelecionado = mesesComDados[0].toString();
-                                    }
+                                if (anoSelecionado && mesSelect) {
+                                    popularMesesDoAno(anoSelecionado, mesSelect);
+                                } else if (mesSelect) {
+                                    // Limpar dropdown de mês se ano for desmarcado
+                                    mesSelect.innerHTML = '<option value="">&lt;Todos os Meses&gt;</option>';
                                 }
-
-                                const selectMesGeral = document.getElementById('filtroMesGeral');
-                                if (selectMesGeral) {
-                                    selectMesGeral.value = mesSelecionado;
-                                    selectMesGeral.dataset.initialized = 'true';
-                                }
-
-                                // Agora carrega os dados com os filtros aplicados
-                                carregarDadosGeraisComFiltros();
-
-                            } catch (error) {
-                                Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar.inner.success", error);
-                                esconderLoading();
-                            }
-                        },
-                        error: function () {
-                            // Em caso de erro, carrega sem mês específico
-                            carregarDadosGeraisComFiltros();
+                            });
+                            select.dataset.eventAdded = 'true';
                         }
                     });
+
+                    // Carrega os dados sem filtros (mostra último mês com dados via API)
+                    carregarDadosGeraisComFiltros();
 
                 } catch (error) {
                     Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar.success", error);
@@ -161,6 +135,38 @@ function inicializarFiltrosECarregar() {
     } catch (error) {
         Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "inicializarFiltrosECarregar", error);
         esconderLoading();
+    }
+}
+
+/**
+ * Popula o dropdown de mês com os meses disponíveis de um ano específico
+ */
+function popularMesesDoAno(ano, mesSelect) {
+    try {
+        $.ajax({
+            url: '/api/abastecimento/DashboardMesesDisponiveis',
+            type: 'GET',
+            data: { ano: ano },
+            success: function (data) {
+                const meses = data.meses || [];
+                const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+                mesSelect.innerHTML = '<option value="">&lt;Todos os Meses&gt;</option>';
+                meses.forEach(mes => {
+                    const option = document.createElement('option');
+                    option.value = mes;
+                    option.textContent = nomesMeses[mes];
+                    mesSelect.appendChild(option);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao buscar meses disponíveis:', error);
+                mesSelect.innerHTML = '<option value="">&lt;Todos os Meses&gt;</option>';
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("dashboard-abastecimento.js", "popularMesesDoAno", error);
     }
 }
 

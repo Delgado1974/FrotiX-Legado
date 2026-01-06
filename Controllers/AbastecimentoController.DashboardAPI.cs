@@ -193,14 +193,11 @@ namespace FrotiX.Controllers
 
                 var dados = query.ToList();
 
-                // Otimizar busca de anos disponíveis - buscar apenas dos últimos 3 anos
-                var anoAtual = DateTime.Now.Year;
-                var anosParaBuscar = Enumerable.Range(anoAtual - 2, 3).ToList();
-
                 var resultado = new
                 {
+                    // Anos disponíveis: TODOS os anos com dados (sem limitação)
                     anosDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
-                        .Where(a => a.DataHora.HasValue && anosParaBuscar.Contains(a.DataHora.Value.Year))
+                        .Where(a => a.DataHora.HasValue)
                         .Select(a => a.DataHora.Value.Year)
                         .Distinct()
                         .OrderByDescending(a => a)
@@ -324,30 +321,30 @@ namespace FrotiX.Controllers
 
             var dados = query.ToList();
 
-            // Otimizar busca de anos disponíveis - buscar apenas dos últimos 3 anos
-            var anoAtual = DateTime.Now.Year;
-            var anosParaBuscar = Enumerable.Range(anoAtual - 2, 3).ToList();
-
             var resultado = new
             {
+                // Anos disponíveis: TODOS os anos com dados (sem limitação)
                 anosDisponiveis = _unitOfWork.ViewAbastecimentos.GetAll()
-                    .Where(a => a.DataHora.HasValue && anosParaBuscar.Contains(a.DataHora.Value.Year))
+                    .Where(a => a.DataHora.HasValue)
                     .Select(a => a.DataHora.Value.Year)
                     .Distinct()
                     .OrderByDescending(a => a)
                     .ToList(),
 
-                resumoPorAno = _unitOfWork.ViewAbastecimentos.GetAll()
-                    .Where(a => a.DataHora.HasValue && anosParaBuscar.Contains(a.DataHora.Value.Year))
-                    .GroupBy(a => a.DataHora.Value.Year)
-                    .Select(g => new
-                    {
-                        ano = g.Key,
-                        valor = g.Sum(a => ParseDecimal(a.ValorTotal)),
-                        litros = g.Sum(a => ParseDecimal(a.Litros))
-                    })
-                    .OrderBy(r => r.ano)
-                    .ToList(),
+                // Resumo por ano: Limitado aos últimos 3 anos para performance
+                resumoPorAno = (from a in _unitOfWork.ViewAbastecimentos.GetAll()
+                               where a.DataHora.HasValue
+                               group a by a.DataHora.Value.Year into g
+                               orderby g.Key descending
+                               select new
+                               {
+                                   ano = g.Key,
+                                   valor = g.Sum(a => ParseDecimal(a.ValorTotal)),
+                                   litros = g.Sum(a => ParseDecimal(a.Litros))
+                               })
+                               .Take(3)
+                               .OrderBy(r => r.ano)
+                               .ToList(),
 
                 mediaLitro = dados
                     .Where(a => !string.IsNullOrEmpty(a.TipoCombustivel))
@@ -1475,6 +1472,46 @@ namespace FrotiX.Controllers
             {
                 Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DashboardHeatmapVeiculo", error);
                 return StatusCode(500, new { message = "Erro ao carregar mapa de calor do veículo" });
+            }
+        }
+
+        /// <summary>
+        /// Retorna os meses disponíveis para um ano específico
+        /// Usado para popular dropdown de mês quando o usuário seleciona um ano
+        /// </summary>
+        [Route("DashboardMesesDisponiveis")]
+        [HttpGet]
+        public IActionResult DashboardMesesDisponiveis(int ano)
+        {
+            try
+            {
+                // Tentar usar dados estatísticos primeiro
+                var mesesEstatisticos = _context.EstatisticaAbastecimentoMensal
+                    .Where(e => e.Ano == ano)
+                    .Select(e => e.Mes)
+                    .Distinct()
+                    .OrderBy(m => m)
+                    .ToList();
+
+                if (mesesEstatisticos.Any())
+                {
+                    return Ok(new { meses = mesesEstatisticos });
+                }
+
+                // Fallback: buscar da view original
+                var mesesView = _unitOfWork.ViewAbastecimentos.GetAll()
+                    .Where(a => a.DataHora.HasValue && a.DataHora.Value.Year == ano)
+                    .Select(a => a.DataHora.Value.Month)
+                    .Distinct()
+                    .OrderBy(m => m)
+                    .ToList();
+
+                return Ok(new { meses = mesesView });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("AbastecimentoController.cs", "DashboardMesesDisponiveis", error);
+                return StatusCode(500, new { message = "Erro ao carregar meses disponíveis" });
             }
         }
 
