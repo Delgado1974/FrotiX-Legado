@@ -119,6 +119,26 @@ function inicializarFiltrosECarregar() {
                         }
                     });
 
+                    // Posicionar dropdowns baseado no filtro aplicado pela API
+                    const filtroAplicado = data.filtroAplicado || {};
+                    if (filtroAplicado.ano > 0) {
+                        // Selecionar o ano no dropdown Geral
+                        if (selectGeral) {
+                            selectGeral.value = filtroAplicado.ano.toString();
+                        }
+
+                        // Popular meses do ano selecionado
+                        const mesSelectGeral = document.getElementById('filtroMesGeral');
+                        if (mesSelectGeral) {
+                            popularMesesDoAno(filtroAplicado.ano, mesSelectGeral, function() {
+                                // Callback: Após popular meses, selecionar o mês
+                                if (filtroAplicado.mes > 0) {
+                                    mesSelectGeral.value = filtroAplicado.mes.toString();
+                                }
+                            });
+                        }
+                    }
+
                     // Carrega os dados sem filtros (mostra último mês com dados via API)
                     carregarDadosGeraisComFiltros();
 
@@ -140,8 +160,11 @@ function inicializarFiltrosECarregar() {
 
 /**
  * Popula o dropdown de mês com os meses disponíveis de um ano específico
+ * @param {number} ano - Ano para buscar meses disponíveis
+ * @param {HTMLElement} mesSelect - Elemento select de mês
+ * @param {Function} callback - Função a ser executada após popular os meses (opcional)
  */
-function popularMesesDoAno(ano, mesSelect) {
+function popularMesesDoAno(ano, mesSelect, callback) {
     try {
         $.ajax({
             url: '/api/abastecimento/DashboardMesesDisponiveis',
@@ -159,6 +182,11 @@ function popularMesesDoAno(ano, mesSelect) {
                     option.textContent = nomesMeses[mes];
                     mesSelect.appendChild(option);
                 });
+
+                // Executar callback se fornecido
+                if (typeof callback === 'function') {
+                    callback();
+                }
             },
             error: function (xhr, status, error) {
                 console.error('Erro ao buscar meses disponíveis:', error);

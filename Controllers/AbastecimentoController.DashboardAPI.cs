@@ -162,7 +162,13 @@ namespace FrotiX.Controllers
                     valorLitroPorMes,
                     litrosPorMes,
                     consumoPorMes,
-                    totais
+                    totais,
+                    // Informar qual filtro foi aplicado para o JavaScript posicionar os dropdowns
+                    filtroAplicado = new
+                    {
+                        ano = ano ?? 0,
+                        mes = mes ?? 0
+                    }
                 };
 
                 return Ok(resultado);
@@ -409,6 +415,13 @@ namespace FrotiX.Controllers
                     valorTotal = dados.Sum(a => ParseDecimal(a.ValorTotal)),
                     litrosTotal = dados.Sum(a => ParseDecimal(a.Litros)),
                     qtdAbastecimentos = dados.Count
+                },
+
+                // Informar qual filtro foi aplicado para o JavaScript posicionar os dropdowns
+                filtroAplicado = new
+                {
+                    ano = ano ?? 0,
+                    mes = mes ?? 0
                 }
             };
 
