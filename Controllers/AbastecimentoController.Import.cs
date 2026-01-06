@@ -185,7 +185,11 @@ namespace FrotiX.Controllers
         /// <summary>
         /// Envia atualização de progresso via SignalR
         /// </summary>
-        private async Task EnviarProgresso(string connectionId, int porcentagem, string etapa, string detalhe, int linhaAtual = 0, int totalLinhas = 0)
+        private async Task EnviarProgresso(string connectionId, int porcentagem, string etapa, string detalhe,
+            int linhaAtual = 0, int totalLinhas = 0,
+            int xlsxAtual = 0, int xlsxTotal = 0,
+            int csvAtual = 0, int csvTotal = 0,
+            int processAtual = 0, int processTotal = 0)
         {
             try
             {
@@ -198,7 +202,13 @@ namespace FrotiX.Controllers
                     Etapa = etapa,
                     Detalhe = detalhe,
                     LinhaAtual = linhaAtual,
-                    TotalLinhas = totalLinhas
+                    TotalLinhas = totalLinhas,
+                    XlsxAtual = xlsxAtual,
+                    XlsxTotal = xlsxTotal,
+                    CsvAtual = csvAtual,
+                    CsvTotal = csvTotal,
+                    ProcessAtual = processAtual,
+                    ProcessTotal = processTotal
                 });
             }
             catch (Exception error)
@@ -367,7 +377,9 @@ namespace FrotiX.Controllers
                     {
                         int porcentagemValidacao = 25 + (int)((linhaProcessada / (double)totalLinhas) * 45);
                         await EnviarProgresso(connectionId, porcentagemValidacao, "Validando linhas",
-                            $"Processando linha {linhaProcessada} de {totalLinhas}...", linhaProcessada, totalLinhas);
+                            $"Processando linha {linhaProcessada} de {totalLinhas}...",
+                            linhaAtual: linhaProcessada, totalLinhas: totalLinhas,
+                            processAtual: linhaProcessada, processTotal: totalLinhas);
                     }
 
                     var dataHoraParsed = ParseDataHora(linha.Data, linha.Hora);
@@ -1237,7 +1249,7 @@ namespace FrotiX.Controllers
         /// <summary>
         /// Lê arquivo CSV e retorna Dictionary com chave = Autorizacao
         /// </summary>
-        private Dictionary<int, LinhaCsv> LerArquivoCsv(IFormFile file)
+        private async Task<Dictionary<int, LinhaCsv>> LerArquivoCsvAsync(IFormFile file, string connectionId = null)
         {
             try
             {
@@ -1253,9 +1265,21 @@ namespace FrotiX.Controllers
                 }))
                 {
                     var registros = csv.GetRecords<LinhaCsv>().ToList();
+                    int totalLinhasCsv = registros.Count;
+                    int linhaAtual = 0;
+                    int intervaloAtualizacao = Math.Max(1, totalLinhasCsv / 20); // Atualizar a cada 5%
 
                     foreach (var registro in registros)
                     {
+                        linhaAtual++;
+
+                        // Enviar progresso a cada N linhas
+                        if (!string.IsNullOrEmpty(connectionId) && (linhaAtual % intervaloAtualizacao == 0 || linhaAtual == totalLinhasCsv))
+                        {
+                            await EnviarProgresso(connectionId, 12, "Lendo CSV", $"Linha {linhaAtual}/{totalLinhasCsv}",
+                                csvAtual: linhaAtual, csvTotal: totalLinhasCsv);
+                        }
+
                         if (registro.Autorizacao > 0 && !resultado.ContainsKey(registro.Autorizacao))
                         {
                             resultado[registro.Autorizacao] = registro;
@@ -1275,7 +1299,7 @@ namespace FrotiX.Controllers
         /// <summary>
         /// Lê arquivo XLSX extraindo apenas Data+Hora e Autorizacao
         /// </summary>
-        private Dictionary<int, LinhaXlsx> LerArquivoXlsx(IFormFile file)
+        private async Task<Dictionary<int, LinhaXlsx>> LerArquivoXlsxAsync(IFormFile file, string connectionId = null)
         {
             try
             {
@@ -1383,10 +1407,23 @@ namespace FrotiX.Controllers
                     }
 
                     // Ler linhas de dados (começar DEPOIS do cabeçalho)
+                    int totalLinhasXlsx = sheet.LastRowNum - headerRowIndex;
+                    int linhaAtual = 0;
+                    int intervaloAtualizacao = Math.Max(1, totalLinhasXlsx / 20); // Atualizar a cada 5%
+
                     for (int row = headerRowIndex + 1; row <= sheet.LastRowNum; row++)
                     {
                         IRow dataRow = sheet.GetRow(row);
                         if (dataRow == null) continue;
+
+                        linhaAtual++;
+
+                        // Enviar progresso a cada N linhas
+                        if (!string.IsNullOrEmpty(connectionId) && (linhaAtual % intervaloAtualizacao == 0 || linhaAtual == totalLinhasXlsx))
+                        {
+                            await EnviarProgresso(connectionId, 7, "Lendo XLSX", $"Linha {linhaAtual}/{totalLinhasXlsx}",
+                                xlsxAtual: linhaAtual, xlsxTotal: totalLinhasXlsx);
+                        }
 
                         int autorizacao = GetCellIntValue(dataRow.GetCell(colAutorizacao));
                         DateTime? dataHora = GetCellDateTimeValue(dataRow.GetCell(colData));
@@ -1473,7 +1510,7 @@ namespace FrotiX.Controllers
                 // === ETAPA 2: Ler XLSX (5-10%) ===
                 await EnviarProgresso(connectionId, 7, "Lendo XLSX", "Extraindo Data/Hora e Autorizações...");
 
-                var dadosXlsx = LerArquivoXlsx(arquivoXlsx);
+                var dadosXlsx = await LerArquivoXlsxAsync(arquivoXlsx, connectionId);
                 if (dadosXlsx.Count == 0)
                 {
                     return Ok(new ResultadoImportacao
@@ -1488,7 +1525,7 @@ namespace FrotiX.Controllers
                 // === ETAPA 3: Ler CSV (10-15%) ===
                 await EnviarProgresso(connectionId, 12, "Lendo CSV", "Extraindo dados de abastecimento...");
 
-                var dadosCsv = LerArquivoCsv(arquivoCsv);
+                var dadosCsv = await LerArquivoCsvAsync(arquivoCsv, connectionId);
                 if (dadosCsv.Count == 0)
                 {
                     return Ok(new ResultadoImportacao
@@ -1511,11 +1548,22 @@ namespace FrotiX.Controllers
 
                 var linhas = new List<LinhaImportacao>();
                 int matchCount = 0;
+                int csvProcessado = 0;
+                int totalCsv = dadosCsv.Count;
+                int intervaloJoin = Math.Max(1, totalCsv / 20); // Atualizar a cada 5%
 
                 foreach (var kvpCsv in dadosCsv)
                 {
+                    csvProcessado++;
                     int autorizacao = kvpCsv.Key;
                     var dadoCsv = kvpCsv.Value;
+
+                    // Enviar progresso periodicamente durante o JOIN
+                    if (!string.IsNullOrEmpty(connectionId) && (csvProcessado % intervaloJoin == 0 || csvProcessado == totalCsv))
+                    {
+                        await EnviarProgresso(connectionId, 17, "Combinando dados", $"Processando {csvProcessado}/{totalCsv}...",
+                            processAtual: csvProcessado, processTotal: totalCsv);
+                    }
 
                     // INNER JOIN: só processa se existe no XLSX
                     if (dadosXlsx.TryGetValue(autorizacao, out var dadoXlsx))
@@ -1595,7 +1643,9 @@ namespace FrotiX.Controllers
                     {
                         int porcentagemValidacao = 25 + (int)((linhaProcessada / (double)totalLinhas) * 45);
                         await EnviarProgresso(connectionId, porcentagemValidacao, "Validando linhas",
-                            $"Processando linha {linhaProcessada} de {totalLinhas}...", linhaProcessada, totalLinhas);
+                            $"Processando linha {linhaProcessada} de {totalLinhas}...",
+                            linhaAtual: linhaProcessada, totalLinhas: totalLinhas,
+                            processAtual: linhaProcessada, processTotal: totalLinhas);
                     }
 
                     // Validação de combustível
