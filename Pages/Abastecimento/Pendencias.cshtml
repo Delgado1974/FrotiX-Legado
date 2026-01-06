@@ -565,19 +565,19 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Veículo</label>
-                            <ejs-dropdownlist id="cmbVeiculo" dataSource="@ViewData["lstVeiculos"]"
-                                              placeholder="Selecione o Veículo" allowFiltering="true" filterType="Contains"
-                                              popupHeight="250px">
-                                <e-dropdownlist-fields text="Descricao" value="Id"></e-dropdownlist-fields>
-                            </ejs-dropdownlist>
+                            <ejs-combobox id="cmbVeiculo" dataSource="@ViewData["lstVeiculos"]"
+                                          placeholder="Selecione o Veículo" allowFiltering="true" filterType="Contains"
+                                          popupHeight="250px" width="100%" showClearButton="true" allowCustom="true">
+                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                            </ejs-combobox>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Motorista</label>
-                            <ejs-dropdownlist id="cmbMotorista" dataSource="@ViewData["lstMotorista"]"
-                                              placeholder="Selecione o Motorista" allowFiltering="true" filterType="Contains"
-                                              popupHeight="250px">
-                                <e-dropdownlist-fields text="Descricao" value="Id"></e-dropdownlist-fields>
-                            </ejs-dropdownlist>
+                            <ejs-combobox id="cmbMotorista" dataSource="@ViewData["lstMotorista"]"
+                                          placeholder="Selecione o Motorista" allowFiltering="true" filterType="Contains"
+                                          popupHeight="250px" width="100%" showClearButton="true" allowCustom="true">
+                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                            </ejs-combobox>
                         </div>
                     </div>
 
@@ -588,11 +588,11 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Combustível</label>
-                            <ejs-dropdownlist id="cmbCombustivel" dataSource="@ViewData["lstCombustivel"]"
-                                              placeholder="Selecione o Combustível" allowFiltering="true" filterType="Contains"
-                                              popupHeight="250px">
-                                <e-dropdownlist-fields text="Descricao" value="Id"></e-dropdownlist-fields>
-                            </ejs-dropdownlist>
+                            <ejs-combobox id="cmbCombustivel" dataSource="@ViewData["lstCombustivel"]"
+                                          placeholder="Selecione o Combustível" allowFiltering="true" filterType="Contains"
+                                          popupHeight="250px" width="100%" showClearButton="true" allowCustom="true">
+                                <e-combobox-fields text="Descricao" value="Id"></e-combobox-fields>
+                            </ejs-combobox>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Litros</label>
