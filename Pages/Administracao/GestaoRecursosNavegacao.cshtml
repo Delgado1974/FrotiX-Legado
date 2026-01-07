@@ -152,14 +152,14 @@
 
         /* ====== FORMULARIO DE PROPRIEDADES ====== */
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;  /* 50% de aumento no espaçamento vertical */
         }
 
         .form-group label {
             display: block;
             font-weight: 500;
             color: #495057;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.25rem;  /* Mantém label próxima ao controle */
             font-size: 0.875rem;
         }
 
@@ -401,7 +401,7 @@
             </div>
         </div>
         <div class="tree-actions">
-            <button type="button" class="btn btn-azul btn-submit-spin" onclick="adicionarNovoItem()">
+            <button type="button" class="btn btn-header-orange btn-submit-spin" onclick="adicionarNovoItem()">
                 <i class="fa-duotone fa-plus icon-space icon-pulse"></i> Novo Item
             </button>
             <button type="button" class="btn btn-azul btn-submit-spin" onclick="salvarOrdenacao()">
@@ -413,7 +413,7 @@
     <!-- Coluna Direita: Propriedades -->
     <div class="props-panel">
         <!-- Card: Propriedades do Item -->
-        <div class="props-card">
+        <div class="props-card" id="propsCard" style="display: none;">
             <div class="props-header">
                 <h5><i class="fa-duotone fa-sliders"></i> Propriedades do Item <span id="modoEdicao" class="badge bg-secondary ms-2">Selecione</span></h5>
                 <span id="selectedItemName" class="text-muted">Nenhum item selecionado</span>
@@ -442,7 +442,12 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label for="txtHref">URL da Página</label>
-                                <input type="text" class="form-control" id="txtHref" placeholder="Ex: /Veiculos/Index ou javascript:void(0);" />
+                                <input type="text" class="form-control" id="txtHref" readonly
+                                       placeholder="Selecione uma página no dropdown abaixo..."
+                                       style="background-color: #f8f9fa; cursor: not-allowed;" />
+                                <small class="form-text text-muted">
+                                    URL gerada automaticamente ao selecionar uma página
+                                </small>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -561,6 +566,12 @@
                            '<span>' + data.text + '</span>' +
                            '</div>';
                 };
+
+                // ✅ Registra evento change para preencher txtIconClass
+                ddlIconeObj.change = function(args) {
+                    onIconeChange(args);
+                };
+
                 console.log('Templates de ícones configurados');
             }
         } catch (error) {
@@ -664,6 +675,9 @@
 
     // Seleciona item e carrega propriedades
     function selecionarItem(itemData) {
+        // Mostra card de propriedades
+        document.getElementById('propsCard').style.display = 'block';
+
         selectedItem = itemData;
         console.log('Selecionando item:', selectedItem);
 
@@ -851,6 +865,9 @@
             if (result.success) {
                 mostrarAlerta(result.message, 'success');
                 carregarArvore();
+
+                // Esconde card após salvar
+                document.getElementById('propsCard').style.display = 'none';
             } else {
                 mostrarAlerta('Erro: ' + result.message, 'danger');
             }
@@ -859,6 +876,9 @@
 
     // Adiciona novo item
     function adicionarNovoItem() {
+        // Mostra card de propriedades
+        document.getElementById('propsCard').style.display = 'block';
+
         limparFormulario();
         document.getElementById('txtNome').focus();
         document.getElementById('selectedItemName').textContent = 'Novo Item';
@@ -910,6 +930,9 @@
         // Reseta indicador de modo
         document.getElementById('modoEdicao').textContent = 'Selecione';
         document.getElementById('modoEdicao').className = 'badge bg-secondary ms-2';
+
+        // Esconde card
+        document.getElementById('propsCard').style.display = 'none';
     }
 
     // Salva ordenacao apos drag-drop
