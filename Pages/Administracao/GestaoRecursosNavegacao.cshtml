@@ -730,6 +730,36 @@
         }
     }
 
+    // ========== FUNÇÕES DE CODIFICAÇÃO/DECODIFICAÇÃO HTML ==========
+
+    // Decodifica entidades HTML para caracteres normais (para exibição)
+    function decodeHtml(html) {
+        if (!html) return html;
+        var txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
+    // Codifica TODOS caracteres especiais e acentuados para entidades HTML (para gravação)
+    function encodeHtml(text) {
+        if (!text) return text;
+
+        var result = '';
+        for (var i = 0; i < text.length; i++) {
+            var char = text[i];
+            var code = char.charCodeAt(0);
+
+            // Se for caractere ASCII básico (32-126) exceto < > & " '
+            if (code >= 32 && code <= 126 && char !== '<' && char !== '>' && char !== '&' && char !== '"' && char !== "'") {
+                result += char;
+            } else {
+                // Converte para entidade HTML numérica
+                result += '&#' + code + ';';
+            }
+        }
+        return result;
+    }
+
     // Carrega dados ao iniciar
     document.addEventListener('DOMContentLoaded', function() {
         carregarArvore();
@@ -780,10 +810,10 @@
         // Extrai todos os grupos da árvore
         extrairGrupos(treeData);
 
-        // Formata texto com indentação baseada no nível
+        // Formata texto com indentação baseada no nível E decodifica HTML
         grupos.forEach(function(grupo) {
             var indentacao = '  '.repeat(grupo.nivel);
-            grupo.textFormatado = indentacao + grupo.text;
+            grupo.textFormatado = indentacao + decodeHtml(grupo.text);  // ✅ DECODIFICA
         });
 
         console.log('Grupos encontrados:', grupos.length);
@@ -908,9 +938,10 @@
             nodeTemplate: function(data) {
                 var badge = data.href && data.href !== 'javascript:void(0);' ? 'Página' : 'Grupo';
                 var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
+                var displayText = decodeHtml(data.text);  // ✅ DECODIFICA para exibição
                 return '<div class="tree-node" data-id="' + data.id + '">' +
                        '<i class="' + (data.icon || 'fa-duotone fa-folder') + '"></i>' +
-                       '<span class="node-text">' + data.text + '</span>' +
+                       '<span class="node-text">' + displayText + '</span>' +
                        '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
                        '</div>';
             },
@@ -1028,17 +1059,18 @@
             var selectedItemName = document.getElementById('selectedItemName');
             var modoEdicao = document.getElementById('modoEdicao');
 
+            // ✅ Preenche campos com valores DECODIFICADOS
             if (recursoId) recursoId.value = selectedItem.id || '';
             if (parentId) parentId.value = selectedItem.parentId || '';
-            if (txtNome) txtNome.value = selectedItem.text || '';
-            if (txtNomeMenu) txtNomeMenu.value = selectedItem.nomeMenu || '';
+            if (txtNome) txtNome.value = decodeHtml(selectedItem.text) || '';
+            if (txtNomeMenu) txtNomeMenu.value = decodeHtml(selectedItem.nomeMenu) || '';
             if (txtHref) txtHref.value = selectedItem.href || '';
             if (txtOrdem) txtOrdem.value = selectedItem.ordem || 0;
-            if (txtDescricao) txtDescricao.value = selectedItem.descricao || '';
+            if (txtDescricao) txtDescricao.value = decodeHtml(selectedItem.descricao) || '';
             if (chkAtivo) chkAtivo.checked = selectedItem.ativo !== false;
-            if (selectedItemName) selectedItemName.textContent = selectedItem.text;
+            if (selectedItemName) selectedItemName.textContent = decodeHtml(selectedItem.text);
 
-            console.log('Campos básicos preenchidos');
+            console.log('Campos básicos preenchidos (decodificados)');
 
             // ========== ATUALIZA DROPDOWNTREE DE ÍCONE ==========
             var iconClass = selectedItem.icon || 'fa-regular fa-file';
@@ -1491,17 +1523,20 @@
 
     // Salva propriedades do item
     function salvarPropriedades() {
+        // ✅ CODIFICA valores antes de enviar ao backend
         var dto = {
             id: document.getElementById('recursoId').value,
-            text: document.getElementById('txtNome').value,
-            nomeMenu: document.getElementById('txtNomeMenu').value,
+            text: encodeHtml(document.getElementById('txtNome').value),
+            nomeMenu: encodeHtml(document.getElementById('txtNomeMenu').value),
             href: document.getElementById('txtHref').value,
             icon: document.getElementById('txtIconClass').value,
             ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
-            descricao: document.getElementById('txtDescricao').value,
+            descricao: encodeHtml(document.getElementById('txtDescricao').value),
             ativo: document.getElementById('chkAtivo').checked,
             parentId: document.getElementById('parentId').value
         };
+
+        console.log('DTO codificado para envio:', dto);
 
         if (!dto.text || !dto.nomeMenu) {
             mostrarAlerta('Preencha Nome e NomeMenu!', 'warning');
