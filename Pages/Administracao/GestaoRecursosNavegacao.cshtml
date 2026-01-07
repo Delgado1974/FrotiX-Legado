@@ -646,8 +646,32 @@
                 console.log('Templates de ícones configurados');
             }
 
-            // ✅ Usa evento SELECT do DropDownTree (mais confiável)
-            // Não mexe na TreeView interna para não quebrar comportamento padrão
+            // ✅ Acessa TreeView interna para capturar clique (sem bloquear comportamento padrão)
+            var ddlIconeElement = document.getElementById('ddlIcone');
+            if (ddlIconeElement && ddlIconeElement.ej2_instances && ddlIconeElement.ej2_instances[0]) {
+                var ddlIcone = ddlIconeElement.ej2_instances[0];
+
+                if (ddlIcone.treeObj) {
+                    // nodeClicked não bloqueia, apenas observa
+                    ddlIcone.treeObj.nodeClicked = function(args) {
+                        if (args.node && args.event) {
+                            setTimeout(function() {
+                                var selectedNode = ddlIcone.treeObj.selectedNodes[0];
+                                if (selectedNode) {
+                                    var nodeData = ddlIcone.treeObj.getNode(selectedNode);
+                                    if (nodeData && !nodeData.isCategory) {
+                                        var txtIconClass = document.getElementById('txtIconClass');
+                                        if (txtIconClass) {
+                                            txtIconClass.value = nodeData.id;
+                                            console.log('✅ Ícone atualizado ao clicar:', nodeData.id);
+                                        }
+                                    }
+                                }
+                            }, 50);
+                        }
+                    };
+                }
+            }
         } catch (error) {
             console.error('Erro ao configurar template do DropDownTree:', error);
         }
@@ -1325,6 +1349,28 @@
                 ddlPaginaObj.change = function(args) {
                     onPaginaChange(args);
                 };
+
+                // ✅ Acessa TreeView interna para capturar clique (sem bloquear comportamento padrão)
+                if (ddlPaginaObj.treeObj) {
+                    // nodeClicked não bloqueia, apenas observa
+                    ddlPaginaObj.treeObj.nodeClicked = function(args) {
+                        if (args.node && args.event) {
+                            setTimeout(function() {
+                                var selectedNode = ddlPaginaObj.treeObj.selectedNodes[0];
+                                if (selectedNode) {
+                                    var nodeData = ddlPaginaObj.treeObj.getNode(selectedNode);
+                                    if (nodeData && !nodeData.isCategory) {
+                                        var txtHref = document.getElementById('txtHref');
+                                        if (txtHref && nodeData.paginaRef) {
+                                            txtHref.value = nodeData.paginaRef;
+                                            console.log('✅ URL atualizada ao clicar:', nodeData.paginaRef);
+                                        }
+                                    }
+                                }
+                            }, 50);
+                        }
+                    };
+                }
 
                 console.log('DropDownTree de páginas configurado');
             }
