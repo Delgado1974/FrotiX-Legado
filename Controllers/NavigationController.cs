@@ -1,7 +1,9 @@
 using FrotiX.Models;
+using FrotiX.Models.FontAwesome;
 using FrotiX.Repository.IRepository;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,17 +19,24 @@ namespace FrotiX.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _env;
+        private readonly IMemoryCache _cache;
 
         // Caminhos absolutos para garantir persistência correta
         private string NavJsonPath => Path.Combine(_env.ContentRootPath, "nav.json");
         private string NavJsonBackupPath => Path.Combine(_env.ContentRootPath, "nav.json.bak");
+        private string FontAwesomeIconsJsonPath => Path.Combine(_env.ContentRootPath, "fontawesome-icons.json");
 
-        public NavigationController(IUnitOfWork unitOfWork, IWebHostEnvironment env)
+        // Configurações de cache para ícones FontAwesome
+        private const string CacheKeyFontAwesomeIcons = "FontAwesomeIcons";
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(24);
+
+        public NavigationController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IMemoryCache cache)
         {
             try
             {
                 _unitOfWork = unitOfWork;
                 _env = env;
+                _cache = cache;
             }
             catch (Exception error)
             {
@@ -933,6 +942,98 @@ namespace FrotiX.Controllers
                     _unitOfWork.ControleAcesso.Add(novoControle);
                 }
             }
+        }
+
+        #endregion
+
+        #region API - Ícones FontAwesome
+
+        /// <summary>
+        /// Lista ícones FontAwesome 7 Pro Duotone em estrutura HIERÁRQUICA por categorias
+        /// Carrega do arquivo fontawesome-icons.json (traduzido PT-BR) e transforma para formato DropDownTree
+        /// </summary>
+        [HttpGet]
+        [Route("GetIconesFontAwesomeHierarquico")]
+        public IActionResult GetIconesFontAwesomeHierarquico()
+        {
+            try
+            {
+                // Tenta buscar do cache
+                if (_cache.TryGetValue(CacheKeyFontAwesomeIcons, out List<object> cachedIcons))
+                {
+                    return Json(new { success = true, data = cachedIcons });
+                }
+
+                // Se não está no cache, carrega do JSON
+                var icons = LoadFontAwesomeIconsFromJson();
+
+                // Salva no cache por 24 horas
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = CacheDuration,
+                    Priority = CacheItemPriority.Normal
+                };
+                _cache.Set(CacheKeyFontAwesomeIcons, icons, cacheOptions);
+
+                return Json(new { success = true, data = icons });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetIconesFontAwesomeHierarquico", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Carrega ícones do arquivo JSON traduzido e transforma para estrutura hierárquica do DropDownTree
+        /// </summary>
+        private List<object> LoadFontAwesomeIconsFromJson()
+        {
+            // Verifica se arquivo existe
+            if (!System.IO.File.Exists(FontAwesomeIconsJsonPath))
+            {
+                throw new FileNotFoundException(
+                    $"Arquivo fontawesome-icons.json não encontrado em: {FontAwesomeIconsJsonPath}");
+            }
+
+            // Lê e desserializa JSON
+            var jsonText = System.IO.File.ReadAllText(FontAwesomeIconsJsonPath);
+            var categorias = FontAwesomeIconsLoader.FromJson(jsonText);
+
+            // Transforma para estrutura esperada pelo DropDownTree
+            var result = new List<object>();
+
+            foreach (var categoria in categorias.OrderBy(c => c.Categoria))
+            {
+                // Cria ID único para a categoria
+                var catId = $"cat_{categoria.CategoriaOriginal}";
+
+                // Ordena ícones dentro da categoria alfabeticamente pelo label
+                var sortedIcons = categoria.Icones
+                    .OrderBy(i => i.Label)
+                    .Select(i => new
+                    {
+                        id = i.Id,              // "fa-duotone fa-bat"
+                        text = i.Label,         // "Bastão" (exibido no dropdown)
+                        name = i.Name,          // "bat" (nome curto)
+                        parentId = catId,
+                        keywords = i.Keywords   // Para busca futura
+                    })
+                    .ToList<object>();
+
+                // Cria estrutura da categoria
+                result.Add(new
+                {
+                    id = catId,
+                    text = categoria.Categoria,
+                    isCategory = true,
+                    hasChild = sortedIcons.Count > 0,
+                    expanded = false,
+                    child = sortedIcons
+                });
+            }
+
+            return result;
         }
 
         #endregion
