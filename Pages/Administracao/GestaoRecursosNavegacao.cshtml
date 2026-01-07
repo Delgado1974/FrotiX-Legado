@@ -622,6 +622,86 @@
 
                 console.log('Templates de ícones configurados');
             }
+
+            // ✅ Registra evento TREEVIEW interno (nodeSelected) - dispara ao clicar na árvore
+            var ddlIconeElement = document.getElementById('ddlIcone');
+            if (ddlIconeElement && ddlIconeElement.ej2_instances && ddlIconeElement.ej2_instances[0]) {
+                var ddlIcone = ddlIconeElement.ej2_instances[0];
+
+                // O DropDownTree tem uma TreeView interna - intercepta o clique direto nela
+                if (ddlIcone.treeObj) {
+                    ddlIcone.treeObj.nodeSelected = function(args) {
+                        console.log('=== TreeView nodeSelected (CLIQUE DIRETO) ===');
+                        console.log('args:', args);
+
+                        if (args.nodeData && !args.nodeData.isCategory) {
+                            var iconClass = args.nodeData.id;
+                            var iconLabel = args.nodeData.text;
+
+                            var txtIconClass = document.getElementById('txtIconClass');
+                            if (txtIconClass) {
+                                txtIconClass.value = iconClass;
+                                console.log('✅ Classe CSS atualizada DIRETO da TreeView:', iconClass);
+                            }
+                        }
+                    };
+                    console.log('✅ Evento nodeSelected registrado na TreeView interna do DropDownTree de ícones');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao configurar template do DropDownTree:', error);
+        }
+    }
+
+    // Callback APÓS o DropDownTree de ícones ser criado
+    function onIconeDropdownCreated() {
+        try {
+            var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+            if (ddlIconeObj) {
+                ddlIconeObj.itemTemplate = function(data) {
+                    if (data.isCategory) {
+                        return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
+                    }
+                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px;"></i>' +
+                           '<span>' + data.text + '</span>' +
+                           '</div>';
+                };
+
+                ddlIconeObj.valueTemplate = function(data) {
+                    if (!data || data.isCategory) return '';
+                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                           '<i class="' + data.id + '" style="font-size: 14px; width: 18px;"></i>' +
+                           '<span>' + data.text + '</span>' +
+                           '</div>';
+                };
+
+                // Registra eventos novamente para garantir
+                ddlIconeObj.select = function(args) {
+                    onIconeSelect(args);
+                };
+
+                ddlIconeObj.change = function(args) {
+                    onIconeChange(args);
+                };
+
+                // Acessa a TreeView interna
+                if (ddlIconeObj.treeObj) {
+                    ddlIconeObj.treeObj.nodeSelected = function(args) {
+                        console.log('=== TreeView nodeSelected no CREATED ===');
+                        if (args.nodeData && !args.nodeData.isCategory) {
+                            var iconClass = args.nodeData.id;
+                            var txtIconClass = document.getElementById('txtIconClass');
+                            if (txtIconClass) {
+                                txtIconClass.value = iconClass;
+                                console.log('✅ Classe CSS atualizada (created):', iconClass);
+                            }
+                        }
+                    };
+                }
+
+                console.log('Templates e eventos reconfigurados no created');
+            }
         } catch (error) {
             console.error('Erro ao configurar template do DropDownTree:', error);
         }
@@ -1078,6 +1158,24 @@
                 ddlPaginaObj.change = function(args) {
                     onPaginaChange(args);
                 };
+
+                // ✅ Acessa a TreeView interna do DropDownTree
+                if (ddlPaginaObj.treeObj) {
+                    ddlPaginaObj.treeObj.nodeSelected = function(args) {
+                        console.log('=== TreeView nodeSelected (PÁGINAS - CLIQUE DIRETO) ===');
+                        console.log('args:', args);
+
+                        if (args.nodeData && !args.nodeData.isCategory) {
+                            var paginaRef = args.nodeData.paginaRef;
+                            var txtHref = document.getElementById('txtHref');
+                            if (txtHref && paginaRef) {
+                                txtHref.value = paginaRef;
+                                console.log('✅ URL atualizada DIRETO da TreeView:', paginaRef);
+                            }
+                        }
+                    };
+                    console.log('✅ Evento nodeSelected registrado na TreeView interna do DropDownTree de páginas');
+                }
 
                 console.log('DropDownTree de páginas configurado');
             }
