@@ -727,44 +727,84 @@
 
     // Seleciona item e carrega propriedades
     function selecionarItem(itemData) {
-        // Mostra card de propriedades
-        document.getElementById('propsCard').style.display = 'block';
+        try {
+            console.log('=== INICIO selecionarItem ===');
+            console.log('itemData recebido:', itemData);
 
-        selectedItem = itemData;
-        console.log('Selecionando item:', selectedItem);
+            if (!itemData) {
+                console.error('itemData é null ou undefined');
+                return;
+            }
 
-        // Marca visualmente
-        document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
-        var node = document.querySelector('.tree-node[data-id="' + selectedItem.id + '"]');
-        if (node) node.classList.add('selected');
+            selectedItem = itemData;
 
-        // Preenche formulario - usa os nomes corretos das propriedades (camelCase do JSON)
-        document.getElementById('recursoId').value = selectedItem.id || '';
-        document.getElementById('parentId').value = selectedItem.parentId || '';
-        document.getElementById('txtNome').value = selectedItem.text || '';
-        document.getElementById('txtNomeMenu').value = selectedItem.nomeMenu || '';
-        document.getElementById('txtHref').value = selectedItem.href || '';
+            // Mostra card de propriedades
+            var propsCard = document.getElementById('propsCard');
+            if (!propsCard) {
+                console.error('Elemento propsCard não encontrado!');
+                return;
+            }
+            propsCard.style.display = 'block';
+            console.log('Card de propriedades mostrado');
 
-        // Atualiza ícone no DropDownTree e campo de texto
-        var iconClass = selectedItem.icon || 'fa-regular fa-file';
-        document.getElementById('txtIconClass').value = iconClass;
-        var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
-        if (ddlIconeObj) {
-            ddlIconeObj.value = [iconClass];
+            // Marca visualmente
+            document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+            var node = document.querySelector('.tree-node[data-id="' + selectedItem.id + '"]');
+            if (node) {
+                node.classList.add('selected');
+                console.log('Node marcado visualmente');
+            }
+
+            // Preenche formulario - usa os nomes corretos das propriedades (camelCase do JSON)
+            var recursoId = document.getElementById('recursoId');
+            var parentId = document.getElementById('parentId');
+            var txtNome = document.getElementById('txtNome');
+            var txtNomeMenu = document.getElementById('txtNomeMenu');
+            var txtHref = document.getElementById('txtHref');
+            var txtIconClass = document.getElementById('txtIconClass');
+            var txtOrdem = document.getElementById('txtOrdem');
+            var txtDescricao = document.getElementById('txtDescricao');
+            var chkAtivo = document.getElementById('chkAtivo');
+            var selectedItemName = document.getElementById('selectedItemName');
+            var modoEdicao = document.getElementById('modoEdicao');
+
+            if (recursoId) recursoId.value = selectedItem.id || '';
+            if (parentId) parentId.value = selectedItem.parentId || '';
+            if (txtNome) txtNome.value = selectedItem.text || '';
+            if (txtNomeMenu) txtNomeMenu.value = selectedItem.nomeMenu || '';
+            if (txtHref) txtHref.value = selectedItem.href || '';
+            if (txtOrdem) txtOrdem.value = selectedItem.ordem || 0;
+            if (txtDescricao) txtDescricao.value = selectedItem.descricao || '';
+            if (chkAtivo) chkAtivo.checked = selectedItem.ativo !== false;
+            if (selectedItemName) selectedItemName.textContent = selectedItem.text;
+
+            console.log('Campos básicos preenchidos');
+
+            // Atualiza ícone no DropDownTree e campo de texto
+            var iconClass = selectedItem.icon || 'fa-regular fa-file';
+            if (txtIconClass) txtIconClass.value = iconClass;
+
+            var ddlIconeObj = document.getElementById('ddlIcone');
+            if (ddlIconeObj && ddlIconeObj.ej2_instances && ddlIconeObj.ej2_instances[0]) {
+                ddlIconeObj.ej2_instances[0].value = [iconClass];
+                console.log('DropDownTree de ícone atualizado');
+            }
+
+            // Atualiza indicador de modo
+            if (modoEdicao) {
+                modoEdicao.textContent = 'Editar';
+                modoEdicao.className = 'badge bg-warning text-dark ms-2';
+            }
+
+            // Carrega controle de acesso
+            carregarControleAcesso(selectedItem.id);
+
+            console.log('=== FIM selecionarItem (sucesso) ===');
+        } catch (error) {
+            console.error('ERRO em selecionarItem:', error);
+            console.error('Stack:', error.stack);
+            mostrarAlerta('Erro ao selecionar item: ' + error.message, 'danger');
         }
-
-        document.getElementById('txtOrdem').value = selectedItem.ordem || 0;
-        document.getElementById('txtDescricao').value = selectedItem.descricao || '';
-        document.getElementById('chkAtivo').checked = selectedItem.ativo !== false;
-
-        document.getElementById('selectedItemName').textContent = selectedItem.text;
-
-        // Atualiza indicador de modo
-        document.getElementById('modoEdicao').textContent = 'Editar';
-        document.getElementById('modoEdicao').className = 'badge bg-warning text-dark ms-2';
-
-        // Carrega controle de acesso
-        carregarControleAcesso(selectedItem.id);
     }
 
     // Busca item por ID recursivamente no treeData
