@@ -1892,8 +1892,60 @@
         });
     }
 
+    // Verifica se há mudanças não salvas no formulário
+    function verificarMudancasNaoSalvas() {
+        if (!selectedItem) return false;
+
+        // Pega valores atuais do formulário
+        var txtNome = document.getElementById('txtNome').value;
+        var txtNomeMenu = document.getElementById('txtNomeMenu').value;
+        var txtHref = document.getElementById('txtHref').value;
+        var txtIconClass = document.getElementById('txtIconClass').value;
+        var txtOrdem = parseFloat(document.getElementById('txtOrdem').value) || 0;
+        var txtDescricao = document.getElementById('txtDescricao').value;
+        var chkAtivo = document.getElementById('chkAtivo').checked;
+        var parentId = document.getElementById('parentId').value;
+
+        // Compara com valores originais do selectedItem (decodificados)
+        var nomeOriginal = decodeHtml(selectedItem.text) || '';
+        var nomeMenuOriginal = decodeHtml(selectedItem.nomeMenu) || '';
+        var hrefOriginal = selectedItem.href || '';
+        var iconOriginal = selectedItem.icon || '';
+        var ordemOriginal = selectedItem.ordem || 0;
+        var descricaoOriginal = decodeHtml(selectedItem.descricao) || '';
+        var ativoOriginal = selectedItem.ativo !== false;
+        var parentIdOriginal = selectedItem.parentId || '';
+
+        // Retorna true se houver alguma diferença
+        return txtNome !== nomeOriginal ||
+               txtNomeMenu !== nomeMenuOriginal ||
+               txtHref !== hrefOriginal ||
+               txtIconClass !== iconOriginal ||
+               txtOrdem !== ordemOriginal ||
+               txtDescricao !== descricaoOriginal ||
+               chkAtivo !== ativoOriginal ||
+               parentId !== parentIdOriginal;
+    }
+
     // Fecha ambos os cards (Propriedades e Controle de Acesso)
     function fecharCards() {
+        // Verifica se está em modo edição (tem selectedItem com ID)
+        var emModoEdicao = selectedItem && selectedItem.id;
+
+        // Se estiver em modo edição e houver mudanças não salvas
+        if (emModoEdicao && verificarMudancasNaoSalvas()) {
+            var resposta = confirm('Você tem mudanças não salvas. Deseja salvar antes de fechar?\n\nClique em OK para SALVAR ou Cancelar para DESCARTAR as mudanças.');
+
+            if (resposta) {
+                // Usuário escolheu SALVAR
+                salvarPropriedades();
+                // Não fecha os cards aqui, salvarPropriedades já gerencia isso
+                return;
+            }
+            // Se não salvou (cancelou), continua e fecha os cards descartando mudanças
+        }
+
+        // Fecha os cards normalmente
         document.getElementById('propsCard').style.display = 'none';
         document.getElementById('acessoCard').style.display = 'none';
         habilitarCardPropriedades(true);
