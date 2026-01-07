@@ -174,30 +174,6 @@
             box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15);
         }
 
-        /* Preview de icone */
-        .icon-preview-container {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .icon-preview {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            font-size: 1.25rem;
-        }
-
-        .icon-preview i.fa-duotone {
-            --fa-primary-color: #a0aec0;
-            --fa-secondary-color: #c67750;
-        }
-
         /* ====== CARD DE CONTROLE DE ACESSO ====== */
         .acesso-list {
             max-height: 300px;
@@ -372,6 +348,27 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* ====== DROPDOWNTREE DE ÍCONES - BORDAS SEMPRE VISÍVEIS ====== */
+        .ddl-icone-border .e-ddt-wrapper,
+        .ddl-icone-border .e-input-group,
+        .ddl-icone-border.e-dropdowntree .e-input-group,
+        .ddl-icone-border.e-input-group {
+            border: 1px solid #ced4da !important;
+            border-radius: 6px !important;
+        }
+
+        .ddl-icone-border .e-input-group.e-input-focus,
+        .ddl-icone-border.e-input-group.e-input-focus {
+            border-color: #3D5771 !important;
+            box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15) !important;
+        }
+
+        /* Força bordas mesmo quando vazio */
+        #ddlIcone.e-dropdowntree,
+        #ddlIcone .e-ddt-wrapper {
+            border: 1px solid #ced4da !important;
+        }
     </style>
 }
 
@@ -460,34 +457,26 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label for="ddlIcone">Selecione o Ícone (FontAwesome 7 Pro)</label>
-                                <div class="d-flex gap-2 align-items-start">
-                                    <!-- Preview do ícone -->
-                                    <div class="icon-preview" id="iconPreview" style="min-width: 40px; min-height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid #dee2e6; border-radius: 4px;">
-                                        <i class="fa-duotone fa-folder"></i>
-                                    </div>
 
-                                    <!-- DropDownTree para seleção hierárquica -->
-                                    <div style="flex: 1;">
-                                        <ejs-dropdowntree id="ddlIcone"
-                                                         placeholder="Busque ou selecione um ícone..."
-                                                         popupHeight="400px"
-                                                         showCheckBox="false"
-                                                         showClearButton="true"
-                                                         allowFiltering="true"
-                                                         filterType="Contains"
-                                                         ignoreCase="true"
-                                                         cssClass="e-outline"
-                                                         created="onIconeDropdownCreated"
-                                                         change="onIconeChange">
-                                        </ejs-dropdowntree>
+                                <!-- DropDownTree para seleção hierárquica -->
+                                <ejs-dropdowntree id="ddlIcone"
+                                                 placeholder="Busque ou selecione um ícone..."
+                                                 popupHeight="400px"
+                                                 showCheckBox="false"
+                                                 showClearButton="true"
+                                                 allowFiltering="true"
+                                                 filterType="Contains"
+                                                 ignoreCase="true"
+                                                 cssClass="e-outline ddl-icone-border"
+                                                 created="onIconeDropdownCreated"
+                                                 change="onIconeChange">
+                                </ejs-dropdowntree>
 
-                                        <!-- Campo bloqueado exibindo a classe CSS completa do ícone selecionado -->
-                                        <small class="form-text text-muted mt-1">Classe CSS:</small>
-                                        <input type="text" class="form-control form-control-sm mt-1" id="txtIconClass" readonly
-                                               placeholder="A classe do ícone aparecerá aqui..."
-                                               style="background-color: #f8f9fa; font-family: monospace; font-size: 0.85rem;" />
-                                    </div>
-                                </div>
+                                <!-- Campo bloqueado exibindo a classe CSS completa do ícone selecionado -->
+                                <small class="form-text text-muted mt-1">Classe CSS:</small>
+                                <input type="text" class="form-control form-control-sm mt-1" id="txtIconClass" readonly
+                                       placeholder="A classe do ícone aparecerá aqui..."
+                                       style="background-color: #f8f9fa; font-family: monospace; font-size: 0.85rem;" />
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -708,8 +697,6 @@
         document.getElementById('modoEdicao').textContent = 'Editar';
         document.getElementById('modoEdicao').className = 'badge bg-warning text-dark ms-2';
 
-        atualizarPreviewIcone(iconClass);
-
         // Carrega controle de acesso
         carregarControleAcesso(selectedItem.id);
     }
@@ -729,14 +716,6 @@
             }
         }
         return null;
-    }
-
-    // Atualiza preview do icone
-    function atualizarPreviewIcone(iconClass) {
-        if (!iconClass) {
-            iconClass = document.getElementById('txtIconClass').value || 'fa-regular fa-file';
-        }
-        document.getElementById('iconPreview').innerHTML = '<i class="' + iconClass + '"></i>';
     }
 
     // Carrega ícones FontAwesome do endpoint
@@ -771,19 +750,22 @@
     // Callback quando um ícone é selecionado no DropDownTree
     function onIconeChange(args) {
         console.log('Ícone selecionado:', args);
-        if (args.itemData) {
-            var iconClass = args.itemData.id;      // "fa-duotone fa-bat"
-            var iconName = args.itemData.name;     // "bat"
-            var iconLabel = args.itemData.text;    // "Bastão"
 
-            // Atualiza campo de texto bloqueado com a classe CSS
-            document.getElementById('txtIconClass').value = iconClass;
-
-            // Atualiza preview visual
-            atualizarPreviewIcone(iconClass);
-
-            console.log('Classe:', iconClass, '| Nome:', iconName, '| Label:', iconLabel);
+        // Se não há dados ou é uma categoria, limpa o campo
+        if (!args.itemData || args.itemData.isCategory) {
+            document.getElementById('txtIconClass').value = '';
+            console.log('Categoria selecionada ou campo limpo');
+            return;
         }
+
+        // Apenas ícones válidos (não categorias)
+        var iconClass = args.itemData.id;      // "fa-duotone fa-bat"
+        var iconLabel = args.itemData.text;    // "Bastão"
+
+        // Atualiza campo de texto bloqueado com a classe CSS
+        document.getElementById('txtIconClass').value = iconClass;
+
+        console.log('Classe:', iconClass, '| Label:', iconLabel);
     }
 
     // Carrega lista de usuarios com acesso
