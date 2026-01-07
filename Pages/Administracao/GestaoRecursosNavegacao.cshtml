@@ -675,27 +675,45 @@
             },
             allowDragAndDrop: true,
             allowMultiSelection: false,
-            // Permite soltar em qualquer nó (criar hierarquia)
-            dropAction: 'child',
             nodeClicked: function(args) {
-                // Verifica se há dados do nó
-                if (!args || !args.nodeData || !args.nodeData.id) {
-                    console.warn('Node clicado sem dados válidos:', args);
-                    return;
-                }
+                try {
+                    console.log('=== nodeClicked event ===', args);
 
-                // Busca o ID do nó clicado
-                var nodeId = args.nodeData.id;
-                console.log('Node clicado - ID:', nodeId);
+                    // Verifica se há elemento node
+                    if (!args || !args.node) {
+                        console.warn('Node clicado sem elemento válido:', args);
+                        return;
+                    }
 
-                // Busca dados completos no treeData
-                var itemCompleto = buscarItemPorId(treeData, nodeId);
-                console.log('Item encontrado:', itemCompleto);
+                    // Obtém o ID do data-id do elemento DOM
+                    var nodeElement = args.node;
+                    var treeNodeDiv = nodeElement.querySelector('.tree-node');
 
-                if (itemCompleto) {
-                    selecionarItem(itemCompleto);
-                } else {
-                    console.error('Item não encontrado no treeData para ID:', nodeId);
+                    if (!treeNodeDiv) {
+                        console.error('Elemento .tree-node não encontrado dentro do node');
+                        return;
+                    }
+
+                    var nodeId = treeNodeDiv.getAttribute('data-id');
+                    console.log('Node clicado - ID extraído do DOM:', nodeId);
+
+                    if (!nodeId) {
+                        console.error('data-id não encontrado no elemento');
+                        return;
+                    }
+
+                    // Busca dados completos no treeData
+                    var itemCompleto = buscarItemPorId(treeData, nodeId);
+                    console.log('Item encontrado no treeData:', itemCompleto);
+
+                    if (itemCompleto) {
+                        selecionarItem(itemCompleto);
+                    } else {
+                        console.error('Item não encontrado no treeData para ID:', nodeId);
+                    }
+                } catch (error) {
+                    console.error('ERRO em nodeClicked:', error);
+                    console.error('Stack:', error.stack);
                 }
             },
             nodeDragStart: function(args) {
