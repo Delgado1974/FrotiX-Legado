@@ -484,6 +484,28 @@
                         </div>
                     </div>
 
+                    <!-- DropDown de Seleção do Item Pai (Grupo) -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="ddlItemPai">Item Pai (Grupo)</label>
+                                <ejs-dropdownlist id="ddlItemPai"
+                                                 placeholder="Selecione o grupo pai deste item..."
+                                                 popupHeight="300px"
+                                                 showClearButton="true"
+                                                 allowFiltering="true"
+                                                 filterType="Contains"
+                                                 ignoreCase="true"
+                                                 cssClass="e-outline"
+                                                 change="onItemPaiChange">
+                                </ejs-dropdownlist>
+                                <small class="form-text text-muted mt-1">
+                                    Ao mudar o Item Pai, a Ordem será recalculada automaticamente
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
@@ -495,8 +517,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="txtOrdem">Ordem</label>
-                                <input type="number" class="form-control" id="txtOrdem" value="0" />
+                                <label for="txtOrdem">Ordem (calculada automaticamente)</label>
+                                <input type="number" class="form-control" id="txtOrdem" value="0" readonly
+                                       style="background-color: #f8f9fa;" />
                             </div>
                         </div>
                     </div>
@@ -714,6 +737,124 @@
         carregarPaginasSistema();
     });
 
+    // Popula dropdown de Item Pai com todos os grupos (não-página)
+    function popularDropdownItemPai() {
+        var grupos = [];
+
+        // Função recursiva para extrair todos os grupos da árvore
+        function extrairGrupos(items) {
+            if (!items) return;
+
+            items.forEach(function(item) {
+                // Grupo = href vazio ou 'javascript:void(0);'
+                var isGrupo = !item.href || item.href === 'javascript:void(0);';
+
+                if (isGrupo) {
+                    grupos.push({
+                        id: item.id,
+                        text: item.text,
+                        nivel: calcularNivel(item.id)
+                    });
+                }
+
+                // Recursão nos filhos
+                if (item.items && item.items.length > 0) {
+                    extrairGrupos(item.items);
+                }
+            });
+        }
+
+        // Calcula nível do item na hierarquia (quantos pais tem)
+        function calcularNivel(itemId) {
+            var nivel = 0;
+            var item = buscarItemPorId(treeData, itemId);
+
+            while (item && item.parentId) {
+                nivel++;
+                item = buscarItemPorId(treeData, item.parentId);
+            }
+
+            return nivel;
+        }
+
+        // Extrai todos os grupos da árvore
+        extrairGrupos(treeData);
+
+        // Formata texto com indentação baseada no nível
+        grupos.forEach(function(grupo) {
+            var indentacao = '  '.repeat(grupo.nivel);
+            grupo.textFormatado = indentacao + grupo.text;
+        });
+
+        console.log('Grupos encontrados:', grupos.length);
+
+        // Popula o DropDownList
+        var ddlItemPai = document.getElementById('ddlItemPai');
+        if (ddlItemPai && ddlItemPai.ej2_instances && ddlItemPai.ej2_instances[0]) {
+            var ddl = ddlItemPai.ej2_instances[0];
+            ddl.dataSource = grupos;
+            ddl.fields = { text: 'textFormatado', value: 'id' };
+            ddl.dataBind();
+            console.log('✅ DropDownList de Item Pai populado');
+        }
+    }
+
+    // Evento change do dropdown de Item Pai
+    function onItemPaiChange(args) {
+        console.log('=== Item Pai alterado ===');
+        console.log('Novo Pai ID:', args.value);
+
+        if (!args.value) {
+            console.log('Pai removido - mantém ordem atual');
+            return;
+        }
+
+        // Calcula nova ordem baseada nos filhos do novo pai
+        calcularOrdemAutomatica(args.value);
+
+        // Atualiza campo parentId oculto
+        document.getElementById('parentId').value = args.value;
+    }
+
+    // Calcula ordem automaticamente baseada nos filhos do pai
+    function calcularOrdemAutomatica(paiId) {
+        console.log('Calculando ordem para pai:', paiId);
+
+        // Busca o item pai no treeData
+        var pai = buscarItemPorId(treeData, paiId);
+
+        if (!pai) {
+            console.warn('Pai não encontrado no treeData');
+            document.getElementById('txtOrdem').value = 0;
+            return;
+        }
+
+        // Busca todos os filhos do pai
+        var filhos = pai.items || [];
+        console.log('Filhos encontrados:', filhos.length);
+
+        if (filhos.length === 0) {
+            // Primeiro filho
+            document.getElementById('txtOrdem').value = 0;
+            console.log('✅ Ordem definida: 0 (primeiro filho)');
+            return;
+        }
+
+        // Encontra a maior ordem entre os filhos
+        var maiorOrdem = -1;
+        filhos.forEach(function(filho) {
+            var ordem = parseFloat(filho.ordem) || 0;
+            if (ordem > maiorOrdem) {
+                maiorOrdem = ordem;
+            }
+        });
+
+        // Nova ordem = maior + 1
+        var novaOrdem = maiorOrdem + 1;
+        document.getElementById('txtOrdem').value = novaOrdem;
+        console.log('✅ Ordem calculada:', novaOrdem, '(maior atual:', maiorOrdem, ')');
+    }
+
     // Carrega arvore do banco de dados
     function carregarArvore() {
         fetch('/api/Navigation/GetTreeAdmin')
@@ -725,6 +866,8 @@
                     document.getElementById('emptyTreeState').style.display = 'none';
                     renderizarTreeView();
                     atualizarContagem();
+                    // ✅ Popula dropdown de Item Pai após carregar árvore
+                    popularDropdownItemPai();
                 } else {
                     document.getElementById('emptyTreeState').style.display = 'block';
                     document.getElementById('itemCount').textContent = '0 itens';
@@ -961,6 +1104,22 @@
                 }
             } else {
                 console.log('URL não está no formato esperado ou está vazia');
+            }
+
+            // ========== ATUALIZA DROPDOWN DE ITEM PAI ==========
+            var parentId = selectedItem.parentId;
+            console.log('Parent ID do item:', parentId);
+
+            var ddlItemPaiObj = document.getElementById('ddlItemPai');
+            if (ddlItemPaiObj && ddlItemPaiObj.ej2_instances && ddlItemPaiObj.ej2_instances[0]) {
+                var ddlItemPai = ddlItemPaiObj.ej2_instances[0];
+                if (parentId) {
+                    ddlItemPai.value = parentId;
+                    console.log('✅ DropDownList de Item Pai atualizado para:', parentId);
+                } else {
+                    ddlItemPai.value = null;
+                    console.log('Item não tem pai (é raiz)');
+                }
             }
 
             // Atualiza indicador de modo
@@ -1431,6 +1590,12 @@
         var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
         if (ddlPaginaObj) {
             ddlPaginaObj.value = null;
+        }
+
+        // Limpa DropDownList de Item Pai
+        var ddlItemPaiObj = document.getElementById('ddlItemPai').ej2_instances[0];
+        if (ddlItemPaiObj) {
+            ddlItemPaiObj.value = null;
         }
 
         document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
