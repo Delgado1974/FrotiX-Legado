@@ -10,6 +10,11 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 
 ## Regras de Git
 
+### Branch Principal (main):
+- **PREFERÊNCIA:** O usuário prefere que todos os commits e pushes sejam feitos diretamente para a branch `main`.
+- **LIMITAÇÃO TÉCNICA:** A ferramenta de submissão do Claude pode criar automaticamente uma branch temporária (ex: `doc-veiculo-module-12345`) mesmo quando solicitado `branch_name="main"`.
+- **AÇÃO:** Sempre tentar submeter para a `main`. Se a ferramenta gerar uma branch diferente, informar IMEDIATAMENTE o usuário com o comando exato para fazer o pull daquela branch específica.
+
 ### Commit e Push:
 - Quando o usuário pedir para fazer commit, **sempre fazer push automaticamente** após o commit
 - **IMPORTANTE:** Fazer commit/push **APENAS** dos arquivos gerados ou modificados na sessão/janela atual
@@ -287,8 +292,7 @@ Implementado dashboard completo de visualização de frotas com gráficos...
 1. `Pages/Dashboard/Frotas.cshtml` - Criada página principal do dashboard
    - Commit: "Adiciona dashboard de frotas com gráficos interativos"
 
-2. `wwwroot/css/frotix.css` - Adicionados estilos para cards de métricas
-   - Commit: "Adiciona estilos para cards de dashboard"
+2. `wwwroot/css/frotix.css` - Adicionados estilos para cards de dashboard"
 
 ## Problemas Encontrados e Soluções
 ### Erro: Gráfico não renderizando
@@ -414,31 +418,12 @@ Documentar **cada página/funcionalidade do FrotiX Web** de forma completa e pad
   - Parâmetros (query, body, header)
   - Response (com exemplo JSON)
   - Erros possíveis
-  - Exemplo de código do controller
-
-Formato:
-```markdown
-### 1. GET `/api/[Controller]/[Action]`
-
-**Descrição**: O que este endpoint faz
-
-**Parâmetros**:
-- `param1` (tipo): Descrição
-
-**Response**:
-```json
-{
-  "campo": "valor"
-}
-```
-
-**Erro (500)**:
-- Descrição do erro
-```
+  - **INCLUIR CÓDIGO**: Copiar trechos reais do código do Controller
 
 #### 6. Frontend
 - **Estrutura HTML**: Componentes principais da página
 - **JavaScript**: Funções importantes, eventos, ciclo de vida
+  - **INCLUIR CÓDIGO**: Copiar trechos reais do JS (AJAX, EventListeners, Datatables)
 - **CSS/Estilos**: Classes importantes, animações, temas
 - **Modais**: Estrutura de modais usados
 - **Componentes**: DropDowns, DataTables, Charts, etc.
@@ -449,7 +434,7 @@ Formato:
   - Campo/dado validado
   - Regra de validação
   - Mensagem de erro
-  - Onde é validada (frontend, backend, ambos)
+  - **INCLUIR CÓDIGO**: Copiar trecho da validação (C# ou JS)
 
 #### 8. Troubleshooting
 - Listar problemas comuns e suas soluções
@@ -462,144 +447,19 @@ Formato:
 
 ---
 
-### PARTE 2 - LOG de Modificações:
+### Nível de Detalhe Esperado (IMPORTANTE):
 
-#### Estrutura:
-```markdown
-# PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
-
-> **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
-> **PADRÃO**: `## [Data/Hora] - Título da Modificação`
-
----
-
-## [DD/MM/AAAA HH:mm] - Título da Modificação Mais Recente
-
-**Descrição**:
-[O que foi feito, por que foi feito]
-
-**Problema Identificado** (se aplicável):
-[Descrição do problema que motivou a mudança]
-
-**Solução Implementada**:
-[Como foi resolvido]
-
-**Arquivos Modificados**:
-- `caminho/arquivo1.ext` (linhas X-Y)
-- `caminho/arquivo2.ext` (linhas A-B)
-
-**Commits Relacionados**:
-- Hash do commit: "Mensagem do commit"
-
-**Status**: ✅ **[Status]** (Implementado, Testado, Em Produção, etc.)
-
-**Notas Adicionais** (opcional):
-[Informações relevantes]
+- **TRECHOS DE CÓDIGO REAIS**: Não apenas descreva o que o código faz, **copie o bloco de código** relevante.
+  - Exemplo incorreto: "O Javascript inicializa a DataTable com a URL da API".
+  - Exemplo correto:
+    ```javascript
+    $('#tblAbastecimentos').DataTable({
+        ajax: { url: "/api/abastecimento", type: "GET" },
+        columns: [ ... ]
+    });
+    ```
+- **Documentar estrutura HTML completa** dos componentes principais (Modais, Tabelas, Forms)
+- **Documentar endpoints API** com request/response completos e código do Controller
+- **Documentar validações** com o código exato (if/else, DataAnnotation)
 
 ---
-
-## [DD/MM/AAAA HH:mm] - Modificação Anterior
-
-[Mesmo formato...]
-
----
-
-**Fim do LOG**
-
----
-
-**Última atualização deste arquivo**: DD/MM/AAAA
-**Responsável pela documentação**: Claude (AI Assistant)
-**Versão do documento**: X.Y
-```
-
----
-
-### Diretrizes de Formatação:
-
-1. **Tabelas**: Usar tabelas para organizar informações estruturadas
-   ```markdown
-   | Coluna 1 | Coluna 2 | Coluna 3 |
-   |----------|----------|----------|
-   | Valor A  | Valor B  | Valor C  |
-   ```
-
-2. **Blocos de Código**: Sempre especificar a linguagem
-   ```markdown
-   ```javascript
-   function exemplo() { ... }
-   ```
-   ```
-
-3. **Emojis para Status**:
-   - ✅ Implementado/Funcionando
-   - ❌ Erro/Não funciona
-   - ⚠️ Atenção/Cuidado
-   - 🔧 Em manutenção
-   - 📝 Documentado
-
-4. **Links Internos**: Usar âncoras para navegação
-   ```markdown
-   [Ir para Arquitetura](#arquitetura)
-   ```
-
-5. **Diagramas**: Usar texto ASCII quando necessário para fluxos
-   ```
-   ┌─────────────────┐
-   │ Etapa 1         │
-   └────────┬────────┘
-            │
-            ▼
-   ┌─────────────────┐
-   │ Etapa 2         │
-   └─────────────────┘
-   ```
-
-6. **Destaque de Código Inline**: Usar backticks simples
-   ```markdown
-   A função `nomeFuncao()` faz X
-   ```
-
----
-
-### Nível de Detalhe Esperado:
-
-- **EXTREMAMENTE DETALHADO**: Não poupar detalhes
-- **Incluir exemplos de código** sempre que possível
-- **Documentar estrutura HTML completa** dos componentes principais
-- **Documentar CSS** com classes importantes e estilos
-- **Documentar JavaScript** com funções principais e fluxos
-- **Documentar endpoints API** com request/response completos
-- **Documentar validações** com regras e mensagens
-- **Documentar fluxos** de dados e operações
-- **Documentar troubleshooting** com problemas reais e soluções testadas
-
----
-
-### Exemplo Completo:
-
-Ver arquivos de referência existentes:
-- `Documentacao/Funcionalidade - Abastecimento - Dashboard.md` (900+ linhas)
-- `Documentacao/Funcionalidade - Abastecimento - Gestao.md` (1000+ linhas)
-- `Documentacao/Funcionalidade - Abastecimento - Importacao.md` (1100+ linhas)
-- `Documentacao/Funcionalidade - Abastecimento - Pendencias.md` (1100+ linhas)
-
-Estes arquivos servem como **template de referência** para o nível de detalhe e estrutura esperados.
-
----
-
-### Checklist Antes de Finalizar Documentação:
-
-- [ ] Cabeçalho com título, data e versão
-- [ ] Índice completo com links
-- [ ] Visão Geral com características principais
-- [ ] Arquitetura com estrutura de arquivos e tecnologias
-- [ ] Todas as funcionalidades documentadas
-- [ ] Todos os endpoints API documentados (se houver)
-- [ ] Frontend documentado (HTML, JS, CSS)
-- [ ] Validações listadas
-- [ ] Troubleshooting com problemas comuns
-- [ ] LOG de Modificações iniciado
-- [ ] Rodapé com data, responsável e versão
-- [ ] Revisão ortográfica e gramatical
-- [ ] Exemplos de código testados e funcionais

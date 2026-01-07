@@ -1,7 +1,7 @@
 # Documentação: Cadastro de Veículo (Upsert)
 
 > **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.0
+> **Versão Atual**: 1.1
 
 ---
 
@@ -106,31 +106,93 @@ Checkboxes booleanos para flags do sistema:
 function GetModeloList(marcaId) {
     $.ajax({
         url: "/Veiculo/Upsert?handler=ModeloList",
+        method: "GET",
         data: { id: marcaId },
         success: function (res) {
-             // Popula dropdown #ModeloId
+            var options = '<option value="">-- Selecione um Modelo --</option>';
+            if (res && res.data && res.data.length) {
+                res.data.forEach(function (obj) {
+                    options += '<option value="' + obj.modeloId + '">' + obj.descricaoModelo + '</option>';
+                });
+            }
+            $('#ModeloId').html(options);
+            // ... seleciona se já tiver valor
+        },
+        error: function (xhr) {
+            AppToast.show('Erro ao carregar modelos', 'Vermelho', 2000);
         }
     });
 }
 ```
 
-**Validação de Placa**:
+**Validação de Placa (FocusOut)**:
 ```javascript
 $('#txtPlaca').on('focusout', function () {
-    var placa = $(this).val(); // Formata
-    // ... chama handler VerificaPlaca
+    var placa = $(this).val();
+    if (placa) {
+        // Formata: remove espaços, remove hífens, converte para maiúsculo
+        placa = placa.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
+        $(this).val(placa);
+
+        // Verifica se placa já existe
+        if (placa.length >= 4) {
+            var ultimos4 = placa.substr(placa.length - 4);
+            verificarPlacaExistente(ultimos4);
+        }
+    }
 });
 ```
 
-**Validação de Submit**:
-Intercepta o submit do formulário para garantir regras de negócio no cliente antes de enviar.
+**Lógica de Veículo Próprio (Toggle)**:
+```javascript
+function toggleCamposVeiculoProprio(veiculoProprio) {
+    if (veiculoProprio) {
+        // É PRÓPRIO
+        $('#divPatrimonio').show();
+        $('#lstcontratos').prop('disabled', true); // Desabilita Contrato
+        $('#lstatas').prop('disabled', true); // Desabilita Ata
+        // Limpa campos...
+    } else {
+        // NÃO É PRÓPRIO
+        $('#divPatrimonio').hide();
+        $('#lstcontratos').prop('disabled', false);
+        $('#lstatas').prop('disabled', false);
+    }
+}
+```
+
+**Validação de Submit (Cliente)**:
+Intercepta o submit para validações que o `required` do HTML5 não cobre.
 ```javascript
 $('form').on('submit', function (e) {
     if (!validarCamposObrigatorios()) {
-        e.preventDefault(); // Impede envio
+        e.preventDefault();
         return false;
     }
+    // ...
 });
+
+function validarCamposObrigatorios() {
+    var camposErro = [];
+
+    // Contrato OU Ata OU Veículo Próprio
+    var contratoId = $('#lstcontratos').val();
+    var ataId = $('#lstatas').val();
+    var veiculoProprio = $('#chkVeiculoProprio').is(':checked');
+
+    if (!contratoId && !ataId && !veiculoProprio) {
+        camposErro.push('Contrato, Ata ou Veículo Próprio (escolha ao menos um)');
+    }
+
+    // ... outras validações
+
+    if (camposErro.length > 0) {
+        var mensagem = 'Campos obrigatórios não preenchidos:\n\n• ' + camposErro.join('\n• ');
+        Alerta.Warning('Validação de Campos', mensagem, 'Ok');
+        return false;
+    }
+    return true;
+}
 ```
 
 ---
@@ -139,24 +201,49 @@ $('form').on('submit', function (e) {
 
 ### Validações Backend (`Upsert.cshtml.cs`)
 
-Além das validações de frontend, o servidor realiza verificações robustas:
+Além das validações de frontend, o servidor realiza verificações robustas através do método `ChecaInconstancias`.
 
-1. **Campos Obrigatórios**: Placa, Marca, Modelo, Km, Unidade, Combustível, Categoria, Data Ingresso.
-2. **Unicidade**:
-   - **Placa**: Verifica se já existe outro veículo com a mesma placa (ignorando o próprio ID em caso de edição).
-   - **Renavam**: Verifica se já existe outro veículo com o mesmo Renavam.
-3. **Consistência de Vínculo**:
-   - Deve ter **pelo menos um**: Contrato, Ata OU Veículo Próprio.
-   - Se Contrato → Item Contratual obrigatório.
-   - Se Ata → Item Ata obrigatório.
-   - Se Próprio → Patrimônio obrigatório.
+**Validação de Placa e Renavam (Unicidade)**:
+```csharp
+var existePlaca = _unitOfWork.Veiculo.GetFirstOrDefault(u =>
+    u.Placa.ToUpper() == VeiculoObj.Veiculo.Placa.ToUpper()
+);
 
-*Método responsável*: `ChecaInconstancias(Guid id)`
+// Se inserindo e já existe
+if (id == Guid.Empty && existePlaca != null)
+{
+    _notyf.Error("Já existe um veículo com essa placa!" , 3);
+    return true;
+}
 
-### Mensagens de Erro
-As mensagens são exibidas via `_notyf` (Toastr) no canto superior direito.
-- ❌ "Já existe um veículo com essa placa!"
-- ❌ "Você precisa definir se o veículo é próprio ou se pertence a um Contrato ou a uma Ata!"
+// Se editando e já existe (mas não é o próprio)
+if (existePlaca != null && existePlaca.VeiculoId != id)
+{
+    _notyf.Error("Já existe um veículo com essa placa!" , 3);
+    return true;
+}
+```
+
+**Consistência de Vínculo**:
+```csharp
+// Deve ter ao menos um: Contrato, Ata ou Veículo Próprio
+if (VeiculoObj.Veiculo.ContratoId == null
+    && VeiculoObj.Veiculo.AtaId == null
+    && VeiculoObj.Veiculo.VeiculoProprio == false)
+{
+    _notyf.Error(
+        "Você precisa definir se o veículo é próprio ou se pertence a um Contrato ou a uma Ata!", 3
+    );
+    return true;
+}
+
+// Se tem Contrato, precisa ter Item Contratual
+if (VeiculoObj.Veiculo.ContratoId != null && VeiculoObj.Veiculo.ItemVeiculoId == null)
+{
+    _notyf.Error("Você precisa informar o Item Contratual do veículo!", 3);
+    return true;
+}
+```
 
 ---
 
@@ -165,7 +252,15 @@ As mensagens são exibidas via `_notyf` (Toastr) no canto superior direito.
 ### Problema: Modelo não carrega ao selecionar Marca
 **Sintoma**: Seleciona marca "Ford", dropdown Modelo continua vazio ou com "Selecione".
 **Causa Possível**: Erro no AJAX ou handler `OnGetModeloList`.
-**Verificação**: Checar Console do navegador (F12) por erros 500 ou 404 na requisição `/Veiculo/Upsert?handler=ModeloList`.
+**Verificação**:
+O handler backend deve retornar um JSON com a propriedade `data`:
+```csharp
+public JsonResult OnGetModeloList(Guid id)
+{
+    var ModeloList = _unitOfWork.ModeloVeiculo.GetAll().Where(e => e.MarcaId == id);
+    return new JsonResult(new { data = ModeloList });
+}
+```
 
 ### Problema: Erro ao salvar arquivo (Upload)
 **Sintoma**: Formulário reseta ou exibe erro ao tentar salvar com CRLV.

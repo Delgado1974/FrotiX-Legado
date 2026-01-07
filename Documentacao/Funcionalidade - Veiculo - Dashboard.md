@@ -1,7 +1,7 @@
 # Documentação: Dashboard de Veículos
 
 > **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.0
+> **Versão Atual**: 1.1
 
 ---
 
@@ -74,20 +74,29 @@ FrotiX.Site/
 
 O dashboard é dividido em 3 contextos distintos, alternados via JavaScript sem recarregar a página.
 
-1. **Visão Geral**:
-   - Foco: Inventário.
-   - Dados: Quantidade de veículos, distribuição por categoria, status, idade da frota.
-   - Carregamento: Automático ao abrir a página.
+**Implementação (JS)**:
+```javascript
+function initTabs() {
+    $('.dash-tab-veic').on('click', function () {
+        const tabId = $(this).data('tab');
 
-2. **Uso dos Veículos**:
-   - Foco: Operacional.
-   - Dados: Viagens realizadas, KM rodado, litros abastecidos.
-   - Carregamento: Sob demanda (Lazy Load) ao clicar na aba.
+        // Atualiza classes das abas (botões)
+        $('.dash-tab-veic').removeClass('active');
+        $(this).addClass('active');
 
-3. **Custos**:
-   - Foco: Financeiro.
-   - Dados: Custo de abastecimento vs Manutenção.
-   - Carregamento: Sob demanda (Lazy Load) ao clicar na aba.
+        // Mostra conteúdo correto (conteúdo)
+        $('.dash-content-veic').removeClass('active');
+        $(`#tab-${tabId}`).addClass('active');
+
+        // Lazy Load: Carrega dados apenas na primeira vez que a aba é aberta
+        if (tabId === 'uso-veiculos' && !filtrosUsoInicializados) {
+            inicializarFiltrosUso();
+        } else if (tabId === 'custos' && !dadosCustos) {
+            carregarDadosCustos();
+        }
+    });
+}
+```
 
 ---
 
@@ -95,7 +104,7 @@ O dashboard é dividido em 3 contextos distintos, alternados via JavaScript sem 
 
 O dashboard utiliza um tema exclusivo baseado em tons de verde, definido via CSS Variables.
 
-### Variáveis CSS
+### Variáveis CSS (`DashboardVeiculos.cshtml`)
 
 ```css
 :root {
@@ -110,47 +119,69 @@ O dashboard utiliza um tema exclusivo baseado em tons de verde, definido via CSS
 }
 ```
 
-### Identidade Visual
-- **Header**: Gradiente com animação *shine* (brilho passando).
-- **Cards KPI**: Borda lateral colorida indicando a categoria da métrica (Sage, Olive, Mint, Teal, Amber).
-- **Gráficos**: Paleta de cores harmonizada com o tema.
-
 ---
 
 ## Filtros e Período
 
-A aba **Uso dos Veículos** possui um sistema de filtros robusto:
+A aba **Uso dos Veículos** possui um sistema de filtros robusto que tenta adivinhar o contexto mais relevante para o usuário.
 
-1. **Filtro de Ano/Mês**:
-   - Dropdown de Ano carregado dinamicamente com base nos dados.
-   - Seleção inteligente: Tenta pré-selecionar o ano e mês mais recentes com dados.
+**Inicialização Inteligente (`inicializarFiltrosUso`)**:
+1. Busca os anos disponíveis na API.
+2. Se houver dados, seleciona o ano mais recente.
+3. Busca os dados desse ano.
+4. Identifica o mês mais recente com registros.
+5. Aplica esse filtro automaticamente.
 
-2. **Período Personalizado**:
-   - Seleção de Data Início e Fim.
-   - Botões de "Períodos Rápidos": 7, 15, 30, 60, 90, 180, 365 dias.
+```javascript
+// Exemplo simplificado da lógica
+$.ajax({
+    url: '/api/DashboardVeiculos/DashboardUso',
+    success: function (data) {
+        const anos = data.anosDisponiveis || [];
+        const anoMaisRecente = anos[0];
 
-3. **Indicador de Contexto**:
-   - Um box informativo mostra qual filtro está ativo no momento (ex: "Período: Junho/2025").
+        // ...
+
+        // Buscar dados DO ANO MAIS RECENTE para determinar o mês mais recente
+        $.ajax({
+            url: '/api/DashboardVeiculos/DashboardUso',
+            data: { ano: anoMaisRecente },
+            success: function (dataAno) {
+                // ... lógica para encontrar último mês com dados ...
+                $('#filtroMesUso').val(mesSelecionado);
+                filtroUsoAtual = { tipo: 'anoMes', ano: anoMaisRecente, mes: mesSelecionado };
+                // ...
+            }
+        });
+    }
+});
+```
 
 ---
 
 ## Indicadores e Métricas
 
-### Aba 1: Visão Geral
-- **Total da Frota**: Contagem absoluta.
-- **Ativos/Inativos**: Saúde da frota.
-- **Reserva/Efetivos**: Disponibilidade operacional.
-- **Idade Média**: Média em anos (Ano Atual - Ano Fabricação).
+Os cards de KPI (Key Performance Indicators) são atualizados dinamicamente via JavaScript.
 
-### Aba 2: Uso
-- **Total de Viagens**: Contagem de viagens no período.
-- **KM Rodado**: Soma da diferença (Km Final - Km Inicial).
-- **Litros**: Volume total abastecido.
-- **Valor Abastecimento**: Custo total em combustível.
+**HTML dos Cards**:
+```html
+<div class="card-estatistica-veic sage">
+    <div class="icone-card-veic"><i class="fa-duotone fa-cars"></i></div>
+    <div class="texto-metrica-veic">Total da Frota</div>
+    <div class="valor-metrica-veic" id="totalVeiculos">0</div>
+</div>
+```
 
-### Aba 3: Custos
-- **Custo Abastecimento**: Valor total.
-- **Custo Manutenção**: Quantidade de ordens (valor financeiro não disponível na modelagem atual).
+**Atualização JS**:
+```javascript
+function atualizarCardsGerais(totais) {
+    $('#totalVeiculos').text(totais.totalVeiculos.toLocaleString('pt-BR'));
+    $('#veiculosAtivos').text(totais.veiculosAtivos.toLocaleString('pt-BR'));
+    // ...
+    $('#idadeMedia').text(totais.idadeMedia.toFixed(1) + ' anos');
+    $('#valorMensalTotal').text(formatarMoeda(totais.valorMensalTotal));
+}
+```
 
 ---
 
@@ -158,71 +189,162 @@ A aba **Uso dos Veículos** possui um sistema de filtros robusto:
 
 Todos os gráficos são renderizados usando a biblioteca **Syncfusion EJ2**.
 
+### Exemplo: Renderização de Gráfico de Pizza (Donut)
+
+```javascript
+function renderizarChartPie(containerId, dados, cores = CORES_VEIC.chart) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = ''; // Limpa anterior
+
+    const chart = new ej.charts.AccumulationChart({
+        series: [{
+            dataSource: dados,
+            xName: 'x',
+            yName: 'y',
+            innerRadius: '50%', // Transforma Pizza em Donut
+            palettes: cores,
+            dataLabel: {
+                visible: true,
+                position: 'Outside',
+                name: 'x',
+                // ...
+            },
+            // ...
+        }],
+        // ...
+    });
+    chart.appendTo(container);
+}
+```
+
 | Aba | Gráfico | Tipo | Descrição |
 |-----|---------|------|-----------|
 | **Geral** | Por Categoria | Pizza (Donut) | Distribuição da frota |
 | **Geral** | Por Status | Pizza (Donut) | Ativos vs Inativos |
 | **Geral** | Top 15 Modelos | Barras Horizontais | Modelos mais comuns |
-| **Geral** | Idade da Frota | Colunas | Veículos por ano de fabricação |
 | **Uso** | Viagens por Mês | Área (Spline) | Evolução temporal de viagens |
-| **Uso** | Abastecimento Mensal | Área (Spline) | Evolução de custos de combustível |
 | **Custos** | Comparativo Mensal | Colunas Agrupadas | Abastecimento vs Manutenção |
 
 ---
 
 ## Tabelas de Dados
 
-Tabelas estilizadas com CSS Grid para melhor performance e layout.
+Tabelas estilizadas com CSS Grid para melhor performance e layout (não usam `<table>` tradicional).
 
-- **Top 10 KM**: Veículos com maior quilometragem acumulada.
-- **Top 10 Viagens**: Veículos mais utilizados.
-- **Eficiência**:
-    - **Mais Eficientes**: Maior média km/l (destaque verde).
-    - **Menos Eficientes**: Menor média km/l (destaque vermelho).
+**Estrutura HTML/JS**:
+```javascript
+// Renderização dinâmica da tabela
+data.topKm.forEach((v, i) => {
+    const badgeClass = i < 3 ? 'top3' : '';
+    htmlTopKm += `
+        <div class="grid-row">
+            <div class="grid-cell"><span class="badge-rank-veic ${badgeClass}">${i + 1}</span></div>
+            <div class="grid-cell">
+                <strong>${v.placa}</strong>
+                <small class="d-block text-muted">${v.modelo}</small>
+            </div>
+            <div class="grid-cell text-end"><strong>${v.km.toLocaleString('pt-BR')} km</strong></div>
+        </div>
+    `;
+});
+$('#tabelaTopKm').html(htmlTopKm);
+```
 
 ---
 
 ## Endpoints API (Backend)
 
-O controller `DashboardVeiculosController` centraliza a lógica de negócio.
+O controller `DashboardVeiculosController.cs` centraliza a lógica de negócio.
 
 ### 1. GET `/api/DashboardVeiculos/DashboardDados`
 Retorna dados para a aba **Visão Geral**.
-- **Payload**: Sem parâmetros.
-- **Retorno**: Totais de frota, distribuições (categoria, status, modelo), Top 10 KM.
+
+**Lógica (C#)**:
+```csharp
+[Route("DashboardDados")]
+[HttpGet]
+public IActionResult DashboardDados()
+{
+    var veiculos = _unitOfWork.ViewVeiculos.GetAll().ToList();
+
+    // Totais
+    var totalVeiculos = veiculos.Count;
+    var veiculosAtivos = veiculos.Count(v => v.Status == true);
+
+    // Agrupamentos
+    var porCategoria = veiculos
+        .Where(v => !string.IsNullOrEmpty(v.Categoria))
+        .GroupBy(v => v.Categoria)
+        .Select(g => new { categoria = g.Key, quantidade = g.Count() })
+        .OrderByDescending(c => c.quantidade)
+        .ToList();
+
+    // ... outros agrupamentos ...
+
+    return Ok(new {
+        totais = new { totalVeiculos, veiculosAtivos, /*...*/ },
+        porCategoria,
+        porStatus,
+        /*...*/
+    });
+}
+```
 
 ### 2. GET `/api/DashboardVeiculos/DashboardUso`
 Retorna dados para a aba **Uso dos Veículos**.
-- **Parâmetros**:
-    - `ano` (int, opcional)
-    - `mes` (int, opcional)
-    - `dataInicio` (DateTime, opcional)
-    - `dataFim` (DateTime, opcional)
-- **Retorno**: Totais filtrados, Top 10 Viagens, Top 10 Consumo, Gráficos mensais.
 
-### 3. GET `/api/DashboardVeiculos/DashboardCustos`
-Retorna dados para a aba **Custos**.
-- **Parâmetros**: `ano` (int)
-- **Retorno**: Comparativo mensal de custos, custo por categoria.
+**Parâmetros**: `ano`, `mes`, `dataInicio`, `dataFim`.
+
+**Lógica de Filtro (C#)**:
+```csharp
+// Aplicar filtro por período personalizado (prioridade)
+if (dataInicio.HasValue && dataFim.HasValue)
+{
+    var dataFimAjustada = dataFim.Value.Date.AddDays(1).AddSeconds(-1);
+    queryViagens = queryViagens.Where(v => v.DataInicial.Value >= dataInicio.Value && v.DataInicial.Value <= dataFimAjustada);
+    // ...
+}
+// Senão, aplicar filtro por ano/mês
+else
+{
+    if (ano.HasValue && ano > 0)
+        queryViagens = queryViagens.Where(v => v.DataInicial.Value.Year == ano.Value);
+
+    if (mes.HasValue && mes > 0)
+        queryViagens = queryViagens.Where(v => v.DataInicial.Value.Month == mes.Value);
+}
+```
 
 ---
 
 ## Troubleshooting
 
-### Problema: Gráficos não carregam
+### Problema: Gráficos não carregam (Espaço em branco)
 **Sintoma**: Espaços em branco onde deveriam estar os gráficos.
 **Causa**: Scripts do Syncfusion não carregaram ou licença inválida.
 **Solução**: Verificar console do navegador por erros de script ou "License validation failed".
+```html
+<!-- Certifique-se que estes scripts estão carregados em _Layout ou na Section Scripts -->
+<script src="https://cdn.syncfusion.com/ej2/23.1.36/ej2-charts/dist/global/ej2-charts.min.js"></script>
+```
 
 ### Problema: Aba de Uso vazia ou zerada
-**Sintoma**: Cards mostram "0".
-**Causa**: Filtro padrão (ano atual) pode não ter dados se a base for antiga.
-**Solução**: O sistema tenta buscar automaticamente o último ano com dados, mas verifique se o dropdown de Ano foi populado.
+**Sintoma**: Cards mostram "0" mesmo sabendo que há dados.
+**Causa**: O filtro automático pode ter falhado em encontrar o ano recente, ou a API retornou timeout.
+**Diagnóstico**: Verificar a chamada AJAX `/api/DashboardVeiculos/DashboardUso` no Network do DevTools. Se retornou 200, verificar o JSON de resposta (`anosDisponiveis`).
 
 ### Problema: Loading infinito
 **Sintoma**: Overlay "Carregando..." não desaparece.
-**Causa**: Erro 500 na API.
-**Solução**: Verificar logs do backend. O frontend tem tratamento de erro (`mostrarErro`), mas em falhas de rede pode travar.
+**Causa**: Erro 500 na API e o callback `error` do AJAX não escondeu o loading ou ocorreu um erro de JS antes.
+**Verificação no JS**:
+```javascript
+error: function (xhr, status, error) {
+    console.error('Erro:', error);
+    esconderLoading(); // << Esta função deve ser chamada sempre
+    mostrarErro('Mensagem');
+}
+```
 
 ---
 
