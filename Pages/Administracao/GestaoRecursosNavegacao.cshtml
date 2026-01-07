@@ -606,6 +606,10 @@
     var treeObj = null;
     var selectedItem = null;
 
+    // ✅ Variáveis para rastrear última seleção nos DropDownTrees
+    var ultimoIconeSelecionado = null;
+    var ultimaPaginaSelecionada = null;
+
     // Callback executado quando o DropDownTree é criado
     function onIconeDropdownCreated() {
         try {
@@ -633,44 +637,56 @@
                            '</div>';
                 };
 
-                // ✅ Evento SELECT: dispara ao clicar no item (não precisa clicar fora)
+                // ✅ Evento SELECT: dispara ao selecionar item
                 ddlIconeObj.select = function(args) {
-                    onIconeSelect(args);
+                    console.log('=== SELECT ícone ===', args);
+                    if (args.nodeData && !args.nodeData.isCategory) {
+                        // Armazena a seleção na variável global
+                        ultimoIconeSelecionado = args.nodeData.id;
+
+                        var txtIconClass = document.getElementById('txtIconClass');
+                        if (txtIconClass) {
+                            txtIconClass.value = args.nodeData.id;
+                            console.log('✅ Classe atualizada via SELECT:', args.nodeData.id);
+                        }
+                    }
                 };
 
-                // ✅ Evento CHANGE: backup para setagem programática
+                // ✅ Evento CHANGE: backup
                 ddlIconeObj.change = function(args) {
                     onIconeChange(args);
                 };
 
-                console.log('Templates de ícones configurados');
-            }
+                // ✅ Evento CLOSE do popup: garante atualização ao fechar
+                ddlIconeObj.close = function(args) {
+                    console.log('=== CLOSE ícone ===');
 
-            // ✅ Acessa TreeView interna para capturar clique (sem bloquear comportamento padrão)
-            var ddlIconeElement = document.getElementById('ddlIcone');
-            if (ddlIconeElement && ddlIconeElement.ej2_instances && ddlIconeElement.ej2_instances[0]) {
-                var ddlIcone = ddlIconeElement.ej2_instances[0];
+                    var iconId = null;
 
-                if (ddlIcone.treeObj) {
-                    // nodeClicked não bloqueia, apenas observa
-                    ddlIcone.treeObj.nodeClicked = function(args) {
-                        if (args.node && args.event) {
-                            setTimeout(function() {
-                                var selectedNode = ddlIcone.treeObj.selectedNodes[0];
-                                if (selectedNode) {
-                                    var nodeData = ddlIcone.treeObj.getNode(selectedNode);
-                                    if (nodeData && !nodeData.isCategory) {
-                                        var txtIconClass = document.getElementById('txtIconClass');
-                                        if (txtIconClass) {
-                                            txtIconClass.value = nodeData.id;
-                                            console.log('✅ Ícone atualizado ao clicar:', nodeData.id);
-                                        }
-                                    }
-                                }
-                            }, 50);
+                    // Tenta pegar o valor atual do componente
+                    var valor = ddlIconeObj.value;
+                    if (valor && valor.length > 0) {
+                        iconId = valor[0];
+                        console.log('Valor do componente:', iconId);
+                    }
+
+                    // Se não encontrou, usa a última seleção armazenada
+                    if (!iconId && ultimoIconeSelecionado) {
+                        iconId = ultimoIconeSelecionado;
+                        console.log('Usando último ícone selecionado:', iconId);
+                    }
+
+                    // Atualiza o campo se tiver um ID válido
+                    if (iconId && !iconId.includes('cat_')) {
+                        var txtIconClass = document.getElementById('txtIconClass');
+                        if (txtIconClass) {
+                            txtIconClass.value = iconId;
+                            console.log('✅ Classe atualizada via CLOSE:', iconId);
                         }
-                    };
-                }
+                    }
+                };
+
+                console.log('Templates de ícones configurados');
             }
         } catch (error) {
             console.error('Erro ao configurar template do DropDownTree:', error);
@@ -1340,37 +1356,76 @@
                            '</div>';
                 };
 
-                // ✅ Evento SELECT: dispara ao clicar no item (não precisa clicar fora)
+                // ✅ Evento SELECT: dispara ao selecionar item
                 ddlPaginaObj.select = function(args) {
-                    onPaginaSelect(args);
+                    console.log('=== SELECT página ===', args);
+                    if (args.nodeData && !args.nodeData.isCategory) {
+                        // Armazena a seleção na variável global
+                        ultimaPaginaSelecionada = {
+                            id: args.nodeData.id,
+                            paginaRef: args.nodeData.paginaRef
+                        };
+
+                        var txtHref = document.getElementById('txtHref');
+                        if (txtHref && args.nodeData.paginaRef) {
+                            txtHref.value = args.nodeData.paginaRef;
+                            console.log('✅ URL atualizada via SELECT:', args.nodeData.paginaRef);
+                        }
+                    }
                 };
 
-                // ✅ Evento CHANGE: dispara ao mudar valor (backup para setagem programática)
+                // ✅ Evento CHANGE: backup
                 ddlPaginaObj.change = function(args) {
                     onPaginaChange(args);
                 };
 
-                // ✅ Acessa TreeView interna para capturar clique (sem bloquear comportamento padrão)
-                if (ddlPaginaObj.treeObj) {
-                    // nodeClicked não bloqueia, apenas observa
-                    ddlPaginaObj.treeObj.nodeClicked = function(args) {
-                        if (args.node && args.event) {
-                            setTimeout(function() {
-                                var selectedNode = ddlPaginaObj.treeObj.selectedNodes[0];
-                                if (selectedNode) {
-                                    var nodeData = ddlPaginaObj.treeObj.getNode(selectedNode);
-                                    if (nodeData && !nodeData.isCategory) {
-                                        var txtHref = document.getElementById('txtHref');
-                                        if (txtHref && nodeData.paginaRef) {
-                                            txtHref.value = nodeData.paginaRef;
-                                            console.log('✅ URL atualizada ao clicar:', nodeData.paginaRef);
+                // ✅ Evento CLOSE do popup: garante atualização ao fechar
+                ddlPaginaObj.close = function(args) {
+                    console.log('=== CLOSE página ===');
+
+                    var paginaRef = null;
+                    var pageId = null;
+
+                    // Tenta pegar o valor atual do componente
+                    var valor = ddlPaginaObj.value;
+                    if (valor && valor.length > 0) {
+                        pageId = valor[0];
+                        console.log('Valor do componente:', pageId);
+
+                        // Busca a paginaRef no dataSource
+                        if (ddlPaginaObj.fields && ddlPaginaObj.fields.dataSource) {
+                            var dataSource = ddlPaginaObj.fields.dataSource;
+                            for (var i = 0; i < dataSource.length; i++) {
+                                var modulo = dataSource[i];
+                                if (modulo.child && modulo.child.length > 0) {
+                                    for (var j = 0; j < modulo.child.length; j++) {
+                                        var page = modulo.child[j];
+                                        if (page.id === pageId && page.paginaRef) {
+                                            paginaRef = page.paginaRef;
+                                            break;
                                         }
                                     }
                                 }
-                            }, 50);
+                                if (paginaRef) break;
+                            }
                         }
-                    };
-                }
+                    }
+
+                    // Se não encontrou, usa a última seleção armazenada
+                    if (!paginaRef && ultimaPaginaSelecionada) {
+                        paginaRef = ultimaPaginaSelecionada.paginaRef;
+                        console.log('Usando última página selecionada:', paginaRef);
+                    }
+
+                    // Atualiza o campo se tiver uma URL válida
+                    if (paginaRef) {
+                        var txtHref = document.getElementById('txtHref');
+                        if (txtHref) {
+                            txtHref.value = paginaRef;
+                            console.log('✅ URL atualizada via CLOSE:', paginaRef);
+                        }
+                    }
+                };
 
                 console.log('DropDownTree de páginas configurado');
             }
@@ -1599,6 +1654,11 @@
     // Limpa formulario
     function limparFormulario(esconderCard = true) {
         selectedItem = null;
+
+        // ✅ Reseta variáveis de rastreamento
+        ultimoIconeSelecionado = null;
+        ultimaPaginaSelecionada = null;
+
         document.getElementById('formPropriedades').reset();
         document.getElementById('recursoId').value = '';
         document.getElementById('parentId').value = '';
