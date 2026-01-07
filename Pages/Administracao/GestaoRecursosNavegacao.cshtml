@@ -610,7 +610,12 @@
                            '</div>';
                 };
 
-                // ✅ Registra evento change para preencher txtIconClass
+                // ✅ Evento SELECT: dispara ao clicar no item (não precisa clicar fora)
+                ddlIconeObj.select = function(args) {
+                    onIconeSelect(args);
+                };
+
+                // ✅ Evento CHANGE: backup para setagem programática
                 ddlIconeObj.change = function(args) {
                     onIconeChange(args);
                 };
@@ -920,7 +925,30 @@
             });
     }
 
-    // Callback quando um ícone é selecionado no DropDownTree
+    // ✅ EVENTO SELECT: Dispara AO CLICAR no ícone (não precisa clicar fora)
+    function onIconeSelect(args) {
+        console.log('=== onIconeSelect disparado (AO CLICAR) ===');
+        console.log('args.nodeData:', args.nodeData);
+
+        if (!args.nodeData || args.nodeData.isCategory) {
+            console.log('Categoria clicada - não atualiza campo');
+            return;
+        }
+
+        // No evento SELECT, os dados vêm em args.nodeData
+        var iconClass = args.nodeData.id;      // "fa-duotone fa-bat"
+        var iconLabel = args.nodeData.text;    // "Bastão"
+
+        var txtIconClass = document.getElementById('txtIconClass');
+        if (txtIconClass) {
+            txtIconClass.value = iconClass;
+            console.log('✅ Classe CSS atualizada IMEDIATAMENTE:', iconClass, '| Label:', iconLabel);
+        } else {
+            console.error('❌ Elemento txtIconClass não encontrado!');
+        }
+    }
+
+    // ✅ EVENTO CHANGE: Backup para quando setado programaticamente
     function onIconeChange(args) {
         console.log('=== onIconeChange disparado ===');
         console.log('args completo:', args);
@@ -1027,12 +1055,19 @@
 
                 ddlPaginaObj.valueTemplate = function(data) {
                     if (!data || data.isCategory) return '';
+                    var displayText = data.displayText || data.text;
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
                            '<i class="fa-regular fa-file-lines" style="font-size: 14px; width: 18px; color: #6c757d;"></i>' +
-                           '<span>' + data.text + '</span>' +
+                           '<span>' + displayText + '</span>' +
                            '</div>';
                 };
 
+                // ✅ Evento SELECT: dispara ao clicar no item (não precisa clicar fora)
+                ddlPaginaObj.select = function(args) {
+                    onPaginaSelect(args);
+                };
+
+                // ✅ Evento CHANGE: dispara ao mudar valor (backup para setagem programática)
                 ddlPaginaObj.change = function(args) {
                     onPaginaChange(args);
                 };
@@ -1044,6 +1079,30 @@
         }
     }
 
+    // ✅ EVENTO SELECT: Dispara AO CLICAR no item (não precisa clicar fora)
+    function onPaginaSelect(args) {
+        console.log('=== onPaginaSelect disparado (AO CLICAR) ===');
+        console.log('args.nodeData:', args.nodeData);
+
+        if (!args.nodeData || args.nodeData.isCategory) {
+            console.log('Categoria clicada - não gera URL');
+            return;
+        }
+
+        // No evento SELECT, os dados vêm em args.nodeData
+        var paginaRef = args.nodeData.paginaRef;
+        console.log('paginaRef extraída:', paginaRef);
+
+        var txtHref = document.getElementById('txtHref');
+        if (txtHref) {
+            txtHref.value = paginaRef;
+            console.log('✅ URL atualizada IMEDIATAMENTE:', paginaRef);
+        } else {
+            console.error('❌ Elemento txtHref não encontrado!');
+        }
+    }
+
+    // ✅ EVENTO CHANGE: Backup para quando setado programaticamente
     function onPaginaChange(args) {
         console.log('=== onPaginaChange disparado ===');
         console.log('args completo:', args);

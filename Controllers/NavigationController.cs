@@ -1106,15 +1106,16 @@ namespace FrotiX.Controllers
                     var pageName = Path.GetFileNameWithoutExtension(pageFile.Name);
                     var pageId = $"page_{moduleName}_{pageName}";
                     var paginaRef = $"{moduleName.ToLower()}_{pageName.ToLower()}.html";
-                    var displayName = GetFriendlyPageName(pageName);
+                    var moduloAmigavel = GetFriendlyModuleName(moduleName);
 
                     return new
                     {
                         id = pageId,
-                        text = displayName,
+                        text = pageName,              // ✅ NOME ORIGINAL DO ARQUIVO (Index, Upsert, etc)
+                        displayText = $"({moduloAmigavel}) {pageName}",  // ✅ DISPLAY: (Veículos) Index
                         paginaRef = paginaRef,
-                        pageName = pageName,          // ✅ NOME ORIGINAL DO ARQUIVO
-                        moduleName = moduleName,      // ✅ NOME ORIGINAL DO MÓDULO
+                        pageName = pageName,
+                        moduleName = moduleName,
                         parentId = moduleId
                     };
                 }).ToList<object>();
