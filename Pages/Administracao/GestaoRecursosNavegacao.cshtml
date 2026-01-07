@@ -798,14 +798,63 @@
 
             console.log('Campos básicos preenchidos');
 
-            // Atualiza ícone no DropDownTree e campo de texto
+            // ========== ATUALIZA DROPDOWNTREE DE ÍCONE ==========
             var iconClass = selectedItem.icon || 'fa-regular fa-file';
             if (txtIconClass) txtIconClass.value = iconClass;
 
             var ddlIconeObj = document.getElementById('ddlIcone');
             if (ddlIconeObj && ddlIconeObj.ej2_instances && ddlIconeObj.ej2_instances[0]) {
-                ddlIconeObj.ej2_instances[0].value = [iconClass];
-                console.log('DropDownTree de ícone atualizado');
+                var ddlIcone = ddlIconeObj.ej2_instances[0];
+                // Limpa seleção anterior
+                ddlIcone.value = null;
+                // Define novo valor
+                setTimeout(function() {
+                    ddlIcone.value = [iconClass];
+                    console.log('DropDownTree de ícone atualizado para:', iconClass);
+                }, 100);
+            }
+
+            // ========== ATUALIZA DROPDOWNTREE DE PÁGINA ==========
+            // Desconstrói a URL para encontrar módulo e página
+            var href = selectedItem.href || '';
+            console.log('URL do item:', href);
+
+            if (href && href.endsWith('.html') && href.includes('_')) {
+                // Remove .html e separa em partes
+                var urlSemExtensao = href.replace('.html', '');
+                var partes = urlSemExtensao.split('_');
+
+                if (partes.length >= 2) {
+                    var moduloLower = partes[0]; // ex: "veiculo"
+                    var paginaLower = partes[1]; // ex: "index"
+
+                    console.log('Módulo (lower):', moduloLower, '| Página (lower):', paginaLower);
+
+                    // Capitaliza primeira letra para corresponder ao nome do diretório
+                    var moduloCapitalized = moduloLower.charAt(0).toUpperCase() + moduloLower.slice(1);
+                    var paginaCapitalized = paginaLower.charAt(0).toUpperCase() + paginaLower.slice(1);
+
+                    console.log('Módulo (capitalized):', moduloCapitalized, '| Página (capitalized):', paginaCapitalized);
+
+                    // Constrói o ID do item no formato: page_Modulo_Pagina
+                    var pageId = 'page_' + moduloCapitalized + '_' + paginaCapitalized;
+                    console.log('ID da página construído:', pageId);
+
+                    // Seta o DropDownTree de páginas
+                    var ddlPaginaObj = document.getElementById('ddlPagina');
+                    if (ddlPaginaObj && ddlPaginaObj.ej2_instances && ddlPaginaObj.ej2_instances[0]) {
+                        var ddlPagina = ddlPaginaObj.ej2_instances[0];
+                        // Limpa seleção anterior
+                        ddlPagina.value = null;
+                        // Define novo valor
+                        setTimeout(function() {
+                            ddlPagina.value = [pageId];
+                            console.log('DropDownTree de página atualizado para:', pageId);
+                        }, 100);
+                    }
+                }
+            } else {
+                console.log('URL não está no formato esperado ou está vazia');
             }
 
             // Atualiza indicador de modo
@@ -954,18 +1003,27 @@
     }
 
     function onPaginaChange(args) {
-        console.log('Página selecionada:', args);
+        console.log('=== onPaginaChange disparado ===');
+        console.log('args completo:', args);
+        console.log('args.itemData:', args.itemData);
 
         // Se não há dados ou é uma categoria, não faz nada
         if (!args.itemData || args.itemData.isCategory) {
-            console.log('Categoria selecionada ou campo limpo');
+            console.log('Categoria selecionada ou campo limpo - não gera URL');
             return;
         }
 
         // Obtém a URL gerada (formato: modulo_pagina.html)
         var paginaRef = args.itemData.paginaRef;
-        document.getElementById('txtHref').value = paginaRef;
-        console.log('URL gerada:', paginaRef);
+        console.log('paginaRef extraída:', paginaRef);
+
+        var txtHref = document.getElementById('txtHref');
+        if (txtHref) {
+            txtHref.value = paginaRef;
+            console.log('✅ URL atualizada no campo txtHref:', paginaRef);
+        } else {
+            console.error('❌ Elemento txtHref não encontrado!');
+        }
     }
 
     // Carrega lista de usuarios com acesso
