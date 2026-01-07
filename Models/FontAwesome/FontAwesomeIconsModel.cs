@@ -6,58 +6,40 @@ using System.Text.Json.Serialization;
 namespace FrotiX.Models.FontAwesome
 {
     /// <summary>
-    /// Root structure for fontawesome-icons.json
+    /// Representa uma categoria de ícones FontAwesome traduzida para PT-BR
     /// </summary>
-    public class FontAwesomeIconsData
+    public class FontAwesomeCategoryPT
     {
-        [JsonPropertyName("version")]
-        public string Version { get; set; } = "1.0";
+        [JsonPropertyName("categoria")]
+        public string Categoria { get; set; }
 
-        [JsonPropertyName("categories")]
-        public List<FontAwesomeCategory> Categories { get; set; } = new();
+        [JsonPropertyName("categoriaOriginal")]
+        public string CategoriaOriginal { get; set; }
+
+        [JsonPropertyName("icones")]
+        public List<FontAwesomeIconPT> Icones { get; set; } = new();
     }
 
     /// <summary>
-    /// Represents a category of icons (e.g., "Comum", "Veículos")
+    /// Representa um ícone FontAwesome individual com tradução e keywords
     /// </summary>
-    public class FontAwesomeCategory
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("text")]
-        public string Text { get; set; }
-
-        [JsonPropertyName("isCategory")]
-        public bool IsCategory { get; set; } = true;
-
-        [JsonPropertyName("hasChild")]
-        public bool HasChild { get; set; } = true;
-
-        [JsonPropertyName("expanded")]
-        public bool Expanded { get; set; } = false;
-
-        [JsonPropertyName("icons")]
-        public List<FontAwesomeIcon> Icons { get; set; } = new();
-    }
-
-    /// <summary>
-    /// Represents a single FontAwesome icon
-    /// </summary>
-    public class FontAwesomeIcon
+    public class FontAwesomeIconPT
     {
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonPropertyName("text")]
-        public string Text { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
-        [JsonPropertyName("parentId")]
-        public string ParentId { get; set; }
+        [JsonPropertyName("label")]
+        public string Label { get; set; }
+
+        [JsonPropertyName("keywords")]
+        public List<string> Keywords { get; set; } = new();
     }
 
     /// <summary>
-    /// Helper for loading and deserializing fontawesome-icons.json
+    /// Helper para carregar e desserializar fontawesome-icons.json (estrutura traduzida)
     /// </summary>
     internal static class FontAwesomeIconsLoader
     {
@@ -71,10 +53,10 @@ namespace FrotiX.Models.FontAwesome
             };
         }
 
-        public static FontAwesomeIconsData FromJson(string json)
+        public static List<FontAwesomeCategoryPT> FromJson(string json)
         {
-            return JsonSerializer.Deserialize<FontAwesomeIconsData>(json, SerializerSettings())
-                   ?? new FontAwesomeIconsData();
+            return JsonSerializer.Deserialize<List<FontAwesomeCategoryPT>>(json, SerializerSettings())
+                   ?? new List<FontAwesomeCategoryPT>();
         }
     }
 }
