@@ -1,0 +1,850 @@
+- Importação de Combustível está indo toda para a data selecionada. Tirar a data ==> OK
+- Verificar valores discrepantes no Dashboard de Viagens ==> Ok
+- Botar o Ajuste de Custos no Padrão FrotiX, mudar o nome no menu e no topo da página ==> Ok
+- Consertar as Fichas da Andrea
+- Consertar o Alerta (criação) e validar o Agendamento completo dele
+- Verificar se o Modal de Custos na Página de Gestão de Viagens está trazendo o combustível ==> Ok
+- Não permitir que na Finalização Viagem, em qualquer tela que seja, a data informada seja maior do que a de hoje. E implemente uma inteligência artificial para analisar as entradas de Data Inicial / Hora Inicial verses a entrada de Data Final / Horário Final, de forma a alertar o usuário com tamanhã propriedade para que ele se convença que errou. Repita o processo para Km Inicial e KmFinal. E uma IA evolutiva, que aprenda a partir das placas dos carros o modus operandi deles, como é a quilometragem habitual (sempre pelo histórico de viagems), para que não emitamos alertas desnecessários
+- Quando cria um novo recurso (página) o sistema não está habilitando automaticamente para todos os usuários
+- Na Gestão de Recursos, (fora do padrão), o Modal de Controle de Acesso não está abrindo
+- Atualização de Recursos fora do Padrão
+- Na tela de gestão de Usuários (fora do padrão)
+  - Botão de Editar Usuário não está funcionando
+  - Modal de Foto não está funcionando
+  - Modal de Gestão de Recursos não está funcionando e está sem Tooltips
+- Impedir em todos os locais de gravação da Viagem que data seja superior ao dia atual
+- Nenhum Registro Aparece quando Abrimos Abastecimentos
+- Mudar o App Economildo para quando mudar o trajeto ou encerrar o turno guardar a hora fim da última viagem inserida (ela sempre vai ser inserida com as duas horas iguais)
+
+- Página de Criar Recurso está fora do padrão e demorando muito à gravar o registro
+
+(ok) - Botão de Editar OS na Lista de Manutenção está fora do Padrão
+
+(ok) - Modal de Fechar OS tem Botão de Foto fora do Padrão (Polaroid Cinza) e o de Remoção tem que ser um que represente esta função, ambos Duotone
+
+- Baixa de OS dando "OS não Encontrada"
+
+(ok) - Criar Ordem de Serviço Dando erro ao gravar com Item de Ocorrência criado na Hora
+
+- Criar Dashboard de Lavagens
+
+(ok) - Página de Gestão de Penalidades está com o botão laranja sem borda
+
+(ok) - Página de Tipos de Combustível tem palavras junto com os ícones na coluna de ação
+
+- Tirar as tooltips do menu de navegação lateral
+
+- Colocar tabela comparativa de Quilometros Rodados do Motorista vs Top 10, e Viagens do Motorista vs Top 10
+
+- Adicionar no Servidor os Recursos: Gerenciador de Navegação, Dashboard de Lavagens, Dashboard Ajuste Estatístico
+
+- SQL para criar tabela e índices no Servidor:
+
+CREATE TABLE dbo.Lavagem (
+  LavagemId UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID())
+ ,VeiculoId UNIQUEIDENTIFIER NULL
+ ,MotoristaId UNIQUEIDENTIFIER NULL
+ ,HorarioInicio DATETIME NULL
+ ,HorarioFim DATETIME NULL
+ ,Data DATETIME NULL
+ ,CONSTRAINT PK_Lavagem_LavagemId PRIMARY KEY CLUSTERED (LavagemId)
+) ON [PRIMARY]
+GO
+  -- Índice mais crítico (filtros por período)
+  CREATE NONCLUSTERED INDEX IX_Lavagem_Data
+  ON dbo.Lavagem(Data)
+  INCLUDE (VeiculoId, MotoristaId, Horario);
+
+  -- Índices para JOINs
+  CREATE NONCLUSTERED INDEX IX_Lavagem_VeiculoId ON dbo.Lavagem(VeiculoId);
+  CREATE NONCLUSTERED INDEX IX_Lavagem_MotoristaId ON dbo.Lavagem(MotoristaId);
+  CREATE NONCLUSTERED INDEX IX_LavadoresLavagem_LavadorId ON dbo.LavadoresLavagem(LavadorId);
+
+  -- 1. Primeiro limpa ControleAcesso (tem FK para Recurso)
+  DELETE FROM ControleAcesso;
+
+  -- 2. Depois limpa Recurso
+  DELETE FROM Recurso;
+
+  -- 3. Confirma que está vazio
+  SELECT COUNT(*) AS TotalRecurso FROM Recurso;
+  SELECT COUNT(*) AS TotalControleAcesso FROM ControleAcesso;
+
+
+ 1. Abra o terminal na mesma pasta do projeto (C:\FrotiX\_FrotiXCompleto 2025 (valendo)\FrotiX.Site)
+  2. Execute o comando:
+  claude --continue
+  2. Isso vai retomar a última conversa automaticamente.
+  3. Ou use:
+  claude --resume
+  3. Para ver uma lista de conversas recentes e escolher qual retomar.
+
+  -- ============================================================
+  -- SCRIPT: Recriar estrutura da tabela Recurso
+  -- Executa no SSMS
+  -- ============================================================
+
+  -- 1. LIMPAR DADOS (na ordem correta por causa das FKs)
+  DELETE FROM ControleAcesso;
+  DELETE FROM Recurso;
+  PRINT 'Dados limpos.';
+  GO
+
+  -- 2. REMOVER TODOS OS ÍNDICES EXISTENTES
+  DECLARE @sql NVARCHAR(MAX) = '';
+
+  SELECT @sql = @sql + 'DROP INDEX [' + i.name + '] ON [Recurso]; '
+  FROM sys.indexes i
+  WHERE i.object_id = OBJECT_ID('Recurso')
+    AND i.name IS NOT NULL
+    AND i.is_primary_key = 0
+    AND i.type > 0;
+
+  IF LEN(@sql) > 0
+  BEGIN
+      EXEC sp_executesql @sql;
+      PRINT 'Índices removidos.';
+  END
+  GO
+
+  -- 3. REMOVER FKs EXISTENTES (exceto a PK)
+  DECLARE @fksql NVARCHAR(MAX) = '';
+
+  SELECT @fksql = @fksql + 'ALTER TABLE [Recurso] DROP CONSTRAINT [' + fk.name + ']; '
+  FROM sys.foreign_keys fk
+  WHERE fk.parent_object_id = OBJECT_ID('Recurso');
+
+  IF LEN(@fksql) > 0
+  BEGIN
+      EXEC sp_executesql @fksql;
+      PRINT 'Foreign Keys removidas.';
+  END
+  GO
+
+  -- 4. GARANTIR QUE AS COLUNAS EXISTEM
+  IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recurso') AND name = 'ParentId')
+      ALTER TABLE Recurso ADD ParentId UNIQUEIDENTIFIER NULL;
+
+  IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recurso') AND name = 'Icon')
+      ALTER TABLE Recurso ADD Icon NVARCHAR(200) NULL;
+
+  IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recurso') AND name = 'Href')
+      ALTER TABLE Recurso ADD Href NVARCHAR(500) NULL;
+
+  IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recurso') AND name = 'Ativo')
+      ALTER TABLE Recurso ADD Ativo BIT NOT NULL DEFAULT 1;
+
+  IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Recurso') AND name = 'Nivel')
+      ALTER TABLE Recurso ADD Nivel INT NOT NULL DEFAULT 0;
+
+  PRINT 'Colunas verificadas/criadas.';
+  GO
+
+  -- 5. CRIAR NOVOS ÍNDICES E FKs
+
+  -- FK para hierarquia (auto-relacionamento)
+  ALTER TABLE Recurso ADD CONSTRAINT FK_Recurso_Parent
+      FOREIGN KEY (ParentId) REFERENCES Recurso(RecursoId);
+  PRINT 'FK_Recurso_Parent criada.';
+
+  -- Índice para performance em consultas hierárquicas
+  CREATE INDEX IX_Recurso_ParentId ON Recurso(ParentId);
+  PRINT 'IX_Recurso_ParentId criado.';
+
+  -- Índice único para NomeMenu (identificador único do recurso)
+  CREATE UNIQUE INDEX UK_Recurso_NomeMenu ON Recurso(NomeMenu);
+  PRINT 'UK_Recurso_NomeMenu criado.';
+
+  -- Índice único para Ordem (ordenação hierárquica única)
+  CREATE UNIQUE INDEX UK_Recurso_Ordem ON Recurso(Ordem);
+  PRINT 'UK_Recurso_Ordem criado.';
+
+  -- Índice composto para garantir nomes únicos dentro do mesmo pai
+  CREATE UNIQUE INDEX UK_Recurso_Parent_Nome ON Recurso(ParentId, Nome) WHERE Nome IS NOT NULL;
+  PRINT 'UK_Recurso_Parent_Nome criado.';
+
+  GO
+
+  -- 6. VERIFICAÇÃO FINAL
+  PRINT '';
+  PRINT '========================================';
+  PRINT 'ESTRUTURA FINAL DA TABELA RECURSO';
+  PRINT '========================================';
+
+  SELECT
+      c.name AS Coluna,
+      t.name AS Tipo,
+      c.max_length AS Tamanho,
+      CASE WHEN c.is_nullable = 1 THEN 'SIM' ELSE 'NAO' END AS Nullable
+  FROM sys.columns c
+  INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+  WHERE c.object_id = OBJECT_ID('Recurso')
+  ORDER BY c.column_id;
+
+  PRINT '';
+  PRINT 'ÍNDICES:';
+  SELECT name, type_desc, is_unique
+  FROM sys.indexes
+  WHERE object_id = OBJECT_ID('Recurso') AND name IS NOT NULL;
+
+  PRINT '';
+  PRINT 'Script concluído! Agora execute a migração pela tela.';
+  GO
+
+
+
+   -- 1. Remove TODOS os índices (exceto PK)
+  IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'UK_Recurso_Parent_Nome' AND object_id = OBJECT_ID('Recurso'))
+      DROP INDEX UK_Recurso_Parent_Nome ON Recurso;
+
+  IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'UK_Recurso_NomeMenu' AND object_id = OBJECT_ID('Recurso'))
+      DROP INDEX UK_Recurso_NomeMenu ON Recurso;
+
+  IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'UK_Recurso_Ordem' AND object_id = OBJECT_ID('Recurso'))
+      DROP INDEX UK_Recurso_Ordem ON Recurso;
+
+  IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'UK_Recurso_Nome' AND object_id = OBJECT_ID('Recurso'))
+      DROP INDEX UK_Recurso_Nome ON Recurso;
+
+  IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Recurso_ParentId' AND object_id = OBJECT_ID('Recurso'))
+      DROP INDEX IX_Recurso_ParentId ON Recurso;
+
+  IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Recurso_NomeMenu' AND object_id = OBJECT_ID('Recurso'))
+      DROP INDEX IX_Recurso_NomeMenu ON Recurso;
+
+  PRINT 'Todos os índices removidos.';
+  GO
+
+  -- 2. Atualiza valores nulos
+  UPDATE Recurso SET Nome = ISNULL(Nome, NomeMenu);
+  UPDATE Recurso SET NomeMenu = ISNULL(NomeMenu, 'sem_nome');
+  UPDATE Recurso SET Icon = ISNULL(Icon, 'fa-regular fa-file');
+  UPDATE Recurso SET Href = ISNULL(Href, 'javascript:void(0);');
+  PRINT 'Valores nulos atualizados.';
+  GO
+
+  -- 3. Altera colunas para NOT NULL
+  ALTER TABLE Recurso ALTER COLUMN Nome NVARCHAR(200) NOT NULL;
+  ALTER TABLE Recurso ALTER COLUMN NomeMenu NVARCHAR(200) NOT NULL;
+  ALTER TABLE Recurso ALTER COLUMN Icon NVARCHAR(200) NOT NULL;
+  ALTER TABLE Recurso ALTER COLUMN Href NVARCHAR(500) NOT NULL;
+  PRINT 'Colunas alteradas para NOT NULL.';
+  GO
+
+  -- 4. Recria os índices necessários
+  CREATE INDEX IX_Recurso_ParentId ON Recurso(ParentId);
+  CREATE UNIQUE INDEX UK_Recurso_NomeMenu ON Recurso(NomeMenu);
+  CREATE UNIQUE INDEX UK_Recurso_Ordem ON Recurso(Ordem);
+  CREATE UNIQUE INDEX UK_Recurso_Parent_Nome ON Recurso(ParentId, Nome);
+  PRINT 'Índices recriados.';
+  GO
+
+  -- 5. Confirma
+  SELECT name, type_desc, is_unique FROM sys.indexes WHERE object_id = OBJECT_ID('Recurso');
+
+
+  -- ============================================
+  -- GESTÃO DE VIAGENS (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-route' WHERE RecursoId = '2bdea390-cb15-4a8a-aa49-504191438ffe'; -- Insere Nova Viagem
+  UPDATE Recurso SET Icon = 'fa-duotone fa-list-check' WHERE RecursoId = '0af15db8-426f-4bd7-92f5-10594b78eabc'; -- Controle de Viagens
+  UPDATE Recurso SET Icon = 'fa-duotone fa-calendar-check' WHERE RecursoId = '42b8343f-973d-42c6-ab5b-f2f97d2b4f40'; -- Gerencia Eventos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-people-arrows' WHERE RecursoId = '19f6fb9a-570a-48c6-aeb2-0d8d10e26cab'; -- Fluxo de Passageiros
+  UPDATE Recurso SET Icon = 'fa-duotone fa-chart-line' WHERE RecursoId = 'd1a51451-b1ff-457f-8835-a69c50b85b45'; -- Gráficos Gerenciais (Viagens)     
+
+  -- Netos de Fluxo de Passageiros
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-circle-plus' WHERE RecursoId = '27b88de4-1599-49c0-9e42-bcd8c4c3328e'; -- Inserir Fichas MOB
+  UPDATE Recurso SET Icon = 'fa-duotone fa-clipboard-user' WHERE RecursoId = 'd87f1952-7b51-4ec3-b1b4-4f39f6b4f516'; -- Gestão Fichas MOB
+
+  -- Netos de Gráficos Gerenciais (Viagens)
+  UPDATE Recurso SET Icon = 'fa-duotone fa-gauge-high' WHERE RecursoId = '86d9e5a3-ced6-4a26-9001-5c47b58a02fb'; -- Dashboard de Viagens
+  UPDATE Recurso SET Icon = 'fa-duotone fa-piggy-bank' WHERE RecursoId = '74f56764-b6fd-4418-b210-5a5c00cec005'; -- Dashboard de Economildos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-calendar-star' WHERE RecursoId = 'a643c3fe-dccc-4755-bbb5-7fcc6a4c8a10'; -- Dashboard de Eventos
+
+  -- ============================================
+  -- GESTÃO DE REQUISIÇÕES (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-building-user' WHERE RecursoId = '9521093a-e047-48d7-a91a-de8bd3b760ab'; -- Setores Solicitantes
+  UPDATE Recurso SET Icon = 'fa-duotone fa-user-tie' WHERE RecursoId = '104e404d-4e9f-4e83-bfe8-2c3a3022dc1d'; -- Requisitantes
+
+  -- ============================================
+  -- GESTÃO DE MANUTENÇÃO (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-triangle-exclamation' WHERE RecursoId = '88609350-638a-4259-9aec-10646b3ce657'; -- Ocorrências
+  UPDATE Recurso SET Icon = 'fa-duotone fa-wrench' WHERE RecursoId = '59c98394-b93a-4743-b947-cb32fe99bda4'; -- Registro de Manutenção
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-slash' WHERE RecursoId = '64f5c4ee-e1a6-4139-adff-4d0bb7fe4455'; -- Controle de Glosas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-soap' WHERE RecursoId = 'd4ed6b20-da38-421f-8dd6-7889b8861b76'; -- Controle de Lavagens
+  UPDATE Recurso SET Icon = 'fa-duotone fa-chart-mixed' WHERE RecursoId = '611ef133-f0b5-46c6-8699-4d92a89e84d0'; -- Gráficos Gerenciais (Manutenção) 
+
+  -- Neto de Gráficos Gerenciais (Manutenção)
+  UPDATE Recurso SET Icon = 'fa-duotone fa-droplet-percent' WHERE RecursoId = 'e8afb399-7059-42fe-b9fd-d98afb741182'; -- Dashboard de Lavagens        
+
+  -- ============================================
+  -- GESTÃO DE ABASTECIMENTO (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-gas-pump' WHERE RecursoId = '984e246d-ab6e-4f6c-b6c5-09be5ebc50d2'; -- Abastecimentos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-import' WHERE RecursoId = '4b2cab15-d69d-48c6-9573-57f85236922f'; -- Importação de Dados
+  UPDATE Recurso SET Icon = 'fa-duotone fa-clock' WHERE RecursoId = '09ecf24e-ff12-4771-814e-59b42e1fde58'; -- Pendências de Abastecimento
+  UPDATE Recurso SET Icon = 'fa-duotone fa-receipt' WHERE RecursoId = '6375be8c-a722-4de7-a308-b98118ed45e0'; -- Registro de Cupons
+  UPDATE Recurso SET Icon = 'fa-duotone fa-chart-pie' WHERE RecursoId = '0634ccdb-4450-443e-af80-87f9c23a4f38'; -- Dashboard de Abastecimento
+
+  -- ============================================
+  -- GESTÃO DE CONTRATOS (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-contract' WHERE RecursoId = 'dee2bfa9-0da9-4421-8ede-b4ce5308a1da'; -- Relação de Contratos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-gavel' WHERE RecursoId = 'cc722827-b75b-4045-9391-577f734dbcba'; -- Atas de Registro de Preços
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-signature' WHERE RecursoId = '97d22f90-160e-449f-9273-130fde0b4d55'; -- Repactuação de Contratos      
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-invoice-dollar' WHERE RecursoId = '854c23f8-c8c0-49e3-b3e4-4bbc5e850ab3'; -- Notas Fiscais e Empenhos 
+  UPDATE Recurso SET Icon = 'fa-duotone fa-list-ul' WHERE RecursoId = 'c64199c1-b588-465c-9d0b-c754fcc51ea3'; -- Itens dos Contratos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-truck-field' WHERE RecursoId = '391147e8-093d-4459-8b8e-0f45782da7ec'; -- Cadastro de Fornecedores
+
+  -- Netos de Notas Fiscais e Empenhos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-money-check-dollar' WHERE RecursoId = '34b03e85-e589-46e0-9ce7-5c70c35ff3c0'; -- Cadastro de Empenhos      
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-invoice' WHERE RecursoId = 'ad8be47d-01ee-4ced-974b-8823ec93b828'; -- Entrada de Notas Fiscais        
+
+  -- ============================================
+  -- GESTÃO DE MULTAS (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-circle-plus' WHERE RecursoId = '3568b841-ae92-48cf-852b-be88ab4d73c4'; -- Nova Autuação
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-exclamation' WHERE RecursoId = 'a28ce09f-680d-48f9-b0f0-5623d10dfda2'; -- Gestão de Autuações
+  UPDATE Recurso SET Icon = 'fa-duotone fa-scale-balanced' WHERE RecursoId = '668e02ee-5d7a-4c12-a1b4-01056f24d637'; -- Gestão de Penalidades
+  UPDATE Recurso SET Icon = 'fa-duotone fa-building-columns' WHERE RecursoId = '264eacc8-976c-4e72-8d45-859eb85205f5'; -- Órgãos Autuantes
+  UPDATE Recurso SET Icon = 'fa-duotone fa-sack-dollar' WHERE RecursoId = 'bcb0d0aa-daf8-4a4a-84ec-ea9958ba5760'; -- Empenhos (Multas)
+  UPDATE Recurso SET Icon = 'fa-duotone fa-traffic-light' WHERE RecursoId = '3fea1be3-e0c5-47fe-83d8-9026e0e5f2e8'; -- Infrações de Trânsito
+
+  -- ============================================
+  -- GESTÃO DE PATRIMÔNIO (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-box-archive' WHERE RecursoId = '683df932-bd40-4503-9a5d-ce03787f0154'; -- Cadastro de Patrimônio
+  UPDATE Recurso SET Icon = 'fa-duotone fa-boxes-stacked' WHERE RecursoId = '164823e2-b050-4f02-8b80-a81558ba0030'; -- Gestão de Patrimônios
+  UPDATE Recurso SET Icon = 'fa-duotone fa-truck-ramp-box' WHERE RecursoId = '54f5d9da-4303-47eb-9630-9840f3d8bd6b'; -- Movimentação de Patrimônio    
+  UPDATE Recurso SET Icon = 'fa-duotone fa-dolly' WHERE RecursoId = '35956b91-8299-4d69-b23e-da3f20d3e76e'; -- Movimentações Patrimoniais
+  UPDATE Recurso SET Icon = 'fa-duotone fa-plus-circle' WHERE RecursoId = 'd82fe193-46df-453e-8832-082ffe71b456'; -- Cadastro de Seção Patrimonial    
+  UPDATE Recurso SET Icon = 'fa-duotone fa-sitemap' WHERE RecursoId = '7ab863bd-6e84-4ae7-895a-2fa3de45cb9c'; -- Gestão de Seções Patrimoniais        
+  UPDATE Recurso SET Icon = 'fa-duotone fa-building' WHERE RecursoId = '199cade7-128a-4c38-b2cf-d720ded19148'; -- Cadastro de Setor Patrimonial       
+  UPDATE Recurso SET Icon = 'fa-duotone fa-city' WHERE RecursoId = 'a1a715e4-c092-4054-8783-874b6945662f'; -- Gestão de Setores Patrimoniais
+
+  -- ============================================
+  -- GESTÃO DE CADASTROS (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-user-gear' WHERE RecursoId = '0fd9ff14-bb86-4cdf-ad25-bf40cb2388c0'; -- Cadastro de Encarregados
+  UPDATE Recurso SET Icon = 'fa-duotone fa-id-card-clip' WHERE RecursoId = 'c8c4f004-960d-4053-b2e0-b8b364139f53'; -- Motoristas (submenu)
+  UPDATE Recurso SET Icon = 'fa-duotone fa-headset' WHERE RecursoId = 'fd3c383b-09fa-4ffa-b81f-82a5498afde6'; -- Cadastro de Operadores
+  UPDATE Recurso SET Icon = 'fa-duotone fa-spray-can-sparkles' WHERE RecursoId = '9689e709-932d-4984-90e3-c9ff2579d107'; -- Cadastro de Lavadores     
+
+  -- Netos de Motoristas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-id-card' WHERE RecursoId = 'c2f084fd-9891-4bf0-b07c-99239515420b'; -- Cadastro de Motoristas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-users-rectangle' WHERE RecursoId = '8c78e638-b5db-4045-8fbe-36181289547c'; -- Lotação de Motoristas        
+  UPDATE Recurso SET Icon = 'fa-duotone fa-eye' WHERE RecursoId = '31fe8e31-e3ab-495e-b557-6b0915b90d1a'; -- Visualiza Lotações
+  UPDATE Recurso SET Icon = 'fa-duotone fa-chart-user' WHERE RecursoId = 'bd88b874-572d-46e4-95fd-6a4e33759963'; -- Gráficos Gerenciais - Motoristas  
+
+  -- Netos de Veículos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-car' WHERE RecursoId = '09e4b715-11e6-4e89-8d9e-ff20b17833ce'; -- Cadastro de Veículos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-droplet' WHERE RecursoId = 'b584b9d8-39bb-4d12-bf90-cd9137059b10'; -- Tipos de Combustível
+  UPDATE Recurso SET Icon = 'fa-duotone fa-copyright' WHERE RecursoId = 'cf6ca0f4-82df-484b-b3e7-5a371abfcace'; -- Cadastro de Marcas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-car-side' WHERE RecursoId = '5b3f82bf-0d4f-4e98-937a-fd6dc9c8cc00'; -- Cadastro de Modelos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-building-flag' WHERE RecursoId = '6223f112-a5f8-4982-a2da-c799d0c6739b'; -- Cadastro de Unidades Usuárias  
+  UPDATE Recurso SET Icon = 'fa-duotone fa-award' WHERE RecursoId = '9e20202d-fa53-4cb3-941e-9a23a9710364'; -- Cadastro de Placas de Bronze
+
+  -- ============================================
+  -- GESTÃO DE ALERTAS (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-bell-plus' WHERE RecursoId = '3e440283-96a9-4caf-aadb-efbd545a2f58'; -- Adiciona Alerta
+  UPDATE Recurso SET Icon = 'fa-duotone fa-bells' WHERE RecursoId = '69fdc368-bad2-4183-8e3a-4d4ad1cee18b'; -- Controle de Alertas
+
+  -- ============================================
+  -- TAXILEG (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-import' WHERE RecursoId = '21703048-9387-4e3f-85b1-e5acc894771b'; -- Importação de Viagens Realizadas 
+  UPDATE Recurso SET Icon = 'fa-duotone fa-file-circle-xmark' WHERE RecursoId = '1f5ab2a0-6656-410d-9b50-63b6ba069ef4'; -- Importação de Viagens Canceladas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-chart-mixed' WHERE RecursoId = '97e9f014-3596-4694-bcd4-f7d8ce687222'; -- Gráficos Gerenciais - TaxiLeg    
+
+  -- ============================================
+  -- ADMINISTRAÇÃO (filhos)
+  -- ============================================
+  UPDATE Recurso SET Icon = 'fa-duotone fa-user-plus' WHERE RecursoId = 'ab9ac64c-8ab5-4247-98ba-220df5124f8d'; -- Cadastro de Usuários
+  UPDATE Recurso SET Icon = 'fa-duotone fa-users-gear' WHERE RecursoId = '00ac7b88-7ae2-4e54-9ff1-132788a53b94'; -- Gestão de Usuários
+  UPDATE Recurso SET Icon = 'fa-duotone fa-puzzle-piece' WHERE RecursoId = 'b28db56d-56e3-4402-8df7-1f29f5bd17fd'; -- Insere Recursos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-cubes' WHERE RecursoId = 'a95e4c6f-7bc7-41b6-b33c-9c22d930dbeb'; -- Gestão de Recursos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-calculator' WHERE RecursoId = '2f2abfb5-12b7-417b-aaeb-5b8e0334ac65'; -- Atualiza Custo das Viagens        
+  UPDATE Recurso SET Icon = 'fa-duotone fa-pen-to-square' WHERE RecursoId = '6dec740a-ab4c-417d-8cf5-984a06448f64'; -- Edita Dados Viagem
+  UPDATE Recurso SET Icon = 'fa-duotone fa-broom' WHERE RecursoId = '66ba8123-d5c5-48ff-bd97-1efc565c688f'; -- Higieniza Origens/Destinos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-bug' WHERE RecursoId = '4ffb071b-513b-4193-a45c-c9391f63a894'; -- Log de Erros
+  UPDATE Recurso SET Icon = 'fa-duotone fa-text' WHERE RecursoId = 'a6620ecc-7e2d-4b17-a076-f8ed4b976962'; -- Monta Descrição
+  UPDATE Recurso SET Icon = 'fa-duotone fa-chart-bar' WHERE RecursoId = '3efb14ff-55c9-469f-9f76-fcd6dd11776f'; -- Gerar Estatísticas Viagens
+  UPDATE Recurso SET Icon = 'fa-duotone fa-sliders' WHERE RecursoId = '3af108bb-ebe3-4943-a9c9-3f9f705ddc94'; -- Dashboard Ajuste Estatístico
+  UPDATE Recurso SET Icon = 'fa-duotone fa-bars-staggered' WHERE RecursoId = '368b877e-5137-4f2e-92ea-9193d0592d0e'; -- Gerenciador de Navegação      
+
+
+  -- Script SQL para Ícones Pai (execute no banco):
+
+  -- Página Inicial
+  UPDATE Recurso SET Icon = 'fa-duotone fa-house' WHERE RecursoId = 'e103ff35-4398-4293-adca-87f6a89b1fa3';
+  -- Agenda
+  UPDATE Recurso SET Icon = 'fa-duotone fa-calendar-days' WHERE RecursoId = 'bfdb9541-e8be-4dc1-b5ab-ec9b6b492f74';
+  -- Nova Viagem
+  UPDATE Recurso SET Icon = 'fa-duotone fa-route' WHERE RecursoId = 'afe0cf41-da14-426e-9e7e-272e87a830ac';
+  -- Gestão de Requisições
+  UPDATE Recurso SET Icon = 'fa-duotone fa-calendar-check' WHERE RecursoId = 'ff5201a1-e1ea-4096-a816-74c4141f3b4e';
+  -- Gestão de Viagens
+  UPDATE Recurso SET Icon = 'fa-duotone fa-suitcase-rolling' WHERE RecursoId = 'e5365aec-c63b-43fc-80d8-30a046562ded';
+  -- Gestão de Manutenção
+  UPDATE Recurso SET Icon = 'fa-duotone fa-car-wrench' WHERE RecursoId = 'b1cc35b4-1169-42de-97f0-f5734a9b0f91';
+  -- Gestão de Abastecimento
+  UPDATE Recurso SET Icon = 'fa-duotone fa-gas-pump' WHERE RecursoId = '298f91ce-94ff-4d16-bb0a-6cce66b2075c';
+  -- Gestão de Contratos
+  UPDATE Recurso SET Icon = 'fa-duotone fa-folders' WHERE RecursoId = '2420c563-76dc-411d-ad2a-4bf59f966b75';
+  -- Gestão de Multas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-gavel' WHERE RecursoId = '695b8da7-ed11-4442-9f0d-4a9f424572be';
+  -- Gestão de Patrimônio
+  UPDATE Recurso SET Icon = 'fa-duotone fa-box-open-full' WHERE RecursoId = 'a258eef3-c4f6-4a5f-8b29-5c96db624400';
+  -- Gestão de Cadastros
+  UPDATE Recurso SET Icon = 'fa-duotone fa-database' WHERE RecursoId = 'c2bc7a34-a3ba-4d33-ae77-bc73a025c65c';
+  -- Gestão de Alertas
+  UPDATE Recurso SET Icon = 'fa-duotone fa-bells' WHERE RecursoId = '1f80e801-2554-4608-a8bc-01b4597690fe';
+  -- TaxiLeg
+  UPDATE Recurso SET Icon = 'fa-duotone fa-taxi' WHERE RecursoId = '79bbdba8-f9ad-4d14-9b5a-2ce837f2133f';
+  -- Administração
+  UPDATE Recurso SET Icon = 'fa-duotone fa-user-shield' WHERE RecursoId = 'a22f6266-50bb-492d-8152-003a7aea1ca9';
+  -- Veículos (submenu)
+  UPDATE Recurso SET Icon = 'fa-duotone fa-car' WHERE RecursoId = '062ac432-fb5c-4045-a7ab-c6762b090421';
+
+
+-- =====================================================
+-- SCRIPT 04: Corrigir link para Gestão de Recursos e Navegação
+-- Execute este script para atualizar o Href no banco
+-- =====================================================
+
+-- Atualiza o Href de GerenciadorNavegacao para GestaoRecursosNavegacao
+UPDATE Recurso
+SET Href = 'administracao_gestaorecursosnavegacao.html',
+    Nome = 'Gestão de Recursos e Navegação',
+    NomeMenu = 'Gestão de Recursos e Navegação'
+WHERE Href LIKE '%gerenciadornavegacao%'
+   OR NomeMenu LIKE '%Gerenciador de Navegação%';
+
+-- Verificar resultado
+SELECT RecursoId, Nome, NomeMenu, Href
+FROM Recurso
+WHERE NomeMenu LIKE '%Navegação%' OR Href LIKE '%navegacao%';
+
+
+  -- Corrigir URL do Dashboard de Motoristas (lembrar de mudar ID)
+  UPDATE Recurso
+  SET Href = 'motorista_dashboardmotoristas.html',
+      Nome = 'Dashboard de Motoristas',
+      NomeMenu = 'Dashboard de Motoristas',
+      Descricao = 'Menu: Dashboard de Motoristas'
+  WHERE RecursoId = 'bd88b874-572d-46e4-95fd-6a4e33759963';
+
+
+  -- ======================================
+  -- ÍNDICES PARA DASHBOARD DE MOTORISTAS
+  -- ======================================
+
+  -- VIAGEM: índice composto para consultas por período e motorista
+  CREATE NONCLUSTERED INDEX IX_Viagem_DataInicial_MotoristaId
+  ON Viagem (DataInicial, MotoristaId)
+  INCLUDE (KmInicial, KmFinal, Minutos);
+
+  -- VIAGEM: índice para heatmap (dia da semana e hora)
+  CREATE NONCLUSTERED INDEX IX_Viagem_MotoristaId_DataInicial
+  ON Viagem (MotoristaId, DataInicial);
+
+  -- ABASTECIMENTO: índice para consultas por período e motorista
+  CREATE NONCLUSTERED INDEX IX_Abastecimento_DataHora_MotoristaId
+  ON Abastecimento (DataHora, MotoristaId);
+
+  -- MULTA: índice para consultas por período e motorista
+  CREATE NONCLUSTERED INDEX IX_Multa_Data_MotoristaId
+  ON Multa (Data, MotoristaId)
+  INCLUDE (ValorAteVencimento);
+
+  -- MOTORISTA: índice para filtros de status e tipo
+  CREATE NONCLUSTERED INDEX IX_Motorista_Status_EfetivoFerista
+  ON Motorista (Status, EfetivoFerista)
+  INCLUDE (Nome, DataVencimentoCNH, DataIngresso);
+
+  -- MOTORISTA: índice para CNH vencendo
+  CREATE NONCLUSTERED INDEX IX_Motorista_Status_DataVencimentoCNH
+  ON Motorista (Status, DataVencimentoCNH)
+  WHERE Status = 1;
+
+
+  -- =====================================================
+  -- CORREÇÃO: Usar HoraInicio para extrair a hora real
+  -- =====================================================
+
+  -- Atualizar a SP sp_RecalcularEstatisticasMotoristas
+  -- Seção do Heatmap:
+
+  IF EXISTS (SELECT * FROM sys.procedures WHERE name = 'sp_RecalcularEstatisticasMotoristas')
+      DROP PROCEDURE sp_RecalcularEstatisticasMotoristas;
+  GO
+
+  CREATE PROCEDURE sp_RecalcularEstatisticasMotoristas
+      @Ano INT,
+      @Mes INT
+  AS
+  BEGIN
+      SET NOCOUNT ON;
+
+      DECLARE @DataInicio DATE = DATEFROMPARTS(@Ano, @Mes, 1);
+      DECLARE @DataFim DATE = EOMONTH(@DataInicio);
+      DECLARE @Hoje DATE = GETDATE();
+
+      BEGIN TRY
+          BEGIN TRANSACTION;
+
+          -- Limpa dados existentes do mês
+          DELETE FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes;
+
+          -- Insere estatísticas de viagens por motorista
+          INSERT INTO EstatisticaMotoristasMensal (MotoristaId, Ano, Mes, TotalViagens, KmTotal, MinutosTotais, DataAtualizacao)
+          SELECT
+              v.MotoristaId,
+              @Ano,
+              @Mes,
+              COUNT(*),
+              SUM(CASE
+                  WHEN v.KmInicial IS NOT NULL AND v.KmFinal IS NOT NULL
+                       AND v.KmFinal >= v.KmInicial
+                       AND (v.KmFinal - v.KmInicial) <= 2000
+                  THEN v.KmFinal - v.KmInicial
+                  ELSE 0
+              END),
+              SUM(ISNULL(v.Minutos, 0)),
+              GETDATE()
+          FROM Viagem v
+          WHERE v.MotoristaId IS NOT NULL
+            AND v.DataInicial >= @DataInicio
+            AND v.DataInicial < DATEADD(DAY, 1, @DataFim)
+          GROUP BY v.MotoristaId;
+
+          -- Atualiza multas por motorista
+          UPDATE e
+          SET e.TotalMultas = ISNULL(m.Total, 0),
+              e.ValorTotalMultas = ISNULL(m.Valor, 0),
+              e.DataAtualizacao = GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          LEFT JOIN (
+              SELECT MotoristaId, COUNT(*) as Total, SUM(ISNULL(ValorAteVencimento, 0)) as Valor
+              FROM Multa
+              WHERE Data >= @DataInicio AND Data < DATEADD(DAY, 1, @DataFim)
+                AND MotoristaId IS NOT NULL
+              GROUP BY MotoristaId
+          ) m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes;
+
+          -- Insere motoristas que só têm multas (sem viagens)
+          INSERT INTO EstatisticaMotoristasMensal (MotoristaId, Ano, Mes, TotalMultas, ValorTotalMultas, DataAtualizacao)
+          SELECT
+              m.MotoristaId,
+              @Ano,
+              @Mes,
+              COUNT(*),
+              SUM(ISNULL(m.ValorAteVencimento, 0)),
+              GETDATE()
+          FROM Multa m
+          WHERE m.MotoristaId IS NOT NULL
+            AND m.Data >= @DataInicio
+            AND m.Data < DATEADD(DAY, 1, @DataFim)
+            AND NOT EXISTS (
+                SELECT 1 FROM EstatisticaMotoristasMensal e
+                WHERE e.MotoristaId = m.MotoristaId AND e.Ano = @Ano AND e.Mes = @Mes
+            )
+          GROUP BY m.MotoristaId;
+
+          -- Atualiza abastecimentos por motorista
+          UPDATE e
+          SET e.TotalAbastecimentos = ISNULL(a.Total, 0),
+              e.LitrosTotais = ISNULL(a.Litros, 0),
+              e.ValorTotalAbastecimentos = ISNULL(a.Valor, 0),
+              e.DataAtualizacao = GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          LEFT JOIN (
+              SELECT MotoristaId, COUNT(*) as Total,
+                     SUM(ISNULL(Litros, 0)) as Litros,
+                     SUM(ISNULL(Litros, 0) * ISNULL(ValorUnitario, 0)) as Valor
+              FROM Abastecimento
+              WHERE DataHora >= @DataInicio AND DataHora < DATEADD(DAY, 1, @DataFim)
+                AND MotoristaId IS NOT NULL AND MotoristaId <> '00000000-0000-0000-0000-000000000000'
+              GROUP BY MotoristaId
+          ) a ON e.MotoristaId = a.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes;
+
+          -- Estatísticas Gerais do Mês
+          DELETE FROM EstatisticaGeralMensal WHERE Ano = @Ano AND Mes = @Mes;
+
+          INSERT INTO EstatisticaGeralMensal (
+              Ano, Mes,
+              TotalMotoristas, MotoristasAtivos, MotoristasInativos,
+              Efetivos, Feristas, Cobertura,
+              TotalViagens, KmTotal, HorasTotais,
+              TotalMultas, ValorTotalMultas,
+              TotalAbastecimentos,
+              DataAtualizacao
+          )
+          SELECT
+              @Ano,
+              @Mes,
+              (SELECT COUNT(*) FROM Motorista),
+              (SELECT COUNT(*) FROM Motorista WHERE Status = 1),
+              (SELECT COUNT(*) FROM Motorista WHERE Status = 0),
+              (SELECT COUNT(*) FROM Motorista WHERE Status = 1 AND (EfetivoFerista = 'Efetivo' OR EfetivoFerista IS NULL OR EfetivoFerista = '')),    
+              (SELECT COUNT(*) FROM Motorista WHERE Status = 1 AND EfetivoFerista = 'Ferista'),
+              (SELECT COUNT(*) FROM Motorista WHERE Status = 1 AND EfetivoFerista = 'Cobertura'),
+              ISNULL((SELECT SUM(TotalViagens) FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes), 0),
+              ISNULL((SELECT SUM(KmTotal) FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes), 0),
+              ISNULL((SELECT SUM(MinutosTotais) / 60.0 FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes), 0),
+              ISNULL((SELECT SUM(TotalMultas) FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes), 0),
+              ISNULL((SELECT SUM(ValorTotalMultas) FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes), 0),
+              ISNULL((SELECT SUM(TotalAbastecimentos) FROM EstatisticaMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes), 0),
+              GETDATE();
+
+          -- Rankings Top 10
+          DELETE FROM RankingMotoristasMensal WHERE Ano = @Ano AND Mes = @Mes;
+
+          -- Top 10 por Viagens
+          INSERT INTO RankingMotoristasMensal (Ano, Mes, TipoRanking, Posicao, MotoristaId, NomeMotorista, TipoMotorista, ValorPrincipal, DataAtualizacao)
+          SELECT TOP 10
+              @Ano, @Mes, 'VIAGENS', ROW_NUMBER() OVER (ORDER BY e.TotalViagens DESC),
+              e.MotoristaId, m.Nome, ISNULL(m.EfetivoFerista, 'Efetivo'), e.TotalViagens, GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          INNER JOIN Motorista m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes AND e.TotalViagens > 0
+          ORDER BY e.TotalViagens DESC;
+
+          -- Top 10 por KM
+          INSERT INTO RankingMotoristasMensal (Ano, Mes, TipoRanking, Posicao, MotoristaId, NomeMotorista, TipoMotorista, ValorPrincipal, DataAtualizacao)
+          SELECT TOP 10
+              @Ano, @Mes, 'KM', ROW_NUMBER() OVER (ORDER BY e.KmTotal DESC),
+              e.MotoristaId, m.Nome, ISNULL(m.EfetivoFerista, 'Efetivo'), e.KmTotal, GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          INNER JOIN Motorista m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes AND e.KmTotal > 0
+          ORDER BY e.KmTotal DESC;
+
+          -- Top 10 por Horas
+          INSERT INTO RankingMotoristasMensal (Ano, Mes, TipoRanking, Posicao, MotoristaId, NomeMotorista, TipoMotorista, ValorPrincipal, DataAtualizacao)
+          SELECT TOP 10
+              @Ano, @Mes, 'HORAS', ROW_NUMBER() OVER (ORDER BY e.MinutosTotais DESC),
+              e.MotoristaId, m.Nome, ISNULL(m.EfetivoFerista, 'Efetivo'), ROUND(e.MinutosTotais / 60.0, 1), GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          INNER JOIN Motorista m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes AND e.MinutosTotais > 0
+          ORDER BY e.MinutosTotais DESC;
+
+          -- Top 10 por Abastecimentos
+          INSERT INTO RankingMotoristasMensal (Ano, Mes, TipoRanking, Posicao, MotoristaId, NomeMotorista, TipoMotorista, ValorPrincipal, DataAtualizacao)
+          SELECT TOP 10
+              @Ano, @Mes, 'ABASTECIMENTOS', ROW_NUMBER() OVER (ORDER BY e.TotalAbastecimentos DESC),
+              e.MotoristaId, m.Nome, ISNULL(m.EfetivoFerista, 'Efetivo'), e.TotalAbastecimentos, GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          INNER JOIN Motorista m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes AND e.TotalAbastecimentos > 0
+          ORDER BY e.TotalAbastecimentos DESC;
+
+          -- Top 10 por Multas
+          INSERT INTO RankingMotoristasMensal (Ano, Mes, TipoRanking, Posicao, MotoristaId, NomeMotorista, TipoMotorista, ValorPrincipal, ValorSecundario, DataAtualizacao)
+          SELECT TOP 10
+              @Ano, @Mes, 'MULTAS', ROW_NUMBER() OVER (ORDER BY e.TotalMultas DESC),
+              e.MotoristaId, m.Nome, ISNULL(m.EfetivoFerista, 'Efetivo'), e.TotalMultas, e.ValorTotalMultas, GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          INNER JOIN Motorista m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes AND e.TotalMultas > 0
+          ORDER BY e.TotalMultas DESC;
+
+          -- Top 10 Performance
+          INSERT INTO RankingMotoristasMensal (Ano, Mes, TipoRanking, Posicao, MotoristaId, NomeMotorista, TipoMotorista, ValorPrincipal, ValorSecundario, ValorTerciario, ValorQuaternario, DataAtualizacao)
+          SELECT TOP 10
+              @Ano, @Mes, 'PERFORMANCE', ROW_NUMBER() OVER (ORDER BY e.TotalViagens DESC),
+              e.MotoristaId, m.Nome, ISNULL(m.EfetivoFerista, 'Efetivo'),
+              e.TotalViagens, e.KmTotal, ROUND(e.MinutosTotais / 60.0, 1), e.TotalMultas, GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          INNER JOIN Motorista m ON e.MotoristaId = m.MotoristaId
+          WHERE e.Ano = @Ano AND e.Mes = @Mes AND e.TotalViagens > 0
+          ORDER BY e.TotalViagens DESC;
+
+          -- =====================================================
+          -- HEATMAP - CORRIGIDO: Usar HoraInicio para extrair a hora
+          -- =====================================================
+          DELETE FROM HeatmapViagensMensal WHERE Ano = @Ano AND Mes = @Mes AND MotoristaId IS NULL;
+
+          INSERT INTO HeatmapViagensMensal (Ano, Mes, MotoristaId, DiaSemana, Hora, TotalViagens, DataAtualizacao)
+          SELECT
+              @Ano, @Mes, NULL,
+              DATEPART(WEEKDAY, v.HoraInicio) - 1,  -- CORRIGIDO: HoraInicio
+              DATEPART(HOUR, v.HoraInicio),          -- CORRIGIDO: HoraInicio
+              COUNT(*),
+              GETDATE()
+          FROM Viagem v
+          WHERE v.MotoristaId IS NOT NULL
+            AND v.DataInicial >= @DataInicio
+            AND v.DataInicial < DATEADD(DAY, 1, @DataFim)
+            AND v.HoraInicio IS NOT NULL
+          GROUP BY DATEPART(WEEKDAY, v.HoraInicio), DATEPART(HOUR, v.HoraInicio);
+
+          -- Evolução Diária de Viagens (Todos os motoristas)
+          DELETE FROM EvolucaoViagensDiaria
+          WHERE Data >= @DataInicio AND Data <= @DataFim AND MotoristaId IS NULL;
+
+          INSERT INTO EvolucaoViagensDiaria (Data, MotoristaId, TotalViagens, KmTotal, MinutosTotais, DataAtualizacao)
+          SELECT
+              CAST(v.DataInicial AS DATE),
+              NULL,
+              COUNT(*),
+              SUM(CASE
+                  WHEN v.KmInicial IS NOT NULL AND v.KmFinal IS NOT NULL
+                       AND v.KmFinal >= v.KmInicial
+                       AND (v.KmFinal - v.KmInicial) <= 2000
+                  THEN v.KmFinal - v.KmInicial
+                  ELSE 0
+              END),
+              SUM(ISNULL(v.Minutos, 0)),
+              GETDATE()
+          FROM Viagem v
+          WHERE v.MotoristaId IS NOT NULL
+            AND v.DataInicial >= @DataInicio
+            AND v.DataInicial < DATEADD(DAY, 1, @DataFim)
+          GROUP BY CAST(v.DataInicial AS DATE);
+
+          COMMIT TRANSACTION;
+          PRINT 'Estatísticas do mês ' + CAST(@Mes AS VARCHAR) + '/' + CAST(@Ano AS VARCHAR) + ' recalculadas com sucesso.';
+
+      END TRY
+      BEGIN CATCH
+          ROLLBACK TRANSACTION;
+          THROW;
+      END CATCH
+  END
+  GO
+
+  -- =====================================================
+  -- SP 2: sp_RecalcularEstatisticasMotoristaUnico (CORRIGIDA)
+  -- =====================================================
+
+  IF EXISTS (SELECT * FROM sys.procedures WHERE name = 'sp_RecalcularEstatisticasMotoristaUnico')
+      DROP PROCEDURE sp_RecalcularEstatisticasMotoristaUnico;
+  GO
+
+  CREATE PROCEDURE sp_RecalcularEstatisticasMotoristaUnico
+      @MotoristaId UNIQUEIDENTIFIER,
+      @Ano INT,
+      @Mes INT
+  AS
+  BEGIN
+      SET NOCOUNT ON;
+
+      DECLARE @DataInicio DATE = DATEFROMPARTS(@Ano, @Mes, 1);
+      DECLARE @DataFim DATE = EOMONTH(@DataInicio);
+
+      BEGIN TRY
+          DELETE FROM EstatisticaMotoristasMensal
+          WHERE MotoristaId = @MotoristaId AND Ano = @Ano AND Mes = @Mes;
+
+          INSERT INTO EstatisticaMotoristasMensal (MotoristaId, Ano, Mes, TotalViagens, KmTotal, MinutosTotais, DataAtualizacao)
+          SELECT
+              @MotoristaId,
+              @Ano,
+              @Mes,
+              COUNT(*),
+              SUM(CASE
+                  WHEN v.KmInicial IS NOT NULL AND v.KmFinal IS NOT NULL
+                       AND v.KmFinal >= v.KmInicial
+                       AND (v.KmFinal - v.KmInicial) <= 2000
+                  THEN v.KmFinal - v.KmInicial
+                  ELSE 0
+              END),
+              SUM(ISNULL(v.Minutos, 0)),
+              GETDATE()
+          FROM Viagem v
+          WHERE v.MotoristaId = @MotoristaId
+            AND v.DataInicial >= @DataInicio
+            AND v.DataInicial < DATEADD(DAY, 1, @DataFim);
+
+          IF @@ROWCOUNT = 0
+          BEGIN
+              INSERT INTO EstatisticaMotoristasMensal (MotoristaId, Ano, Mes, DataAtualizacao)
+              VALUES (@MotoristaId, @Ano, @Mes, GETDATE());
+          END
+
+          UPDATE e
+          SET e.TotalMultas = ISNULL(m.Total, 0),
+              e.ValorTotalMultas = ISNULL(m.Valor, 0),
+              e.DataAtualizacao = GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          LEFT JOIN (
+              SELECT COUNT(*) as Total, SUM(ISNULL(ValorAteVencimento, 0)) as Valor
+              FROM Multa
+              WHERE MotoristaId = @MotoristaId
+                AND Data >= @DataInicio AND Data < DATEADD(DAY, 1, @DataFim)
+          ) m ON 1=1
+          WHERE e.MotoristaId = @MotoristaId AND e.Ano = @Ano AND e.Mes = @Mes;
+
+          UPDATE e
+          SET e.TotalAbastecimentos = ISNULL(a.Total, 0),
+              e.LitrosTotais = ISNULL(a.Litros, 0),
+              e.ValorTotalAbastecimentos = ISNULL(a.Valor, 0),
+              e.DataAtualizacao = GETDATE()
+          FROM EstatisticaMotoristasMensal e
+          LEFT JOIN (
+              SELECT COUNT(*) as Total,
+                     SUM(ISNULL(Litros, 0)) as Litros,
+                     SUM(ISNULL(Litros, 0) * ISNULL(ValorUnitario, 0)) as Valor
+              FROM Abastecimento
+              WHERE MotoristaId = @MotoristaId
+                AND DataHora >= @DataInicio AND DataHora < DATEADD(DAY, 1, @DataFim)
+          ) a ON 1=1
+          WHERE e.MotoristaId = @MotoristaId AND e.Ano = @Ano AND e.Mes = @Mes;
+
+          -- HEATMAP - CORRIGIDO: Usar HoraInicio
+          DELETE FROM HeatmapViagensMensal
+          WHERE Ano = @Ano AND Mes = @Mes AND MotoristaId = @MotoristaId;
+
+          INSERT INTO HeatmapViagensMensal (Ano, Mes, MotoristaId, DiaSemana, Hora, TotalViagens, DataAtualizacao)
+          SELECT
+              @Ano, @Mes, @MotoristaId,
+              DATEPART(WEEKDAY, v.HoraInicio) - 1,  -- CORRIGIDO: HoraInicio
+              DATEPART(HOUR, v.HoraInicio),          -- CORRIGIDO: HoraInicio
+              COUNT(*),
+              GETDATE()
+          FROM Viagem v
+          WHERE v.MotoristaId = @MotoristaId
+            AND v.DataInicial >= @DataInicio
+            AND v.DataInicial < DATEADD(DAY, 1, @DataFim)
+            AND v.HoraInicio IS NOT NULL
+          GROUP BY DATEPART(WEEKDAY, v.HoraInicio), DATEPART(HOUR, v.HoraInicio);
+
+          DELETE FROM EvolucaoViagensDiaria
+          WHERE Data >= @DataInicio AND Data <= @DataFim AND MotoristaId = @MotoristaId;
+
+          INSERT INTO EvolucaoViagensDiaria (Data, MotoristaId, TotalViagens, KmTotal, MinutosTotais, DataAtualizacao)
+          SELECT
+              CAST(v.DataInicial AS DATE),
+              @MotoristaId,
+              COUNT(*),
+              SUM(CASE
+                  WHEN v.KmInicial IS NOT NULL AND v.KmFinal IS NOT NULL
+                       AND v.KmFinal >= v.KmInicial
+                       AND (v.KmFinal - v.KmInicial) <= 2000
+                  THEN v.KmFinal - v.KmInicial
+                  ELSE 0
+              END),
+              SUM(ISNULL(v.Minutos, 0)),
+              GETDATE()
+          FROM Viagem v
+          WHERE v.MotoristaId = @MotoristaId
+            AND v.DataInicial >= @DataInicio
+            AND v.DataInicial < DATEADD(DAY, 1, @DataFim)
+          GROUP BY CAST(v.DataInicial AS DATE);
+
+      END TRY
+      BEGIN CATCH
+          THROW;
+      END CATCH
+  END
+  GO
+
+  PRINT 'SPs corrigidas para usar HoraInicio no Heatmap!';
+  GO
