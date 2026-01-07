@@ -642,6 +642,21 @@
                            '</div>';
                 };
 
+                // ✅ Evento SELECTING: dispara ANTES de confirmar seleção (mais confiável)
+                ddlIconeObj.selecting = function(args) {
+                    console.log('=== SELECTING ícone (ANTES) ===', args);
+                    if (args.nodeData && !args.nodeData.isCategory) {
+                        // Armazena a seleção na variável global IMEDIATAMENTE
+                        ultimoIconeSelecionado = args.nodeData.id;
+
+                        var txtIconClass = document.getElementById('txtIconClass');
+                        if (txtIconClass) {
+                            txtIconClass.value = args.nodeData.id;
+                            console.log('✅ Classe atualizada via SELECTING:', args.nodeData.id);
+                        }
+                    }
+                };
+
                 // ✅ Evento SELECT: dispara ao selecionar item
                 ddlIconeObj.select = function(args) {
                     console.log('=== SELECT ícone ===', args);
@@ -1365,6 +1380,24 @@
                            '</div>';
                 };
 
+                // ✅ Evento SELECTING: dispara ANTES de confirmar seleção (mais confiável)
+                ddlPaginaObj.selecting = function(args) {
+                    console.log('=== SELECTING página (ANTES) ===', args);
+                    if (args.nodeData && !args.nodeData.isCategory) {
+                        // Armazena a seleção na variável global IMEDIATAMENTE
+                        ultimaPaginaSelecionada = {
+                            id: args.nodeData.id,
+                            paginaRef: args.nodeData.paginaRef
+                        };
+
+                        var txtHref = document.getElementById('txtHref');
+                        if (txtHref && args.nodeData.paginaRef) {
+                            txtHref.value = args.nodeData.paginaRef;
+                            console.log('✅ URL atualizada via SELECTING:', args.nodeData.paginaRef);
+                        }
+                    }
+                };
+
                 // ✅ Evento SELECT: dispara ao selecionar item
                 ddlPaginaObj.select = function(args) {
                     console.log('=== SELECT página ===', args);
@@ -1609,8 +1642,10 @@
             if (result.success) {
                 mostrarAlerta(result.message, 'success');
 
-                // Atualiza árvore
-                carregarArvore();
+                // ✅ Atualiza árvore após pequeno delay para garantir que backend processou
+                setTimeout(function() {
+                    carregarArvore();
+                }, 300);
 
                 var recursoId = result.id || dto.id;
 
