@@ -756,30 +756,40 @@
 
     // Decodifica entidades HTML para caracteres normais (para exibição)
     function decodeHtml(html) {
-        if (!html) return html;
-        var txt = document.createElement("textarea");
-        txt.innerHTML = html;
-        return txt.value;
+        try {
+            if (!html) return html;
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        } catch (erro) {
+            console.error('[decodeHtml] Erro:', erro);
+            return html; // Retorna valor original em caso de erro
+        }
     }
 
     // Codifica TODOS caracteres especiais e acentuados para entidades HTML (para gravação)
     function encodeHtml(text) {
-        if (!text) return text;
+        try {
+            if (!text) return text;
 
-        var result = '';
-        for (var i = 0; i < text.length; i++) {
-            var char = text[i];
-            var code = char.charCodeAt(0);
+            var result = '';
+            for (var i = 0; i < text.length; i++) {
+                var char = text[i];
+                var code = char.charCodeAt(0);
 
-            // Se for caractere ASCII básico (32-126) exceto < > & " '
-            if (code >= 32 && code <= 126 && char !== '<' && char !== '>' && char !== '&' && char !== '"' && char !== "'") {
-                result += char;
-            } else {
-                // Converte para entidade HTML numérica
-                result += '&#' + code + ';';
+                // Se for caractere ASCII básico (32-126) exceto < > & " '
+                if (code >= 32 && code <= 126 && char !== '<' && char !== '>' && char !== '&' && char !== '"' && char !== "'") {
+                    result += char;
+                } else {
+                    // Converte para entidade HTML numérica
+                    result += '&#' + code + ';';
+                }
             }
+            return result;
+        } catch (erro) {
+            console.error('[encodeHtml] Erro:', erro);
+            return text; // Retorna valor original em caso de erro
         }
-        return result;
     }
 
     // Carrega dados ao iniciar
@@ -791,251 +801,269 @@
 
     // Popula dropdown de Item Pai com todos os grupos (não-página)
     function popularDropdownItemPai() {
-        var grupos = [];
+        try {
+            var grupos = [];
 
-        // Função recursiva para extrair todos os grupos da árvore
-        function extrairGrupos(items) {
-            if (!items) return;
+            // Função recursiva para extrair todos os grupos da árvore
+            function extrairGrupos(items) {
+                if (!items) return;
 
-            items.forEach(function(item) {
-                // Grupo = href vazio ou 'javascript:void(0);'
-                var isGrupo = !item.href || item.href === 'javascript:void(0);';
+                items.forEach(function(item) {
+                    // Grupo = href vazio ou 'javascript:void(0);'
+                    var isGrupo = !item.href || item.href === 'javascript:void(0);';
 
-                if (isGrupo) {
-                    grupos.push({
-                        id: item.id,
-                        text: item.text,
-                        nivel: calcularNivel(item.id)
-                    });
-                }
+                    if (isGrupo) {
+                        grupos.push({
+                            id: item.id,
+                            text: item.text,
+                            nivel: calcularNivel(item.id)
+                        });
+                    }
 
-                // Recursão nos filhos
-                if (item.items && item.items.length > 0) {
-                    extrairGrupos(item.items);
-                }
-            });
-        }
-
-        // Calcula nível do item na hierarquia (quantos pais tem)
-        function calcularNivel(itemId) {
-            var nivel = 0;
-            var item = buscarItemPorId(treeData, itemId);
-
-            while (item && item.parentId) {
-                nivel++;
-                item = buscarItemPorId(treeData, item.parentId);
+                    // Recursão nos filhos
+                    if (item.items && item.items.length > 0) {
+                        extrairGrupos(item.items);
+                    }
+                });
             }
 
-            return nivel;
-        }
+            // Calcula nível do item na hierarquia (quantos pais tem)
+            function calcularNivel(itemId) {
+                var nivel = 0;
+                var item = buscarItemPorId(treeData, itemId);
 
-        // Extrai todos os grupos da árvore
-        extrairGrupos(treeData);
+                while (item && item.parentId) {
+                    nivel++;
+                    item = buscarItemPorId(treeData, item.parentId);
+                }
 
-        // Formata texto com indentação baseada no nível E decodifica HTML
-        grupos.forEach(function(grupo) {
-            var indentacao = '  '.repeat(grupo.nivel);
-            grupo.textFormatado = indentacao + decodeHtml(grupo.text);  // ✅ DECODIFICA
-        });
+                return nivel;
+            }
 
-        console.log('Grupos encontrados:', grupos.length);
+            // Extrai todos os grupos da árvore
+            extrairGrupos(treeData);
 
-        // Popula o DropDownList
-        var ddlItemPai = document.getElementById('ddlItemPai');
-        if (ddlItemPai && ddlItemPai.ej2_instances && ddlItemPai.ej2_instances[0]) {
-            var ddl = ddlItemPai.ej2_instances[0];
-            ddl.dataSource = grupos;
-            ddl.fields = { text: 'textFormatado', value: 'id' };
-            ddl.dataBind();
-            console.log('✅ DropDownList de Item Pai populado');
+            // Formata texto com indentação baseada no nível E decodifica HTML
+            grupos.forEach(function(grupo) {
+                var indentacao = '  '.repeat(grupo.nivel);
+                grupo.textFormatado = indentacao + decodeHtml(grupo.text);  // ✅ DECODIFICA
+            });
+
+            console.log('Grupos encontrados:', grupos.length);
+
+            // Popula o DropDownList
+            var ddlItemPai = document.getElementById('ddlItemPai');
+            if (ddlItemPai && ddlItemPai.ej2_instances && ddlItemPai.ej2_instances[0]) {
+                var ddl = ddlItemPai.ej2_instances[0];
+                ddl.dataSource = grupos;
+                ddl.fields = { text: 'textFormatado', value: 'id' };
+                ddl.dataBind();
+                console.log('✅ DropDownList de Item Pai populado');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "popularDropdownItemPai", erro);
         }
     }
 
     // Evento change do dropdown de Item Pai
     function onItemPaiChange(args) {
-        console.log('=== Item Pai alterado ===');
-        console.log('Novo Pai ID:', args.value);
+        try {
+            console.log('=== Item Pai alterado ===');
+            console.log('Novo Pai ID:', args.value);
 
-        if (!args.value) {
-            console.log('Pai removido - mantém ordem atual');
-            return;
+            if (!args.value) {
+                console.log('Pai removido - mantém ordem atual');
+                return;
+            }
+
+            // Calcula nova ordem baseada nos filhos do novo pai
+            calcularOrdemAutomatica(args.value);
+
+            // Atualiza campo parentId oculto
+            document.getElementById('parentId').value = args.value;
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onItemPaiChange", erro);
         }
-
-        // Calcula nova ordem baseada nos filhos do novo pai
-        calcularOrdemAutomatica(args.value);
-
-        // Atualiza campo parentId oculto
-        document.getElementById('parentId').value = args.value;
     }
 
     // Calcula ordem automaticamente baseada nos filhos do pai
     function calcularOrdemAutomatica(paiId) {
-        console.log('Calculando ordem para pai:', paiId);
+        try {
+            console.log('Calculando ordem para pai:', paiId);
 
-        // Busca o item pai no treeData
-        var pai = buscarItemPorId(treeData, paiId);
+            // Busca o item pai no treeData
+            var pai = buscarItemPorId(treeData, paiId);
 
-        if (!pai) {
-            console.warn('Pai não encontrado no treeData');
-            document.getElementById('txtOrdem').value = 0;
-            return;
-        }
-
-        // Busca todos os filhos do pai
-        var filhos = pai.items || [];
-        console.log('Filhos encontrados:', filhos.length);
-
-        if (filhos.length === 0) {
-            // Primeiro filho
-            document.getElementById('txtOrdem').value = 0;
-            console.log('✅ Ordem definida: 0 (primeiro filho)');
-            return;
-        }
-
-        // Encontra a maior ordem entre os filhos
-        var maiorOrdem = -1;
-        filhos.forEach(function(filho) {
-            var ordem = parseFloat(filho.ordem) || 0;
-            if (ordem > maiorOrdem) {
-                maiorOrdem = ordem;
+            if (!pai) {
+                console.warn('Pai não encontrado no treeData');
+                document.getElementById('txtOrdem').value = 0;
+                return;
             }
-        });
 
-        // Nova ordem = maior + 1
-        var novaOrdem = maiorOrdem + 1;
-        document.getElementById('txtOrdem').value = novaOrdem;
-        console.log('✅ Ordem calculada:', novaOrdem, '(maior atual:', maiorOrdem, ')');
+            // Busca todos os filhos do pai
+            var filhos = pai.items || [];
+            console.log('Filhos encontrados:', filhos.length);
+
+            if (filhos.length === 0) {
+                // Primeiro filho
+                document.getElementById('txtOrdem').value = 0;
+                console.log('✅ Ordem definida: 0 (primeiro filho)');
+                return;
+            }
+
+            // Encontra a maior ordem entre os filhos
+            var maiorOrdem = -1;
+            filhos.forEach(function(filho) {
+                var ordem = parseFloat(filho.ordem) || 0;
+                if (ordem > maiorOrdem) {
+                    maiorOrdem = ordem;
+                }
+            });
+
+            // Nova ordem = maior + 1
+            var novaOrdem = maiorOrdem + 1;
+            document.getElementById('txtOrdem').value = novaOrdem;
+            console.log('✅ Ordem calculada:', novaOrdem, '(maior atual:', maiorOrdem, ')');
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "calcularOrdemAutomatica", erro);
+        }
     }
 
     // Carrega arvore do banco de dados
     function carregarArvore() {
-        fetch('/api/Navigation/GetTreeAdmin')
-            .then(r => r.json())
-            .then(result => {
-                console.log('Dados recebidos da API:', result);
-                if (result.success && result.data && result.data.length > 0) {
-                    treeData = result.data;
-                    document.getElementById('emptyTreeState').style.display = 'none';
-                    renderizarTreeView();
-                    atualizarContagem();
-                    // ✅ Popula dropdown de Item Pai após carregar árvore
-                    popularDropdownItemPai();
-                } else {
-                    document.getElementById('emptyTreeState').style.display = 'block';
-                    document.getElementById('itemCount').textContent = '0 itens';
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao carregar arvore:', error);
-                mostrarAlerta('Erro ao carregar dados', 'danger');
-            });
+        try {
+            fetch('/api/Navigation/GetTreeAdmin')
+                .then(r => r.json())
+                .then(result => {
+                    console.log('Dados recebidos da API:', result);
+                    if (result.success && result.data && result.data.length > 0) {
+                        treeData = result.data;
+                        document.getElementById('emptyTreeState').style.display = 'none';
+                        renderizarTreeView();
+                        atualizarContagem();
+                        // ✅ Popula dropdown de Item Pai após carregar árvore
+                        popularDropdownItemPai();
+                    } else {
+                        document.getElementById('emptyTreeState').style.display = 'block';
+                        document.getElementById('itemCount').textContent = '0 itens';
+                    }
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarArvore", erro);
+                });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarArvore", erro);
+        }
     }
 
     // Renderiza TreeView com Syncfusion
     function renderizarTreeView() {
-        // ✅ Destrói instância anterior do TreeView se existir
-        if (treeObj) {
-            console.log('Destruindo instância anterior do TreeView...');
-            try {
-                treeObj.destroy();
-                treeObj = null;
-            } catch (error) {
-                console.warn('Erro ao destruir TreeView anterior:', error);
-            }
-        }
-
-        var container = document.getElementById('gestaoTreeView');
-        container.innerHTML = '<div id="treeViewControl"></div>';
-
-        console.log('Criando nova instância do TreeView com', treeData.length, 'itens');
-
-        treeObj = new ej.navigations.TreeView({
-            fields: {
-                dataSource: treeData,
-                id: 'id',
-                text: 'text',
-                child: 'items',
-                parentID: 'parentId'
-            },
-            nodeTemplate: function(data) {
-                var badge = data.href && data.href !== 'javascript:void(0);' ? 'Página' : 'Grupo';
-                var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
-                var displayText = decodeHtml(data.text);  // ✅ DECODIFICA para exibição
-                return '<div class="tree-node" data-id="' + data.id + '">' +
-                       '<i class="' + (data.icon || 'fa-duotone fa-folder') + '"></i>' +
-                       '<span class="node-text">' + displayText + '</span>' +
-                       '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
-                       '</div>';
-            },
-            allowDragAndDrop: true,
-            allowMultiSelection: false,
-            nodeClicked: function(args) {
+        try {
+            // ✅ Destrói instância anterior do TreeView se existir
+            if (treeObj) {
+                console.log('Destruindo instância anterior do TreeView...');
                 try {
-                    console.log('=== nodeClicked event ===', args);
-
-                    // Verifica se há elemento node
-                    if (!args || !args.node) {
-                        console.warn('Node clicado sem elemento válido:', args);
-                        return;
-                    }
-
-                    // Obtém o ID do data-id do elemento DOM
-                    var nodeElement = args.node;
-                    var treeNodeDiv = nodeElement.querySelector('.tree-node');
-
-                    if (!treeNodeDiv) {
-                        console.error('Elemento .tree-node não encontrado dentro do node');
-                        return;
-                    }
-
-                    var nodeId = treeNodeDiv.getAttribute('data-id');
-                    console.log('Node clicado - ID extraído do DOM:', nodeId);
-
-                    if (!nodeId) {
-                        console.error('data-id não encontrado no elemento');
-                        return;
-                    }
-
-                    // Busca dados completos no treeData
-                    var itemCompleto = buscarItemPorId(treeData, nodeId);
-                    console.log('Item encontrado no treeData:', itemCompleto);
-
-                    if (itemCompleto) {
-                        selecionarItem(itemCompleto);
-                    } else {
-                        console.error('Item não encontrado no treeData para ID:', nodeId);
-                    }
+                    treeObj.destroy();
+                    treeObj = null;
                 } catch (error) {
-                    console.error('ERRO em nodeClicked:', error);
-                    console.error('Stack:', error.stack);
+                    console.warn('Erro ao destruir TreeView anterior:', error);
                 }
-            },
-            nodeDragStart: function(args) {
-                console.log('Drag iniciado:', args.draggedNodeData);
-            },
-            nodeDragging: function(args) {
-                // Permite arrastar para qualquer lugar
-            },
-            nodeDragStop: function(args) {
-                console.log('Drag finalizado:', args);
-                // Atualiza hierarquia apos drag-drop
-                setTimeout(function() {
-                    // Recarrega dados atualizados do TreeView
-                    treeData = treeObj.fields.dataSource;
-                    atualizarContagem();
-                    mostrarAlerta('Arraste concluído. Clique em "Salvar Ordenação" para persistir.', 'info');
-                }, 200);
-            },
-            nodeDropped: function(args) {
-                console.log('Node solto:', args);
-                console.log('Destino:', args.droppedNode);
-                console.log('Posição:', args.dropLevel, args.dropIndex);
-            },
-            expandOn: 'Click'
-        });
+            }
 
-        treeObj.appendTo('#treeViewControl');
-        console.log('✅ TreeView renderizado com sucesso! Total de itens:', treeData.length);
+            var container = document.getElementById('gestaoTreeView');
+            container.innerHTML = '<div id="treeViewControl"></div>';
+
+            console.log('Criando nova instância do TreeView com', treeData.length, 'itens');
+
+            treeObj = new ej.navigations.TreeView({
+                fields: {
+                    dataSource: treeData,
+                    id: 'id',
+                    text: 'text',
+                    child: 'items',
+                    parentID: 'parentId'
+                },
+                nodeTemplate: function(data) {
+                    var badge = data.href && data.href !== 'javascript:void(0);' ? 'Página' : 'Grupo';
+                    var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
+                    var displayText = decodeHtml(data.text);  // ✅ DECODIFICA para exibição
+                    return '<div class="tree-node" data-id="' + data.id + '">' +
+                           '<i class="' + (data.icon || 'fa-duotone fa-folder') + '"></i>' +
+                           '<span class="node-text">' + displayText + '</span>' +
+                           '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
+                           '</div>';
+                },
+                allowDragAndDrop: true,
+                allowMultiSelection: false,
+                nodeClicked: function(args) {
+                    try {
+                        console.log('=== nodeClicked event ===', args);
+
+                        // Verifica se há elemento node
+                        if (!args || !args.node) {
+                            console.warn('Node clicado sem elemento válido:', args);
+                            return;
+                        }
+
+                        // Obtém o ID do data-id do elemento DOM
+                        var nodeElement = args.node;
+                        var treeNodeDiv = nodeElement.querySelector('.tree-node');
+
+                        if (!treeNodeDiv) {
+                            console.error('Elemento .tree-node não encontrado dentro do node');
+                            return;
+                        }
+
+                        var nodeId = treeNodeDiv.getAttribute('data-id');
+                        console.log('Node clicado - ID extraído do DOM:', nodeId);
+
+                        if (!nodeId) {
+                            console.error('data-id não encontrado no elemento');
+                            return;
+                        }
+
+                        // Busca dados completos no treeData
+                        var itemCompleto = buscarItemPorId(treeData, nodeId);
+                        console.log('Item encontrado no treeData:', itemCompleto);
+
+                        if (itemCompleto) {
+                            selecionarItem(itemCompleto);
+                        } else {
+                            console.error('Item não encontrado no treeData para ID:', nodeId);
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "renderizarTreeView.nodeClicked", error);
+                    }
+                },
+                nodeDragStart: function(args) {
+                    console.log('Drag iniciado:', args.draggedNodeData);
+                },
+                nodeDragging: function(args) {
+                    // Permite arrastar para qualquer lugar
+                },
+                nodeDragStop: function(args) {
+                    console.log('Drag finalizado:', args);
+                    // Atualiza hierarquia apos drag-drop
+                    setTimeout(function() {
+                        // Recarrega dados atualizados do TreeView
+                        treeData = treeObj.fields.dataSource;
+                        atualizarContagem();
+                        mostrarAlerta('Arraste concluído. Clique em "Salvar Ordenação" para persistir.', 'info');
+                    }, 200);
+                },
+                nodeDropped: function(args) {
+                    console.log('Node solto:', args);
+                    console.log('Destino:', args.droppedNode);
+                    console.log('Posição:', args.dropLevel, args.dropIndex);
+                },
+                expandOn: 'Click'
+            });
+
+            treeObj.appendTo('#treeViewControl');
+            console.log('✅ TreeView renderizado com sucesso! Total de itens:', treeData.length);
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "renderizarTreeView", erro);
+        }
     }
 
     // Seleciona item e carrega propriedades
@@ -1199,162 +1227,181 @@
 
     // Busca item por ID recursivamente no treeData
     function buscarItemPorId(items, id) {
-        if (!items || !id) return null;
+        try {
+            if (!items || !id) return null;
 
-        for (var i = 0; i < items.length; i++) {
-            // Compara como string para garantir
-            if (String(items[i].id) === String(id)) {
-                return items[i];
+            for (var i = 0; i < items.length; i++) {
+                // Compara como string para garantir
+                if (String(items[i].id) === String(id)) {
+                    return items[i];
+                }
+                if (items[i].items && items[i].items.length > 0) {
+                    var found = buscarItemPorId(items[i].items, id);
+                    if (found) return found;
+                }
             }
-            if (items[i].items && items[i].items.length > 0) {
-                var found = buscarItemPorId(items[i].items, id);
-                if (found) return found;
-            }
+            return null;
+        } catch (erro) {
+            console.error('[buscarItemPorId] Erro:', erro);
+            return null;
         }
-        return null;
     }
 
     // Carrega ícones FontAwesome do endpoint
     function carregarIconesFontAwesome() {
-        fetch('/api/Navigation/GetIconesFontAwesomeHierarquico')
-            .then(r => r.json())
-            .then(result => {
-                console.log('Ícones FontAwesome carregados:', result);
-                if (result.success && result.data) {
-                    var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
-                    if (ddlIconeObj) {
-                        // Configura os fields do DropDownTree
-                        ddlIconeObj.fields = {
-                            dataSource: result.data,
-                            value: 'id',
-                            text: 'text',
-                            parentValue: 'parentId',
-                            hasChildren: 'hasChild',
-                            child: 'child'
-                        };
-                        ddlIconeObj.dataBind();
-                        console.log('DropDownTree de ícones populado com', result.data.length, 'categorias');
+        try {
+            fetch('/api/Navigation/GetIconesFontAwesomeHierarquico')
+                .then(r => r.json())
+                .then(result => {
+                    console.log('Ícones FontAwesome carregados:', result);
+                    if (result.success && result.data) {
+                        var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+                        if (ddlIconeObj) {
+                            // Configura os fields do DropDownTree
+                            ddlIconeObj.fields = {
+                                dataSource: result.data,
+                                value: 'id',
+                                text: 'text',
+                                parentValue: 'parentId',
+                                hasChildren: 'hasChild',
+                                child: 'child'
+                            };
+                            ddlIconeObj.dataBind();
+                            console.log('DropDownTree de ícones populado com', result.data.length, 'categorias');
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao carregar ícones FontAwesome:', error);
-                mostrarAlerta('Erro ao carregar ícones. Verifique o console.', 'warning');
-            });
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarIconesFontAwesome", erro);
+                });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarIconesFontAwesome", erro);
+        }
     }
 
     // ✅ EVENTO SELECT: Dispara AO CLICAR no ícone (não precisa clicar fora)
     function onIconeSelect(args) {
-        console.log('=== onIconeSelect disparado (AO CLICAR) ===');
-        console.log('args.nodeData:', args.nodeData);
+        try {
+            console.log('=== onIconeSelect disparado (AO CLICAR) ===');
+            console.log('args.nodeData:', args.nodeData);
 
-        if (!args.nodeData || args.nodeData.isCategory) {
-            console.log('Categoria clicada - não atualiza campo');
-            return;
-        }
+            if (!args.nodeData || args.nodeData.isCategory) {
+                console.log('Categoria clicada - não atualiza campo');
+                return;
+            }
 
-        // No evento SELECT, os dados vêm em args.nodeData
-        var iconClass = args.nodeData.id;      // "fa-duotone fa-bat"
-        var iconLabel = args.nodeData.text;    // "Bastão"
+            // No evento SELECT, os dados vêm em args.nodeData
+            var iconClass = args.nodeData.id;      // "fa-duotone fa-bat"
+            var iconLabel = args.nodeData.text;    // "Bastão"
 
-        var txtIconClass = document.getElementById('txtIconClass');
-        if (txtIconClass) {
-            txtIconClass.value = iconClass;
-            console.log('✅ Classe CSS atualizada IMEDIATAMENTE:', iconClass, '| Label:', iconLabel);
-        } else {
-            console.error('❌ Elemento txtIconClass não encontrado!');
+            var txtIconClass = document.getElementById('txtIconClass');
+            if (txtIconClass) {
+                txtIconClass.value = iconClass;
+                console.log('✅ Classe CSS atualizada IMEDIATAMENTE:', iconClass, '| Label:', iconLabel);
+            } else {
+                console.error('❌ Elemento txtIconClass não encontrado!');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onIconeSelect", erro);
         }
     }
 
     // ✅ EVENTO CHANGE: Backup para quando setado programaticamente
     function onIconeChange(args) {
-        console.log('=== onIconeChange disparado ===');
-        console.log('args completo:', args);
-        console.log('args.itemData:', args.itemData);
-        console.log('args.value:', args.value);
+        try {
+            console.log('=== onIconeChange disparado ===');
+            console.log('args completo:', args);
+            console.log('args.itemData:', args.itemData);
+            console.log('args.value:', args.value);
 
-        // Quando setado programaticamente, itemData vem undefined
-        // Preciso buscar o item no dataSource
-        var itemData = args.itemData;
+            // Quando setado programaticamente, itemData vem undefined
+            // Preciso buscar o item no dataSource
+            var itemData = args.itemData;
 
-        if (!itemData && args.value && args.value.length > 0) {
-            console.log('itemData undefined - buscando no dataSource...');
-            var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
-            if (ddlIconeObj && ddlIconeObj.fields && ddlIconeObj.fields.dataSource) {
-                var iconId = args.value[0];
-                console.log('Buscando iconId:', iconId);
+            if (!itemData && args.value && args.value.length > 0) {
+                console.log('itemData undefined - buscando no dataSource...');
+                var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+                if (ddlIconeObj && ddlIconeObj.fields && ddlIconeObj.fields.dataSource) {
+                    var iconId = args.value[0];
+                    console.log('Buscando iconId:', iconId);
 
-                // Busca em todas as categorias
-                var dataSource = ddlIconeObj.fields.dataSource;
-                for (var i = 0; i < dataSource.length; i++) {
-                    var category = dataSource[i];
-                    if (category.child && category.child.length > 0) {
-                        for (var j = 0; j < category.child.length; j++) {
-                            if (category.child[j].id === iconId) {
-                                itemData = category.child[j];
-                                console.log('✅ Ícone encontrado no dataSource:', itemData);
-                                break;
+                    // Busca em todas as categorias
+                    var dataSource = ddlIconeObj.fields.dataSource;
+                    for (var i = 0; i < dataSource.length; i++) {
+                        var category = dataSource[i];
+                        if (category.child && category.child.length > 0) {
+                            for (var j = 0; j < category.child.length; j++) {
+                                if (category.child[j].id === iconId) {
+                                    itemData = category.child[j];
+                                    console.log('✅ Ícone encontrado no dataSource:', itemData);
+                                    break;
+                                }
                             }
                         }
+                        if (itemData) break;
                     }
-                    if (itemData) break;
-                }
 
-                // Se não encontrou, pode ser que seja a própria classe
-                if (!itemData) {
-                    console.log('❌ Ícone não encontrado no dataSource - usando iconId diretamente');
-                    itemData = { id: iconId, text: iconId, isCategory: false };
+                    // Se não encontrou, pode ser que seja a própria classe
+                    if (!itemData) {
+                        console.log('❌ Ícone não encontrado no dataSource - usando iconId diretamente');
+                        itemData = { id: iconId, text: iconId, isCategory: false };
+                    }
                 }
             }
-        }
 
-        // Se não há dados ou é uma categoria, limpa o campo
-        if (!itemData || itemData.isCategory) {
-            document.getElementById('txtIconClass').value = '';
-            console.log('Categoria selecionada ou campo limpo');
-            return;
-        }
+            // Se não há dados ou é uma categoria, limpa o campo
+            if (!itemData || itemData.isCategory) {
+                document.getElementById('txtIconClass').value = '';
+                console.log('Categoria selecionada ou campo limpo');
+                return;
+            }
 
-        // Apenas ícones válidos (não categorias)
-        var iconClass = itemData.id;      // "fa-duotone fa-bat"
-        var iconLabel = itemData.text;    // "Bastão"
+            // Apenas ícones válidos (não categorias)
+            var iconClass = itemData.id;      // "fa-duotone fa-bat"
+            var iconLabel = itemData.text;    // "Bastão"
 
-        // Atualiza campo de texto bloqueado com a classe CSS
-        var txtIconClass = document.getElementById('txtIconClass');
-        if (txtIconClass) {
-            txtIconClass.value = iconClass;
-            console.log('✅ Classe CSS atualizada:', iconClass, '| Label:', iconLabel);
-        } else {
-            console.error('❌ Elemento txtIconClass não encontrado!');
+            // Atualiza campo de texto bloqueado com a classe CSS
+            var txtIconClass = document.getElementById('txtIconClass');
+            if (txtIconClass) {
+                txtIconClass.value = iconClass;
+                console.log('✅ Classe CSS atualizada:', iconClass, '| Label:', iconLabel);
+            } else {
+                console.error('❌ Elemento txtIconClass não encontrado!');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onIconeChange", erro);
         }
     }
 
     // Carrega páginas do sistema
     function carregarPaginasSistema() {
-        fetch('/api/Navigation/GetPaginasHierarquico')
-            .then(r => r.json())
-            .then(result => {
-                console.log('Páginas carregadas:', result);
-                if (result.success && result.data) {
-                    var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
-                    if (ddlPaginaObj) {
-                        ddlPaginaObj.fields = {
-                            dataSource: result.data,
-                            value: 'id',
-                            text: 'text',
-                            parentValue: 'parentId',
-                            hasChildren: 'hasChild',
-                            child: 'child'
-                        };
-                        ddlPaginaObj.dataBind();
-                        console.log('DropDownTree de páginas populado com', result.data.length, 'módulos');
+        try {
+            fetch('/api/Navigation/GetPaginasHierarquico')
+                .then(r => r.json())
+                .then(result => {
+                    console.log('Páginas carregadas:', result);
+                    if (result.success && result.data) {
+                        var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+                        if (ddlPaginaObj) {
+                            ddlPaginaObj.fields = {
+                                dataSource: result.data,
+                                value: 'id',
+                                text: 'text',
+                                parentValue: 'parentId',
+                                hasChildren: 'hasChild',
+                                child: 'child'
+                            };
+                            ddlPaginaObj.dataBind();
+                            console.log('DropDownTree de páginas populado com', result.data.length, 'módulos');
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao carregar páginas:', error);
-                mostrarAlerta('Erro ao carregar páginas. Verifique o console.', 'warning');
-            });
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarPaginasSistema", erro);
+                });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarPaginasSistema", erro);
+        }
     }
 
     function onPaginaDropdownCreated() {
@@ -1478,79 +1525,87 @@
 
     // ✅ EVENTO SELECT: Dispara AO CLICAR no item (não precisa clicar fora)
     function onPaginaSelect(args) {
-        console.log('=== onPaginaSelect disparado (AO CLICAR) ===');
-        console.log('args.nodeData:', args.nodeData);
+        try {
+            console.log('=== onPaginaSelect disparado (AO CLICAR) ===');
+            console.log('args.nodeData:', args.nodeData);
 
-        if (!args.nodeData || args.nodeData.isCategory) {
-            console.log('Categoria clicada - não gera URL');
-            return;
-        }
+            if (!args.nodeData || args.nodeData.isCategory) {
+                console.log('Categoria clicada - não gera URL');
+                return;
+            }
 
-        // No evento SELECT, os dados vêm em args.nodeData
-        var paginaRef = args.nodeData.paginaRef;
-        console.log('paginaRef extraída:', paginaRef);
+            // No evento SELECT, os dados vêm em args.nodeData
+            var paginaRef = args.nodeData.paginaRef;
+            console.log('paginaRef extraída:', paginaRef);
 
-        var txtHref = document.getElementById('txtHref');
-        if (txtHref) {
-            txtHref.value = paginaRef;
-            console.log('✅ URL atualizada IMEDIATAMENTE:', paginaRef);
-        } else {
-            console.error('❌ Elemento txtHref não encontrado!');
+            var txtHref = document.getElementById('txtHref');
+            if (txtHref) {
+                txtHref.value = paginaRef;
+                console.log('✅ URL atualizada IMEDIATAMENTE:', paginaRef);
+            } else {
+                console.error('❌ Elemento txtHref não encontrado!');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onPaginaSelect", erro);
         }
     }
 
     // ✅ EVENTO CHANGE: Backup para quando setado programaticamente
     function onPaginaChange(args) {
-        console.log('=== onPaginaChange disparado ===');
-        console.log('args completo:', args);
-        console.log('args.itemData:', args.itemData);
-        console.log('args.value:', args.value);
+        try {
+            console.log('=== onPaginaChange disparado ===');
+            console.log('args completo:', args);
+            console.log('args.itemData:', args.itemData);
+            console.log('args.value:', args.value);
 
-        // Quando setado programaticamente, itemData vem undefined
-        // Preciso buscar o item no dataSource
-        var itemData = args.itemData;
+            // Quando setado programaticamente, itemData vem undefined
+            // Preciso buscar o item no dataSource
+            var itemData = args.itemData;
 
-        if (!itemData && args.value && args.value.length > 0) {
-            console.log('itemData undefined - buscando no dataSource...');
-            var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
-            if (ddlPaginaObj && ddlPaginaObj.fields && ddlPaginaObj.fields.dataSource) {
-                var pageId = args.value[0];
-                console.log('Buscando pageId:', pageId);
+            if (!itemData && args.value && args.value.length > 0) {
+                console.log('itemData undefined - buscando no dataSource...');
+                var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+                if (ddlPaginaObj && ddlPaginaObj.fields && ddlPaginaObj.fields.dataSource) {
+                    var pageId = args.value[0];
+                    console.log('Buscando pageId:', pageId);
 
-                // Busca em todas as categorias
-                var dataSource = ddlPaginaObj.fields.dataSource;
-                for (var i = 0; i < dataSource.length; i++) {
-                    var category = dataSource[i];
-                    if (category.child && category.child.length > 0) {
-                        for (var j = 0; j < category.child.length; j++) {
-                            if (category.child[j].id === pageId) {
-                                itemData = category.child[j];
-                                console.log('✅ Item encontrado no dataSource:', itemData);
-                                break;
+                    // Busca em todas as categorias
+                    var dataSource = ddlPaginaObj.fields.dataSource;
+                    for (var i = 0; i < dataSource.length; i++) {
+                        var category = dataSource[i];
+                        if (category.child && category.child.length > 0) {
+                            for (var j = 0; j < category.child.length; j++) {
+                                if (category.child[j].id === pageId) {
+                                    itemData = category.child[j];
+                                    console.log('✅ Item encontrado no dataSource:', itemData);
+                                    break;
+                                }
                             }
                         }
+                        if (itemData) break;
                     }
-                    if (itemData) break;
                 }
             }
-        }
 
-        // Se não há dados ou é uma categoria, não faz nada
-        if (!itemData || itemData.isCategory) {
-            console.log('Categoria selecionada ou campo limpo - não gera URL');
-            return;
-        }
+            // Se não há dados ou é uma categoria, não faz nada
+            if (!itemData || itemData.isCategory) {
+                console.log('Categoria selecionada ou campo limpo - não gera URL');
+                return;
+            }
 
-        // Obtém a URL gerada (formato: modulo_pagina.html)
-        var paginaRef = itemData.paginaRef;
-        console.log('paginaRef extraída:', paginaRef);
+            // Obtém a URL gerada (formato: modulo_pagina.html)
+            var paginaRef = itemData.paginaRef;
+            console.log('paginaRef extraída:', paginaRef);
 
-        var txtHref = document.getElementById('txtHref');
-        if (txtHref) {
-            txtHref.value = paginaRef;
-            console.log('✅ URL atualizada no campo txtHref:', paginaRef);
-        } else {
-            console.error('❌ Elemento txtHref não encontrado!');
+            var txtHref = document.getElementById('txtHref');
+            if (txtHref) {
+                txtHref.value = paginaRef;
+                console.log('✅ URL atualizada no campo txtHref:', paginaRef);
+            } else {
+                console.error('❌ Elemento txtHref não encontrado!');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onPaginaChange", erro);
         }
     }
 
@@ -1722,88 +1777,105 @@
 
     // Adiciona novo item
     function adicionarNovoItem() {
-        // Limpa formulario mas mantém card visível
-        limparFormulario(false);  // false = NÃO esconde o card
+        try {
+            // Limpa formulario mas mantém card visível
+            limparFormulario(false);  // false = NÃO esconde o card
 
-        // ✅ Habilita Card de Propriedades
-        habilitarCardPropriedades(true);
+            // ✅ Habilita Card de Propriedades
+            habilitarCardPropriedades(true);
 
-        // Mostra card de propriedades
-        document.getElementById('propsCard').style.display = 'block';
+            // Mostra card de propriedades
+            document.getElementById('propsCard').style.display = 'block';
 
-        // ✅ Garante que Card de Controle de Acesso está escondido ao criar novo item
-        document.getElementById('acessoCard').style.display = 'none';
+            // ✅ Garante que Card de Controle de Acesso está escondido ao criar novo item
+            document.getElementById('acessoCard').style.display = 'none';
 
-        document.getElementById('txtNome').focus();
-        document.getElementById('selectedItemName').textContent = 'Novo Item';
+            document.getElementById('txtNome').focus();
+            document.getElementById('selectedItemName').textContent = 'Novo Item';
 
-        // Atualiza indicador de modo para "Criar"
-        document.getElementById('modoEdicao').textContent = 'Criar';
-        document.getElementById('modoEdicao').className = 'badge bg-success ms-2';
+            // Atualiza indicador de modo para "Criar"
+            document.getElementById('modoEdicao').textContent = 'Criar';
+            document.getElementById('modoEdicao').className = 'badge bg-success ms-2';
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "adicionarNovoItem", erro);
+        }
     }
 
     // Exclui item selecionado
     function excluirItem() {
-        if (!selectedItem || !selectedItem.id) {
-            mostrarAlerta('Selecione um item para excluir!', 'warning');
-            return;
-        }
-
-        if (!confirm('Tem certeza que deseja excluir "' + selectedItem.text + '"?')) {
-            return;
-        }
-
-        fetch('/api/Navigation/DeleteRecurso', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recursoId: selectedItem.id })
-        })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                mostrarAlerta(result.message, 'success');
-                limparFormulario();
-                carregarArvore();
-            } else {
-                mostrarAlerta('Erro: ' + result.message, 'danger');
+        try {
+            if (!selectedItem || !selectedItem.id) {
+                mostrarAlerta('Selecione um item para excluir!', 'warning');
+                return;
             }
-        });
+
+            Alerta.Confirmar(
+                'Confirmar Exclusão',
+                'Tem certeza que deseja excluir "' + decodeHtml(selectedItem.text) + '"?',
+                'Excluir',
+                'Cancelar'
+            ).then(function(result) {
+                if (!result) return;
+
+                fetch('/api/Navigation/DeleteRecurso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recursoId: selectedItem.id })
+                })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.success) {
+                        mostrarAlerta(result.message, 'success');
+                        limparFormulario();
+                        carregarArvore();
+                    } else {
+                        mostrarAlerta('Erro: ' + result.message, 'danger');
+                    }
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "excluirItem", erro);
+                });
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "excluirItem", erro);
+        }
     }
 
     // Limpa formulario
     function limparFormulario(esconderCard = true) {
-        selectedItem = null;
+        try {
+            selectedItem = null;
 
-        // ✅ Reseta variáveis de rastreamento
-        ultimoIconeSelecionado = null;
-        ultimaPaginaSelecionada = null;
+            // ✅ Reseta variáveis de rastreamento
+            ultimoIconeSelecionado = null;
+            ultimaPaginaSelecionada = null;
 
-        document.getElementById('formPropriedades').reset();
-        document.getElementById('recursoId').value = '';
-        document.getElementById('parentId').value = '';
-        document.getElementById('txtIconClass').value = '';
-        document.getElementById('selectedItemName').textContent = 'Nenhum item selecionado';
+            document.getElementById('formPropriedades').reset();
+            document.getElementById('recursoId').value = '';
+            document.getElementById('parentId').value = '';
+            document.getElementById('txtIconClass').value = '';
+            document.getElementById('selectedItemName').textContent = 'Nenhum item selecionado';
 
-        // Limpa DropDownTree de ícones
-        var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
-        if (ddlIconeObj) {
-            ddlIconeObj.value = null;
-        }
+            // Limpa DropDownTree de ícones
+            var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+            if (ddlIconeObj) {
+                ddlIconeObj.value = null;
+            }
 
-        // Limpa DropDownTree de páginas
-        var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
-        if (ddlPaginaObj) {
-            ddlPaginaObj.value = null;
-        }
+            // Limpa DropDownTree de páginas
+            var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+            if (ddlPaginaObj) {
+                ddlPaginaObj.value = null;
+            }
 
-        // Limpa DropDownList de Item Pai
-        var ddlItemPaiObj = document.getElementById('ddlItemPai').ej2_instances[0];
-        if (ddlItemPaiObj) {
-            ddlItemPaiObj.value = null;
-        }
+            // Limpa DropDownList de Item Pai
+            var ddlItemPaiObj = document.getElementById('ddlItemPai').ej2_instances[0];
+            if (ddlItemPaiObj) {
+                ddlItemPaiObj.value = null;
+            }
 
-        document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
-        document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+            document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
+            document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
 
         // Reseta indicador de modo
         document.getElementById('modoEdicao').textContent = 'Selecione';
@@ -1817,142 +1889,184 @@
 
     // Salva ordenacao apos drag-drop
     function salvarOrdenacao() {
-        if (!treeObj) return;
+        try {
+            if (!treeObj) return;
 
-        // Pega o dataSource atualizado do TreeView
-        var dataSource = treeObj.getTreeData();
-        console.log('Dados para salvar:', dataSource);
+            // Pega o dataSource atualizado do TreeView
+            var dataSource = treeObj.getTreeData();
+            console.log('Dados para salvar:', dataSource);
 
-        var items = extrairItensDoTreeView(dataSource, null, 0);
-        console.log('Itens extraídos:', items);
+            var items = extrairItensDoTreeView(dataSource, null, 0);
+            console.log('Itens extraídos:', items);
 
-        fetch('/api/Navigation/SaveTreeToDb', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(items)
-        })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                mostrarAlerta('Ordenação salva com sucesso!', 'success');
-                carregarArvore(); // Recarrega para refletir as mudanças
-            } else {
-                mostrarAlerta('Erro: ' + result.message, 'danger');
-            }
-        });
+            fetch('/api/Navigation/SaveTreeToDb', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(items)
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    mostrarAlerta('Ordenação salva com sucesso!', 'success');
+                    carregarArvore(); // Recarrega para refletir as mudanças
+                } else {
+                    mostrarAlerta('Erro: ' + result.message, 'danger');
+                }
+            })
+            .catch(erro => {
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacao", erro);
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacao", erro);
+        }
     }
 
     // Extrai itens do TreeView para salvar
     function extrairItensDoTreeView(items, parentId, nivel) {
-        if (!items) return [];
+        try {
+            if (!items) return [];
 
-        var result = [];
+            var result = [];
 
-        items.forEach(function(item, index) {
-            result.push({
-                id: item.id,
-                text: item.text,
-                nomeMenu: item.nomeMenu,
-                icon: item.icon,
-                href: item.href,
-                parentId: parentId,
-                ordem: (nivel * 100) + index + 1,
-                nivel: nivel,
-                ativo: item.ativo !== false,
-                descricao: item.descricao,
-                items: []
+            items.forEach(function(item, index) {
+                result.push({
+                    id: item.id,
+                    text: item.text,
+                    nomeMenu: item.nomeMenu,
+                    icon: item.icon,
+                    href: item.href,
+                    parentId: parentId,
+                    ordem: (nivel * 100) + index + 1,
+                    nivel: nivel,
+                    ativo: item.ativo !== false,
+                    descricao: item.descricao,
+                    items: []
+                });
+
+                if (item.items && item.items.length > 0) {
+                    result = result.concat(extrairItensDoTreeView(item.items, item.id, nivel + 1));
+                }
             });
 
-            if (item.items && item.items.length > 0) {
-                result = result.concat(extrairItensDoTreeView(item.items, item.id, nivel + 1));
-            }
-        });
-
-        return result;
+            return result;
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "extrairItensDoTreeView", erro);
+            return [];
+        }
     }
 
     // Atualiza contagem de itens
     function atualizarContagem() {
-        var total = contarItens(treeData);
-        document.getElementById('itemCount').textContent = total + ' itens';
+        try {
+            var total = contarItens(treeData);
+            document.getElementById('itemCount').textContent = total + ' itens';
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "atualizarContagem", erro);
+        }
     }
 
     function contarItens(items) {
-        if (!items) return 0;
-        var count = items.length;
-        items.forEach(function(item) {
-            if (item.items && item.items.length > 0) {
-                count += contarItens(item.items);
-            }
-        });
-        return count;
+        try {
+            if (!items) return 0;
+            var count = items.length;
+            items.forEach(function(item) {
+                if (item.items && item.items.length > 0) {
+                    count += contarItens(item.items);
+                }
+            });
+            return count;
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "contarItens", erro);
+            return 0;
+        }
     }
 
     // Migra dados do JSON
     function migrarDadosJson() {
-        if (!confirm('Isso irá migrar os dados do nav.json para o banco de dados. Continuar?')) {
-            return;
+        try {
+            Alerta.Confirmar(
+                'Confirmar Migração',
+                'Isso irá migrar os dados do nav.json para o banco de dados. Continuar?',
+                'Migrar',
+                'Cancelar'
+            ).then(function(result) {
+                if (!result) return;
+
+                mostrarAlerta('Migrando dados...', 'info');
+
+                fetch('/api/Navigation/MigrateFromJson', {
+                    method: 'POST'
+                })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.success) {
+                        mostrarAlerta(result.message, 'success');
+                        carregarArvore();
+                    } else {
+                        mostrarAlerta('Erro: ' + result.message, 'danger');
+                    }
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "migrarDadosJson", erro);
+                });
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "migrarDadosJson", erro);
         }
-
-        mostrarAlerta('Migrando dados...', 'info');
-
-        fetch('/api/Navigation/MigrateFromJson', {
-            method: 'POST'
-        })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                mostrarAlerta(result.message, 'success');
-                carregarArvore();
-            } else {
-                mostrarAlerta('Erro: ' + result.message, 'danger');
-            }
-        });
     }
 
     // Seleciona todos os acessos
     function selecionarTodosAcessos() {
-        document.querySelectorAll('#listaAcessos input[type="checkbox"]').forEach(function(cb) {
-            if (!cb.checked) {
-                cb.checked = true;
-                cb.dispatchEvent(new Event('change'));
-            }
-        });
+        try {
+            document.querySelectorAll('#listaAcessos input[type="checkbox"]').forEach(function(cb) {
+                if (!cb.checked) {
+                    cb.checked = true;
+                    cb.dispatchEvent(new Event('change'));
+                }
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "selecionarTodosAcessos", erro);
+        }
     }
 
     // Verifica se há mudanças não salvas no formulário
     function verificarMudancasNaoSalvas() {
-        if (!selectedItem) return false;
+        try {
+            if (!selectedItem) return false;
 
-        // Pega valores atuais do formulário
-        var txtNome = document.getElementById('txtNome').value;
-        var txtNomeMenu = document.getElementById('txtNomeMenu').value;
-        var txtHref = document.getElementById('txtHref').value;
-        var txtIconClass = document.getElementById('txtIconClass').value;
-        var txtOrdem = parseFloat(document.getElementById('txtOrdem').value) || 0;
-        var txtDescricao = document.getElementById('txtDescricao').value;
-        var chkAtivo = document.getElementById('chkAtivo').checked;
-        var parentId = document.getElementById('parentId').value;
+            // Pega valores atuais do formulário
+            var txtNome = document.getElementById('txtNome').value;
+            var txtNomeMenu = document.getElementById('txtNomeMenu').value;
+            var txtHref = document.getElementById('txtHref').value;
+            var txtIconClass = document.getElementById('txtIconClass').value;
+            var txtOrdem = parseFloat(document.getElementById('txtOrdem').value) || 0;
+            var txtDescricao = document.getElementById('txtDescricao').value;
+            var chkAtivo = document.getElementById('chkAtivo').checked;
+            var parentId = document.getElementById('parentId').value;
 
-        // Compara com valores originais do selectedItem (decodificados)
-        var nomeOriginal = decodeHtml(selectedItem.text) || '';
-        var nomeMenuOriginal = decodeHtml(selectedItem.nomeMenu) || '';
-        var hrefOriginal = selectedItem.href || '';
-        var iconOriginal = selectedItem.icon || '';
-        var ordemOriginal = selectedItem.ordem || 0;
-        var descricaoOriginal = decodeHtml(selectedItem.descricao) || '';
-        var ativoOriginal = selectedItem.ativo !== false;
-        var parentIdOriginal = selectedItem.parentId || '';
+            // Compara com valores originais do selectedItem (decodificados)
+            var nomeOriginal = decodeHtml(selectedItem.text) || '';
+            var nomeMenuOriginal = decodeHtml(selectedItem.nomeMenu) || '';
+            var hrefOriginal = selectedItem.href || '';
+            var iconOriginal = selectedItem.icon || '';
+            var ordemOriginal = selectedItem.ordem || 0;
+            var descricaoOriginal = decodeHtml(selectedItem.descricao) || '';
+            var ativoOriginal = selectedItem.ativo !== false;
+            var parentIdOriginal = selectedItem.parentId || '';
 
-        // Retorna true se houver alguma diferença
-        return txtNome !== nomeOriginal ||
-               txtNomeMenu !== nomeMenuOriginal ||
-               txtHref !== hrefOriginal ||
-               txtIconClass !== iconOriginal ||
-               txtOrdem !== ordemOriginal ||
-               txtDescricao !== descricaoOriginal ||
-               chkAtivo !== ativoOriginal ||
-               parentId !== parentIdOriginal;
+            // Retorna true se houver alguma diferença
+            return txtNome !== nomeOriginal ||
+                   txtNomeMenu !== nomeMenuOriginal ||
+                   txtHref !== hrefOriginal ||
+                   txtIconClass !== iconOriginal ||
+                   txtOrdem !== ordemOriginal ||
+                   txtDescricao !== descricaoOriginal ||
+                   chkAtivo !== ativoOriginal ||
+                   parentId !== parentIdOriginal;
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "verificarMudancasNaoSalvas", erro);
+            return false;
+        }
     }
 
     // Fecha ambos os cards (Propriedades e Controle de Acesso)
@@ -1996,45 +2110,53 @@
 
     // Habilita ou desabilita todos os campos do Card de Propriedades
     function habilitarCardPropriedades(habilitar) {
-        var campos = document.querySelectorAll('#formPropriedades input, #formPropriedades textarea, #formPropriedades select, #formPropriedades button');
-        campos.forEach(function(campo) {
-            if (habilitar) {
-                campo.removeAttribute('disabled');
-                campo.style.opacity = '1';
-                campo.style.cursor = 'auto';
-            } else {
-                campo.setAttribute('disabled', 'disabled');
-                campo.style.opacity = '0.6';
-                campo.style.cursor = 'not-allowed';
-            }
-        });
+        try {
+            var campos = document.querySelectorAll('#formPropriedades input, #formPropriedades textarea, #formPropriedades select, #formPropriedades button');
+            campos.forEach(function(campo) {
+                if (habilitar) {
+                    campo.removeAttribute('disabled');
+                    campo.style.opacity = '1';
+                    campo.style.cursor = 'auto';
+                } else {
+                    campo.setAttribute('disabled', 'disabled');
+                    campo.style.opacity = '0.6';
+                    campo.style.cursor = 'not-allowed';
+                }
+            });
 
-        // Mantém o botão Salvar Propriedades desabilitado quando está no modo de controle de acesso
-        var btnSalvar = document.querySelector('#formPropriedades button[onclick*="salvarPropriedades"]');
-        if (btnSalvar && !habilitar) {
-            btnSalvar.setAttribute('disabled', 'disabled');
+            // Mantém o botão Salvar Propriedades desabilitado quando está no modo de controle de acesso
+            var btnSalvar = document.querySelector('#formPropriedades button[onclick*="salvarPropriedades"]');
+            if (btnSalvar && !habilitar) {
+                btnSalvar.setAttribute('disabled', 'disabled');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "habilitarCardPropriedades", erro);
         }
     }
 
     // Habilita acesso para todos os usuários (chamado ao criar novo item)
     function habilitarAcessoTodosUsuarios(recursoId) {
-        fetch('/api/Navigation/HabilitarAcessoTodosUsuarios', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recursoId: recursoId })
-        })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                console.log('Acessos habilitados para todos os usuários');
-                carregarControleAcesso(recursoId);
-            } else {
-                console.error('Erro ao habilitar acessos:', result.message);
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao habilitar acessos:', error);
-        });
+        try {
+            fetch('/api/Navigation/HabilitarAcessoTodosUsuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ recursoId: recursoId })
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    console.log('Acessos habilitados para todos os usuários');
+                    carregarControleAcesso(recursoId);
+                } else {
+                    console.error('Erro ao habilitar acessos:', result.message);
+                }
+            })
+            .catch(erro => {
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "habilitarAcessoTodosUsuarios", erro);
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "habilitarAcessoTodosUsuarios", erro);
+        }
     }
 
     // Mostra alerta toast
