@@ -459,14 +459,33 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
-                                <label for="txtIcon">Classe do Ícone (FontAwesome)</label>
-                                <div class="icon-preview-container">
-                                    <div class="icon-preview" id="iconPreview">
+                                <label for="ddlIcone">Selecione o Ícone (FontAwesome 7 Pro)</label>
+                                <div class="d-flex gap-2 align-items-start">
+                                    <!-- Preview do ícone -->
+                                    <div class="icon-preview" id="iconPreview" style="min-width: 40px; min-height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid #dee2e6; border-radius: 4px;">
                                         <i class="fa-duotone fa-folder"></i>
                                     </div>
-                                    <input type="text" class="form-control flex-grow-1" id="txtIcon"
-                                           placeholder="fa-duotone fa-car ou fa-solid fa-car"
-                                           oninput="atualizarPreviewIcone()" />
+
+                                    <!-- DropDownTree para seleção hierárquica -->
+                                    <div style="flex: 1;">
+                                        <ejs-dropdowntree id="ddlIcone"
+                                                         placeholder="Busque ou selecione um ícone..."
+                                                         popupHeight="400px"
+                                                         showCheckBox="false"
+                                                         showClearButton="true"
+                                                         allowFiltering="true"
+                                                         filterType="Contains"
+                                                         ignoreCase="true"
+                                                         treeSettings="@(new Syncfusion.EJ2.DropDowns.DropDownTreeFieldsSettings { DataSource = new List<object>(), Value = "id", Text = "text", ParentValue = "parentId", HasChildren = "hasChild", Child = "child" })"
+                                                         change="onIconeChange">
+                                        </ejs-dropdowntree>
+
+                                        <!-- Campo bloqueado exibindo a classe CSS completa do ícone selecionado -->
+                                        <small class="form-text text-muted mt-1">Classe CSS:</small>
+                                        <input type="text" class="form-control form-control-sm mt-1" id="txtIconClass" readonly
+                                               placeholder="A classe do ícone aparecerá aqui..."
+                                               style="background-color: #f8f9fa; font-family: monospace; font-size: 0.85rem;" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -529,6 +548,7 @@
     // Carrega dados ao iniciar
     document.addEventListener('DOMContentLoaded', function() {
         carregarArvore();
+        carregarIconesFontAwesome();
     });
 
     // Carrega arvore do banco de dados
@@ -635,7 +655,15 @@
         document.getElementById('txtNome').value = selectedItem.text || '';
         document.getElementById('txtNomeMenu').value = selectedItem.nomeMenu || '';
         document.getElementById('txtHref').value = selectedItem.href || '';
-        document.getElementById('txtIcon').value = selectedItem.icon || '';
+
+        // Atualiza ícone no DropDownTree e campo de texto
+        var iconClass = selectedItem.icon || 'fa-regular fa-file';
+        document.getElementById('txtIconClass').value = iconClass;
+        var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+        if (ddlIconeObj) {
+            ddlIconeObj.value = [iconClass];
+        }
+
         document.getElementById('txtOrdem').value = selectedItem.ordem || 0;
         document.getElementById('txtDescricao').value = selectedItem.descricao || '';
         document.getElementById('chkAtivo').checked = selectedItem.ativo !== false;
@@ -646,7 +674,7 @@
         document.getElementById('modoEdicao').textContent = 'Editar';
         document.getElementById('modoEdicao').className = 'badge bg-warning text-dark ms-2';
 
-        atualizarPreviewIcone();
+        atualizarPreviewIcone(iconClass);
 
         // Carrega controle de acesso
         carregarControleAcesso(selectedItem.id);
@@ -670,9 +698,50 @@
     }
 
     // Atualiza preview do icone
-    function atualizarPreviewIcone() {
-        var iconClass = document.getElementById('txtIcon').value || 'fa-regular fa-file';
+    function atualizarPreviewIcone(iconClass) {
+        if (!iconClass) {
+            iconClass = document.getElementById('txtIconClass').value || 'fa-regular fa-file';
+        }
         document.getElementById('iconPreview').innerHTML = '<i class="' + iconClass + '"></i>';
+    }
+
+    // Carrega ícones FontAwesome do endpoint
+    function carregarIconesFontAwesome() {
+        fetch('/api/Navigation/GetIconesFontAwesomeHierarquico')
+            .then(r => r.json())
+            .then(result => {
+                console.log('Ícones FontAwesome carregados:', result);
+                if (result.success && result.data) {
+                    var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+                    if (ddlIconeObj) {
+                        ddlIconeObj.fields.dataSource = result.data;
+                        ddlIconeObj.dataBind();
+                        console.log('DropDownTree de ícones populado com', result.data.length, 'categorias');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar ícones FontAwesome:', error);
+                mostrarAlerta('Erro ao carregar ícones. Verifique o console.', 'warning');
+            });
+    }
+
+    // Callback quando um ícone é selecionado no DropDownTree
+    function onIconeChange(args) {
+        console.log('Ícone selecionado:', args);
+        if (args.itemData) {
+            var iconClass = args.itemData.id;      // "fa-duotone fa-bat"
+            var iconName = args.itemData.name;     // "bat"
+            var iconLabel = args.itemData.text;    // "Bastão"
+
+            // Atualiza campo de texto bloqueado com a classe CSS
+            document.getElementById('txtIconClass').value = iconClass;
+
+            // Atualiza preview visual
+            atualizarPreviewIcone(iconClass);
+
+            console.log('Classe:', iconClass, '| Nome:', iconName, '| Label:', iconLabel);
+        }
     }
 
     // Carrega lista de usuarios com acesso
@@ -736,7 +805,7 @@
             text: document.getElementById('txtNome').value,
             nomeMenu: document.getElementById('txtNomeMenu').value,
             href: document.getElementById('txtHref').value,
-            icon: document.getElementById('txtIcon').value,
+            icon: document.getElementById('txtIconClass').value,
             ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
             descricao: document.getElementById('txtDescricao').value,
             ativo: document.getElementById('chkAtivo').checked,
