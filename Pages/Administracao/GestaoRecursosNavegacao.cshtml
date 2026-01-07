@@ -678,6 +678,12 @@
             // Permite soltar em qualquer nó (criar hierarquia)
             dropAction: 'child',
             nodeClicked: function(args) {
+                // Verifica se há dados do nó
+                if (!args || !args.nodeData || !args.nodeData.id) {
+                    console.warn('Node clicado sem dados válidos:', args);
+                    return;
+                }
+
                 // Busca o ID do nó clicado
                 var nodeId = args.nodeData.id;
                 console.log('Node clicado - ID:', nodeId);
@@ -688,6 +694,8 @@
 
                 if (itemCompleto) {
                     selecionarItem(itemCompleto);
+                } else {
+                    console.error('Item não encontrado no treeData para ID:', nodeId);
                 }
             },
             nodeDragStart: function(args) {
