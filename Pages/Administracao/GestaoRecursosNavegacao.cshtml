@@ -922,23 +922,65 @@
 
     // Callback quando um ícone é selecionado no DropDownTree
     function onIconeChange(args) {
-        console.log('Ícone selecionado:', args);
+        console.log('=== onIconeChange disparado ===');
+        console.log('args completo:', args);
+        console.log('args.itemData:', args.itemData);
+        console.log('args.value:', args.value);
+
+        // Quando setado programaticamente, itemData vem undefined
+        // Preciso buscar o item no dataSource
+        var itemData = args.itemData;
+
+        if (!itemData && args.value && args.value.length > 0) {
+            console.log('itemData undefined - buscando no dataSource...');
+            var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+            if (ddlIconeObj && ddlIconeObj.fields && ddlIconeObj.fields.dataSource) {
+                var iconId = args.value[0];
+                console.log('Buscando iconId:', iconId);
+
+                // Busca em todas as categorias
+                var dataSource = ddlIconeObj.fields.dataSource;
+                for (var i = 0; i < dataSource.length; i++) {
+                    var category = dataSource[i];
+                    if (category.child && category.child.length > 0) {
+                        for (var j = 0; j < category.child.length; j++) {
+                            if (category.child[j].id === iconId) {
+                                itemData = category.child[j];
+                                console.log('✅ Ícone encontrado no dataSource:', itemData);
+                                break;
+                            }
+                        }
+                    }
+                    if (itemData) break;
+                }
+
+                // Se não encontrou, pode ser que seja a própria classe
+                if (!itemData) {
+                    console.log('❌ Ícone não encontrado no dataSource - usando iconId diretamente');
+                    itemData = { id: iconId, text: iconId, isCategory: false };
+                }
+            }
+        }
 
         // Se não há dados ou é uma categoria, limpa o campo
-        if (!args.itemData || args.itemData.isCategory) {
+        if (!itemData || itemData.isCategory) {
             document.getElementById('txtIconClass').value = '';
             console.log('Categoria selecionada ou campo limpo');
             return;
         }
 
         // Apenas ícones válidos (não categorias)
-        var iconClass = args.itemData.id;      // "fa-duotone fa-bat"
-        var iconLabel = args.itemData.text;    // "Bastão"
+        var iconClass = itemData.id;      // "fa-duotone fa-bat"
+        var iconLabel = itemData.text;    // "Bastão"
 
         // Atualiza campo de texto bloqueado com a classe CSS
-        document.getElementById('txtIconClass').value = iconClass;
-
-        console.log('Classe:', iconClass, '| Label:', iconLabel);
+        var txtIconClass = document.getElementById('txtIconClass');
+        if (txtIconClass) {
+            txtIconClass.value = iconClass;
+            console.log('✅ Classe CSS atualizada:', iconClass, '| Label:', iconLabel);
+        } else {
+            console.error('❌ Elemento txtIconClass não encontrado!');
+        }
     }
 
     // Carrega páginas do sistema
@@ -1006,15 +1048,45 @@
         console.log('=== onPaginaChange disparado ===');
         console.log('args completo:', args);
         console.log('args.itemData:', args.itemData);
+        console.log('args.value:', args.value);
+
+        // Quando setado programaticamente, itemData vem undefined
+        // Preciso buscar o item no dataSource
+        var itemData = args.itemData;
+
+        if (!itemData && args.value && args.value.length > 0) {
+            console.log('itemData undefined - buscando no dataSource...');
+            var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+            if (ddlPaginaObj && ddlPaginaObj.fields && ddlPaginaObj.fields.dataSource) {
+                var pageId = args.value[0];
+                console.log('Buscando pageId:', pageId);
+
+                // Busca em todas as categorias
+                var dataSource = ddlPaginaObj.fields.dataSource;
+                for (var i = 0; i < dataSource.length; i++) {
+                    var category = dataSource[i];
+                    if (category.child && category.child.length > 0) {
+                        for (var j = 0; j < category.child.length; j++) {
+                            if (category.child[j].id === pageId) {
+                                itemData = category.child[j];
+                                console.log('✅ Item encontrado no dataSource:', itemData);
+                                break;
+                            }
+                        }
+                    }
+                    if (itemData) break;
+                }
+            }
+        }
 
         // Se não há dados ou é uma categoria, não faz nada
-        if (!args.itemData || args.itemData.isCategory) {
+        if (!itemData || itemData.isCategory) {
             console.log('Categoria selecionada ou campo limpo - não gera URL');
             return;
         }
 
         // Obtém a URL gerada (formato: modulo_pagina.html)
-        var paginaRef = args.itemData.paginaRef;
+        var paginaRef = itemData.paginaRef;
         console.log('paginaRef extraída:', paginaRef);
 
         var txtHref = document.getElementById('txtHref');

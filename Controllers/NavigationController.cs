@@ -1113,6 +1113,8 @@ namespace FrotiX.Controllers
                         id = pageId,
                         text = displayName,
                         paginaRef = paginaRef,
+                        pageName = pageName,          // ✅ NOME ORIGINAL DO ARQUIVO
+                        moduleName = moduleName,      // ✅ NOME ORIGINAL DO MÓDULO
                         parentId = moduleId
                     };
                 }).ToList<object>();
