@@ -619,12 +619,12 @@ namespace FrotiX.Controllers
 
                     if (controleExistente == null)
                     {
-                        // Cria novo registro com Acesso = 1 (habilitado)
+                        // Cria novo registro com Acesso = true (habilitado)
                         var novoControle = new ControleAcesso
                         {
                             UsuarioId = usuario.Id,
                             RecursoId = recursoId,
-                            Acesso = 1
+                            Acesso = true
                         };
                         _unitOfWork.ControleAcesso.Add(novoControle);
                     }
