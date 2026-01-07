@@ -1,7 +1,7 @@
 # Documentação: Dashboard de Veículos
 
 > **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.1
+> **Versão Atual**: 1.2
 
 ---
 
@@ -75,23 +75,28 @@ FrotiX.Site/
 O dashboard é dividido em 3 contextos distintos, alternados via JavaScript sem recarregar a página.
 
 **Implementação (JS)**:
+
 ```javascript
-function initTabs() {
-    $('.dash-tab-veic').on('click', function () {
+function initTabs()
+{
+    $('.dash-tab-veic').on('click', function ()
+    {
         const tabId = $(this).data('tab');
 
-        // Atualiza classes das abas (botões)
+        // Atualiza classes das abas
         $('.dash-tab-veic').removeClass('active');
         $(this).addClass('active');
 
-        // Mostra conteúdo correto (conteúdo)
+        // Mostra conteúdo correto
         $('.dash-content-veic').removeClass('active');
         $(`#tab-${tabId}`).addClass('active');
 
-        // Lazy Load: Carrega dados apenas na primeira vez que a aba é aberta
-        if (tabId === 'uso-veiculos' && !filtrosUsoInicializados) {
+        // Carrega dados se necessário
+        if (tabId === 'uso-veiculos' && !filtrosUsoInicializados)
+        {
             inicializarFiltrosUso();
-        } else if (tabId === 'custos' && !dadosCustos) {
+        } else if (tabId === 'custos' && !dadosCustos)
+        {
             carregarDadosCustos();
         }
     });
@@ -108,13 +113,13 @@ O dashboard utiliza um tema exclusivo baseado em tons de verde, definido via CSS
 
 ```css
 :root {
-    --veic-primary: #5f8575;      /* Verde Sage Principal */
-    --veic-secondary: #7aa390;    /* Sage Claro */
-    --veic-accent: #8fb8a4;       /* Acento */
-    --veic-dark: #4a6b5c;         /* Verde Escuro */
-    --veic-darker: #3a5548;       /* Verde Oliva Escuro */
-    --veic-light: #f0f7f4;        /* Fundo Claro */
-    --veic-cream: #e8f2ed;        /* Creme Esverdeado */
+    --veic-primary: #5f8575;
+    --veic-secondary: #7aa390;
+    --veic-accent: #8fb8a4;
+    --veic-dark: #4a6b5c;
+    --veic-darker: #3a5548;
+    --veic-light: #f0f7f4;
+    --veic-cream: #e8f2ed;
     --veic-gradient: linear-gradient(135deg, #5f8575 0%, #7aa390 100%);
 }
 ```
@@ -126,35 +131,83 @@ O dashboard utiliza um tema exclusivo baseado em tons de verde, definido via CSS
 A aba **Uso dos Veículos** possui um sistema de filtros robusto que tenta adivinhar o contexto mais relevante para o usuário.
 
 **Inicialização Inteligente (`inicializarFiltrosUso`)**:
-1. Busca os anos disponíveis na API.
-2. Se houver dados, seleciona o ano mais recente.
-3. Busca os dados desse ano.
-4. Identifica o mês mais recente com registros.
-5. Aplica esse filtro automaticamente.
 
 ```javascript
-// Exemplo simplificado da lógica
-$.ajax({
-    url: '/api/DashboardVeiculos/DashboardUso',
-    success: function (data) {
-        const anos = data.anosDisponiveis || [];
-        const anoMaisRecente = anos[0];
+function inicializarFiltrosUso()
+{
+    mostrarLoading('Carregando estatísticas de uso...');
 
-        // ...
+    // Primeira chamada: obter anos disponíveis
+    $.ajax({
+        url: '/api/DashboardVeiculos/DashboardUso',
+        method: 'GET',
+        data: {},
+        success: function (data)
+        {
+            const anos = data.anosDisponiveis || [];
 
-        // Buscar dados DO ANO MAIS RECENTE para determinar o mês mais recente
-        $.ajax({
-            url: '/api/DashboardVeiculos/DashboardUso',
-            data: { ano: anoMaisRecente },
-            success: function (dataAno) {
-                // ... lógica para encontrar último mês com dados ...
-                $('#filtroMesUso').val(mesSelecionado);
-                filtroUsoAtual = { tipo: 'anoMes', ano: anoMaisRecente, mes: mesSelecionado };
-                // ...
+            if (anos.length === 0)
+            {
+                // ... (tratamento sem dados)
+                return;
             }
-        });
-    }
-});
+
+            // Ano com último registro (primeiro da lista, ordenado desc)
+            const anoMaisRecente = anos[0];
+
+            // Preencher select de anos e pré-selecionar o mais recente
+            preencherSelectAnos('#filtroAnoUso', anos, anoMaisRecente);
+            $('#filtroAnoUso').val(anoMaisRecente.toString());
+
+            // Buscar dados DO ANO MAIS RECENTE para determinar o mês mais recente
+            $.ajax({
+                url: '/api/DashboardVeiculos/DashboardUso',
+                method: 'GET',
+                data: { ano: anoMaisRecente },
+                success: function (dataAno)
+                {
+                    let mesSelecionado = '';
+                    const viagensPorMes = dataAno.viagensPorMes || [];
+
+                    // Encontrar o último mês com dados (maior número de mês com valor > 0)
+                    if (viagensPorMes.length > 0)
+                    {
+                        const mesesComDados = viagensPorMes
+                            .filter(item => item.total > 0)
+                            .map(item => item.mes)
+                            .sort((a, b) => b - a); // Ordenar decrescente
+
+                        if (mesesComDados.length > 0)
+                        {
+                            mesSelecionado = mesesComDados[0].toString();
+                        }
+                    }
+
+                    // Pré-selecionar mês se encontrado
+                    if (mesSelecionado)
+                    {
+                        $('#filtroMesUso').val(mesSelecionado);
+                        filtroUsoAtual = { tipo: 'anoMes', ano: anoMaisRecente.toString(), mes: mesSelecionado };
+                    } else
+                    {
+                        filtroUsoAtual = { tipo: 'anoMes', ano: anoMaisRecente.toString(), mes: '' };
+                    }
+
+                    // Atualizar label de período
+                    atualizarPeriodoAtualLabel();
+
+                    // Carregar dados com filtros aplicados
+                    dadosUso = dataAno;
+                    filtrosUsoInicializados = true;
+                    atualizarCardsUso(dataAno.totais);
+                    renderizarGraficosUso(dataAno);
+                    renderizarTabelasUso(dataAno);
+                    esconderLoading();
+                }
+            });
+        }
+    });
+}
 ```
 
 ---
@@ -172,12 +225,18 @@ Os cards de KPI (Key Performance Indicators) são atualizados dinamicamente via 
 </div>
 ```
 
-**Atualização JS**:
+**Atualização JS (`atualizarCardsGerais`)**:
+
 ```javascript
-function atualizarCardsGerais(totais) {
+function atualizarCardsGerais(totais)
+{
     $('#totalVeiculos').text(totais.totalVeiculos.toLocaleString('pt-BR'));
     $('#veiculosAtivos').text(totais.veiculosAtivos.toLocaleString('pt-BR'));
-    // ...
+    $('#veiculosInativos').text(totais.veiculosInativos.toLocaleString('pt-BR'));
+    $('#veiculosReserva').text(totais.veiculosReserva.toLocaleString('pt-BR'));
+    $('#veiculosEfetivos').text(totais.veiculosEfetivos.toLocaleString('pt-BR'));
+    $('#veiculosProprios').text(totais.veiculosProprios.toLocaleString('pt-BR'));
+    $('#veiculosLocados').text(totais.veiculosLocados.toLocaleString('pt-BR'));
     $('#idadeMedia').text(totais.idadeMedia.toFixed(1) + ' anos');
     $('#valorMensalTotal').text(formatarMoeda(totais.valorMensalTotal));
 }
@@ -192,27 +251,41 @@ Todos os gráficos são renderizados usando a biblioteca **Syncfusion EJ2**.
 ### Exemplo: Renderização de Gráfico de Pizza (Donut)
 
 ```javascript
-function renderizarChartPie(containerId, dados, cores = CORES_VEIC.chart) {
+function renderizarChartPie(containerId, dados, cores = CORES_VEIC.chart)
+{
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.innerHTML = ''; // Limpa anterior
+    container.innerHTML = '';
 
     const chart = new ej.charts.AccumulationChart({
         series: [{
             dataSource: dados,
             xName: 'x',
             yName: 'y',
-            innerRadius: '50%', // Transforma Pizza em Donut
+            innerRadius: '50%',
             palettes: cores,
             dataLabel: {
                 visible: true,
                 position: 'Outside',
                 name: 'x',
-                // ...
+                font: { fontWeight: '600', size: '11px' },
+                connectorStyle: { length: '10px', type: 'Curve' }
             },
-            // ...
+            explode: true,
+            explodeOffset: '5%',
+            explodeIndex: 0
         }],
-        // ...
+        legendSettings: {
+            visible: true,
+            position: 'Bottom',
+            textStyle: { size: '11px' }
+        },
+        tooltip: {
+            enable: true,
+            format: '${point.x}: <b>${point.y}</b>'
+        },
+        background: 'transparent',
+        enableSmartLabels: true
     });
     chart.appendTo(container);
 }
@@ -223,7 +296,9 @@ function renderizarChartPie(containerId, dados, cores = CORES_VEIC.chart) {
 | **Geral** | Por Categoria | Pizza (Donut) | Distribuição da frota |
 | **Geral** | Por Status | Pizza (Donut) | Ativos vs Inativos |
 | **Geral** | Top 15 Modelos | Barras Horizontais | Modelos mais comuns |
+| **Geral** | Idade da Frota | Colunas | Veículos por ano de fabricação |
 | **Uso** | Viagens por Mês | Área (Spline) | Evolução temporal de viagens |
+| **Uso** | Abastecimento Mensal | Área (Spline) | Evolução de custos de combustível |
 | **Custos** | Comparativo Mensal | Colunas Agrupadas | Abastecimento vs Manutenção |
 
 ---
@@ -233,21 +308,30 @@ function renderizarChartPie(containerId, dados, cores = CORES_VEIC.chart) {
 Tabelas estilizadas com CSS Grid para melhor performance e layout (não usam `<table>` tradicional).
 
 **Estrutura HTML/JS**:
+
 ```javascript
-// Renderização dinâmica da tabela
-data.topKm.forEach((v, i) => {
-    const badgeClass = i < 3 ? 'top3' : '';
-    htmlTopKm += `
-        <div class="grid-row">
-            <div class="grid-cell"><span class="badge-rank-veic ${badgeClass}">${i + 1}</span></div>
-            <div class="grid-cell">
-                <strong>${v.placa}</strong>
-                <small class="d-block text-muted">${v.modelo}</small>
+// Tabela Top KM
+let htmlTopKm = '';
+if (data.topKm && data.topKm.length > 0)
+{
+    data.topKm.forEach((v, i) =>
+    {
+        const badgeClass = i < 3 ? 'top3' : '';
+        htmlTopKm += `
+            <div class="grid-row">
+                <div class="grid-cell"><span class="badge-rank-veic ${badgeClass}">${i + 1}</span></div>
+                <div class="grid-cell">
+                    <strong>${v.placa}</strong>
+                    <small class="d-block text-muted">${v.modelo}</small>
+                </div>
+                <div class="grid-cell text-end"><strong>${v.km.toLocaleString('pt-BR')} km</strong></div>
             </div>
-            <div class="grid-cell text-end"><strong>${v.km.toLocaleString('pt-BR')} km</strong></div>
-        </div>
-    `;
-});
+        `;
+    });
+} else
+{
+    htmlTopKm = '<div class="grid-row"><div class="grid-cell" style="grid-column: span 3; text-align: center;">Nenhum dado encontrado</div></div>';
+}
 $('#tabelaTopKm').html(htmlTopKm);
 ```
 
@@ -261,33 +345,56 @@ O controller `DashboardVeiculosController.cs` centraliza a lógica de negócio.
 Retorna dados para a aba **Visão Geral**.
 
 **Lógica (C#)**:
+
 ```csharp
 [Route("DashboardDados")]
 [HttpGet]
 public IActionResult DashboardDados()
 {
-    var veiculos = _unitOfWork.ViewVeiculos.GetAll().ToList();
+    try
+    {
+        var veiculos = _unitOfWork.ViewVeiculos.GetAll().ToList();
+        var veiculosModel = _unitOfWork.Veiculo.GetAll().ToList();
 
-    // Totais
-    var totalVeiculos = veiculos.Count;
-    var veiculosAtivos = veiculos.Count(v => v.Status == true);
+        // Totais gerais
+        var totalVeiculos = veiculos.Count;
+        var veiculosAtivos = veiculos.Count(v => v.Status == true);
 
-    // Agrupamentos
-    var porCategoria = veiculos
-        .Where(v => !string.IsNullOrEmpty(v.Categoria))
-        .GroupBy(v => v.Categoria)
-        .Select(g => new { categoria = g.Key, quantidade = g.Count() })
-        .OrderByDescending(c => c.quantidade)
-        .ToList();
+        // ... (outros totais)
 
-    // ... outros agrupamentos ...
+        // Distribuição por categoria
+        var porCategoria = veiculos
+            .Where(v => !string.IsNullOrEmpty(v.Categoria))
+            .GroupBy(v => v.Categoria)
+            .Select(g => new
+            {
+                categoria = g.Key,
+                quantidade = g.Count()
+            })
+            .OrderByDescending(c => c.quantidade)
+            .ToList();
 
-    return Ok(new {
-        totais = new { totalVeiculos, veiculosAtivos, /*...*/ },
-        porCategoria,
-        porStatus,
-        /*...*/
-    });
+        // ... (outros agrupamentos)
+
+        var resultado = new
+        {
+            totais = new
+            {
+                totalVeiculos,
+                veiculosAtivos,
+                // ...
+            },
+            porCategoria,
+            // ...
+        };
+
+        return Ok(resultado);
+    }
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("DashboardVeiculosController.cs", "DashboardDados", error);
+        return StatusCode(500, new { message = "Erro ao carregar dados do dashboard" });
+    }
 }
 ```
 
@@ -297,22 +404,43 @@ Retorna dados para a aba **Uso dos Veículos**.
 **Parâmetros**: `ano`, `mes`, `dataInicio`, `dataFim`.
 
 **Lógica de Filtro (C#)**:
-```csharp
-// Aplicar filtro por período personalizado (prioridade)
-if (dataInicio.HasValue && dataFim.HasValue)
-{
-    var dataFimAjustada = dataFim.Value.Date.AddDays(1).AddSeconds(-1);
-    queryViagens = queryViagens.Where(v => v.DataInicial.Value >= dataInicio.Value && v.DataInicial.Value <= dataFimAjustada);
-    // ...
-}
-// Senão, aplicar filtro por ano/mês
-else
-{
-    if (ano.HasValue && ano > 0)
-        queryViagens = queryViagens.Where(v => v.DataInicial.Value.Year == ano.Value);
 
-    if (mes.HasValue && mes > 0)
-        queryViagens = queryViagens.Where(v => v.DataInicial.Value.Month == mes.Value);
+```csharp
+[Route("DashboardUso")]
+[HttpGet]
+public IActionResult DashboardUso(int? ano, int? mes, DateTime? dataInicio, DateTime? dataFim)
+{
+    // Construir query de viagens
+    var queryViagens = _unitOfWork.Viagem.GetAll()
+        .Where(v => v.DataInicial.HasValue);
+
+    // Construir query de abastecimentos
+    var queryAbastecimentos = _unitOfWork.ViewAbastecimentos.GetAll()
+        .Where(a => a.DataHora.HasValue);
+
+    // Aplicar filtro por período personalizado (prioridade)
+    if (dataInicio.HasValue && dataFim.HasValue)
+    {
+        var dataFimAjustada = dataFim.Value.Date.AddDays(1).AddSeconds(-1);
+        queryViagens = queryViagens.Where(v => v.DataInicial.Value >= dataInicio.Value && v.DataInicial.Value <= dataFimAjustada);
+        queryAbastecimentos = queryAbastecimentos.Where(a => a.DataHora.Value >= dataInicio.Value && a.DataHora.Value <= dataFimAjustada);
+    }
+    // Senão, aplicar filtro por ano/mês
+    else
+    {
+        if (ano.HasValue && ano > 0)
+        {
+            queryViagens = queryViagens.Where(v => v.DataInicial.Value.Year == ano.Value);
+            queryAbastecimentos = queryAbastecimentos.Where(a => a.DataHora.Value.Year == ano.Value);
+        }
+
+        if (mes.HasValue && mes > 0)
+        {
+            queryViagens = queryViagens.Where(v => v.DataInicial.Value.Month == mes.Value);
+            queryAbastecimentos = queryAbastecimentos.Where(a => a.DataHora.Value.Month == mes.Value);
+        }
+    }
+    // ...
 }
 ```
 

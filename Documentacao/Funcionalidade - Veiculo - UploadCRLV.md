@@ -1,7 +1,7 @@
 # Documentação: Upload de CRLV
 
 > **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.1
+> **Versão Atual**: 1.2
 
 ---
 
@@ -90,29 +90,42 @@ Permite remover o arquivo atual. O componente Uploader chama o endpoint de remo�
 Recebe o arquivo e salva no banco.
 
 **Implementação (`UploadCRLVController.cs`)**:
+
 ```csharp
 [HttpPost]
 [Route("Save")]
 public IActionResult Save(IList<IFormFile> UploadFiles, [FromQuery] Guid veiculoId)
 {
-    if (UploadFiles != null && veiculoId != Guid.Empty)
+    try
     {
-        foreach (var file in UploadFiles)
+        if (UploadFiles != null && veiculoId != Guid.Empty)
         {
-            var objFromDb = _unitOfWork.Veiculo.GetFirstOrDefault(u => u.VeiculoId == veiculoId);
-            if (objFromDb != null)
+            foreach (var file in UploadFiles)
             {
-                using (var target = new MemoryStream())
+                var objFromDb = _unitOfWork.Veiculo.GetFirstOrDefault(u =>
+                    u.VeiculoId == veiculoId
+                );
+
+                if (objFromDb != null)
                 {
-                    file.CopyTo(target);
-                    objFromDb.CRLV = target.ToArray();
+                    using (var target = new MemoryStream())
+                    {
+                        file.CopyTo(target);
+                        objFromDb.CRLV = target.ToArray();
+                    }
+                    _unitOfWork.Veiculo.Update(objFromDb);
+                    _unitOfWork.Save();
                 }
-                _unitOfWork.Veiculo.Update(objFromDb);
-                _unitOfWork.Save();
             }
         }
+        return Content("");
     }
-    return Content("");
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("UploadCRLVController.cs" , "Save" , error);
+        Response.StatusCode = 500;
+        return Content("");
+    }
 }
 ```
 
@@ -120,19 +133,37 @@ public IActionResult Save(IList<IFormFile> UploadFiles, [FromQuery] Guid veiculo
 Remove o arquivo do banco.
 
 **Implementação**:
+
 ```csharp
 [HttpPost]
 [Route("Remove")]
 public IActionResult Remove(IList<IFormFile> UploadFiles, [FromQuery] Guid veiculoId)
 {
-    var objFromDb = _unitOfWork.Veiculo.GetFirstOrDefault(u => u.VeiculoId == veiculoId);
-    if (objFromDb != null)
+    try
     {
-        objFromDb.CRLV = null;
-        _unitOfWork.Veiculo.Update(objFromDb);
-        _unitOfWork.Save();
+        if (veiculoId != Guid.Empty)
+        {
+            var objFromDb = _unitOfWork.Veiculo.GetFirstOrDefault(u =>
+                u.VeiculoId == veiculoId
+            );
+
+            if (objFromDb != null)
+            {
+                objFromDb.CRLV = null;
+                _unitOfWork.Veiculo.Update(objFromDb);
+                _unitOfWork.Save();
+            }
+        }
+        return Content("");
     }
-    return Content("");
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("UploadCRLVController.cs" , "Remove" , error);
+        Response.Clear();
+        Response.StatusCode = 500;
+        Response.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase = error.Message;
+        return Content("");
+    }
 }
 ```
 
@@ -146,49 +177,87 @@ O script da página gerencia os eventos dos componentes Syncfusion.
 
 **Upload Concluído (`onActionComplete`)**:
 Esta função é chamada automaticamente pelo componente após o upload.
+
 ```javascript
 window.onActionComplete = function(args) {
-    if (!args || !args.fileData || !args.fileData.length) return;
-
-    // Exibe o viewer (que estava oculto)
-    var div = document.getElementById("divpdf");
-    if (div) {
-        div.style.visibility = "visible";
-        div.style.height = "600px";
-    }
-
-    // Carrega o PDF recém enviado no viewer
-    $.ajax({
-        url: '/api/PdfViewer/GetDocument?id=@Model.VeiculoObj.Veiculo.VeiculoId',
-        method: 'POST',
-        cache: false,
-        processData: false,
-        contentType: false
-    })
-    .done(function (result) {
-        var pdfViewer = document.getElementById('pdfviewer');
-        if (pdfViewer && pdfViewer.ej2_instances && pdfViewer.ej2_instances[0]) {
-            pdfViewer.ej2_instances[0].load(result, null);
+    try {
+        if (!args || !args.fileData || !args.fileData.length) {
+            console.warn("onActionComplete sem arquivo.");
+            return;
         }
-    });
+
+        console.info("Upload concluído:", args.fileData[0].name);
+
+        // Exibe o viewer
+        var div = document.getElementById("divpdf");
+        if (div) {
+            div.style.visibility = "visible";
+            div.style.height = "600px";
+        }
+
+        // Carrega o PDF do veículo
+        $.ajax({
+            url: '/api/PdfViewer/GetDocument?id=@Model.VeiculoObj.Veiculo.VeiculoId',
+            method: 'POST',
+            cache: false,
+            processData: false,
+            contentType: false
+        })
+        .done(function (result) {
+            try {
+                console.log("Documento carregado.");
+                var pdfViewer = document.getElementById('pdfviewer');
+                if (pdfViewer && pdfViewer.ej2_instances && pdfViewer.ej2_instances[0]) {
+                    pdfViewer.ej2_instances[0].load(result, null);
+                }
+            } catch (error) {
+                Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "ajax.done", error);
+            }
+        })
+        // ... (fail callback)
+
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "onActionComplete", error);
+    }
 };
 ```
 
 **Carregamento Inicial (se já existir arquivo)**:
+
 ```javascript
 $(document).ready(function () {
-    if (@Model.CRLV == 1) { // Verifica flag do modelo
-        // Mostra div
-        document.getElementById("divpdf").style.visibility = "visible";
+    try {
+        console.log("Página abriu");
 
-        // Busca documento
-        $.ajax({
-            url: '/api/PdfViewer/GetDocument?id=@Model.VeiculoObj.Veiculo.VeiculoId',
-            method: 'POST',
-            // ...
-        }).done(function(result) {
-            // Carrega no viewer
-        });
+        if (@Model.CRLV == 1) {
+            var div = document.getElementById("divpdf");
+            if (div) {
+                div.style.visibility = "visible";
+                div.style.height = "600px";
+            }
+
+            $.ajax({
+                url: '/api/PdfViewer/GetDocument?id=@Model.VeiculoObj.Veiculo.VeiculoId',
+                method: 'POST',
+                cache: false,
+                processData: false,
+                contentType: false
+            })
+            .done(function (result) {
+                try {
+                    console.log("Documento carregado (auto).");
+                    var pdfViewer = document.getElementById('pdfviewer');
+                    if (pdfViewer && pdfViewer.ej2_instances && pdfViewer.ej2_instances[0]) {
+                        pdfViewer.ej2_instances[0].load(result, null);
+                    }
+                } catch (error) {
+                    Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "document.ready.ajax.done", error);
+                }
+            })
+            // ... (fail callback)
+        }
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("UploadCRLV.cshtml", "document.ready", error);
     }
 });
 ```

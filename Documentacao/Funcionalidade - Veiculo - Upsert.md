@@ -1,7 +1,7 @@
 # Documentação: Cadastro de Veículo (Upsert)
 
 > **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.1
+> **Versão Atual**: 1.2
 
 ---
 
@@ -102,96 +102,244 @@ Checkboxes booleanos para flags do sistema:
 ### JavaScript (`veiculo_upsert.js`)
 
 **Carregamento de Listas (Cascata)**:
+
 ```javascript
-function GetModeloList(marcaId) {
-    $.ajax({
-        url: "/Veiculo/Upsert?handler=ModeloList",
-        method: "GET",
-        data: { id: marcaId },
-        success: function (res) {
-            var options = '<option value="">-- Selecione um Modelo --</option>';
-            if (res && res.data && res.data.length) {
-                res.data.forEach(function (obj) {
-                    options += '<option value="' + obj.modeloId + '">' + obj.descricaoModelo + '</option>';
-                });
+function GetModeloList(marcaId)
+{
+    try
+    {
+        $.ajax({
+            url: "/Veiculo/Upsert?handler=ModeloList",
+            method: "GET",
+            data: { id: marcaId },
+            success: function (res)
+            {
+                try
+                {
+                    var options = '<option value="">-- Selecione um Modelo --</option>';
+
+                    if (res && res.data && res.data.length)
+                    {
+                        res.data.forEach(function (obj)
+                        {
+                            options += '<option value="' + obj.modeloId + '">' + obj.descricaoModelo + '</option>';
+                        });
+                    }
+
+                    $('#ModeloId').html(options);
+
+                    // Seleciona modelo se já existir
+                    var modeloIdSelecionado = $('#Veiculo_ModeloId').val();
+                    if (modeloIdSelecionado)
+                    {
+                        $('#ModeloId').val(modeloIdSelecionado);
+                    }
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("veiculo_upsert.js", "GetModeloList.success", error);
+                }
+            },
+            error: function (xhr)
+            {
+                try
+                {
+                    console.error("Erro ao carregar modelos:", xhr);
+                    AppToast.show('Erro ao carregar modelos', 'Vermelho', 2000);
+                } catch (error)
+                {
+                    Alerta.TratamentoErroComLinha("veiculo_upsert.js", "GetModeloList.error", error);
+                }
             }
-            $('#ModeloId').html(options);
-            // ... seleciona se já tiver valor
-        },
-        error: function (xhr) {
-            AppToast.show('Erro ao carregar modelos', 'Vermelho', 2000);
-        }
-    });
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("veiculo_upsert.js", "GetModeloList", error);
+    }
 }
 ```
 
 **Validação de Placa (FocusOut)**:
-```javascript
-$('#txtPlaca').on('focusout', function () {
-    var placa = $(this).val();
-    if (placa) {
-        // Formata: remove espaços, remove hífens, converte para maiúsculo
-        placa = placa.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
-        $(this).val(placa);
 
-        // Verifica se placa já existe
-        if (placa.length >= 4) {
-            var ultimos4 = placa.substr(placa.length - 4);
-            verificarPlacaExistente(ultimos4);
+```javascript
+$('#txtPlaca').on('focusout', function ()
+{
+    try
+    {
+        var placa = $(this).val();
+
+        if (placa)
+        {
+            // Formata: remove espaços, remove hífens, converte para maiúsculo
+            placa = placa.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
+            $(this).val(placa);
+
+            // Verifica se placa já existe
+            if (placa.length >= 4)
+            {
+                var ultimos4 = placa.substr(placa.length - 4);
+                verificarPlacaExistente(ultimos4);
+            }
         }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("veiculo_upsert.js", "txtPlaca.focusout", error);
     }
 });
 ```
 
 **Lógica de Veículo Próprio (Toggle)**:
+
 ```javascript
-function toggleCamposVeiculoProprio(veiculoProprio) {
-    if (veiculoProprio) {
-        // É PRÓPRIO
-        $('#divPatrimonio').show();
-        $('#lstcontratos').prop('disabled', true); // Desabilita Contrato
-        $('#lstatas').prop('disabled', true); // Desabilita Ata
-        // Limpa campos...
-    } else {
-        // NÃO É PRÓPRIO
-        $('#divPatrimonio').hide();
-        $('#lstcontratos').prop('disabled', false);
-        $('#lstatas').prop('disabled', false);
+function toggleCamposVeiculoProprio(veiculoProprio)
+{
+    try
+    {
+        if (veiculoProprio)
+        {
+            // É PRÓPRIO
+            // Mostra Patrimônio
+            $('#divPatrimonio').show();
+
+            // DESABILITA Contrato e Ata (mas mantém visíveis)
+            $('#lstcontratos').prop('disabled', true);
+            $('#lstatas').prop('disabled', true);
+
+            // Esconde e limpa Items
+            $('#lstItemVeiculo').hide().val('');
+            $('#lstItemVeiculoAta').hide().val('');
+            $('#lblItemContrato').hide();
+            $('#lblItemAta').hide();
+
+            // Limpa valores de Contrato e Ata
+            $('#lstcontratos').val('');
+            $('#lstatas').val('');
+        } else
+        {
+            // NÃO É PRÓPRIO
+            // Esconde Patrimônio e limpa valor
+            $('#divPatrimonio').hide();
+            $('#txtPatrimonio').val('');
+
+            // HABILITA Contrato e Ata
+            $('#lstcontratos').prop('disabled', false);
+            $('#lstatas').prop('disabled', false);
+        }
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("veiculo_upsert.js", "toggleCamposVeiculoProprio", error);
     }
 }
 ```
 
 **Validação de Submit (Cliente)**:
 Intercepta o submit para validações que o `required` do HTML5 não cobre.
+
 ```javascript
-$('form').on('submit', function (e) {
-    if (!validarCamposObrigatorios()) {
-        e.preventDefault();
+function validarCamposObrigatorios()
+{
+    try
+    {
+        var camposErro = [];
+
+        // Marca
+        if (!$('#listamarca').val())
+        {
+            camposErro.push('Marca');
+        }
+
+        // Modelo
+        if (!$('#ModeloId').val())
+        {
+            camposErro.push('Modelo');
+        }
+
+        // Placa
+        var placa = $('#txtPlaca').val();
+        if (!placa || placa.trim() === '')
+        {
+            camposErro.push('Placa');
+        }
+
+        // Quilometragem
+        var km = $('#VeiculoObj_Veiculo_Quilometragem').val();
+        if (!km || km.trim() === '')
+        {
+            camposErro.push('Quilometragem');
+        }
+
+        // Unidade Vinculada
+        if (!$('#VeiculoObj_Veiculo_UnidadeId').val())
+        {
+            camposErro.push('Unidade Vinculada');
+        }
+
+        // Combustível
+        if (!$('#VeiculoObj_Veiculo_CombustivelId').val())
+        {
+            camposErro.push('Combustível');
+        }
+
+        // Categoria
+        if (!$('#VeiculoObj_Veiculo_Categoria').val())
+        {
+            camposErro.push('Categoria');
+        }
+
+        // Data de Ingresso na Frota
+        var dataIngresso = $('#txtDataChegada').val();
+        if (!dataIngresso || dataIngresso.trim() === '')
+        {
+            camposErro.push('Data de Ingresso na Frota');
+        }
+
+        // Contrato OU Ata OU Veículo Próprio
+        var contratoId = $('#lstcontratos').val();
+        var ataId = $('#lstatas').val();
+        var veiculoProprio = $('#chkVeiculoProprio').is(':checked');
+
+        if (!contratoId && !ataId && !veiculoProprio)
+        {
+            camposErro.push('Contrato, Ata ou Veículo Próprio (escolha ao menos um)');
+        }
+
+        // Se tem Contrato E o campo está visível, precisa Item Contratual
+        if (contratoId && $('#lstItemVeiculo').is(':visible') && !$('#lstItemVeiculo').val())
+        {
+            camposErro.push('Item Contratual (obrigatório quando há Contrato)');
+        }
+
+        // Se tem Ata E o campo está visível, precisa Item da Ata
+        if (ataId && $('#lstItemVeiculoAta').is(':visible') && !$('#lstItemVeiculoAta').val())
+        {
+            camposErro.push('Item da Ata (obrigatório quando há Ata)');
+        }
+
+        // Se Veículo Próprio E campo está visível, precisa Patrimônio
+        if (veiculoProprio && $('#txtPatrimonio').is(':visible'))
+        {
+            var patrimonio = $('#txtPatrimonio').val();
+            if (!patrimonio || patrimonio.trim() === '')
+            {
+                camposErro.push('Nº Patrimônio (obrigatório para Veículo Próprio)');
+            }
+        }
+
+        // Se encontrou erros, exibe alerta
+        if (camposErro.length > 0)
+        {
+            var mensagem = 'Campos obrigatórios não preenchidos:\n\n• ' + camposErro.join('\n• ');
+            console.log('Validação falhou. Campos:', camposErro);
+            Alerta.Warning('Validação de Campos', mensagem, 'Ok');
+            return false;
+        }
+
+        console.log('Validação passou! Submetendo formulário...');
+        return true;
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("veiculo_upsert.js", "validarCamposObrigatorios", error);
         return false;
     }
-    // ...
-});
-
-function validarCamposObrigatorios() {
-    var camposErro = [];
-
-    // Contrato OU Ata OU Veículo Próprio
-    var contratoId = $('#lstcontratos').val();
-    var ataId = $('#lstatas').val();
-    var veiculoProprio = $('#chkVeiculoProprio').is(':checked');
-
-    if (!contratoId && !ataId && !veiculoProprio) {
-        camposErro.push('Contrato, Ata ou Veículo Próprio (escolha ao menos um)');
-    }
-
-    // ... outras validações
-
-    if (camposErro.length > 0) {
-        var mensagem = 'Campos obrigatórios não preenchidos:\n\n• ' + camposErro.join('\n• ');
-        Alerta.Warning('Validação de Campos', mensagem, 'Ok');
-        return false;
-    }
-    return true;
 }
 ```
 
@@ -203,45 +351,160 @@ function validarCamposObrigatorios() {
 
 Além das validações de frontend, o servidor realiza verificações robustas através do método `ChecaInconstancias`.
 
-**Validação de Placa e Renavam (Unicidade)**:
 ```csharp
-var existePlaca = _unitOfWork.Veiculo.GetFirstOrDefault(u =>
-    u.Placa.ToUpper() == VeiculoObj.Veiculo.Placa.ToUpper()
-);
-
-// Se inserindo e já existe
-if (id == Guid.Empty && existePlaca != null)
+private bool ChecaInconstancias(Guid id)
 {
-    _notyf.Error("Já existe um veículo com essa placa!" , 3);
-    return true;
-}
+    try
+    {
+        // === VALIDAÇÕES DE CAMPOS OBRIGATÓRIOS BÁSICOS ===
 
-// Se editando e já existe (mas não é o próprio)
-if (existePlaca != null && existePlaca.VeiculoId != id)
-{
-    _notyf.Error("Já existe um veículo com essa placa!" , 3);
-    return true;
+        // Placa
+        if (string.IsNullOrWhiteSpace(VeiculoObj.Veiculo.Placa))
+        {
+            _notyf.Error("Você precisa informar a placa do veículo!" , 3);
+            return true;
+        }
+
+        // ... (outras validações de campos básicos)
+
+        // === VALIDAÇÕES DE DUPLICIDADES ===
+
+        // Verifica Placa Duplicada
+        var existePlaca = _unitOfWork.Veiculo.GetFirstOrDefault(u =>
+            u.Placa.ToUpper() == VeiculoObj.Veiculo.Placa.ToUpper()
+        );
+
+        if (id == Guid.Empty && existePlaca != null)
+        {
+            _notyf.Error("Já existe um veículo com essa placa!" , 3);
+            return true;
+        }
+
+        if (existePlaca != null && existePlaca.VeiculoId != id)
+        {
+            _notyf.Error("Já existe um veículo com essa placa!" , 3);
+            return true;
+        }
+
+        // ... (validação Renavam)
+
+        // === VALIDAÇÕES DE VÍNCULO (Contrato/Ata/Próprio) ===
+
+        // Deve ter ao menos um: Contrato, Ata ou Veículo Próprio
+        if (
+            (
+                VeiculoObj.Veiculo.ContratoId == null
+                && VeiculoObj.Veiculo.AtaId == null
+                && VeiculoObj.Veiculo.VeiculoProprio == false
+            )
+        )
+        {
+            _notyf.Error(
+                "Você precisa definir se o veículo é próprio ou se pertence a um Contrato ou a uma Ata!" ,
+                3
+            );
+            return true;
+        }
+
+        // Se tem Contrato, precisa ter Item Contratual
+        if (
+            (
+                VeiculoObj.Veiculo.ContratoId != null
+                && VeiculoObj.Veiculo.ItemVeiculoId == null
+            )
+        )
+        {
+            _notyf.Error("Você precisa informar o Item Contratual do veículo!" , 3);
+            return true;
+        }
+
+        // Se tem Ata, precisa ter Item da Ata
+        if (
+            (
+                VeiculoObj.Veiculo.AtaId != null
+                && VeiculoObj.Veiculo.ItemVeiculoAtaId == null
+            )
+        )
+        {
+            _notyf.Error("Você precisa informar o Item da Ata do veículo!" , 3);
+            return true;
+        }
+
+        // Se é Veículo Próprio, precisa ter número de Patrimônio
+        if (
+            (
+                VeiculoObj.Veiculo.VeiculoProprio == true
+                && VeiculoObj.Veiculo.Patrimonio == null
+            )
+        )
+        {
+            _notyf.Error("Você precisa informar o número de patrimônio do veículo!" , 3);
+            return true;
+        }
+
+        return false;
+    }
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("Upsert.cshtml.cs" , "ChecaInconstancias" , error);
+        return false;
+    }
 }
 ```
 
-**Consistência de Vínculo**:
-```csharp
-// Deve ter ao menos um: Contrato, Ata ou Veículo Próprio
-if (VeiculoObj.Veiculo.ContratoId == null
-    && VeiculoObj.Veiculo.AtaId == null
-    && VeiculoObj.Veiculo.VeiculoProprio == false)
-{
-    _notyf.Error(
-        "Você precisa definir se o veículo é próprio ou se pertence a um Contrato ou a uma Ata!", 3
-    );
-    return true;
-}
+**Método Submit (Insert)**:
 
-// Se tem Contrato, precisa ter Item Contratual
-if (VeiculoObj.Veiculo.ContratoId != null && VeiculoObj.Veiculo.ItemVeiculoId == null)
+```csharp
+public IActionResult OnPostSubmit()
 {
-    _notyf.Error("Você precisa informar o Item Contratual do veículo!", 3);
-    return true;
+    try
+    {
+        // ... (preparação de dados)
+
+        if (ChecaInconstancias(Guid.Empty))
+        {
+            SetViewModel();
+            return Page();
+        }
+
+        // Processa o arquivo CRLV se foi enviado
+        if (ArquivoCRLV != null && ArquivoCRLV.Length > 0)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                ArquivoCRLV.CopyTo(memoryStream);
+                VeiculoObj.Veiculo.CRLV = memoryStream.ToArray();
+            }
+        }
+
+        // Adiciona o veículo
+        if (VeiculoObj.Veiculo.VeiculoId == Guid.Empty)
+        {
+            _unitOfWork.Veiculo.Add(VeiculoObj.Veiculo);
+
+            // Adiciona o veículo ao contrato, caso selecionado
+            if (VeiculoObj.Veiculo.ContratoId != null)
+            {
+                VeiculoContrato veiculoContrato = new VeiculoContrato
+                {
+                    ContratoId = (Guid)VeiculoObj.Veiculo.ContratoId ,
+                    VeiculoId = VeiculoObj.Veiculo.VeiculoId ,
+                };
+                _unitOfWork.VeiculoContrato.Add(veiculoContrato);
+            }
+
+            _unitOfWork.Save();
+
+            AppToast.show("Verde" , "Veículo criado com sucesso!" , 2000);
+        }
+
+        return RedirectToPage("./Index");
+    }
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("Upsert.cshtml.cs" , "OnPostSubmit" , error);
+        return RedirectToPage("./Index");
+    }
 }
 ```
 
