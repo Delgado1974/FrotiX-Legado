@@ -8,6 +8,56 @@ Este arquivo contém instruções e regras específicas do projeto FrotiX para o
 - Quando o usuário disser "memorize", "guarde na memória" ou similar, **adicionar a instrução neste arquivo CLAUDE.md**
 - Claude não tem memória persistente entre sessões - este arquivo é a "memória eterna"
 
+### Sistema de Alertas SweetAlert:
+**SEMPRE** usar o sistema customizado de alertas SweetAlert (alerta.js e sweetalert_interop.js) para comunicação com o usuário.
+
+**NUNCA** usar alertas nativos do JavaScript (`alert()`, `confirm()`, `prompt()`).
+
+**Funções disponíveis:**
+- `Alerta.Confirmar(titulo, texto, confirm, cancel)` - retorna `Promise<boolean>`
+  - Exemplo: `Alerta.Confirmar("Confirmar ação", "Deseja continuar?", "Sim", "Não").then(result => { ... })`
+- `Alerta.Erro(titulo, texto, confirm)` - mostra erro
+- `Alerta.Sucesso(titulo, texto, confirm)` - mostra sucesso
+- `Alerta.Warning(titulo, texto, confirm)` - mostra aviso
+- `Alerta.Info(titulo, texto, confirm)` - mostra informação
+- `Alerta.TratamentoErroComLinha(arquivo, metodo, erro)` - para erros em try-catch
+
+**Importante:**
+- Todas essas funções retornam **Promises**
+- Sempre usar `.then()` ou `await` para processar resultados
+- `Alerta.Confirmar()` retorna `true` se usuário confirmou, `false` se cancelou
+
+### Try-Catch Obrigatório:
+**TODAS** as funções JavaScript e C# devem ter blocos try-catch.
+
+**JavaScript:**
+```javascript
+function minhaFuncao() {
+    try {
+        // código
+    } catch (erro) {
+        Alerta.TratamentoErroComLinha("meuArquivo.js", "minhaFuncao", erro);
+    }
+}
+```
+
+**C#:**
+```csharp
+public IActionResult MinhaAction() {
+    try {
+        // código
+    } catch (Exception error) {
+        Alerta.TratamentoErroComLinha("MeuController.cs", "MinhaAction", error);
+        return Json(new { success = false, message = error.Message });
+    }
+}
+```
+
+**Regra:**
+- **NUNCA** deixar função sem try-catch
+- **SEMPRE** usar `Alerta.TratamentoErroComLinha()` no bloco catch
+- No C#, sempre retornar `{ success: false, message }` em caso de erro
+
 ## Regras de Git
 
 ### Commit e Push:

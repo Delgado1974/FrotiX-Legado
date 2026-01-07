@@ -1649,41 +1649,51 @@
 
                 var recursoId = result.id || dto.id;
 
-                // Se foi criado novo item, habilita acesso para todos usuários
+                // ✅ APENAS para NOVO ITEM: habilita acesso e pergunta sobre gerenciamento
                 if (ehNovoItem && recursoId) {
+                    // Habilita acesso para todos usuários automaticamente
                     habilitarAcessoTodosUsuarios(recursoId);
-                }
 
-                // Pergunta se deseja fazer controle de acesso
-                if (confirm('Deseja gerenciar o controle de acesso deste item agora?')) {
-                    // Atualiza selectedItem com o ID retornado
-                    if (ehNovoItem) {
-                        selectedItem = {
-                            id: recursoId,
-                            text: dto.text,
-                            nomeMenu: dto.nomeMenu,
-                            href: dto.href,
-                            icon: dto.icon,
-                            ordem: dto.ordem,
-                            descricao: dto.descricao,
-                            ativo: dto.ativo,
-                            parentId: dto.parentId
-                        };
-                        document.getElementById('recursoId').value = recursoId;
-                    }
+                    // Pergunta se deseja fazer controle de acesso
+                    Alerta.Confirmar(
+                        'Gerenciar Controle de Acesso',
+                        'Deseja gerenciar o controle de acesso deste item agora?',
+                        'Sim',
+                        'Não'
+                    ).then(function(result) {
+                        if (result) {
+                            // Atualiza selectedItem com o ID retornado
+                            selectedItem = {
+                                id: recursoId,
+                                text: dto.text,
+                                nomeMenu: dto.nomeMenu,
+                                href: dto.href,
+                                icon: dto.icon,
+                                ordem: dto.ordem,
+                                descricao: dto.descricao,
+                                ativo: dto.ativo,
+                                parentId: dto.parentId
+                            };
+                            document.getElementById('recursoId').value = recursoId;
 
-                    // Desabilita Card de Propriedades
-                    habilitarCardPropriedades(false);
+                            // Desabilita Card de Propriedades
+                            habilitarCardPropriedades(false);
 
-                    // Carrega controle de acesso
-                    carregarControleAcesso(recursoId);
+                            // Carrega controle de acesso
+                            carregarControleAcesso(recursoId);
 
-                    // Mostra Card de Controle de Acesso
-                    document.getElementById('acessoCard').style.display = 'block';
+                            // Mostra Card de Controle de Acesso
+                            document.getElementById('acessoCard').style.display = 'block';
+                        } else {
+                            // Não quer gerenciar acesso, fecha os cards
+                            document.getElementById('propsCard').style.display = 'none';
+                            document.getElementById('acessoCard').style.display = 'none';
+                            habilitarCardPropriedades(true);
+                        }
+                    });
                 } else {
-                    // Não quer gerenciar acesso, fecha os cards
+                    // ✅ EDIÇÃO de item existente: apenas fecha card de propriedades
                     document.getElementById('propsCard').style.display = 'none';
-                    document.getElementById('acessoCard').style.display = 'none';
                     habilitarCardPropriedades(true);
                 }
             } else {
@@ -1929,27 +1939,41 @@
 
     // Fecha ambos os cards (Propriedades e Controle de Acesso)
     function fecharCards() {
-        // Verifica se está em modo edição (tem selectedItem com ID)
-        var emModoEdicao = selectedItem && selectedItem.id;
+        try {
+            // Verifica se está em modo edição (tem selectedItem com ID)
+            var emModoEdicao = selectedItem && selectedItem.id;
 
-        // Se estiver em modo edição e houver mudanças não salvas
-        if (emModoEdicao && verificarMudancasNaoSalvas()) {
-            var resposta = confirm('Você tem mudanças não salvas. Deseja salvar antes de fechar?\n\nClique em OK para SALVAR ou Cancelar para DESCARTAR as mudanças.');
-
-            if (resposta) {
-                // Usuário escolheu SALVAR
-                salvarPropriedades();
-                // Não fecha os cards aqui, salvarPropriedades já gerencia isso
+            // Se estiver em modo edição e houver mudanças não salvas
+            if (emModoEdicao && verificarMudancasNaoSalvas()) {
+                Alerta.Confirmar(
+                    'Mudanças Não Salvas',
+                    'Você tem mudanças não salvas. Deseja salvar antes de fechar?',
+                    'Salvar',
+                    'Descartar'
+                ).then(function(result) {
+                    if (result) {
+                        // Usuário escolheu SALVAR
+                        salvarPropriedades();
+                        // Não fecha os cards aqui, salvarPropriedades já gerencia isso
+                    } else {
+                        // Usuário escolheu DESCARTAR - fecha os cards
+                        document.getElementById('propsCard').style.display = 'none';
+                        document.getElementById('acessoCard').style.display = 'none';
+                        habilitarCardPropriedades(true);
+                        limparFormulario(true);
+                    }
+                });
                 return;
             }
-            // Se não salvou (cancelou), continua e fecha os cards descartando mudanças
-        }
 
-        // Fecha os cards normalmente
-        document.getElementById('propsCard').style.display = 'none';
-        document.getElementById('acessoCard').style.display = 'none';
-        habilitarCardPropriedades(true);
-        limparFormulario(true);
+            // Fecha os cards normalmente
+            document.getElementById('propsCard').style.display = 'none';
+            document.getElementById('acessoCard').style.display = 'none';
+            habilitarCardPropriedades(true);
+            limparFormulario(true);
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "fecharCards", erro);
+        }
     }
 
     // Habilita ou desabilita todos os campos do Card de Propriedades
