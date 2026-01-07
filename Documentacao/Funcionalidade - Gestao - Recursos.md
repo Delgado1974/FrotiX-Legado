@@ -1,7 +1,7 @@
 # Documentação: Gestão de Recursos de Navegação - Seletor de Ícones
 
-> **Última Atualização**: 07/01/2026
-> **Versão Atual**: 1.0
+> **Última Atualização**: 07/01/2026 19:15
+> **Versão Atual**: 1.1
 
 ---
 
@@ -941,6 +941,76 @@ CMD + SHIFT + R (Mac)
 
 ---
 
+## [07/01/2026 19:15] - Correção de renderização do template no DropDownTree
+
+**Descrição**:
+Corrigido problema de renderização onde o template mostrava texto literal "iconItemTemplate" ao invés de renderizar HTML com ícones e labels. Também adicionadas bordas ao componente DropDownTree.
+
+**Problema Identificado**:
+1. Template mostrava texto literal "iconItemTemplate" tanto em categorias quanto em ícones
+2. DropDownTree sem bordas superior e inferior
+3. Ícones FontAwesome não apareciam visualmente
+
+**Solução Implementada**:
+1. Removido atributo `itemTemplate="iconItemTemplate"` (string literal)
+2. Adicionado callback `created="onIconeDropdownCreated"`
+3. Adicionado `cssClass="e-outline"` para bordas
+4. Configuração de templates via JavaScript após criação do componente:
+   - `ddlIconeObj.itemTemplate = function(data) { ... }`
+   - `ddlIconeObj.valueTemplate = function(data) { ... }`
+
+**Código Implementado**:
+```javascript
+function onIconeDropdownCreated() {
+    try {
+        var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+        if (ddlIconeObj) {
+            // Template para itens do dropdown
+            ddlIconeObj.itemTemplate = function(data) {
+                if (data.isCategory) {
+                    return '<div style="font-weight: 600; padding: 4px 0;">' + data.text + '</div>';
+                }
+                return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                       '<i class="' + data.id + '" style="font-size: 18px; width: 24px; text-align: center;"></i>' +
+                       '<span>' + data.text + '</span>' +
+                       '</div>';
+            };
+
+            // Template para valor selecionado
+            ddlIconeObj.valueTemplate = function(data) {
+                if (!data || data.isCategory) return '';
+                return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                       '<i class="' + data.id + '" style="font-size: 16px; width: 20px; text-align: center;"></i>' +
+                       '<span>' + data.text + '</span>' +
+                       '</div>';
+            };
+        }
+    } catch (error) {
+        console.error('Erro ao configurar template do DropDownTree:', error);
+    }
+}
+```
+
+**Arquivos Modificados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
+  - Linhas 471-482: Markup do DropDownTree (removido itemTemplate, adicionado created e cssClass)
+  - Linhas 549-580: Função `onIconeDropdownCreated()`
+
+**Commits Relacionados**:
+- `a606986`: "Corrige renderização de template no DropDownTree de ícones"
+
+**Status**: ✅ **Implementado e Build Sucesso (0 erros)**
+
+**Padrão de Referência**:
+Solução baseada no padrão funcional encontrado em `Pages/Viagens/Upsert.cshtml` (linhas 152-165), onde templates Syncfusion são configurados via callback `created` ao invés de string attribute.
+
+**Notas Adicionais**:
+- Syncfusion requer que templates sejam funções JavaScript, não strings
+- A configuração via `created` callback é o padrão oficial do framework
+- Pendente teste no navegador para validar renderização visual completa
+
+---
+
 ## [07/01/2026 18:30] - Correção de erro CS0234 e finalização da implementação
 
 **Descrição**:
@@ -1079,6 +1149,6 @@ Copiado arquivo `fontawesome-icons-pt.json` (já traduzido pelo usuário) para r
 
 ---
 
-**Última atualização deste arquivo**: 07/01/2026
+**Última atualização deste arquivo**: 07/01/2026 19:15
 **Responsável pela documentação**: Claude Sonnet 4.5
-**Versão do documento**: 1.0
+**Versão do documento**: 1.1
