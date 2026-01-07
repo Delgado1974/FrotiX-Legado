@@ -476,6 +476,7 @@
                                                          allowFiltering="true"
                                                          filterType="Contains"
                                                          ignoreCase="true"
+                                                         itemTemplate="iconItemTemplate"
                                                          treeSettings="@(new Syncfusion.EJ2.DropDowns.DropDownTreeFieldsSettings { DataSource = new List<object>(), Value = "id", Text = "text", ParentValue = "parentId", HasChildren = "hasChild", Child = "child" })"
                                                          change="onIconeChange">
                                         </ejs-dropdowntree>
@@ -544,6 +545,19 @@
     var treeData = [];
     var treeObj = null;
     var selectedItem = null;
+
+    // Template customizado para exibir ícone + label no DropDownTree
+    function iconItemTemplate(data) {
+        // Se for uma categoria, não exibe ícone
+        if (data.isCategory) {
+            return '<div style="font-weight: 600; padding: 4px 0;">' + data.text + '</div>';
+        }
+        // Se for um ícone, exibe o ícone FontAwesome + label
+        return '<div style="display: flex; align-items: center; gap: 8px;">' +
+               '<i class="' + data.id + '" style="font-size: 18px; width: 24px; text-align: center;"></i>' +
+               '<span>' + data.text + '</span>' +
+               '</div>';
+    }
 
     // Carrega dados ao iniciar
     document.addEventListener('DOMContentLoaded', function() {
