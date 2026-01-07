@@ -594,6 +594,53 @@ namespace FrotiX.Controllers
             }
         }
 
+        /// <summary>
+        /// Habilita acesso para todos os usuários do sistema ao criar novo item
+        /// </summary>
+        [HttpPost]
+        [Route("HabilitarAcessoTodosUsuarios")]
+        public IActionResult HabilitarAcessoTodosUsuarios([FromBody] HabilitarAcessoRequest request)
+        {
+            try
+            {
+                if (!Guid.TryParse(request.RecursoId, out var recursoId))
+                {
+                    return Json(new { success = false, message = "ID do recurso inválido!" });
+                }
+
+                // Busca todos os usuários do sistema
+                var todosUsuarios = _unitOfWork.AspNetUsers.GetAll();
+
+                foreach (var usuario in todosUsuarios)
+                {
+                    // Verifica se já existe controle de acesso para este usuário e recurso
+                    var controleExistente = _unitOfWork.ControleAcesso.GetFirstOrDefault(ca =>
+                        ca.UsuarioId == usuario.Id && ca.RecursoId == recursoId);
+
+                    if (controleExistente == null)
+                    {
+                        // Cria novo registro com Acesso = 1 (habilitado)
+                        var novoControle = new ControleAcesso
+                        {
+                            UsuarioId = usuario.Id,
+                            RecursoId = recursoId,
+                            Acesso = 1
+                        };
+                        _unitOfWork.ControleAcesso.Add(novoControle);
+                    }
+                }
+
+                _unitOfWork.Save();
+
+                return Json(new { success = true, message = "Acesso habilitado para todos os usuários!" });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "HabilitarAcessoTodosUsuarios", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
         #endregion
 
         #region Métodos Auxiliares para Banco de Dados
@@ -1179,5 +1226,13 @@ namespace FrotiX.Controllers
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Request para habilitar acesso de todos usuários a um recurso
+    /// </summary>
+    public class HabilitarAcessoRequest
+    {
+        public string RecursoId { get; set; }
     }
 }

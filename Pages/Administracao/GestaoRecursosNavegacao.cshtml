@@ -582,7 +582,7 @@
         </div>
 
         <!-- Card: Controle de Acesso -->
-        <div class="props-card">
+        <div class="props-card" id="acessoCard" style="display: none;">
             <div class="props-header">
                 <h5><i class="fa-duotone fa-users"></i> Controle de Acesso</h5>
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="selecionarTodosAcessos()">
@@ -595,6 +595,11 @@
                         <p class="text-muted mb-0">Selecione um item para gerenciar acessos</p>
                     </div>
                 </div>
+            </div>
+            <div class="props-footer" style="padding: 15px; border-top: 1px solid #dee2e6; text-align: center;">
+                <button type="button" class="btn btn-ftx-fechar" onclick="fecharCards()">
+                    <i class="fa-duotone fa-circle-xmark icon-space icon-pulse"></i> Fechar Item
+                </button>
             </div>
         </div>
     </div>
@@ -1162,8 +1167,12 @@
                 modoEdicao.className = 'badge bg-warning text-dark ms-2';
             }
 
-            // Carrega controle de acesso
+            // ✅ Habilita Card de Propriedades (caso esteja desabilitado)
+            habilitarCardPropriedades(true);
+
+            // ✅ Carrega e mostra controle de acesso
             carregarControleAcesso(selectedItem.id);
+            document.getElementById('acessoCard').style.display = 'block';
 
             console.log('=== FIM selecionarItem (sucesso) ===');
         } catch (error) {
@@ -1588,6 +1597,8 @@
             return;
         }
 
+        var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
+
         fetch('/api/Navigation/SaveRecurso', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1597,10 +1608,49 @@
         .then(result => {
             if (result.success) {
                 mostrarAlerta(result.message, 'success');
+
+                // Atualiza árvore
                 carregarArvore();
 
-                // Esconde card após salvar
-                document.getElementById('propsCard').style.display = 'none';
+                var recursoId = result.id || dto.id;
+
+                // Se foi criado novo item, habilita acesso para todos usuários
+                if (ehNovoItem && recursoId) {
+                    habilitarAcessoTodosUsuarios(recursoId);
+                }
+
+                // Pergunta se deseja fazer controle de acesso
+                if (confirm('Deseja gerenciar o controle de acesso deste item agora?')) {
+                    // Atualiza selectedItem com o ID retornado
+                    if (ehNovoItem) {
+                        selectedItem = {
+                            id: recursoId,
+                            text: dto.text,
+                            nomeMenu: dto.nomeMenu,
+                            href: dto.href,
+                            icon: dto.icon,
+                            ordem: dto.ordem,
+                            descricao: dto.descricao,
+                            ativo: dto.ativo,
+                            parentId: dto.parentId
+                        };
+                        document.getElementById('recursoId').value = recursoId;
+                    }
+
+                    // Desabilita Card de Propriedades
+                    habilitarCardPropriedades(false);
+
+                    // Carrega controle de acesso
+                    carregarControleAcesso(recursoId);
+
+                    // Mostra Card de Controle de Acesso
+                    document.getElementById('acessoCard').style.display = 'block';
+                } else {
+                    // Não quer gerenciar acesso, fecha os cards
+                    document.getElementById('propsCard').style.display = 'none';
+                    document.getElementById('acessoCard').style.display = 'none';
+                    habilitarCardPropriedades(true);
+                }
             } else {
                 mostrarAlerta('Erro: ' + result.message, 'danger');
             }
@@ -1612,8 +1662,14 @@
         // Limpa formulario mas mantém card visível
         limparFormulario(false);  // false = NÃO esconde o card
 
+        // ✅ Habilita Card de Propriedades
+        habilitarCardPropriedades(true);
+
         // Mostra card de propriedades
         document.getElementById('propsCard').style.display = 'block';
+
+        // ✅ Garante que Card de Controle de Acesso está escondido ao criar novo item
+        document.getElementById('acessoCard').style.display = 'none';
 
         document.getElementById('txtNome').focus();
         document.getElementById('selectedItemName').textContent = 'Novo Item';
@@ -1798,6 +1854,57 @@
                 cb.checked = true;
                 cb.dispatchEvent(new Event('change'));
             }
+        });
+    }
+
+    // Fecha ambos os cards (Propriedades e Controle de Acesso)
+    function fecharCards() {
+        document.getElementById('propsCard').style.display = 'none';
+        document.getElementById('acessoCard').style.display = 'none';
+        habilitarCardPropriedades(true);
+        limparFormulario(true);
+    }
+
+    // Habilita ou desabilita todos os campos do Card de Propriedades
+    function habilitarCardPropriedades(habilitar) {
+        var campos = document.querySelectorAll('#formPropriedades input, #formPropriedades textarea, #formPropriedades select, #formPropriedades button');
+        campos.forEach(function(campo) {
+            if (habilitar) {
+                campo.removeAttribute('disabled');
+                campo.style.opacity = '1';
+                campo.style.cursor = 'auto';
+            } else {
+                campo.setAttribute('disabled', 'disabled');
+                campo.style.opacity = '0.6';
+                campo.style.cursor = 'not-allowed';
+            }
+        });
+
+        // Mantém o botão Salvar Propriedades desabilitado quando está no modo de controle de acesso
+        var btnSalvar = document.querySelector('#formPropriedades button[onclick*="salvarPropriedades"]');
+        if (btnSalvar && !habilitar) {
+            btnSalvar.setAttribute('disabled', 'disabled');
+        }
+    }
+
+    // Habilita acesso para todos os usuários (chamado ao criar novo item)
+    function habilitarAcessoTodosUsuarios(recursoId) {
+        fetch('/api/Navigation/HabilitarAcessoTodosUsuarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recursoId: recursoId })
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Acessos habilitados para todos os usuários');
+                carregarControleAcesso(recursoId);
+            } else {
+                console.error('Erro ao habilitar acessos:', result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao habilitar acessos:', error);
         });
     }
 
