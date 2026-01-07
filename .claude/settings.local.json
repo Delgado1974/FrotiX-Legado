@@ -46,7 +46,18 @@
       "Bash(dotnet nuget list:*)",
       "Bash(dotnet restore:*)",
       "Bash(Select-Object -First 10)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet build-server:*)",
+      "Bash(tar:*)",
+      "Bash(copy \"c:\\\\traducao\\\\fontawesome-icons-pt.json\" \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\fontawesome-icons.json\")",
+      "Bash(Select-String -Pattern \"error|Build succeeded|Build FAILED\")",
+      "Bash(tail:*)",
+      "Bash(Select-String -Pattern \"error|warning|succeeded|failed\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\FrotiX\\\\_FrotiXCompleto 2025 \\(valendo\\)\\\\FrotiX.Site\\\\Pages\" -Directory)",
+      "Bash(Measure-Object)",
+      "Bash(Select-Object -ExpandProperty Count)",
+      "Bash(git rm:*)"
     ]
   }
 }
