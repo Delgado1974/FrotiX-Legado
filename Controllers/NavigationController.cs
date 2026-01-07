@@ -1037,5 +1037,144 @@ namespace FrotiX.Controllers
         }
 
         #endregion
+
+        #region API - Páginas do Sistema
+
+        [HttpGet]
+        [Route("GetPaginasHierarquico")]
+        public IActionResult GetPaginasHierarquico()
+        {
+            try
+            {
+                const string cacheKey = "PaginasHierarquicas";
+
+                if (_cache.TryGetValue(cacheKey, out List<object> cachedPages))
+                {
+                    return Json(new { success = true, data = cachedPages });
+                }
+
+                var paginas = LoadPaginasFromFileSystem();
+
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24),
+                    Priority = CacheItemPriority.Normal
+                };
+                _cache.Set(cacheKey, paginas, cacheOptions);
+
+                return Json(new { success = true, data = paginas });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "GetPaginasHierarquico", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        private List<object> LoadPaginasFromFileSystem()
+        {
+            var pagesPath = Path.Combine(_env.ContentRootPath, "Pages");
+
+            if (!Directory.Exists(pagesPath))
+            {
+                throw new DirectoryNotFoundException($"Pasta Pages não encontrada em: {pagesPath}");
+            }
+
+            var result = new List<object>();
+
+            var moduleDirs = Directory.GetDirectories(pagesPath)
+                .Select(d => new DirectoryInfo(d))
+                .Where(d => !d.Name.StartsWith("_") && !d.Name.Equals("Shared", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(d => d.Name)
+                .ToList();
+
+            foreach (var moduleDir in moduleDirs)
+            {
+                var moduleName = moduleDir.Name;
+                var moduleId = $"module_{moduleName}";
+
+                var pageFiles = moduleDir.GetFiles("*.cshtml", SearchOption.TopDirectoryOnly)
+                    .Where(f => !f.Name.StartsWith("_"))
+                    .OrderBy(f => f.Name)
+                    .ToList();
+
+                if (!pageFiles.Any())
+                    continue;
+
+                var children = pageFiles.Select(pageFile =>
+                {
+                    var pageName = Path.GetFileNameWithoutExtension(pageFile.Name);
+                    var pageId = $"page_{moduleName}_{pageName}";
+                    var paginaRef = $"{moduleName.ToLower()}_{pageName.ToLower()}.html";
+                    var displayName = GetFriendlyPageName(pageName);
+
+                    return new
+                    {
+                        id = pageId,
+                        text = displayName,
+                        paginaRef = paginaRef,
+                        parentId = moduleId
+                    };
+                }).ToList<object>();
+
+                result.Add(new
+                {
+                    id = moduleId,
+                    text = GetFriendlyModuleName(moduleName),
+                    isCategory = true,
+                    hasChild = children.Count > 0,
+                    expanded = false,
+                    child = children
+                });
+            }
+
+            return result;
+        }
+
+        private string GetFriendlyPageName(string pageName)
+        {
+            return pageName switch
+            {
+                "Index" => "Listar",
+                "Upsert" => "Criar/Editar",
+                "UploadCNH" => "Upload CNH",
+                "UploadCRLV" => "Upload CRLV",
+                "UploadPDF" => "Upload PDF",
+                "DashboardAbastecimento" => "Dashboard",
+                "DashboardVeiculos" => "Dashboard",
+                "DashboardMotoristas" => "Dashboard",
+                "DashboardViagens" => "Dashboard",
+                "DashboardLavagem" => "Dashboard",
+                "DashboardEventos" => "Dashboard",
+                "DashboardEconomildo" => "Dashboard Economildo",
+                "DashboardAdministracao" => "Dashboard",
+                "PBI" => "Power BI",
+                "PBILotacaoMotorista" => "Power BI - Lotação",
+                "PBILavagem" => "Power BI - Lavagem",
+                "PBITaxiLeg" => "Power BI - Taxi Leg",
+                _ => pageName
+            };
+        }
+
+        private string GetFriendlyModuleName(string moduleName)
+        {
+            return moduleName switch
+            {
+                "Administracao" => "Administração",
+                "AlertasFrotiX" => "Alertas FrotiX",
+                "AtaRegistroPrecos" => "Ata de Registro de Preços",
+                "Combustivel" => "Combustível",
+                "Manutencao" => "Manutenção",
+                "MovimentacaoPatrimonio" => "Movimentação de Patrimônio",
+                "SecaoPatrimonial" => "Seções Patrimoniais",
+                "SetorPatrimonial" => "Setores Patrimoniais",
+                "SetorSolicitante" => "Setores Solicitantes",
+                "Usuarios" => "Usuários",
+                "Veiculo" => "Veículos",
+                _ => moduleName
+            };
+        }
+
+        #endregion
     }
 }

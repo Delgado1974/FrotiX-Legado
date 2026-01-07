@@ -369,6 +369,27 @@
         #ddlIcone .e-ddt-wrapper {
             border: 1px solid #ced4da !important;
         }
+
+        /* ====== DROPDOWNTREE DE PÁGINAS - BORDAS SEMPRE VISÍVEIS ====== */
+        .ddl-pagina-border .e-ddt-wrapper,
+        .ddl-pagina-border .e-input-group,
+        .ddl-pagina-border.e-dropdowntree .e-input-group,
+        .ddl-pagina-border.e-input-group {
+            border: 1px solid #ced4da !important;
+            border-radius: 6px !important;
+        }
+
+        .ddl-pagina-border .e-input-group.e-input-focus,
+        .ddl-pagina-border.e-input-group.e-input-focus {
+            border-color: #3D5771 !important;
+            box-shadow: 0 0 0 0.2rem rgba(61, 87, 113, 0.15) !important;
+        }
+
+        /* Força bordas mesmo quando vazio */
+        #ddlPagina.e-dropdowntree,
+        #ddlPagina .e-ddt-wrapper {
+            border: 1px solid #ced4da !important;
+        }
     </style>
 }
 
@@ -454,6 +475,31 @@
                             <div class="form-group">
                                 <label for="txtOrdem">Ordem</label>
                                 <input type="number" class="form-control" id="txtOrdem" value="0" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DropDownTree de Páginas -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="ddlPagina">Selecione a Página do Sistema</label>
+
+                                <ejs-dropdowntree id="ddlPagina"
+                                                 placeholder="Busque ou selecione uma página..."
+                                                 popupHeight="400px"
+                                                 showCheckBox="false"
+                                                 showClearButton="true"
+                                                 allowFiltering="true"
+                                                 filterType="Contains"
+                                                 ignoreCase="true"
+                                                 cssClass="e-outline ddl-pagina-border"
+                                                 created="onPaginaDropdownCreated">
+                                </ejs-dropdowntree>
+
+                                <small class="form-text text-muted mt-1">
+                                    Ao selecionar uma página, a URL será preenchida automaticamente
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -583,6 +629,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         carregarArvore();
         carregarIconesFontAwesome();
+        carregarPaginasSistema();
     });
 
     // Carrega arvore do banco de dados
@@ -780,6 +827,82 @@
         document.getElementById('txtIconClass').value = iconClass;
 
         console.log('Classe:', iconClass, '| Label:', iconLabel);
+    }
+
+    // Carrega páginas do sistema
+    function carregarPaginasSistema() {
+        fetch('/api/Navigation/GetPaginasHierarquico')
+            .then(r => r.json())
+            .then(result => {
+                console.log('Páginas carregadas:', result);
+                if (result.success && result.data) {
+                    var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+                    if (ddlPaginaObj) {
+                        ddlPaginaObj.fields = {
+                            dataSource: result.data,
+                            value: 'id',
+                            text: 'text',
+                            parentValue: 'parentId',
+                            hasChildren: 'hasChild',
+                            child: 'child'
+                        };
+                        ddlPaginaObj.dataBind();
+                        console.log('DropDownTree de páginas populado com', result.data.length, 'módulos');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar páginas:', error);
+                mostrarAlerta('Erro ao carregar páginas. Verifique o console.', 'warning');
+            });
+    }
+
+    function onPaginaDropdownCreated() {
+        try {
+            var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+            if (ddlPaginaObj) {
+                ddlPaginaObj.itemTemplate = function(data) {
+                    if (data.isCategory) {
+                        return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
+                    }
+                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                           '<i class="fa-regular fa-file-lines" style="font-size: 16px; width: 20px; color: #6c757d;"></i>' +
+                           '<span>' + data.text + '</span>' +
+                           '</div>';
+                };
+
+                ddlPaginaObj.valueTemplate = function(data) {
+                    if (!data || data.isCategory) return '';
+                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                           '<i class="fa-regular fa-file-lines" style="font-size: 14px; width: 18px; color: #6c757d;"></i>' +
+                           '<span>' + data.text + '</span>' +
+                           '</div>';
+                };
+
+                ddlPaginaObj.change = function(args) {
+                    onPaginaChange(args);
+                };
+
+                console.log('DropDownTree de páginas configurado');
+            }
+        } catch (error) {
+            console.error('Erro ao configurar DropDownTree de páginas:', error);
+        }
+    }
+
+    function onPaginaChange(args) {
+        console.log('Página selecionada:', args);
+
+        // Se não há dados ou é uma categoria, não faz nada
+        if (!args.itemData || args.itemData.isCategory) {
+            console.log('Categoria selecionada ou campo limpo');
+            return;
+        }
+
+        // Obtém a URL gerada (formato: modulo_pagina.html)
+        var paginaRef = args.itemData.paginaRef;
+        document.getElementById('txtHref').value = paginaRef;
+        console.log('URL gerada:', paginaRef);
     }
 
     // Carrega lista de usuarios com acesso
