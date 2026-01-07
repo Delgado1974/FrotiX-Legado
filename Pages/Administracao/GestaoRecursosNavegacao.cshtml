@@ -477,7 +477,6 @@
                                                          filterType="Contains"
                                                          ignoreCase="true"
                                                          itemTemplate="iconItemTemplate"
-                                                         treeSettings="@(new Syncfusion.EJ2.DropDowns.DropDownTreeFieldsSettings { DataSource = new List<object>(), Value = "id", Text = "text", ParentValue = "parentId", HasChildren = "hasChild", Child = "child" })"
                                                          change="onIconeChange">
                                         </ejs-dropdowntree>
 
@@ -728,7 +727,15 @@
                 if (result.success && result.data) {
                     var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
                     if (ddlIconeObj) {
-                        ddlIconeObj.fields.dataSource = result.data;
+                        // Configura os fields do DropDownTree
+                        ddlIconeObj.fields = {
+                            dataSource: result.data,
+                            value: 'id',
+                            text: 'text',
+                            parentValue: 'parentId',
+                            hasChildren: 'hasChild',
+                            child: 'child'
+                        };
                         ddlIconeObj.dataBind();
                         console.log('DropDownTree de ícones populado com', result.data.length, 'categorias');
                     }
