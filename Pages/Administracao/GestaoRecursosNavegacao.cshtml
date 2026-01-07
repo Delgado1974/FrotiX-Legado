@@ -738,8 +738,21 @@
 
     // Renderiza TreeView com Syncfusion
     function renderizarTreeView() {
+        // ✅ Destrói instância anterior do TreeView se existir
+        if (treeObj) {
+            console.log('Destruindo instância anterior do TreeView...');
+            try {
+                treeObj.destroy();
+                treeObj = null;
+            } catch (error) {
+                console.warn('Erro ao destruir TreeView anterior:', error);
+            }
+        }
+
         var container = document.getElementById('gestaoTreeView');
         container.innerHTML = '<div id="treeViewControl"></div>';
+
+        console.log('Criando nova instância do TreeView com', treeData.length, 'itens');
 
         treeObj = new ej.navigations.TreeView({
             fields: {
@@ -826,6 +839,7 @@
         });
 
         treeObj.appendTo('#treeViewControl');
+        console.log('✅ TreeView renderizado com sucesso! Total de itens:', treeData.length);
     }
 
     // Seleciona item e carrega propriedades
