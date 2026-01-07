@@ -1556,150 +1556,168 @@
 
     // Carrega lista de usuarios com acesso
     function carregarControleAcesso(recursoId) {
-        if (!recursoId) {
-            document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
-            return;
-        }
+        try {
+            if (!recursoId) {
+                document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
+                return;
+            }
 
-        fetch('/api/Navigation/GetUsuariosAcesso?recursoId=' + recursoId)
-            .then(r => r.json())
-            .then(result => {
-                console.log('Acessos carregados:', result);
-                var container = document.getElementById('listaAcessos');
-                if (result.success && result.data && result.data.length > 0) {
-                    container.innerHTML = result.data.map(u =>
-                        '<div class="acesso-item">' +
-                        '<input type="checkbox" class="form-check-input me-2" ' +
-                        'id="acesso_' + u.usuarioId + '" ' +
-                        (u.acesso ? 'checked' : '') +
-                        ' onchange="atualizarAcesso(\'' + u.usuarioId + '\', this.checked)" />' +
-                        '<label for="acesso_' + u.usuarioId + '">' + u.nome + '</label>' +
-                        '</div>'
-                    ).join('');
-                } else {
-                    container.innerHTML = '<p class="text-muted text-center">Nenhum usuário encontrado</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao carregar acessos:', error);
-            });
+            fetch('/api/Navigation/GetUsuariosAcesso?recursoId=' + recursoId)
+                .then(r => r.json())
+                .then(result => {
+                    console.log('Acessos carregados:', result);
+                    var container = document.getElementById('listaAcessos');
+                    if (result.success && result.data && result.data.length > 0) {
+                        container.innerHTML = result.data.map(u =>
+                            '<div class="acesso-item">' +
+                            '<input type="checkbox" class="form-check-input me-2" ' +
+                            'id="acesso_' + u.usuarioId + '" ' +
+                            (u.acesso ? 'checked' : '') +
+                            ' onchange="atualizarAcesso(\'' + u.usuarioId + '\', this.checked)" />' +
+                            '<label for="acesso_' + u.usuarioId + '">' + u.nome + '</label>' +
+                            '</div>'
+                        ).join('');
+                    } else {
+                        container.innerHTML = '<p class="text-muted text-center">Nenhum usuário encontrado</p>';
+                    }
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarControleAcesso", erro);
+                });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarControleAcesso", erro);
+        }
     }
 
     // Atualiza acesso de usuario
     function atualizarAcesso(usuarioId, acesso) {
-        if (!selectedItem) return;
+        try {
+            if (!selectedItem) return;
 
-        fetch('/api/Navigation/UpdateAcesso', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                usuarioId: usuarioId,
-                recursoId: selectedItem.id,
-                acesso: acesso
+            fetch('/api/Navigation/UpdateAcesso', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usuarioId: usuarioId,
+                    recursoId: selectedItem.id,
+                    acesso: acesso
+                })
             })
-        })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                mostrarAlerta('Acesso atualizado!', 'success');
-            } else {
-                mostrarAlerta('Erro ao atualizar acesso: ' + result.message, 'danger');
-            }
-        });
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    mostrarAlerta('Acesso atualizado!', 'success');
+                } else {
+                    mostrarAlerta('Erro ao atualizar acesso: ' + result.message, 'danger');
+                }
+            })
+            .catch(erro => {
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "atualizarAcesso", erro);
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "atualizarAcesso", erro);
+        }
     }
 
     // Salva propriedades do item
     function salvarPropriedades() {
-        // ✅ CODIFICA valores antes de enviar ao backend
-        var dto = {
-            id: document.getElementById('recursoId').value,
-            text: encodeHtml(document.getElementById('txtNome').value),
-            nomeMenu: encodeHtml(document.getElementById('txtNomeMenu').value),
-            href: document.getElementById('txtHref').value,
-            icon: document.getElementById('txtIconClass').value,
-            ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
-            descricao: encodeHtml(document.getElementById('txtDescricao').value),
-            ativo: document.getElementById('chkAtivo').checked,
-            parentId: document.getElementById('parentId').value
-        };
+        try {
+            // ✅ CODIFICA valores antes de enviar ao backend
+            var dto = {
+                id: document.getElementById('recursoId').value,
+                text: encodeHtml(document.getElementById('txtNome').value),
+                nomeMenu: encodeHtml(document.getElementById('txtNomeMenu').value),
+                href: document.getElementById('txtHref').value,
+                icon: document.getElementById('txtIconClass').value,
+                ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
+                descricao: encodeHtml(document.getElementById('txtDescricao').value),
+                ativo: document.getElementById('chkAtivo').checked,
+                parentId: document.getElementById('parentId').value
+            };
 
-        console.log('DTO codificado para envio:', dto);
+            console.log('DTO codificado para envio:', dto);
 
-        if (!dto.text || !dto.nomeMenu) {
-            mostrarAlerta('Preencha Nome e NomeMenu!', 'warning');
-            return;
-        }
-
-        var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
-
-        fetch('/api/Navigation/SaveRecurso', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dto)
-        })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                mostrarAlerta(result.message, 'success');
-
-                // ✅ Atualiza árvore após pequeno delay para garantir que backend processou
-                setTimeout(function() {
-                    carregarArvore();
-                }, 300);
-
-                var recursoId = result.id || dto.id;
-
-                // ✅ APENAS para NOVO ITEM: habilita acesso e pergunta sobre gerenciamento
-                if (ehNovoItem && recursoId) {
-                    // Habilita acesso para todos usuários automaticamente
-                    habilitarAcessoTodosUsuarios(recursoId);
-
-                    // Pergunta se deseja fazer controle de acesso
-                    Alerta.Confirmar(
-                        'Gerenciar Controle de Acesso',
-                        'Deseja gerenciar o controle de acesso deste item agora?',
-                        'Sim',
-                        'Não'
-                    ).then(function(result) {
-                        if (result) {
-                            // Atualiza selectedItem com o ID retornado
-                            selectedItem = {
-                                id: recursoId,
-                                text: dto.text,
-                                nomeMenu: dto.nomeMenu,
-                                href: dto.href,
-                                icon: dto.icon,
-                                ordem: dto.ordem,
-                                descricao: dto.descricao,
-                                ativo: dto.ativo,
-                                parentId: dto.parentId
-                            };
-                            document.getElementById('recursoId').value = recursoId;
-
-                            // Desabilita Card de Propriedades
-                            habilitarCardPropriedades(false);
-
-                            // Carrega controle de acesso
-                            carregarControleAcesso(recursoId);
-
-                            // Mostra Card de Controle de Acesso
-                            document.getElementById('acessoCard').style.display = 'block';
-                        } else {
-                            // Não quer gerenciar acesso, fecha os cards
-                            document.getElementById('propsCard').style.display = 'none';
-                            document.getElementById('acessoCard').style.display = 'none';
-                            habilitarCardPropriedades(true);
-                        }
-                    });
-                } else {
-                    // ✅ EDIÇÃO de item existente: apenas fecha card de propriedades
-                    document.getElementById('propsCard').style.display = 'none';
-                    habilitarCardPropriedades(true);
-                }
-            } else {
-                mostrarAlerta('Erro: ' + result.message, 'danger');
+            if (!dto.text || !dto.nomeMenu) {
+                mostrarAlerta('Preencha Nome e NomeMenu!', 'warning');
+                return;
             }
-        });
+
+            var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
+
+            fetch('/api/Navigation/SaveRecurso', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dto)
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    mostrarAlerta(result.message, 'success');
+
+                    // ✅ Atualiza árvore após pequeno delay para garantir que backend processou
+                    setTimeout(function() {
+                        carregarArvore();
+                    }, 300);
+
+                    var recursoId = result.id || dto.id;
+
+                    // ✅ APENAS para NOVO ITEM: habilita acesso e pergunta sobre gerenciamento
+                    if (ehNovoItem && recursoId) {
+                        // Habilita acesso para todos usuários automaticamente
+                        habilitarAcessoTodosUsuarios(recursoId);
+
+                        // Pergunta se deseja fazer controle de acesso
+                        Alerta.Confirmar(
+                            'Gerenciar Controle de Acesso',
+                            'Deseja gerenciar o controle de acesso deste item agora?',
+                            'Sim',
+                            'Não'
+                        ).then(function(result) {
+                            if (result) {
+                                // Atualiza selectedItem com o ID retornado
+                                selectedItem = {
+                                    id: recursoId,
+                                    text: dto.text,
+                                    nomeMenu: dto.nomeMenu,
+                                    href: dto.href,
+                                    icon: dto.icon,
+                                    ordem: dto.ordem,
+                                    descricao: dto.descricao,
+                                    ativo: dto.ativo,
+                                    parentId: dto.parentId
+                                };
+                                document.getElementById('recursoId').value = recursoId;
+
+                                // Desabilita Card de Propriedades
+                                habilitarCardPropriedades(false);
+
+                                // Carrega controle de acesso
+                                carregarControleAcesso(recursoId);
+
+                                // Mostra Card de Controle de Acesso
+                                document.getElementById('acessoCard').style.display = 'block';
+                            } else {
+                                // Não quer gerenciar acesso, fecha os cards
+                                document.getElementById('propsCard').style.display = 'none';
+                                document.getElementById('acessoCard').style.display = 'none';
+                                habilitarCardPropriedades(true);
+                            }
+                        });
+                    } else {
+                        // ✅ EDIÇÃO de item existente: apenas fecha card de propriedades
+                        document.getElementById('propsCard').style.display = 'none';
+                        habilitarCardPropriedades(true);
+                    }
+                } else {
+                    mostrarAlerta('Erro: ' + result.message, 'danger');
+                }
+            })
+            .catch(erro => {
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
+        }
     }
 
     // Adiciona novo item
@@ -2020,18 +2038,28 @@
     }
 
     // Mostra alerta toast
+    // Função wrapper para mostrar alertas usando SweetAlert
     function mostrarAlerta(mensagem, tipo) {
-        var existente = document.querySelector('.alert-toast');
-        if (existente) existente.remove();
-
-        var alert = document.createElement('div');
-        alert.className = 'alert alert-' + tipo + ' alert-toast alert-dismissible fade show';
-        alert.innerHTML = mensagem + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
-        document.body.appendChild(alert);
-
-        setTimeout(function() {
-            alert.remove();
-        }, 5000);
+        try {
+            // Mapeia tipos Bootstrap para funções SweetAlert
+            switch(tipo) {
+                case 'success':
+                    return Alerta.Sucesso('Sucesso', mensagem);
+                case 'danger':
+                case 'error':
+                    return Alerta.Erro('Erro', mensagem);
+                case 'warning':
+                    return Alerta.Warning('Atenção', mensagem);
+                case 'info':
+                    return Alerta.Info('Informação', mensagem);
+                default:
+                    return Alerta.Info('Aviso', mensagem);
+            }
+        } catch (erro) {
+            // Fallback para console se SweetAlert falhar
+            console.error('[mostrarAlerta] Erro ao exibir alerta:', erro);
+            console.log(`[${tipo}] ${mensagem}`);
+        }
     }
 </script>
 }
