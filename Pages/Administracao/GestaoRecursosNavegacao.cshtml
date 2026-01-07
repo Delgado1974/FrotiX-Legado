@@ -476,7 +476,8 @@
                                                          allowFiltering="true"
                                                          filterType="Contains"
                                                          ignoreCase="true"
-                                                         itemTemplate="iconItemTemplate"
+                                                         cssClass="e-outline"
+                                                         created="onIconeDropdownCreated"
                                                          change="onIconeChange">
                                         </ejs-dropdowntree>
 
@@ -545,17 +546,37 @@
     var treeObj = null;
     var selectedItem = null;
 
-    // Template customizado para exibir ícone + label no DropDownTree
-    function iconItemTemplate(data) {
-        // Se for uma categoria, não exibe ícone
-        if (data.isCategory) {
-            return '<div style="font-weight: 600; padding: 4px 0;">' + data.text + '</div>';
+    // Callback executado quando o DropDownTree é criado
+    function onIconeDropdownCreated() {
+        try {
+            var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+            if (ddlIconeObj) {
+                // Configura template customizado para exibir ícone + label no dropdown
+                ddlIconeObj.itemTemplate = function(data) {
+                    // Se for uma categoria, não exibe ícone
+                    if (data.isCategory) {
+                        return '<div style="font-weight: 600; padding: 4px 0;">' + data.text + '</div>';
+                    }
+                    // Se for um ícone, exibe o ícone FontAwesome + label
+                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                           '<i class="' + data.id + '" style="font-size: 18px; width: 24px; text-align: center;"></i>' +
+                           '<span>' + data.text + '</span>' +
+                           '</div>';
+                };
+
+                // Configura template para o valor selecionado (exibido no campo)
+                ddlIconeObj.valueTemplate = function(data) {
+                    if (!data || data.isCategory) return '';
+                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
+                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px; text-align: center;"></i>' +
+                           '<span>' + data.text + '</span>' +
+                           '</div>';
+                };
+                console.log('Templates de ícones configurados');
+            }
+        } catch (error) {
+            console.error('Erro ao configurar template do DropDownTree:', error);
         }
-        // Se for um ícone, exibe o ícone FontAwesome + label
-        return '<div style="display: flex; align-items: center; gap: 8px;">' +
-               '<i class="' + data.id + '" style="font-size: 18px; width: 24px; text-align: center;"></i>' +
-               '<span>' + data.text + '</span>' +
-               '</div>';
     }
 
     // Carrega dados ao iniciar
