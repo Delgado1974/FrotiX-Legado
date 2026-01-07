@@ -152,14 +152,14 @@
 
         /* ====== FORMULARIO DE PROPRIEDADES ====== */
         .form-group {
-            margin-bottom: 1.5rem;  /* 50% de aumento no espaçamento vertical */
+            margin-bottom: 2rem;  /* Espaçamento vertical aumentado significativamente */
         }
 
         .form-group label {
             display: block;
             font-weight: 500;
             color: #495057;
-            margin-bottom: 0.25rem;  /* Mantém label próxima ao controle */
+            margin-bottom: 0.375rem;  /* Mantém label próxima ao controle */
             font-size: 0.875rem;
         }
 
@@ -459,27 +459,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="txtHref">URL da Página</label>
-                                <input type="text" class="form-control" id="txtHref" readonly
-                                       placeholder="Selecione uma página no dropdown abaixo..."
-                                       style="background-color: #f8f9fa; cursor: not-allowed;" />
-                                <small class="form-text text-muted">
-                                    URL gerada automaticamente ao selecionar uma página
-                                </small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="txtOrdem">Ordem</label>
-                                <input type="number" class="form-control" id="txtOrdem" value="0" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- DropDownTree de Páginas -->
+                    <!-- DropDownTree de Páginas - DEVE FICAR ANTES DO CAMPO URL -->
                     <div class="row">
                         <div class="col-12">
                             <div class="form-group">
@@ -498,8 +478,25 @@
                                 </ejs-dropdowntree>
 
                                 <small class="form-text text-muted mt-1">
-                                    Ao selecionar uma página, a URL será preenchida automaticamente
+                                    Ao selecionar uma página, a URL será preenchida automaticamente abaixo
                                 </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="txtHref">URL da Página (gerada automaticamente)</label>
+                                <input type="text" class="form-control" id="txtHref" readonly
+                                       placeholder="Selecione uma página acima para gerar a URL..."
+                                       style="background-color: #f8f9fa; cursor: not-allowed;" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtOrdem">Ordem</label>
+                                <input type="number" class="form-control" id="txtOrdem" value="0" />
                             </div>
                         </div>
                     </div>
@@ -999,10 +996,12 @@
 
     // Adiciona novo item
     function adicionarNovoItem() {
+        // Limpa formulario mas mantém card visível
+        limparFormulario(false);  // false = NÃO esconde o card
+
         // Mostra card de propriedades
         document.getElementById('propsCard').style.display = 'block';
 
-        limparFormulario();
         document.getElementById('txtNome').focus();
         document.getElementById('selectedItemName').textContent = 'Novo Item';
 
@@ -1040,13 +1039,26 @@
     }
 
     // Limpa formulario
-    function limparFormulario() {
+    function limparFormulario(esconderCard = true) {
         selectedItem = null;
         document.getElementById('formPropriedades').reset();
         document.getElementById('recursoId').value = '';
         document.getElementById('parentId').value = '';
+        document.getElementById('txtIconClass').value = '';
         document.getElementById('selectedItemName').textContent = 'Nenhum item selecionado';
-        document.getElementById('iconPreview').innerHTML = '<i class="fa-duotone fa-folder"></i>';
+
+        // Limpa DropDownTree de ícones
+        var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
+        if (ddlIconeObj) {
+            ddlIconeObj.value = null;
+        }
+
+        // Limpa DropDownTree de páginas
+        var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+        if (ddlPaginaObj) {
+            ddlPaginaObj.value = null;
+        }
+
         document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
         document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
 
@@ -1054,8 +1066,10 @@
         document.getElementById('modoEdicao').textContent = 'Selecione';
         document.getElementById('modoEdicao').className = 'badge bg-secondary ms-2';
 
-        // Esconde card
-        document.getElementById('propsCard').style.display = 'none';
+        // Esconde card apenas se solicitado
+        if (esconderCard) {
+            document.getElementById('propsCard').style.display = 'none';
+        }
     }
 
     // Salva ordenacao apos drag-drop
