@@ -155,6 +155,7 @@ function inicializarProgressBar()
     try 
     {
         var progressBar = document.getElementById('progressoLeitura');
+        var progressWarned = false;
 
         function verificarProgressBar(tentativa) {
             try {
@@ -164,7 +165,10 @@ function inicializarProgressBar()
                 }
 
                 if (tentativa >= 5) {
-                    console.warn('⚠️ ProgressBar ainda não foi inicializado pelo Syncfusion (última tentativa)');
+                    if (!progressWarned) {
+                        console.warn('⚠️ ProgressBar ainda não foi inicializado pelo Syncfusion (última tentativa)');
+                        progressWarned = true;
+                    }
                     return;
                 }
 
