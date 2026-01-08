@@ -535,3 +535,60 @@ Documentar **cada página/funcionalidade do FrotiX Web** de forma completa e pad
 - **Documentar validações** com o código exato (if/else, DataAnnotation)
 
 ---
+
+## Memória (Projeto): Padrão de Documentação FrotiX (`Documentacao/`)
+
+Esta seção consolida o que foi observado nos arquivos reais de `Documentacao/*.md` e serve como checklist prático para criar/atualizar documentação.
+
+### Onde fica / como nomear
+- **Pasta**: `Documentacao/`
+- **1 arquivo por funcionalidade/página** (ou por “módulo” quando fizer sentido: ex. `Contrato.md`, `Fornecedor.md`, `Unidade.md`, `Requisitante.md`)
+- **Nome padrão**: `Funcionalidade - [Módulo] - [Página].md`
+  - Exemplos comuns:
+    - `Funcionalidade - Veiculo - Index.md`, `Funcionalidade - Veiculo - Upsert.md`, `Funcionalidade - Veiculo - Dashboard.md`
+    - `Funcionalidade - Abastecimento - Importacao.md`, `... - Pendencias.md`, `... - Dashboard.md`
+    - `Funcionalidade - Administracao - [Ferramenta].md`
+
+### Estrutura obrigatória (template “ouro”)
+- **Cabeçalho**:
+  - `# Documentação: <Nome>`
+  - `> Última Atualização: DD/MM/AAAA`
+  - `> Versão Atual: X.Y`
+  - Separador `---`
+- **PARTE 1: DOCUMENTAÇÃO DA FUNCIONALIDADE**
+  - Índice com âncoras
+  - Visão geral com ✅ “Características Principais”
+  - Arquitetura: árvore de arquivos, tecnologias, e (quando aplicável) padrão (MVC/Razor Pages/API)
+  - Seções específicas conforme o tipo da página:
+    - **Listagens (Index)**: tabela/grid, filtros, DataTables, renderers, ações (editar/excluir/status), modais.
+    - **Formulários (Upsert)**: seções do formulário, bindings, validações, uploads, regras por status (readonly), JS principal.
+    - **Dashboards**: abas, filtros (ano/mês/período), KPIs, gráficos (Syncfusion/Chart.js), overlays de loading, performance.
+    - **Jobs/Backoffice (batch)**: execução, progresso (polling/cache), riscos (timeout/IIS), troubleshooting.
+    - **Agenda/Calendário**: FullCalendar, modal unificado, recorrência, conflitos.
+  - **Endpoints API (quando houver)**:
+    - Listar todos os endpoints usados pela tela
+    - Descrever rota/método/parâmetros e incluir exemplos de request/response
+    - **Incluir trechos reais do Controller**
+  - **Frontend**
+    - HTML principal (cards/tabelas/modais)
+    - JavaScript (funções críticas, eventos, inicialização)
+    - CSS (classes importantes, animações; lembrar: `@@keyframes` quando em `.cshtml`)
+  - **Validações**
+    - Lista completa de regras e, quando relevante, o código exato (C#/JS)
+  - **Troubleshooting**
+    - Problema → sintoma → causa → solução (com trechos de código/comandos quando útil)
+- **PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES**
+  - Entradas em ordem **decrescente**: `## [DD/MM/AAAA HH:mm] - Título`
+  - Descrever: problema → causa → solução → arquivos afetados → commits (quando existirem) → status
+
+### Regras e padrões recorrentes observados
+- **Trecho de código real > descrição genérica**: quando documentar um comportamento importante, copiar o bloco do código.
+- **Padrão de alertas**: o projeto padroniza comunicação por `Alerta.*` (SweetAlert custom) e toast (`AppToast.show(...)`).
+- **Try-catch**: JS e C# com `try/catch` e `Alerta.TratamentoErroComLinha("Arquivo", "Metodo", erro)`.
+- **Consistência visual**:
+  - Ícones sempre `fa-duotone`
+  - Botões e overlays seguem padrões FrotiX (ex.: logo pulsante no loading overlay)
+- **Documentar “discrepâncias”**: quando JS e Controller divergirem (rota antiga/novo endpoint), registrar a nota explicitamente e apontar o código-fonte considerado.
+
+### Observação importante (dívida técnica de documentação)
+- Alguns arquivos estão em formato mais “antigo/sintético” (ex.: docs de `AtaRegistroPrecos` sem PARTE 1/2 completas). Idealmente, padronizar esses arquivos no modelo atual quando o módulo for tocado novamente.
