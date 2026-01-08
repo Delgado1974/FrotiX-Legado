@@ -119,7 +119,7 @@ namespace FrotiX.Pages.Motorista
                         CNHMotorista = MotoristaObj.Motorista.CNHDigital;
                     }
 
-                    if (MotoristaObj.Motorista.Status == false || MotoristaObj.Motorista.Status == null)
+                    if (MotoristaObj.Motorista.Status == false )
                     {
                         MotoristaObj.Motorista.Status = true;
                     }

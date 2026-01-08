@@ -158,10 +158,7 @@ namespace FrotiX.Pages.Viagens
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    viagemId = (Guid)id;
-                }
+                viagemId = id;
 
                 //Pega o usuário corrente
                 //=======================

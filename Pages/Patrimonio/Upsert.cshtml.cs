@@ -69,10 +69,7 @@ namespace FrotiX.Pages.Patrimonio
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    patrimonioId = (Guid)id;
-                }
+                patrimonioId = id;
 
                 if (id != Guid.Empty)
                 {

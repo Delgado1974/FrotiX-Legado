@@ -36,9 +36,6 @@ namespace FrotiX.Pages.TaxiLeg
         {
             try
             {
-                Console.WriteLine("Entrei por aqui");
-                return RedirectToPage("./Index");
-
                 IList<ExcelViewModel> list = new List<ExcelViewModel>();
                 var validTypes = new string[]
                 {
@@ -95,7 +92,7 @@ namespace FrotiX.Pages.TaxiLeg
 
                                 using (var stream = new FileStream(filePath , FileMode.Create))
                                 {
-                                    file.CopyToAsync(stream);
+                                    file.CopyTo(stream);
                                 }
 
                                 using (ExcelPackage package = new ExcelPackage(fileInfo))

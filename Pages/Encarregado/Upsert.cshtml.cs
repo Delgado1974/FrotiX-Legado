@@ -81,10 +81,7 @@ namespace FrotiX.Pages.Encarregado
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    encarregadoId = (Guid)id;
-                }
+                encarregadoId = id;
 
                 // Pega o usuário corrente
                 // =======================

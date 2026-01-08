@@ -165,7 +165,7 @@ namespace FrotiX.Controllers
         {
             try
             {
-                var result = _unitOfWork.ViewLotacaoMotorista.GetAll(lm => lm.MotoristaId == null);
+                var result = _unitOfWork.ViewLotacaoMotorista.GetAll(lm => lm.MotoristaId == Guid.Empty);
 
                 if (motoristaId != null)
                 {
@@ -571,7 +571,7 @@ namespace FrotiX.Controllers
             {
                 var lotacoesAnteriores = _unitOfWork.LotacaoMotorista.GetAll(lm =>
                     lm.MotoristaId == Guid.Parse(motoristaId)
-                    && (lm.Lotado == true || lm.Lotado == null)
+                    && lm.Lotado == true
                 );
                 foreach (var lotacao in lotacoesAnteriores)
                 {
