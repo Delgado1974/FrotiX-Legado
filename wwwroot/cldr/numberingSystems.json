@@ -1,1 +1,11 @@
-{"supplemental":{"numberingSystems":{"latn":{"_type":"numeric"}}}}
+{
+  "supplemental": {
+    "version": { "_cldrVersion": "36", "_number": "$Revision: 14409 $" },
+    "numberingSystems": {
+      "latn": {
+        "_type": "numeric",
+        "_digits": "0123456789"
+      }
+    }
+  }
+}

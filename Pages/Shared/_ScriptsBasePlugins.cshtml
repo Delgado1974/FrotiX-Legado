@@ -149,8 +149,9 @@
 <!-- Kendo UI - CDN Oficial Telerik -->
 @* <link href="https://kendo.cdn.telerik.com/2023.1.117/styles/kendo.default-main.min.css" rel="stylesheet" /> *@
 <script src="https://kendo.cdn.telerik.com/2023.1.117/js/jszip.min.js"></script>
-<script src="https://kendo.cdn.telerik.com/2025.2.520/mjs/kendo.all.js"></script>
-<script src="https://kendo.cdn.telerik.com/2025.2.520/mjs/kendo.aspnetmvc.js"></script>
+<!-- Usar distribuição clássica (non-module) para evitar SyntaxError em browsers -->
+<script src="https://kendo.cdn.telerik.com/2025.2.520/js/kendo.all.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2025.2.520/js/kendo.aspnetmvc.min.js"></script>
 
 <!-- PDF.js para o Kendo PDFViewer -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -183,6 +184,24 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
 		crossorigin="anonymous"></script>
+<!-- Shim para expor $.fn.tooltip usando Bootstrap 5 (evita logs \"bs.tooltip is not loaded\") -->
+<script>
+	(function ($, bootstrap) {
+		if (!$ || !bootstrap || !bootstrap.Tooltip) return;
+		if ($.fn.tooltip) return;
+		$.fn.tooltip = function (arg) {
+			return this.each(function () {
+				var instance = bootstrap.Tooltip.getInstance(this);
+				if (!instance) {
+					instance = new bootstrap.Tooltip(this, typeof arg === 'object' ? arg : {});
+				}
+				if (typeof arg === 'string' && typeof instance[arg] === 'function') {
+					instance[arg]();
+				}
+			});
+		};
+	})(window.jQuery, window.bootstrap);
+</script>
 
 <!-- Font Awesome -->
 <script src="https://kit.fontawesome.com/afeb78ad1f.js" crossorigin="anonymous"></script>
@@ -399,16 +418,24 @@
     // Configuração de localização
     const LOCALE_CONFIG = {
         culture: 'pt-BR',
+        // Caminho padrão (usado se a fonte não definir paths próprios)
         paths: [
             'supplemental/numberingSystems.json',
             'main/pt/ca-gregorian.json',
             'main/pt/numbers.json',
             'main/pt/timeZoneNames.json'
         ],
+        // Fonte local única para evitar 404/CORS; remotas removidas
         sources: [
-            'https://cdn.syncfusion.com/ej2/cldr-data',
-            'https://cdn.jsdelivr.net/npm/cldr-data@latest',
-            'https://unpkg.com/cldr-data@latest'
+            {
+                baseUrl: '/cldr',
+                paths: [
+                    'numberingSystems.json',
+                    'ca-gregorian.json',
+                    'numbers.json',
+                    'timeZoneNames.json'
+                ]
+            }
         ],
         translations: {
             'pt-BR': {
@@ -475,11 +502,14 @@
         const errors = [];
 
         // Tenta cada fonte
-        for (const baseUrl of LOCALE_CONFIG.sources) {
+        for (const source of LOCALE_CONFIG.sources) {
+            const baseUrl = typeof source === 'string' ? source : source.baseUrl;
+            const paths = typeof source === 'string' ? LOCALE_CONFIG.paths : (source.paths || LOCALE_CONFIG.paths);
+
             try {
                 console.log(`Tentando carregar CLDR de: ${baseUrl}`);
 
-                const dataPromises = LOCALE_CONFIG.paths.map(path =>
+                const dataPromises = paths.map(path =>
                     fetchJsonWithRetry(`${baseUrl}/${path}`, 1, 3000)
                 );
 

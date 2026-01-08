@@ -219,14 +219,20 @@ var SignalRManager = (function ()
                     console.log("❌ Conexão SignalR fechada");
                     if (error)
                     {
-                        console.error("Erro:", error.toString());
-
-                        // Verificar se é erro de WebSocket
                         var errorMessage = error.toString().toLowerCase();
-                        if (errorMessage.includes('websocket') && !config.fallbackToLongPolling)
+                        var isWebSocketIssue = errorMessage.includes('websocket');
+
+                        if (isWebSocketIssue && !config.fallbackToLongPolling)
                         {
                             console.log("🔄 Erro de WebSocket detectado, tentando fallback para LongPolling...");
                             config.fallbackToLongPolling = true;
+                        }
+
+                        // Log em nível de aviso para erros esperados de WebSocket
+                        if (isWebSocketIssue) {
+                            console.warn("WebSocket indisponível, usando fallback:", error.toString());
+                        } else {
+                            console.error("Erro:", error.toString());
                         }
                     }
 

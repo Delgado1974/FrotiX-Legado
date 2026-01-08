@@ -1,1 +1,82 @@
-{"main":{"pt-BR":{"numbers":{"decimal":",","group":"."}}}}
+{
+  "main": {
+    "pt": {
+      "numbers": {
+        "symbols-numberSystem-latn": {
+          "decimal": ",",
+          "group": ".",
+          "list": ";",
+          "percentSign": "%",
+          "plusSign": "+",
+          "minusSign": "-",
+          "exponential": "E",
+          "superscriptingExponent": "×",
+          "perMille": "‰",
+          "infinity": "∞",
+          "nan": "NaN",
+          "timeSeparator": ":"
+        },
+        "decimalFormats-numberSystem-latn": {
+          "standard": "#,##0.###"
+        },
+        "percentFormats-numberSystem-latn": {
+          "standard": "#,##0%"
+        },
+        "currencyFormats-numberSystem-latn": {
+          "standard": "¤ #,##0.00",
+          "currencySpacing": {
+            "beforeCurrency": {
+              "currencyMatch": "[:^S:]",
+              "surroundingMatch": "[:digit:]",
+              "insertBetween": " "
+            },
+            "afterCurrency": {
+              "currencyMatch": "[:^S:]",
+              "surroundingMatch": "[:digit:]",
+              "insertBetween": " "
+            }
+          }
+        }
+      }
+    },
+    "pt-BR": {
+      "numbers": {
+        "symbols-numberSystem-latn": {
+          "decimal": ",",
+          "group": ".",
+          "list": ";",
+          "percentSign": "%",
+          "plusSign": "+",
+          "minusSign": "-",
+          "exponential": "E",
+          "superscriptingExponent": "×",
+          "perMille": "‰",
+          "infinity": "∞",
+          "nan": "NaN",
+          "timeSeparator": ":"
+        },
+        "decimalFormats-numberSystem-latn": {
+          "standard": "#,##0.###"
+        },
+        "percentFormats-numberSystem-latn": {
+          "standard": "#,##0%"
+        },
+        "currencyFormats-numberSystem-latn": {
+          "standard": "¤ #,##0.00",
+          "currencySpacing": {
+            "beforeCurrency": {
+              "currencyMatch": "[:^S:]",
+              "surroundingMatch": "[:digit:]",
+              "insertBetween": " "
+            },
+            "afterCurrency": {
+              "currencyMatch": "[:^S:]",
+              "surroundingMatch": "[:digit:]",
+              "insertBetween": " "
+            }
+          }
+        }
+      }
+    }
+  }
+}

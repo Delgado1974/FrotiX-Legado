@@ -1,1 +1,24 @@
-{"main":{"pt-BR":{"dates":{"timeZoneNames":{"hourFormat":"+HH:mm;-HH:mm"}}}}}
+{
+  "main": {
+    "pt": {
+      "dates": {
+        "timeZoneNames": {
+          "hourFormat": "+HH:mm;-HH:mm",
+          "gmtFormat": "GMT{0}",
+          "gmtZeroFormat": "GMT",
+          "regionFormat": "Hora de {0}"
+        }
+      }
+    },
+    "pt-BR": {
+      "dates": {
+        "timeZoneNames": {
+          "hourFormat": "+HH:mm;-HH:mm",
+          "gmtFormat": "GMT{0}",
+          "gmtZeroFormat": "GMT",
+          "regionFormat": "Hora de {0}"
+        }
+      }
+    }
+  }
+}

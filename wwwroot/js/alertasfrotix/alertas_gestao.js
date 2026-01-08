@@ -156,25 +156,28 @@ function inicializarProgressBar()
     {
         var progressBar = document.getElementById('progressoLeitura');
 
+        function verificarProgressBar(tentativa) {
+            try {
+                if (progressBar && progressBar.ej2_instances && progressBar.ej2_instances[0]) {
+                    console.log('✅ ProgressBar Syncfusion inicializado');
+                    return;
+                }
+
+                if (tentativa >= 5) {
+                    console.warn('⚠️ ProgressBar ainda não foi inicializado pelo Syncfusion (última tentativa)');
+                    return;
+                }
+
+                setTimeout(function () { verificarProgressBar(tentativa + 1); }, 400);
+            } catch (e) {
+                console.error('❌ Erro ao verificar ProgressBar:', e);
+            }
+        }
+
         if (progressBar)
         {
-            // Aguardar um pouco para garantir que o Syncfusion inicializou
-            setTimeout(function ()
-            {
-                try
-                {
-                    if (progressBar.ej2_instances && progressBar.ej2_instances[0])
-                    {
-                        console.log('✅ ProgressBar Syncfusion inicializado');
-                    } else
-                    {
-                        console.warn('⚠️ ProgressBar ainda não foi inicializado pelo Syncfusion');
-                    }
-                } catch (e)
-                {
-                    console.error('❌ Erro ao verificar ProgressBar:', e);
-                }
-            }, 500);
+            // Aguardar e verificar algumas vezes até o Syncfusion finalizar
+            setTimeout(function () { verificarProgressBar(1); }, 300);
         } else
         {
             console.warn('⚠️ Elemento progressoLeitura não encontrado no DOM');
