@@ -18,7 +18,6 @@ namespace FrotiX.Pages.PlacaBronze
     public class UpsertModel : PageModel
     {
         private static Guid veiculoId;
-        private IEnumerable data;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IndexModel> _logger;
         private readonly INotyfService _notyf;

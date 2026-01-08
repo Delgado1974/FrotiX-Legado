@@ -4,6 +4,6 @@ namespace FrotiX.Repository.IRepository
 {
     public interface IEncarregadoRepository : IRepository<Encarregado>
     {
-        void Update(Encarregado encarregado);
+        new void Update(Encarregado encarregado);
     }
 }

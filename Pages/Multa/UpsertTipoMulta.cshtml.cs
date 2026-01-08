@@ -10,7 +10,6 @@ namespace FrotiX.Pages.Multa
 {
     public class UpsertTipoMultaModel : PageModel
     {
-        private static Guid veiculoId;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpsertTipoMultaModel> _logger;
         private readonly INotyfService _notyf;

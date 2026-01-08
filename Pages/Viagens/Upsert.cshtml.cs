@@ -32,9 +32,7 @@ namespace FrotiX.Pages.Viagens
         private static DateTime dataAgendamento;
         private static DateTime dataCancelamento;
         private static DateTime dataCriacao;
-        private static DateTime dataFinalizacao;
         private static int kmAtual;
-        private static string lstRequisitante;
         private static string usuarioCorrenteId;
         private static string usuarioCorrenteNome;
         private static string UsuarioIdCancelamento;
