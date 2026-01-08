@@ -1907,6 +1907,9 @@
         if (esconderCard) {
             document.getElementById('propsCard').style.display = 'none';
         }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "limparFormulario", erro);
+        }
     }
 
     // Salva ordenacao apos drag-drop
