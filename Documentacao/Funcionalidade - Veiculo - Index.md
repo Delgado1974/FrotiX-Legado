@@ -1,7 +1,7 @@
 # Documentação: Gestão de Veículos (Index)
 
 > **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.0
+> **Versão Atual**: 1.2
 
 ---
 
@@ -104,65 +104,192 @@ Permite remover um veículo do sistema, desde que não possua vínculos impediti
 ### 1. GET `/api/Veiculo`
 Retorna a lista de todos os veículos para popular o DataTable.
 
-**Response (JSON)**:
-```json
+**Método**: `VeiculoController.Get()`
+
+```csharp
+[HttpGet]
+public IActionResult Get()
 {
-  "data": [
+    try
     {
-      "veiculoId": "uuid",
-      "placa": "ABC1234",
-      "marcaModelo": "Ford / Ka",
-      "origemVeiculo": "Contrato 123",
-      "sigla": "ADM",
-      "descricao": "Gasolina",
-      "consumo": 12.5,
-      "quilometragem": 50000,
-      "veiculoReserva": "Não",
-      "status": true,
-      // ... outros campos
+        var objVeiculos = _unitOfWork
+            .ViewVeiculos.GetAllReduced(selector: vv => new
+            {
+                vv.VeiculoId ,
+                vv.Placa ,
+                vv.Quilometragem ,
+                vv.MarcaModelo ,
+                vv.Sigla ,
+                vv.Descricao ,
+                vv.Consumo ,
+                vv.OrigemVeiculo ,
+                vv.DataAlteracao ,
+                vv.NomeCompleto ,
+                vv.VeiculoReserva ,
+                vv.Status ,
+                vv.CombustivelId ,
+                vv.VeiculoProprio ,
+            })
+            .ToList();
+
+        return Json(new
+        {
+            data = objVeiculos
+        });
     }
-  ]
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("VeiculoController.cs" , "Get" , error);
+        return Json(new
+        {
+            success = false ,
+            message = "Erro ao carregar dados"
+        });
+    }
 }
 ```
 
 ### 2. POST `/api/Veiculo/Delete`
 Remove um veículo do banco de dados.
 
-**Body**:
-```json
-{
-  "VeiculoId": "uuid-do-veiculo"
-}
-```
+**Body**: `{ "VeiculoId": "uuid" }`
 
-**Response (Sucesso)**:
-```json
-{
-  "success": true,
-  "message": "Veículo removido com sucesso"
-}
-```
+**Método**: `VeiculoController.Delete(VeiculoViewModel model)`
 
-**Response (Erro - Vínculo Encontrado)**:
-```json
+```csharp
+[Route("Delete")]
+[HttpPost]
+public IActionResult Delete(VeiculoViewModel model)
 {
-  "success": false,
-  "message": "Não foi possível remover o veículo. Ele está associado a uma ou mais viagens!"
+    try
+    {
+        if (model != null && model.VeiculoId != Guid.Empty)
+        {
+            var objFromDb = _unitOfWork.Veiculo.GetFirstOrDefault(u =>
+                u.VeiculoId == model.VeiculoId
+            );
+            if (objFromDb != null)
+            {
+                var veiculoContrato = _unitOfWork.VeiculoContrato.GetFirstOrDefault(u =>
+                    u.VeiculoId == model.VeiculoId
+                );
+                if (veiculoContrato != null)
+                {
+                    return Json(
+                        new
+                        {
+                            success = false ,
+                            message = "Não foi possível remover o veículo. Ele está associado a um ou mais contratos!" ,
+                        }
+                    );
+                }
+
+                var objViagem = _unitOfWork.Viagem.GetFirstOrDefault(u =>
+                    u.VeiculoId == model.VeiculoId
+                );
+                if (objViagem != null)
+                {
+                    return Json(
+                        new
+                        {
+                            success = false ,
+                            message = "Não foi possível remover o veículo. Ele está associado a uma ou mais viagens!" ,
+                        }
+                    );
+                }
+
+                _unitOfWork.Veiculo.Remove(objFromDb);
+                _unitOfWork.Save();
+                return Json(
+                    new
+                    {
+                        success = true ,
+                        message = "Veículo removido com sucesso"
+                    }
+                );
+            }
+        }
+        return Json(new
+        {
+            success = false ,
+            message = "Erro ao apagar veículo"
+        });
+    }
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("VeiculoController.cs" , "Delete" , error);
+        return Json(new
+        {
+            success = false ,
+            message = "Erro ao deletar veículo"
+        });
+    }
 }
 ```
 
 ### 3. GET `/api/Veiculo/UpdateStatusVeiculo`
 Alterna o status do veículo (toggle).
 
-**Parâmetros**:
-- `Id`: UUID do veículo
+**Parâmetros**: `Id` (Guid)
 
-**Response**:
-```json
+**Método**: `VeiculoController.UpdateStatusVeiculo(Guid Id)`
+
+```csharp
+[Route("UpdateStatusVeiculo")]
+public JsonResult UpdateStatusVeiculo(Guid Id)
 {
-  "success": true,
-  "message": "Atualizado Status do Veículo [Nome: ABC1234] (Inativo)",
-  "type": 1 // 1 = Inativo, 0 = Ativo
+    try
+    {
+        if (Id != Guid.Empty)
+        {
+            var objFromDb = _unitOfWork.Veiculo.GetFirstOrDefault(u => u.VeiculoId == Id);
+            string Description = "";
+            int type = 0;
+
+            if (objFromDb != null)
+            {
+                if (objFromDb.Status == true)
+                {
+                    objFromDb.Status = false;
+                    Description = string.Format(
+                        "Atualizado Status do Veículo [Nome: {0}] (Inativo)" ,
+                        objFromDb.Placa
+                    );
+                    type = 1;
+                }
+                else
+                {
+                    objFromDb.Status = true;
+                    Description = string.Format(
+                        "Atualizado Status do Veículo  [Nome: {0}] (Ativo)" ,
+                        objFromDb.Placa
+                    );
+                    type = 0;
+                }
+                _unitOfWork.Veiculo.Update(objFromDb);
+            }
+            return Json(
+                new
+                {
+                    success = true ,
+                    message = Description ,
+                    type = type ,
+                }
+            );
+        }
+        return Json(new
+        {
+            success = false
+        });
+    }
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("VeiculoController.cs" , "UpdateStatusVeiculo" , error);
+        return new JsonResult(new
+        {
+            success = false
+        });
+    }
 }
 ```
 
@@ -171,46 +298,229 @@ Alterna o status do veículo (toggle).
 ## Frontend
 
 ### Estrutura HTML Principal
+A tabela é definida em `Index.cshtml` com estrutura padrão do DataTables:
 ```html
-<table id="tblVeiculo" class="table table-bordered table-striped" width="100%">
-    <thead>
-        <tr>
-            <th>Placa</th>
-            <th>Marca/Modelo</th>
-            <!-- ... -->
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div id="divVeiculos">
+    <table id="tblVeiculo" class="table table-bordered table-striped" width="100%">
+        <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Marca/Modelo</th>
+                <th>Contrato</th>
+                <th>Sigla</th>
+                <th>Combustível</th>
+                <th>Consumo</th>
+                <th>Km</th>
+                <th>Reserva</th>
+                <th>Status</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 ```
 
 ### JavaScript (`veiculo_index.js`)
 
 **Inicialização do DataTable**:
-```javascript
-dataTable = $("#tblVeiculo").DataTable({
-    ajax: {
-        url: "/api/veiculo",
-        type: "GET",
-        datatype: "json"
-    },
-    columns: [
-        { data: "placa" },
-        // ... configurações de colunas e renders customizados
-    ],
-    // ...
-});
-```
+Configura as colunas, URLs e renderizadores customizados.
 
-**Renderização de Status (Custom Render)**:
 ```javascript
-render: function (data, type, row, meta) {
-    if (data) {
-        return `<a ... class="btn btn-verde ...">Ativo</a>`;
-    } else {
-        return `<a ... class="btn fundo-cinza ...">Inativo</a>`;
+function loadList()
+{
+    try
+    {
+        dataTable = $("#tblVeiculo").DataTable({
+            columnDefs: [
+                {
+                    targets: 0, // Placa
+                    className: "text-center",
+                    width: "9%"
+                },
+                // ... outras definições de coluna ...
+                {
+                    targets: 9, // Ação
+                    className: "text-center",
+                    width: "8%"
+                }
+            ],
+            responsive: true,
+            ajax: {
+                url: "/api/veiculo",
+                type: "GET",
+                datatype: "json"
+            },
+            columns: [
+                { data: "placa" },
+                { data: "marcaModelo" },
+                { data: "origemVeiculo" },
+                { data: "sigla" },
+                { data: "descricao" },
+                {
+                    data: "consumo",
+                    render: function (data)
+                    {
+                        try
+                        {
+                            if (data === null || data === undefined) return "0,00";
+                            return parseFloat(data).toFixed(2).replace(".", ",");
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("veiculo_index.js", "consumo.render", error);
+                            return "0,00";
+                        }
+                    }
+                },
+                { data: "quilometragem" },
+                { data: "veiculoReserva" },
+                {
+                    data: "status",
+                    render: function (data, type, row, meta)
+                    {
+                        try
+                        {
+                            if (data)
+                            {
+                                return `<a href="javascript:void(0)"
+                                           class="updateStatusVeiculo btn btn-verde text-white"
+                                           data-url="/api/Veiculo/updateStatusVeiculo?Id=${row.veiculoId}"
+                                           data-ejtip="Desativar veículo"
+                                           style="cursor:pointer; padding: 4px 10px; font-size: 12px; border-radius: 6px;">
+                                            <i class="fa-duotone fa-circle-check me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#c8e6c9;"></i> Ativo
+                                        </a>`;
+                            } else
+                            {
+                                return `<a href="javascript:void(0)"
+                                           class="updateStatusVeiculo btn fundo-cinza text-white"
+                                           data-url="/api/Veiculo/updateStatusVeiculo?Id=${row.veiculoId}"
+                                           data-ejtip="Ativar veículo"
+                                           style="cursor:pointer; padding: 4px 10px; font-size: 12px; border-radius: 6px;">
+                                            <i class="fa-duotone fa-circle-xmark me-1" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i> Inativo
+                                        </a>`;
+                            }
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("veiculo_index.js", "status.render", error);
+                            return "";
+                        }
+                    }
+                },
+                {
+                    data: "veiculoId",
+                    render: function (data)
+                    {
+                        try
+                        {
+                            return `<div class="text-center">
+                                <a href="/Veiculo/Upsert?id=${data}"
+                                   class="btn btn-azul text-white"
+                                   data-ejtip="Editar veículo"
+                                   aria-label="Editar veículo"
+                                   style="cursor:pointer; padding: 4px 8px; font-size: 12px; border-radius: 6px; margin: 1px;">
+                                    <i class="fa-duotone fa-pen-to-square" style="--fa-primary-color:#fff; --fa-secondary-color:#90caf9;"></i>
+                                </a>
+                                <a class="btn-delete btn btn-vinho text-white"
+                                   data-ejtip="Excluir veículo"
+                                   aria-label="Excluir veículo"
+                                   style="cursor:pointer; padding: 4px 8px; font-size: 12px; border-radius: 6px; margin: 1px;"
+                                   data-id='${data}'>
+                                    <i class="fa-duotone fa-trash-can" style="--fa-primary-color:#fff; --fa-secondary-color:#ffcdd2;"></i>
+                                </a>
+                            </div>`;
+                        } catch (error)
+                        {
+                            Alerta.TratamentoErroComLinha("veiculo_index.js", "veiculoId.render", error);
+                            return "";
+                        }
+                    }
+                }
+            ],
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+                emptyTable: "Sem Dados para Exibição"
+            },
+            width: "100%"
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("veiculo_index.js", "loadList", error);
     }
 }
+```
+
+**Exclusão (SweetAlert e AJAX)**:
+
+```javascript
+$(document).on("click", ".btn-delete", function ()
+{
+    try
+    {
+        var id = $(this).data("id");
+
+        Alerta.Confirmar(
+            "Confirmar Exclusão",
+            "Você tem certeza que deseja apagar este veículo? Não será possível recuperar os dados eliminados!",
+            "Sim, excluir",
+            "Cancelar"
+        ).then(function (confirmed)
+        {
+            try
+            {
+                if (confirmed)
+                {
+                    var dataToPost = JSON.stringify({ VeiculoId: id });
+                    var url = "/api/Veiculo/Delete";
+
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        data: dataToPost,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data)
+                        {
+                            try
+                            {
+                                if (data.success)
+                                {
+                                    AppToast.show('Verde', data.message || "Veículo excluído com sucesso.", 2000);
+                                    if (dataTable)
+                                    {
+                                        dataTable.ajax.reload();
+                                    }
+                                } else
+                                {
+                                    AppToast.show('Vermelho', data.message || "Erro ao excluir veículo.", 2000);
+                                }
+                            } catch (error)
+                            {
+                                Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.ajax.success", error);
+                            }
+                        },
+                        error: function (err)
+                        {
+                            try
+                            {
+                                console.error(err);
+                                AppToast.show('Vermelho', "Algo deu errado ao excluir o veículo.", 2000);
+                            } catch (error)
+                            {
+                                Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.ajax.error", error);
+                            }
+                        }
+                    });
+                }
+            } catch (error)
+            {
+                Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.confirmar.then", error);
+            }
+        });
+    } catch (error)
+    {
+        Alerta.TratamentoErroComLinha("veiculo_index.js", "btn-delete.click", error);
+    }
+});
 ```
 
 ---
@@ -221,9 +531,7 @@ render: function (data, type, row, meta) {
 O sistema impede a exclusão física do registro se houver integridade referencial a ser mantida:
 
 1. **Vínculo com Contratos**: Verifica tabela `VeiculoContrato`.
-   - *Mensagem*: "Não foi possível remover o veículo. Ele está associado a um ou mais contratos!"
 2. **Vínculo com Viagens**: Verifica tabela `Viagem`.
-   - *Mensagem*: "Não foi possível remover o veículo. Ele está associado a uma ou mais viagens!"
 
 ---
 
@@ -232,16 +540,12 @@ O sistema impede a exclusão física do registro se houver integridade referenci
 ### Problema: Botão de Excluir exibe erro genérico
 **Sintoma**: Ao tentar excluir, aparece toast vermelho "Algo deu errado".
 **Causa**: Exceção não tratada no servidor ou falha de rede.
-**Solução**: Verificar logs do servidor (`LogErros`).
+**Solução**: Verificar logs do servidor (`LogErros`). O bloco catch no frontend apenas mostra toast genérico se o servidor retornar 500.
 
 ### Problema: Status não muda visualmente
 **Sintoma**: Clica no botão de status, toast de sucesso aparece, mas botão não muda de cor.
 **Causa**: Falha na manipulação do DOM no callback `success` do AJAX.
-**Verificação**:
-```javascript
-// O código espera que 'this' seja o elemento clicado, mas no callback do $.get o contexto pode mudar se não for salvo antes
-var currentElement = $(this); // Isso é feito corretamente no código atual
-```
+**Verificação**: O código usa `currentElement` capturado antes da chamada AJAX para garantir o contexto correto.
 
 ---
 
