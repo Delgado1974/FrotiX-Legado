@@ -426,16 +426,26 @@ namespace FrotiX.Controllers
                 var recursosDict = recursos.ToDictionary(r => r.RecursoId);
                 Console.WriteLine($"[SaveTreeToDb] Total de entidades carregadas: {recursosDict.Count}");
 
-                // FASE 1: Define valores temporários negativos para evitar conflito com UNIQUE INDEX
-                Console.WriteLine($"[SaveTreeToDb] FASE 1: Aplicando valores temporários negativos...");
+                // FASE 1: Aplica TODAS as mudanças com Ordem negativa temporária
+                // (Evita violação de UK_Recurso_Parent_Nome ao atualizar ParentId logo)
+                Console.WriteLine($"[SaveTreeToDb] FASE 1: Aplicando valores temporários negativos e atualizando hierarquia...");
                 for (int i = 0; i < updates.Count; i++)
                 {
                     var update = updates[i];
                     if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
                     {
-                        recurso.Ordem = -(i + 1); // Valores negativos únicos temporários
-                        _unitOfWork.Recurso.Update(recurso); // ✅ Marca como Modified no ChangeTracker
-                        Console.WriteLine($"[SaveTreeToDb] Fase 1: {recurso.Nome} → Ordem temp: {recurso.Ordem}");
+                        // ✅ Atualiza TODAS as propriedades de uma vez (ParentId, Nivel, Icon, Href)
+                        recurso.ParentId = update.ParentId;
+                        recurso.Nivel = update.Nivel;
+                        recurso.Ordem = -(i + 1); // Ordem negativa temporária
+
+                        if (!string.IsNullOrEmpty(update.Icon))
+                            recurso.Icon = update.Icon;
+                        if (!string.IsNullOrEmpty(update.Href))
+                            recurso.Href = update.Href;
+
+                        _unitOfWork.Recurso.Update(recurso);
+                        Console.WriteLine($"[SaveTreeToDb] Fase 1: {recurso.Nome} → Parent: {recurso.ParentId}, Nível: {recurso.Nivel}, Ordem temp: {recurso.Ordem}");
                     }
                 }
 
@@ -443,25 +453,17 @@ namespace FrotiX.Controllers
                 _unitOfWork.Save();
                 Console.WriteLine($"[SaveTreeToDb] ✅ Fase 1 concluída!");
 
-                // FASE 2: Aplica valores finais corretos (mesmas entidades já rastreadas)
-                Console.WriteLine($"[SaveTreeToDb] FASE 2: Aplicando valores finais...");
+                // FASE 2: Corrige apenas a Ordem para valores positivos finais
+                Console.WriteLine($"[SaveTreeToDb] FASE 2: Corrigindo Ordem para valores finais...");
                 foreach (var update in updates)
                 {
                     if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
                     {
-                        recurso.ParentId = update.ParentId;
-                        recurso.Nivel = update.Nivel;
+                        // ✅ Apenas corrige Ordem (ParentId, Nivel, Icon, Href já estão corretos da Fase 1)
                         recurso.Ordem = update.OrdemFinal;
 
-                        // Atualiza Icon e Href apenas se fornecidos
-                        if (!string.IsNullOrEmpty(update.Icon))
-                            recurso.Icon = update.Icon;
-                        if (!string.IsNullOrEmpty(update.Href))
-                            recurso.Href = update.Href;
-
-                        // ✅ Chama Update() para garantir que EF detecta mudanças (mesma instância, não duplica)
                         _unitOfWork.Recurso.Update(recurso);
-                        Console.WriteLine($"[SaveTreeToDb] Fase 2: {recurso.Nome} → Ordem: {recurso.Ordem}, Nível: {recurso.Nivel}, Parent: {recurso.ParentId}");
+                        Console.WriteLine($"[SaveTreeToDb] Fase 2: {recurso.Nome} → Ordem final: {recurso.Ordem}");
                     }
                 }
 
