@@ -39,7 +39,6 @@ namespace FrotiX.Pages.Uploads
             }
         }
 
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostSaveIMGManutencaoAsync(IEnumerable<IFormFile> files)
         {
             try

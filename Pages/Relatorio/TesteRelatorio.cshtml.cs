@@ -22,7 +22,6 @@ namespace FrotiX.Pages.Relatorio
         public static Guid viagemId;
         private static DateTime dataCriacao;
         private static int kmAtual;
-        private static string lstRequisitante;
         private static string usuarioCorrenteId;
         private static string usuarioCorrenteNome;
         private static string usuarioIdCriacao;

@@ -16,7 +16,6 @@ namespace FrotiX.Pages.Veiculo
         }
 
         private readonly IUnitOfWork _unitOfWork;
-        private IWebHostEnvironment hostingEnv;
 
         public UploadCRLVModel(IUnitOfWork unitOfWork)
         {

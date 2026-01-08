@@ -1,3 +1,4 @@
+#nullable enable
 using FrotiX.Validations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;

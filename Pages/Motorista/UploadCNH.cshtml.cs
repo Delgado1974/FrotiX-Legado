@@ -15,7 +15,6 @@ namespace FrotiX.Pages.Motorista
         }
 
         private readonly IUnitOfWork _unitOfWork;
-        private IWebHostEnvironment hostingEnv;
 
         public UploadCNHModel(IUnitOfWork unitOfWork)
         {

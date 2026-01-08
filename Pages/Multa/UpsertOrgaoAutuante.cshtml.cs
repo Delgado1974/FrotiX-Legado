@@ -10,7 +10,6 @@ namespace FrotiX.Pages.Multa
 {
     public class UpsertOrgaoAutuanteModel : PageModel
     {
-        private static Guid veiculoId;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpsertOrgaoAutuanteModel> _logger;
         private readonly INotyfService _notyf;
