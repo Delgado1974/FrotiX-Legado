@@ -62,10 +62,7 @@ namespace FrotiX.Pages.Secao
             try
             {
                 SetModel();
-                if (id != null)
-                {
-                    secaoId = (Guid)id;
-                }
+                secaoId = id;
 
                 if (id != Guid.Empty)
                 {

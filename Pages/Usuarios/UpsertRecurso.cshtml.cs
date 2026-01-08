@@ -64,10 +64,7 @@ namespace FrotiX.Pages.Usuarios
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    recursoId = (Guid)id;
-                }
+                recursoId = id;
 
                 if (id != Guid.Empty)
                 {

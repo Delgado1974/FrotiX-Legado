@@ -86,7 +86,7 @@ namespace FrotiX.Pages.Multa
         {
             try
             {
-                if (EmpenhoMultaObj.EmpenhoMulta.OrgaoAutuanteId == null)
+                if (EmpenhoMultaObj.EmpenhoMulta.OrgaoAutuanteId == Guid.Empty)
                 {
                     AppToast.show("Amarelo" , "Você deve informar o Órgão Autuante!" , 3000);
                     SetViewModel();

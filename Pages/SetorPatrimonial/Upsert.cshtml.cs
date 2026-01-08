@@ -62,10 +62,7 @@ namespace FrotiX.Pages.Setor
             try
             {
                 SetModel();
-                if (id != null)
-                {
-                    setorId = (Guid)id;
-                }
+                setorId = id;
 
                 if (id != Guid.Empty)
                 {

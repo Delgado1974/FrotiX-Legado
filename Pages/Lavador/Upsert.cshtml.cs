@@ -79,10 +79,7 @@ namespace FrotiX.Pages.Lavador
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    LavadorId = (Guid)id;
-                }
+                LavadorId = id;
 
                 // Pega o usuário corrente
                 // =======================

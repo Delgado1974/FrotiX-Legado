@@ -81,10 +81,7 @@ namespace FrotiX.Pages.Operador
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    operadorId = (Guid)id;
-                }
+                operadorId = id;
 
                 //Pega o usuário corrente
                 //=======================

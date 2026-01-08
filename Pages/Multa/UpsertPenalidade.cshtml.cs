@@ -64,10 +64,7 @@ namespace FrotiX.Pages.Multa
             {
                 SetViewModel();
 
-                if (id != null)
-                {
-                    multaId = (Guid)id;
-                }
+                multaId = id;
 
                 if (id != Guid.Empty)
                 {
