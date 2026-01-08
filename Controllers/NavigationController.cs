@@ -1,3 +1,4 @@
+using FrotiX.Filters;
 using FrotiX.Models;
 using FrotiX.Models.FontAwesome;
 using FrotiX.Repository.IRepository;
@@ -400,8 +401,12 @@ namespace FrotiX.Controllers
         /// Salva alterações na árvore (reordenação, hierarquia) no banco de dados
         /// Usa estratégia de duas fases para evitar violação de UNIQUE INDEX em Ordem
         /// </summary>
+        /// <remarks>
+        /// Desabilita validação automática do [ApiController] pois campos nullable podem vir null do frontend
+        /// </remarks>
         [HttpPost]
         [Route("SaveTreeToDb")]
+        [SkipModelValidation]  // ✅ Desabilita validação automática para este endpoint
         public IActionResult SaveTreeToDb([FromBody] List<RecursoTreeDTO> items)
         {
             try
