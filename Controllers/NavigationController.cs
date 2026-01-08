@@ -334,6 +334,51 @@ namespace FrotiX.Controllers
         }
 
         /// <summary>
+        /// DEBUG: Endpoint para diagnóstico de problemas na carga da árvore
+        /// </summary>
+        [HttpGet]
+        [Route("DebugTreeAdmin")]
+        public IActionResult DebugTreeAdmin()
+        {
+            try
+            {
+                var todosRecursos = _unitOfWork.Recurso.GetAll().ToList();
+                var totalRecursos = todosRecursos.Count;
+                var recursosRaiz = todosRecursos.Where(r => r.ParentId == null).ToList();
+                var arvore = MontarArvoreRecursiva(todosRecursos, null);
+
+                return Json(new
+                {
+                    success = true,
+                    totalRecursosNoBanco = totalRecursos,
+                    totalRecursosRaiz = recursosRaiz.Count,
+                    totalItensNaArvore = arvore.Count,
+                    primeiros5Recursos = todosRecursos.Take(5).Select(r => new
+                    {
+                        r.RecursoId,
+                        r.Nome,
+                        r.NomeMenu,
+                        r.ParentId,
+                        r.Ordem,
+                        r.Ativo
+                    }),
+                    recursosRaizNomes = recursosRaiz.Select(r => r.Nome).ToList(),
+                    arvoreGerada = arvore
+                });
+            }
+            catch (Exception error)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = error.Message,
+                    stackTrace = error.StackTrace,
+                    innerException = error.InnerException?.Message
+                });
+            }
+        }
+
+        /// <summary>
         /// Salva alterações na árvore (reordenação, hierarquia) no banco de dados
         /// </summary>
         [HttpPost]
