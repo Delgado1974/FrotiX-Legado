@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class ViewViagensAgendaTodosMesesRepository : Repository<ViewViagensAgendaTodosMeses>, IViewViagensAgendaTodosMesesRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewViagensAgendaTodosMesesRepository(FrotiXDbContext db) : base(db)
             {
@@ -29,7 +29,7 @@ namespace FrotiX.Repository
                 });
             }
 
-        public void Update(ViewViagensAgendaTodosMeses viewViagensAgendaTodosMeses)
+        public new void Update(ViewViagensAgendaTodosMeses viewViagensAgendaTodosMeses)
             {
             var objFromDb = _db.ViewViagensAgendaTodosMeses.FirstOrDefault(s => s.ViagemId == viewViagensAgendaTodosMeses.ViagemId);
 

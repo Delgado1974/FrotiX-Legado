@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace FrotiX.Repository
     {
     public class PatrimonioRepository : Repository<Patrimonio>, IPatrimonioRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public PatrimonioRepository(FrotiXDbContext db) : base(db)
             {
@@ -30,7 +30,7 @@ namespace FrotiX.Repository
                 });
             }
 
-        public void Update(Patrimonio patrimonio)
+        public new void Update(Patrimonio patrimonio)
             {
             var objFromDb = _db.Patrimonio.FirstOrDefault(s => s.PatrimonioId == patrimonio.PatrimonioId);
 

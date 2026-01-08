@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
@@ -23,7 +23,7 @@ namespace FrotiX.Extensions
             {
             var options = new JsonSerializerOptions
                 {
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
                 WriteIndented = indented,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 };

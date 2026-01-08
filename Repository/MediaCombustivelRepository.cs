@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class MediaCombustivelRepository : Repository<MediaCombustivel>, IMediaCombustivelRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public MediaCombustivelRepository(FrotiXDbContext db) : base(db)
             {
@@ -29,7 +29,7 @@ namespace FrotiX.Repository
                     });
             }
 
-        public void Update(MediaCombustivel mediacombustivel)
+        public new void Update(MediaCombustivel mediacombustivel)
             {
             var objFromDb = _db.MediaCombustivel.FirstOrDefault(s => (s.CombustivelId == mediacombustivel.CombustivelId) && (s.NotaFiscalId == mediacombustivel.NotaFiscalId) && (s.Ano == mediacombustivel.Ano) && (s.Mes == mediacombustivel.Mes));
 

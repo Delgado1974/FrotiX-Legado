@@ -11,7 +11,7 @@ namespace FrotiX.Repository
 {
     public class RequisitanteRepository : Repository<Requisitante>, IRequisitanteRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public RequisitanteRepository(FrotiXDbContext db)
             : base(db)
@@ -31,7 +31,7 @@ namespace FrotiX.Repository
                 });
         }
 
-        public void Update(Requisitante requisitante)
+        public new void Update(Requisitante requisitante)
         {
             var objFromDb = _db.Requisitante.FirstOrDefault(s =>
                 s.RequisitanteId == requisitante.RequisitanteId

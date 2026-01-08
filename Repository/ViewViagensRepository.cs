@@ -13,7 +13,7 @@ namespace FrotiX.Repository
 {
     public class ViewViagensRepository : Repository<ViewViagens>, IViewViagensRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewViagensRepository(FrotiXDbContext db)
             : base(db)
@@ -57,7 +57,7 @@ namespace FrotiX.Repository
             ;
         }
 
-        public void Update(ViewViagens viewViagens)
+        public new void Update(ViewViagens viewViagens)
         {
             var objFromDb = _db.ViewViagens.FirstOrDefault(s => s.ViagemId == viewViagens.ViagemId);
 

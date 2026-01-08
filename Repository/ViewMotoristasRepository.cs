@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class ViewMotoristasRepository : Repository<ViewMotoristas>, IViewMotoristasRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewMotoristasRepository(FrotiXDbContext db) : base(db)
             {
@@ -29,7 +29,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(ViewMotoristas viewMotoristas)
+        public new void Update(ViewMotoristas viewMotoristas)
             {
             var objFromDb = _db.ViewMotoristas.FirstOrDefault(s => s.MotoristaId == viewMotoristas.MotoristaId);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class AtaRegistroPrecosRepository : Repository<AtaRegistroPrecos>, IAtaRegistroPrecosRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public AtaRegistroPrecosRepository(FrotiXDbContext db) : base(db)
             {
@@ -31,7 +31,7 @@ namespace FrotiX.Repository
                 });
             }
 
-        public void Update(AtaRegistroPrecos ataRegistroPrecos)
+        public new void Update(AtaRegistroPrecos ataRegistroPrecos)
             {
             var objFromDb = _db.AtaRegistroPrecos.FirstOrDefault(s => s.AtaId == ataRegistroPrecos.AtaId);
 

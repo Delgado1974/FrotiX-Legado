@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class AspNetUsersRepository : Repository<AspNetUsers>, IAspNetUsersRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public AspNetUsersRepository(FrotiXDbContext db) : base(db)
             {
@@ -30,7 +30,7 @@ namespace FrotiX.Repository
                     });
             }
 
-        public void Update(AspNetUsers aspNetUsers)
+        public new void Update(AspNetUsers aspNetUsers)
             {
             var objFromDb = _db.AspNetUsers.FirstOrDefault(s => s.Id == aspNetUsers.Id);
 

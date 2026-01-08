@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class ViewControleAcessoRepository : Repository<ViewControleAcesso>, IViewControleAcessoRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewControleAcessoRepository(FrotiXDbContext db) : base(db)
             {
@@ -29,7 +29,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(ViewControleAcesso viewControleAcesso)
+        public new void Update(ViewControleAcesso viewControleAcesso)
             {
             var objFromDb = _db.ViewControleAcesso.FirstOrDefault(s => s.RecursoId == viewControleAcesso.RecursoId);
 

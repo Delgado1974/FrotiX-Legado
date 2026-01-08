@@ -11,7 +11,7 @@ namespace FrotiX.Repository
 {
     public class MarcaVeiculoRepository : Repository<MarcaVeiculo>, IMarcaVeiculoRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public MarcaVeiculoRepository(FrotiXDbContext db)
             : base(db)
@@ -31,7 +31,7 @@ namespace FrotiX.Repository
                 });
         }
 
-        public void Update(MarcaVeiculo marcaVeiculo)
+        public new void Update(MarcaVeiculo marcaVeiculo)
         {
             var objFromDb = _db.MarcaVeiculo.FirstOrDefault(s => s.MarcaId == marcaVeiculo.MarcaId);
 

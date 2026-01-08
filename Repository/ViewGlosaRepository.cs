@@ -1,4 +1,4 @@
-﻿using FrotiX.Data;
+using FrotiX.Data;
 using FrotiX.Models; // ViewGlosaModel
 using FrotiX.Repository.IRepository;
 
@@ -9,7 +9,7 @@ namespace FrotiX.Repository
     /// </summary>
     public class ViewGlosaRepository : Repository<ViewGlosa>, IViewGlosaRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewGlosaRepository(FrotiXDbContext db)
             : base(db)

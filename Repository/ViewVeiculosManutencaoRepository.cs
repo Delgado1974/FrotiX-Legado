@@ -1,4 +1,4 @@
-﻿using FrotiX.Data;
+using FrotiX.Data;
 using FrotiX.Models;
 using FrotiX.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,7 +9,7 @@ namespace FrotiX.Repository
     {
     public class ViewVeiculosManutencaoRepository : Repository<ViewVeiculosManutencao>, IViewVeiculosManutencaoRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewVeiculosManutencaoRepository(FrotiXDbContext db) : base(db)
             {
@@ -27,7 +27,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(ViewVeiculosManutencao viewVeiculosManutencao)
+        public new void Update(ViewVeiculosManutencao viewVeiculosManutencao)
             {
             var objFromDb = _db.ViewVeiculosManutencao.FirstOrDefault(s => s.VeiculoId == viewVeiculosManutencao.VeiculoId);
 

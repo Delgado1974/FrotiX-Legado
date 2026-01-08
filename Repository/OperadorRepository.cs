@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class OperadorRepository : Repository<Operador>, IOperadorRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public OperadorRepository(FrotiXDbContext db) : base(db)
             {
@@ -29,7 +29,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(Operador operador)
+        public new void Update(Operador operador)
             {
             var objFromDb = _db.Operador.FirstOrDefault(s => s.OperadorId == operador.OperadorId);
 

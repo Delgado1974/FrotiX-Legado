@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class AbastecimentoRepository : Repository<Abastecimento>, IAbastecimentoRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public AbastecimentoRepository(FrotiXDbContext db) : base(db)
             {
@@ -28,7 +28,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(Abastecimento abastecimento)
+        public new void Update(Abastecimento abastecimento)
             {
             var objFromDb = _db.Abastecimento.FirstOrDefault(s => s.AbastecimentoId == abastecimento.AbastecimentoId);
 

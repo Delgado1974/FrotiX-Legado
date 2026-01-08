@@ -10,7 +10,7 @@ namespace FrotiX.Repository
 {
     public class ViewOcorrenciasAbertasVeiculoRepository : IViewOcorrenciasAbertasVeiculoRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewOcorrenciasAbertasVeiculoRepository(FrotiXDbContext db)
         {

@@ -10,7 +10,7 @@ namespace FrotiX.Repository
 {
     public class RepactuacaoVeiculoRepository : Repository<RepactuacaoVeiculo>, IRepactuacaoVeiculoRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public RepactuacaoVeiculoRepository(FrotiXDbContext db) : base(db)
         {
@@ -28,7 +28,7 @@ namespace FrotiX.Repository
                 });
         }
 
-        public void Update(RepactuacaoVeiculo repactuacaoVeiculo)
+        public new void Update(RepactuacaoVeiculo repactuacaoVeiculo)
         {
             var objFromDb = _db.RepactuacaoVeiculo.FirstOrDefault(s =>
                 s.RepactuacaoVeiculoId == repactuacaoVeiculo.RepactuacaoVeiculoId

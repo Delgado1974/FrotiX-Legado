@@ -14,7 +14,7 @@ namespace FrotiX.Repository
 {
     public class ViagemRepository : Repository<Viagem>, IViagemRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViagemRepository(FrotiXDbContext db) : base(db)
         {
@@ -32,7 +32,7 @@ namespace FrotiX.Repository
                 });
         }
 
-        public void Update(Viagem viagem)
+        public new void Update(Viagem viagem)
         {
             _db.Update(viagem);
             _db.SaveChanges();

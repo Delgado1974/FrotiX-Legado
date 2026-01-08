@@ -16,7 +16,7 @@ namespace FrotiX.Repository
 {
     public class AlertasFrotiXRepository : Repository<AlertasFrotiX>, IAlertasFrotiXRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public AlertasFrotiXRepository(FrotiXDbContext db) : base(db)
         {

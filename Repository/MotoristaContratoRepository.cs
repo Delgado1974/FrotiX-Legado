@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class MotoristaContratoRepository : Repository<MotoristaContrato>, IMotoristaContratoRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public MotoristaContratoRepository(FrotiXDbContext db) : base(db)
             {
@@ -27,7 +27,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(MotoristaContrato motoristaContrato)
+        public new void Update(MotoristaContrato motoristaContrato)
             {
             var objFromDb = _db.MotoristaContrato.FirstOrDefault(s => (s.MotoristaId == motoristaContrato.MotoristaId) && (s.ContratoId == motoristaContrato.ContratoId));
 

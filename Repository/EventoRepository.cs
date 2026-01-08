@@ -13,7 +13,7 @@ namespace FrotiX.Repository
 {
     public class EventoRepository :Repository<Evento>, IEventoRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public EventoRepository(FrotiXDbContext db) : base(db)
         {
@@ -31,7 +31,7 @@ namespace FrotiX.Repository
             });
         }
 
-        public void Update(Evento evento)
+        public new void Update(Evento evento)
         {
         _db.Update(evento);
         _db.SaveChanges();

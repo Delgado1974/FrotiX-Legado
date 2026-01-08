@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class CorridasCanceladasTaxiLegRepository : Repository<CorridasCanceladasTaxiLeg>, ICorridasCanceladasTaxiLegRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public CorridasCanceladasTaxiLegRepository(FrotiXDbContext db) : base(db)
             {
@@ -28,7 +28,7 @@ namespace FrotiX.Repository
                 });
             }
 
-        public void Update(CorridasCanceladasTaxiLeg corridasCanceladasTaxiLeg)
+        public new void Update(CorridasCanceladasTaxiLeg corridasCanceladasTaxiLeg)
             {
             var objFromDb = _db.CorridasCanceladasTaxiLeg.FirstOrDefault(s => s.CorridaCanceladaId == corridasCanceladasTaxiLeg.CorridaCanceladaId);
 

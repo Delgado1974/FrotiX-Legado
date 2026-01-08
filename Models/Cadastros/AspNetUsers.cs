@@ -19,66 +19,66 @@ namespace FrotiX.Models
     public class AspNetUsers :IdentityUser
     {
         [Key]
-        public string Id
+        public new string Id
         {
             get; set;
         }
 
-        public string? UserName
+        public new string? UserName
         {
             get; set;
         }
-        public string? NormalizedUserName
+        public new string? NormalizedUserName
         {
             get; set;
         }
-        public string? Email
+        public new string? Email
         {
             get; set;
         }
-        public string? NormalizedEmail
-        {
-            get; set;
-        }
-
-        // MUDANÇAS AQUI: bool → bool?
-        public bool? EmailConfirmed
-        {
-            get; set;
-        }
-
-        public string? PasswordHash
-        {
-            get; set;
-        }
-        public string? SecurityStamp
-        {
-            get; set;
-        }
-        public string? ConcurrencyStamp
-        {
-            get; set;
-        }
-        public string? PhoneNumber
+        public new string? NormalizedEmail
         {
             get; set;
         }
 
         // MUDANÇAS AQUI: bool → bool?
-        public bool? PhoneNumberConfirmed
-        {
-            get; set;
-        }
-        public bool? TwoFactorEnabled
-        {
-            get; set;
-        }
-        public bool? LockoutEnabled
+        public new bool? EmailConfirmed
         {
             get; set;
         }
 
-        public int? AccessFailedCount
+        public new string? PasswordHash
+        {
+            get; set;
+        }
+        public new string? SecurityStamp
+        {
+            get; set;
+        }
+        public new string? ConcurrencyStamp
+        {
+            get; set;
+        }
+        public new string? PhoneNumber
+        {
+            get; set;
+        }
+
+        // MUDANÇAS AQUI: bool → bool?
+        public new bool? PhoneNumberConfirmed
+        {
+            get; set;
+        }
+        public new bool? TwoFactorEnabled
+        {
+            get; set;
+        }
+        public new bool? LockoutEnabled
+        {
+            get; set;
+        }
+
+        public new int? AccessFailedCount
         {
             get; set;
         }

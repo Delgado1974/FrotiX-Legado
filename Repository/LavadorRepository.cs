@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class LavadorRepository : Repository<Lavador>, ILavadorRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public LavadorRepository(FrotiXDbContext db) : base(db)
             {
@@ -29,7 +29,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(Lavador lavador)
+        public new void Update(Lavador lavador)
             {
             var objFromDb = _db.Lavador.FirstOrDefault(s => s.LavadorId == lavador.LavadorId);
 

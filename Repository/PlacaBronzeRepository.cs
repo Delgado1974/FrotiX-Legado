@@ -11,7 +11,7 @@ namespace FrotiX.Repository
 {
     public class PlacaBronzeRepository : Repository<PlacaBronze>, IPlacaBronzeRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public PlacaBronzeRepository(FrotiXDbContext db)
             : base(db)
@@ -31,7 +31,7 @@ namespace FrotiX.Repository
                 });
         }
 
-        public void Update(PlacaBronze placaBronze)
+        public new void Update(PlacaBronze placaBronze)
         {
             var objFromDb = _db.PlacaBronze.FirstOrDefault(s =>
                 s.PlacaBronzeId == placaBronze.PlacaBronzeId

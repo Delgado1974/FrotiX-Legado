@@ -6,14 +6,14 @@ namespace FrotiX.Repository
 {
     public class EncarregadoRepository : Repository<Encarregado>, IEncarregadoRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public EncarregadoRepository(FrotiXDbContext db) : base(db)
         {
             _db = db;
         }
 
-        public void Update(Encarregado encarregado)
+        public new void Update(Encarregado encarregado)
         {
             _db.Encarregado.Update(encarregado);
             _db.SaveChanges();

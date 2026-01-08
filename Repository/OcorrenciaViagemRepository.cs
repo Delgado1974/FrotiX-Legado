@@ -11,7 +11,7 @@ namespace FrotiX.Repository
 {
     public class OcorrenciaViagemRepository : IOcorrenciaViagemRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public OcorrenciaViagemRepository(FrotiXDbContext db)
         {
@@ -63,7 +63,7 @@ namespace FrotiX.Repository
             _db.OcorrenciaViagem.Remove(entity);
         }
 
-        public void Update(OcorrenciaViagem entity)
+        public new void Update(OcorrenciaViagem entity)
         {
             _db.OcorrenciaViagem.Update(entity);
         }

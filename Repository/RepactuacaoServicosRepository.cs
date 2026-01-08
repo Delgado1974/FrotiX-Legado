@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace FrotiX.Repository
     {
     public class RepactuacaoServicosRepository : Repository<RepactuacaoServicos>, IRepactuacaoServicosRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public RepactuacaoServicosRepository(FrotiXDbContext db) : base(db)
             {
@@ -28,7 +28,7 @@ namespace FrotiX.Repository
                     });
             }
 
-        public void Update(RepactuacaoServicos RepactuacaoServicos)
+        public new void Update(RepactuacaoServicos RepactuacaoServicos)
             {
             var objFromDb = _db.RepactuacaoServicos.FirstOrDefault(s => s.RepactuacaoServicoId == RepactuacaoServicos.RepactuacaoServicoId);
 

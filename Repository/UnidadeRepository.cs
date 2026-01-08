@@ -11,7 +11,7 @@ namespace FrotiX.Repository
 {
     public class UnidadeRepository : Repository<Unidade>, IUnidadeRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public UnidadeRepository(FrotiXDbContext db)
             : base(db)
@@ -31,7 +31,7 @@ namespace FrotiX.Repository
                 });
         }
 
-        public void Update(Unidade unidade)
+        public new void Update(Unidade unidade)
         {
             var objFromDb = _db.Unidade.FirstOrDefault(s => s.UnidadeId == unidade.UnidadeId);
 

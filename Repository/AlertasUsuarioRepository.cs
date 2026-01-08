@@ -11,7 +11,7 @@ namespace FrotiX.Repository
 {
     public class AlertasUsuarioRepository :Repository<AlertasUsuario>, IAlertasUsuarioRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public AlertasUsuarioRepository(FrotiXDbContext db) : base(db)
         {
@@ -83,7 +83,7 @@ namespace FrotiX.Repository
         /// <summary>
         /// Atualiza a entidade AlertasUsuario
         /// </summary>
-        public void Update(AlertasUsuario alertaUsuario)
+        public new void Update(AlertasUsuario alertaUsuario)
         {
             if (alertaUsuario == null)
                 throw new ArgumentNullException(nameof(alertaUsuario));

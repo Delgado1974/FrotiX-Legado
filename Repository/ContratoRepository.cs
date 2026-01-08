@@ -1,4 +1,4 @@
-﻿// ContratoRepository.cs
+// ContratoRepository.cs
 using System.Linq;
 using FrotiX.Data;
 using FrotiX.Models;
@@ -10,7 +10,7 @@ namespace FrotiX.Repository
     {
     public class ContratoRepository : Repository<Contrato>, IContratoRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ContratoRepository(FrotiXDbContext db)
             : base(db)

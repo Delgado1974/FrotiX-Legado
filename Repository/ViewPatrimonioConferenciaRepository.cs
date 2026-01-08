@@ -6,7 +6,7 @@ namespace FrotiX.Repository
 {
     public class ViewPatrimonioConferenciaRepository :Repository<ViewPatrimonioConferencia>, IViewPatrimonioConferenciaRepository
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewPatrimonioConferenciaRepository(FrotiXDbContext db) : base(db)
         {

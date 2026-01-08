@@ -7,7 +7,7 @@ namespace FrotiX.Repository
 {
     public partial class UnitOfWork : IUnitOfWork
     {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
         private ViagemEstatisticaRepository _viagemEstatisticaRepository;
         private VeiculoPadraoViagemRepository _veiculoPadraoViagemRepository;
 

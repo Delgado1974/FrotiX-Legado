@@ -197,7 +197,7 @@ namespace FrotiX.Repository
             await dbSet.AddAsync(entity);
             }
 
-        public void Update(T entity)
+        public new void Update(T entity)
             {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));

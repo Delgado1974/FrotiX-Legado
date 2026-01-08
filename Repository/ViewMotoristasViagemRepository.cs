@@ -1,4 +1,4 @@
-﻿using FrotiX.Data;
+using FrotiX.Data;
 using FrotiX.Models;
 using FrotiX.Models.Views;
 using FrotiX.Repository.IRepository;
@@ -12,7 +12,7 @@ namespace FrotiX.Repository
     {
     public class ViewMotoristasViagemRepository : Repository<ViewMotoristasViagem>, IViewMotoristasViagemRepository
         {
-        private readonly FrotiXDbContext _db;
+        private new readonly FrotiXDbContext _db;
 
         public ViewMotoristasViagemRepository(FrotiXDbContext db) : base(db)
             {
@@ -30,7 +30,7 @@ namespace FrotiX.Repository
                 }); ;
             }
 
-        public void Update(ViewMotoristasViagem viewMotoristasviagem)
+        public new void Update(ViewMotoristasViagem viewMotoristasviagem)
             {
             var objFromDb = _db.ViewMotoristasViagem.FirstOrDefault(s => s.MotoristaId == viewMotoristasviagem.MotoristaId);
 
