@@ -4,7 +4,7 @@
         {
             "title": "P&aacute;gina Inicial",
             "nomeMenu": "Página Inicial",
-            "icon": "fa-regular fa-home",
+            "icon": "fa-duotone fa-home",
             "href": "intel_analyticsdashboard.html",
             "roles": [],
             "hasChild": false
@@ -12,7 +12,7 @@
         {
             "title": "Agenda",
             "nomeMenu": "Agenda",
-            "icon": "fa-regular fa-calendar-alt",
+            "icon": "fa-duotone fa-calendar-alt",
             "href": "agenda_index.html",
             "roles": [],
             "hasChild": false
@@ -20,7 +20,7 @@
         {
             "title": "Nova Viagem",
             "nomeMenu": "Nova Viagem",
-            "icon": "fa-regular fa-route",
+            "icon": "fa-duotone fa-route",
             "href": "viagens_upsert.html",
             "roles": [],
             "hasChild": false
@@ -28,13 +28,13 @@
         {
             "title": "Gest&atilde;o de Requisi&ccedil;&otilde;es",
             "nomeMenu": "Gestão de Requisições",
-            "icon": "fa-regular fa-calendar-alt",
+            "icon": "fa-duotone fa-calendar-alt",
             "roles": [],
             "items": [
                 {
                     "title": "Setores Solicitantes",
                     "nomeMenu": "Setores Solicitantes",
-                    "icon": "fa-regular fa-building",
+                    "icon": "fa-duotone fa-building",
                     "href": "setorsolicitante_index.html",
                     "roles": [],
                     "hasChild": false
@@ -42,7 +42,7 @@
                 {
                     "title": "Requisitantes",
                     "nomeMenu": "Requisitantes",
-                    "icon": "fa-regular fa-user-tie",
+                    "icon": "fa-duotone fa-user-tie",
                     "href": "requisitante_index.html",
                     "roles": [],
                     "hasChild": false
@@ -53,13 +53,13 @@
         {
             "title": "Gest&atilde;o de Viagens",
             "nomeMenu": "Gestão de Viagens",
-            "icon": "fa-regular fa-briefcase-clock",
+            "icon": "fa-duotone fa-briefcase-clock",
             "roles": [],
             "items": [
                 {
                     "title": "Insere Nova Viagem",
                     "nomeMenu": "Insere Nova Viagem",
-                    "icon": "fa-regular fa-route",
+                    "icon": "fa-duotone fa-route",
                     "href": "viagens_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -67,7 +67,7 @@
                 {
                     "title": "Controle de Viagens",
                     "nomeMenu": "Controle de Viagens",
-                    "icon": "fa-regular fa-list-check",
+                    "icon": "fa-duotone fa-list-check",
                     "href": "viagens_index.html",
                     "roles": [],
                     "hasChild": false
@@ -75,7 +75,7 @@
                 {
                     "title": "Gerencia Eventos",
                     "nomeMenu": "Gerencia Eventos",
-                    "icon": "fa-regular fa-calendar-days",
+                    "icon": "fa-duotone fa-calendar-days",
                     "href": "viagens_listaeventos.html",
                     "roles": [],
                     "hasChild": false
@@ -83,13 +83,13 @@
                 {
                     "title": "Fluxo de Passageiros",
                     "nomeMenu": "Fluxo de Passageiros",
-                    "icon": "fa-regular fa-users",
+                    "icon": "fa-duotone fa-users",
                     "roles": [],
                     "items": [
                         {
                             "title": "Inserir Fichas MOB",
                             "nomeMenu": "Inserir Fichas MOB",
-                            "icon": "fa-regular fa-file-plus",
+                            "icon": "fa-duotone fa-file-plus",
                             "href": "viagens_fluxopassageiros.html",
                             "roles": [],
                             "hasChild": false
@@ -97,7 +97,7 @@
                         {
                             "title": "Gest&atilde;o Fichas MOB",
                             "nomeMenu": "Gestão Fichas MOB",
-                            "icon": "fa-regular fa-folder-open",
+                            "icon": "fa-duotone fa-folder-open",
                             "href": "viagens_gestaofluxo.html",
                             "roles": [],
                             "hasChild": false
@@ -108,13 +108,13 @@
                 {
                     "title": "Gr&aacute;ficos Gerenciais",
                     "nomeMenu": "Viagens - Gráficos Gerenciais",
-                    "icon": "fa-regular fa-chart-line",
+                    "icon": "fa-duotone fa-chart-line",
                     "roles": [],
                     "items": [
                         {
                             "title": "Dashboard de Viagens",
                             "nomeMenu": "Dashboard de Viagens",
-                            "icon": "fa-regular fa-chart-mixed",
+                            "icon": "fa-duotone fa-chart-mixed",
                             "href": "viagens_dashboardviagens.html",
                             "roles": [],
                             "hasChild": false
@@ -122,7 +122,7 @@
                         {
                             "title": "Dashboard de Economildos",
                             "nomeMenu": "Dashboard de Economildos",
-                            "icon": "fa-regular fa-money-bill-trend-up",
+                            "icon": "fa-duotone fa-money-bill-trend-up",
                             "href": "frota_dashboardeconomildo.html",
                             "roles": [],
                             "hasChild": false
@@ -130,7 +130,7 @@
                         {
                             "title": "Dashboard de Eventos",
                             "nomeMenu": "Dashboard de Eventos",
-                            "icon": "fa-regular fa-chart-pie",
+                            "icon": "fa-duotone fa-chart-pie",
                             "href": "viagens_dashboardeventos.html",
                             "roles": [],
                             "hasChild": false
@@ -144,13 +144,13 @@
         {
             "title": "Gest&atilde;o de Manuten&ccedil;&atilde;o",
             "nomeMenu": "Gestão de Manutenção",
-            "icon": "fa-regular fa-car-wrench",
+            "icon": "fa-duotone fa-car-wrench",
             "roles": [],
             "items": [
                 {
                     "title": "Ocorr&ecirc;ncias",
                     "nomeMenu": "Ocorrências",
-                    "icon": "fa-regular fa-triangle-exclamation",
+                    "icon": "fa-duotone fa-triangle-exclamation",
                     "href": "ocorrencia_ocorrencias.html",
                     "roles": [],
                     "hasChild": false
@@ -158,7 +158,7 @@
                 {
                     "title": "Registro de Manuten&ccedil;&atilde;o",
                     "nomeMenu": "Registro de Manutenção",
-                    "icon": "fa-regular fa-wrench",
+                    "icon": "fa-duotone fa-wrench",
                     "href": "manutencao_listamanutencao.html",
                     "roles": [],
                     "hasChild": false
@@ -166,7 +166,7 @@
                 {
                     "title": "Controle de Glosas",
                     "nomeMenu": "Controle de Glosas",
-                    "icon": "fa-regular fa-file-invoice-dollar",
+                    "icon": "fa-duotone fa-file-invoice-dollar",
                     "href": "manutencao_glosas.html",
                     "roles": [],
                     "hasChild": false
@@ -174,7 +174,7 @@
                 {
                     "title": "Controle de Lavagens",
                     "nomeMenu": "Controle de Lavagens",
-                    "icon": "fa-regular fa-car-wash",
+                    "icon": "fa-duotone fa-car-wash",
                     "href": "manutencao_controlelavagem.html",
                     "roles": [],
                     "hasChild": false
@@ -182,13 +182,13 @@
                 {
                     "title": "Gr&aacute;ficos Gerenciais",
                     "nomeMenu": "Manutenção - Gráficos Gerenciais",
-                    "icon": "fa-regular fa-chart-line",
+                    "icon": "fa-duotone fa-chart-line",
                     "roles": [],
                     "items": [
                         {
                             "title": "Dashboard de Lavagens",
                             "nomeMenu": "Dashboard de Lavagens",
-                            "icon": "fa-regular fa-chart-area",
+                            "icon": "fa-duotone fa-chart-area",
                             "href": "manutencao_dashboardlavagem.html",
                             "roles": [],
                             "hasChild": false
@@ -202,13 +202,13 @@
         {
             "title": "Gest&atilde;o de Abastecimento",
             "nomeMenu": "Gestão de Abastecimento",
-            "icon": "fa-regular fa-gas-pump",
+            "icon": "fa-duotone fa-gas-pump",
             "roles": [],
             "items": [
                 {
                     "title": "Abastecimentos",
                     "nomeMenu": "Abastecimentos",
-                    "icon": "fa-regular fa-list",
+                    "icon": "fa-duotone fa-list",
                     "href": "abastecimento_index.html",
                     "roles": [],
                     "hasChild": false
@@ -216,7 +216,7 @@
                 {
                     "title": "Importa&ccedil;&atilde;o de Dados",
                     "nomeMenu": "Importação de Dados",
-                    "icon": "fa-regular fa-file-import",
+                    "icon": "fa-duotone fa-file-import",
                     "href": "abastecimento_importacao.html",
                     "roles": [],
                     "hasChild": false
@@ -224,7 +224,7 @@
                 {
                     "title": "Pendências de Abastecimento",
                     "nomeMenu": "Pendências de Abastecimento",
-                    "icon": "fa-regular fa-clock",
+                    "icon": "fa-duotone fa-clock",
                     "href": "abastecimento_pendencias.html",
                     "roles": [],
                     "hasChild": false
@@ -232,7 +232,7 @@
                 {
                     "title": "Registro de Cupons",
                     "nomeMenu": "Registro de Cupons",
-                    "icon": "fa-regular fa-receipt",
+                    "icon": "fa-duotone fa-receipt",
                     "href": "abastecimento_registracupons.html",
                     "roles": [],
                     "hasChild": false
@@ -240,7 +240,7 @@
                 {
                     "title": "Dashboard de Abastecimento",
                     "nomeMenu": "Dashboard de Abastecimento",
-                    "icon": "fa-regular fa-chart-simple",
+                    "icon": "fa-duotone fa-chart-simple",
                     "href": "abastecimento_dashboardabastecimento.html",
                     "roles": [],
                     "hasChild": false
@@ -251,13 +251,13 @@
         {
             "title": "Gest&atilde;o de Contratos",
             "nomeMenu": "Gestão de Contratos",
-            "icon": "fa-regular fa-folders",
+            "icon": "fa-duotone fa-folders",
             "roles": [],
             "items": [
                 {
                     "title": "Rela&ccedil;&atilde;o de Contratos",
                     "nomeMenu": "Relação de Contratos",
-                    "icon": "fa-regular fa-file-contract",
+                    "icon": "fa-duotone fa-file-contract",
                     "href": "contrato_index.html",
                     "roles": [],
                     "hasChild": false
@@ -265,7 +265,7 @@
                 {
                     "title": "Atas de Registro de Pre&ccedil;os",
                     "nomeMenu": "Atas de Registro de Preços",
-                    "icon": "fa-regular fa-gavel",
+                    "icon": "fa-duotone fa-gavel",
                     "href": "ataregistroprecos_index.html",
                     "roles": [],
                     "hasChild": false
@@ -273,7 +273,7 @@
                 {
                     "title": "Repactua&ccedil;&atilde;o de Contratos",
                     "nomeMenu": "Repactuação de Contratos",
-                    "icon": "fa-regular fa-file-pen",
+                    "icon": "fa-duotone fa-file-pen",
                     "href": "contrato_RepactuacaoContrato.html",
                     "roles": [],
                     "hasChild": false
@@ -281,13 +281,13 @@
                 {
                     "title": "Notas Fiscais e Empenhos",
                     "nomeMenu": "Notas Fiscais e Empenhos",
-                    "icon": "fa-regular fa-money-check-dollar",
+                    "icon": "fa-duotone fa-money-check-dollar",
                     "roles": [],
                     "items": [
                         {
                             "title": "Cadastro de Empenhos",
                             "nomeMenu": "Cadastro de Empenhos",
-                            "icon": "fa-regular fa-hand-holding-dollar",
+                            "icon": "fa-duotone fa-hand-holding-dollar",
                             "href": "empenho_index.html",
                             "roles": [],
                             "hasChild": false
@@ -295,7 +295,7 @@
                         {
                             "title": "Entrada de Notas Fiscais",
                             "nomeMenu": "Entrada de Notas Fiscais",
-                            "icon": "fa-regular fa-file-invoice",
+                            "icon": "fa-duotone fa-file-invoice",
                             "href": "notafiscal_index.html",
                             "roles": [],
                             "hasChild": false
@@ -306,7 +306,7 @@
                 {
                     "title": "Itens dos Contratos",
                     "nomeMenu": "Itens dos Contratos",
-                    "icon": "fa-regular fa-list-ul",
+                    "icon": "fa-duotone fa-list-ul",
                     "href": "contrato_itenscontrato.html",
                     "roles": [],
                     "hasChild": false
@@ -314,7 +314,7 @@
                 {
                     "title": "Cadastro de Fornecedores",
                     "nomeMenu": "Cadastro de Fornecedores",
-                    "icon": "fa-regular fa-truck-field",
+                    "icon": "fa-duotone fa-truck-field",
                     "href": "fornecedor_index.html",
                     "roles": [],
                     "hasChild": false
@@ -325,13 +325,13 @@
         {
             "title": "Gest&atilde;o de Multas",
             "nomeMenu": "Gestão de Multas",
-            "icon": "fa-regular fa-pen-to-square",
+            "icon": "fa-duotone fa-pen-to-square",
             "roles": [],
             "items": [
                 {
                     "title": "Nova Autua&ccedil;&atilde;o",
                     "nomeMenu": "Nova Autuação",
-                    "icon": "fa-regular fa-file-plus",
+                    "icon": "fa-duotone fa-file-plus",
                     "href": "multa_upsertautuacao.html",
                     "roles": [],
                     "hasChild": false
@@ -339,7 +339,7 @@
                 {
                     "title": "Gest&atilde;o de Autua&ccedil;&atilde;o",
                     "nomeMenu": "Gestão de Autuações",
-                    "icon": "fa-regular fa-clipboard-list",
+                    "icon": "fa-duotone fa-clipboard-list",
                     "href": "multa_listaautuacao.html",
                     "roles": [],
                     "hasChild": false
@@ -347,7 +347,7 @@
                 {
                     "title": "Gest&atilde;o de Penalidades",
                     "nomeMenu": "Gestão de Penalidades",
-                    "icon": "fa-regular fa-scale-balanced",
+                    "icon": "fa-duotone fa-scale-balanced",
                     "href": "multa_listapenalidade.html",
                     "roles": [],
                     "hasChild": false
@@ -355,7 +355,7 @@
                 {
                     "title": "&Oacute;rg&atilde;os Autuantes",
                     "nomeMenu": "Órgãos Autuantes",
-                    "icon": "fa-regular fa-shield-check",
+                    "icon": "fa-duotone fa-shield-check",
                     "href": "multa_listaorgaosautuantes.html",
                     "roles": [],
                     "hasChild": false
@@ -363,7 +363,7 @@
                 {
                     "title": "Empenhos",
                     "nomeMenu": "Empenhos",
-                    "icon": "fa-regular fa-money-bills",
+                    "icon": "fa-duotone fa-money-bills",
                     "href": "multa_listaempenhosmulta.html",
                     "roles": [],
                     "hasChild": false
@@ -371,7 +371,7 @@
                 {
                     "title": "Infra&ccedil;&otilde;es de Tr&acirc;nsito",
                     "nomeMenu": "Infrações de Trânsito",
-                    "icon": "fa-regular fa-traffic-light",
+                    "icon": "fa-duotone fa-traffic-light",
                     "href": "multa_listatiposmulta.html",
                     "roles": [],
                     "hasChild": false
@@ -388,7 +388,7 @@
                 {
                     "title": "Cadastro de Patrim&ocirc;nio",
                     "nomeMenu": "Cadastro de Patrimônio",
-                    "icon": "fa-regular fa-box-circle-check",
+                    "icon": "fa-duotone fa-box-circle-check",
                     "href": "patrimonio_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -396,7 +396,7 @@
                 {
                     "title": "Gest&atilde;o de Patrim&ocirc;nio",
                     "nomeMenu": "Gestão de Patrimônios",
-                    "icon": "fa-regular fa-boxes-stacked",
+                    "icon": "fa-duotone fa-boxes-stacked",
                     "href": "patrimonio_index.html",
                     "roles": [],
                     "hasChild": false
@@ -404,7 +404,7 @@
                 {
                     "title": "Movimenta&ccedil;&atilde;o de Patrim&ocirc;nio",
                     "nomeMenu": "Movimentação de Patrimônio",
-                    "icon": "fa-regular fa-dolly",
+                    "icon": "fa-duotone fa-dolly",
                     "href": "MovimentacaoPatrimonio_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -412,7 +412,7 @@
                 {
                     "title": "Movimenta&ccedil;&otilde;es Patrimoniais",
                     "nomeMenu": "Movimentações Patrimoniais",
-                    "icon": "fa-regular fa-arrow-right-arrow-left",
+                    "icon": "fa-duotone fa-arrow-right-arrow-left",
                     "href": "MovimentacaoPatrimonio_index.html",
                     "roles": [],
                     "hasChild": false
@@ -420,7 +420,7 @@
                 {
                     "title": "Cadastro de Se&ccedil;&atilde;o Patrimonial",
                     "nomeMenu": "Cadastro de Seção Patrimonial",
-                    "icon": "fa-regular fa-folder-plus",
+                    "icon": "fa-duotone fa-folder-plus",
                     "href": "secaopatrimonial_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -428,7 +428,7 @@
                 {
                     "title": "Gest&atilde;o de Se&ccedil;&otilde;es Patrimoniais",
                     "nomeMenu": "Gestão de Seções Patrimoniais",
-                    "icon": "fa-regular fa-folders",
+                    "icon": "fa-duotone fa-folders",
                     "href": "secaopatrimonial_index.html",
                     "roles": [],
                     "hasChild": false
@@ -436,7 +436,7 @@
                 {
                     "title": "Cadastro de Setor Patrimonial",
                     "nomeMenu": "Cadastro de Setor Patrimonial",
-                    "icon": "fa-regular fa-building-circle-check",
+                    "icon": "fa-duotone fa-building-circle-check",
                     "href": "setorpatrimonial_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -444,7 +444,7 @@
                 {
                     "title": "Gest&atilde;o de Setores Patrimoniais",
                     "nomeMenu": "Gestão de Setores Patrimoniais",
-                    "icon": "fa-regular fa-buildings",
+                    "icon": "fa-duotone fa-buildings",
                     "href": "setorpatrimonial_index.html",
                     "roles": [],
                     "hasChild": false
@@ -455,13 +455,13 @@
         {
             "title": "Gest&atilde;o de Cadastros",
             "nomeMenu": "Gestão de Cadastros",
-            "icon": "fa-regular fa-database",
+            "icon": "fa-duotone fa-database",
             "roles": [],
             "items": [
                 {
                     "title": "Cadastro de Encarregados",
                     "nomeMenu": "Cadastro de Encarregados",
-                    "icon": "fa-regular fa-user-hard-hat",
+                    "icon": "fa-duotone fa-user-hard-hat",
                     "href": "encarregado_index.html",
                     "roles": [],
                     "hasChild": false
@@ -469,13 +469,13 @@
                 {
                     "title": "Motoristas",
                     "nomeMenu": "Motoristas",
-                    "icon": "fa-regular fa-id-card",
+                    "icon": "fa-duotone fa-id-card",
                     "roles": [],
                     "items": [
                         {
                             "title": "Cadastro de Motoristas",
                             "nomeMenu": "Cadastro de Motoristas",
-                            "icon": "fa-regular fa-user-plus",
+                            "icon": "fa-duotone fa-user-plus",
                             "href": "motorista_index.html",
                             "roles": [],
                             "hasChild": false
@@ -483,7 +483,7 @@
                         {
                             "title": "Lota&ccedil;&atilde;o de Motoristas",
                             "nomeMenu": "Lotação de Motoristas",
-                            "icon": "fa-regular fa-people-arrows",
+                            "icon": "fa-duotone fa-people-arrows",
                             "href": "unidade_lotacaomotoristas.html;",
                             "roles": [],
                             "hasChild": false
@@ -491,7 +491,7 @@
                         {
                             "title": "Visualiza Lota&ccedil;&otilde;es",
                             "nomeMenu": "Visualiza Lotações",
-                            "icon": "fa-regular fa-eye",
+                            "icon": "fa-duotone fa-eye",
                             "href": "unidade_visualizalotacoes.html;",
                             "roles": [],
                             "hasChild": false
@@ -499,7 +499,7 @@
                         {
                             "title": "Dashboard de Motoristas",
                             "nomeMenu": "Dashboard de Motoristas",
-                            "icon": "fa-regular fa-chart-user",
+                            "icon": "fa-duotone fa-chart-user",
                             "href": "motorista_dashboardmotoristas.html",
                             "roles": [],
                             "hasChild": false
@@ -510,7 +510,7 @@
                 {
                     "title": "Cadastro de Operadores",
                     "nomeMenu": "Cadastro de Operadores",
-                    "icon": "fa-regular fa-user-gear",
+                    "icon": "fa-duotone fa-user-gear",
                     "href": "operador_index.html",
                     "roles": [],
                     "hasChild": false
@@ -518,7 +518,7 @@
                 {
                     "title": "Cadastro de Lavadores",
                     "nomeMenu": "Cadastro de Lavadores",
-                    "icon": "fa-regular fa-person-dress-simple",
+                    "icon": "fa-duotone fa-person-dress-simple",
                     "href": "lavador_index.html",
                     "roles": [],
                     "hasChild": false
@@ -526,13 +526,13 @@
                 {
                     "title": "Ve&iacute;culos",
                     "nomeMenu": "Veículos",
-                    "icon": "fa-regular fa-cars",
+                    "icon": "fa-duotone fa-cars",
                     "roles": [],
                     "items": [
                         {
                             "title": "Dashboard de Ve&iacute;culos",
                             "nomeMenu": "Dashboard de Veículos",
-                            "icon": "fa-regular fa-chart-column",
+                            "icon": "fa-duotone fa-chart-column",
                             "href": "veiculo_dashboardveiculos.html",
                             "roles": [],
                             "hasChild": false
@@ -540,7 +540,7 @@
                         {
                             "title": "Cadastro de Ve&iacute;culos",
                             "nomeMenu": "Cadastro de Veículos",
-                            "icon": "fa-regular fa-car",
+                            "icon": "fa-duotone fa-car",
                             "href": "veiculo_index.html",
                             "roles": [],
                             "hasChild": false
@@ -548,7 +548,7 @@
                         {
                             "title": "Tipos de Combustivel",
                             "nomeMenu": "Tipos de Combustível",
-                            "icon": "fa-regular fa-oil-can",
+                            "icon": "fa-duotone fa-oil-can",
                             "href": "combustivel_index.html",
                             "roles": [],
                             "hasChild": false
@@ -556,7 +556,7 @@
                         {
                             "title": "Cadastro de Marcas",
                             "nomeMenu": "Cadastro de Marcas",
-                            "icon": "fa-regular fa-copyright",
+                            "icon": "fa-duotone fa-copyright",
                             "href": "marcaveiculo_index.html",
                             "roles": [],
                             "hasChild": false
@@ -564,7 +564,7 @@
                         {
                             "title": "Cadastro de Modelos",
                             "nomeMenu": "Cadastro de Modelos",
-                            "icon": "fa-regular fa-car-side",
+                            "icon": "fa-duotone fa-car-side",
                             "href": "modeloveiculo_index.html",
                             "roles": [],
                             "hasChild": false
@@ -572,7 +572,7 @@
                         {
                             "title": "Cadastro de Unidades Usu&aacute;rias",
                             "nomeMenu": "Cadastro de Unidades Usuárias",
-                            "icon": "fa-regular fa-house-building",
+                            "icon": "fa-duotone fa-house-building",
                             "href": "unidade_index.html",
                             "roles": [],
                             "hasChild": false
@@ -580,7 +580,7 @@
                         {
                             "title": "Cadastro de Placas de Bronze",
                             "nomeMenu": "Cadastro de Placas de Bronze",
-                            "icon": "fa-regular fa-square-parking",
+                            "icon": "fa-duotone fa-square-parking",
                             "href": "placabronze_index.html",
                             "roles": [],
                             "hasChild": false
@@ -600,7 +600,7 @@
                 {
                     "title": "Insere Novo Alerta",
                     "nomeMenu": "Adiciona Alerta",
-                    "icon": "fa-regular fa-bell-plus",
+                    "icon": "fa-duotone fa-bell-plus",
                     "href": "alertasfrotix_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -608,7 +608,7 @@
                 {
                     "title": "Controle de Alertas",
                     "nomeMenu": "Controle de Alertas",
-                    "icon": "fa-regular fa-bell-on",
+                    "icon": "fa-duotone fa-bell-on",
                     "href": "alertasfrotix_alertasfrotix.html",
                     "roles": [],
                     "hasChild": false
@@ -619,13 +619,13 @@
         {
             "title": "TaxiLeg",
             "nomeMenu": "TaxiLeg",
-            "icon": "fa-regular fa-taxi",
+            "icon": "fa-duotone fa-taxi",
             "roles": [],
             "items": [
                 {
                     "title": "Importa&ccedil;&atilde;o de Viagens Realizadas",
                     "nomeMenu": "Importação de Viagens Realizadas",
-                    "icon": "fa-regular fa-file-import",
+                    "icon": "fa-duotone fa-file-import",
                     "href": "taxileg_importacao.html",
                     "roles": [],
                     "hasChild": false
@@ -633,7 +633,7 @@
                 {
                     "title": "Importa&ccedil;&atilde;o de Viagens Canceladas",
                     "nomeMenu": "Importação de Viagens Canceladas",
-                    "icon": "fa-regular fa-ban",
+                    "icon": "fa-duotone fa-ban",
                     "href": "taxileg_canceladas.html",
                     "roles": [],
                     "hasChild": false
@@ -641,7 +641,7 @@
                 {
                     "title": "Graficos Gerenciais - TaxiLeg",
                     "nomeMenu": "Gráficos Gerenciais - TaxiLeg",
-                    "icon": "fa-regular fa-chart-bar",
+                    "icon": "fa-duotone fa-chart-bar",
                     "href": "taxileg_PBITaxiLeg",
                     "roles": [],
                     "hasChild": false
@@ -652,13 +652,13 @@
         {
             "title": "Administra&ccedil;&atilde;o",
             "nomeMenu": "Administração",
-            "icon": "fa-regular fa-user-shield",
+            "icon": "fa-duotone fa-user-shield",
             "roles": [],
             "items": [
                 {
                     "title": "Cadastro de Usu&aacute;rios",
                     "nomeMenu": "Cadastro de Usuários",
-                    "icon": "fa-regular fa-user-plus",
+                    "icon": "fa-duotone fa-user-plus",
                     "href": "usuarios_upsert.html",
                     "roles": [],
                     "hasChild": false
@@ -666,7 +666,7 @@
                 {
                     "title": "Gest&atilde;o de Usu&aacute;rios",
                     "nomeMenu": "Gestão de Usuários",
-                    "icon": "fa-regular fa-users-gear",
+                    "icon": "fa-duotone fa-users-gear",
                     "href": "usuarios_index.html",
                     "roles": [],
                     "hasChild": false
@@ -674,7 +674,7 @@
                 {
                     "title": "Insere Recursos",
                     "nomeMenu": "Insere Recursos",
-                    "icon": "fa-regular fa-layer-plus",
+                    "icon": "fa-duotone fa-layer-plus",
                     "href": "usuarios_insererecursosusuarios.html",
                     "roles": [],
                     "hasChild": false
@@ -682,7 +682,7 @@
                 {
                     "title": "Gest&atilde;o de Recursos",
                     "nomeMenu": "Gestão de Recursos",
-                    "icon": "fa-regular fa-sitemap",
+                    "icon": "fa-duotone fa-sitemap",
                     "href": "usuarios_recursos.html",
                     "roles": [],
                     "hasChild": false
@@ -690,7 +690,7 @@
                 {
                     "title": "Atualiza Custo das Viagens",
                     "nomeMenu": "Atualiza Custo das Viagens",
-                    "icon": "fa-regular fa-calculator",
+                    "icon": "fa-duotone fa-calculator",
                     "href": "administracao_CalculaCustoViagensTotal.html",
                     "roles": [],
                     "hasChild": false
@@ -698,7 +698,7 @@
                 {
                     "title": "Edita Dados Viagem",
                     "nomeMenu": "Edita Dados Viagem",
-                    "icon": "fa-regular fa-pencil",
+                    "icon": "fa-duotone fa-pencil",
                     "href": "administracao_AjustaCustosViagem.html",
                     "roles": [],
                     "hasChild": false
@@ -706,7 +706,7 @@
                 {
                     "title": "Higieniza Origens/Destinos",
                     "nomeMenu": "Higieniza Origens/Destinos",
-                    "icon": "fa-regular fa-broom",
+                    "icon": "fa-duotone fa-broom",
                     "href": "administracao_higienizarviagens.html",
                     "roles": [],
                     "hasChild": false
@@ -714,7 +714,7 @@
                 {
                     "title": "Log de Erros",
                     "nomeMenu": "Log de Erros",
-                    "icon": "fa-regular fa-bug",
+                    "icon": "fa-duotone fa-bug",
                     "href": "administracao_logerros.html",
                     "roles": [],
                     "hasChild": false
@@ -722,7 +722,7 @@
                 {
                     "title": "Monta Descrição Sem HTML",
                     "nomeMenu": "Monta Descrição",
-                    "icon": "fa-regular fa-code",
+                    "icon": "fa-duotone fa-code",
                     "href": "administracao_montadescricaosemformato.html",
                     "roles": [],
                     "hasChild": false
@@ -730,7 +730,7 @@
                 {
                     "title": "Gerar Estatísticas Viagens",
                     "nomeMenu": "Gerar Estatísticas Viagens",
-                    "icon": "fa-regular fa-chart-network",
+                    "icon": "fa-duotone fa-chart-network",
                     "href": "administracao_gerarestatisticasviagens.html",
                     "roles": [],
                     "hasChild": false
@@ -738,7 +738,7 @@
                 {
                     "title": "Dashboard de Ajuste Estatístico dos Registros",
                     "nomeMenu": "Dashboard Ajuste Estatístico",
-                    "icon": "fa-regular fa-gauge-high",
+                    "icon": "fa-duotone fa-gauge-high",
                     "href": "administracao_dashboardadministracao.html",
                     "roles": [],
                     "hasChild": false
@@ -746,7 +746,7 @@
                 {
                     "title": "Gest&atilde;o de Recursos e Navega&ccedil;&atilde;o",
                     "nomeMenu": "Gestão de Recursos e Navegação",
-                    "icon": "fa-regular fa-compass",
+                    "icon": "fa-duotone fa-compass",
                     "href": "administracao_gestaorecursosnavegacao.html",
                     "roles": [],
                     "hasChild": false
@@ -756,3 +756,4 @@
         }
     ]
 }
+

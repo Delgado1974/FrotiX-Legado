@@ -140,6 +140,28 @@ new bootstrap.Tooltip(elemento, {
 - O ícone dos botões "Voltar à Lista" e semelhantes é **sempre**: `fa-duotone fa-rotate-left icon-space icon-rotate-left`
 - **NUNCA** alterar este ícone para outro (como fa-arrow-left)
 
+### Estilo de Ícones FontAwesome - SEMPRE Duotone:
+- **TODOS** os ícones do sistema FrotiX **DEVEM** usar o estilo **`fa-duotone`**
+- **NUNCA** usar outros estilos como `fa-regular`, `fa-solid`, `fa-light`, `fa-thin`, `fa-brands`
+- Aplicável a:
+  - Ícones de navegação (nav.json)
+  - Ícones em botões
+  - Ícones em cards e headers
+  - Ícones em listas e tabelas
+  - Ícones em qualquer componente da interface
+
+**Exemplos corretos:**
+- ✅ `fa-duotone fa-home`
+- ✅ `fa-duotone fa-car`
+- ✅ `fa-duotone fa-user`
+
+**Exemplos incorretos:**
+- ❌ `fa-regular fa-home`
+- ❌ `fa-solid fa-car`
+- ❌ `fa-light fa-user`
+
+**Razão**: O estilo duotone mantém consistência visual em todo o sistema, com cores primárias e secundárias automaticamente aplicadas conforme o contexto (header, sidebar, etc.).
+
 ## Regras de Botões
 
 ### Botão "Voltar à Lista" - Localização determina a classe:

@@ -2009,7 +2009,10 @@
                     // Toast discreto ao invés de alerta grande
                     mostrarToastSucesso('Ordenação salva automaticamente');
 
-                    // ✅ Atualiza menu lateral (reload da página)
+                    // ✅ Recarrega árvore com dados atualizados do banco
+                    carregarArvore();
+
+                    // ✅ Atualiza menu lateral
                     atualizarNavegacaoLateral();
                 } else {
                     console.error('[AUTO-SAVE] ❌ Erro no backend:', result.message);
