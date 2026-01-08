@@ -225,7 +225,7 @@ namespace FrotiX.Pages.PlacaBronze
             {
                 Alerta.TratamentoErroComLinha("Upsert.cshtml.cs" , "OnGetVeiculoData" , error);
                 return Task.FromResult(
-                    new JsonResult(new SelectList(data , "VeiculoId" , "VeiculoCompleto"))
+                    new JsonResult(new SelectList(new List<object>() , "VeiculoId" , "VeiculoCompleto"))
                 );
             }
         }
