@@ -1,4 +1,5 @@
 using FrotiX.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
@@ -6,6 +7,11 @@ namespace FrotiX.Repository.IRepository
 {
     public partial interface IUnitOfWork : IDisposable
     {
+        /// <summary>
+        /// Retorna o DbContext para operações avançadas (ChangeTracker, etc.)
+        /// </summary>
+        DbContext GetDbContext();
+
         IAbastecimentoRepository Abastecimento
         {
             get;

@@ -1,6 +1,7 @@
 using FrotiX.Data;
 using FrotiX.Models;
 using FrotiX.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace FrotiX.Repository
@@ -10,6 +11,11 @@ namespace FrotiX.Repository
         private new readonly FrotiXDbContext _db;
         private ViagemEstatisticaRepository _viagemEstatisticaRepository;
         private VeiculoPadraoViagemRepository _veiculoPadraoViagemRepository;
+
+        /// <summary>
+        /// Retorna o DbContext para operações avançadas (ChangeTracker, etc.)
+        /// </summary>
+        public DbContext GetDbContext() => _db;
 
         public UnitOfWork(FrotiXDbContext db)
         {

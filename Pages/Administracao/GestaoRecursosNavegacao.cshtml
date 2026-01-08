@@ -608,108 +608,32 @@
     var treeData = [];
     var treeObj = null;
     var selectedItem = null;
+    var lastDragInfo = null; // guarda informação do movimento para o toast
+
+    // Helper para achar ícone no dataSource do DropDownTree
+    function findIconById(iconId) {
+        try {
+            var ddlIconeObj = document.getElementById('ddlIcone')?.ej2_instances?.[0];
+            if (!ddlIconeObj || !ddlIconeObj.fields || !ddlIconeObj.fields.dataSource) return null;
+            var ds = ddlIconeObj.fields.dataSource;
+            for (var i = 0; i < ds.length; i++) {
+                var cat = ds[i];
+                if (cat.child && cat.child.length > 0) {
+                    for (var j = 0; j < cat.child.length; j++) {
+                        if (cat.child[j].id === iconId) return cat.child[j];
+                    }
+                }
+            }
+            return null;
+        } catch (e) {
+            console.warn('[findIconById] Erro:', e);
+            return null;
+        }
+    }
 
     // ✅ Variáveis para rastrear última seleção nos DropDownTrees
     var ultimoIconeSelecionado = null;
     var ultimaPaginaSelecionada = null;
-
-    // Callback executado quando o DropDownTree é criado
-    function onIconeDropdownCreated() {
-        try {
-            var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
-            if (ddlIconeObj) {
-                // Configura template customizado para exibir ícone + label no dropdown
-                ddlIconeObj.itemTemplate = function(data) {
-                    // Se for uma categoria, não exibe ícone
-                    if (data.isCategory) {
-                        return '<div style="font-weight: 600; padding: 4px 0;">' + data.text + '</div>';
-                    }
-                    // Se for um ícone, exibe o ícone FontAwesome + label
-                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 18px; width: 24px; text-align: center;"></i>' +
-                           '<span>' + data.text + '</span>' +
-                           '</div>';
-                };
-
-                // Configura template para o valor selecionado (exibido no campo)
-                ddlIconeObj.valueTemplate = function(data) {
-                    if (!data || data.isCategory) return '';
-                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px; text-align: center;"></i>' +
-                           '<span>' + data.text + '</span>' +
-                           '</div>';
-                };
-
-                // ✅ Evento SELECTING: dispara ANTES de confirmar seleção (mais confiável)
-                ddlIconeObj.selecting = function(args) {
-                    console.log('=== SELECTING ícone (ANTES) ===', args);
-                    if (args.nodeData && !args.nodeData.isCategory) {
-                        // Armazena a seleção na variável global IMEDIATAMENTE
-                        ultimoIconeSelecionado = args.nodeData.id;
-
-                        var txtIconClass = document.getElementById('txtIconClass');
-                        if (txtIconClass) {
-                            txtIconClass.value = args.nodeData.id;
-                            console.log('✅ Classe atualizada via SELECTING:', args.nodeData.id);
-                        }
-                    }
-                };
-
-                // ✅ Evento SELECT: dispara ao selecionar item
-                ddlIconeObj.select = function(args) {
-                    console.log('=== SELECT ícone ===', args);
-                    if (args.nodeData && !args.nodeData.isCategory) {
-                        // Armazena a seleção na variável global
-                        ultimoIconeSelecionado = args.nodeData.id;
-
-                        var txtIconClass = document.getElementById('txtIconClass');
-                        if (txtIconClass) {
-                            txtIconClass.value = args.nodeData.id;
-                            console.log('✅ Classe atualizada via SELECT:', args.nodeData.id);
-                        }
-                    }
-                };
-
-                // ✅ Evento CHANGE: backup
-                ddlIconeObj.change = function(args) {
-                    onIconeChange(args);
-                };
-
-                // ✅ Evento CLOSE do popup: garante atualização ao fechar
-                ddlIconeObj.close = function(args) {
-                    console.log('=== CLOSE ícone ===');
-
-                    var iconId = null;
-
-                    // Tenta pegar o valor atual do componente
-                    var valor = ddlIconeObj.value;
-                    if (valor && valor.length > 0) {
-                        iconId = valor[0];
-                        console.log('Valor do componente:', iconId);
-                    }
-
-                    // Se não encontrou, usa a última seleção armazenada
-                    if (!iconId && ultimoIconeSelecionado) {
-                        iconId = ultimoIconeSelecionado;
-                        console.log('Usando último ícone selecionado:', iconId);
-                    }
-
-                    // Atualiza o campo se tiver um ID válido
-                    if (iconId && !iconId.includes('cat_')) {
-                        var txtIconClass = document.getElementById('txtIconClass');
-                        if (txtIconClass) {
-                            txtIconClass.value = iconId;
-                            console.log('✅ Classe atualizada via CLOSE:', iconId);
-                        }
-                    }
-                };
-
-                console.log('Templates de ícones configurados');
-            }
-        } catch (error) {
-            console.error('Erro ao configurar template do DropDownTree:', error);
-        }
-    }
 
     // Callback APÓS o DropDownTree de ícones ser criado
     function onIconeDropdownCreated() {
@@ -721,29 +645,51 @@
                         return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
                     }
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px;"></i>' +
-                           '<span>' + data.text + '</span>' +
+                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px; color: #f29900;"></i>' +
+                           '<span style="color: #5f6b7a;">' + data.text + '</span>' +
                            '</div>';
                 };
 
                 ddlIconeObj.valueTemplate = function(data) {
                     if (!data || data.isCategory) return '';
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 14px; width: 18px;"></i>' +
-                           '<span>' + data.text + '</span>' +
+                           '<i class="' + data.id + '" style="font-size: 14px; width: 18px; color: #f29900;"></i>' +
+                           '<span style="color: #5f6b7a;">' + data.text + '</span>' +
                            '</div>';
                 };
 
-                // Registra eventos novamente para garantir
+                // Eventos alinhados ao comportamento de páginas (aplica no primeiro clique)
+                ddlIconeObj.selecting = function(args) {
+                    if (args.nodeData && !args.nodeData.isCategory) {
+                        ultimoIconeSelecionado = args.nodeData.id;
+                        var txtIconClass = document.getElementById('txtIconClass');
+                        if (txtIconClass) {
+                            txtIconClass.value = args.nodeData.id;
+                        }
+                    }
+                };
+
                 ddlIconeObj.select = function(args) {
-                    onIconeSelect(args);
+                    console.log('=== SELECT ícone ===', args);
+                    if (args.nodeData && !args.nodeData.isCategory) {
+                        ultimoIconeSelecionado = args.nodeData.id;
+                        ddlIconeObj.value = [args.nodeData.id];
+                        var txtIconClass = document.getElementById('txtIconClass');
+                        if (txtIconClass) {
+                            txtIconClass.value = args.nodeData.id;
+                        }
+                        onIconeChange({ itemData: args.nodeData, value: [args.nodeData.id] });
+                        ddlIconeObj.hidePopup();
+                    }
                 };
 
                 ddlIconeObj.change = function(args) {
                     onIconeChange(args);
                 };
 
-                console.log('Templates e eventos reconfigurados no created');
+                ddlIconeObj.changeOnBlur = false;
+
+                console.log('Templates e eventos de ícone configurados');
             }
         } catch (error) {
             console.error('Erro ao configurar template do DropDownTree:', error);
@@ -1071,6 +1017,19 @@
                 },
                 nodeDragStart: function(args) {
                     console.log('Drag iniciado:', args.draggedNodeData);
+                    // Guarda info de origem para o toast
+                    lastDragInfo = {
+                        itemId: args.draggedNodeData.id,
+                        itemName: args.draggedNodeData.text,
+                        fromParentId: args.draggedNodeData.parentID || null,
+                        fromParentName: 'Sem grupo'
+                    };
+                    if (lastDragInfo.fromParentId) {
+                        var paiOrigem = buscarItemPorId(treeData, lastDragInfo.fromParentId);
+                        if (paiOrigem) {
+                            lastDragInfo.fromParentName = paiOrigem.text || paiOrigem.nomeMenu || 'Sem grupo';
+                        }
+                    }
                 },
                 nodeDragging: function(args) {
                     // Permite arrastar para qualquer lugar
@@ -1086,6 +1045,14 @@
 
                             treeData = dadosAtualizados;
                             atualizarContagem();
+
+                            // Preenche destino para toast
+                            if (lastDragInfo && lastDragInfo.itemId) {
+                                var itemMovido = buscarItemPorId(treeData, lastDragInfo.itemId);
+                                var novoPai = itemMovido && itemMovido.parentId ? buscarItemPorId(treeData, itemMovido.parentId) : null;
+                                lastDragInfo.toParentId = itemMovido ? (itemMovido.parentId || null) : null;
+                                lastDragInfo.toParentName = novoPai ? (novoPai.text || novoPai.nomeMenu || 'Sem grupo') : 'Sem grupo';
+                            }
 
                             // Salva automaticamente no banco
                             console.log('[DRAG-STOP] Chamando salvarOrdenacaoAutomatica...');
@@ -1370,20 +1337,9 @@
                     var iconId = args.value[0];
                     console.log('Buscando iconId:', iconId);
 
-                    // Busca em todas as categorias
-                    var dataSource = ddlIconeObj.fields.dataSource;
-                    for (var i = 0; i < dataSource.length; i++) {
-                        var category = dataSource[i];
-                        if (category.child && category.child.length > 0) {
-                            for (var j = 0; j < category.child.length; j++) {
-                                if (category.child[j].id === iconId) {
-                                    itemData = category.child[j];
-                                    console.log('✅ Ícone encontrado no dataSource:', itemData);
-                                    break;
-                                }
-                            }
-                        }
-                        if (itemData) break;
+                    itemData = findIconById(iconId);
+                    if (itemData) {
+                        console.log('✅ Ícone encontrado no dataSource:', itemData);
                     }
 
                     // Se não encontrou, pode ser que seja a própria classe
@@ -1505,6 +1461,11 @@
                             txtHref.value = args.nodeData.paginaRef;
                             console.log('✅ URL atualizada via SELECT:', args.nodeData.paginaRef);
                         }
+
+                        // força valor e dispara change manual para refletir na primeira escolha
+                        ddlPaginaObj.value = [args.nodeData.id];
+                        onPaginaChange({ itemData: args.nodeData, value: [args.nodeData.id] });
+                        ddlPaginaObj.hidePopup();
                     }
                 };
 
@@ -1512,6 +1473,9 @@
                 ddlPaginaObj.change = function(args) {
                     onPaginaChange(args);
                 };
+
+                // Não depende de blur para aplicar mudança
+                ddlPaginaObj.changeOnBlur = false;
 
                 // ✅ Evento CLOSE do popup: garante atualização ao fechar
                 ddlPaginaObj.close = function(args) {
@@ -1907,7 +1871,9 @@
             // Limpa DropDownTree de ícones
             var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
             if (ddlIconeObj) {
-                ddlIconeObj.value = null;
+                ddlIconeObj.value = [];
+                ddlIconeObj.text = '';
+                ddlIconeObj.refresh();
             }
 
             // Limpa DropDownTree de páginas
@@ -2028,7 +1994,13 @@
                 if (response.data.success) {
                     console.log('[AUTO-SAVE] ✅ Ordenação salva automaticamente!');
                     // Toast discreto ao invés de alerta grande
-                    mostrarToastSucesso('Ordenação salva automaticamente');
+                    var msg = 'Ordenação salva automaticamente';
+                    if (lastDragInfo && lastDragInfo.itemName) {
+                        msg = "Item '" + lastDragInfo.itemName + "' movido de '" +
+                            (lastDragInfo.fromParentName || 'Sem grupo') + "' para '" +
+                            (lastDragInfo.toParentName || 'Sem grupo') + "'";
+                    }
+                    mostrarToastSucesso(msg);
 
                     // ✅ Recarrega árvore com dados atualizados do banco
                     carregarArvore();
@@ -2069,8 +2041,14 @@
     // Helper: Toast discreto para auto-save
     function mostrarToastSucesso(mensagem) {
         try {
-            if (typeof Alerta !== 'undefined' && Alerta.Toast) {
-                Alerta.Toast('success', mensagem);
+            if (window.AppToast && typeof window.AppToast.show === 'function') {
+                // Converte entidades HTML para texto visível no toast
+                var msgDecodificada = decodeHtml(mensagem);
+                window.AppToast.show('Verde', msgDecodificada, 4000);
+            } else if (typeof showSyncfusionToast === 'function') {
+                showSyncfusionToast(decodeHtml(mensagem), 'success', '✅');
+            } else if (typeof Alerta !== 'undefined' && Alerta.Toast) {
+                Alerta.Toast('success', decodeHtml(mensagem));
             } else {
                 console.log('[TOAST]', mensagem);
             }

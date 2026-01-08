@@ -38,8 +38,12 @@ namespace FrotiX.Repository
             {
             IQueryable<T> query = dbSet;
 
+            // Observação: o DbContext está configurado globalmente como NoTracking.
+            // Precisamos forçar AsTracking quando asNoTracking == false para permitir persistência.
             if (asNoTracking)
                 query = query.AsNoTracking();
+            else
+                query = query.AsTracking();
 
             if (filter != null)
                 query = query.Where(filter);

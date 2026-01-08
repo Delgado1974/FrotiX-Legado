@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -408,11 +409,18 @@ namespace FrotiX.Controllers
         [Route("SaveTreeToDb")]
         public async Task<IActionResult> SaveTreeToDb()
         {
+            void Log(string msg)
+            {
+                var fullMsg = $"[SaveTreeToDb] {msg}";
+                Console.WriteLine(fullMsg);
+                System.Diagnostics.Debug.WriteLine(fullMsg);
+            }
+
             try
             {
                 // ✅ Lê o body diretamente como string para evitar validação automática
-                Console.WriteLine($"[SaveTreeToDb] ========================================");
-                Console.WriteLine($"[SaveTreeToDb] Lendo body da requisição...");
+                Log("========================================");
+                Log("Lendo body da requisição...");
 
                 string jsonBody;
                 using (var reader = new StreamReader(Request.Body))
@@ -420,7 +428,7 @@ namespace FrotiX.Controllers
                     jsonBody = await reader.ReadToEndAsync();
                 }
 
-                Console.WriteLine($"[SaveTreeToDb] JSON recebido ({jsonBody.Length} chars), deserializando...");
+                Log($"JSON recebido ({jsonBody.Length} chars), deserializando...");
 
                 var options = new JsonSerializerOptions
                 {
@@ -434,57 +442,77 @@ namespace FrotiX.Controllers
                 }
                 catch (JsonException ex)
                 {
-                    Console.WriteLine($"[SaveTreeToDb] ❌ Erro ao deserializar JSON: {ex.Message}");
+                    Log($"❌ Erro ao deserializar JSON: {ex.Message}");
                     return Json(new { success = false, message = "Erro ao processar JSON: " + ex.Message });
                 }
 
-                Console.WriteLine($"[SaveTreeToDb] Recebido {items?.Count ?? 0} itens para salvar");
+                Log($"Recebido {items?.Count ?? 0} itens para salvar");
 
                 if (items == null || items.Count == 0)
                 {
-                    Console.WriteLine($"[SaveTreeToDb] ❌ ERRO: items é NULL ou vazio!");
+                    Log("❌ ERRO: items é NULL ou vazio!");
                     return Json(new { success = false, message = "Lista de itens é nula ou vazia. Verifique o JSON enviado." });
                 }
 
                 // Log dos primeiros 3 itens para debug
                 foreach (var item in items.Take(3))
                 {
-                    Console.WriteLine($"[SaveTreeToDb] Item: Id={item.Id}, Text={item.Text}, NomeMenu={item.NomeMenu}, Icon={item.Icon}, Href={item.Href}");
+                    Log($"Item: Id={item.Id}, Text={item.Text}, NomeMenu={item.NomeMenu}, Ordem={item.Ordem}");
                 }
 
-                // Coleta todas as atualizações necessárias
+                var db = _unitOfWork.GetDbContext();
+
+                // ============================================================
+                // FASE 0: Coleta de atualizações (ordens finais e hierarquia)
+                // ============================================================
                 var updates = new List<RecursoUpdate>();
-                var processedIds = new HashSet<Guid>(); // ✅ Previne duplicatas
-                Console.WriteLine($"[SaveTreeToDb] Coletando atualizações...");
+                var processedIds = new HashSet<Guid>();
+                Log("Coletando atualizações...");
                 ColetarAtualizacoes(items, null, 0, 0, updates, processedIds);
-                Console.WriteLine($"[SaveTreeToDb] Total de atualizações coletadas: {updates.Count}");
+                Log($"Total de atualizações coletadas: {updates.Count}");
 
-                // ✅ Validação: Verifica se há IDs duplicados
-                var duplicateCheck = updates.GroupBy(u => u.RecursoId).Where(g => g.Count() > 1).ToList();
-                if (duplicateCheck.Any())
+                if (updates.Count == 0)
                 {
-                    Console.WriteLine($"[SaveTreeToDb] ⚠️ AVISO: {duplicateCheck.Count} recursos duplicados detectados!");
-                    foreach (var dup in duplicateCheck)
-                    {
-                        Console.WriteLine($"  - {dup.First().Nome} aparece {dup.Count()} vezes");
-                    }
-                    return Json(new { success = false, message = "Erro: Estrutura contém recursos duplicados. Recarregue a página." });
+                    Log("⚠️ Nenhuma atualização encontrada. Nada a salvar.");
+                    return Json(new { success = false, message = "Nenhuma alteração detectada na árvore." });
                 }
 
-                // Busca todas as entidades UMA VEZ e cria dictionary para acesso rápido
-                // ✅ IMPORTANTE: asNoTracking: false para que o EF Core RASTREIE as entidades e salve as mudanças!
-                Console.WriteLine($"[SaveTreeToDb] Buscando entidades do banco (com tracking)...");
+                // ============================================================
+                // Carrega entidades COM TRACKING (necessário para SaveChanges)
+                // ============================================================
                 var recursoIds = updates.Select(u => u.RecursoId).ToList();
-                var recursos = _unitOfWork.Recurso.GetAll(
-                    filter: r => recursoIds.Contains(r.RecursoId),
-                    asNoTracking: false  // ✅ CRÍTICO: Sem isso, as mudanças NÃO são salvas!
-                ).ToList();
-                var recursosDict = recursos.ToDictionary(r => r.RecursoId);
-                Console.WriteLine($"[SaveTreeToDb] Total de entidades carregadas (rastreadas): {recursosDict.Count}");
+                Log($"Buscando {recursoIds.Count} entidades rastreadas...");
+                var recursosDict = db.Set<Recurso>()
+                    .AsTracking()
+                    .Where(r => recursoIds.Contains(r.RecursoId))
+                    .ToDictionary(r => r.RecursoId);
+                Log($"Entidades carregadas (rastreadas): {recursosDict.Count}");
 
-                // ✅ SOLUÇÃO DEFINITIVA: Atualiza TUDO de uma vez (sem fases)
-                // EF Core detecta mudanças automaticamente via change tracking
-                Console.WriteLine($"[SaveTreeToDb] Aplicando todas as mudanças...");
+                // ============================================================
+                // FASE 1: Aplicar ordens temporárias negativas (previne duplicatas)
+                // ============================================================
+                Log("FASE 1: Aplicando ordens temporárias negativas...");
+                int rowsAffectedPhase1 = 0;
+                for (int i = 0; i < updates.Count; i++)
+                {
+                    var update = updates[i];
+                    if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
+                    {
+                        recurso.Ordem = -(i + 1); // valores únicos negativos
+                        db.Entry(recurso).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        Log($"⚠️ Recurso não encontrado (fase 1): {update.RecursoId}");
+                    }
+                }
+                rowsAffectedPhase1 = db.SaveChanges();
+                Log($"FASE 1 concluída. Linhas afetadas: {rowsAffectedPhase1}");
+
+                // ============================================================
+                // FASE 2: Aplicar valores finais corretos
+                // ============================================================
+                Log("FASE 2: Aplicando valores finais...");
                 foreach (var update in updates)
                 {
                     if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
@@ -498,16 +526,24 @@ namespace FrotiX.Controllers
                         if (!string.IsNullOrEmpty(update.Href))
                             recurso.Href = update.Href;
 
-                        // EF já rastreou via GetAll(), não precisa Update()
-                        Console.WriteLine($"[SaveTreeToDb] {recurso.Nome} → Parent: {update.ParentId}, Nível: {update.Nivel}, Ordem: {update.OrdemFinal}");
+                        db.Entry(recurso).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        Log($"⚠️ Recurso não encontrado (fase 2): {update.RecursoId}");
                     }
                 }
+                var rowsAffectedPhase2 = db.SaveChanges();
+                Log($"FASE 2 concluída. Linhas afetadas: {rowsAffectedPhase2}");
 
-                Console.WriteLine($"[SaveTreeToDb] Salvando mudanças (transação atômica)...");
-                _unitOfWork.Save();
-                Console.WriteLine($"[SaveTreeToDb] ✅ Concluído!");
+                var totalRows = rowsAffectedPhase1 + rowsAffectedPhase2;
+                if (totalRows == 0)
+                {
+                    Log("⚠️ Nenhuma linha foi alterada nas duas fases.");
+                    return Json(new { success = false, message = "Nenhuma alteração foi persistida." });
+                }
 
-                return Json(new { success = true, message = "Navegação salva com sucesso!" });
+                return Json(new { success = true, message = $"Navegação salva com sucesso! ({totalRows} registros atualizados)" });
             }
             catch (Exception error)
             {
@@ -522,11 +558,71 @@ namespace FrotiX.Controllers
                     }
                 }
 
-                Console.WriteLine($"[SaveTreeToDb] ❌ ERRO: {errorMessage}");
-                Console.WriteLine($"[SaveTreeToDb] StackTrace: {error.StackTrace}");
+                Log($"❌ ERRO: {errorMessage}");
+                Log($"StackTrace: {error.StackTrace}");
 
                 Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveTreeToDb", error);
                 return Json(new { success = false, message = errorMessage });
+            }
+        }
+
+        /// <summary>
+        /// Processa a árvore e aplica mudanças diretamente nas entidades rastreadas
+        /// </summary>
+        private void ProcessarArvoreComTracking(
+            List<RecursoTreeDTO> items, 
+            Guid? parentId, 
+            int nivel, 
+            double ordemBase, 
+            Dictionary<Guid, Recurso> recursosDict,
+            ref int processados,
+            ref int modificados)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                double ordemAtual = ordemBase + i + 1; // +1 para começar em 1
+
+                if (Guid.TryParse(item.Id, out var recursoId))
+                {
+                    if (recursosDict.TryGetValue(recursoId, out var recurso))
+                    {
+                        processados++;
+
+                        // Verifica se algo mudou
+                        bool mudou = false;
+                        if (recurso.ParentId != parentId)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[CHANGE] {recurso.Nome}: ParentId {recurso.ParentId} → {parentId}");
+                            recurso.ParentId = parentId;
+                            mudou = true;
+                        }
+                        if (recurso.Nivel != nivel)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[CHANGE] {recurso.Nome}: Nivel {recurso.Nivel} → {nivel}");
+                            recurso.Nivel = nivel;
+                            mudou = true;
+                        }
+                        if (Math.Abs(recurso.Ordem - ordemAtual) > 0.001)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[CHANGE] {recurso.Nome}: Ordem {recurso.Ordem} → {ordemAtual}");
+                            recurso.Ordem = ordemAtual;
+                            mudou = true;
+                        }
+
+                        if (mudou)
+                        {
+                            modificados++;
+                        }
+
+                        // Processa filhos recursivamente
+                        if (item.Items?.Any() == true)
+                        {
+                            double ordemBaseFilhos = ordemAtual * 100;
+                            ProcessarArvoreComTracking(item.Items, recursoId, nivel + 1, ordemBaseFilhos, recursosDict, ref processados, ref modificados);
+                        }
+                    }
+                }
             }
         }
 
@@ -538,7 +634,7 @@ namespace FrotiX.Controllers
             for (int i = 0; i < items.Count; i++)
             {
                 var item = items[i];
-                double ordemAtual = ordemBase + i;
+                double ordemAtual = ordemBase + i + 1; // 1-based para alinhar com front
 
                 if (Guid.TryParse(item.Id, out var recursoId))
                 {
