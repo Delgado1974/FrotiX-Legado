@@ -433,11 +433,15 @@ namespace FrotiX.Controllers
                 }
 
                 // Busca todas as entidades UMA VEZ e cria dictionary para acesso rápido
-                Console.WriteLine($"[SaveTreeToDb] Buscando entidades do banco...");
+                // ✅ IMPORTANTE: asNoTracking: false para que o EF Core RASTREIE as entidades e salve as mudanças!
+                Console.WriteLine($"[SaveTreeToDb] Buscando entidades do banco (com tracking)...");
                 var recursoIds = updates.Select(u => u.RecursoId).ToList();
-                var recursos = _unitOfWork.Recurso.GetAll(r => recursoIds.Contains(r.RecursoId)).ToList();
+                var recursos = _unitOfWork.Recurso.GetAll(
+                    filter: r => recursoIds.Contains(r.RecursoId),
+                    asNoTracking: false  // ✅ CRÍTICO: Sem isso, as mudanças NÃO são salvas!
+                ).ToList();
                 var recursosDict = recursos.ToDictionary(r => r.RecursoId);
-                Console.WriteLine($"[SaveTreeToDb] Total de entidades carregadas: {recursosDict.Count}");
+                Console.WriteLine($"[SaveTreeToDb] Total de entidades carregadas (rastreadas): {recursosDict.Count}");
 
                 // ✅ SOLUÇÃO DEFINITIVA: Atualiza TUDO de uma vez (sem fases)
                 // EF Core detecta mudanças automaticamente via change tracking
