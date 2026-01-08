@@ -1992,18 +1992,40 @@
 
             console.log('[AUTO-SAVE] Enviando para backend...');
 
+            var jsonPayload = JSON.stringify(items);
+            console.log('[AUTO-SAVE] JSON Payload (primeiros 500 chars):', jsonPayload.substring(0, 500));
+
             fetch('/api/Navigation/SaveTreeToDb', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(items)
+                body: jsonPayload
             })
             .then(r => {
                 console.log('[AUTO-SAVE] Response status:', r.status);
-                return r.json();
+                // Se não for 2xx, ainda precisamos ler o body para ver o erro
+                return r.json().then(data => ({ ok: r.ok, status: r.status, data: data }));
             })
-            .then(result => {
-                console.log('[AUTO-SAVE] Response do backend:', result);
-                if (result.success) {
+            .then(response => {
+                console.log('[AUTO-SAVE] Response do backend:', response.data);
+
+                if (!response.ok) {
+                    // Erro HTTP - mostra detalhes do erro de validação
+                    console.error('[AUTO-SAVE] ❌ HTTP Error:', response.status);
+
+                    if (response.data.errors) {
+                        console.error('[AUTO-SAVE] ❌ Erros de Validação:', JSON.stringify(response.data.errors, null, 2));
+                        var erroMsg = 'Erro de validação: ';
+                        for (var campo in response.data.errors) {
+                            erroMsg += campo + ': ' + response.data.errors[campo].join(', ') + '; ';
+                        }
+                        mostrarAlerta(erroMsg, 'danger');
+                    } else {
+                        mostrarAlerta('Erro HTTP ' + response.status + ': ' + (response.data.message || response.data.title || 'Erro desconhecido'), 'danger');
+                    }
+                    return;
+                }
+
+                if (response.data.success) {
                     console.log('[AUTO-SAVE] ✅ Ordenação salva automaticamente!');
                     // Toast discreto ao invés de alerta grande
                     mostrarToastSucesso('Ordenação salva automaticamente');
@@ -2014,8 +2036,8 @@
                     // ✅ Atualiza menu lateral
                     atualizarNavegacaoLateral();
                 } else {
-                    console.error('[AUTO-SAVE] ❌ Erro no backend:', result.message);
-                    mostrarAlerta('Erro ao salvar ordenação: ' + result.message, 'danger');
+                    console.error('[AUTO-SAVE] ❌ Erro no backend:', response.data.message);
+                    mostrarAlerta('Erro ao salvar ordenação: ' + response.data.message, 'danger');
                 }
             })
             .catch(erro => {

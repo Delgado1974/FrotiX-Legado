@@ -10,25 +10,25 @@ namespace FrotiX.Models
     public class RecursoTreeDTO
     {
         /// <summary>ID único do recurso (string para compatibilidade com TreeView)</summary>
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         /// <summary>Texto exibido no menu</summary>
-        public string Text { get; set; }
+        public string? Text { get; set; }
 
         /// <summary>Identificador único do recurso (para vinculação com ControleAcesso)</summary>
-        public string NomeMenu { get; set; }
+        public string? NomeMenu { get; set; }
 
         /// <summary>Classe FontAwesome do ícone (ex: "fa-duotone fa-car")</summary>
-        public string Icon { get; set; }
+        public string? Icon { get; set; }
 
         /// <summary>CSS do ícone para TreeView Syncfusion</summary>
-        public string IconCss { get; set; }
+        public string? IconCss { get; set; }
 
         /// <summary>URL da página (ex: "veiculo_index.html")</summary>
-        public string Href { get; set; }
+        public string? Href { get; set; }
 
         /// <summary>ID do recurso pai (null = raiz)</summary>
-        public string ParentId { get; set; }
+        public string? ParentId { get; set; }
 
         /// <summary>Indica se tem filhos (usado pelo TreeView)</summary>
         public bool HasChild { get; set; }
@@ -43,13 +43,13 @@ namespace FrotiX.Models
         public int Nivel { get; set; }
 
         /// <summary>Descrição do recurso</summary>
-        public string Descricao { get; set; }
+        public string? Descricao { get; set; }
 
         /// <summary>Se o recurso está ativo no menu</summary>
         public bool Ativo { get; set; } = true;
 
         /// <summary>Lista de filhos (subitens do menu)</summary>
-        public List<RecursoTreeDTO> Items { get; set; } = new List<RecursoTreeDTO>();
+        public List<RecursoTreeDTO>? Items { get; set; } = new List<RecursoTreeDTO>();
 
         /// <summary>
         /// Converte um Recurso do banco para DTO

@@ -406,7 +406,21 @@ namespace FrotiX.Controllers
         {
             try
             {
+                // ✅ Log detalhado para debug
+                Console.WriteLine($"[SaveTreeToDb] ========================================");
                 Console.WriteLine($"[SaveTreeToDb] Recebido {items?.Count ?? 0} itens para salvar");
+
+                if (items == null)
+                {
+                    Console.WriteLine($"[SaveTreeToDb] ❌ ERRO: items é NULL!");
+                    return Json(new { success = false, message = "Lista de itens é nula. Verifique o JSON enviado." });
+                }
+
+                // Log dos primeiros 3 itens para debug
+                foreach (var item in items.Take(3))
+                {
+                    Console.WriteLine($"[SaveTreeToDb] Item: Id={item.Id}, Text={item.Text}, NomeMenu={item.NomeMenu}, Icon={item.Icon}, Href={item.Href}");
+                }
 
                 if (items == null || items.Count == 0)
                 {
