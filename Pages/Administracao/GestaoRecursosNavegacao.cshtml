@@ -425,9 +425,7 @@
             <button type="button" class="btn btn-header-orange btn-submit-spin" onclick="adicionarNovoItem()">
                 <i class="fa-duotone fa-plus icon-space icon-pulse"></i> Novo Item
             </button>
-            <button type="button" class="btn btn-azul btn-submit-spin" onclick="salvarOrdenacao()">
-                <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Salvar Ordenação
-            </button>
+            <!-- ✅ REMOVIDO: Salvamento agora é automático após drag-drop -->
         </div>
     </div>
 
@@ -1064,16 +1062,25 @@
                     // Permite arrastar para qualquer lugar
                 },
                 nodeDragStop: function(args) {
-                    console.log('Drag finalizado:', args);
+                    console.log('[DRAG-STOP] Drag finalizado:', args);
                     // ✅ AUTO-SAVE: Salva automaticamente após drag-drop
                     setTimeout(function() {
-                        // Recarrega dados atualizados do TreeView
-                        treeData = treeObj.fields.dataSource;
-                        atualizarContagem();
+                        try {
+                            // ✅ Usa getTreeData() que retorna a estrutura atualizada após drag
+                            var dadosAtualizados = treeObj.getTreeData();
+                            console.log('[DRAG-STOP] Dados do TreeView após drag:', dadosAtualizados);
 
-                        // Salva automaticamente no banco
-                        salvarOrdenacaoAutomatica();
-                    }, 200);
+                            treeData = dadosAtualizados;
+                            atualizarContagem();
+
+                            // Salva automaticamente no banco
+                            console.log('[DRAG-STOP] Chamando salvarOrdenacaoAutomatica...');
+                            salvarOrdenacaoAutomatica();
+                        } catch (erro) {
+                            console.error('[DRAG-STOP] Erro:', erro);
+                            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "nodeDragStop", erro);
+                        }
+                    }, 500); // Aumentado para 500ms para garantir que TreeView atualizou
                 },
                 nodeDropped: function(args) {
                     console.log('Node solto:', args);
@@ -1917,18 +1924,13 @@
         }
     }
 
-    // Salva ordenacao apos drag-drop (chamado pelo botão - DEPRECATED)
+    /*
+    // ❌ DEPRECATED: Salvamento agora é automático - função mantida apenas como backup
     function salvarOrdenacao() {
         try {
             if (!treeObj) return;
-
-            // Pega o dataSource atualizado do TreeView
             var dataSource = treeObj.getTreeData();
-            console.log('Dados para salvar:', dataSource);
-
             var items = extrairItensDoTreeView(dataSource, null, 0);
-            console.log('Itens extraídos:', items);
-
             fetch('/api/Navigation/SaveTreeToDb', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1938,8 +1940,8 @@
             .then(result => {
                 if (result.success) {
                     mostrarAlerta('Ordenação salva com sucesso!', 'success');
-                    carregarArvore(); // Recarrega para refletir as mudanças
-                    atualizarNavegacaoLateral(); // ✅ Atualiza menu lateral
+                    carregarArvore();
+                    atualizarNavegacaoLateral();
                 } else {
                     mostrarAlerta('Erro: ' + result.message, 'danger');
                 }
@@ -1951,34 +1953,51 @@
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacao", erro);
         }
     }
+    */
 
     // ✅ AUTO-SAVE: Salva ordenação automaticamente após drag-drop
     function salvarOrdenacaoAutomatica() {
         try {
-            if (!treeObj) return;
+            if (!treeObj) {
+                console.error('[AUTO-SAVE] treeObj não existe!');
+                return;
+            }
 
             // Pega o dataSource atualizado do TreeView
             var dataSource = treeObj.getTreeData();
-            var items = extrairItensDoTreeView(dataSource, null, 0);
+            console.log('[AUTO-SAVE] DataSource obtido:', dataSource);
 
-            console.log('[AUTO-SAVE] Salvando ordenação automaticamente...', items.length, 'itens');
+            var items = extrairItensDoTreeView(dataSource, null, 0);
+            console.log('[AUTO-SAVE] Items extraídos para salvar:', items);
+            console.log('[AUTO-SAVE] Total de items:', items.length);
+
+            if (items.length === 0) {
+                console.warn('[AUTO-SAVE] Nenhum item para salvar!');
+                return;
+            }
+
+            console.log('[AUTO-SAVE] Enviando para backend...');
 
             fetch('/api/Navigation/SaveTreeToDb', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(items)
             })
-            .then(r => r.json())
+            .then(r => {
+                console.log('[AUTO-SAVE] Response status:', r.status);
+                return r.json();
+            })
             .then(result => {
+                console.log('[AUTO-SAVE] Response do backend:', result);
                 if (result.success) {
                     console.log('[AUTO-SAVE] ✅ Ordenação salva automaticamente!');
                     // Toast discreto ao invés de alerta grande
                     mostrarToastSucesso('Ordenação salva automaticamente');
 
-                    // ✅ Atualiza menu lateral
+                    // ✅ Atualiza menu lateral (reload da página)
                     atualizarNavegacaoLateral();
                 } else {
-                    console.error('[AUTO-SAVE] ❌ Erro:', result.message);
+                    console.error('[AUTO-SAVE] ❌ Erro no backend:', result.message);
                     mostrarAlerta('Erro ao salvar ordenação: ' + result.message, 'danger');
                 }
             })
@@ -1987,6 +2006,7 @@
                 Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacaoAutomatica", erro);
             });
         } catch (erro) {
+            console.error('[AUTO-SAVE] ❌ Erro no try-catch:', erro);
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacaoAutomatica", erro);
         }
     }
