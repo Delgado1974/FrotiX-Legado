@@ -402,34 +402,46 @@ namespace FrotiX.Controllers
         /// Usa estratégia de duas fases para evitar violação de UNIQUE INDEX em Ordem
         /// </summary>
         /// <remarks>
-        /// Desabilita validação automática do [ApiController] pois campos nullable podem vir null do frontend
+        /// Recebe JSON como JsonElement para evitar validação automática do [ApiController]
         /// </remarks>
         [HttpPost]
         [Route("SaveTreeToDb")]
-        [SkipModelValidation]  // ✅ Desabilita validação automática para este endpoint
-        public IActionResult SaveTreeToDb([FromBody] List<RecursoTreeDTO> items)
+        public IActionResult SaveTreeToDb([FromBody] JsonElement jsonBody)
         {
             try
             {
-                // ✅ Log detalhado para debug
+                // ✅ Deserializa manualmente para evitar validação automática do [ApiController]
                 Console.WriteLine($"[SaveTreeToDb] ========================================");
+                Console.WriteLine($"[SaveTreeToDb] JSON recebido, deserializando...");
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                List<RecursoTreeDTO>? items = null;
+                try
+                {
+                    items = JsonSerializer.Deserialize<List<RecursoTreeDTO>>(jsonBody.GetRawText(), options);
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"[SaveTreeToDb] ❌ Erro ao deserializar JSON: {ex.Message}");
+                    return Json(new { success = false, message = "Erro ao processar JSON: " + ex.Message });
+                }
+
                 Console.WriteLine($"[SaveTreeToDb] Recebido {items?.Count ?? 0} itens para salvar");
 
-                if (items == null)
+                if (items == null || items.Count == 0)
                 {
-                    Console.WriteLine($"[SaveTreeToDb] ❌ ERRO: items é NULL!");
-                    return Json(new { success = false, message = "Lista de itens é nula. Verifique o JSON enviado." });
+                    Console.WriteLine($"[SaveTreeToDb] ❌ ERRO: items é NULL ou vazio!");
+                    return Json(new { success = false, message = "Lista de itens é nula ou vazia. Verifique o JSON enviado." });
                 }
 
                 // Log dos primeiros 3 itens para debug
                 foreach (var item in items.Take(3))
                 {
                     Console.WriteLine($"[SaveTreeToDb] Item: Id={item.Id}, Text={item.Text}, NomeMenu={item.NomeMenu}, Icon={item.Icon}, Href={item.Href}");
-                }
-
-                if (items == null || items.Count == 0)
-                {
-                    return Json(new { success = false, message = "Nenhum item recebido para salvar" });
                 }
 
                 // Coleta todas as atualizações necessárias
