@@ -391,16 +391,41 @@ namespace FrotiX.Controllers
         {
             try
             {
+                Console.WriteLine($"[SaveTreeToDb] Recebido {items?.Count ?? 0} itens para salvar");
+
+                if (items == null || items.Count == 0)
+                {
+                    return Json(new { success = false, message = "Nenhum item recebido para salvar" });
+                }
+
                 // Atualiza recursos recursivamente
+                Console.WriteLine($"[SaveTreeToDb] Chamando AtualizarRecursosRecursivamente...");
                 AtualizarRecursosRecursivamente(items, null, 0, 0);
+
+                Console.WriteLine($"[SaveTreeToDb] Chamando _unitOfWork.Save()...");
                 _unitOfWork.Save();
 
+                Console.WriteLine($"[SaveTreeToDb] ✅ Sucesso!");
                 return Json(new { success = true, message = "Navegação salva com sucesso!" });
             }
             catch (Exception error)
             {
+                // Captura InnerException para ver o erro real do EF
+                var errorMessage = error.Message;
+                if (error.InnerException != null)
+                {
+                    errorMessage += " | Inner: " + error.InnerException.Message;
+                    if (error.InnerException.InnerException != null)
+                    {
+                        errorMessage += " | Inner2: " + error.InnerException.InnerException.Message;
+                    }
+                }
+
+                Console.WriteLine($"[SaveTreeToDb] ❌ ERRO: {errorMessage}");
+                Console.WriteLine($"[SaveTreeToDb] StackTrace: {error.StackTrace}");
+
                 Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveTreeToDb", error);
-                return Json(new { success = false, message = error.Message });
+                return Json(new { success = false, message = errorMessage });
             }
         }
 
@@ -727,21 +752,47 @@ namespace FrotiX.Controllers
                     var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
                     if (recurso != null)
                     {
+                        Console.WriteLine($"[AtualizarRecursos] Atualizando: {recurso.Nome} | Ordem: {ordemAtual} | Nível: {nivel} | ParentId: {parentId}");
+
+                        // ✅ Guarda valores originais para debug
+                        var ordemAnterior = recurso.Ordem;
+                        var parentIdAnterior = recurso.ParentId;
+
                         recurso.ParentId = parentId;
                         recurso.Nivel = nivel;
                         recurso.Ordem = ordemAtual;
-                        recurso.Icon = item.Icon;
-                        recurso.Href = item.Href;
+
+                        // ✅ Atualiza Icon e Href apenas se fornecidos (não nulos/vazios)
+                        if (!string.IsNullOrEmpty(item.Icon))
+                        {
+                            recurso.Icon = item.Icon;
+                        }
+                        if (!string.IsNullOrEmpty(item.Href))
+                        {
+                            recurso.Href = item.Href;
+                        }
+
                         _unitOfWork.Recurso.Update(recurso);
+
+                        Console.WriteLine($"[AtualizarRecursos] ✅ Atualizado: {recurso.Nome} | Ordem: {ordemAnterior} → {ordemAtual}");
 
                         // Processa filhos recursivamente
                         if (item.Items?.Any() == true)
                         {
                             // Calcula ordem base dos filhos: ordem do pai * 100
                             double ordemBaseFilhos = ordemAtual * 100;
+                            Console.WriteLine($"[AtualizarRecursos] Processando {item.Items.Count} filhos de '{recurso.Nome}'");
                             AtualizarRecursosRecursivamente(item.Items, recursoId, nivel + 1, ordemBaseFilhos);
                         }
                     }
+                    else
+                    {
+                        Console.WriteLine($"[AtualizarRecursos] ❌ Recurso não encontrado: ID={item.Id}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"[AtualizarRecursos] ❌ ID inválido: {item.Id}");
                 }
             }
         }
