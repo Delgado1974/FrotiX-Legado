@@ -932,26 +932,43 @@
     // Carrega arvore do banco de dados
     function carregarArvore() {
         try {
+            console.log('[DEBUG] Iniciando carregamento da árvore...');
             fetch('/api/Navigation/GetTreeAdmin')
-                .then(r => r.json())
+                .then(r => {
+                    console.log('[DEBUG] Response recebido:', r.status, r.statusText);
+                    return r.json();
+                })
                 .then(result => {
-                    console.log('Dados recebidos da API:', result);
+                    console.log('[DEBUG] Dados recebidos da API:', result);
+                    console.log('[DEBUG] result.success:', result.success);
+                    console.log('[DEBUG] result.data:', result.data);
+                    console.log('[DEBUG] result.data.length:', result.data ? result.data.length : 'undefined');
+
                     if (result.success && result.data && result.data.length > 0) {
+                        console.log('[DEBUG] ✅ Condição OK - Renderizando árvore com', result.data.length, 'itens');
                         treeData = result.data;
                         document.getElementById('emptyTreeState').style.display = 'none';
+                        console.log('[DEBUG] Chamando renderizarTreeView()...');
                         renderizarTreeView();
+                        console.log('[DEBUG] Chamando atualizarContagem()...');
                         atualizarContagem();
+                        console.log('[DEBUG] Chamando popularDropdownItemPai()...');
                         // ✅ Popula dropdown de Item Pai após carregar árvore
                         popularDropdownItemPai();
+                        console.log('[DEBUG] ✅ Árvore carregada com sucesso!');
                     } else {
+                        console.log('[DEBUG] ❌ Condição falhou - Mostrando estado vazio');
+                        console.log('[DEBUG] Motivo: success=' + result.success + ', data=' + (result.data ? 'existe' : 'null/undefined') + ', length=' + (result.data ? result.data.length : 'N/A'));
                         document.getElementById('emptyTreeState').style.display = 'block';
                         document.getElementById('itemCount').textContent = '0 itens';
                     }
                 })
                 .catch(erro => {
+                    console.error('[DEBUG] ❌ ERRO no fetch:', erro);
                     Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarArvore", erro);
                 });
         } catch (erro) {
+            console.error('[DEBUG] ❌ ERRO no try-catch:', erro);
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarArvore", erro);
         }
     }
@@ -959,21 +976,26 @@
     // Renderiza TreeView com Syncfusion
     function renderizarTreeView() {
         try {
+            console.log('[DEBUG renderizarTreeView] Iniciando renderização...');
+            console.log('[DEBUG renderizarTreeView] treeData:', treeData);
+            console.log('[DEBUG renderizarTreeView] treeData.length:', treeData ? treeData.length : 'undefined');
+
             // ✅ Destrói instância anterior do TreeView se existir
             if (treeObj) {
-                console.log('Destruindo instância anterior do TreeView...');
+                console.log('[DEBUG renderizarTreeView] Destruindo instância anterior do TreeView...');
                 try {
                     treeObj.destroy();
                     treeObj = null;
                 } catch (error) {
-                    console.warn('Erro ao destruir TreeView anterior:', error);
+                    console.warn('[DEBUG renderizarTreeView] Erro ao destruir TreeView anterior:', error);
                 }
             }
 
             var container = document.getElementById('gestaoTreeView');
+            console.log('[DEBUG renderizarTreeView] Container encontrado:', container);
             container.innerHTML = '<div id="treeViewControl"></div>';
 
-            console.log('Criando nova instância do TreeView com', treeData.length, 'itens');
+            console.log('[DEBUG renderizarTreeView] Criando nova instância do TreeView com', treeData.length, 'itens');
 
             treeObj = new ej.navigations.TreeView({
                 fields: {
