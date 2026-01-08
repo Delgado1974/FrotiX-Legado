@@ -22,7 +22,8 @@ var SignalRManager = (function ()
         maxReconnectAttempts: 5,
         reconnectAttempt: 0,
         initialDelay: 1000, // Delay inicial antes de conectar
-        fallbackToLongPolling: false // Flag para controlar fallback
+        // Começar com LongPolling para evitar erros de WebSocket em ambientes restritos
+        fallbackToLongPolling: true // Flag para controlar fallback
     };
 
     /**

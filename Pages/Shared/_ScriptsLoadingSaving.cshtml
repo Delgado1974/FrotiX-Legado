@@ -4,13 +4,23 @@
 	 *	Note: the script is written in pure javascript and does not depend on thirdparty library
 	 **/
 	'use strict';
-	var classHolder = document.getElementsByTagName("BODY")[0],
-	/** 
-	 * Load from localstorage
-	 **/
-	themeSettings =  (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) : {},
-	themeURL = themeSettings.themeURL || '',
-	themeOptions = themeSettings.themeOptions || '';
+var classHolder = document.getElementsByTagName("BODY")[0],
+/** 
+ * Load from localstorage (tolerante a JSON corrompido)
+ **/
+rawThemeSettings = localStorage.getItem('themeSettings'),
+themeSettings = {};
+
+try {
+    themeSettings = rawThemeSettings ? JSON.parse(rawThemeSettings) : {};
+} catch (e) {
+    console.warn("⚠️ themeSettings corrompido no localStorage. Limpando e voltando ao padrão.", e);
+    localStorage.removeItem('themeSettings');
+    themeSettings = {};
+}
+
+themeURL = themeSettings.themeURL || '';
+themeOptions = themeSettings.themeOptions || '';
 	/** 
 	 * Load theme options
 	 **/
