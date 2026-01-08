@@ -75,7 +75,6 @@ namespace FrotiX.Pages.PlacaBronze
             _unitOfWork.Save();
 
             // Handle Vehicle Association
-            // First, clear any vehicle currently associated with this PlacaBronze if changed
              var currentVeiculo = _unitOfWork.Veiculo.GetFirstOrDefault(v => v.PlacaBronzeId == PlacaBronzeObj.PlacaBronze.PlacaBronzeId);
 
              if (currentVeiculo != null && currentVeiculo.VeiculoId != PlacaBronzeObj.VeiculoId)
@@ -108,10 +107,8 @@ namespace FrotiX.Pages.PlacaBronze
                     .ToList();
                 return new JsonResult(veiculos);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-               // If there is an error, return an empty list or handle it appropriately
-               // The frontend expects a list of objects with value and text
                return new JsonResult(new List<object>());
             }
         }

@@ -1773,6 +1773,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Pages\PlacaBronze\Upsert.cshtml.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Reports\Agendamento.trdp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
