@@ -439,50 +439,30 @@ namespace FrotiX.Controllers
                 var recursosDict = recursos.ToDictionary(r => r.RecursoId);
                 Console.WriteLine($"[SaveTreeToDb] Total de entidades carregadas: {recursosDict.Count}");
 
-                // FASE 1: Aplica TODAS as mudanças com Ordem negativa temporária
-                // (Evita violação de UK_Recurso_Parent_Nome ao atualizar ParentId logo)
-                Console.WriteLine($"[SaveTreeToDb] FASE 1: Aplicando valores temporários negativos e atualizando hierarquia...");
-                for (int i = 0; i < updates.Count; i++)
+                // ✅ SOLUÇÃO DEFINITIVA: Atualiza TUDO de uma vez (sem fases)
+                // EF Core detecta mudanças automaticamente via change tracking
+                Console.WriteLine($"[SaveTreeToDb] Aplicando todas as mudanças...");
+                foreach (var update in updates)
                 {
-                    var update = updates[i];
                     if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
                     {
-                        // ✅ Atualiza TODAS as propriedades de uma vez (ParentId, Nivel, Icon, Href)
                         recurso.ParentId = update.ParentId;
                         recurso.Nivel = update.Nivel;
-                        recurso.Ordem = -(i + 1); // Ordem negativa temporária
+                        recurso.Ordem = update.OrdemFinal;
 
                         if (!string.IsNullOrEmpty(update.Icon))
                             recurso.Icon = update.Icon;
                         if (!string.IsNullOrEmpty(update.Href))
                             recurso.Href = update.Href;
 
-                        _unitOfWork.Recurso.Update(recurso);
-                        Console.WriteLine($"[SaveTreeToDb] Fase 1: {recurso.Nome} → Parent: {recurso.ParentId}, Nível: {recurso.Nivel}, Ordem temp: {recurso.Ordem}");
+                        // EF já rastreou via GetAll(), não precisa Update()
+                        Console.WriteLine($"[SaveTreeToDb] {recurso.Nome} → Parent: {update.ParentId}, Nível: {update.Nivel}, Ordem: {update.OrdemFinal}");
                     }
                 }
 
-                Console.WriteLine($"[SaveTreeToDb] Salvando Fase 1...");
+                Console.WriteLine($"[SaveTreeToDb] Salvando mudanças (transação atômica)...");
                 _unitOfWork.Save();
-                Console.WriteLine($"[SaveTreeToDb] ✅ Fase 1 concluída!");
-
-                // FASE 2: Corrige apenas a Ordem para valores positivos finais
-                Console.WriteLine($"[SaveTreeToDb] FASE 2: Corrigindo Ordem para valores finais...");
-                foreach (var update in updates)
-                {
-                    if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
-                    {
-                        // ✅ Apenas corrige Ordem (ParentId, Nivel, Icon, Href já estão corretos da Fase 1)
-                        recurso.Ordem = update.OrdemFinal;
-
-                        _unitOfWork.Recurso.Update(recurso);
-                        Console.WriteLine($"[SaveTreeToDb] Fase 2: {recurso.Nome} → Ordem final: {recurso.Ordem}");
-                    }
-                }
-
-                Console.WriteLine($"[SaveTreeToDb] Salvando Fase 2...");
-                _unitOfWork.Save();
-                Console.WriteLine($"[SaveTreeToDb] ✅ Fase 2 concluída!");
+                Console.WriteLine($"[SaveTreeToDb] ✅ Concluído!");
 
                 return Json(new { success = true, message = "Navegação salva com sucesso!" });
             }
