@@ -402,17 +402,25 @@ namespace FrotiX.Controllers
         /// Usa estratégia de duas fases para evitar violação de UNIQUE INDEX em Ordem
         /// </summary>
         /// <remarks>
-        /// Recebe JSON como JsonElement para evitar validação automática do [ApiController]
+        /// Lê o body diretamente como string para evitar validação automática do [ApiController]
         /// </remarks>
         [HttpPost]
         [Route("SaveTreeToDb")]
-        public IActionResult SaveTreeToDb([FromBody] JsonElement jsonBody)
+        public async Task<IActionResult> SaveTreeToDb()
         {
             try
             {
-                // ✅ Deserializa manualmente para evitar validação automática do [ApiController]
+                // ✅ Lê o body diretamente como string para evitar validação automática
                 Console.WriteLine($"[SaveTreeToDb] ========================================");
-                Console.WriteLine($"[SaveTreeToDb] JSON recebido, deserializando...");
+                Console.WriteLine($"[SaveTreeToDb] Lendo body da requisição...");
+
+                string jsonBody;
+                using (var reader = new StreamReader(Request.Body))
+                {
+                    jsonBody = await reader.ReadToEndAsync();
+                }
+
+                Console.WriteLine($"[SaveTreeToDb] JSON recebido ({jsonBody.Length} chars), deserializando...");
 
                 var options = new JsonSerializerOptions
                 {
@@ -422,7 +430,7 @@ namespace FrotiX.Controllers
                 List<RecursoTreeDTO>? items = null;
                 try
                 {
-                    items = JsonSerializer.Deserialize<List<RecursoTreeDTO>>(jsonBody.GetRawText(), options);
+                    items = JsonSerializer.Deserialize<List<RecursoTreeDTO>>(jsonBody, options);
                 }
                 catch (JsonException ex)
                 {
