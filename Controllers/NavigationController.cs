@@ -415,9 +415,22 @@ namespace FrotiX.Controllers
 
                 // Coleta todas as atualizações necessárias
                 var updates = new List<RecursoUpdate>();
+                var processedIds = new HashSet<Guid>(); // ✅ Previne duplicatas
                 Console.WriteLine($"[SaveTreeToDb] Coletando atualizações...");
-                ColetarAtualizacoes(items, null, 0, 0, updates);
+                ColetarAtualizacoes(items, null, 0, 0, updates, processedIds);
                 Console.WriteLine($"[SaveTreeToDb] Total de atualizações coletadas: {updates.Count}");
+
+                // ✅ Validação: Verifica se há IDs duplicados
+                var duplicateCheck = updates.GroupBy(u => u.RecursoId).Where(g => g.Count() > 1).ToList();
+                if (duplicateCheck.Any())
+                {
+                    Console.WriteLine($"[SaveTreeToDb] ⚠️ AVISO: {duplicateCheck.Count} recursos duplicados detectados!");
+                    foreach (var dup in duplicateCheck)
+                    {
+                        Console.WriteLine($"  - {dup.First().Nome} aparece {dup.Count()} vezes");
+                    }
+                    return Json(new { success = false, message = "Erro: Estrutura contém recursos duplicados. Recarregue a página." });
+                }
 
                 // Busca todas as entidades UMA VEZ e cria dictionary para acesso rápido
                 Console.WriteLine($"[SaveTreeToDb] Buscando entidades do banco...");
@@ -495,9 +508,9 @@ namespace FrotiX.Controllers
         }
 
         /// <summary>
-        /// Coleta todas as atualizações necessárias recursivamente
+        /// Coleta todas as atualizações necessárias recursivamente (previne duplicatas)
         /// </summary>
-        private void ColetarAtualizacoes(List<RecursoTreeDTO> items, Guid? parentId, int nivel, double ordemBase, List<RecursoUpdate> updates)
+        private void ColetarAtualizacoes(List<RecursoTreeDTO> items, Guid? parentId, int nivel, double ordemBase, List<RecursoUpdate> updates, HashSet<Guid> processedIds)
         {
             for (int i = 0; i < items.Count; i++)
             {
@@ -506,9 +519,19 @@ namespace FrotiX.Controllers
 
                 if (Guid.TryParse(item.Id, out var recursoId))
                 {
+                    // ✅ Verifica se já foi processado (previne duplicatas)
+                    if (processedIds.Contains(recursoId))
+                    {
+                        Console.WriteLine($"[ColetarAtualizacoes] ⚠️ IGNORADO (duplicata): ID={recursoId}");
+                        continue;
+                    }
+
                     var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
                     if (recurso != null)
                     {
+                        // ✅ Marca como processado
+                        processedIds.Add(recursoId);
+
                         updates.Add(new RecursoUpdate
                         {
                             RecursoId = recursoId,
@@ -526,7 +549,7 @@ namespace FrotiX.Controllers
                         if (item.Items?.Any() == true)
                         {
                             double ordemBaseFilhos = ordemAtual * 100;
-                            ColetarAtualizacoes(item.Items, recursoId, nivel + 1, ordemBaseFilhos, updates);
+                            ColetarAtualizacoes(item.Items, recursoId, nivel + 1, ordemBaseFilhos, updates, processedIds);
                         }
                     }
                 }
