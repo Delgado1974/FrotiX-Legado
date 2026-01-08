@@ -269,6 +269,11 @@
             font-weight: 700 !important;
         }
 
+        /* Texto em NEGRITO para grupos (nós com filhos ou href vazio) */
+        #gestaoTreeView .tree-node .node-text.node-group {
+            font-weight: 700;
+        }
+
         /* FORÇA texto visível em TODOS os estados do Syncfusion */
         #gestaoTreeView .e-treeview .e-list-text,
         #gestaoTreeView .e-treeview .e-text-content,
@@ -964,12 +969,13 @@
                     child: 'items'
                 },
                 nodeTemplate: function(data) {
-                    var badge = data.href && data.href !== 'javascript:void(0);' ? 'Página' : 'Grupo';
+                    var isGroup = !data.href || data.href === 'javascript:void(0);' || (data.items && data.items.length > 0);
+                    var badge = isGroup ? 'Grupo' : 'Página';
                     var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
                     var displayText = decodeHtml(data.text);  // ✅ DECODIFICA para exibição
                     return '<div class="tree-node" data-id="' + data.id + '">' +
                            '<i class="' + (data.icon || 'fa-duotone fa-folder') + '"></i>' +
-                           '<span class="node-text">' + displayText + '</span>' +
+                           '<span class="node-text ' + (isGroup ? 'node-group' : '') + '">' + displayText + '</span>' +
                            '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
                            '</div>';
                 },

@@ -24,15 +24,19 @@
     <Compile Remove="js\**" />
     <Compile Remove="Reports.old\**" />
     <Compile Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <Compile Remove="Tools\**" />
     <Content Remove="js\**" />
     <Content Remove="Reports.old\**" />
     <Content Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <Content Remove="Tools\**" />
     <EmbeddedResource Remove="js\**" />
     <EmbeddedResource Remove="Reports.old\**" />
     <EmbeddedResource Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <EmbeddedResource Remove="Tools\**" />
     <None Remove="js\**" />
     <None Remove="Reports.old\**" />
     <None Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
+    <None Remove="Tools\**" />
     <TypeScriptCompile Remove="Reports.old\**" />
     <TypeScriptCompile Remove="TextNormalization\Sources\Seeds\NovaPasta\**" />
   </ItemGroup>
