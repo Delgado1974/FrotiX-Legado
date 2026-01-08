@@ -383,7 +383,22 @@ namespace FrotiX.Controllers
         }
 
         /// <summary>
+        /// Classe auxiliar para armazenar dados de atualização
+        /// </summary>
+        private class RecursoUpdate
+        {
+            public Guid RecursoId { get; set; }
+            public Guid? ParentId { get; set; }
+            public int Nivel { get; set; }
+            public double OrdemFinal { get; set; }
+            public string Icon { get; set; }
+            public string Href { get; set; }
+            public string Nome { get; set; }
+        }
+
+        /// <summary>
         /// Salva alterações na árvore (reordenação, hierarquia) no banco de dados
+        /// Usa estratégia de duas fases para evitar violação de UNIQUE INDEX em Ordem
         /// </summary>
         [HttpPost]
         [Route("SaveTreeToDb")]
@@ -398,14 +413,58 @@ namespace FrotiX.Controllers
                     return Json(new { success = false, message = "Nenhum item recebido para salvar" });
                 }
 
-                // Atualiza recursos recursivamente
-                Console.WriteLine($"[SaveTreeToDb] Chamando AtualizarRecursosRecursivamente...");
-                AtualizarRecursosRecursivamente(items, null, 0, 0);
+                // Coleta todas as atualizações necessárias
+                var updates = new List<RecursoUpdate>();
+                Console.WriteLine($"[SaveTreeToDb] Coletando atualizações...");
+                ColetarAtualizacoes(items, null, 0, 0, updates);
+                Console.WriteLine($"[SaveTreeToDb] Total de atualizações coletadas: {updates.Count}");
 
-                Console.WriteLine($"[SaveTreeToDb] Chamando _unitOfWork.Save()...");
+                // FASE 1: Define valores temporários negativos para evitar conflito com UNIQUE INDEX
+                Console.WriteLine($"[SaveTreeToDb] FASE 1: Aplicando valores temporários negativos...");
+                for (int i = 0; i < updates.Count; i++)
+                {
+                    var update = updates[i];
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == update.RecursoId);
+
+                    if (recurso != null)
+                    {
+                        recurso.Ordem = -(i + 1); // Valores negativos únicos temporários
+                        _unitOfWork.Recurso.Update(recurso);
+                        Console.WriteLine($"[SaveTreeToDb] Fase 1: {recurso.Nome} → Ordem temp: {recurso.Ordem}");
+                    }
+                }
+
+                Console.WriteLine($"[SaveTreeToDb] Salvando Fase 1...");
                 _unitOfWork.Save();
+                Console.WriteLine($"[SaveTreeToDb] ✅ Fase 1 concluída!");
 
-                Console.WriteLine($"[SaveTreeToDb] ✅ Sucesso!");
+                // FASE 2: Aplica valores finais corretos
+                Console.WriteLine($"[SaveTreeToDb] FASE 2: Aplicando valores finais...");
+                foreach (var update in updates)
+                {
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == update.RecursoId);
+
+                    if (recurso != null)
+                    {
+                        recurso.ParentId = update.ParentId;
+                        recurso.Nivel = update.Nivel;
+                        recurso.Ordem = update.OrdemFinal;
+
+                        // Atualiza Icon e Href apenas se fornecidos
+                        if (!string.IsNullOrEmpty(update.Icon))
+                            recurso.Icon = update.Icon;
+                        if (!string.IsNullOrEmpty(update.Href))
+                            recurso.Href = update.Href;
+
+                        _unitOfWork.Recurso.Update(recurso);
+                        Console.WriteLine($"[SaveTreeToDb] Fase 2: {recurso.Nome} → Ordem: {recurso.Ordem}, Nível: {recurso.Nivel}, Parent: {recurso.ParentId}");
+                    }
+                }
+
+                Console.WriteLine($"[SaveTreeToDb] Salvando Fase 2...");
+                _unitOfWork.Save();
+                Console.WriteLine($"[SaveTreeToDb] ✅ Fase 2 concluída!");
+
                 return Json(new { success = true, message = "Navegação salva com sucesso!" });
             }
             catch (Exception error)
@@ -426,6 +485,45 @@ namespace FrotiX.Controllers
 
                 Alerta.TratamentoErroComLinha("NavigationController.cs", "SaveTreeToDb", error);
                 return Json(new { success = false, message = errorMessage });
+            }
+        }
+
+        /// <summary>
+        /// Coleta todas as atualizações necessárias recursivamente
+        /// </summary>
+        private void ColetarAtualizacoes(List<RecursoTreeDTO> items, Guid? parentId, int nivel, double ordemBase, List<RecursoUpdate> updates)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                double ordemAtual = ordemBase + i;
+
+                if (Guid.TryParse(item.Id, out var recursoId))
+                {
+                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == recursoId);
+                    if (recurso != null)
+                    {
+                        updates.Add(new RecursoUpdate
+                        {
+                            RecursoId = recursoId,
+                            ParentId = parentId,
+                            Nivel = nivel,
+                            OrdemFinal = ordemAtual,
+                            Icon = item.Icon,
+                            Href = item.Href,
+                            Nome = recurso.Nome
+                        });
+
+                        Console.WriteLine($"[ColetarAtualizacoes] Coletado: {recurso.Nome} | Ordem: {ordemAtual} | Nível: {nivel}");
+
+                        // Processa filhos recursivamente
+                        if (item.Items?.Any() == true)
+                        {
+                            double ordemBaseFilhos = ordemAtual * 100;
+                            ColetarAtualizacoes(item.Items, recursoId, nivel + 1, ordemBaseFilhos, updates);
+                        }
+                    }
+                }
             }
         }
 
