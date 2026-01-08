@@ -419,14 +419,19 @@ namespace FrotiX.Controllers
                 ColetarAtualizacoes(items, null, 0, 0, updates);
                 Console.WriteLine($"[SaveTreeToDb] Total de atualizações coletadas: {updates.Count}");
 
+                // Busca todas as entidades UMA VEZ e cria dictionary para acesso rápido
+                Console.WriteLine($"[SaveTreeToDb] Buscando entidades do banco...");
+                var recursoIds = updates.Select(u => u.RecursoId).ToList();
+                var recursos = _unitOfWork.Recurso.GetAll(r => recursoIds.Contains(r.RecursoId)).ToList();
+                var recursosDict = recursos.ToDictionary(r => r.RecursoId);
+                Console.WriteLine($"[SaveTreeToDb] Total de entidades carregadas: {recursosDict.Count}");
+
                 // FASE 1: Define valores temporários negativos para evitar conflito com UNIQUE INDEX
                 Console.WriteLine($"[SaveTreeToDb] FASE 1: Aplicando valores temporários negativos...");
                 for (int i = 0; i < updates.Count; i++)
                 {
                     var update = updates[i];
-                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == update.RecursoId);
-
-                    if (recurso != null)
+                    if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
                     {
                         recurso.Ordem = -(i + 1); // Valores negativos únicos temporários
                         _unitOfWork.Recurso.Update(recurso);
@@ -438,13 +443,11 @@ namespace FrotiX.Controllers
                 _unitOfWork.Save();
                 Console.WriteLine($"[SaveTreeToDb] ✅ Fase 1 concluída!");
 
-                // FASE 2: Aplica valores finais corretos
+                // FASE 2: Aplica valores finais corretos (reutiliza MESMAS entidades rastreadas)
                 Console.WriteLine($"[SaveTreeToDb] FASE 2: Aplicando valores finais...");
                 foreach (var update in updates)
                 {
-                    var recurso = _unitOfWork.Recurso.GetFirstOrDefault(r => r.RecursoId == update.RecursoId);
-
-                    if (recurso != null)
+                    if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
                     {
                         recurso.ParentId = update.ParentId;
                         recurso.Nivel = update.Nivel;
