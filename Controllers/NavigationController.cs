@@ -3,13 +3,17 @@ using FrotiX.Models.FontAwesome;
 using FrotiX.Repository.IRepository;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace FrotiX.Controllers
 {
