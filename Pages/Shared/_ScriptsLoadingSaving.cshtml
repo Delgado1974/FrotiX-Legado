@@ -5,11 +5,13 @@
 	 **/
 	'use strict';
 var classHolder = document.getElementsByTagName("BODY")[0],
-/** 
- * Load from localstorage (tolerante a JSON corrompido)
- **/
-rawThemeSettings = localStorage.getItem('themeSettings'),
-themeSettings = {};
+    /** 
+     * Load from localstorage (tolerante a JSON corrompido)
+     **/
+    rawThemeSettings = localStorage.getItem('themeSettings'),
+    themeSettings = {},
+    themeURL = '',
+    themeOptions = '';
 
 try {
     themeSettings = rawThemeSettings ? JSON.parse(rawThemeSettings) : {};
