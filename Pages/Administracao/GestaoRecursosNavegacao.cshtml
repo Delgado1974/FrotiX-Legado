@@ -1065,12 +1065,14 @@
                 },
                 nodeDragStop: function(args) {
                     console.log('Drag finalizado:', args);
-                    // Atualiza hierarquia apos drag-drop
+                    // ✅ AUTO-SAVE: Salva automaticamente após drag-drop
                     setTimeout(function() {
                         // Recarrega dados atualizados do TreeView
                         treeData = treeObj.fields.dataSource;
                         atualizarContagem();
-                        mostrarAlerta('Arraste concluído. Clique em "Salvar Ordenação" para persistir.', 'info');
+
+                        // Salva automaticamente no banco
+                        salvarOrdenacaoAutomatica();
                     }, 200);
                 },
                 nodeDropped: function(args) {
@@ -1736,6 +1738,9 @@
                         carregarArvore();
                     }, 300);
 
+                    // ✅ Atualiza navegação lateral após salvar
+                    atualizarNavegacaoLateral();
+
                     var recursoId = result.id || dto.id;
 
                     // ✅ APENAS para NOVO ITEM: habilita acesso e pergunta sobre gerenciamento
@@ -1912,7 +1917,7 @@
         }
     }
 
-    // Salva ordenacao apos drag-drop
+    // Salva ordenacao apos drag-drop (chamado pelo botão - DEPRECATED)
     function salvarOrdenacao() {
         try {
             if (!treeObj) return;
@@ -1934,6 +1939,7 @@
                 if (result.success) {
                     mostrarAlerta('Ordenação salva com sucesso!', 'success');
                     carregarArvore(); // Recarrega para refletir as mudanças
+                    atualizarNavegacaoLateral(); // ✅ Atualiza menu lateral
                 } else {
                     mostrarAlerta('Erro: ' + result.message, 'danger');
                 }
@@ -1943,6 +1949,74 @@
             });
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacao", erro);
+        }
+    }
+
+    // ✅ AUTO-SAVE: Salva ordenação automaticamente após drag-drop
+    function salvarOrdenacaoAutomatica() {
+        try {
+            if (!treeObj) return;
+
+            // Pega o dataSource atualizado do TreeView
+            var dataSource = treeObj.getTreeData();
+            var items = extrairItensDoTreeView(dataSource, null, 0);
+
+            console.log('[AUTO-SAVE] Salvando ordenação automaticamente...', items.length, 'itens');
+
+            fetch('/api/Navigation/SaveTreeToDb', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(items)
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    console.log('[AUTO-SAVE] ✅ Ordenação salva automaticamente!');
+                    // Toast discreto ao invés de alerta grande
+                    mostrarToastSucesso('Ordenação salva automaticamente');
+
+                    // ✅ Atualiza menu lateral
+                    atualizarNavegacaoLateral();
+                } else {
+                    console.error('[AUTO-SAVE] ❌ Erro:', result.message);
+                    mostrarAlerta('Erro ao salvar ordenação: ' + result.message, 'danger');
+                }
+            })
+            .catch(erro => {
+                console.error('[AUTO-SAVE] ❌ Erro no fetch:', erro);
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacaoAutomatica", erro);
+            });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacaoAutomatica", erro);
+        }
+    }
+
+    // ✅ Atualiza a navegação lateral (menu do sistema)
+    function atualizarNavegacaoLateral() {
+        try {
+            console.log('[NAV-UPDATE] Atualizando navegação lateral...');
+
+            // ✅ SOLUÇÃO SIMPLES E EFICAZ: Recarrega a página inteira após 1 segundo
+            // Isso garante que o menu lateral seja atualizado com os dados mais recentes do banco
+            setTimeout(function() {
+                console.log('[NAV-UPDATE] Recarregando página para atualizar navegação...');
+                window.location.reload();
+            }, 1000);
+        } catch (erro) {
+            console.error('[NAV-UPDATE] Erro:', erro);
+        }
+    }
+
+    // Helper: Toast discreto para auto-save
+    function mostrarToastSucesso(mensagem) {
+        try {
+            if (typeof Alerta !== 'undefined' && Alerta.Toast) {
+                Alerta.Toast('success', mensagem);
+            } else {
+                console.log('[TOAST]', mensagem);
+            }
+        } catch (erro) {
+            console.log('[TOAST]', mensagem);
         }
     }
 
