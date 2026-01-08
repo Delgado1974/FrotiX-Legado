@@ -2066,7 +2066,7 @@
             var result = [];
 
             items.forEach(function(item, index) {
-                result.push({
+                var newItem = {
                     id: item.id,
                     text: item.text,
                     nomeMenu: item.nomeMenu,
@@ -2078,11 +2078,13 @@
                     ativo: item.ativo !== false,
                     descricao: item.descricao,
                     items: []
-                });
+                };
 
                 if (item.items && item.items.length > 0) {
-                    result = result.concat(extrairItensDoTreeView(item.items, item.id, nivel + 1));
+                    newItem.items = extrairItensDoTreeView(item.items, item.id, nivel + 1);
                 }
+
+                result.push(newItem);
             });
 
             return result;
