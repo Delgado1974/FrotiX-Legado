@@ -165,10 +165,8 @@ function inicializarProgressBar()
                 }
 
                 if (tentativa >= 5) {
-                    if (!progressWarned) {
-                        console.warn('⚠️ ProgressBar ainda não foi inicializado pelo Syncfusion (última tentativa)');
-                        progressWarned = true;
-                    }
+                    // Silencia após a última tentativa; mantém flag apenas para evitar repetir lógica
+                    progressWarned = true;
                     return;
                 }
 
