@@ -434,7 +434,6 @@ namespace FrotiX.Controllers
                     if (recursosDict.TryGetValue(update.RecursoId, out var recurso))
                     {
                         recurso.Ordem = -(i + 1); // Valores negativos únicos temporários
-                        _unitOfWork.Recurso.Update(recurso);
                         Console.WriteLine($"[SaveTreeToDb] Fase 1: {recurso.Nome} → Ordem temp: {recurso.Ordem}");
                     }
                 }
@@ -443,7 +442,7 @@ namespace FrotiX.Controllers
                 _unitOfWork.Save();
                 Console.WriteLine($"[SaveTreeToDb] ✅ Fase 1 concluída!");
 
-                // FASE 2: Aplica valores finais corretos (reutiliza MESMAS entidades rastreadas)
+                // FASE 2: Aplica valores finais corretos (NÃO chama Update - entidades já rastreadas!)
                 Console.WriteLine($"[SaveTreeToDb] FASE 2: Aplicando valores finais...");
                 foreach (var update in updates)
                 {
@@ -459,7 +458,7 @@ namespace FrotiX.Controllers
                         if (!string.IsNullOrEmpty(update.Href))
                             recurso.Href = update.Href;
 
-                        _unitOfWork.Recurso.Update(recurso);
+                        // NÃO chama Update() - entidade já está rastreada desde Fase 1
                         Console.WriteLine($"[SaveTreeToDb] Fase 2: {recurso.Nome} → Ordem: {recurso.Ordem}, Nível: {recurso.Nivel}, Parent: {recurso.ParentId}");
                     }
                 }

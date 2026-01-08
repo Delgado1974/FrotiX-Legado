@@ -945,7 +945,13 @@
                     if (result.success && result.data && result.data.length > 0) {
                         console.log('[DEBUG] ✅ Condição OK - Renderizando árvore com', result.data.length, 'itens');
                         treeData = result.data;
-                        document.getElementById('emptyTreeState').style.display = 'none';
+
+                        // Esconde estado vazio (com verificação de existência)
+                        var emptyState = document.getElementById('emptyTreeState');
+                        if (emptyState) {
+                            emptyState.style.display = 'none';
+                        }
+
                         console.log('[DEBUG] Chamando renderizarTreeView()...');
                         renderizarTreeView();
                         console.log('[DEBUG] Chamando atualizarContagem()...');
@@ -957,8 +963,17 @@
                     } else {
                         console.log('[DEBUG] ❌ Condição falhou - Mostrando estado vazio');
                         console.log('[DEBUG] Motivo: success=' + result.success + ', data=' + (result.data ? 'existe' : 'null/undefined') + ', length=' + (result.data ? result.data.length : 'N/A'));
-                        document.getElementById('emptyTreeState').style.display = 'block';
-                        document.getElementById('itemCount').textContent = '0 itens';
+
+                        // Mostra estado vazio (com verificação de existência)
+                        var emptyState = document.getElementById('emptyTreeState');
+                        if (emptyState) {
+                            emptyState.style.display = 'block';
+                        }
+
+                        var itemCount = document.getElementById('itemCount');
+                        if (itemCount) {
+                            itemCount.textContent = '0 itens';
+                        }
                     }
                 })
                 .catch(erro => {
