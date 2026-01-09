@@ -1930,6 +1930,15 @@
             }
 
             var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
+            
+            // ✅ Mostra modal de espera padrão FrotiX
+            var mensagemLoading = ehNovoItem ? 'Inserindo Item de Menu' : 'Atualizando Item de Menu';
+            if (window.FtxSpin) {
+                window.FtxSpin.show(mensagemLoading);
+            } else {
+                // Fallback se FtxSpin não estiver disponível
+                console.log('[LOADING]', mensagemLoading);
+            }
 
             fetch('/api/Navigation/SaveRecurso', {
                 method: 'POST',
@@ -1938,6 +1947,12 @@
             })
             .then(r => r.json())
             .then(result => {
+                // ✅ Esconde modal de espera
+                if (window.FtxSpin) {
+                    window.FtxSpin.hide();
+                }
+                
+                if (result.success) {
                 if (result.success) {
                     mostrarAlerta(result.message, 'success');
 
@@ -2003,9 +2018,17 @@
                 }
             })
             .catch(erro => {
+                // ✅ Esconde modal de espera em caso de erro
+                if (window.FtxSpin) {
+                    window.FtxSpin.hide();
+                }
                 Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
             });
         } catch (erro) {
+            // ✅ Esconde modal de espera em caso de erro
+            if (window.FtxSpin) {
+                window.FtxSpin.hide();
+            }
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
         }
     }
