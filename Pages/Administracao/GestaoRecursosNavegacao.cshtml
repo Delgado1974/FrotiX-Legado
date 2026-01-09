@@ -2411,9 +2411,9 @@
             
             console.log('[MOVER-BAIXO] ✅ Posições trocadas na lista');
             
-            // ✅ IMPORTANTE: Atualiza treeData mantendo a referência original
-            // Não cria nova cópia, apenas força atualização do TreeView
-            treeData = treeData.slice(); // Cria nova referência do array raiz
+            // ✅ Recria treeData completamente para forçar atualização do TreeView
+            var treeDataNovo = JSON.parse(JSON.stringify(treeData));
+            treeData = treeDataNovo;
             
             // Atualiza TreeView com nova estrutura
             treeObj.fields.dataSource = treeData;
