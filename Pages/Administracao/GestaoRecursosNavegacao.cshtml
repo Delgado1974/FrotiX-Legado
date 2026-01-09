@@ -980,6 +980,8 @@
                            '</div>';
                 },
                 allowDragAndDrop: true,
+                allowDropSibling: true,  // ✅ Permite soltar entre itens (como irmão)
+                allowDropChild: true,    // ✅ Permite soltar SOBRE item (como filho - transforma em grupo)
                 allowMultiSelection: false,
                 nodeClicked: function(args) {
                     try {
@@ -1070,9 +1072,47 @@
                     }, 500); // Aumentado para 500ms para garantir que TreeView atualizou
                 },
                 nodeDropped: function(args) {
-                    console.log('Node solto:', args);
-                    console.log('Destino:', args.droppedNode);
-                    console.log('Posição:', args.dropLevel, args.dropIndex);
+                    try {
+                        console.log('[DROP] Node solto:', args);
+                        console.log('[DROP] Item arrastado:', args.draggedNodeData);
+                        console.log('[DROP] Destino:', args.droppedNode);
+                        console.log('[DROP] Posição - Level:', args.dropLevel, 'Index:', args.dropIndex);
+                        
+                        // ✅ Se soltou SOBRE um item (não entre itens), expande o item de destino
+                        // para mostrar visualmente que o item foi adicionado como filho
+                        if (args.droppedNode && args.droppedNode.id) {
+                            var droppedNodeId = args.droppedNode.id;
+                            var draggedNodeId = args.draggedNodeData ? args.draggedNodeData.id : null;
+                            
+                            console.log('[DROP] Item solto sobre o nó:', droppedNodeId);
+                            console.log('[DROP] Item arrastado ID:', draggedNodeId);
+                            
+                            // Verifica se o item foi realmente adicionado como filho (não como irmão)
+                            // Se dropLevel > 0 ou se droppedNode tem o draggedNode como filho, expande
+                            setTimeout(function() {
+                                try {
+                                    if (treeObj && draggedNodeId) {
+                                        // Busca o item arrastado na estrutura atualizada
+                                        var dadosAtualizados = treeObj.getTreeData();
+                                        var itemArrastado = buscarItemPorId(dadosAtualizados, draggedNodeId);
+                                        
+                                        if (itemArrastado && itemArrastado.parentId === droppedNodeId) {
+                                            // ✅ Item foi adicionado como filho - expande o pai
+                                            console.log('[DROP] ✅ Item adicionado como filho de:', droppedNodeId);
+                                            treeObj.expandAll([droppedNodeId]);
+                                        } else {
+                                            console.log('[DROP] Item não foi adicionado como filho (foi como irmão)');
+                                        }
+                                    }
+                                } catch (erro) {
+                                    console.error('[DROP] Erro ao expandir nó de destino:', erro);
+                                }
+                            }, 200); // Delay para garantir que TreeView atualizou a estrutura
+                        }
+                    } catch (erro) {
+                        console.error('[DROP] Erro no nodeDropped:', erro);
+                        Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "nodeDropped", erro);
+                    }
                 },
                 expandOn: 'Click'
             });
