@@ -170,11 +170,13 @@ namespace FrotiX.Controllers
                     HasChild = false // Novos itens não têm filhos inicialmente
                 };
                 _unitOfWork.Recurso.Add(recurso);
-
-                // Cria ControleAcesso para todos usuários ativos
-                CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
-
+                
+                // ✅ Salva o Recurso PRIMEIRO para garantir que existe no banco antes de criar ControleAcesso
                 _unitOfWork.Save();
+
+                // ✅ DEPOIS cria os registros de ControleAcesso (agora o RecursoId existe no banco)
+                CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                _unitOfWork.Save(); // Salva os ControleAcesso criados
 
                 return Json(new
                 {
@@ -766,14 +768,18 @@ namespace FrotiX.Controllers
                 if (isNew)
                 {
                     _unitOfWork.Recurso.Add(recurso);
+                    // ✅ Salva o Recurso PRIMEIRO para garantir que existe no banco antes de criar ControleAcesso
+                    _unitOfWork.Save();
+                    
+                    // ✅ DEPOIS cria os registros de ControleAcesso (agora o RecursoId existe no banco)
                     CriarControleAcessoParaTodosUsuarios(recurso.RecursoId);
+                    _unitOfWork.Save(); // Salva os ControleAcesso criados
                 }
                 else
                 {
                     _unitOfWork.Recurso.Update(recurso);
+                    _unitOfWork.Save();
                 }
-
-                _unitOfWork.Save();
 
                 return Json(new
                 {
