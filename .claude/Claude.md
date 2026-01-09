@@ -20,6 +20,88 @@
 - ✅ **SERVICES** - Cada arquivo `.cs` em `Services/`
 - ✅ **MIDDLEWARES** - Cada arquivo `.cs` em `Middlewares/`
 - ✅ **MODELS** - Cada arquivo `.cs` em `Models/` (quando relevante)
+  - **IMPORTANTE**: Para Models que representam tabelas/views do banco, incluir:
+    - Estrutura SQL completa da tabela/view (CREATE TABLE/VIEW)
+    - Tabela comparativa campo a campo (Model ↔ Banco)
+    - Tipo de dados de cada campo
+    - Indicação se é tabela ou view
+    - Chaves primárias, estrangeiras e índices
+    - Constraints e validações do banco
+    - **Triggers associados**: Listar todos os triggers da tabela e explicar sua função
+    - **Stored Procedures relacionadas**: Referenciar procedures que operam nesta tabela (documentação separada em `Documentacao/Banco de Dados/Stored Procedures.md`)
+
+### 🗄️ Diretrizes para Trabalho com Banco de Dados
+
+#### ANTES de Criar/Alterar Funcionalidade que se Comunica com BD:
+
+1. **Verificar se o campo existe no Model**:
+   - Consultar o arquivo `.cs` do Model correspondente
+   - Verificar se a propriedade existe e está mapeada corretamente
+
+2. **Verificar se o Model está atualizado com a Tabela/View no Banco**:
+   - Comparar estrutura do Model com a estrutura real da tabela/view no banco
+   - Verificar tipos de dados, nullable, tamanhos, etc.
+   - **Se não estiver atualizado**: 
+     - ⚠️ **AVISAR ao usuário** que é necessária criação/alteração de campo/índice/trigger na tabela
+     - Fornecer SQL completo para ser executado no banco
+     - Atualizar o Model após a alteração no banco
+
+#### ANTES de Implementar Função de Gravação (INSERT/UPDATE):
+
+1. **Verificar se a tabela tem Triggers**:
+   - Consultar triggers associados à tabela
+   - Identificar triggers que podem causar erros no Entity Framework durante `Save()`
+   - **Se houver triggers problemáticos**:
+     - Implementar **bypass no código de acesso ao banco** sem alterar os triggers
+     - Usar `ExecuteSqlRaw` ou `ExecuteSqlInterpolated` quando necessário
+     - Documentar o motivo do bypass na documentação
+
+#### Estrutura de Documentação de Banco de Dados
+
+```
+Documentacao/
+└── Banco de Dados/
+    ├── Stored Procedures.md          # Todas as Stored Procedures
+    ├── Triggers.md                   # Todos os Triggers (opcional, pode estar junto com tabelas)
+    └── Views.md                      # Todas as Views (opcional)
+```
+
+**Para cada Model de Tabela/View**, incluir seção:
+
+```markdown
+## Estrutura do Banco de Dados
+
+### Tabela: `[NomeDaTabela]`
+
+**Tipo**: Tabela / View
+
+**SQL de Criação**:
+```sql
+CREATE TABLE dbo.[NomeDaTabela] (
+  -- estrutura completa
+)
+```
+
+**Mapeamento Model ↔ Banco**:
+
+| Campo no Model | Campo no Banco | Tipo SQL | Tipo C# | Nullable | Descrição |
+|----------------|----------------|----------|---------|----------|-----------|
+| `ViagemId` | `ViagemId` | `uniqueidentifier` | `Guid` | ❌ | Chave primária |
+| `DataInicial` | `DataInicial` | `datetime2` | `DateTime?` | ✅ | Data inicial da viagem |
+
+**Chaves e Índices**:
+- **PK**: `ViagemId` (CLUSTERED)
+- **FK**: `VeiculoId` → `Veiculo(VeiculoId)`
+- **IX**: `IX_Viagem_DataInicial` (DataInicial)
+
+**Triggers Associados**:
+- `tr_Viagem_AfterInsert`: Atualiza estatísticas após inserção
+- `tr_Viagem_AfterUpdate`: Recalcula custos após atualização
+
+**Stored Procedures Relacionadas**:
+- `sp_CalcularCustoViagem`: Calcula custo total de uma viagem
+- Ver `Documentacao/Banco de Dados/Stored Procedures.md` para detalhes
+```
 
 ### 2. Arquivos JavaScript Específicos
 
