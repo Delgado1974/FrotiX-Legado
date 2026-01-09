@@ -306,7 +306,6 @@
 
         /* Garante que o texto NÃO desaparece ao selecionar */
         #gestaoTreeView .tree-node .node-text,
-        #gestaoTreeView .tree-node.selected .node-text,
         #gestaoTreeView .e-list-item .tree-node .node-text,
         #gestaoTreeView .e-list-item.e-active .tree-node .node-text,
         #gestaoTreeView .e-list-item.e-node-focus .tree-node .node-text {
@@ -315,9 +314,12 @@
             visibility: visible !important;
         }
 
-        /* Texto em NEGRITO quando item está selecionado */
+        /* Texto em NEGRITO LARANJA ESCURO quando item está selecionado */
         #gestaoTreeView .tree-node.selected .node-text {
-            font-weight: 700 !important;
+            color: #cc5500 !important;  /* Laranja bem escuro */
+            font-weight: 700 !important;  /* Negrito */
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         /* Texto em NEGRITO para grupos (nós com filhos ou href vazio) */
