@@ -353,14 +353,44 @@ namespace FrotiX.Controllers
                 var todosRecursos = _unitOfWork.Recurso.GetAll().ToList();
                 var totalRecursos = todosRecursos.Count;
                 var recursosRaiz = todosRecursos.Where(r => r.ParentId == null).ToList();
+                
+                // ✅ Log detalhado para debug
+                Console.WriteLine($"[DebugTreeAdmin] Total de recursos: {totalRecursos}");
+                Console.WriteLine($"[DebugTreeAdmin] Recursos raiz (ParentId = null): {recursosRaiz.Count}");
+                foreach (var raiz in recursosRaiz.Take(5))
+                {
+                    Console.WriteLine($"[DebugTreeAdmin] Raiz: {raiz.Nome} (Ordem: {raiz.Ordem}, Nivel: {raiz.Nivel})");
+                }
+                
                 var arvore = MontarArvoreRecursiva(todosRecursos, null);
+                
+                // ✅ Conta total de itens na árvore recursivamente
+                int ContarItens(List<RecursoTreeDTO> items)
+                {
+                    if (items == null || items.Count == 0) return 0;
+                    return items.Count + items.Sum(i => ContarItens(i.Items));
+                }
+                
+                var totalNaArvore = ContarItens(arvore);
+                
+                Console.WriteLine($"[DebugTreeAdmin] Total de itens na árvore gerada: {totalNaArvore}");
+                Console.WriteLine($"[DebugTreeAdmin] Diferença: {totalRecursos - totalNaArvore}");
 
                 return Json(new
                 {
                     success = true,
                     totalRecursosNoBanco = totalRecursos,
                     totalRecursosRaiz = recursosRaiz.Count,
-                    totalItensNaArvore = arvore.Count,
+                    totalItensNaArvore = totalNaArvore,
+                    diferenca = totalRecursos - totalNaArvore,
+                    recursosRaizDetalhes = recursosRaiz.Select(r => new
+                    {
+                        id = r.RecursoId,
+                        nome = r.Nome,
+                        ordem = r.Ordem,
+                        nivel = r.Nivel,
+                        parentId = r.ParentId
+                    }).ToList(),
                     primeiros5Recursos = todosRecursos.Take(5).Select(r => new
                     {
                         r.RecursoId,
@@ -368,20 +398,131 @@ namespace FrotiX.Controllers
                         r.NomeMenu,
                         r.ParentId,
                         r.Ordem,
-                        r.Ativo
+                        r.Ativo,
+                        r.Nivel
                     }),
-                    recursosRaizNomes = recursosRaiz.Select(r => r.Nome).ToList(),
                     arvoreGerada = arvore
                 });
             }
             catch (Exception error)
             {
+                Console.WriteLine($"[DebugTreeAdmin] ERRO: {error.Message}");
+                Console.WriteLine($"[DebugTreeAdmin] StackTrace: {error.StackTrace}");
                 return Json(new
                 {
                     success = false,
                     message = error.Message,
                     stackTrace = error.StackTrace,
                     innerException = error.InnerException?.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// TESTE: Monta árvore em memória com dados fornecidos para verificar lógica
+        /// </summary>
+        [HttpGet]
+        [Route("TestarMontagemArvore")]
+        public IActionResult TestarMontagemArvore()
+        {
+            try
+            {
+                // ✅ Dados fornecidos pelo usuário (simulando banco)
+                var recursosTeste = new List<Recurso>
+                {
+                    // Raiz (ParentId = null)
+                    new Recurso { RecursoId = Guid.Parse("d0cef4a7-efb7-429c-9ab7-5bd77d38b386"), Nome = "Página Inicial", NomeMenu = "Página Inicial", Ordem = 1, ParentId = null, Nivel = 0, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("3c9dc854-c008-4774-ac86-1569cb2d7b8a"), Nome = "Agenda", NomeMenu = "Agenda", Ordem = 2, ParentId = null, Nivel = 0, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("e7d1611d-b13c-4f66-bb4b-8cd5e988092c"), Nome = "Nova Viagem", NomeMenu = "Nova Viagem", Ordem = 3, ParentId = null, Nivel = 0, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("29de13bd-15fd-40d4-9c6b-5a1a46e7dc6d"), Nome = "Gestão de Requisições", NomeMenu = "Gestão de Requisições", Ordem = 4, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("83969489-6b00-43c1-97d0-3dea354d3bec"), Nome = "Gestão de Viagens", NomeMenu = "Gestão de Viagens", Ordem = 5, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("d27514fe-567f-446e-8dd1-ecfdccafc63f"), Nome = "Gestão de Manutenção", NomeMenu = "Gestão de Manutenção", Ordem = 6, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("8586399a-7392-4cde-81bc-1a270685f85b"), Nome = "Gestão de Abastecimento", NomeMenu = "Gestão de Abastecimento", Ordem = 7, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("5b565573-987e-4a3d-ac7d-b88bd30786de"), Nome = "Gestão de Contratos", NomeMenu = "Gestão de Contratos", Ordem = 8, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("f9be17d9-77c3-43bc-a870-aa34bb3364f7"), Nome = "Gestão de Multas", NomeMenu = "Gestão de Multas", Ordem = 9, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("b7f25dcd-13c0-4082-8f14-1e7b7f8b747e"), Nome = "Gestão de Patrimônio", NomeMenu = "Gestão de Patrimônio", Ordem = 10, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("b3e9e1e5-826d-457f-8f6e-d4a1a224ec6e"), Nome = "Gestão de Cadastros", NomeMenu = "Gestão de Cadastros", Ordem = 11, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("30158f58-6890-4610-b99c-98d0ee4cab91"), Nome = "Gestão de Alertas", NomeMenu = "Gestão de Alertas", Ordem = 12, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("70901a41-a547-4603-8a4f-39971a21f7f6"), Nome = "TaxiLeg", NomeMenu = "TaxiLeg", Ordem = 13, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nome = "Administração", NomeMenu = "Administração", Ordem = 14, ParentId = null, Nivel = 0, Ativo = true, HasChild = true },
+                    
+                    // Filhos de Gestão de Requisições (4)
+                    new Recurso { RecursoId = Guid.Parse("9577d8e0-38eb-4bcd-ab0c-5e884cdca7f1"), Nome = "Setores Solicitantes", NomeMenu = "Setores Solicitantes", Ordem = 401, ParentId = Guid.Parse("29de13bd-15fd-40d4-9c6b-5a1a46e7dc6d"), Nivel = 1, Ativo = true, HasChild = false },
+                    
+                    // Filhos de Gestão de Viagens (5)
+                    new Recurso { RecursoId = Guid.Parse("ca6f657b-715f-4eb0-a871-00fc3faade9b"), Nome = "Insere Nova Viagem", NomeMenu = "Insere Nova Viagem", Ordem = 501, ParentId = Guid.Parse("83969489-6b00-43c1-97d0-3dea354d3bec"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("d62a86ca-e849-4239-9fb8-b2b33aacf9dc"), Nome = "Controle de Viagens", NomeMenu = "Controle de Viagens", Ordem = 502, ParentId = Guid.Parse("83969489-6b00-43c1-97d0-3dea354d3bec"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("75548376-b6aa-4157-a530-95e83c0040ea"), Nome = "Gerencia Eventos", NomeMenu = "Gerencia Eventos", Ordem = 503, ParentId = Guid.Parse("83969489-6b00-43c1-97d0-3dea354d3bec"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("bca818cf-450f-4c6d-8ec3-9033698878c0"), Nome = "Fluxo de Passageiros", NomeMenu = "Fluxo de Passageiros", Ordem = 504, ParentId = Guid.Parse("83969489-6b00-43c1-97d0-3dea354d3bec"), Nivel = 1, Ativo = true, HasChild = true },
+                    new Recurso { RecursoId = Guid.Parse("4518bde4-e5ce-4cbf-ad4a-f1e89fcebf05"), Nome = "Gráficos Gerenciais", NomeMenu = "Viagens - Gráficos Gerenciais", Ordem = 505, ParentId = Guid.Parse("83969489-6b00-43c1-97d0-3dea354d3bec"), Nivel = 1, Ativo = true, HasChild = true },
+                    
+                    // Filhos de Gestão de Abastecimento (7)
+                    new Recurso { RecursoId = Guid.Parse("2175b480-5546-44f6-854d-735440f24391"), Nome = "Abastecimentos", NomeMenu = "Abastecimentos", Ordem = 701, ParentId = Guid.Parse("8586399a-7392-4cde-81bc-1a270685f85b"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("f6c61ab4-f95a-4950-9e27-14c7d2a7d307"), Nome = "Importação de Dados", NomeMenu = "Importação de Dados", Ordem = 702, ParentId = Guid.Parse("8586399a-7392-4cde-81bc-1a270685f85b"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("2c31d63d-78d9-4e7a-992e-2af3dc6a9cae"), Nome = "Pendências de Abastecimento", NomeMenu = "Pendências de Abastecimento", Ordem = 703, ParentId = Guid.Parse("8586399a-7392-4cde-81bc-1a270685f85b"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("3c15419c-3c6b-456c-8f02-e3490aa4db51"), Nome = "Registro de Cupons", NomeMenu = "Registro de Cupons", Ordem = 704, ParentId = Guid.Parse("8586399a-7392-4cde-81bc-1a270685f85b"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("ec917b0d-9aa7-4270-81f6-5c393c56d29f"), Nome = "Dashboard de Abastecimento", NomeMenu = "Dashboard de Abastecimento", Ordem = 705, ParentId = Guid.Parse("8586399a-7392-4cde-81bc-1a270685f85b"), Nivel = 1, Ativo = true, HasChild = false },
+                    
+                    // Filhos de Administração (14)
+                    new Recurso { RecursoId = Guid.Parse("025a38c5-5948-4ecb-8b83-f4d9b33da280"), Nome = "Cadastro de Usuários", NomeMenu = "Cadastro de Usuários", Ordem = 1401, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("72b57d33-45e4-452e-a101-8bf364ab1093"), Nome = "Gestão de Usuários", NomeMenu = "Gestão de Usuários", Ordem = 1402, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("d9c64834-b27c-447e-8372-3e683d96aa05"), Nome = "Insere Recursos", NomeMenu = "Insere Recursos", Ordem = 1403, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("7f1cf8fd-62de-4999-9b38-5ffde049d5fa"), Nome = "Gestão de Recursos", NomeMenu = "Gestão de Recursos", Ordem = 1404, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("948082da-bcd9-42c3-acd4-0004a823b14d"), Nome = "Atualiza Custo das Viagens", NomeMenu = "Atualiza Custo das Viagens", Ordem = 1405, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("fb5f8043-71b5-4505-b009-b108bcf4d86a"), Nome = "Edita Dados Viagem", NomeMenu = "Edita Dados Viagem", Ordem = 1406, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("835220e2-9f7a-4e1f-9ff2-23a951acfba8"), Nome = "Higieniza Origens/Destinos", NomeMenu = "Higieniza Origens/Destinos", Ordem = 1407, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("4d9055e5-9d47-4bcb-90f2-f5719f9591a6"), Nome = "Log de Erros", NomeMenu = "Log de Erros", Ordem = 1408, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("a892c31a-b919-437e-b1d9-eb860856850c"), Nome = "Monta Descrição Sem HTML", NomeMenu = "Monta Descrição", Ordem = 1409, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("8a06458e-9e73-40cb-9574-a9f5a2ee43e5"), Nome = "Gerar Estatísticas Viagens", NomeMenu = "Gerar Estatísticas Viagens", Ordem = 1410, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("657b2c65-8fbb-4d76-bde5-02b1afbcc0c3"), Nome = "Dashboard de Ajuste Estatístico dos Registros", NomeMenu = "Dashboard Ajuste Estatístico", Ordem = 1411, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false },
+                    new Recurso { RecursoId = Guid.Parse("b1093c9d-1112-4a36-aeb5-e7866a3f0ab3"), Nome = "Gestão de Recursos e Navegação", NomeMenu = "Gestão de Recursos e Navegação", Ordem = 1412, ParentId = Guid.Parse("01837504-99e9-46f2-8765-55c438ae9712"), Nivel = 1, Ativo = true, HasChild = false }
+                };
+
+                Console.WriteLine($"[TestarMontagemArvore] Total de recursos de teste: {recursosTeste.Count}");
+                Console.WriteLine($"[TestarMontagemArvore] Recursos raiz: {recursosTeste.Count(r => r.ParentId == null)}");
+                
+                var arvoreTeste = MontarArvoreRecursiva(recursosTeste, null);
+                
+                // Conta total recursivamente
+                int ContarItens(List<RecursoTreeDTO> items)
+                {
+                    if (items == null || items.Count == 0) return 0;
+                    return items.Count + items.Sum(i => ContarItens(i.Items));
+                }
+                
+                var totalNaArvore = ContarItens(arvoreTeste);
+                
+                Console.WriteLine($"[TestarMontagemArvore] Total na árvore gerada: {totalNaArvore}");
+                Console.WriteLine($"[TestarMontagemArvore] Itens raiz na árvore: {arvoreTeste.Count}");
+
+                return Json(new
+                {
+                    success = true,
+                    totalRecursosTeste = recursosTeste.Count,
+                    recursosRaiz = recursosTeste.Count(r => r.ParentId == null),
+                    totalNaArvore = totalNaArvore,
+                    itensRaizNaArvore = arvoreTeste.Count,
+                    diferenca = recursosTeste.Count - totalNaArvore,
+                    estruturaArvore = arvoreTeste.Select(r => new
+                    {
+                        id = r.Id,
+                        nome = r.Text,
+                        ordem = r.Ordem,
+                        nivel = r.Nivel,
+                        temFilhos = r.HasChild,
+                        quantidadeFilhos = r.Items?.Count ?? 0,
+                        filhos = r.Items?.Select(f => new { id = f.Id, nome = f.Text, ordem = f.Ordem }).ToList()
+                    }).ToList()
+                });
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine($"[TestarMontagemArvore] ERRO: {error.Message}");
+                return Json(new
+                {
+                    success = false,
+                    message = error.Message,
+                    stackTrace = error.StackTrace
                 });
             }
         }
