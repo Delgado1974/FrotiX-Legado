@@ -7,135 +7,32 @@
 
 # PARTE 1: DOCUMENTAÇÃO DA FUNCIONALIDADE
 
-## Índice
-1. [Visão Geral](#visão-geral)
-2. [Arquitetura](#arquitetura)
-3. [Estrutura de Arquivos](#estrutura-de-arquivos)
-4. [Lógica de Negócio](#lógica-de-negócio)
-5. [Interconexões](#interconexões)
-6. [Estrutura da Interface](#estrutura-da-interface)
-7. [DataTable e Configurações](#datatable-e-configurações)
-8. [Modal de Foto](#modal-de-foto)
-9. [Lógica de Frontend (JavaScript)](#lógica-de-frontend-javascript)
-10. [Endpoints API](#endpoints-api)
-11. [Validações](#validações)
-12. [Exemplos de Uso](#exemplos-de-uso)
-13. [Troubleshooting](#troubleshooting)
+## Objetivos
+
+A página de **Listagem de Motoristas** (`Pages/Motorista/Index.cshtml`) permite:
+- ✅ Visualizar todos os motoristas cadastrados em uma tabela interativa
+- ✅ Visualizar fotos dos motoristas através de modal
+- ✅ Gerenciar status (Ativo/Inativo) diretamente da listagem
+- ✅ Editar motoristas através de link para página de edição
+- ✅ Excluir motoristas com confirmação de segurança
+- ✅ Exportar dados para Excel e PDF
+- ✅ Filtrar e ordenar dados usando recursos nativos do DataTable
 
 ---
 
-## Visão Geral
+## Arquivos Envolvidos
 
-A página de **Listagem de Motoristas** (`Pages/Motorista/Index.cshtml`) é o **ponto de entrada central** para o gerenciamento completo de condutores no sistema FrotiX. Ela exibe todos os motoristas cadastrados em uma tabela interativa rica, permitindo visualizar informações detalhadas, gerenciar status, visualizar fotos e realizar operações CRUD básicas.
+### 1. Pages/Motorista/Index.cshtml
+**Função**: View principal da página com HTML da tabela e modal de foto
 
-### Objetivo
+**Estrutura**:
+- Header com botão "Novo Motorista"
+- Tabela DataTable (`#tblMotorista`)
+- Modal Bootstrap para exibir foto (`#modalFoto`)
 
-A página de Motoristas permite que os usuários:
-- **Visualizem** todos os motoristas cadastrados em uma tabela interativa
-- **Visualizem** fotos dos motoristas através de modal
-- **Gerenciem** status (Ativo/Inativo) diretamente da listagem
-- **Editem** motoristas através de link para página de edição
-- **Excluam** motoristas com confirmação de segurança
-- **Exportem** dados para Excel e PDF
-- **Filtrem** e **ordenem** dados usando recursos nativos do DataTable
-
-### Características Principais
-
-- ✅ **Listagem Rica**: DataTable com informações detalhadas (Nome, Ponto, CNH, Categoria, Celular, Unidade, Contrato, Tipo, Status)
-- ✅ **Modal de Foto**: Visualização rápida da foto do motorista em modal Bootstrap sem sair da listagem
-- ✅ **Filtros e Ordenação**: Recursos nativos do DataTable com busca em todas as colunas
-- ✅ **Status Visual**: Indicadores claros de motoristas Ativos/Inativos com badges coloridos
-- ✅ **Gestão de Status**: Alternância de status diretamente na tabela com feedback visual
-- ✅ **Exportação de Dados**: Botões para exportar para Excel e PDF (formato paisagem)
-- ✅ **Exclusão Segura**: Confirmação antes de excluir motorista
-- ✅ **Layout Responsivo**: Tabela adaptável para diferentes tamanhos de tela
-
----
-
-## Arquitetura
-
-### Visão Geral da Arquitetura
-
-A página de Motoristas utiliza uma arquitetura **simples mas eficiente**, focada em:
-- **Backend (ASP.NET Core Razor Pages)**: Renderização da página e inicialização
-- **Frontend (JavaScript)**: Lógica de tabela e interações
-- **API RESTful**: Endpoints para busca de dados e operações
-- **DataTables**: Componente de tabela interativa
-
-### Padrões de Design Utilizados
-
-1. **Repository Pattern**: Acesso a dados através de `IUnitOfWork` e repositórios específicos
-2. **API RESTful**: Comunicação padronizada entre frontend e backend
-3. **Dependency Injection**: Serviços injetados via construtor no backend
-
----
-
-## Estrutura de Arquivos
-
-### Arquivos Principais
-
-```
-FrotiX.Site/
-├── Pages/
-│   └── Motorista/
-│       ├── Index.cshtml              # View Principal (400+ linhas)
-│       │                             # - HTML da tabela
-│       │                             # - Modal de foto
-│       │                             # - Estilos CSS customizados
-│       │                             # - Scripts inline
-│       │
-│       └── Index.cshtml.cs          # PageModel (Backend Init)
-│                                     # - Inicialização básica
-│
-├── Controllers/
-│   └── MotoristaController.cs        # API Controller (500+ linhas)
-│                                     # - Get: Lista todos os motoristas
-│                                     # - PegaFotoModal: Retorna foto em Base64
-│                                     # - Delete: Exclui motorista
-│                                     # - UpdateStatus: Atualiza status Ativo/Inativo
-│
-├── wwwroot/
-│   ├── js/
-│   │   └── cadastros/
-│   │       └── motorista.js          # Lógica do DataTable (296 linhas)
-│   │                                 # - Inicialização da tabela
-│   │                                 # - Handlers de eventos
-│   │                                 # - Gestão de status
-│   │                                 # - Exclusão de motoristas
-│   │
-│   └── css/
-│       └── (estilos inline no Index.cshtml)
-│
-└── Models/
-    └── Cadastros/
-        └── Motorista.cs              # Modelo principal de motorista
-```
-
-### Arquivos Relacionados
-
-- `Repository/MotoristaRepository.cs` - Acesso a dados de motoristas
-- `Repository/ViewMotoristasRepository.cs` - Acesso à view de motoristas
-- `Helpers/ListaMotorista.cs` - Helper para listagem de motoristas
-
-### Tecnologias Utilizadas
-
-| Tecnologia | Versão | Uso Específico |
-|------------|--------|----------------|
-| **jQuery DataTables** | Latest | Tabela interativa com paginação, ordenação e exportação |
-| **ASP.NET Core** | 3.1+ | Backend Razor Pages, Dependency Injection |
-| **jQuery** | 3.6.0 | Manipulação DOM, AJAX, Event Handlers |
-| **Bootstrap** | 5.x | Modais, Layout Responsivo |
-| **Font Awesome Duotone** | Latest | Ícones e badges visuais |
-| **SweetAlert2** | Latest | Confirmações elegantes |
-
----
-
-## Estrutura da Interface
-
-### Tabela Principal
-A tabela é renderizada com a classe `table-bordered table-striped` e preenchida dinamicamente.
-
+**Código Principal**:
 ```html
+<!-- Tabela principal -->
 <table id="tblMotorista" class="table table-bordered table-striped" width="100%">
     <thead>
         <tr>
@@ -153,196 +50,329 @@ A tabela é renderizada com a classe `table-bordered table-striped` e preenchida
     </thead>
     <tbody></tbody>
 </table>
-```
 
-### Modal de Foto
-Um modal Bootstrap (`#modalFoto`) é utilizado para exibir a imagem do motorista quando o botão de câmera é clicado na grid.
-
-```html
+<!-- Modal de Foto -->
 <div class="modal fade ftx-modal" id="modalFoto">
-    <!-- ... -->
-    <div class="ftx-foto-container">
-        <img id="imgViewer" src="/Images/barbudo.jpg" class="ftx-foto-img" />
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header modal-header-azul">
+                <h5 class="modal-title">
+                    <i class="fa-duotone fa-camera-retro me-2"></i>
+                    Foto do Motorista
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="ftx-foto-container">
+                    <img id="imgViewer" src="/Images/barbudo.jpg" class="ftx-foto-img" />
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 ```
 
 ---
 
-## Lógica de Frontend (JavaScript)
+### 2. Pages/Motorista/Index.cshtml.cs
+**Função**: PageModel básico (inicialização simples)
 
-O arquivo `motorista.js` (296 linhas) gerencia toda a interatividade da página.
-
-### 1. Inicialização do DataTable
-
-A função `loadList()` é chamada quando o documento está pronto:
-
-```javascript
-$(document).ready(function () {
-    loadList();
-    // ... outros event handlers ...
-});
-```
-
-**Configurações Principais**:
-- **dom**: `"Bfrtip"` - Define layout (Botões, filtro, tabela, informações, paginação)
-- **lengthMenu**: Opções de linhas por página (10, 25, 50, Todas)
-- **buttons**: Exportação para Excel e PDF
-- **responsive**: Tabela adaptável para mobile
-- **language**: Português Brasil via CDN
-
-### 2. Gestão de Status
-
-O sistema permite alternar status diretamente na tabela:
-
-**Event Handler**:
-```javascript
-$(document).on("click", ".updateStatusMotorista", function () {
-    const url = $(this).data("url");
-    const currentElement = $(this);
-    
-    $.get(url, function (data) {
-        if (data.success) {
-            AppToast.show("Verde", "Status alterado com sucesso!", 2000);
-            
-            if (data.type == 0) {
-                // ATIVO = VERDE
-                currentElement.html('<i class="fa-duotone fa-circle-check"></i> Ativo');
-                currentElement.removeClass("fundo-cinza").addClass("btn-verde");
-                currentElement.attr('data-ejtip', 'Motorista ativo - clique para inativar');
-            } else {
-                // INATIVO = CINZA
-                currentElement.html('<i class="fa-duotone fa-circle-xmark"></i> Inativo');
-                currentElement.removeClass("btn-verde").addClass("fundo-cinza");
-                currentElement.attr('data-ejtip', 'Motorista inativo - clique para ativar');
-            }
-        }
-    });
-});
-```
-
-**Características**:
-- Atualização visual sem recarregar tabela
-- Feedback imediato ao usuário
-- Tooltip atualizado dinamicamente
-
-### 3. Exclusão de Motorista
-
-O sistema possui exclusão segura com confirmação:
-
-**Event Handler**:
-```javascript
-$(document).on("click", ".btn-delete", function () {
-    const id = $(this).data("id");
-    
-    Alerta.Confirmar(
-        "Confirmar Exclusão",
-        "Você tem certeza que deseja apagar este motorista? Não será possível recuperar os dados eliminados!",
-        "Sim, excluir",
-        "Cancelar"
-    ).then((confirmed) => {
-        if (confirmed) {
-            $.ajax({
-                url: "/api/Motorista/Delete",
-                type: "POST",
-                data: JSON.stringify({ MotoristaId: id }),
-                contentType: "application/json; charset=utf-8",
-                success: function (data) {
-                    if (data.success) {
-                        AppToast.show("Verde", data.message, 3000);
-                        dataTable.ajax.reload();
-                    } else {
-                        AppToast.show("Vermelho", data.message, 3000);
-                    }
-                }
-            });
-        }
-    });
-});
-```
-
-**Validações**:
-- Confirmação obrigatória antes de excluir
-- Verificação de dependências no backend (contratos)
-- Feedback claro sobre sucesso ou erro
-
----
-
-## Endpoints API
-
-O controller `MotoristaController.cs` gerencia todas as operações relacionadas aos motoristas através de uma API RESTful.
-
-### 1. GET `/api/motorista`
-
-**Descrição**: Retorna a lista completa de motoristas, incluindo ativos e inativos.
-
-**Parâmetros**: Nenhum
-
-**Response** (JSON compatível com DataTables):
-```json
+**Código**:
+```csharp
+public class IndexModel : PageModel
 {
-  "data": [
+    public void OnGet()
     {
-      "motoristaId": "guid",
-      "nome": "João Silva",
-      "ponto": "12345",
-      "cnh": "12345678901",
-      "categoriaCNH": "B",
-      "celular01": "(11) 98765-4321",
-      "sigla": "SP",
-      "contratoMotorista": "2026/001 - Empresa XYZ",
-      "efetivoFerista": "Efetivo",
-      "status": true,
-      "foto": "base64-string..."
+        try
+        {
+            // Página carregada via AJAX no DataTable
+        }
+        catch (Exception error)
+        {
+            Alerta.TratamentoErroComLinha("Index.cshtml.cs", "OnGet", error);
+        }
     }
-  ]
 }
 ```
 
-**Lógica de Processamento**:
+---
 
-O endpoint utiliza a view `ViewMotoristas` e formata os dados:
+### 3. wwwroot/js/cadastros/motorista.js
+**Função**: Lógica do DataTable e interações da página
 
-```csharp
-var result = (
-    from vm in _unitOfWork.ViewMotoristas.GetAll()
-    select new
-    {
-        vm.MotoristaId,
-        vm.Nome,
-        vm.Ponto,
-        vm.CNH,
-        vm.Celular01,
-        vm.CategoriaCNH,
-        Sigla = vm.Sigla != null ? vm.Sigla : "",
-        ContratoMotorista = vm.AnoContrato != null
-            ? (vm.AnoContrato + "/" + vm.NumeroContrato + " - " + vm.DescricaoFornecedor)
-            : vm.TipoCondutor != null ? vm.TipoCondutor
-            : "(sem contrato)",
-        vm.Status,
-        vm.EfetivoFerista,
-        vm.Foto
-    }
-).ToList();
+#### 3.1. Inicialização do DataTable
+**Problema**: Tabela precisa carregar dados de motoristas via AJAX e renderizar colunas customizadas
+
+**Solução**: Configurar DataTable com AJAX, renderizadores customizados para status e ações
+
+**Código**:
+```javascript
+function loadList() {
+    dataTable = $("#tblMotorista").DataTable({
+        autoWidth: false,
+        dom: "Bfrtip",
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ["10 linhas", "25 linhas", "50 linhas", "Todas as Linhas"]
+        ],
+        buttons: [
+            "pageLength",
+            "excel",
+            {
+                extend: "pdfHtml5",
+                orientation: "landscape",
+                pageSize: "LEGAL"
+            }
+        ],
+        responsive: true,
+        ajax: {
+            url: "/api/motorista",
+            type: "GET",
+            datatype: "json"
+        },
+        columns: [
+            { data: "nome" },
+            { data: "ponto" },
+            { data: "cnh" },
+            { data: "categoriaCNH" },
+            { data: "celular01" },
+            { data: "sigla" },
+            { data: "contratoMotorista" },
+            { data: "efetivoFerista" },
+            {
+                // ✅ Renderizador de Status (badge clicável)
+                data: "status",
+                render: function (data, type, row, meta) {
+                    if (data) {
+                        // ATIVO = btn-verde
+                        return `<a href="javascript:void(0)"
+                                   class="updateStatusMotorista btn btn-verde btn-xs"
+                                   data-ejtip="Motorista ativo - clique para inativar"
+                                   data-url="/api/Motorista/UpdateStatusMotorista?Id=${row.motoristaId}">
+                                    <i class="fa-duotone fa-circle-check"></i> Ativo
+                                </a>`;
+                    } else {
+                        // INATIVO = fundo-cinza
+                        return `<a href="javascript:void(0)"
+                                   class="updateStatusMotorista btn fundo-cinza btn-xs"
+                                   data-ejtip="Motorista inativo - clique para ativar"
+                                   data-url="/api/Motorista/UpdateStatusMotorista?Id=${row.motoristaId}">
+                                    <i class="fa-duotone fa-circle-xmark"></i> Inativo
+                                </a>`;
+                    }
+                }
+            },
+            {
+                // ✅ Renderizador de Ações (3 botões)
+                data: "motoristaId",
+                render: function (data) {
+                    return `<div class="ftx-btn-acoes">
+                                <a href="/Motorista/Upsert?id=${data}"
+                                   class="btn btn-editar btn-icon-28"
+                                   data-ejtip="Editar Motorista">
+                                    <i class="fa-duotone fa-pen-to-square"></i>
+                                </a>
+                                <a href="javascript:void(0)"
+                                   class="btn fundo-vermelho btn-icon-28 btn-delete"
+                                   data-ejtip="Excluir Motorista"
+                                   data-id="${data}">
+                                    <i class="fa-duotone fa-trash-can"></i>
+                                </a>
+                                <a href="javascript:void(0)"
+                                   class="btn btn-foto btn-icon-28"
+                                   data-ejtip="Foto do Motorista"
+                                   data-id="${data}">
+                                    <i class="fa-duotone fa-camera-retro"></i>
+                                </a>
+                            </div>`;
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+            emptyTable: "Sem Dados para Exibição"
+        }
+    });
+}
 ```
 
-**Características**:
-- Formata contrato como "Ano/Número - Fornecedor"
-- Fallback para tipo de condutor se não houver contrato
-- Inclui foto em Base64 (se disponível)
+#### 3.2. Gestão de Status
+**Problema**: Usuário precisa alternar status de motorista diretamente na tabela
+
+**Solução**: Event handler que envia requisição AJAX e atualiza badge visualmente sem recarregar tabela
+
+**Código**:
+```javascript
+$(document).on("click", ".updateStatusMotorista", function () {
+    try {
+        var url = $(this).data("url");
+        var currentElement = $(this);
+        
+        $.get(url, function (data) {
+            if (data.success) {
+                AppToast.show("Verde", "Status alterado com sucesso!", 2000);
+                
+                if (data.type == 0) {
+                    // ✅ ATIVO = VERDE
+                    currentElement.html('<i class="fa-duotone fa-circle-check"></i> Ativo');
+                    currentElement.removeClass("fundo-cinza").addClass("btn-verde");
+                    currentElement.attr('data-ejtip', 'Motorista ativo - clique para inativar');
+                } else {
+                    // ✅ INATIVO = CINZA
+                    currentElement.html('<i class="fa-duotone fa-circle-xmark"></i> Inativo');
+                    currentElement.removeClass("btn-verde").addClass("fundo-cinza");
+                    currentElement.attr('data-ejtip', 'Motorista inativo - clique para ativar');
+                }
+            } else {
+                Alerta.Erro("Erro ao Alterar Status", "Ocorreu um erro ao tentar alterar o status. Tente novamente.", "OK");
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("motorista.js", "updateStatusMotorista.click", error);
+    }
+});
+```
+
+#### 3.3. Exclusão de Motorista
+**Problema**: Usuário precisa excluir motorista com confirmação e validação de dependências
+
+**Solução**: Confirmação via SweetAlert antes de excluir, backend valida dependências
+
+**Código**:
+```javascript
+$(document).on("click", ".btn-delete", function () {
+    try {
+        var id = $(this).data("id");
+        
+        // ✅ Confirmação obrigatória antes de excluir
+        Alerta.Confirmar(
+            "Confirmar Exclusão",
+            "Você tem certeza que deseja apagar este motorista? Não será possível recuperar os dados eliminados!",
+            "Sim, excluir",
+            "Cancelar"
+        ).then((confirmed) => {
+            if (confirmed) {
+                var dataToPost = JSON.stringify({ MotoristaId: id });
+                
+                $.ajax({
+                    url: "/api/Motorista/Delete",
+                    type: "POST",
+                    data: dataToPost,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.success) {
+                            AppToast.show("Verde", data.message, 3000);
+                            dataTable.ajax.reload();
+                        } else {
+                            AppToast.show("Vermelho", data.message, 3000);
+                        }
+                    },
+                    error: function (err) {
+                        console.error("Erro ao deletar motorista:", err);
+                        AppToast.show("Vermelho", "Erro ao processar a exclusão", 3000);
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("motorista.js", "btn-delete.click", error);
+    }
+});
+```
+
+#### 3.4. Modal de Foto
+**Problema**: Usuário precisa visualizar foto do motorista em tamanho maior
+
+**Solução**: Modal Bootstrap que busca foto em Base64 via AJAX e exibe, com fallback para imagem padrão
+
+**Código**:
+```javascript
+$(document).on("click", ".btn-foto", function (e) {
+    try {
+        const motoristaId = $(this).data('id');
+        const modalElement = document.getElementById('modalFoto');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // ✅ Busca foto em Base64
+        $.ajax({
+            type: "GET",
+            url: "/api/Motorista/PegaFotoModal",
+            data: { id: motoristaId },
+            success: function (res) {
+                if (res) {
+                    // ✅ Exibe foto em Base64
+                    $("#imgViewer").attr("src", "data:image/jpg;base64," + res);
+                } else {
+                    // ✅ Fallback para imagem padrão
+                    $("#imgViewer").attr("src", "/Images/barbudo.jpg");
+                }
+            },
+            error: function() {
+                // ✅ Fallback em caso de erro
+                $("#imgViewer").attr("src", "/Images/barbudo.jpg");
+            }
+        });
+    } catch (error) {
+        Alerta.TratamentoErroComLinha("motorista.js", "btn-foto.click", error);
+    }
+});
+```
 
 ---
 
-### 2. GET `/api/Motorista/PegaFotoModal`
+### 4. Controllers/MotoristaController.cs
+**Função**: Endpoints API para operações com motoristas
 
-**Descrição**: Retorna a foto do motorista em formato Base64 para exibição no modal.
+#### 4.1. GET `/api/motorista`
+**Problema**: Frontend precisa de lista completa de motoristas formatada para DataTable
 
-**Parâmetros de Query**:
-- `id` (Guid, obrigatório): ID do motorista
+**Solução**: Endpoint que retorna todos os motoristas da view `ViewMotoristas` com dados formatados
 
-**Response**:
-- **Sucesso**: String Base64 da imagem (ex: `"/9j/4AAQSkZJRg..."`)
-- **Sem foto**: `false` ou `null`
+**Código**:
+```csharp
+[HttpGet]
+public IActionResult Get()
+{
+    try
+    {
+        var result = (
+            from vm in _unitOfWork.ViewMotoristas.GetAll()
+            select new
+            {
+                vm.MotoristaId,
+                vm.Nome,
+                vm.Ponto,
+                vm.CNH,
+                vm.Celular01,
+                vm.CategoriaCNH,
+                // ✅ Formata sigla (pode ser null)
+                Sigla = vm.Sigla != null ? vm.Sigla : "",
+                // ✅ Formata contrato (Ano/Número - Fornecedor ou Tipo ou "(sem contrato)")
+                ContratoMotorista = vm.AnoContrato != null
+                    ? (vm.AnoContrato + "/" + vm.NumeroContrato + " - " + vm.DescricaoFornecedor)
+                    : vm.TipoCondutor != null ? vm.TipoCondutor
+                    : "(sem contrato)",
+                vm.Status,
+                vm.EfetivoFerista,
+                vm.Foto
+            }
+        ).ToList();
+        
+        return Json(new { data = result });
+    }
+    catch (Exception error)
+    {
+        Alerta.TratamentoErroComLinha("MotoristaController.cs", "Get", error);
+        return View();
+    }
+}
+```
+
+#### 4.2. GET `/api/Motorista/PegaFotoModal`
+**Problema**: Modal precisa exibir foto do motorista em Base64
+
+**Solução**: Endpoint que busca motorista e retorna foto em Base64 ou `false` se não houver
 
 **Código**:
 ```csharp
@@ -351,13 +381,14 @@ public JsonResult PegaFotoModal(Guid id)
 {
     try
     {
-        var motorista = _unitOfWork.Motorista.GetFirstOrDefault(m =>
-            m.MotoristaId == id
+        var objFromDb = _unitOfWork.Motorista.GetFirstOrDefault(u => 
+            u.MotoristaId == id
         );
         
-        if (motorista != null && motorista.Foto != null && motorista.Foto.Length > 0)
+        if (objFromDb != null && objFromDb.Foto != null && objFromDb.Foto.Length > 0)
         {
-            string base64 = Convert.ToBase64String(motorista.Foto);
+            // ✅ Converte byte[] para Base64
+            string base64 = Convert.ToBase64String(objFromDb.Foto);
             return Json(base64);
         }
         
@@ -371,45 +402,10 @@ public JsonResult PegaFotoModal(Guid id)
 }
 ```
 
-**Uso no Frontend**:
-```javascript
-$.ajax({
-    type: "GET",
-    url: "/api/Motorista/PegaFotoModal",
-    data: { id: motoristaId },
-    success: function (res) {
-        if (res) {
-            $("#imgViewer").attr("src", "data:image/jpg;base64," + res);
-        } else {
-            $("#imgViewer").attr("src", "/Images/barbudo.jpg");
-        }
-    }
-});
-```
+#### 4.3. GET `/api/Motorista/UpdateStatusMotorista`
+**Problema**: Frontend precisa alternar status de motorista
 
----
-
-### 3. GET `/api/Motorista/UpdateStatusMotorista`
-
-**Descrição**: Alterna o status de um motorista entre Ativo e Inativo.
-
-**Parâmetros de Query**:
-- `Id` (Guid, obrigatório): ID do motorista
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Atualizado Status do Motorista [Nome: João Silva] (Ativo)",
-  "type": 0
-}
-```
-
-**Lógica**:
-- Se status atual é `true` (Ativo) → muda para `false` (Inativo), `type = 1`
-- Se status atual é `false` (Inativo) → muda para `true` (Ativo), `type = 0`
-- Atualiza registro no banco
-- Retorna mensagem descritiva
+**Solução**: Endpoint que inverte status (true ↔ false) e retorna novo estado
 
 **Código**:
 ```csharp
@@ -431,12 +427,14 @@ public JsonResult UpdateStatusMotorista(Guid Id)
                 
                 if (objFromDb.Status == true)
                 {
+                    // ✅ Inverte para Inativo
                     objFromDb.Status = false;
                     Description = $"Atualizado Status do Motorista [Nome: {objFromDb.Nome}] (Inativo)";
                     type = 1;
                 }
                 else
                 {
+                    // ✅ Inverte para Ativo
                     objFromDb.Status = true;
                     Description = $"Atualizado Status do Motorista [Nome: {objFromDb.Nome}] (Ativo)";
                     type = 0;
@@ -464,32 +462,10 @@ public JsonResult UpdateStatusMotorista(Guid Id)
 }
 ```
 
----
+#### 4.4. POST `/api/Motorista/Delete`
+**Problema**: Frontend precisa excluir motorista com validação de dependências
 
-### 4. POST `/api/Motorista/Delete`
-
-**Descrição**: Exclui um motorista do sistema, com validação de dependências.
-
-**Request Body** (JSON):
-```json
-{
-  "MotoristaId": "guid-do-motorista"
-}
-```
-
-**Validações Executadas**:
-1. Verifica se motorista existe
-2. **Verifica se motorista está associado a contratos**:
-   - Se estiver associado, **bloqueia exclusão**
-   - Retorna mensagem: "Não foi possível remover o motorista. Ele está associado a um ou mais contratos!"
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Motorista removido com sucesso"
-}
-```
+**Solução**: Endpoint que verifica se motorista tem contratos associados antes de excluir
 
 **Código**:
 ```csharp
@@ -507,13 +483,14 @@ public IActionResult Delete(MotoristaViewModel model)
             
             if (objFromDb != null)
             {
-                // Verifica se pode apagar o motorista
+                // ✅ Verifica se motorista está associado a contratos
                 var motoristaContrato = _unitOfWork.MotoristaContrato.GetFirstOrDefault(u =>
                     u.MotoristaId == model.MotoristaId
                 );
                 
                 if (motoristaContrato != null)
                 {
+                    // ✅ Bloqueia exclusão se houver contratos
                     return Json(new
                     {
                         success = false,
@@ -521,6 +498,7 @@ public IActionResult Delete(MotoristaViewModel model)
                     });
                 }
                 
+                // ✅ Exclui motorista
                 _unitOfWork.Motorista.Remove(objFromDb);
                 _unitOfWork.Save();
                 
@@ -548,250 +526,143 @@ public IActionResult Delete(MotoristaViewModel model)
 
 ---
 
-## Validações
+## Fluxo de Funcionamento
 
-### Validações Frontend
+### Carregamento da Página
+```
+1. Página carrega (OnGet)
+   ↓
+2. Frontend inicializa DataTable chamando loadList()
+   ↓
+3. Requisição AJAX para /api/motorista (GET)
+   ↓
+4. Backend retorna todos os motoristas da ViewMotoristas
+   ↓
+5. DataTable renderiza dados na tabela com renderizadores customizados
+   ↓
+6. Event handlers são registrados para ações (status, exclusão, foto)
+```
 
-1. **Confirmação de Exclusão**: Obrigatória antes de excluir motorista
-2. **Validação de ID**: Verifica se ID é válido antes de requisições
+### Alteração de Status
+```
+1. Usuário clica no badge de status
+   ↓
+2. Requisição AJAX para /api/Motorista/UpdateStatusMotorista?Id=guid
+   ↓
+3. Backend inverte status no banco
+   ↓
+4. Retorna novo status e tipo (0=Ativo, 1=Inativo)
+   ↓
+5. Frontend atualiza badge visualmente (cor e texto)
+   ↓
+6. Toast de sucesso é exibido
+```
 
-### Validações Backend
+### Visualização de Foto
+```
+1. Usuário clica no botão de foto (ícone de câmera)
+   ↓
+2. Modal Bootstrap abre
+   ↓
+3. Requisição AJAX para /api/Motorista/PegaFotoModal?id=guid
+   ↓
+4. Backend retorna foto em Base64 ou false
+   ↓
+5. Se foto existe: exibe "data:image/jpg;base64,..."
+   ↓
+6. Se não existe: exibe imagem padrão (/Images/barbudo.jpg)
+```
 
-1. **Motorista existe**: Verifica se motorista existe antes de operações
-2. **Dependências**: Verifica se motorista está associado a contratos antes de excluir
-3. **ID válido**: Valida que ID não é Guid.Empty
+### Exclusão de Motorista
+```
+1. Usuário clica no botão de excluir
+   ↓
+2. Confirmação SweetAlert é exibida
+   ↓
+3. Se confirmado: Requisição POST para /api/Motorista/Delete
+   ↓
+4. Backend verifica se motorista tem contratos associados
+   ↓
+5. Se tem contratos: retorna erro e bloqueia exclusão
+   ↓
+6. Se não tem: exclui motorista e retorna sucesso
+   ↓
+7. Tabela recarrega automaticamente
+```
 
 ---
 
-## Exemplos de Uso
+## Endpoints API Resumidos
 
-### Exemplo 1: Visualizar Todos os Motoristas
-
-**Situação**: Usuário quer ver todos os motoristas cadastrados.
-
-**Passos**:
-1. Acessa página `/Motorista`
-2. Tabela carrega automaticamente mostrando todos os motoristas
-3. Pode filtrar usando campo de busca do DataTable
-4. Pode ordenar clicando nos headers das colunas
-
-**O que acontece**:
-- Backend retorna todos os motoristas da view
-- DataTable renderiza com paginação (10 por página por padrão)
-- Usuário pode navegar entre páginas
-
-### Exemplo 2: Inativar Motorista
-
-**Situação**: Usuário quer inativar um motorista que está de férias.
-
-**Passos**:
-1. Localiza motorista na tabela
-2. Clica no badge verde "Ativo"
-3. Sistema pergunta confirmação (implícita)
-4. Status muda para "Inativo" (cinza)
-
-**O que acontece**:
-- Requisição AJAX para `/api/Motorista/UpdateStatusMotorista`
-- Backend inverte status no banco
-- Frontend atualiza badge visualmente
-- Toast de sucesso é exibido
-
-### Exemplo 3: Visualizar Foto do Motorista
-
-**Situação**: Usuário quer ver a foto de um motorista.
-
-**Passos**:
-1. Localiza motorista na tabela
-2. Clica no botão de foto (ícone de câmera)
-3. Modal abre mostrando foto
-
-**O que acontece**:
-- Modal Bootstrap abre
-- Requisição AJAX busca foto em Base64
-- Se foto existe, exibe no modal
-- Se não existe, mostra imagem padrão
-
-### Exemplo 4: Excluir Motorista
-
-**Situação**: Usuário quer excluir um motorista que não está mais na empresa.
-
-**Passos**:
-1. Localiza motorista na tabela
-2. Clica no botão vermelho de excluir
-3. Sistema pergunta confirmação
-4. Usuário confirma
-5. Sistema verifica dependências
-6. Se não houver dependências, exclui
-
-**O que acontece**:
-- Confirmação via SweetAlert
-- Requisição POST para `/api/Motorista/Delete`
-- Backend verifica se motorista tem contratos
-- Se não tiver, exclui e retorna sucesso
-- Se tiver, retorna erro e mantém motorista
-- Tabela recarrega após sucesso
+| Método | Endpoint | Descrição | Retorno |
+|--------|----------|-----------|---------|
+| GET | `/api/motorista` | Lista todos os motoristas | JSON com array de motoristas |
+| GET | `/api/Motorista/PegaFotoModal?id=guid` | Retorna foto em Base64 | String Base64 ou `false` |
+| GET | `/api/Motorista/UpdateStatusMotorista?Id=guid` | Alterna status | `{success, message, type}` |
+| POST | `/api/Motorista/Delete` | Exclui motorista | `{success, message}` |
 
 ---
 
 ## Troubleshooting
 
-### Problema 1: Tabela não carrega (Loading infinito)
-
-**Sintoma**: 
-- Tabela aparece vazia ou com mensagem "Carregando..."
-- Nenhum dado é exibido
-
-**Causas Possíveis**:
-1. Erro no endpoint `/api/motorista` (500 Internal Server Error)
-2. View `ViewMotoristas` não existe ou tem erro
-3. Problema de serialização JSON (campo binário muito grande)
-
-**Diagnóstico**:
-1. Abrir DevTools (F12)
-2. Ir para aba Network
-3. Verificar requisição `motorista`
-4. Verificar Status Code e Response
-
-**Solução**:
+### Problema: Tabela não carrega (Loading infinito)
+**Causa**: Erro no endpoint `/api/motorista` (500 Internal Server Error)  
+**Solução**: 
+- Abrir DevTools (F12) → Network → Verificar requisição `motorista`
 - Verificar logs do servidor
-- Verificar se view existe no banco de dados
-- Verificar se campo `Foto` não está causando problema de serialização
+- Verificar se view `ViewMotoristas` existe no banco
 
----
-
-### Problema 2: Foto não carrega (imagem quebrada)
-
-**Sintoma**: 
-- Modal abre mas mostra imagem quebrada
-- Ou sempre mostra imagem padrão (`barbudo.jpg`)
-
-**Causas Possíveis**:
-1. String Base64 inválida ou corrompida
-2. Campo `Foto` no banco está vazio ou NULL
-3. Endpoint `/api/Motorista/PegaFotoModal` retorna erro
-4. Base64 muito grande causando problema de serialização
-
-**Diagnóstico**:
-```javascript
-// Testar endpoint manualmente
-fetch('/api/Motorista/PegaFotoModal?id=guid-do-motorista')
-    .then(r => r.json())
-    .then(data => {
-        console.log('Foto recebida:', data ? 'Sim' : 'Não');
-        console.log('Tamanho:', data?.length);
-    });
-```
-
-**Solução**:
+### Problema: Foto não carrega (imagem quebrada)
+**Causa**: String Base64 inválida ou campo `Foto` vazio no banco  
+**Solução**: 
 - Verificar se campo `Foto` no banco tem dados válidos
 - Verificar se Base64 está sendo gerado corretamente
-- O JS possui fallback para `/Images/barbudo.jpg` que deve funcionar
+- O sistema possui fallback para `/Images/barbudo.jpg` que deve funcionar
 
----
-
-### Problema 3: Status não atualiza visualmente
-
-**Sintoma**: 
-- Clica no badge de status
-- Requisição é enviada e retorna sucesso
-- Mas badge não muda de cor
-
-**Causas Possíveis**:
-1. Event handler não está atualizando elemento corretamente
-2. Classes CSS não estão sendo aplicadas
-3. Elemento foi removido/recriado pelo DataTable
-
-**Solução**:
+### Problema: Status não atualiza visualmente
+**Causa**: Classes CSS não estão sendo aplicadas ou elemento foi recriado  
+**Solução**: 
 - Verificar se classes `btn-verde` e `fundo-cinza` existem no CSS
 - Verificar se `currentElement` está referenciando elemento correto
 - Recarregar tabela após atualização: `dataTable.ajax.reload()`
 
----
-
-### Problema 4: Não consegue excluir motorista
-
-**Sintoma**: 
-- Tenta excluir motorista
-- Recebe mensagem: "Não foi possível remover o motorista. Ele está associado a um ou mais contratos!"
-
-**Causa**: Motorista está associado a um ou mais contratos na tabela `MotoristaContrato`.
-
-**Solução**:
+### Problema: Não consegue excluir motorista
+**Causa**: Motorista está associado a um ou mais contratos  
+**Solução**: 
 - Verificar contratos do motorista na página de Contratos
 - Desassociar motorista dos contratos primeiro
 - Depois tentar excluir novamente
 
 ---
 
-### Problema 5: Exportação não funciona
-
-**Sintoma**: 
-- Botões de exportar Excel/PDF não fazem nada
-
-**Causas Possíveis**:
-1. Plugins do DataTable não foram carregados
-2. Bibliotecas de exportação não estão disponíveis
-
-**Solução**:
-- Verificar se `buttons.html5.js` foi carregado
-- Verificar se `jszip.js` e `pdfmake.js` estão disponíveis
-- Verificar ordem de carregamento dos scripts
-
----
-
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
 
 ---
 
-## [08/01/2026] - Expansão Completa da Documentação
+## [08/01/2026] - Reescrita no Padrão FrotiX Simplificado
 
 **Descrição**:
-Documentação expandida de ~194 linhas para mais de 600 linhas, incluindo:
-- Detalhamento completo da arquitetura e estrutura de arquivos
-- Explicação detalhada do DataTable e renderizadores customizados
-- Documentação completa do modal de foto
-- Sistema de gestão de status explicado
-- Documentação completa de todos os endpoints API
-- Validações frontend e backend documentadas
-- Exemplos práticos de uso
-- Troubleshooting expandido com 5 problemas comuns e soluções
+Documentação reescrita seguindo padrão simplificado e didático:
+- Objetivos claros no início
+- Arquivos listados com Problema/Solução/Código
+- Fluxos de funcionamento explicados passo a passo
+- Troubleshooting simplificado
 
-**Arquivos Afetados**:
-- `Documentacao/Pages/Motorista - Index.md` (expansão completa)
-
-**Status**: ✅ **Documentado e Expandido**
+**Status**: ✅ **Reescrito**
 
 **Responsável**: Claude (AI Assistant)
 **Versão**: 2.0
 
 ---
 
-## [06/01/2026] - Criação da Documentação Inicial
+## [08/01/2026] - Expansão Completa da Documentação
 
 **Descrição**:
-Documentação inicial da listagem de Motoristas (Index).
+Documentação expandida de ~194 linhas para mais de 600 linhas.
 
-**Status**: ✅ **Documentado**
-
-**Responsável**: Claude (AI Assistant)
-**Versão**: 1.0
-
----
-
-# PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
-
-> **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
-
----
-
-## [06/01/2026] - Criação da Documentação
-
-**Descrição**:
-Documentação inicial da listagem de Motoristas (Index).
-
-**Status**: ✅ **Documentado**
+**Status**: ✅ **Expandido**
 
 **Responsável**: Claude (AI Assistant)
 **Versão**: 1.0
