@@ -806,10 +806,14 @@
 
 ## 📌 Notas Importantes
 
-1. **Documentação de Referência**: A documentação da Agenda (`Pages/Agenda/Index.md`) com **2300+ linhas** serve como modelo de qualidade para todas as outras documentações.
+1. **Padrão FrotiX Simplificado**: Todas as documentações seguem formato didático com:
+   - Objetivos claros no início
+   - Arquivos listados com Problema/Solução/Código
+   - Fluxos explicados passo a passo
+   - Troubleshooting simplificado
 
 2. **Comentários Visuais**: Todos os arquivos fonte documentados possuem comentários visuais no topo indicando onde está a documentação.
 
 3. **Estrutura de Diretórios**: A documentação está organizada em subdiretórios por tipo de arquivo (Pages, Controllers, Services, etc.).
 
-4. **Padrão de Qualidade**: Cada documentação deve ter pelo menos 500 linhas (arquivos simples) ou 1000+ linhas (arquivos complexos como Agenda).
+4. **Padrão de Qualidade**: Documentações devem ser extremamente bem explicadas para leigos em TI, com exemplos generosos e interconexões documentadas.
