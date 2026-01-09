@@ -334,17 +334,21 @@
             color: #333 !important;
         }
 
-        /* Ícones duotone com cores FrotiX padrão */
-        #gestaoTreeView .tree-node i,
-        #gestaoTreeView .tree-node i.fa-duotone {
+        /* Classe para ícones duotone padrão FrotiX (reutilizável) */
+        .icon-duotone-ftx {
             --fa-primary-color: #ff6b35;      /* Laranja forte */
             --fa-secondary-color: #6c757d;    /* Cinza médio */
             --fa-primary-opacity: 1;
             --fa-secondary-opacity: 1;
+            margin-right: 0.5rem;  /* Espaçamento de 2 caracteres */
+        }
+
+        /* Ícones duotone com cores FrotiX padrão */
+        #gestaoTreeView .tree-node i,
+        #gestaoTreeView .tree-node i.fa-duotone {
             width: 20px;
             text-align: center;
             font-size: 1rem;
-            margin-right: 0.5rem;  /* Espaçamento de 2 caracteres */
         }
 
         /* Ícone do item selecionado mantém cores padrão */
@@ -352,6 +356,30 @@
         #gestaoTreeView .tree-node.selected i.fa-duotone {
             --fa-primary-color: #ff6b35;
             --fa-secondary-color: #6c757d;
+        }
+
+        /* Drop como filho - destaca item inteiro */
+        #gestaoTreeView .e-drop-target-child {
+            background-color: rgba(0, 123, 255, 0.2) !important;
+            border: 2px dashed #007bff !important;
+            border-radius: 6px;
+        }
+
+        /* Drop como irmão - linha indicadora */
+        #gestaoTreeView .e-drop-target-sibling {
+            position: relative;
+        }
+
+        #gestaoTreeView .e-drop-target-sibling::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -2px;
+            height: 3px;
+            background-color: #007bff;
+            border-radius: 2px;
+            z-index: 10;
         }
 
         #gestaoTreeView .tree-node .node-text {
@@ -869,6 +897,14 @@
         try {
             var grupos = [];
 
+            // ✅ Adiciona opção "<sem grupo>" no início
+            grupos.push({
+                id: null,
+                text: '<sem grupo>',
+                textFormatado: '<sem grupo>',
+                nivel: -1
+            });
+
             // Função recursiva para extrair todos os grupos da árvore
             function extrairGrupos(items) {
                 if (!items) return;
@@ -910,11 +946,23 @@
 
             // Formata texto com indentação baseada no nível E decodifica HTML
             grupos.forEach(function(grupo) {
-                var indentacao = '  '.repeat(grupo.nivel);
-                grupo.textFormatado = indentacao + decodeHtml(grupo.text);  // ✅ DECODIFICA
+                if (grupo.id === null) {
+                    // "<sem grupo>" não precisa indentação
+                    grupo.textFormatado = '<sem grupo>';
+                } else {
+                    var indentacao = '  '.repeat(grupo.nivel);
+                    grupo.textFormatado = indentacao + decodeHtml(grupo.text);  // ✅ DECODIFICA
+                }
             });
 
-            console.log('Grupos encontrados:', grupos.length);
+            // ✅ Ordena alfabeticamente (exceto "<sem grupo>" que fica primeiro)
+            grupos.sort(function(a, b) {
+                if (a.id === null) return -1; // "<sem grupo>" sempre primeiro
+                if (b.id === null) return 1;
+                return a.textFormatado.localeCompare(b.textFormatado);
+            });
+
+            console.log('Grupos encontrados:', grupos.length - 1, '+ <sem grupo>');
 
             // Popula o DropDownList
             var ddlItemPai = document.getElementById('ddlItemPai');
@@ -936,13 +984,76 @@
             console.log('=== Item Pai alterado ===');
             console.log('Novo Pai ID:', args.value);
 
-            if (!args.value) {
+            if (!selectedItem || !selectedItem.id) {
+                console.warn('Nenhum item selecionado');
+                return;
+            }
+
+            var novoPaiId = args.value; // null se "<sem grupo>"
+            var item = buscarItemPorId(treeData, selectedItem.id);
+
+            if (!item) {
+                console.error('Item não encontrado na árvore');
+                return;
+            }
+
+            // ✅ Se selecionou "<sem grupo>" e item é grupo (sem href)
+            if (novoPaiId === null && (!item.href || item.href === 'javascript:void(0);')) {
+                console.log('[TRANSFORMAR] Transformando grupo em página raiz');
+                
+                // Transforma grupo em página raiz
+                // Remove href vazio, mantém apenas ícone e nome
+                item.href = null; // Será definido quando selecionar página
+                item.parentId = null;
+                
+                // Remove filhos se houver (grupo não pode ter filhos se vira página)
+                if (item.items && item.items.length > 0) {
+                    Alerta.Warning(
+                        'Atenção',
+                        'Este grupo possui ' + item.items.length + ' filho(s). Ao transformá-lo em página, os filhos serão movidos para a raiz. Deseja continuar?',
+                        'OK'
+                    );
+                    // Move filhos para raiz
+                    item.items.forEach(function(filho) {
+                        filho.parentId = null;
+                        if (!treeData.find(function(i) { return i.id === filho.id; })) {
+                            treeData.push(filho);
+                        }
+                    });
+                    item.items = [];
+                }
+                
+                // Atualiza TreeView
+                treeObj.fields.dataSource = treeData;
+                treeObj.dataBind();
+                
+                // Atualiza formulário
+                document.getElementById('parentId').value = '';
+                var txtHref = document.getElementById('txtHref');
+                if (txtHref) txtHref.value = '';
+                
+                // Limpa campo de página para usuário escolher
+                var ddlPagina = document.getElementById('ddlPagina');
+                if (ddlPagina && ddlPagina.ej2_instances && ddlPagina.ej2_instances[0]) {
+                    ddlPagina.ej2_instances[0].value = null;
+                    ddlPagina.ej2_instances[0].dataBind();
+                }
+                
+                // Atualiza item selecionado
+                selecionarItem(item);
+                
+                // Salva alterações
+                salvarOrdenacaoAutomatica();
+                return;
+            }
+
+            if (!novoPaiId) {
                 console.log('Pai removido - mantém ordem atual');
                 return;
             }
 
             // Calcula nova ordem baseada nos filhos do novo pai
-            calcularOrdemAutomatica(args.value);
+            calcularOrdemAutomatica(novoPaiId);
 
             // Atualiza campo parentId oculto
             document.getElementById('parentId').value = args.value;
@@ -1097,7 +1208,7 @@
                     }
                     
                     return '<div class="tree-node" data-id="' + data.id + '">' +
-                           '<i class="' + iconClass + '" style="--fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d; margin-right: 0.5rem;"></i>' +
+                           '<i class="' + iconClass + ' icon-duotone-ftx"></i>' +
                            '<span class="node-text ' + (isGroup ? 'node-group' : '') + '">' + displayText + '</span>' +
                            '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
                            '</div>';
@@ -1220,10 +1331,9 @@
                     try {
                         console.log('[DRAG-STOP] Drag finalizado:', args);
                         
-                        // ✅ Remove classe de destaque de todos os itens
-                        var allItems = treeObj.element.querySelectorAll('.e-list-item.e-drop-target');
-                        allItems.forEach(function(item) {
-                            item.classList.remove('e-drop-target');
+                        // ✅ Remove classes de destaque de todos os itens
+                        document.querySelectorAll('.e-drop-target-child, .e-drop-target-sibling').forEach(function(item) {
+                            item.classList.remove('e-drop-target-child', 'e-drop-target-sibling');
                         });
                         
                         // ✅ Verifica se está tentando transformar item em grupo
@@ -2395,17 +2505,18 @@
             var listaIrmaos = resultado.lista;
             var indexAtual = resultado.indice;
             
-            // Troca posição com o item anterior
+            // ✅ Troca posição com o item anterior (modifica referência original)
             var temp = listaIrmaos[indexAtual];
             listaIrmaos[indexAtual] = listaIrmaos[indexAtual - 1];
             listaIrmaos[indexAtual - 1] = temp;
             
-            // Atualiza treeData
-            treeData = JSON.parse(JSON.stringify(treeData)); // Força atualização
+            console.log('[MOVER-CIMA] ✅ Posições trocadas na lista original');
             
-            // Atualiza TreeView
+            // ✅ Atualiza TreeView diretamente (não cria nova cópia)
             treeObj.fields.dataSource = treeData;
             treeObj.dataBind();
+            
+            console.log('[MOVER-CIMA] ✅ TreeView atualizado');
             
             // Seleciona o item novamente após mover
             setTimeout(function() {
@@ -2414,7 +2525,7 @@
                     selecionarItem(itemAtualizado);
                 }
                 salvarOrdenacaoAutomatica();
-            }, 200);
+            }, 300);
             
         } catch (erro) {
             console.error('[moverItemParaCima] Erro:', erro);
