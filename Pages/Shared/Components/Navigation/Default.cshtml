@@ -3,6 +3,19 @@
     var pageName = ViewData["PageName"]?.ToString().ToLower();
 }
 
+@functions {
+    // ✅ Função helper para normalizar ícone para DUOTONE
+    private static string NormalizarIcone(string icon) {
+        if (string.IsNullOrEmpty(icon)) return "fa-duotone fa-circle";
+        if (!icon.Contains("fa-duotone")) {
+            return icon.Replace("fa-regular", "fa-duotone")
+                       .Replace("fa-solid", "fa-duotone")
+                       .Replace("fa-light", "fa-duotone");
+        }
+        return icon;
+    }
+}
+
 <style>
 
 /* ====== CORES DOS ÍCONES DUOTONE ====== */
