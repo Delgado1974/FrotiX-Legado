@@ -24,7 +24,7 @@
 ## 📄 Páginas Razor (Pages)
 
 ### Abastecimento
-- [x] `Pages/Abastecimento/Index.cshtml` → `Pages/Abastecimento/Index.md` ✅ **COMPLETO** (600+ linhas)
+- [x] `Pages/Abastecimento/Index.cshtml` → `Pages/Abastecimento/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/Abastecimento/Index.cshtml.cs` → `Pages/Abastecimento/Index.cshtml.cs.md`
 - [ ] `Pages/Abastecimento/Importacao.cshtml` → `Pages/Abastecimento/Importacao.md`
 - [ ] `Pages/Abastecimento/Importacao.cshtml.cs` → `Pages/Abastecimento/Importacao.cshtml.cs.md`
@@ -56,7 +56,7 @@
 - [ ] `Pages/Administracao/LogErros.cshtml.cs` → `Pages/Administracao/LogErros.cshtml.cs.md`
 
 ### Agenda
-- [x] `Pages/Agenda/Index.cshtml` → `Pages/Agenda/Index.md` ✅ **COMPLETO** (2300+ linhas)
+- [x] `Pages/Agenda/Index.cshtml` → `Pages/Agenda/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/Agenda/Index.cshtml.cs` → `Pages/Agenda/Index.cshtml.cs.md`
 
 ### AlertasFrotiX
@@ -356,7 +356,7 @@
 - [ ] `Pages/Veiculo/Upsert.cshtml.cs` → `Pages/Veiculo/Upsert.cshtml.cs.md`
 
 ### Viagens
-- [x] `Pages/Viagens/Index.cshtml` → `Pages/Viagens/Index.md` ✅ **COMPLETO** (700+ linhas)
+- [x] `Pages/Viagens/Index.cshtml` → `Pages/Viagens/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/Viagens/Index.cshtml.cs` → `Pages/Viagens/Index.cshtml.cs.md`
 - [ ] `Pages/Viagens/DashboardEventos.cshtml` → `Pages/Viagens/DashboardEventos.md`
 - [ ] `Pages/Viagens/DashboardEventos.cshtml.cs` → `Pages/Viagens/DashboardEventos.cshtml.cs.md`
