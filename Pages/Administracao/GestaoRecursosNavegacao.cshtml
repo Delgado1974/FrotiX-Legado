@@ -2014,6 +2014,10 @@
                         habilitarCardPropriedades(true);
                     }
                 } else {
+                    // ✅ Esconde modal de espera em caso de erro na resposta
+                    if (window.FtxSpin) {
+                        window.FtxSpin.hide();
+                    }
                     mostrarAlerta('Erro: ' + result.message, 'danger');
                 }
             })
