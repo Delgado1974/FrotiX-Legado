@@ -24,7 +24,7 @@
 ## 📄 Páginas Razor (Pages)
 
 ### Abastecimento
-- [ ] `Pages/Abastecimento/Index.cshtml` → `Pages/Abastecimento/Index.md`
+- [x] `Pages/Abastecimento/Index.cshtml` → `Pages/Abastecimento/Index.md` ✅ **COMPLETO** (600+ linhas)
 - [ ] `Pages/Abastecimento/Index.cshtml.cs` → `Pages/Abastecimento/Index.cshtml.cs.md`
 - [ ] `Pages/Abastecimento/Importacao.cshtml` → `Pages/Abastecimento/Importacao.md`
 - [ ] `Pages/Abastecimento/Importacao.cshtml.cs` → `Pages/Abastecimento/Importacao.cshtml.cs.md`
