@@ -1305,16 +1305,22 @@ namespace FrotiX.Controllers
                 .Select(r =>
                 {
                     var dto = RecursoTreeDTO.FromRecurso(r);
-                    // ✅ IMPORTANTE: Inicializa Items como lista vazia se null
-                    if (dto.Items == null)
-                    {
-                        dto.Items = new List<RecursoTreeDTO>();
-                    }
                     
                     // ✅ Busca filhos recursivamente
                     var filhos = MontarArvoreRecursiva(recursos, r.RecursoId);
-                    dto.Items = filhos;
-                    dto.HasChild = filhos != null && filhos.Any();
+                    
+                    // ✅ Define Items e HasChild baseado nos filhos encontrados
+                    if (filhos != null && filhos.Any())
+                    {
+                        dto.Items = filhos;
+                        dto.HasChild = true;
+                    }
+                    else
+                    {
+                        // ✅ Syncfusion TreeView funciona melhor com null ao invés de lista vazia
+                        dto.Items = null;
+                        dto.HasChild = false;
+                    }
                     
                     return dto;
                 })
