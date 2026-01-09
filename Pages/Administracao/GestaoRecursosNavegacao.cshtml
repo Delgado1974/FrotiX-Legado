@@ -951,17 +951,21 @@
                 if (grupo.id === null) {
                     // "<sem grupo>" não precisa indentação
                     grupo.textFormatado = '<sem grupo>';
+                    grupo.textoSemIndentacao = '<sem grupo>';
                 } else {
+                    var textoDecodificado = decodeHtml(grupo.text);  // ✅ DECODIFICA
                     var indentacao = '  '.repeat(grupo.nivel);
-                    grupo.textFormatado = indentacao + decodeHtml(grupo.text);  // ✅ DECODIFICA
+                    grupo.textFormatado = indentacao + textoDecodificado;  // Com indentação para exibição
+                    grupo.textoSemIndentacao = textoDecodificado;  // Sem indentação para ordenação
                 }
             });
 
-            // ✅ Ordena alfabeticamente (exceto "<sem grupo>" que fica primeiro)
+            // ✅ Ordena alfabeticamente pelo texto SEM indentação (exceto "<sem grupo>" que fica primeiro)
             grupos.sort(function(a, b) {
                 if (a.id === null) return -1; // "<sem grupo>" sempre primeiro
                 if (b.id === null) return 1;
-                return a.textFormatado.localeCompare(b.textFormatado);
+                // Ordena pelo texto sem indentação para ordenação correta
+                return a.textoSemIndentacao.localeCompare(b.textoSemIndentacao, 'pt-BR', { sensitivity: 'base' });
             });
 
             console.log('Grupos encontrados:', grupos.length - 1, '+ <sem grupo>');
@@ -1003,19 +1007,44 @@
             if (novoPaiId === null && (!item.href || item.href === 'javascript:void(0);')) {
                 console.log('[TRANSFORMAR] Transformando grupo em página raiz');
                 
+                // Remove filhos se houver (grupo não pode ter filhos se vira página)
+                if (item.items && item.items.length > 0) {
+                    Alerta.Confirmar(
+                        'Transformar Grupo em Página',
+                        'Este grupo possui ' + item.items.length + ' filho(s). Ao transformá-lo em página, os filhos serão movidos para a raiz. Deseja continuar?',
+                        'Sim, Transformar',
+                        'Cancelar'
+                    ).then(function(confirmado) {
+                        if (!confirmado) {
+                            // Cancela - restaura valor anterior no dropdown
+                            var ddlItemPai = document.getElementById('ddlItemPai').ej2_instances[0];
+                            if (ddlItemPai) {
+                                ddlItemPai.value = item.parentId || null;
+                                ddlItemPai.dataBind();
+                            }
+                            return;
+                        }
+                        
+                        // Prossegue com transformação
+                        transformarGrupoEmPagina(item);
+                    });
+                    return;
+                } else {
+                    // Não tem filhos, transforma diretamente
+                    transformarGrupoEmPagina(item);
+                }
+                
+                return;
+            }
+            
+            function transformarGrupoEmPagina(item) {
                 // Transforma grupo em página raiz
                 // Remove href vazio, mantém apenas ícone e nome
                 item.href = null; // Será definido quando selecionar página
                 item.parentId = null;
                 
-                // Remove filhos se houver (grupo não pode ter filhos se vira página)
+                // Move filhos para raiz se houver
                 if (item.items && item.items.length > 0) {
-                    Alerta.Warning(
-                        'Atenção',
-                        'Este grupo possui ' + item.items.length + ' filho(s). Ao transformá-lo em página, os filhos serão movidos para a raiz. Deseja continuar?',
-                        'OK'
-                    );
-                    // Move filhos para raiz
                     item.items.forEach(function(filho) {
                         filho.parentId = null;
                         if (!treeData.find(function(i) { return i.id === filho.id; })) {
@@ -1041,12 +1070,18 @@
                     ddlPagina.ej2_instances[0].dataBind();
                 }
                 
+                // Atualiza dropdown de Item Pai para mostrar "<sem grupo>" selecionado
+                var ddlItemPai = document.getElementById('ddlItemPai').ej2_instances[0];
+                if (ddlItemPai) {
+                    ddlItemPai.value = null;
+                    ddlItemPai.dataBind();
+                }
+                
                 // Atualiza item selecionado
                 selecionarItem(item);
                 
                 // Salva alterações
                 salvarOrdenacaoAutomatica();
-                return;
             }
 
             if (!novoPaiId) {
@@ -1452,13 +1487,19 @@
             var ddlItemPaiObj = document.getElementById('ddlItemPai');
             if (ddlItemPaiObj && ddlItemPaiObj.ej2_instances && ddlItemPaiObj.ej2_instances[0]) {
                 var ddlItemPai = ddlItemPaiObj.ej2_instances[0];
-                if (parentId) {
-                    ddlItemPai.value = parentId;
-                    console.log('✅ DropDownList de Item Pai atualizado para:', parentId);
-                } else {
-                    ddlItemPai.value = null;
-                    console.log('Item não tem pai (é raiz)');
-                }
+                // ✅ Aguarda um pouco para garantir que dropdown está populado
+                setTimeout(function() {
+                    if (parentId) {
+                        ddlItemPai.value = parentId;
+                        ddlItemPai.dataBind();
+                        console.log('✅ DropDownList de Item Pai atualizado para:', parentId);
+                    } else {
+                        // ✅ Para "<sem grupo>", usa null explicitamente
+                        ddlItemPai.value = null;
+                        ddlItemPai.dataBind();
+                        console.log('✅ DropDownList de Item Pai definido como null (<sem grupo>)');
+                    }
+                }, 200);
             }
 
             // Atualiza indicador de modo
@@ -1979,16 +2020,27 @@
     function salvarPropriedades() {
         try {
             // ✅ CODIFICA valores antes de enviar ao backend
+            var txtHref = document.getElementById('txtHref').value;
+            var parentIdValue = document.getElementById('parentId').value;
+            
+            // ✅ Se parentId está vazio e href está vazio, é grupo sendo transformado em página
+            // Neste caso, envia href como null explicitamente para backend não definir javascript:void(0);
+            var hrefFinal = txtHref || null;
+            if (!txtHref && !parentIdValue) {
+                // Grupo sendo transformado em página raiz - href deve ser null
+                hrefFinal = null;
+            }
+            
             var dto = {
                 id: document.getElementById('recursoId').value,
                 text: encodeHtml(document.getElementById('txtNome').value),
                 nomeMenu: encodeHtml(document.getElementById('txtNomeMenu').value),
-                href: document.getElementById('txtHref').value,
+                href: hrefFinal,  // null se grupo sendo transformado em página
                 icon: document.getElementById('txtIconClass').value,
                 ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
                 descricao: encodeHtml(document.getElementById('txtDescricao').value),
                 ativo: document.getElementById('chkAtivo').checked,
-                parentId: document.getElementById('parentId').value
+                parentId: parentIdValue || null  // null se "<sem grupo>"
             };
 
             console.log('DTO codificado para envio:', dto);

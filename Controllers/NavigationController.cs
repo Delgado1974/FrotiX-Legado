@@ -757,7 +757,18 @@ namespace FrotiX.Controllers
                 recurso.Nome = !string.IsNullOrEmpty(dto.Text) ? dto.Text : "Novo Item";
                 recurso.NomeMenu = !string.IsNullOrEmpty(dto.NomeMenu) ? dto.NomeMenu : $"menu_{Guid.NewGuid():N}";
                 recurso.Icon = !string.IsNullOrEmpty(dto.Icon) ? dto.Icon : "fa-duotone fa-folder";
-                recurso.Href = !string.IsNullOrEmpty(dto.Href) ? dto.Href : "javascript:void(0);";
+                
+                // ✅ Se href é null explicitamente, mantém null (grupo sendo transformado em página)
+                // Se href é vazio ou null mas não foi explicitamente null, define como grupo
+                if (dto.Href == null)
+                {
+                    recurso.Href = null; // Grupo sendo transformado em página - mantém null
+                }
+                else
+                {
+                    recurso.Href = !string.IsNullOrEmpty(dto.Href) ? dto.Href : "javascript:void(0);";
+                }
+                
                 recurso.Descricao = dto.Descricao;
                 recurso.Ordem = dto.Ordem > 0 ? dto.Ordem : GetNextOrdem();
                 recurso.Nivel = dto.Nivel;
