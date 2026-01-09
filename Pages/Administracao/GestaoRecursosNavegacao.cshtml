@@ -307,15 +307,17 @@
         /* Garante que o texto NÃO desaparece ao selecionar */
         #gestaoTreeView .tree-node .node-text,
         #gestaoTreeView .e-list-item .tree-node .node-text,
-        #gestaoTreeView .e-list-item.e-active .tree-node .node-text,
-        #gestaoTreeView .e-list-item.e-node-focus .tree-node .node-text {
+        /* Texto padrão quando item NÃO está selecionado */
+        #gestaoTreeView .e-list-item .tree-node:not(.selected) .node-text {
             color: #333 !important;
             opacity: 1 !important;
             visibility: visible !important;
         }
 
         /* Texto em NEGRITO LARANJA ESCURO quando item está selecionado */
-        #gestaoTreeView .tree-node.selected .node-text {
+        #gestaoTreeView .tree-node.selected .node-text,
+        #gestaoTreeView .e-list-item.e-active .tree-node.selected .node-text,
+        #gestaoTreeView .e-list-item.e-node-focus .tree-node.selected .node-text {
             color: #cc5500 !important;  /* Laranja bem escuro */
             font-weight: 700 !important;  /* Negrito */
             opacity: 1 !important;
@@ -900,10 +902,12 @@
             var grupos = [];
 
             // ✅ Adiciona opção "<sem grupo>" no início
+            // Usa valor especial '_SEM_GRUPO_' ao invés de null para dropdown conseguir selecionar visualmente
             grupos.push({
-                id: null,
+                id: '_SEM_GRUPO_',
                 text: '<sem grupo>',
                 textFormatado: '<sem grupo>',
+                textoSemIndentacao: '<sem grupo>',
                 nivel: -1
             });
 
@@ -948,10 +952,9 @@
 
             // Formata texto com indentação baseada no nível E decodifica HTML
             grupos.forEach(function(grupo) {
-                if (grupo.id === null) {
-                    // "<sem grupo>" não precisa indentação
-                    grupo.textFormatado = '<sem grupo>';
-                    grupo.textoSemIndentacao = '<sem grupo>';
+                if (grupo.id === '_SEM_GRUPO_') {
+                    // "<sem grupo>" não precisa indentação (já definido acima)
+                    return;
                 } else {
                     var textoDecodificado = decodeHtml(grupo.text);  // ✅ DECODIFICA
                     var indentacao = '  '.repeat(grupo.nivel);
@@ -962,8 +965,8 @@
 
             // ✅ Ordena alfabeticamente pelo texto SEM indentação (exceto "<sem grupo>" que fica primeiro)
             grupos.sort(function(a, b) {
-                if (a.id === null) return -1; // "<sem grupo>" sempre primeiro
-                if (b.id === null) return 1;
+                if (a.id === '_SEM_GRUPO_') return -1; // "<sem grupo>" sempre primeiro
+                if (b.id === '_SEM_GRUPO_') return 1;
                 // Ordena pelo texto sem indentação para ordenação correta
                 return a.textoSemIndentacao.localeCompare(b.textoSemIndentacao, 'pt-BR', { sensitivity: 'base' });
             });
@@ -995,7 +998,7 @@
                 return;
             }
 
-            var novoPaiId = args.value; // null se "<sem grupo>"
+            var novoPaiId = args.value; // '_SEM_GRUPO_' se "<sem grupo>"
             var item = buscarItemPorId(treeData, selectedItem.id);
 
             if (!item) {
@@ -1004,7 +1007,7 @@
             }
 
             // ✅ Se selecionou "<sem grupo>" e item é grupo (sem href)
-            if (novoPaiId === null && (!item.href || item.href === 'javascript:void(0);')) {
+            if (novoPaiId === '_SEM_GRUPO_' && (!item.href || item.href === 'javascript:void(0);')) {
                 console.log('[TRANSFORMAR] Transformando grupo em página raiz');
                 
                 // Remove filhos se houver (grupo não pode ter filhos se vira página)
@@ -1019,7 +1022,7 @@
                             // Cancela - restaura valor anterior no dropdown
                             var ddlItemPai = document.getElementById('ddlItemPai').ej2_instances[0];
                             if (ddlItemPai) {
-                                ddlItemPai.value = item.parentId || null;
+                                ddlItemPai.value = item.parentId || '_SEM_GRUPO_';
                                 ddlItemPai.dataBind();
                             }
                             return;
@@ -1038,54 +1041,82 @@
             }
             
             function transformarGrupoEmPagina(item) {
-                // Transforma grupo em página raiz
-                // Remove href vazio, mantém apenas ícone e nome
-                item.href = null; // Será definido quando selecionar página
-                item.parentId = null;
+                console.log('[TRANSFORMAR] Iniciando transformação do grupo:', item.id, item.text);
                 
-                // Move filhos para raiz se houver
-                if (item.items && item.items.length > 0) {
-                    item.items.forEach(function(filho) {
+                // Guarda os filhos antes de modificar
+                var filhosOriginais = item.items ? item.items.slice() : [];
+                console.log('[TRANSFORMAR] Filhos originais:', filhosOriginais.length);
+                
+                // 1. Primeiro, move os filhos para a raiz do treeData
+                if (filhosOriginais.length > 0) {
+                    filhosOriginais.forEach(function(filho) {
+                        console.log('[TRANSFORMAR] Movendo filho para raiz:', filho.id, filho.text);
                         filho.parentId = null;
-                        if (!treeData.find(function(i) { return i.id === filho.id; })) {
+                        
+                        // Se o filho não está na raiz do treeData, adiciona
+                        var existeNaRaiz = treeData.some(function(i) { return i.id === filho.id; });
+                        if (!existeNaRaiz) {
                             treeData.push(filho);
                         }
                     });
-                    item.items = [];
                 }
                 
-                // Atualiza TreeView
+                // 2. Limpa os filhos do item (agora ele não tem mais filhos)
+                item.items = [];
+                
+                // 3. Define item como página (sem href por enquanto - usuário vai escolher)
+                item.href = null;
+                item.parentId = null;
+                
+                // 4. Força reconstrução completa do treeData
+                treeData = JSON.parse(JSON.stringify(treeData));
+                
+                console.log('[TRANSFORMAR] treeData após transformação:', treeData);
+                
+                // 5. Atualiza TreeView forçando refresh completo
                 treeObj.fields.dataSource = treeData;
                 treeObj.dataBind();
+                treeObj.refresh();
                 
-                // Atualiza formulário
+                // 6. Atualiza formulário
                 document.getElementById('parentId').value = '';
                 var txtHref = document.getElementById('txtHref');
                 if (txtHref) txtHref.value = '';
                 
-                // Limpa campo de página para usuário escolher
+                // 7. Limpa campo de página para usuário escolher
                 var ddlPagina = document.getElementById('ddlPagina');
                 if (ddlPagina && ddlPagina.ej2_instances && ddlPagina.ej2_instances[0]) {
                     ddlPagina.ej2_instances[0].value = null;
                     ddlPagina.ej2_instances[0].dataBind();
                 }
                 
-                // Atualiza dropdown de Item Pai para mostrar "<sem grupo>" selecionado
+                // 8. Atualiza dropdown de Item Pai para mostrar "<sem grupo>" selecionado
                 var ddlItemPai = document.getElementById('ddlItemPai').ej2_instances[0];
                 if (ddlItemPai) {
-                    ddlItemPai.value = null;
+                    ddlItemPai.value = '_SEM_GRUPO_';
                     ddlItemPai.dataBind();
                 }
                 
-                // Atualiza item selecionado
-                selecionarItem(item);
+                // 9. Repopula dropdown de grupos (lista mudou)
+                popularDropdownItemPai();
                 
-                // Salva alterações
+                // 10. Atualiza item selecionado (busca novamente pois foi reconstruído)
+                var itemAtualizado = buscarItemPorId(treeData, item.id);
+                if (itemAtualizado) {
+                    selecionarItem(itemAtualizado);
+                }
+                
+                // 11. Salva alterações no banco
+                console.log('[TRANSFORMAR] Salvando alterações...');
                 salvarOrdenacaoAutomatica();
+                
+                // 12. Mostra mensagem de sucesso
+                Alerta.Sucesso('Grupo transformado em página. Agora selecione uma página do sistema para completar a transformação.');
             }
 
-            if (!novoPaiId) {
+            if (!novoPaiId || novoPaiId === '_SEM_GRUPO_') {
                 console.log('Pai removido - mantém ordem atual');
+                document.getElementById('parentId').value = '';  // Limpa parentId
                 return;
             }
 
@@ -1093,7 +1124,7 @@
             calcularOrdemAutomatica(novoPaiId);
 
             // Atualiza campo parentId oculto
-            document.getElementById('parentId').value = args.value;
+            document.getElementById('parentId').value = novoPaiId;
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onItemPaiChange", erro);
         }
@@ -1494,10 +1525,10 @@
                         ddlItemPai.dataBind();
                         console.log('✅ DropDownList de Item Pai atualizado para:', parentId);
                     } else {
-                        // ✅ Para "<sem grupo>", usa null explicitamente
-                        ddlItemPai.value = null;
+                        // ✅ Para "<sem grupo>", usa valor especial que dropdown consegue selecionar
+                        ddlItemPai.value = '_SEM_GRUPO_';
                         ddlItemPai.dataBind();
-                        console.log('✅ DropDownList de Item Pai definido como null (<sem grupo>)');
+                        console.log('✅ DropDownList de Item Pai definido como _SEM_GRUPO_');
                     }
                 }, 200);
             }
@@ -2507,17 +2538,18 @@
     }
     */
 
-    // ✅ AUTO-SAVE: Salva ordenação automaticamente após drag-drop
+    // ✅ AUTO-SAVE: Salva ordenação automaticamente após drag-drop ou transformação
     function salvarOrdenacaoAutomatica() {
         try {
-            if (!treeObj) {
-                console.error('[AUTO-SAVE] treeObj não existe!');
+            if (!treeObj && !treeData) {
+                console.error('[AUTO-SAVE] Nem treeObj nem treeData existem!');
                 return;
             }
 
-            // Pega o dataSource atualizado do TreeView
-            var dataSource = treeObj.getTreeData();
-            console.log('[AUTO-SAVE] DataSource obtido:', dataSource);
+            // ✅ Usa treeData diretamente (mais confiável após modificações manuais)
+            // O treeData é a fonte de verdade após transformações
+            var dataSource = treeData || treeObj.getTreeData();
+            console.log('[AUTO-SAVE] DataSource obtido (treeData):', dataSource);
 
             var items = extrairItensDoTreeView(dataSource, null, 0);
             console.log('[AUTO-SAVE] Items extraídos para salvar:', items);
