@@ -163,6 +163,57 @@
             font-size: 0.875rem;
         }
 
+        /* Asteriscos obrigatórios nas labels */
+        .form-group label .required-asterisk {
+            font-size: calc(0.875rem - 2px);
+            color: #dc3545;
+            font-style: italic;
+            margin-left: 0.25rem;
+        }
+
+        /* Botões de ordenação */
+        .order-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .btn-order {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #ced4da;
+            background: #fff;
+            color: #495057;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 24px;
+        }
+
+        .btn-order:hover:not(:disabled) {
+            background: #f8f9fa;
+            border-color: #3D5771;
+            color: #3D5771;
+        }
+
+        .btn-order:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-order i {
+            font-size: 0.875rem;
+        }
+
+        .order-input-group {
+            display: flex;
+            align-items: center;
+        }
+
         .form-group .form-control {
             border-radius: 6px;
             border: 1px solid #ced4da;
@@ -479,13 +530,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="txtNome">Nome (exibido no menu)</label>
+                                <label for="txtNome">Nome (exibido no menu)<span class="required-asterisk">*</span></label>
                                 <input type="text" class="form-control" id="txtNome" placeholder="Ex: Veiculos" />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="txtNomeMenu">NomeMenu (identificador único)</label>
+                                <label for="txtNomeMenu">NomeMenu (identificador único)<span class="required-asterisk">*</span></label>
                                 <input type="text" class="form-control" id="txtNomeMenu" placeholder="Ex: veiculo" />
                             </div>
                         </div>
@@ -550,8 +601,26 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="txtOrdem">Ordem (calculada automaticamente)</label>
-                                <input type="number" class="form-control" id="txtOrdem" value="0" readonly
-                                       style="background-color: #f8f9fa;" />
+                                <div class="order-input-group">
+                                    <input type="number" class="form-control" id="txtOrdem" value="0" readonly
+                                           style="background-color: #f8f9fa;" />
+                                    <div class="order-controls" id="orderControls">
+                                        <button type="button" class="btn-order" id="btnOrderUp" 
+                                                data-bs-toggle="tooltip" 
+                                                data-bs-custom-class="tooltip-ftx-azul"
+                                                data-bs-placement="top"
+                                                title="Mover item para cima">
+                                            <i class="fa-duotone fa-arrow-up"></i>
+                                        </button>
+                                        <button type="button" class="btn-order" id="btnOrderDown"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-custom-class="tooltip-ftx-azul"
+                                                data-bs-placement="bottom"
+                                                title="Mover item para baixo">
+                                            <i class="fa-duotone fa-arrow-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -559,7 +628,7 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
-                                <label for="ddlIcone">Selecione o Ícone (FontAwesome 7 Pro)</label>
+                                <label for="ddlIcone">Selecione o Ícone (FontAwesome 7 Pro)<span class="required-asterisk">*</span></label>
 
                                 <!-- DropDownTree para seleção hierárquica -->
                                 <ejs-dropdowntree id="ddlIcone"
@@ -707,13 +776,20 @@
                     console.log('=== SELECT ícone ===', args);
                     if (args.nodeData && !args.nodeData.isCategory) {
                         ultimoIconeSelecionado = args.nodeData.id;
-                        ddlIconeObj.value = [args.nodeData.id];
                         var txtIconClass = document.getElementById('txtIconClass');
                         if (txtIconClass) {
                             txtIconClass.value = args.nodeData.id;
                         }
-                        onIconeChange({ itemData: args.nodeData, value: [args.nodeData.id] });
-                        ddlIconeObj.hidePopup();
+                        // ✅ Define o valor e fecha o popup IMEDIATAMENTE
+                        ddlIconeObj.value = [args.nodeData.id];
+                        ddlIconeObj.dataBind();
+                        setTimeout(function() {
+                            ddlIconeObj.hidePopup();
+                            // ✅ Dispara change manualmente após fechar
+                            onIconeChange({ itemData: args.nodeData, value: [args.nodeData.id] });
+                            // ✅ Atualiza estado dos botões de ordenação
+                            atualizarEstadoBotoesOrdenacao();
+                        }, 50);
                     }
                 };
 
@@ -1309,6 +1385,9 @@
             if (selectedItemName) selectedItemName.textContent = decodeHtml(selectedItem.text);
 
             console.log('Campos básicos preenchidos (decodificados)');
+            
+            // ✅ Atualiza estado dos botões de ordenação
+            atualizarEstadoBotoesOrdenacao();
 
             // ========== ATUALIZA DROPDOWNTREE DE ÍCONE ==========
             var iconClass = selectedItem.icon || 'fa-regular fa-file';
@@ -2077,6 +2156,219 @@
     }
 
     // Limpa formulario
+    // ✅ Valida se campos obrigatórios estão preenchidos
+    function validarCamposObrigatorios() {
+        var nome = document.getElementById('txtNome').value.trim();
+        var nomeMenu = document.getElementById('txtNomeMenu').value.trim();
+        var pagina = document.getElementById('ddlPagina')?.ej2_instances?.[0]?.value;
+        var icone = document.getElementById('ddlIcone')?.ej2_instances?.[0]?.value;
+        
+        return nome && nomeMenu && pagina && pagina.length > 0 && icone && icone.length > 0;
+    }
+
+    // ✅ Atualiza estado dos botões de ordenação
+    function atualizarEstadoBotoesOrdenacao() {
+        try {
+            var btnUp = document.getElementById('btnOrderUp');
+            var btnDown = document.getElementById('btnOrderDown');
+            
+            if (!btnUp || !btnDown) return;
+            
+            var ehNovoItem = !selectedItem || !selectedItem.id;
+            var camposValidos = validarCamposObrigatorios();
+            
+            // Para itens novos, só habilita se campos obrigatórios estiverem preenchidos
+            if (ehNovoItem) {
+                var habilitado = camposValidos;
+                btnUp.disabled = !habilitado;
+                btnDown.disabled = !habilitado;
+                
+                // Atualiza tooltip se desabilitado
+                if (!habilitado) {
+                    var tooltipText = 'Preencha os campos obrigatórios: Nome, NomeMenu, Página do Sistema e Ícone';
+                    btnUp.setAttribute('data-bs-original-title', tooltipText);
+                    btnDown.setAttribute('data-bs-original-title', tooltipText);
+                    // Reinicializa tooltip
+                    var tooltipUp = bootstrap.Tooltip.getInstance(btnUp);
+                    var tooltipDown = bootstrap.Tooltip.getInstance(btnDown);
+                    if (tooltipUp) tooltipUp.setContent({ '.tooltip-inner': tooltipText });
+                    if (tooltipDown) tooltipDown.setContent({ '.tooltip-inner': tooltipText });
+                } else {
+                    btnUp.setAttribute('data-bs-original-title', 'Mover item para cima');
+                    btnDown.setAttribute('data-bs-original-title', 'Mover item para baixo');
+                    var tooltipUp = bootstrap.Tooltip.getInstance(btnUp);
+                    var tooltipDown = bootstrap.Tooltip.getInstance(btnDown);
+                    if (tooltipUp) tooltipUp.setContent({ '.tooltip-inner': 'Mover item para cima' });
+                    if (tooltipDown) tooltipDown.setContent({ '.tooltip-inner': 'Mover item para baixo' });
+                }
+            } else {
+                // Para itens existentes, verifica se pode mover
+                var podeMoverCima = podeMoverParaCima();
+                var podeMoverBaixo = podeMoverParaBaixo();
+                
+                btnUp.disabled = !podeMoverCima;
+                btnDown.disabled = !podeMoverBaixo;
+            }
+        } catch (erro) {
+            console.error('[atualizarEstadoBotoesOrdenacao] Erro:', erro);
+        }
+    }
+
+    // ✅ Verifica se pode mover para cima
+    function podeMoverParaCima() {
+        if (!selectedItem || !selectedItem.id || !treeData) return false;
+        
+        var item = buscarItemPorId(treeData, selectedItem.id);
+        if (!item) return false;
+        
+        // Busca irmãos do item
+        var irmaos = buscarIrmaos(item);
+        if (!irmaos || irmaos.length <= 1) return false;
+        
+        var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
+        return indexAtual > 0; // Pode mover se não é o primeiro
+    }
+
+    // ✅ Verifica se pode mover para baixo
+    function podeMoverParaBaixo() {
+        if (!selectedItem || !selectedItem.id || !treeData) return false;
+        
+        var item = buscarItemPorId(treeData, selectedItem.id);
+        if (!item) return false;
+        
+        // Busca irmãos do item
+        var irmaos = buscarIrmaos(item);
+        if (!irmaos || irmaos.length <= 1) return false;
+        
+        var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
+        return indexAtual < irmaos.length - 1; // Pode mover se não é o último
+    }
+
+    // ✅ Busca irmãos de um item
+    function buscarIrmaos(item) {
+        if (!item || !treeData) return [];
+        
+        var parentId = item.parentId || null;
+        var itemId = item.id;
+        
+        // Função recursiva para buscar lista que contém o item
+        function encontrarListaPai(lista, targetId, targetParentId) {
+            for (var i = 0; i < lista.length; i++) {
+                var currentItem = lista[i];
+                var currentParentId = currentItem.parentId || null;
+                
+                // Verifica se este item é o alvo
+                if (currentItem.id === targetId) {
+                    // Retorna a lista que contém este item (seus irmãos)
+                    return lista;
+                }
+                
+                // Verifica se está na lista correta (mesmo parentId)
+                if ((targetParentId === null && currentParentId === null) || 
+                    (targetParentId !== null && currentParentId === targetParentId)) {
+                    // Esta lista tem irmãos do item, mas ainda não encontramos o item
+                    // Continua procurando recursivamente
+                }
+                
+                // Busca recursivamente nos filhos
+                if (currentItem.items && currentItem.items.length > 0) {
+                    var resultado = encontrarListaPai(currentItem.items, targetId, targetParentId);
+                    if (resultado) return resultado;
+                }
+            }
+            return null;
+        }
+        
+        var listaIrmaos = encontrarListaPai(treeData, itemId, parentId);
+        return listaIrmaos || [];
+    }
+
+    // ✅ Move item para cima
+    function moverItemParaCima() {
+        try {
+            if (!selectedItem || !selectedItem.id) {
+                mostrarAlerta('Selecione um item primeiro', 'warning');
+                return;
+            }
+            
+            var item = buscarItemPorId(treeData, selectedItem.id);
+            if (!item) {
+                mostrarAlerta('Item não encontrado na árvore', 'danger');
+                return;
+            }
+            
+            var irmaos = buscarIrmaos(item);
+            var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
+            
+            if (indexAtual <= 0) {
+                mostrarAlerta('Item já está na primeira posição', 'info');
+                return;
+            }
+            
+            // Troca posição com o item anterior
+            var temp = irmaos[indexAtual];
+            irmaos[indexAtual] = irmaos[indexAtual - 1];
+            irmaos[indexAtual - 1] = temp;
+            
+            // Atualiza TreeView
+            treeObj.fields.dataSource = treeData;
+            treeObj.dataBind();
+            
+            // Seleciona o item novamente após mover
+            setTimeout(function() {
+                selecionarItem(item);
+                salvarOrdenacaoAutomatica();
+            }, 100);
+            
+        } catch (erro) {
+            console.error('[moverItemParaCima] Erro:', erro);
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemParaCima", erro);
+        }
+    }
+
+    // ✅ Move item para baixo
+    function moverItemParaBaixo() {
+        try {
+            if (!selectedItem || !selectedItem.id) {
+                mostrarAlerta('Selecione um item primeiro', 'warning');
+                return;
+            }
+            
+            var item = buscarItemPorId(treeData, selectedItem.id);
+            if (!item) {
+                mostrarAlerta('Item não encontrado na árvore', 'danger');
+                return;
+            }
+            
+            var irmaos = buscarIrmaos(item);
+            var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
+            
+            if (indexAtual >= irmaos.length - 1) {
+                mostrarAlerta('Item já está na última posição', 'info');
+                return;
+            }
+            
+            // Troca posição com o item seguinte
+            var temp = irmaos[indexAtual];
+            irmaos[indexAtual] = irmaos[indexAtual + 1];
+            irmaos[indexAtual + 1] = temp;
+            
+            // Atualiza TreeView
+            treeObj.fields.dataSource = treeData;
+            treeObj.dataBind();
+            
+            // Seleciona o item novamente após mover
+            setTimeout(function() {
+                selecionarItem(item);
+                salvarOrdenacaoAutomatica();
+            }, 100);
+            
+        } catch (erro) {
+            console.error('[moverItemParaBaixo] Erro:', erro);
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemParaBaixo", erro);
+        }
+    }
+
     function limparFormulario(esconderCard = true) {
         try {
             selectedItem = null;
@@ -2118,6 +2410,9 @@
         document.getElementById('modoEdicao').textContent = 'Selecione';
         document.getElementById('modoEdicao').className = 'badge bg-secondary ms-2';
 
+        // ✅ Atualiza estado dos botões de ordenação
+        atualizarEstadoBotoesOrdenacao();
+        
         // Esconde card apenas se solicitado
         if (esconderCard) {
             document.getElementById('propsCard').style.display = 'none';
