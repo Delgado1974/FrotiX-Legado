@@ -2282,12 +2282,11 @@
         var item = buscarItemPorId(treeData, selectedItem.id);
         if (!item) return false;
         
-        // Busca irmãos do item
-        var irmaos = buscarIrmaos(item);
-        if (!irmaos || irmaos.length <= 1) return false;
+        // Encontra a lista que contém o item e seu índice
+        var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+        if (!resultado) return false;
         
-        var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
-        return indexAtual > 0; // Pode mover se não é o primeiro
+        return resultado.indice > 0; // Pode mover se não é o primeiro
     }
 
     // ✅ Verifica se pode mover para baixo
@@ -2297,12 +2296,11 @@
         var item = buscarItemPorId(treeData, selectedItem.id);
         if (!item) return false;
         
-        // Busca irmãos do item
-        var irmaos = buscarIrmaos(item);
-        if (!irmaos || irmaos.length <= 1) return false;
+        // Encontra a lista que contém o item e seu índice
+        var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+        if (!resultado) return false;
         
-        var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
-        return indexAtual < irmaos.length - 1; // Pode mover se não é o último
+        return resultado.indice < resultado.lista.length - 1; // Pode mover se não é o último
     }
 
     // ✅ Busca a lista pai que contém um item e retorna referência à lista e índice
@@ -2325,28 +2323,6 @@
         return null;
     }
 
-    // ✅ Busca a lista pai que contém um item e retorna referência à lista e índice
-    function encontrarListaPaiEIndice(lista, targetId, targetParentId, listaPai, indicePai) {
-        listaPai = listaPai || null;
-        indicePai = indicePai || -1;
-        
-        for (var i = 0; i < lista.length; i++) {
-            var currentItem = lista[i];
-            var currentParentId = currentItem.parentId || null;
-            
-            // Verifica se este item é o alvo
-            if (String(currentItem.id) === String(targetId)) {
-                return { lista: lista, indice: i };
-            }
-            
-            // Busca recursivamente nos filhos
-            if (currentItem.items && currentItem.items.length > 0) {
-                var resultado = encontrarListaPaiEIndice(currentItem.items, targetId, targetParentId, lista, i);
-                if (resultado) return resultado;
-            }
-        }
-        return null;
-    }
 
     // ✅ Move item para cima (move grupo inteiro se for grupo)
     function moverItemParaCima() {
@@ -2423,17 +2399,24 @@
             var listaIrmaos = resultado.lista;
             var indexAtual = resultado.indice;
             
-            // Troca posição com o item seguinte
+            console.log('[MOVER-BAIXO] Lista encontrada:', listaIrmaos.length, 'itens');
+            console.log('[MOVER-BAIXO] Índice atual:', indexAtual);
+            
+            // Troca posição com o item seguinte (move grupo inteiro se for grupo)
             var temp = listaIrmaos[indexAtual];
             listaIrmaos[indexAtual] = listaIrmaos[indexAtual + 1];
             listaIrmaos[indexAtual + 1] = temp;
             
-            // Atualiza treeData
-            treeData = JSON.parse(JSON.stringify(treeData)); // Força atualização
+            console.log('[MOVER-BAIXO] Posições trocadas');
             
-            // Atualiza TreeView
+            // Atualiza treeData (cria nova referência para forçar atualização)
+            treeData = JSON.parse(JSON.stringify(treeData));
+            
+            // Atualiza TreeView com nova estrutura
             treeObj.fields.dataSource = treeData;
             treeObj.dataBind();
+            
+            console.log('[MOVER-BAIXO] TreeView atualizado');
             
             // Seleciona o item novamente após mover
             setTimeout(function() {
@@ -2442,7 +2425,7 @@
                     selecionarItem(itemAtualizado);
                 }
                 salvarOrdenacaoAutomatica();
-            }, 200);
+            }, 300);
             
         } catch (erro) {
             console.error('[moverItemParaBaixo] Erro:', erro);

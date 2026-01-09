@@ -149,18 +149,28 @@ new bootstrap.Tooltip(elemento, {
   - Ícones em cards e headers
   - Ícones em listas e tabelas
   - Ícones em qualquer componente da interface
+  - **Ícones no DropDownTree de seleção de ícones** (categorias e itens)
+
+**Cores Padrão FrotiX para Ícones Duotone:**
+- **Cor primária**: Laranja forte `#ff6b35` (`--fa-primary-color: #ff6b35`)
+- **Cor secundária**: Cinza médio `#6c757d` (`--fa-secondary-color: #6c757d`)
+- Aplicar via CSS: `style="--fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d;"`
 
 **Exemplos corretos:**
-- ✅ `fa-duotone fa-home`
-- ✅ `fa-duotone fa-car`
-- ✅ `fa-duotone fa-user`
+- ✅ `fa-duotone fa-home` (com cores padrão aplicadas)
+- ✅ `fa-duotone fa-car` (com cores padrão aplicadas)
+- ✅ `fa-duotone fa-user` (com cores padrão aplicadas)
 
 **Exemplos incorretos:**
 - ❌ `fa-regular fa-home`
 - ❌ `fa-solid fa-car`
 - ❌ `fa-light fa-user`
 
-**Razão**: O estilo duotone mantém consistência visual em todo o sistema, com cores primárias e secundárias automaticamente aplicadas conforme o contexto (header, sidebar, etc.).
+**Razão**: O estilo duotone mantém consistência visual em todo o sistema, com cores primárias (laranja forte) e secundárias (cinza médio) automaticamente aplicadas conforme o contexto (header, sidebar, etc.).
+
+**Conversão Automática:**
+- Quando carregar ícones do banco que estejam em outros estilos (`fa-regular`, `fa-solid`, `fa-light`), **SEMPRE** converter para `fa-duotone` antes de exibir ou usar.
+- Exemplo de conversão: `iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone')`
 
 ## Regras de Botões
 
