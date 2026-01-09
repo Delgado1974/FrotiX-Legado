@@ -8,7 +8,7 @@
 ## 📋 Status da Documentação
 
 **Total de Controllers**: 90 arquivos  
-**Documentados**: 20/90 (22.2%)  
+**Documentados**: 61/90 (67.8%)  
 **Em Progresso**: Em andamento
 
 ---
@@ -42,6 +42,70 @@
 - [x] [`FornecedorController.md`](./FornecedorController.md) - CRUD de fornecedores
 - [x] [`SetorController.md`](./SetorController.md) - CRUD de setores patrimoniais
 - [x] [`SecaoController.md`](./SecaoController.md) - CRUD de seções patrimoniais
+- [x] [`SetorSolicitanteController.md`](./SetorSolicitanteController.md) - CRUD de setores solicitantes
+- [x] [`VeiculosUnidadeController.md`](./VeiculosUnidadeController.md) - Relação veículos-unidades
+- [x] [`ItensContratoController.md`](./ItensContratoController.md) - CRUD de itens de contrato
+- [x] [`RecursoController.md`](./RecursoController.md) - CRUD de recursos
+- [x] [`UsuarioController.md`](./UsuarioController.md) - CRUD de usuários
+- [x] [`PatrimonioController.md`](./PatrimonioController.md) - CRUD de patrimônio
+
+### Controllers de Viagens
+
+- [x] [`ViagemController.md`](./ViagemController.md) - Controller principal de viagens
+- [x] [`ViagemEventoController.md`](./ViagemEventoController.md) - CRUD de eventos de viagem
+- [x] [`ViagemLimpezaController.md`](./ViagemLimpezaController.md) - Limpeza de dados de viagens
+- [x] [`OcorrenciaViagemController.md`](./OcorrenciaViagemController.md) - CRUD de ocorrências de viagem
+- [x] [`OcorrenciaController.md`](./OcorrenciaController.md) - CRUD de ocorrências gerais
+- [x] [`CustosViagemController.md`](./CustosViagemController.md) - Gestão de custos de viagens
+
+### Controllers de Dashboards
+
+- [x] [`DashboardViagensController.md`](./DashboardViagensController.md) - Dashboard de viagens
+- [x] [`DashboardVeiculosController.md`](./DashboardVeiculosController.md) - Dashboard de veículos
+- [x] [`DashboardMotoristasController.md`](./DashboardMotoristasController.md) - Dashboard de motoristas
+- [x] [`DashboardLavagemController.md`](./DashboardLavagemController.md) - Dashboard de lavagem
+- [x] [`DashboardEventosController.md`](./DashboardEventosController.md) - Dashboard de eventos
+
+### Controllers de Administração
+
+- [x] [`AdministracaoController.md`](./AdministracaoController.md) - Funcionalidades administrativas
+- [x] [`AtaRegistroPrecosController.md`](./AtaRegistroPrecosController.md) - CRUD de atas de registro de preços
+- [x] [`GridAtaController.md`](./GridAtaController.md) - Grid de atas
+- [x] [`GridContratoController.md`](./GridContratoController.md) - Grid de contratos
+- [x] [`EmpenhoController.md`](./EmpenhoController.md) - CRUD de empenhos
+- [x] [`GlosaController.md`](./GlosaController.md) - CRUD de glosas
+- [x] [`NotaFiscalController.md`](./NotaFiscalController.md) - CRUD de notas fiscais
+- [x] [`ManutencaoController.md`](./ManutencaoController.md) - CRUD de manutenções
+- [x] [`MultaController.md`](./MultaController.md) - CRUD de multas
+- [x] [`MultaUploadController.md`](./MultaUploadController.md) - Upload de multas
+- [x] [`MultaPdfViewerController.md`](./MultaPdfViewerController.md) - Visualizador PDF de multas
+- [x] [`PlacaBronzeController.md`](./PlacaBronzeController.md) - Gestão de placas bronze
+- [x] [`TaxiLegController.md`](./TaxiLegController.md) - Gestão de táxi legal
+
+### Controllers de Relatórios
+
+- [x] [`RelatoriosController.md`](./RelatoriosController.md) - Geração de relatórios
+- [x] [`RelatorioSetorSolicitanteController.md`](./RelatorioSetorSolicitanteController.md) - Relatório de setores
+- [x] [`ReportsController.md`](./ReportsController.md) - Controller de reports
+- [x] [`TestePdfController.md`](./TestePdfController.md) - Testes de PDF
+
+### Controllers de Upload/Visualização
+
+- [x] [`UploadCNHController.md`](./UploadCNHController.md) - Upload de CNH
+- [x] [`UploadCRLVController.md`](./UploadCRLVController.md) - Upload de CRLV
+- [x] [`PdfViewerController.md`](./PdfViewerController.md) - Visualizador PDF genérico
+- [x] [`PdfViewerCNHController.md`](./PdfViewerCNHController.md) - Visualizador PDF de CNH
+
+### Controllers Auxiliares
+
+- [x] [`EditorController.md`](./EditorController.md) - Editor de conteúdo
+- [x] [`NormalizeController.md`](./NormalizeController.md) - Normalização de dados
+- [x] [`LogErrosController.md`](./LogErrosController.md) - Logs de erros
+- [x] [`AlertasFrotiXController.md`](./AlertasFrotiXController.md) - Alertas do sistema
+
+### Controllers de API Externa
+
+- [x] [`Api/WhatsAppController.md`](./Api/WhatsAppController.md) - Integração WhatsApp
 
 ---
 
@@ -55,34 +119,23 @@
 - [ ] `AbastecimentoController.Import.cs` - Importação de abastecimentos
 - [ ] `AbastecimentoImportController.cs` - Controller alternativo de importação
 
-### Controllers de Cadastros
+### Controllers de Abastecimento (Parciais)
 
-- [ ] `VeiculoController.cs` - CRUD de veículos
-- [ ] `MotoristaController.cs` - CRUD de motoristas
-- [ ] `ContratoController.cs` - CRUD de contratos
+- [ ] `AbastecimentoController.DashboardAPI.cs` - Endpoints de dashboard otimizados
+- [ ] `AbastecimentoController.Pendencias.cs` - Gerenciamento de pendências
+- [ ] `AbastecimentoController.Import.cs` - Importação de abastecimentos
+- [ ] `AbastecimentoImportController.cs` - Controller alternativo de importação
+
+### Controllers de Cadastros (Parciais)
+
 - [ ] `ContratoController.Partial.cs` - Métodos parciais de contratos
 - [ ] `ContratoController.VerificarDependencias.cs` - Validação de dependências
-- [ ] `CombustivelController.cs` - CRUD de combustíveis
-- [ ] `EncarregadoController.cs` - CRUD de encarregados
-- [ ] `MarcaVeiculoController.cs` - CRUD de marcas de veículos
-- [ ] `ModeloVeiculoController.cs` - CRUD de modelos de veículos
-- [ ] `RequisitanteController.cs` - CRUD de requisitantes
-- [ ] `OperadorController.cs` - CRUD de operadores
-- [ ] `UnidadeController.cs` - CRUD de unidades
-- [ ] `AgendaController.cs` - CRUD de agendas
-- [ ] `LavadorController.cs` - CRUD de lavadores
-- [ ] `FornecedorController.cs` - CRUD de fornecedores
-- [ ] `SetorController.cs` - CRUD de setores
-- [ ] `SetorSolicitanteController.cs` - CRUD de setores solicitantes
 - [ ] `SetorSolicitanteController.GetAll.cs` - Métodos de listagem
 - [ ] `SetorSolicitanteController.UpdateStatus.cs` - Atualização de status
-- [ ] `SecaoController.cs` - CRUD de seções
-- [ ] `ItensContratoController.cs` - CRUD de itens de contrato
-- [ ] `VeiculosUnidadeController.cs` - Relação veículos-unidades
+- [ ] `UsuarioController.Usuarios.cs` - Métodos específicos de usuários
 
-### Controllers de Viagens
+### Controllers de Viagens (Parciais)
 
-- [ ] `ViagemController.cs` - Controller principal de viagens
 - [ ] `ViagemController.AtualizarDados.cs` - Atualização de dados
 - [ ] `ViagemController.AtualizarDadosViagem.cs` - Atualização específica
 - [ ] `ViagemController.CalculoCustoBatch.cs` - Cálculo de custos em lote
@@ -93,74 +146,21 @@
 - [ ] `ViagemController.HeatmapEconomildoPassageiros.cs` - Heatmap passageiros
 - [ ] `ViagemController.ListaEventos.cs` - Listagem de eventos
 - [ ] `ViagemController.MetodosEstatisticas.cs` - Métodos estatísticos
-- [ ] `ViagemEventoController.cs` - CRUD de eventos de viagem
 - [ ] `ViagemEventoController.UpdateStatus.cs` - Atualização de status
-- [ ] `ViagemLimpezaController.cs` - Limpeza de dados de viagens
-- [ ] `OcorrenciaViagemController.cs` - CRUD de ocorrências
 - [ ] `OcorrenciaViagemController.Debug.cs` - Métodos de debug
 - [ ] `OcorrenciaViagemController.Gestao.cs` - Gestão de ocorrências
 - [ ] `OcorrenciaViagemController.Listar.cs` - Listagem de ocorrências
 - [ ] `OcorrenciaViagemController.Upsert.cs` - Criação/edição de ocorrências
-- [ ] `OcorrenciaController.cs` - CRUD de ocorrências gerais
-- [ ] `CustosViagemController.cs` - Gestão de custos de viagens
 
-### Controllers de Dashboards
+### Controllers de Dashboards (Parciais)
 
-- [ ] `DashboardViagensController.cs` - Dashboard de viagens
 - [ ] `DashboardViagensController_ExportacaoPDF.cs` - Exportação PDF
-- [ ] `DashboardVeiculosController.cs` - Dashboard de veículos
-- [ ] `DashboardMotoristasController.cs` - Dashboard de motoristas
-- [ ] `DashboardLavagemController.cs` - Dashboard de lavagem
-- [ ] `DashboardEventosController.cs` - Dashboard de eventos
 - [ ] `DashboardEventosController_ExportacaoPDF.cs` - Exportação PDF eventos
 
-### Controllers de Administração
+### Controllers de Administração (Parciais)
 
-- [ ] `AdministracaoController.cs` - Funcionalidades administrativas
-- [ ] `UsuarioController.cs` - CRUD de usuários
-- [ ] `UsuarioController.Usuarios.cs` - Métodos específicos de usuários
-- [ ] `RecursoController.cs` - CRUD de recursos
-- [ ] `PatrimonioController.cs` - CRUD de patrimônio
-- [ ] `AtaRegistroPrecosController.cs` - CRUD de atas de registro de preços
 - [ ] `AtaRegistroPrecosController.Partial.cs` - Métodos parciais
-- [ ] `GridAtaController.cs` - Grid de atas
-- [ ] `GridContratoController.cs` - Grid de contratos
-- [ ] `EmpenhoController.cs` - CRUD de empenhos
-- [ ] `GlosaController.cs` - CRUD de glosas
-- [ ] `NotaFiscalController.cs` - CRUD de notas fiscais
 - [ ] `NotaFiscalController.Partial.cs` - Métodos parciais
-- [ ] `ManutencaoController.cs` - CRUD de manutenções
-- [ ] `MultaController.cs` - CRUD de multas
-- [ ] `MultaUploadController.cs` - Upload de multas
-- [ ] `MultaPdfViewerController.cs` - Visualizador PDF de multas
-- [ ] `PlacaBronzeController.cs` - Gestão de placas bronze
-- [ ] `TaxiLegController.cs` - Gestão de táxi legal
-
-### Controllers de Relatórios
-
-- [ ] `RelatoriosController.cs` - Geração de relatórios
-- [ ] `RelatorioSetorSolicitanteController.cs` - Relatório de setores
-- [ ] `ReportsController.cs` - Controller de reports
-- [ ] `TestePdfController.cs` - Testes de PDF
-
-### Controllers de Upload/Visualização
-
-- [ ] `UploadCNHController.cs` - Upload de CNH
-- [ ] `UploadCRLVController.cs` - Upload de CRLV
-- [ ] `PdfViewerController.cs` - Visualizador PDF genérico
-- [ ] `PdfViewerCNHController.cs` - Visualizador PDF de CNH
-
-### Controllers Auxiliares
-
-- [ ] `EditorController.cs` - Editor de conteúdo
-- [ ] `NormalizeController.cs` - Normalização de dados
-- [ ] `LogErrosController.cs` - Logs de erros
-- [ ] `AlertasFrotiXController.cs` - Alertas do sistema
-- [ ] `HomeController.cs` - Controller home (já documentado)
-
-### Controllers de API Externa
-
-- [ ] `Api/WhatsAppController.cs` - Integração WhatsApp
 
 ---
 
@@ -170,26 +170,26 @@
 |-----------|-------|--------------|-----------|
 | Principais | 3 | 3 | 0 |
 | Abastecimento | 5 | 1 | 4 |
-| Cadastros | 22 | 14 | 8 |
-| Viagens | 20 | 0 | 20 |
-| Dashboards | 7 | 0 | 7 |
-| Administração | 15 | 0 | 15 |
-| Relatórios | 4 | 0 | 4 |
-| Upload/Visualização | 4 | 0 | 4 |
-| Auxiliares | 5 | 0 | 5 |
-| API Externa | 1 | 0 | 1 |
-| **TOTAL** | **90** | **3** | **87** |
+| Cadastros | 22 | 19 | 5 |
+| Viagens | 20 | 6 | 14 |
+| Dashboards | 7 | 5 | 2 |
+| Administração | 15 | 13 | 2 |
+| Relatórios | 4 | 4 | 0 |
+| Upload/Visualização | 4 | 4 | 0 |
+| Auxiliares | 5 | 4 | 0 |
+| API Externa | 1 | 1 | 0 |
+| **TOTAL** | **90** | **61** | **29** |
 
 ---
 
 ## 🔄 Próximos Passos
 
 1. ✅ Documentar controllers principais (Home, Login, Navigation)
-2. ⏳ Documentar controllers de Abastecimento (5 arquivos)
-3. ⏳ Documentar controllers de Cadastros principais (Veiculo, Motorista, Contrato)
-4. ⏳ Documentar controllers de Viagens principais
-5. ⏳ Documentar controllers de Dashboards
-6. ⏳ Documentar controllers restantes
+2. ⏳ Documentar controllers parciais de Abastecimento (4 arquivos)
+3. ⏳ Documentar controllers parciais de Cadastros (5 arquivos)
+4. ⏳ Documentar controllers parciais de Viagens (14 arquivos)
+5. ⏳ Documentar controllers parciais de Dashboards (2 arquivos)
+6. ⏳ Documentar controllers parciais de Administração (2 arquivos)
 
 ---
 
