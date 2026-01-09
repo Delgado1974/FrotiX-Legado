@@ -1,3 +1,23 @@
+/*
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  📚 DOCUMENTAÇÃO DISPONÍVEL                                              ║
+ * ║                                                                          ║
+ * ║  Este arquivo está completamente documentado em:                         ║
+ * ║  📄 Documentacao/Pages/Viagens - Index.md                                 ║
+ * ║                                                                          ║
+ * ║  A documentação inclui:                                                   ║
+ * ║  • Explicação detalhada de todas as funções principais                   ║
+ * ║  • Sistema de lazy loading de fotos explicado                           ║
+ * ║  • Handlers de modais e eventos                                          ║
+ * ║  • Validações e processamento                                            ║
+ * ║  • Interconexões com outros módulos                                      ║
+ * ║                                                                          ║
+ * ║  Última atualização: 08/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ */
+
 // Para controlar a exibição de ToolTips
 var CarregandoViagemBloqueada = false;
 
