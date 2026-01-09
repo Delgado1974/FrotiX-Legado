@@ -146,7 +146,7 @@
 - [ ] `Pages/Manutencao/Upsert.cshtml.cs` → `Pages/Manutencao/Upsert.cshtml.cs.md`
 
 ### MarcaVeiculo
-- [ ] `Pages/MarcaVeiculo/Index.cshtml` → `Pages/MarcaVeiculo/Index.md`
+- [x] `Pages/MarcaVeiculo/Index.cshtml` → `Pages/MarcaVeiculo/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/MarcaVeiculo/Index.cshtml.cs` → `Pages/MarcaVeiculo/Index.cshtml.cs.md`
 - [ ] `Pages/MarcaVeiculo/Upsert.cshtml` → `Pages/MarcaVeiculo/Upsert.md`
 - [ ] `Pages/MarcaVeiculo/Upsert.cshtml.cs` → `Pages/MarcaVeiculo/Upsert.cshtml.cs.md`
@@ -276,7 +276,7 @@
 - [ ] `Pages/Relatorio/TesteRelatorio.cshtml.cs` → `Pages/Relatorio/TesteRelatorio.cshtml.cs.md`
 
 ### Requisitante
-- [ ] `Pages/Requisitante/Index.cshtml` → `Pages/Requisitante/Index.md`
+- [x] `Pages/Requisitante/Index.cshtml` → `Pages/Requisitante/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/Requisitante/Index.cshtml.cs` → `Pages/Requisitante/Index.cshtml.cs.md`
 - [ ] `Pages/Requisitante/Upsert.cshtml` → `Pages/Requisitante/Upsert.md`
 - [ ] `Pages/Requisitante/Upsert.cshtml.cs` → `Pages/Requisitante/Upsert.cshtml.cs.md`

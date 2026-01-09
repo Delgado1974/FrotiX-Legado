@@ -144,7 +144,7 @@
                                 <a href="@item.Route" data-filter-tags="@item.Tags">
                                     @if (!string.IsNullOrEmpty(item.Icon))
                                     {
-                                        <i class="@item.Icon subitem-icon"></i>
+                                        <i class="@NormalizarIcone(item.Icon) subitem-icon"></i>
                                     }
                                     <span class="nav-link-text" data-i18n="@item.I18n">@item.Text.AsRaw()</span>
                                     @if (item.Span.HasValue())

@@ -1,3 +1,18 @@
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/Pages/Requisitante - Index.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo contém a lógica JavaScript do DataTable e ações da página de
+    listagem de Requisitantes. Para entender completamente a funcionalidade,
+    consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
 var dataTable;
 
 $(document).ready(function ()
