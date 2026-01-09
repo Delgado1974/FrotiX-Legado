@@ -365,6 +365,7 @@ namespace FrotiX.Controllers
 
                 return Json(new
                 {
+                    success = true,
                     totalRecursos = totalRecursos,
                     recursosRaiz = recursosRaiz.Count,
                     recursosOrfaos = recursosOrfaos.Count,
@@ -372,6 +373,7 @@ namespace FrotiX.Controllers
                     {
                         id = r.RecursoId,
                         nome = r.Nome,
+                        nomeMenu = r.NomeMenu,
                         parentId = r.ParentId,
                         ordem = r.Ordem,
                         nivel = r.Nivel
