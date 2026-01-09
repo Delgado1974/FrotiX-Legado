@@ -1143,17 +1143,52 @@ namespace FrotiX.Controllers
         private List<RecursoTreeDTO> MontarArvoreRecursiva(List<Recurso> recursos, Guid? parentId)
         {
             // ✅ Comparação explícita para NULL para garantir que funciona corretamente
-            return recursos
+            var filtrados = recursos
                 .Where(r => 
                     (parentId == null && r.ParentId == null) || 
                     (parentId != null && r.ParentId == parentId)
                 )
                 .OrderBy(r => r.Ordem)
+                .ToList();
+            
+            // ✅ Log para debug
+            if (parentId == null)
+            {
+                Console.WriteLine($"[MontarArvoreRecursiva] Nível RAIZ: Encontrados {filtrados.Count} recursos raiz");
+            }
+            else
+            {
+                Console.WriteLine($"[MontarArvoreRecursiva] Nível FILHO (ParentId={parentId}): Encontrados {filtrados.Count} filhos");
+                if (filtrados.Count == 0)
+                {
+                    // ✅ Verifica se há recursos com ParentId diferente mas que deveriam ser filhos
+                    var todosComParentId = recursos.Where(r => r.ParentId != null).ToList();
+                    Console.WriteLine($"[MontarArvoreRecursiva] Total de recursos com ParentId não-nulo: {todosComParentId.Count}");
+                    var exemplo = todosComParentId.Take(3).ToList();
+                    foreach (var ex in exemplo)
+                    {
+                        Console.WriteLine($"[MontarArvoreRecursiva] Exemplo: {ex.Nome} (ParentId={ex.ParentId}, RecursoId={ex.RecursoId})");
+                    }
+                }
+            }
+            
+            return filtrados
                 .Select(r =>
                 {
                     var dto = RecursoTreeDTO.FromRecurso(r);
                     dto.Items = MontarArvoreRecursiva(recursos, r.RecursoId);
                     dto.HasChild = dto.Items.Any();
+                    
+                    if (dto.HasChild)
+                    {
+                        Console.WriteLine($"[MontarArvoreRecursiva] ✅ '{r.Nome}' tem {dto.Items.Count} filhos");
+                    }
+                    else if (parentId == null)
+                    {
+                        // Só loga para raiz sem filhos (pode ser normal)
+                        Console.WriteLine($"[MontarArvoreRecursiva] '{r.Nome}' não tem filhos (Raiz sem filhos)");
+                    }
+                    
                     return dto;
                 })
                 .ToList();
