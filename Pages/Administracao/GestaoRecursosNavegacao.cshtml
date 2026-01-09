@@ -747,16 +747,26 @@
                     if (data.isCategory) {
                         return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
                     }
+                    // ✅ Garante que seja duotone e aplica cores padrão FrotiX
+                    var iconClass = data.id || '';
+                    if (iconClass && !iconClass.includes('fa-duotone')) {
+                        iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
+                    }
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px; color: #f29900;"></i>' +
+                           '<i class="' + iconClass + '" style="font-size: 16px; width: 20px; --fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d;"></i>' +
                            '<span style="color: #5f6b7a;">' + data.text + '</span>' +
                            '</div>';
                 };
 
                 ddlIconeObj.valueTemplate = function(data) {
                     if (!data || data.isCategory) return '';
+                    // ✅ Garante que seja duotone e aplica cores padrão FrotiX
+                    var iconClass = data.id || '';
+                    if (iconClass && !iconClass.includes('fa-duotone')) {
+                        iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
+                    }
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 14px; width: 18px; color: #f29900;"></i>' +
+                           '<i class="' + iconClass + '" style="font-size: 14px; width: 18px; --fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d;"></i>' +
                            '<span style="color: #5f6b7a;">' + data.text + '</span>' +
                            '</div>';
                 };
@@ -1390,19 +1400,70 @@
             atualizarEstadoBotoesOrdenacao();
 
             // ========== ATUALIZA DROPDOWNTREE DE ÍCONE ==========
-            var iconClass = selectedItem.icon || 'fa-regular fa-file';
+            var iconClass = selectedItem.icon || 'fa-duotone fa-file';
             if (txtIconClass) txtIconClass.value = iconClass;
 
             var ddlIconeObj = document.getElementById('ddlIcone');
             if (ddlIconeObj && ddlIconeObj.ej2_instances && ddlIconeObj.ej2_instances[0]) {
                 var ddlIcone = ddlIconeObj.ej2_instances[0];
+                
+                // ✅ Converte fa-regular/fa-solid/fa-light para fa-duotone se necessário
+                var iconClassNormalizado = iconClass;
+                if (iconClass) {
+                    // Remove qualquer prefixo e adiciona fa-duotone
+                    iconClassNormalizado = iconClass.replace(/^fa-(regular|solid|light|duotone)\s+/, 'fa-duotone ');
+                    // Se não tinha prefixo, adiciona fa-duotone
+                    if (!iconClassNormalizado.startsWith('fa-')) {
+                        iconClassNormalizado = 'fa-duotone ' + iconClassNormalizado;
+                    }
+                }
+                
                 // Limpa seleção anterior
                 ddlIcone.value = null;
-                // Define novo valor
+                ddlIcone.dataBind();
+                
+                // Define novo valor após um pequeno delay para garantir que o componente está pronto
                 setTimeout(function() {
-                    ddlIcone.value = [iconClass];
-                    console.log('DropDownTree de ícone atualizado para:', iconClass);
-                }, 100);
+                    if (ddlIcone.fields && ddlIcone.fields.dataSource) {
+                        var dataSource = ddlIcone.fields.dataSource;
+                        var iconEncontrado = null;
+                        
+                        // Busca em todas as categorias
+                        for (var i = 0; i < dataSource.length; i++) {
+                            var cat = dataSource[i];
+                            if (cat.child && cat.child.length > 0) {
+                                for (var j = 0; j < cat.child.length; j++) {
+                                    var icon = cat.child[j];
+                                    // Compara com ID normalizado, original, ou apenas o nome do ícone
+                                    var iconIdStr = String(icon.id || '');
+                                    var iconClassStr = String(iconClassNormalizado || '');
+                                    var iconClassOriginalStr = String(iconClass || '');
+                                    
+                                    // Extrai apenas o nome do ícone (ex: "fa-file" de "fa-duotone fa-file")
+                                    var iconNameNormalizado = iconClassNormalizado.replace(/^fa-duotone\s+/, '');
+                                    var iconNameOriginal = iconClassOriginalStr.replace(/^fa-(regular|solid|light|duotone)\s+/, '');
+                                    
+                                    if (iconIdStr === iconClassNormalizado || 
+                                        iconIdStr === iconClassOriginalStr ||
+                                        iconIdStr.endsWith(' ' + iconNameNormalizado) ||
+                                        iconIdStr.endsWith(' ' + iconNameOriginal)) {
+                                        iconEncontrado = icon;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (iconEncontrado) break;
+                        }
+                        
+                        if (iconEncontrado) {
+                            ddlIcone.value = [iconEncontrado.id];
+                            ddlIcone.dataBind();
+                            console.log('✅ DropDownTree de ícone atualizado para:', iconEncontrado.id);
+                        } else {
+                            console.warn('Ícone não encontrado no dataSource. Tentando:', iconClassNormalizado, 'ou', iconClass);
+                        }
+                    }
+                }, 500);
             }
 
             // ========== ATUALIZA DROPDOWNTREE DE PÁGINA ==========
@@ -1716,7 +1777,7 @@
                         return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
                     }
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="fa-regular fa-file-lines" style="font-size: 16px; width: 20px; color: #6c757d;"></i>' +
+                           '<i class="fa-duotone fa-file-lines" style="font-size: 16px; width: 20px; --fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d;"></i>' +
                            '<span>' + data.text + '</span>' +
                            '</div>';
                 };
@@ -1725,7 +1786,7 @@
                     if (!data || data.isCategory) return '';
                     var displayText = data.displayText || data.text;
                     return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="fa-regular fa-file-lines" style="font-size: 14px; width: 18px; color: #6c757d;"></i>' +
+                           '<i class="fa-duotone fa-file-lines" style="font-size: 14px; width: 18px; --fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d;"></i>' +
                            '<span>' + displayText + '</span>' +
                            '</div>';
                 };
@@ -2244,46 +2305,50 @@
         return indexAtual < irmaos.length - 1; // Pode mover se não é o último
     }
 
-    // ✅ Busca irmãos de um item
-    function buscarIrmaos(item) {
-        if (!item || !treeData) return [];
-        
-        var parentId = item.parentId || null;
-        var itemId = item.id;
-        
-        // Função recursiva para buscar lista que contém o item
-        function encontrarListaPai(lista, targetId, targetParentId) {
-            for (var i = 0; i < lista.length; i++) {
-                var currentItem = lista[i];
-                var currentParentId = currentItem.parentId || null;
-                
-                // Verifica se este item é o alvo
-                if (currentItem.id === targetId) {
-                    // Retorna a lista que contém este item (seus irmãos)
-                    return lista;
-                }
-                
-                // Verifica se está na lista correta (mesmo parentId)
-                if ((targetParentId === null && currentParentId === null) || 
-                    (targetParentId !== null && currentParentId === targetParentId)) {
-                    // Esta lista tem irmãos do item, mas ainda não encontramos o item
-                    // Continua procurando recursivamente
-                }
-                
-                // Busca recursivamente nos filhos
-                if (currentItem.items && currentItem.items.length > 0) {
-                    var resultado = encontrarListaPai(currentItem.items, targetId, targetParentId);
-                    if (resultado) return resultado;
-                }
+    // ✅ Busca a lista pai que contém um item e retorna referência à lista e índice
+    function encontrarListaPaiEIndice(lista, targetId, targetParentId) {
+        for (var i = 0; i < lista.length; i++) {
+            var currentItem = lista[i];
+            var currentParentId = currentItem.parentId || null;
+            
+            // Verifica se este item é o alvo
+            if (String(currentItem.id) === String(targetId)) {
+                return { lista: lista, indice: i };
             }
-            return null;
+            
+            // Busca recursivamente nos filhos
+            if (currentItem.items && currentItem.items.length > 0) {
+                var resultado = encontrarListaPaiEIndice(currentItem.items, targetId, targetParentId);
+                if (resultado) return resultado;
+            }
         }
-        
-        var listaIrmaos = encontrarListaPai(treeData, itemId, parentId);
-        return listaIrmaos || [];
+        return null;
     }
 
-    // ✅ Move item para cima
+    // ✅ Busca a lista pai que contém um item e retorna referência à lista e índice
+    function encontrarListaPaiEIndice(lista, targetId, targetParentId, listaPai, indicePai) {
+        listaPai = listaPai || null;
+        indicePai = indicePai || -1;
+        
+        for (var i = 0; i < lista.length; i++) {
+            var currentItem = lista[i];
+            var currentParentId = currentItem.parentId || null;
+            
+            // Verifica se este item é o alvo
+            if (String(currentItem.id) === String(targetId)) {
+                return { lista: lista, indice: i };
+            }
+            
+            // Busca recursivamente nos filhos
+            if (currentItem.items && currentItem.items.length > 0) {
+                var resultado = encontrarListaPaiEIndice(currentItem.items, targetId, targetParentId, lista, i);
+                if (resultado) return resultado;
+            }
+        }
+        return null;
+    }
+
+    // ✅ Move item para cima (move grupo inteiro se for grupo)
     function moverItemParaCima() {
         try {
             if (!selectedItem || !selectedItem.id) {
@@ -2297,18 +2362,23 @@
                 return;
             }
             
-            var irmaos = buscarIrmaos(item);
-            var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
-            
-            if (indexAtual <= 0) {
+            // Encontra a lista que contém o item e seu índice
+            var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+            if (!resultado || resultado.indice <= 0) {
                 mostrarAlerta('Item já está na primeira posição', 'info');
                 return;
             }
             
+            var listaIrmaos = resultado.lista;
+            var indexAtual = resultado.indice;
+            
             // Troca posição com o item anterior
-            var temp = irmaos[indexAtual];
-            irmaos[indexAtual] = irmaos[indexAtual - 1];
-            irmaos[indexAtual - 1] = temp;
+            var temp = listaIrmaos[indexAtual];
+            listaIrmaos[indexAtual] = listaIrmaos[indexAtual - 1];
+            listaIrmaos[indexAtual - 1] = temp;
+            
+            // Atualiza treeData
+            treeData = JSON.parse(JSON.stringify(treeData)); // Força atualização
             
             // Atualiza TreeView
             treeObj.fields.dataSource = treeData;
@@ -2316,9 +2386,12 @@
             
             // Seleciona o item novamente após mover
             setTimeout(function() {
-                selecionarItem(item);
+                var itemAtualizado = buscarItemPorId(treeData, item.id);
+                if (itemAtualizado) {
+                    selecionarItem(itemAtualizado);
+                }
                 salvarOrdenacaoAutomatica();
-            }, 100);
+            }, 200);
             
         } catch (erro) {
             console.error('[moverItemParaCima] Erro:', erro);
@@ -2326,7 +2399,7 @@
         }
     }
 
-    // ✅ Move item para baixo
+    // ✅ Move item para baixo (move grupo inteiro se for grupo)
     function moverItemParaBaixo() {
         try {
             if (!selectedItem || !selectedItem.id) {
@@ -2340,18 +2413,23 @@
                 return;
             }
             
-            var irmaos = buscarIrmaos(item);
-            var indexAtual = irmaos.findIndex(function(i) { return i.id === item.id; });
-            
-            if (indexAtual >= irmaos.length - 1) {
+            // Encontra a lista que contém o item e seu índice
+            var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+            if (!resultado || resultado.indice >= resultado.lista.length - 1) {
                 mostrarAlerta('Item já está na última posição', 'info');
                 return;
             }
             
+            var listaIrmaos = resultado.lista;
+            var indexAtual = resultado.indice;
+            
             // Troca posição com o item seguinte
-            var temp = irmaos[indexAtual];
-            irmaos[indexAtual] = irmaos[indexAtual + 1];
-            irmaos[indexAtual + 1] = temp;
+            var temp = listaIrmaos[indexAtual];
+            listaIrmaos[indexAtual] = listaIrmaos[indexAtual + 1];
+            listaIrmaos[indexAtual + 1] = temp;
+            
+            // Atualiza treeData
+            treeData = JSON.parse(JSON.stringify(treeData)); // Força atualização
             
             // Atualiza TreeView
             treeObj.fields.dataSource = treeData;
@@ -2359,9 +2437,12 @@
             
             // Seleciona o item novamente após mover
             setTimeout(function() {
-                selecionarItem(item);
+                var itemAtualizado = buscarItemPorId(treeData, item.id);
+                if (itemAtualizado) {
+                    selecionarItem(itemAtualizado);
+                }
                 salvarOrdenacaoAutomatica();
-            }, 100);
+            }, 200);
             
         } catch (erro) {
             console.error('[moverItemParaBaixo] Erro:', erro);
