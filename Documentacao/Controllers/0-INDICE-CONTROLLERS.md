@@ -8,7 +8,7 @@
 ## 📋 Status da Documentação
 
 **Total de Controllers**: 90 arquivos  
-**Documentados**: 3/90 (3.3%)  
+**Documentados**: 20/90 (22.2%)  
 **Em Progresso**: Em andamento
 
 ---
@@ -20,6 +20,28 @@
 - [x] [`HomeController.md`](./HomeController.md) - Controller de exemplo/teste para Syncfusion DataGrid
 - [x] [`LoginController.md`](./LoginController.md) - Gerenciamento de informações do usuário logado
 - [x] [`NavigationController.md`](./NavigationController.md) - Gerenciamento completo de navegação e recursos
+
+### Controllers de Abastecimento
+
+- [x] [`AbastecimentoController.md`](./AbastecimentoController.md) - Controller principal de abastecimentos
+
+### Controllers de Cadastros
+
+- [x] [`VeiculoController.md`](./VeiculoController.md) - CRUD de veículos
+- [x] [`MotoristaController.md`](./MotoristaController.md) - CRUD de motoristas
+- [x] [`ContratoController.md`](./ContratoController.md) - CRUD de contratos
+- [x] [`CombustivelController.md`](./CombustivelController.md) - CRUD de combustíveis
+- [x] [`EncarregadoController.md`](./EncarregadoController.md) - CRUD de encarregados
+- [x] [`MarcaVeiculoController.md`](./MarcaVeiculoController.md) - CRUD de marcas de veículos
+- [x] [`ModeloVeiculoController.md`](./ModeloVeiculoController.md) - CRUD de modelos de veículos
+- [x] [`RequisitanteController.md`](./RequisitanteController.md) - CRUD de requisitantes
+- [x] [`OperadorController.md`](./OperadorController.md) - CRUD de operadores
+- [x] [`UnidadeController.md`](./UnidadeController.md) - CRUD de unidades e lotações
+- [x] [`AgendaController.md`](./AgendaController.md) - Sistema de agendamento de viagens
+- [x] [`LavadorController.md`](./LavadorController.md) - CRUD de lavadores
+- [x] [`FornecedorController.md`](./FornecedorController.md) - CRUD de fornecedores
+- [x] [`SetorController.md`](./SetorController.md) - CRUD de setores patrimoniais
+- [x] [`SecaoController.md`](./SecaoController.md) - CRUD de seções patrimoniais
 
 ---
 
@@ -147,8 +169,8 @@
 | Categoria | Total | Documentados | Pendentes |
 |-----------|-------|--------------|-----------|
 | Principais | 3 | 3 | 0 |
-| Abastecimento | 5 | 0 | 5 |
-| Cadastros | 22 | 0 | 22 |
+| Abastecimento | 5 | 1 | 4 |
+| Cadastros | 22 | 14 | 8 |
 | Viagens | 20 | 0 | 20 |
 | Dashboards | 7 | 0 | 7 |
 | Administração | 15 | 0 | 15 |
