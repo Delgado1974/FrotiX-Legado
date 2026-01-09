@@ -2401,22 +2401,25 @@
             
             console.log('[MOVER-BAIXO] Lista encontrada:', listaIrmaos.length, 'itens');
             console.log('[MOVER-BAIXO] Índice atual:', indexAtual);
+            console.log('[MOVER-BAIXO] Item atual:', item.text);
+            console.log('[MOVER-BAIXO] Item seguinte:', listaIrmaos[indexAtual + 1].text);
             
             // Troca posição com o item seguinte (move grupo inteiro se for grupo)
             var temp = listaIrmaos[indexAtual];
             listaIrmaos[indexAtual] = listaIrmaos[indexAtual + 1];
             listaIrmaos[indexAtual + 1] = temp;
             
-            console.log('[MOVER-BAIXO] Posições trocadas');
+            console.log('[MOVER-BAIXO] ✅ Posições trocadas na lista');
             
-            // Atualiza treeData (cria nova referência para forçar atualização)
-            treeData = JSON.parse(JSON.stringify(treeData));
+            // ✅ IMPORTANTE: Atualiza treeData mantendo a referência original
+            // Não cria nova cópia, apenas força atualização do TreeView
+            treeData = treeData.slice(); // Cria nova referência do array raiz
             
             // Atualiza TreeView com nova estrutura
             treeObj.fields.dataSource = treeData;
             treeObj.dataBind();
             
-            console.log('[MOVER-BAIXO] TreeView atualizado');
+            console.log('[MOVER-BAIXO] ✅ TreeView atualizado');
             
             // Seleciona o item novamente após mover
             setTimeout(function() {
