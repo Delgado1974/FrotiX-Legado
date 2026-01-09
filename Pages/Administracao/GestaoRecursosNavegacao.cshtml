@@ -1213,9 +1213,9 @@
                            '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
                            '</div>';
                 },
-                allowDragAndDrop: true,
-                allowDropSibling: true,  // ✅ Permite soltar entre itens (como irmão)
-                allowDropChild: true,    // ✅ Permite soltar SOBRE item (como filho - transforma em grupo)
+                allowDragAndDrop: false,  // ✅ DESABILITADO - usar apenas Propriedades
+                allowDropSibling: false,
+                allowDropChild: false,
                 allowMultiSelection: false,
                 nodeClicked: function(args) {
                     try {
@@ -2511,8 +2511,13 @@
             listaIrmaos[indexAtual - 1] = temp;
             
             console.log('[MOVER-CIMA] ✅ Posições trocadas na lista original');
+            console.log('[MOVER-CIMA] Lista após troca:', listaIrmaos.map(function(i) { return i.text; }));
             
-            // ✅ Atualiza TreeView diretamente (não cria nova cópia)
+            // ✅ Recria treeData para forçar atualização do TreeView
+            var treeDataNovo = JSON.parse(JSON.stringify(treeData));
+            treeData = treeDataNovo;
+            
+            // ✅ Atualiza TreeView com nova estrutura
             treeObj.fields.dataSource = treeData;
             treeObj.dataBind();
             
