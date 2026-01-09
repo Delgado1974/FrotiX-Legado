@@ -334,23 +334,24 @@
             color: #333 !important;
         }
 
-        /* Ícones duotone com cores FrotiX */
+        /* Ícones duotone com cores FrotiX padrão */
         #gestaoTreeView .tree-node i,
         #gestaoTreeView .tree-node i.fa-duotone {
-            --fa-primary-color: #a0aec0;
-            --fa-secondary-color: #c67750;
+            --fa-primary-color: #ff6b35;      /* Laranja forte */
+            --fa-secondary-color: #6c757d;    /* Cinza médio */
             --fa-primary-opacity: 1;
             --fa-secondary-opacity: 1;
             width: 20px;
             text-align: center;
             font-size: 1rem;
+            margin-right: 0.5rem;  /* Espaçamento de 2 caracteres */
         }
 
-        /* Ícone do item selecionado destaca com cor primária laranja */
+        /* Ícone do item selecionado mantém cores padrão */
         #gestaoTreeView .tree-node.selected i,
         #gestaoTreeView .tree-node.selected i.fa-duotone {
-            --fa-primary-color: #c67750;
-            --fa-secondary-color: #3D5771;
+            --fa-primary-color: #ff6b35;
+            --fa-secondary-color: #6c757d;
         }
 
         #gestaoTreeView .tree-node .node-text {
@@ -1088,8 +1089,15 @@
                     var badge = isGroup ? 'Grupo' : 'Página';
                     var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
                     var displayText = decodeHtml(data.text);  // ✅ DECODIFICA para exibição
+                    
+                    // ✅ Normaliza ícone para DUOTONE
+                    var iconClass = data.icon || 'fa-duotone fa-folder';
+                    if (iconClass && !iconClass.includes('fa-duotone')) {
+                        iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
+                    }
+                    
                     return '<div class="tree-node" data-id="' + data.id + '">' +
-                           '<i class="' + (data.icon || 'fa-duotone fa-folder') + '"></i>' +
+                           '<i class="' + iconClass + '" style="--fa-primary-color: #ff6b35; --fa-secondary-color: #6c757d; margin-right: 0.5rem;"></i>' +
                            '<span class="node-text ' + (isGroup ? 'node-group' : '') + '">' + displayText + '</span>' +
                            '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
                            '</div>';
@@ -1218,70 +1226,109 @@
                             item.classList.remove('e-drop-target');
                         });
                         
-                        // ✅ AUTO-SAVE: Salva automaticamente após drag-drop
-                        setTimeout(function() {
-                            try {
-                                // ✅ Usa getTreeData() que retorna a estrutura atualizada após drag
-                                var dadosAtualizados = treeObj.getTreeData();
+                        // ✅ Verifica se está tentando transformar item em grupo
+                        var draggedItem = lastDragInfo ? buscarItemPorId(treeData, lastDragInfo.itemId) : null;
+                        var dropTargetId = window.currentDropTargetId;
+                        
+                        if (dropTargetId && draggedItem) {
+                            var dropTarget = buscarItemPorId(treeData, dropTargetId);
+                            
+                            // ✅ Se destino não é grupo (tem href) e origem também não é grupo
+                            if (dropTarget && dropTarget.href && dropTarget.href !== 'javascript:void(0);') {
+                                var origemNaoEGrupo = draggedItem.href && draggedItem.href !== 'javascript:void(0);';
                                 
-                                // ✅ Se havia um item de destino guardado (drop sobre item), força como filho
-                                if (window.currentDropTargetId && lastDragInfo && lastDragInfo.itemId) {
-                                    console.log('[DRAG-STOP] ✅ Drop sobre item detectado! Forçando como filho de:', window.currentDropTargetId);
-                                    
-                                    // Encontra o item arrastado e o item de destino
-                                    var itemArrastado = buscarItemPorId(dadosAtualizados, lastDragInfo.itemId);
-                                    var itemDestino = buscarItemPorId(dadosAtualizados, window.currentDropTargetId);
-                                    
-                                    if (itemArrastado && itemDestino && itemArrastado.id !== itemDestino.id) {
-                                        // ✅ Força o item arrastado a ser filho do item de destino
-                                        // Remove o item arrastado de sua posição atual
-                                        removerItemDaArvore(dadosAtualizados, itemArrastado.id);
-                                        
-                                        // Adiciona como filho do item de destino
-                                        if (!itemDestino.items) {
-                                            itemDestino.items = [];
+                                if (origemNaoEGrupo && draggedItem.id !== dropTarget.id) {
+                                    // ✅ Mostra aviso antes de transformar em grupo
+                                    Alerta.Confirmar(
+                                        'Transformar Item em Grupo?',
+                                        'Ao soltar este item sobre "' + decodeHtml(dropTarget.text) + '", o item "' + decodeHtml(dropTarget.text) + '" será transformado em grupo e perderá suas propriedades (não apontará mais para página alguma). Apenas o ícone e o nome serão mantidos. Deseja continuar?',
+                                        'Sim, Transformar',
+                                        'Cancelar'
+                                    ).then(function(confirmado) {
+                                        if (!confirmado) {
+                                            // Cancela o drop - restaura posição original
+                                            console.log('[DRAG-STOP] Usuário cancelou transformação em grupo');
+                                            carregarArvore();
+                                            window.currentDropTargetId = null;
+                                            return;
                                         }
-                                        itemArrastado.parentId = itemDestino.id;
-                                        itemDestino.items.push(itemArrastado);
+                                        // Prossegue com o drop normalmente
+                                        console.log('[DRAG-STOP] Usuário confirmou transformação em grupo');
+                                        processarDrop();
+                                    });
+                                    return; // Não continua com o processamento normal
+                                }
+                            }
+                        }
+                        
+                        // ✅ AUTO-SAVE: Salva automaticamente após drag-drop
+                        processarDrop();
+                        
+                        function processarDrop() {
+                            setTimeout(function() {
+                                try {
+                                    // ✅ Usa getTreeData() que retorna a estrutura atualizada após drag
+                                    var dadosAtualizados = treeObj.getTreeData();
+                                    
+                                    // ✅ Se havia um item de destino guardado (drop sobre item), força como filho
+                                    if (window.currentDropTargetId && lastDragInfo && lastDragInfo.itemId) {
+                                        console.log('[DRAG-STOP] ✅ Drop sobre item detectado! Forçando como filho de:', window.currentDropTargetId);
                                         
-                                        // Atualiza TreeView com nova estrutura
-                                        treeObj.fields.dataSource = dadosAtualizados;
-                                        treeObj.dataBind();
+                                        // Encontra o item arrastado e o item de destino
+                                        var itemArrastado = buscarItemPorId(dadosAtualizados, lastDragInfo.itemId);
+                                        var itemDestino = buscarItemPorId(dadosAtualizados, window.currentDropTargetId);
                                         
-                                        // Expande o item de destino para mostrar o novo filho
-                                        treeObj.expandAll([window.currentDropTargetId]);
+                                        if (itemArrastado && itemDestino && itemArrastado.id !== itemDestino.id) {
+                                            // ✅ Força o item arrastado a ser filho do item de destino
+                                            // Remove o item arrastado de sua posição atual
+                                            removerItemDaArvore(dadosAtualizados, itemArrastado.id);
+                                            
+                                            // Adiciona como filho do item de destino
+                                            if (!itemDestino.items) {
+                                                itemDestino.items = [];
+                                            }
+                                            itemArrastado.parentId = itemDestino.id;
+                                            itemDestino.items.push(itemArrastado);
+                                            
+                                            // Atualiza TreeView com nova estrutura
+                                            treeObj.fields.dataSource = dadosAtualizados;
+                                            treeObj.dataBind();
+                                            
+                                            // Expande o item de destino para mostrar o novo filho
+                                            treeObj.expandAll([window.currentDropTargetId]);
+                                            
+                                            console.log('[DRAG-STOP] ✅ Item movido como filho!');
+                                            
+                                            // Atualiza dadosAtualizados para usar na estrutura final
+                                            dadosAtualizados = treeObj.getTreeData();
+                                        }
                                         
-                                        console.log('[DRAG-STOP] ✅ Item movido como filho!');
-                                        
-                                        // Atualiza dadosAtualizados para usar na estrutura final
-                                        dadosAtualizados = treeObj.getTreeData();
+                                        // Limpa o ID guardado
+                                        window.currentDropTargetId = null;
                                     }
                                     
-                                    // Limpa o ID guardado
-                                    window.currentDropTargetId = null;
+                                    console.log('[DRAG-STOP] Dados do TreeView após drag:', dadosAtualizados);
+
+                                    treeData = dadosAtualizados;
+                                    atualizarContagem();
+
+                                    // Preenche destino para toast
+                                    if (lastDragInfo && lastDragInfo.itemId) {
+                                        var itemMovido = buscarItemPorId(treeData, lastDragInfo.itemId);
+                                        var novoPai = itemMovido && itemMovido.parentId ? buscarItemPorId(treeData, itemMovido.parentId) : null;
+                                        lastDragInfo.toParentId = itemMovido ? (itemMovido.parentId || null) : null;
+                                        lastDragInfo.toParentName = novoPai ? (novoPai.text || novoPai.nomeMenu || 'Sem grupo') : 'Sem grupo';
+                                    }
+
+                                    // Salva automaticamente no banco
+                                    console.log('[DRAG-STOP] Chamando salvarOrdenacaoAutomatica...');
+                                    salvarOrdenacaoAutomatica();
+                                } catch (erro) {
+                                    console.error('[DRAG-STOP] Erro:', erro);
+                                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "nodeDragStop", erro);
                                 }
-                                
-                                console.log('[DRAG-STOP] Dados do TreeView após drag:', dadosAtualizados);
-
-                                treeData = dadosAtualizados;
-                                atualizarContagem();
-
-                                // Preenche destino para toast
-                                if (lastDragInfo && lastDragInfo.itemId) {
-                                    var itemMovido = buscarItemPorId(treeData, lastDragInfo.itemId);
-                                    var novoPai = itemMovido && itemMovido.parentId ? buscarItemPorId(treeData, itemMovido.parentId) : null;
-                                    lastDragInfo.toParentId = itemMovido ? (itemMovido.parentId || null) : null;
-                                    lastDragInfo.toParentName = novoPai ? (novoPai.text || novoPai.nomeMenu || 'Sem grupo') : 'Sem grupo';
-                                }
-
-                                // Salva automaticamente no banco
-                                console.log('[DRAG-STOP] Chamando salvarOrdenacaoAutomatica...');
-                                salvarOrdenacaoAutomatica();
-                            } catch (erro) {
-                                console.error('[DRAG-STOP] Erro:', erro);
-                                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "nodeDragStop", erro);
-                            }
-                        }, 500); // Aumentado para 500ms para garantir que TreeView atualizou
+                            }, 500); // Aumentado para 500ms para garantir que TreeView atualizou
+                        }
                     } catch (erro) {
                         console.error('[DRAG-STOP] Erro geral:', erro);
                         Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "nodeDragStop", erro);

@@ -1,4 +1,4 @@
-﻿@model SmartNavigation
+@model SmartNavigation
 @{
     var pageName = ViewData["PageName"]?.ToString().ToLower();
 }
@@ -6,18 +6,20 @@
 <style>
 
 /* ====== CORES DOS ÍCONES DUOTONE ====== */
-/* Primary: cinza claro | Secondary: laranja sóbrio */
+/* Primary: laranja forte | Secondary: cinza médio */
 .nav-menu .fa-duotone {
-    --fa-primary-color: #a0aec0;      /* Cinza claro */
-    --fa-secondary-color: #c67750;    /* Laranja sóbrio (FrotiX) */
+    --fa-primary-color: #ff6b35;      /* Laranja forte */
+    --fa-secondary-color: #6c757d;    /* Cinza médio */
     --fa-primary-opacity: 1;
     --fa-secondary-opacity: 1;
+    margin-right: 0.5rem;  /* Espaçamento de 2 caracteres */
 }
 
-/* Ícones dos subitens - cores um pouco mais suaves */
+/* Ícones dos subitens - mantém cores padrão */
 .nav-menu .subitem-icon.fa-duotone {
-    --fa-primary-color: #b0bcc8;
-    --fa-secondary-color: #d4917a;
+    --fa-primary-color: #ff6b35;
+    --fa-secondary-color: #6c757d;
+    margin-right: 0.5rem;  /* Espaçamento de 2 caracteres */
 }
 
 .dropdown-toggle::after {
@@ -104,7 +106,7 @@
             });
             <li class="@(groups.Contains(pageName) ? "active open" : "")">
                 <a href="#" data-filter-tags="@group.Tags">
-                    <i class="@group.Icon"></i>
+                    <i class="@NormalizarIcone(group.Icon)"></i>
                     <span class="nav-link-text" data-i18n="@group.I18n">@group.Text.AsRaw()</span>
                     @if (group.Span.HasValue())
                     {
@@ -173,7 +175,7 @@
                             <a href="@subItem.Route" data-filter-tags="@subItem.Tags">
                                 @if (!string.IsNullOrEmpty(subItem.Icon))
                                 {
-                                    <i class="@subItem.Icon subitem-icon"></i>
+                                    <i class="@NormalizarIcone(subItem.Icon) subitem-icon"></i>
                                 }
                                 <span class="nav-link-text" data-i18n="@subItem.I18n">@subItem.Text.AsRaw()</span>
                                 <i class="fa-solid fa-circle selection-dot"></i>
@@ -199,7 +201,7 @@
             {
                 <li class="@(pageName == group.Href.ToPage() ? "active" : "")">
                     <a href="@group.Route" data-filter-tags="@group.Tags">
-                        <i class="@group.Icon" text-warning></i>
+                        <i class="@NormalizarIcone(group.Icon)" text-warning></i>
                         <span class="nav-link-text" data-i18n="@group.I18n">@group.Title.AsRaw()</span>
                         <i class="fa-solid fa-circle selection-dot"></i>
                     </a>
