@@ -23,18 +23,31 @@ internal static class Program
             description: "Log detalhado.",
             getDefaultValue: () => false);
 
+        var minLinesOption = new Option<int>(
+            name: "--minLines",
+            description: "Mínimo de linhas por arquivo de documentação.",
+            getDefaultValue: () => 350);
+
+        var maxLinesOption = new Option<int>(
+            name: "--maxLines",
+            description: "Máximo de linhas por arquivo de documentação.",
+            getDefaultValue: () => 650);
+
         var command = new RootCommand("Gerador de documentação FrotiX (Pages + catálogos de código).")
         {
             rootOption,
             overwriteOption,
-            verboseOption
+            verboseOption,
+            minLinesOption,
+            maxLinesOption
         };
 
-        command.SetHandler((DirectoryInfo root, bool overwrite, bool verbose) =>
+        command.SetHandler((DirectoryInfo root, bool overwrite, bool verbose, int minLines, int maxLines) =>
         {
             var projectRoot = root.FullName;
             var pagesDir = Path.Combine(projectRoot, "Pages");
             var docsDir = Path.Combine(projectRoot, "Documentacao");
+            var codeDocsDir = Path.Combine(docsDir, "Codigo");
 
             if (!Directory.Exists(pagesDir))
                 throw new DirectoryNotFoundException($"Diretório não encontrado: {pagesDir}");
@@ -42,22 +55,46 @@ internal static class Program
             if (!Directory.Exists(docsDir))
                 Directory.CreateDirectory(docsDir);
 
+            if (!Directory.Exists(codeDocsDir))
+                Directory.CreateDirectory(codeDocsDir);
+
             var existingDocs = new HashSet<string>(
-                Directory.EnumerateFiles(docsDir, "*.md", SearchOption.TopDirectoryOnly)
+                Directory.EnumerateFiles(docsDir, "*.md", SearchOption.AllDirectories)
                     .Select(Path.GetFullPath),
                 StringComparer.OrdinalIgnoreCase);
 
             var result = new GenerationResult();
 
-            GenerateDocsForPages(pagesDir, docsDir, existingDocs, overwrite, verbose, result);
+            var repoIndex = BuildRepositoryIndex(projectRoot, pagesDir, verbose);
+
+            // Pages
+            GenerateDocsForPages(pagesDir, docsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+
+            // 1 md por .cs (Controllers/Helpers/Middlewares/Services/Models)
+            GenerateDocsForCSharpFolder(projectRoot, "Controllers", codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForCSharpFolder(projectRoot, "Helpers", codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForCSharpFolder(projectRoot, "Middlewares", codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForCSharpFolder(projectRoot, "Services", codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForCSharpFolder(projectRoot, "Models", codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+
+            // 1 md por .js (cadastros/dashboards/agendamento/alertasfrotix)
+            GenerateDocsForJsFolder(projectRoot, Path.Combine("wwwroot", "js", "cadastros"), codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForJsFolder(projectRoot, Path.Combine("wwwroot", "js", "dashboards"), codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForJsFolder(projectRoot, Path.Combine("wwwroot", "js", "agendamento"), codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+            GenerateDocsForJsFolder(projectRoot, Path.Combine("wwwroot", "js", "alertasfrotix"), codeDocsDir, existingDocs, overwrite, verbose, result, repoIndex, minLines, maxLines);
+
+            // Catálogos (mantém os já existentes)
             GenerateCatalogDocs(projectRoot, docsDir, existingDocs, overwrite, verbose, result);
+
+            // Normalização final (350-650 linhas) em TODOS os .md (se overwrite=true)
+            NormalizeAllMarkdownDocs(docsDir, overwrite, verbose, minLines, maxLines, result);
 
             Console.WriteLine("==== DocGenerator ====");
             Console.WriteLine($"Docs criados: {result.Created}");
             Console.WriteLine($"Docs atualizados: {result.Updated}");
             Console.WriteLine($"Docs ignorados (já existiam): {result.Skipped}");
             Console.WriteLine($"Falhas: {result.Failed}");
-        }, rootOption, overwriteOption, verboseOption);
+        }, rootOption, overwriteOption, verboseOption, minLinesOption, maxLinesOption);
 
         return await command.InvokeAsync(args);
     }
@@ -68,7 +105,10 @@ internal static class Program
     HashSet<string> existingDocs,
     bool overwrite,
     bool verbose,
-    GenerationResult result)
+    GenerationResult result,
+    RepoIndex repoIndex,
+    int minLines,
+    int maxLines)
 {
     var cshtmlFiles = Directory.EnumerateFiles(pagesDir, "*.cshtml", SearchOption.AllDirectories)
         .Where(p =>
@@ -86,6 +126,7 @@ internal static class Program
 
             return true;
         })
+        .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
         .ToList();
 
     foreach (var cshtmlPath in cshtmlFiles)
@@ -125,14 +166,18 @@ internal static class Program
             var md = BuildPageMarkdown(
                 title: title,
                 lastUpdate: lastUpdate,
-                version: "0.1",
+                version: "1.0",
                 modulo: modulo,
                 pagina: pagina,
                 route: route,
                 cshtmlPath: NormalizeSlashes(Path.Combine("Pages", rel)),
                 cshtmlCsPath: File.Exists(codeBehindPath) ? NormalizeSlashes(Path.Combine("Pages", rel + ".cs")) : null,
                 modelDirective: model,
-                assets: assets);
+                assets: assets,
+                repoIndex: repoIndex,
+                currentPageRel: NormalizeSlashes(Path.Combine("Pages", rel)));
+
+            md = EnsureLineCount(md, minLines, maxLines, $"Apêndice: Complementos automáticos ({modulo}/{pagina})");
 
             Directory.CreateDirectory(Path.GetDirectoryName(fullDocPath)!);
             File.WriteAllText(fullDocPath, md, Utf8NoBom);

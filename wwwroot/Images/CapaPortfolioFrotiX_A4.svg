@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Capa A4 (em p&#233;) para Portf&#243;lio FrotiX
+  - Tamanho: 210 &#215; 297 mm
+  - Texto "Portf&#243;lio" com est&#233;tica met&#225;lica/baixo-relevo (SVG filters)
+  - Fonte sugerida: Poppins 800 (carregada no app via Google Fonts). Fallback: Outfit / Segoe UI.
+  Observa&#231;&#227;o: se abrir este SVG fora do site, garanta que a fonte esteja instalada ou incorpore via CSS/Font.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="210mm"
+     height="297mm"
+     viewBox="0 0 2100 2970"
+     preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!--
+      Fonte "rounded" para aproximar do wordmark FrotiX.
+      Observação: o SVG tenta carregar via Google Fonts quando aberto em navegador.
+    -->
+    <style>
+      <![CDATA[
+        @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@900&display=swap');
+      ]]>
+    </style>
+
+    <!-- Padrão de aço escovado (linhas finas + variação leve) -->
+    <pattern id="brushedLines" patternUnits="userSpaceOnUse" width="22" height="22" patternTransform="rotate(-10)">
+      <rect width="22" height="22" fill="transparent"/>
+      <!-- reflexos -->
+      <path d="M0 5 H22 M0 11 H22 M0 17 H22" stroke="#eaf1f7" stroke-width="1" opacity="0.10"/>
+      <!-- sulcos -->
+      <path d="M0 7 H22 M0 13 H22 M0 19 H22" stroke="#000000" stroke-width="1" opacity="0.08"/>
+    </pattern>
+
+    <!-- Fundo (grafite) -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b242b"/>
+      <stop offset="0.55" stop-color="#2a343c"/>
+      <stop offset="1" stop-color="#151b20"/>
+    </linearGradient>
+
+    <!-- Vinheta suave -->
+    <radialGradient id="vignette" cx="50%" cy="35%" r="85%">
+      <stop offset="0" stop-color="rgba(255,255,255,0.06)"/>
+      <stop offset="0.45" stop-color="rgba(255,255,255,0.02)"/>
+      <stop offset="1" stop-color="rgba(0,0,0,0.55)"/>
+    </radialGradient>
+
+    <!-- Textura (ru&#237;do) -->
+    <filter id="grain" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
+      <feColorMatrix in="noise" type="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 0.08 0" result="noiseAlpha"/>
+      <feBlend in="SourceGraphic" in2="noiseAlpha" mode="overlay"/>
+    </filter>
+
+    <!-- Gradiente met&#225;lico para o texto (cinza chumbo) -->
+    <linearGradient id="metalFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#53626d"/>
+      <stop offset="0.18" stop-color="#2a343c"/>
+      <stop offset="0.42" stop-color="#6f828f"/>
+      <stop offset="0.62" stop-color="#1f272d"/>
+      <stop offset="1" stop-color="#5d707c"/>
+    </linearGradient>
+
+    <!-- "Bevel"/baixo-relevo: sombra + ilumina&#231;&#227;o especular -->
+    <filter id="metalEmboss" x="-25%" y="-25%" width="150%" height="150%">
+      <!-- profundidade/extrus&#227;o -->
+      <feOffset in="SourceAlpha" dx="10" dy="12" result="offA"/>
+      <feGaussianBlur in="offA" stdDeviation="6" result="offBlur"/>
+      <feColorMatrix in="offBlur" type="matrix"
+                     values="0 0 0 0 0
+                             0 0 0 0 0
+                             0 0 0 0 0
+                             0 0 0 0.55 0" result="shadow"/>
+
+      <!-- brilho especular no topo -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="alphaBlur"/>
+      <feSpecularLighting in="alphaBlur"
+                          surfaceScale="6"
+                          specularConstant="0.85"
+                          specularExponent="25"
+                          lighting-color="#f3f7ff"
+                          result="specLight">
+        <feDistantLight azimuth="235" elevation="45"/>
+      </feSpecularLighting>
+      <feComposite in="specLight" in2="SourceAlpha" operator="in" result="specClipped"/>
+      <feColorMatrix in="specClipped" type="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 0.55 0" result="specSoft"/>
+
+      <!-- leve sombra interna (para "baixo relevo") -->
+      <feOffset in="SourceAlpha" dx="-3" dy="-3" result="inOff"/>
+      <feGaussianBlur in="inOff" stdDeviation="4" result="inBlur"/>
+      <feComposite in="inBlur" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="inShadow"/>
+      <feColorMatrix in="inShadow" type="matrix"
+                     values="0 0 0 0 0
+                             0 0 0 0 0
+                             0 0 0 0 0
+                             0 0 0 0.45 0" result="inShadowSoft"/>
+
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="inShadowSoft"/>
+        <feMergeNode in="specSoft"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glow sutil do contorno (como no logo grafite) -->
+    <filter id="edgeGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+                     values="0 0 0 0 0.65
+                             0 0 0 0 0.78
+                             0 0 0 0 0.90
+                             0 0 0 0.18 0" result="gl"/>
+      <feMerge>
+        <feMergeNode in="gl"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="2100" height="2970" fill="url(#bgGrad)"/>
+  <rect x="0" y="0" width="2100" height="2970" fill="url(#vignette)" opacity="0.95"/>
+
+  <!-- Logo FrotiX (referência relativa ao arquivo/site)
+       - Para visualizar abrindo o SVG direto do disco, use caminho RELATIVO (mesma pasta).
+       - No site, também funciona porque resolve relativo a /Images/.
+  -->
+  <g opacity="0.96">
+    <image x="210" y="220" width="1680" height="650"
+           href="LogotipoCompletoFrotiXGrafiteFundoTransparente.png"
+           xlink:href="LogotipoCompletoFrotiXGrafiteFundoTransparente.png"
+           preserveAspectRatio="xMidYMid meet"/>
+  </g>
+
+  <!-- T&#237;tulo principal -->
+  <g filter="url(#grain)">
+    <!-- "Extrus&#227;o" extra (um degrau) -->
+    <text x="1050" y="1850"
+          text-anchor="middle"
+          font-family="'Nunito Sans', Poppins, Outfit, 'Segoe UI', Arial, sans-serif"
+          font-weight="900"
+          font-size="540"
+          letter-spacing="-14"
+          textLength="1500"
+          lengthAdjust="spacingAndGlyphs"
+          fill="#141b20"
+          opacity="0.55"
+          transform="translate(12,14)">
+      Portf&#243;lio
+    </text>
+
+    <!-- Texto met&#225;lico (principal) -->
+    <text x="1050" y="1850"
+          text-anchor="middle"
+          font-family="'Nunito Sans', Poppins, Outfit, 'Segoe UI', Arial, sans-serif"
+          font-weight="900"
+          font-size="540"
+          letter-spacing="-14"
+          textLength="1500"
+          lengthAdjust="spacingAndGlyphs"
+          fill="url(#metalFill)"
+          stroke="#0f1418"
+          stroke-width="10"
+          paint-order="stroke fill"
+          filter="url(#metalEmboss)">
+      Portf&#243;lio
+    </text>
+
+    <!-- Camada de aço escovado (sutil) por cima do metal -->
+    <text x="1050" y="1850"
+          text-anchor="middle"
+          font-family="'Nunito Sans', Poppins, Outfit, 'Segoe UI', Arial, sans-serif"
+          font-weight="900"
+          font-size="540"
+          letter-spacing="-14"
+          textLength="1500"
+          lengthAdjust="spacingAndGlyphs"
+          fill="url(#brushedLines)"
+          opacity="0.22">
+      Portf&#243;lio
+    </text>
+
+    <!-- Contorno com glow (bem sutil) -->
+    <text x="1050" y="1850"
+          text-anchor="middle"
+          font-family="'Nunito Sans', Poppins, Outfit, 'Segoe UI', Arial, sans-serif"
+          font-weight="900"
+          font-size="540"
+          letter-spacing="-14"
+          textLength="1500"
+          lengthAdjust="spacingAndGlyphs"
+          fill="none"
+          stroke="#88a9c0"
+          stroke-width="3"
+          opacity="0.25"
+          filter="url(#edgeGlow)">
+      Portf&#243;lio
+    </text>
+  </g>
+
+  <!-- Rodap&#233; opcional (discreto) -->
+  <g opacity="0.65">
+    <text x="1050" y="2730"
+          text-anchor="middle"
+          font-family="Outfit, Poppins, Segoe UI, Arial, sans-serif"
+          font-weight="600"
+          font-size="58"
+          fill="#9fb0bd">
+      FrotiX Web &#8226; Gest&#227;o de Transportes
+    </text>
+  </g>
+</svg>
