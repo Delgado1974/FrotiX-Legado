@@ -1,3 +1,22 @@
+/*
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  📚 DOCUMENTAÇÃO DISPONÍVEL                                              ║
+ * ║                                                                          ║
+ * ║  Este arquivo está completamente documentado em:                         ║
+ * ║  📄 Documentacao/Pages/Agenda - Index.md                                 ║
+ * ║                                                                          ║
+ * ║  A documentação inclui:                                                   ║
+ * ║  • Explicação detalhada de cada endpoint API                             ║
+ * ║  • Lógica de processamento de agendamentos recorrentes                   ║
+ * ║  • Validações e verificações de conflitos                                ║
+ * ║  • Interconexões com outros componentes                                  ║
+ * ║                                                                          ║
+ * ║  Última atualização: 08/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ */
+
 using FrotiX.Data;
 using FrotiX.Models;
 using FrotiX.Models.DTO;

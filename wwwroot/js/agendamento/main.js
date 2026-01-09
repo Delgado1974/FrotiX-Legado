@@ -1,3 +1,23 @@
+/*
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  📚 DOCUMENTAÇÃO DISPONÍVEL                                              ║
+ * ║                                                                          ║
+ * ║  Este arquivo está completamente documentado em:                         ║
+ * ║  📄 Documentacao/Pages/Agenda - Index.md                                 ║
+ * ║                                                                          ║
+ * ║  A documentação inclui:                                                   ║
+ * ║  • Explicação detalhada de todas as funções principais                   ║
+ * ║  • Fluxo completo de inicialização                                      ║
+ * ║  • Handlers de eventos e validações                                      ║
+ * ║  • Sistema de recorrência explicado                                     ║
+ * ║  • Interconexões com outros módulos                                      ║
+ * ║                                                                          ║
+ * ║  Última atualização: 08/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ */
+
 // ====================================================================
 // MAIN.JS - Entry Point da Aplicação de Agendamento
 // ====================================================================
