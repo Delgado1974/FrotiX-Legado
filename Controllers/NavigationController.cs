@@ -330,12 +330,37 @@ namespace FrotiX.Controllers
                     .OrderBy(r => r.Ordem)
                     .ToList();
 
+                Console.WriteLine($"[GetTreeAdmin] Total de recursos no banco: {todosRecursos.Count}");
+                Console.WriteLine($"[GetTreeAdmin] Recursos raiz (ParentId = null): {todosRecursos.Count(r => r.ParentId == null)}");
+                
+                // ✅ Log dos primeiros 5 recursos raiz
+                var recursosRaiz = todosRecursos.Where(r => r.ParentId == null).OrderBy(r => r.Ordem).Take(5).ToList();
+                foreach (var raiz in recursosRaiz)
+                {
+                    Console.WriteLine($"[GetTreeAdmin] Raiz: {raiz.Nome} (Ordem: {raiz.Ordem}, Nivel: {raiz.Nivel}, ParentId: {raiz.ParentId})");
+                }
+
                 var arvore = MontarArvoreRecursiva(todosRecursos, null);
+                
+                Console.WriteLine($"[GetTreeAdmin] Total de itens raiz na árvore gerada: {arvore.Count}");
+                
+                // ✅ Conta total recursivamente
+                int ContarItens(List<RecursoTreeDTO> items)
+                {
+                    if (items == null || items.Count == 0) return 0;
+                    return items.Count + items.Sum(i => ContarItens(i.Items));
+                }
+                
+                var totalNaArvore = ContarItens(arvore);
+                Console.WriteLine($"[GetTreeAdmin] Total de itens na árvore (recursivo): {totalNaArvore}");
+                Console.WriteLine($"[GetTreeAdmin] Diferença: {todosRecursos.Count - totalNaArvore}");
 
                 return Json(new { success = true, data = arvore });
             }
             catch (Exception error)
             {
+                Console.WriteLine($"[GetTreeAdmin] ERRO: {error.Message}");
+                Console.WriteLine($"[GetTreeAdmin] StackTrace: {error.StackTrace}");
                 Alerta.TratamentoErroComLinha("NavigationController.cs", "GetTreeAdmin", error);
                 return Json(new { success = false, message = error.Message });
             }
