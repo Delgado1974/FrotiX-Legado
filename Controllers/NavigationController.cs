@@ -353,10 +353,100 @@ namespace FrotiX.Controllers
                 var todosRecursos = _unitOfWork.Recurso.GetAll().ToList();
                 var totalRecursos = todosRecursos.Count;
                 var recursosRaiz = todosRecursos.Where(r => r.ParentId == null).ToList();
+                
+                // ✅ Verifica registros órfãos (filhos com ParentId que não existe)
+                var idsExistentes = todosRecursos.Select(r => r.RecursoId).ToHashSet();
+                var recursosOrfaos = todosRecursos
+                    .Where(r => r.ParentId != null && !idsExistentes.Contains(r.ParentId.Value))
+                    .ToList();
+                
                 var arvore = MontarArvoreRecursiva(todosRecursos, null);
+                var totalNaArvore = ContarItensNaArvore(arvore);
 
                 return Json(new
                 {
+                    totalRecursos = totalRecursos,
+                    recursosRaiz = recursosRaiz.Count,
+                    recursosOrfaos = recursosOrfaos.Count,
+                    recursosOrfaosDetalhes = recursosOrfaos.Select(r => new
+                    {
+                        id = r.RecursoId,
+                        nome = r.Nome,
+                        parentId = r.ParentId,
+                        ordem = r.Ordem,
+                        nivel = r.Nivel
+                    }).ToList(),
+                    totalNaArvore = totalNaArvore,
+                    diferenca = totalRecursos - totalNaArvore,
+                    arvore = arvore
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "DebugTreeAdmin", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
+
+        /// <summary>
+        /// Conta total de itens na árvore recursivamente
+        /// </summary>
+        private int ContarItensNaArvore(List<RecursoTreeDTO> arvore)
+        {
+            if (arvore == null || arvore.Count == 0) return 0;
+            return arvore.Count + arvore.Sum(item => ContarItensNaArvore(item.Items));
+        }
+
+        /// <summary>
+        /// Corrige registros órfãos (filhos com ParentId inválido)
+        /// </summary>
+        [HttpPost]
+        [Route("CorrigirOrfaos")]
+        public IActionResult CorrigirOrfaos()
+        {
+            try
+            {
+                var todosRecursos = _unitOfWork.Recurso.GetAll().ToList();
+                var idsExistentes = todosRecursos.Select(r => r.RecursoId).ToHashSet();
+                
+                var recursosOrfaos = todosRecursos
+                    .Where(r => r.ParentId != null && !idsExistentes.Contains(r.ParentId.Value))
+                    .ToList();
+
+                var corrigidos = 0;
+                foreach (var orfao in recursosOrfaos)
+                {
+                    // ✅ Coloca como raiz (ParentId = null) e ajusta nível
+                    orfao.ParentId = null;
+                    orfao.Nivel = 0;
+                    _unitOfWork.Recurso.Update(orfao);
+                    corrigidos++;
+                }
+
+                if (corrigidos > 0)
+                {
+                    _unitOfWork.Save();
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"{corrigidos} registro(s) órfão(s) corrigido(s)",
+                    corrigidos = corrigidos,
+                    detalhes = recursosOrfaos.Select(r => new
+                    {
+                        id = r.RecursoId,
+                        nome = r.Nome,
+                        parentIdAnterior = r.ParentId
+                    }).ToList()
+                });
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("NavigationController.cs", "CorrigirOrfaos", error);
+                return Json(new { success = false, message = error.Message });
+            }
+        }
                     success = true,
                     totalRecursosNoBanco = totalRecursos,
                     totalRecursosRaiz = recursosRaiz.Count,
