@@ -56,7 +56,7 @@
 - [ ] `Pages/Administracao/LogErros.cshtml.cs` → `Pages/Administracao/LogErros.cshtml.cs.md`
 
 ### Agenda
-- [x] `Pages/Agenda/Index.cshtml` → `Pages/Agenda/Index.md` ✅ (Revisar e expandir)
+- [x] `Pages/Agenda/Index.cshtml` → `Pages/Agenda/Index.md` ✅ **COMPLETO** (2300+ linhas)
 - [ ] `Pages/Agenda/Index.cshtml.cs` → `Pages/Agenda/Index.cshtml.cs.md`
 
 ### AlertasFrotiX
@@ -801,3 +801,15 @@
 
 **Última atualização**: 08/01/2026  
 **Mantido por**: Sistema de Documentação FrotiX
+
+---
+
+## 📌 Notas Importantes
+
+1. **Documentação de Referência**: A documentação da Agenda (`Pages/Agenda/Index.md`) com **2300+ linhas** serve como modelo de qualidade para todas as outras documentações.
+
+2. **Comentários Visuais**: Todos os arquivos fonte documentados possuem comentários visuais no topo indicando onde está a documentação.
+
+3. **Estrutura de Diretórios**: A documentação está organizada em subdiretórios por tipo de arquivo (Pages, Controllers, Services, etc.).
+
+4. **Padrão de Qualidade**: Cada documentação deve ter pelo menos 500 linhas (arquivos simples) ou 1000+ linhas (arquivos complexos como Agenda).
