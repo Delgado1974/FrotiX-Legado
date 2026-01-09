@@ -639,123 +639,6 @@
 
 @section ScriptsBlock {
 <script>
-    // ✅ DECLARAÇÕES GLOBAIS DE FUNÇÕES (devem estar ANTES dos componentes serem criados)
-    // Callback APÓS o DropDownTree de páginas ser criado
-    function onPaginaDropdownCreated() {
-        try {
-            var ddlPaginaObj = document.getElementById('ddlPagina')?.ej2_instances?.[0];
-            if (ddlPaginaObj) {
-                ddlPaginaObj.itemTemplate = function(data) {
-                    if (data.isCategory) {
-                        return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
-                    }
-                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="fa-regular fa-file-lines" style="font-size: 16px; width: 20px; color: #6c757d;"></i>' +
-                           '<span>' + data.text + '</span>' +
-                           '</div>';
-                };
-
-                ddlPaginaObj.valueTemplate = function(data) {
-                    if (!data || data.isCategory) return '';
-                    var displayText = data.displayText || data.text;
-                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="fa-regular fa-file-lines" style="font-size: 14px; width: 18px; color: #6c757d;"></i>' +
-                           '<span>' + displayText + '</span>' +
-                           '</div>';
-                };
-
-                // ✅ Evento SELECTING: dispara ANTES de confirmar seleção (mais confiável)
-                ddlPaginaObj.selecting = function(args) {
-                    console.log('=== SELECTING página (ANTES) ===', args);
-                    if (args.nodeData && !args.nodeData.isCategory) {
-                        // Armazena a seleção na variável global IMEDIATAMENTE
-                        ultimaPaginaSelecionada = {
-                            id: args.nodeData.id,
-                            text: args.nodeData.text,
-                            href: args.nodeData.href || args.nodeData.route || ''
-                        };
-                        console.log('✅ Seleção armazenada:', ultimaPaginaSelecionada);
-                    }
-                };
-
-                // ✅ Evento CHANGE: dispara DEPOIS de confirmar seleção (backup)
-                ddlPaginaObj.change = function(args) {
-                    console.log('=== CHANGE página (DEPOIS) ===', args);
-                    if (args.itemData && !args.itemData.isCategory) {
-                        ultimaPaginaSelecionada = {
-                            id: args.itemData.id,
-                            text: args.itemData.text,
-                            href: args.itemData.href || args.itemData.route || ''
-                        };
-                        console.log('✅ Seleção confirmada (CHANGE):', ultimaPaginaSelecionada);
-                        
-                        // Preenche o campo Href automaticamente
-                        if (ultimaPaginaSelecionada.href) {
-                            document.getElementById('txtHref').value = ultimaPaginaSelecionada.href;
-                        }
-                    }
-                };
-            }
-        } catch (erro) {
-            console.error('[onPaginaDropdownCreated] Erro:', erro);
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onPaginaDropdownCreated", erro);
-        }
-    }
-
-    // Callback APÓS o DropDownTree de ícones ser criado
-    function onIconeDropdownCreated() {
-        try {
-            var ddlIconeObj = document.getElementById('ddlIcone')?.ej2_instances?.[0];
-            if (ddlIconeObj) {
-                ddlIconeObj.itemTemplate = function(data) {
-                    if (data.isCategory) {
-                        return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
-                    }
-                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 16px; width: 20px; color: #f29900;"></i>' +
-                           '<span style="color: #5f6b7a;">' + data.text + '</span>' +
-                           '</div>';
-                };
-
-                ddlIconeObj.valueTemplate = function(data) {
-                    if (!data || data.isCategory) return '';
-                    return '<div style="display: flex; align-items: center; gap: 8px;">' +
-                           '<i class="' + data.id + '" style="font-size: 14px; width: 18px; color: #f29900;"></i>' +
-                           '<span style="color: #5f6b7a;">' + data.text + '</span>' +
-                           '</div>';
-                };
-
-                // Eventos alinhados ao comportamento de páginas (aplica no primeiro clique)
-                ddlIconeObj.selecting = function(args) {
-                    if (args.nodeData && !args.nodeData.isCategory) {
-                        ultimoIconeSelecionado = args.nodeData.id;
-                        var txtIconClass = document.getElementById('txtIconClass');
-                        if (txtIconClass) {
-                            txtIconClass.value = args.nodeData.id;
-                        }
-                    }
-                };
-
-                ddlIconeObj.change = function(args) {
-                    if (args.itemData && !args.itemData.isCategory) {
-                        ultimoIconeSelecionado = args.itemData.id;
-                        var txtIconClass = document.getElementById('txtIconClass');
-                        if (txtIconClass) {
-                            txtIconClass.value = args.itemData.id;
-                        }
-                        // Chama o handler de mudança se existir
-                        if (typeof onIconeChange === 'function') {
-                            onIconeChange(args);
-                        }
-                    }
-                };
-            }
-        } catch (erro) {
-            console.error('[onIconeDropdownCreated] Erro:', erro);
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onIconeDropdownCreated", erro);
-        }
-    }
-
     var treeData = [];
     var treeObj = null;
     var selectedItem = null;
@@ -786,8 +669,8 @@
     var ultimoIconeSelecionado = null;
     var ultimaPaginaSelecionada = null;
 
-    // ✅ FUNÇÃO REMOVIDA - já está definida no início do script para evitar erro de "not defined"
-    // function onIconeDropdownCreated() { ... } - MOVIDA PARA O INÍCIO DO SCRIPT
+    // Callback APÓS o DropDownTree de ícones ser criado
+    function onIconeDropdownCreated() {
         try {
             var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
             if (ddlIconeObj) {
@@ -1745,42 +1628,10 @@
         }
     }
 
-    // ✅ FUNÇÃO REMOVIDA - já está definida no início do script para evitar erro de "not defined"
-    // function onPaginaDropdownCreated() { ... } - MOVIDA PARA O INÍCIO DO SCRIPT
-
-    function carregarPaginasSistema() {
+    function onPaginaDropdownCreated() {
         try {
-            fetch('/api/Navigation/GetPaginasHierarquico')
-                .then(r => r.json())
-                .then(result => {
-                    console.log('Páginas carregadas:', result);
-                    if (result.success && result.data) {
-                        var ddlPaginaObj = document.getElementById('ddlPagina')?.ej2_instances?.[0];
-                        if (ddlPaginaObj) {
-                            ddlPaginaObj.fields = {
-                                dataSource: result.data,
-                                value: 'id',
-                                text: 'text',
-                                parentValue: 'parentId',
-                                hasChildren: 'hasChild',
-                                child: 'child'
-                            };
-                            ddlPaginaObj.dataBind();
-                            console.log('DropDownTree de páginas populado com', result.data.length, 'módulos');
-                        }
-                    }
-                })
-                .catch(erro => {
-                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarPaginasSistema", erro);
-                });
-        } catch (erro) {
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarPaginasSistema", erro);
-        }
-    }
-
-    // ✅ FUNÇÃO REMOVIDA - código duplicado removido
-    // O código abaixo estava duplicado e quebrado, foi removido:
-    /*
+            var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
+            if (ddlPaginaObj) {
                 ddlPaginaObj.itemTemplate = function(data) {
                     if (data.isCategory) {
                         return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
@@ -2079,15 +1930,6 @@
             }
 
             var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
-            
-            // ✅ Mostra modal de espera padrão FrotiX
-            var mensagemLoading = ehNovoItem ? 'Inserindo Item de Menu' : 'Atualizando Item de Menu';
-            if (window.FtxSpin) {
-                window.FtxSpin.show(mensagemLoading);
-            } else {
-                // Fallback se FtxSpin não estiver disponível
-                console.log('[LOADING]', mensagemLoading);
-            }
 
             fetch('/api/Navigation/SaveRecurso', {
                 method: 'POST',
@@ -2096,12 +1938,6 @@
             })
             .then(r => r.json())
             .then(result => {
-                // ✅ Esconde modal de espera
-                if (window.FtxSpin) {
-                    window.FtxSpin.hide();
-                }
-                
-                if (result.success) {
                 if (result.success) {
                     mostrarAlerta(result.message, 'success');
 
@@ -2163,25 +1999,13 @@
                         habilitarCardPropriedades(true);
                     }
                 } else {
-                    // ✅ Esconde modal de espera em caso de erro na resposta
-                    if (window.FtxSpin) {
-                        window.FtxSpin.hide();
-                    }
                     mostrarAlerta('Erro: ' + result.message, 'danger');
                 }
             })
             .catch(erro => {
-                // ✅ Esconde modal de espera em caso de erro
-                if (window.FtxSpin) {
-                    window.FtxSpin.hide();
-                }
                 Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
             });
         } catch (erro) {
-            // ✅ Esconde modal de espera em caso de erro
-            if (window.FtxSpin) {
-                window.FtxSpin.hide();
-            }
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
         }
     }

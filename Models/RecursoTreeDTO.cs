@@ -49,7 +49,7 @@ namespace FrotiX.Models
         public bool Ativo { get; set; } = true;
 
         /// <summary>Lista de filhos (subitens do menu)</summary>
-        public List<RecursoTreeDTO>? Items { get; set; }
+        public List<RecursoTreeDTO>? Items { get; set; } = new List<RecursoTreeDTO>();
 
         /// <summary>
         /// Converte um Recurso do banco para DTO
@@ -70,9 +70,7 @@ namespace FrotiX.Models
                 Descricao = recurso.Descricao,
                 Ativo = recurso.Ativo,
                 HasChild = recurso.HasChild,
-                Expanded = true,
-                // ✅ IMPORTANTE: Items será preenchido pela montagem recursiva, não inicializa aqui
-                Items = null
+                Expanded = true
             };
         }
 
