@@ -356,7 +356,7 @@
 - [ ] `Pages/Veiculo/Upsert.cshtml.cs` → `Pages/Veiculo/Upsert.cshtml.cs.md`
 
 ### Viagens
-- [x] `Pages/Viagens/Index.cshtml` → `Pages/Viagens/Index.md` ✅ (Revisar e expandir)
+- [x] `Pages/Viagens/Index.cshtml` → `Pages/Viagens/Index.md` ✅ **COMPLETO** (700+ linhas)
 - [ ] `Pages/Viagens/Index.cshtml.cs` → `Pages/Viagens/Index.cshtml.cs.md`
 - [ ] `Pages/Viagens/DashboardEventos.cshtml` → `Pages/Viagens/DashboardEventos.md`
 - [ ] `Pages/Viagens/DashboardEventos.cshtml.cs` → `Pages/Viagens/DashboardEventos.cshtml.cs.md`
