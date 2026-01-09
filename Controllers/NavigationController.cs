@@ -444,6 +444,76 @@ namespace FrotiX.Controllers
         }
 
         /// <summary>
+        /// TESTE: Verifica estrutura completa da árvore montada
+        /// </summary>
+        [HttpGet]
+        [Route("TestarEstruturaArvore")]
+        public IActionResult TestarEstruturaArvore()
+        {
+            try
+            {
+                var todosRecursos = _unitOfWork.Recurso.GetAll().ToList();
+                var arvore = MontarArvoreRecursiva(todosRecursos, null);
+                
+                // Função auxiliar para contar recursivamente
+                int ContarItens(List<RecursoTreeDTO> items)
+                {
+                    if (items == null || items.Count == 0) return 0;
+                    return items.Count + items.Sum(i => ContarItens(i.Items));
+                }
+                
+                // Função auxiliar para mostrar estrutura
+                object MostrarEstrutura(List<RecursoTreeDTO> items, int nivel = 0)
+                {
+                    return items.Select(item => new
+                    {
+                        nome = item.Text,
+                        ordem = item.ordem,
+                        nivel = nivel,
+                        temFilhos = item.HasChild,
+                        quantidadeFilhos = item.Items?.Count ?? 0,
+                        filhos = item.Items != null && item.Items.Any() 
+                            ? MostrarEstrutura(item.Items, nivel + 1) 
+                            : null
+                    }).ToList();
+                }
+                
+                return Json(new
+                {
+                    success = true,
+                    totalRecursosNoBanco = todosRecursos.Count,
+                    totalNaArvore = ContarItens(arvore),
+                    itensRaiz = arvore.Count,
+                    estruturaCompleta = MostrarEstrutura(arvore),
+                    // Primeiros 3 itens raiz com detalhes completos
+                    primeiros3Raiz = arvore.Take(3).Select(r => new
+                    {
+                        nome = r.Text,
+                        ordem = r.Ordem,
+                        temFilhos = r.HasChild,
+                        quantidadeFilhos = r.Items?.Count ?? 0,
+                        filhos = r.Items?.Select(f => new
+                        {
+                            nome = f.Text,
+                            ordem = f.Ordem,
+                            temFilhos = f.HasChild,
+                            quantidadeFilhos = f.Items?.Count ?? 0
+                        }).ToList()
+                    }).ToList()
+                });
+            }
+            catch (Exception error)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = error.Message,
+                    stackTrace = error.StackTrace
+                });
+            }
+        }
+
+        /// <summary>
         /// TESTE: Verifica se filhos estão sendo encontrados corretamente
         /// </summary>
         [HttpGet]
@@ -1231,15 +1301,26 @@ namespace FrotiX.Controllers
                 .OrderBy(r => r.Ordem)
                 .ToList();
             
-            return filtrados
+            var resultado = filtrados
                 .Select(r =>
                 {
                     var dto = RecursoTreeDTO.FromRecurso(r);
-                    dto.Items = MontarArvoreRecursiva(recursos, r.RecursoId);
-                    dto.HasChild = dto.Items.Any();
+                    // ✅ IMPORTANTE: Inicializa Items como lista vazia se null
+                    if (dto.Items == null)
+                    {
+                        dto.Items = new List<RecursoTreeDTO>();
+                    }
+                    
+                    // ✅ Busca filhos recursivamente
+                    var filhos = MontarArvoreRecursiva(recursos, r.RecursoId);
+                    dto.Items = filhos;
+                    dto.HasChild = filhos != null && filhos.Any();
+                    
                     return dto;
                 })
                 .ToList();
+            
+            return resultado;
         }
 
         /// <summary>
