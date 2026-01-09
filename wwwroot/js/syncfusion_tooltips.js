@@ -1,3 +1,18 @@
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/JavaScript/syncfusion_tooltips.js.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo gerencia tooltips globais usando Syncfusion EJ2, substituindo
+    tooltips do Bootstrap e funcionando com elementos dinâmicos. Para entender
+    completamente a funcionalidade, consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
 // syncfusion_tooltips.js - Tooltip GLOBAL para todos os elementos com data-ejtip
 (function ()
 {

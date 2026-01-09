@@ -1,3 +1,18 @@
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/JavaScript/global-toast.js.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo fornece sistema de notificações toast nativo (sem dependências),
+    com animações suaves e barra de progresso. Para entender completamente a
+    funcionalidade, consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
 // wwwroot/js/global-toast.js
 // VERSÃO DEFINITIVA - AppToast Puro (JavaScript Nativo)
 // Sem dependência do Syncfusion - 100% confiável

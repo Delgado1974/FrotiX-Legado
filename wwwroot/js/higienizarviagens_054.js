@@ -1,4 +1,19 @@
-﻿// ===== FUNÇÕES DE LOADING - PADRÃO FROTIX =====
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/JavaScript/higienizarviagens_054.js.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo gerencia a funcionalidade de higienização/unificação de origens
+    e destinos de viagens. Para entender completamente a funcionalidade,
+    consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
+// ===== FUNÇÕES DE LOADING - PADRÃO FROTIX =====
 function mostrarLoading(texto) {
     const overlay = document.getElementById('loadingOverlayHigienizar');
     if (overlay) {

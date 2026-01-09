@@ -74,7 +74,7 @@
 - [ ] `Pages/AtaRegistroPrecos/Upsert.cshtml.cs` → `Pages/AtaRegistroPrecos/Upsert.cshtml.cs.md`
 
 ### Combustivel
-- [ ] `Pages/Combustivel/Index.cshtml` → `Pages/Combustivel/Index.md`
+- [x] `Pages/Combustivel/Index.cshtml` → `Pages/Combustivel/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/Combustivel/Index.cshtml.cs` → `Pages/Combustivel/Index.cshtml.cs.md`
 - [ ] `Pages/Combustivel/Upsert.cshtml` → `Pages/Combustivel/Upsert.md`
 - [ ] `Pages/Combustivel/Upsert.cshtml.cs` → `Pages/Combustivel/Upsert.cshtml.cs.md`
@@ -96,7 +96,7 @@
 - [ ] `Pages/Empenho/Upsert.cshtml.cs` → `Pages/Empenho/Upsert.cshtml.cs.md`
 
 ### Encarregado
-- [ ] `Pages/Encarregado/Index.cshtml` → `Pages/Encarregado/Index.md`
+- [x] `Pages/Encarregado/Index.cshtml` → `Pages/Encarregado/Index.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 - [ ] `Pages/Encarregado/Index.cshtml.cs` → `Pages/Encarregado/Index.cshtml.cs.md`
 - [ ] `Pages/Encarregado/Upsert.cshtml` → `Pages/Encarregado/Upsert.md`
 - [ ] `Pages/Encarregado/Upsert.cshtml.cs` → `Pages/Encarregado/Upsert.cshtml.cs.md`
@@ -691,12 +691,12 @@
 ## 📜 JavaScript
 
 ### Raiz (wwwroot/js/)
-- [ ] `wwwroot/js/alerta.js` → `JavaScript/alerta.js.md`
-- [ ] `wwwroot/js/frotix.js` → `JavaScript/frotix.js.md`
-- [ ] `wwwroot/js/higienizarviagens_054.js` → `JavaScript/higienizarviagens_054.js.md`
-- [ ] `wwwroot/js/sweetalert_interop.js` → `JavaScript/sweetalert_interop.js.md`
-- [ ] `wwwroot/js/syncfusion_tooltips.js` → `JavaScript/syncfusion_tooltips.js.md`
-- [ ] `wwwroot/js/global-toast.js` → `JavaScript/global-toast.js.md`
+- [x] `wwwroot/js/alerta.js` → `JavaScript/alerta.js.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
+- [x] `wwwroot/js/frotix.js` → `JavaScript/frotix.js.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
+- [x] `wwwroot/js/higienizarviagens_054.js` → `JavaScript/higienizarviagens_054.js.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
+- [x] `wwwroot/js/sweetalert_interop.js` → `JavaScript/sweetalert_interop.js.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
+- [x] `wwwroot/js/syncfusion_tooltips.js` → `JavaScript/syncfusion_tooltips.js.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
+- [x] `wwwroot/js/global-toast.js` → `JavaScript/global-toast.js.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 
 ### Cadastros (wwwroot/js/cadastros/)
 - [ ] `wwwroot/js/cadastros/ViagemIndex.js` → `JavaScript/cadastros/ViagemIndex.md`
@@ -768,7 +768,7 @@
 
 ## 🎨 CSS
 
-- [ ] `wwwroot/css/frotix.css` → `CSS/frotix.css.md`
+- [x] `wwwroot/css/frotix.css` → `CSS/frotix.css.md` ✅ **COMPLETO** (Padrão FrotiX Simplificado)
 
 ---
 
@@ -784,9 +784,9 @@
 | **Models** | ~130 | 0 | ~130 | 0% |
 | **Repository** | ~100 | 0 | ~100 | 0% |
 | **Data** | 5 | 0 | 5 | 0% |
-| **JavaScript** | ~60 | 0 | ~60 | 0% |
-| **CSS** | 1 | 0 | 1 | 0% |
-| **TOTAL** | **~714** | **2** | **~712** | **0.3%** |
+| **JavaScript** | ~60 | 6 | ~54 | 10% |
+| **CSS** | 1 | 1 | 0 | 100% |
+| **TOTAL** | **~714** | **9** | **~705** | **1.3%** |
 
 ---
 

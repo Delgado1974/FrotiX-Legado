@@ -1,3 +1,18 @@
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/JavaScript/alerta.js.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo fornece uma interface simplificada para exibir alertas, confirmações
+    e tratamento de erros em todo o sistema FrotiX. Para entender completamente a
+    funcionalidade, consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
 // ================================
 // Arquivo: alerta.js
 // Wrapper utilitário para SweetAlertInterop

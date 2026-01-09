@@ -1,3 +1,18 @@
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/JavaScript/sweetalert_interop.js.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo é a camada de baixo nível que renderiza modais de alerta usando
+    SweetAlert2 com design customizado FrotiX. Para entender completamente a
+    funcionalidade, consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
 window.SweetAlertInterop = {
     ShowCustomAlert: async function (icon, iconHtml, title, message, confirmButtonText, cancelButtonText = null)
     {

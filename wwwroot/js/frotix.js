@@ -1,3 +1,18 @@
+/*
+    ═══════════════════════════════════════════════════════════════════════════════
+    📄 DOCUMENTAÇÃO COMPLETA DISPONÍVEL
+    ═══════════════════════════════════════════════════════════════════════════════
+    
+    📍 Localização: Documentacao/JavaScript/frotix.js.md
+    📅 Última Atualização: 08/01/2026
+    📋 Versão: 2.0 (Padrão FrotiX Simplificado)
+    
+    Este arquivo contém utilitários globais, sistemas de UI (spinner, ripple, loading)
+    e funções de formatação. Para entender completamente a funcionalidade,
+    consulte a documentação acima.
+    ═══════════════════════════════════════════════════════════════════════════════
+*/
+
 /**
  * Corta as bordas transparentes de uma imagem PNG e redimensiona para largura e altura desejadas
  * param {HTMLImageElement} img - Elemento de imagem já carregado
