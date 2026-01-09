@@ -786,8 +786,8 @@
     var ultimoIconeSelecionado = null;
     var ultimaPaginaSelecionada = null;
 
-    // Callback APÓS o DropDownTree de ícones ser criado
-    function onIconeDropdownCreated() {
+    // ✅ FUNÇÃO REMOVIDA - já está definida no início do script para evitar erro de "not defined"
+    // function onIconeDropdownCreated() { ... } - MOVIDA PARA O INÍCIO DO SCRIPT
         try {
             var ddlIconeObj = document.getElementById('ddlIcone').ej2_instances[0];
             if (ddlIconeObj) {
@@ -1745,10 +1745,42 @@
         }
     }
 
-    function onPaginaDropdownCreated() {
+    // ✅ FUNÇÃO REMOVIDA - já está definida no início do script para evitar erro de "not defined"
+    // function onPaginaDropdownCreated() { ... } - MOVIDA PARA O INÍCIO DO SCRIPT
+
+    function carregarPaginasSistema() {
         try {
-            var ddlPaginaObj = document.getElementById('ddlPagina').ej2_instances[0];
-            if (ddlPaginaObj) {
+            fetch('/api/Navigation/GetPaginasHierarquico')
+                .then(r => r.json())
+                .then(result => {
+                    console.log('Páginas carregadas:', result);
+                    if (result.success && result.data) {
+                        var ddlPaginaObj = document.getElementById('ddlPagina')?.ej2_instances?.[0];
+                        if (ddlPaginaObj) {
+                            ddlPaginaObj.fields = {
+                                dataSource: result.data,
+                                value: 'id',
+                                text: 'text',
+                                parentValue: 'parentId',
+                                hasChildren: 'hasChild',
+                                child: 'child'
+                            };
+                            ddlPaginaObj.dataBind();
+                            console.log('DropDownTree de páginas populado com', result.data.length, 'módulos');
+                        }
+                    }
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarPaginasSistema", erro);
+                });
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "carregarPaginasSistema", erro);
+        }
+    }
+
+    // ✅ FUNÇÃO REMOVIDA - código duplicado removido
+    // O código abaixo estava duplicado e quebrado, foi removido:
+    /*
                 ddlPaginaObj.itemTemplate = function(data) {
                     if (data.isCategory) {
                         return '<div style="font-weight: 600; padding: 4px 0; color: #3D5771;">' + data.text + '</div>';
