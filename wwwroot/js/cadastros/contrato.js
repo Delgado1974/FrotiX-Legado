@@ -1,3 +1,23 @@
+/*
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  📚 DOCUMENTAÇÃO DISPONÍVEL                                              ║
+ * ║                                                                          ║
+ * ║  Este arquivo está completamente documentado em:                         ║
+ * ║  📄 Documentacao/Pages/Contrato - Index.md                                ║
+ * ║                                                                          ║
+ * ║  A documentação inclui:                                                   ║
+ * ║  • Explicação detalhada de todas as funções principais                   ║
+ * ║  • Sistema de validação de dependências                                  ║
+ * ║  • Gestão de status com bloqueio de ações                                ║
+ * ║  • Handlers de eventos                                                   ║
+ * ║  • Interconexões com outros módulos                                      ║
+ * ║                                                                          ║
+ * ║  Última atualização: 08/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ */
+
 var dataTable;
 
 $(document).ready(function () {

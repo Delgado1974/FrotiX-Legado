@@ -1,3 +1,23 @@
+/*
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  📚 DOCUMENTAÇÃO DISPONÍVEL                                              ║
+ * ║                                                                          ║
+ * ║  Este arquivo está completamente documentado em:                         ║
+ * ║  📄 Documentacao/Pages/Motorista - Index.md                               ║
+ * ║                                                                          ║
+ * ║  A documentação inclui:                                                   ║
+ * ║  • Explicação detalhada de todas as funções principais                   ║
+ * ║  • Inicialização do DataTable                                            ║
+ * ║  • Gestão de status e exclusão                                           ║
+ * ║  • Handlers de eventos                                                   ║
+ * ║  • Interconexões com outros módulos                                      ║
+ * ║                                                                          ║
+ * ║  Última atualização: 08/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ */
+
 var dataTable;
 
 $(document).ready(function ()

@@ -80,7 +80,7 @@
 - [ ] `Pages/Combustivel/Upsert.cshtml.cs` → `Pages/Combustivel/Upsert.cshtml.cs.md`
 
 ### Contrato
-- [ ] `Pages/Contrato/Index.cshtml` → `Pages/Contrato/Index.md`
+- [x] `Pages/Contrato/Index.cshtml` → `Pages/Contrato/Index.md` ✅ **COMPLETO** (700+ linhas)
 - [ ] `Pages/Contrato/Index.cshtml.cs` → `Pages/Contrato/Index.cshtml.cs.md`
 - [ ] `Pages/Contrato/ItensContrato.cshtml` → `Pages/Contrato/ItensContrato.md`
 - [ ] `Pages/Contrato/ItensContrato.cshtml.cs` → `Pages/Contrato/ItensContrato.cshtml.cs.md`
@@ -160,7 +160,7 @@
 ### Motorista
 - [ ] `Pages/Motorista/DashboardMotoristas.cshtml` → `Pages/Motorista/DashboardMotoristas.md`
 - [ ] `Pages/Motorista/DashboardMotoristas.cshtml.cs` → `Pages/Motorista/DashboardMotoristas.cshtml.cs.md`
-- [ ] `Pages/Motorista/Index.cshtml` → `Pages/Motorista/Index.md`
+- [x] `Pages/Motorista/Index.cshtml` → `Pages/Motorista/Index.md` ✅ **COMPLETO** (600+ linhas)
 - [ ] `Pages/Motorista/Index.cshtml.cs` → `Pages/Motorista/Index.cshtml.cs.md`
 - [ ] `Pages/Motorista/PBILotacaoMotorista.cshtml` → `Pages/Motorista/PBILotacaoMotorista.md`
 - [ ] `Pages/Motorista/PBILotacaoMotorista.cshtml.cs` → `Pages/Motorista/PBILotacaoMotorista.cshtml.cs.md`
@@ -312,7 +312,7 @@
 - [ ] `Pages/Temp/Index.cshtml.cs` → `Pages/Temp/Index.cshtml.cs.md`
 
 ### Unidade
-- [ ] `Pages/Unidade/Index.cshtml` → `Pages/Unidade/Index.md`
+- [x] `Pages/Unidade/Index.cshtml` → `Pages/Unidade/Index.md` ✅ **COMPLETO** (500+ linhas)
 - [ ] `Pages/Unidade/Index.cshtml.cs` → `Pages/Unidade/Index.cshtml.cs.md`
 - [ ] `Pages/Unidade/LotacaoMotoristas.cshtml` → `Pages/Unidade/LotacaoMotoristas.md`
 - [ ] `Pages/Unidade/LotacaoMotoristas.cshtml.cs` → `Pages/Unidade/LotacaoMotoristas.cshtml.cs.md`

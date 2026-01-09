@@ -1,7 +1,20 @@
 /*
- * REFATORAÇÕES APLICADAS:
- * - Removido try-catch duplicado no método Get()
- * - Mantida toda estrutura e lógica original
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  📚 DOCUMENTAÇÃO DISPONÍVEL                                              ║
+ * ║                                                                          ║
+ * ║  Este arquivo está completamente documentado em:                         ║
+ * ║  📄 Documentacao/Pages/Motorista - Index.md                               ║
+ * ║                                                                          ║
+ * ║  A documentação inclui:                                                   ║
+ * ║  • Explicação detalhada de cada endpoint API                             ║
+ * ║  • Validações e verificações de dependências                            ║
+ * ║  • Lógica de processamento                                               ║
+ * ║  • Interconexões com outros componentes                                 ║
+ * ║                                                                          ║
+ * ║  Última atualização: 08/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
 using FrotiX.Models;
