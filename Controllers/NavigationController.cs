@@ -444,6 +444,85 @@ namespace FrotiX.Controllers
         }
 
         /// <summary>
+        /// TESTE: Verifica se filhos estão sendo encontrados corretamente
+        /// </summary>
+        [HttpGet]
+        [Route("TestarBuscaFilhos")]
+        public IActionResult TestarBuscaFilhos()
+        {
+            try
+            {
+                var todosRecursos = _unitOfWork.Recurso.GetAll().ToList();
+                var totalRecursos = todosRecursos.Count;
+                var recursosRaiz = todosRecursos.Where(r => r.ParentId == null).ToList();
+                
+                var resultado = new List<object>();
+                
+                // Testa cada recurso raiz para ver se encontra seus filhos
+                foreach (var raiz in recursosRaiz.Take(5))
+                {
+                    // Método 1: Comparação direta com ==
+                    var filhosMetodo1 = todosRecursos.Where(r => r.ParentId == raiz.RecursoId).ToList();
+                    
+                    // Método 2: Comparação com Equals()
+                    var filhosMetodo2 = todosRecursos.Where(r => r.ParentId != null && r.ParentId.Value.Equals(raiz.RecursoId)).ToList();
+                    
+                    // Método 3: Comparação com == null primeiro
+                    var filhosMetodo3 = todosRecursos.Where(r => 
+                        raiz.RecursoId != null && r.ParentId != null && r.ParentId.Value.Equals(raiz.RecursoId)
+                    ).ToList();
+                    
+                    resultado.Add(new
+                    {
+                        raizNome = raiz.Nome,
+                        raizId = raiz.RecursoId,
+                        filhosMetodo1 = filhosMetodo1.Count,
+                        filhosMetodo2 = filhosMetodo2.Count,
+                        filhosMetodo3 = filhosMetodo3.Count,
+                        filhosDetalhes = filhosMetodo2.Select(f => new
+                        {
+                            nome = f.Nome,
+                            parentId = f.ParentId,
+                            recursoId = f.RecursoId,
+                            parentIdEquals = f.ParentId != null && f.ParentId.Value.Equals(raiz.RecursoId)
+                        }).ToList()
+                    });
+                }
+                
+                // Verifica recursos órfãos (têm ParentId mas o pai não existe)
+                var recursosComParent = todosRecursos.Where(r => r.ParentId != null).ToList();
+                var recursosOrfaos = recursosComParent.Where(r => 
+                    !todosRecursos.Any(p => p.RecursoId.Equals(r.ParentId.Value))
+                ).ToList();
+                
+                return Json(new
+                {
+                    success = true,
+                    totalRecursos = totalRecursos,
+                    recursosRaiz = recursosRaiz.Count,
+                    recursosComParent = recursosComParent.Count,
+                    recursosOrfaos = recursosOrfaos.Count,
+                    testeBuscaFilhos = resultado,
+                    exemplosOrfaos = recursosOrfaos.Take(5).Select(o => new
+                    {
+                        nome = o.Nome,
+                        parentId = o.ParentId,
+                        recursoId = o.RecursoId
+                    }).ToList()
+                });
+            }
+            catch (Exception error)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = error.Message,
+                    stackTrace = error.StackTrace
+                });
+            }
+        }
+
+        /// <summary>
         /// TESTE: Monta árvore em memória com dados fornecidos para verificar lógica
         /// </summary>
         [HttpGet]
@@ -1143,34 +1222,14 @@ namespace FrotiX.Controllers
         private List<RecursoTreeDTO> MontarArvoreRecursiva(List<Recurso> recursos, Guid? parentId)
         {
             // ✅ Comparação explícita para NULL para garantir que funciona corretamente
+            // ✅ IMPORTANTE: Usar Equals() para comparar GUIDs, não ==
             var filtrados = recursos
                 .Where(r => 
                     (parentId == null && r.ParentId == null) || 
-                    (parentId != null && r.ParentId == parentId)
+                    (parentId != null && r.ParentId != null && r.ParentId.Value.Equals(parentId.Value))
                 )
                 .OrderBy(r => r.Ordem)
                 .ToList();
-            
-            // ✅ Log para debug
-            if (parentId == null)
-            {
-                Console.WriteLine($"[MontarArvoreRecursiva] Nível RAIZ: Encontrados {filtrados.Count} recursos raiz");
-            }
-            else
-            {
-                Console.WriteLine($"[MontarArvoreRecursiva] Nível FILHO (ParentId={parentId}): Encontrados {filtrados.Count} filhos");
-                if (filtrados.Count == 0)
-                {
-                    // ✅ Verifica se há recursos com ParentId diferente mas que deveriam ser filhos
-                    var todosComParentId = recursos.Where(r => r.ParentId != null).ToList();
-                    Console.WriteLine($"[MontarArvoreRecursiva] Total de recursos com ParentId não-nulo: {todosComParentId.Count}");
-                    var exemplo = todosComParentId.Take(3).ToList();
-                    foreach (var ex in exemplo)
-                    {
-                        Console.WriteLine($"[MontarArvoreRecursiva] Exemplo: {ex.Nome} (ParentId={ex.ParentId}, RecursoId={ex.RecursoId})");
-                    }
-                }
-            }
             
             return filtrados
                 .Select(r =>
@@ -1178,17 +1237,6 @@ namespace FrotiX.Controllers
                     var dto = RecursoTreeDTO.FromRecurso(r);
                     dto.Items = MontarArvoreRecursiva(recursos, r.RecursoId);
                     dto.HasChild = dto.Items.Any();
-                    
-                    if (dto.HasChild)
-                    {
-                        Console.WriteLine($"[MontarArvoreRecursiva] ✅ '{r.Nome}' tem {dto.Items.Count} filhos");
-                    }
-                    else if (parentId == null)
-                    {
-                        // Só loga para raiz sem filhos (pode ser normal)
-                        Console.WriteLine($"[MontarArvoreRecursiva] '{r.Nome}' não tem filhos (Raiz sem filhos)");
-                    }
-                    
                     return dto;
                 })
                 .ToList();
