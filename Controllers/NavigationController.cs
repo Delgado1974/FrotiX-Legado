@@ -468,7 +468,7 @@ namespace FrotiX.Controllers
                     return items.Select(item => new
                     {
                         nome = item.Text,
-                        ordem = item.ordem,
+                        ordem = item.Ordem,
                         nivel = nivel,
                         temFilhos = item.HasChild,
                         quantidadeFilhos = item.Items?.Count ?? 0,
