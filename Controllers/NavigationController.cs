@@ -976,14 +976,18 @@ namespace FrotiX.Controllers
         /// </summary>
         private List<RecursoTreeDTO> MontarArvoreRecursiva(List<Recurso> recursos, Guid? parentId)
         {
+            // ✅ Comparação explícita para NULL - necessário para funcionar corretamente
             return recursos
-                .Where(r => r.ParentId == parentId)
+                .Where(r => 
+                    (parentId == null && r.ParentId == null) || 
+                    (parentId != null && r.ParentId == parentId)
+                )
                 .OrderBy(r => r.Ordem)
                 .Select(r =>
                 {
                     var dto = RecursoTreeDTO.FromRecurso(r);
                     dto.Items = MontarArvoreRecursiva(recursos, r.RecursoId);
-                    dto.HasChild = dto.Items.Any();
+                    dto.HasChild = dto.Items != null && dto.Items.Any();
                     return dto;
                 })
                 .ToList();
