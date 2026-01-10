@@ -390,12 +390,12 @@
                                             {
                                                 <img id="imgPreview" src="/Images/sucesso_transparente.png" alt="Foto do Usuário" />
                                             }
-                                            <!-- Botão Limpar: sempre no container, visibilidade controlada por classe show -->
+                                            <!-- Botão Limpar: SEMPRE oculto no HTML, JS controla visibilidade -->
                                             <button type="button" 
-                                                    class="ftx-foto-clear @(fotoBase64 != null ? "show" : "")" 
+                                                    class="ftx-foto-clear" 
                                                     id="btnLimparFoto" 
                                                     data-ejtip="Remover foto"
-                                                    style="position: absolute !important; bottom: -14px !important; right: -22px !important; z-index: 999 !important; @(fotoBase64 == null ? "display: none !important; visibility: hidden !important; opacity: 0 !important;" : "display: flex !important; visibility: visible !important; opacity: 1 !important;")">
+                                                    style="display: none !important;">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
@@ -473,13 +473,8 @@
                 const fotoPadraoPath = '/Images/sucesso_transparente.png';
                 const hasFotoInicial = @(fotoBase64 != null ? "true" : "false") === "true";
 
-                // FORÇA OCULTAÇÃO IMEDIATA se não há foto (antes de qualquer log ou processamento)
-                if (btnLimparFoto && !hasFotoInicial) {
-                    btnLimparFoto.style.display = 'none';
-                    btnLimparFoto.style.visibility = 'hidden';
-                    btnLimparFoto.style.opacity = '0';
-                    btnLimparFoto.classList.remove('show');
-                }
+                // Botão já começa oculto no HTML (display: none !important)
+                // Não precisa forçar ocultação - só mostra se hasFotoInicial
 
                 // #region agent log - H1 visibilidade inicial
                 fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
@@ -503,17 +498,16 @@
                 }).catch(()=>{});
                 // #endregion
 
-                // Ajusta estado inicial do botão e dropzone - FORÇA OCULTAÇÃO SE NÃO HÁ FOTO
-                if (!hasFotoInicial) {
-                    if (btnLimparFoto) {
-                        btnLimparFoto.classList.remove('show');
-                    }
-                    if (dropzoneArea) dropzoneArea.classList.remove('has-file');
-                } else {
-                    if (btnLimparFoto) {
-                        btnLimparFoto.classList.add('show');
-                    }
+                // Ajusta estado inicial do botão e dropzone
+                // Botão SEMPRE começa oculto no HTML - JS decide se mostra
+                if (hasFotoInicial && btnLimparFoto) {
+                    // Só mostra se há foto inicial (edição com foto)
+                    btnLimparFoto.style.cssText = 'display: flex !important; position: absolute !important; bottom: -14px !important; right: -22px !important; z-index: 999 !important;';
+                    btnLimparFoto.classList.add('show');
                     if (dropzoneArea) dropzoneArea.classList.add('has-file');
+                } else {
+                    // Sem foto - mantém oculto (já está oculto no HTML)
+                    if (dropzoneArea) dropzoneArea.classList.remove('has-file');
                 }
 
                 // #region agent log - H2 posicao botao após layout
@@ -550,12 +544,10 @@
                                 // Atualiza preview
                                 imgPreview.src = window.URL.createObjectURL(files[0]);
                                 
-                                // Mostra botão de limpar - FORÇA todas as propriedades
+                                // Mostra botão de limpar - usa cssText para sobrescrever display:none
                                 if (btnLimparFoto) {
+                                    btnLimparFoto.style.cssText = 'display: flex !important; position: absolute !important; bottom: -14px !important; right: -22px !important; z-index: 999 !important;';
                                     btnLimparFoto.classList.add('show');
-                                    btnLimparFoto.style.display = 'flex';
-                                    btnLimparFoto.style.visibility = 'visible';
-                                    btnLimparFoto.style.opacity = '1';
                                 }
                                 
                                 // Atualiza visual do dropzone
@@ -616,11 +608,9 @@
                                 imgPreview.src = fotoPadraoPath;
                             }
 
-                            // Esconde o botão de limpar - FORÇA todas as propriedades
+                            // Esconde o botão de limpar
                             btnLimparFoto.classList.remove('show');
-                            btnLimparFoto.style.display = 'none';
-                            btnLimparFoto.style.visibility = 'hidden';
-                            btnLimparFoto.style.opacity = '0';
+                            btnLimparFoto.style.cssText = 'display: none !important;';
 
                             // Reseta o visual do dropzone
                             if (dropzoneArea) {
