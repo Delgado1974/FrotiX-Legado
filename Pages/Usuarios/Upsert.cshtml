@@ -121,11 +121,11 @@
             border-radius: 9px; /* Arredonda a imagem para não vazar */
         }
 
-        /* Botão de Limpar Foto (lixeira) */
+        /* Botão de Limpar Foto (lixeira) - 40% dentro, 60% fora */
         .ftx-foto-clear {
             position: absolute;
-            bottom: -8px;
-            right: -8px;
+            bottom: -14px;  /* 36px * 0.4 = 14.4px dentro */
+            right: -14px;   /* 60% fora do container */
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -375,17 +375,18 @@
                                             @if (fotoBase64 != null)
                                             {
                                                 <img id="imgPreview" src="data:image/png;base64,@fotoBase64" alt="Foto do Usuário" />
-                                                <button type="button" class="ftx-foto-clear" id="btnLimparFoto" data-ejtip="Remover foto">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
                                             }
                                             else
                                             {
                                                 <img id="imgPreview" src="/Images/sucesso_transparente.png" alt="Foto do Usuário" />
-                                                <button type="button" class="ftx-foto-clear d-none" id="btnLimparFoto" data-ejtip="Remover foto">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
                                             }
+                                            <!-- Botão Limpar: sempre no container, visibilidade controlada por JS -->
+                                            <button type="button" 
+                                                    class="ftx-foto-clear @(fotoBase64 == null ? "d-none" : "")" 
+                                                    id="btnLimparFoto" 
+                                                    data-ejtip="Remover foto">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
                                         </div>
 
                                         <!-- Dropzone Estilizado -->
