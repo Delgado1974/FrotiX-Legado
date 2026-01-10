@@ -104,10 +104,11 @@
         }
 
         .ftx-foto-container {
+            position: relative;
             width: 180px;
             height: 180px;
             border-radius: 12px;
-            overflow: hidden;
+            overflow: visible; /* Permite o botão sair da área */
             border: 3px solid #3D5771;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             background: #fff;
@@ -117,6 +118,41 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 9px; /* Arredonda a imagem para não vazar */
+        }
+
+        /* Botão de Limpar Foto (lixeira) */
+        .ftx-foto-clear {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #722F37, #8B3A3A);
+            border: 3px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 20;
+        }
+
+        .ftx-foto-clear:hover {
+            background: linear-gradient(135deg, #8B3A3A, #A04040);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .ftx-foto-clear i {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .ftx-foto-clear.d-none {
+            display: none !important;
         }
 
         /* Dropzone Visual Elegante */
@@ -126,6 +162,7 @@
             cursor: pointer;
         }
 
+        /* Esconde completamente o input file nativo (incluindo texto "Nenhum arquivo escolhido") */
         .ftx-dropzone-input {
             position: absolute;
             width: 100%;
@@ -135,6 +172,14 @@
             opacity: 0;
             cursor: pointer;
             z-index: 10;
+        }
+
+        .ftx-dropzone-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+
+        .ftx-dropzone-input::file-selector-button {
+            visibility: hidden;
         }
 
         .ftx-dropzone-area {
@@ -325,15 +370,21 @@
                                         <i class="fa-duotone fa-camera me-1"></i> Foto do Usuário
                                     </h6>
                                     <div class="ftx-foto-section">
-                                        <!-- Preview da Foto -->
+                                        <!-- Preview da Foto com Botão de Limpar -->
                                         <div class="ftx-foto-container">
                                             @if (fotoBase64 != null)
                                             {
                                                 <img id="imgPreview" src="data:image/png;base64,@fotoBase64" alt="Foto do Usuário" />
+                                                <button type="button" class="ftx-foto-clear" id="btnLimparFoto" data-ejtip="Remover foto">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
                                             }
                                             else
                                             {
                                                 <img id="imgPreview" src="/Images/sucesso_transparente.png" alt="Foto do Usuário" />
+                                                <button type="button" class="ftx-foto-clear d-none" id="btnLimparFoto" data-ejtip="Remover foto">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
                                             }
                                         </div>
 
@@ -343,7 +394,8 @@
                                                    class="ftx-dropzone-input" 
                                                    id="inputFoto" 
                                                    name="FotoUpload" 
-                                                   accept="image/*" />
+                                                   accept="image/*" 
+                                                   title="" />
                                             <div class="ftx-dropzone-area">
                                                 <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon"></i>
                                                 <p class="ftx-dropzone-text">Clique ou arraste uma imagem</p>
@@ -405,6 +457,8 @@
                 const dropzoneArea = document.getElementById('dropzoneArea');
                 const dropzoneText = dropzoneArea ? dropzoneArea.querySelector('.ftx-dropzone-text') : null;
                 const dropzoneIcon = dropzoneArea ? dropzoneArea.querySelector('.ftx-dropzone-icon') : null;
+                const btnLimparFoto = document.getElementById('btnLimparFoto');
+                const fotoPadraoPath = '/Images/sucesso_transparente.png';
 
                 // Preview da foto ao selecionar arquivo
                 if (inputFoto) {
@@ -414,6 +468,11 @@
                             if (files && files[0]) {
                                 // Atualiza preview
                                 imgPreview.src = window.URL.createObjectURL(files[0]);
+                                
+                                // Mostra botão de limpar
+                                if (btnLimparFoto) {
+                                    btnLimparFoto.classList.remove('d-none');
+                                }
                                 
                                 // Atualiza visual do dropzone
                                 if (dropzoneArea) {
@@ -452,6 +511,46 @@
                             dropzoneArea.querySelector('.ftx-dropzone-area').style.background = '';
                         });
                     }
+                }
+
+                // =====================================================
+                // BOTÃO LIMPAR FOTO (Lixeira)
+                // =====================================================
+                if (btnLimparFoto) {
+                    btnLimparFoto.addEventListener('click', function (e) {
+                        try {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            // Limpa o input file
+                            if (inputFoto) {
+                                inputFoto.value = '';
+                            }
+
+                            // Volta para a foto padrão
+                            if (imgPreview) {
+                                imgPreview.src = fotoPadraoPath;
+                            }
+
+                            // Esconde o botão de limpar
+                            btnLimparFoto.classList.add('d-none');
+
+                            // Reseta o visual do dropzone
+                            if (dropzoneArea) {
+                                dropzoneArea.classList.remove('has-file');
+                                dropzoneArea.querySelector('.ftx-dropzone-area').style.borderColor = '';
+                                dropzoneArea.querySelector('.ftx-dropzone-area').style.background = '';
+                            }
+                            if (dropzoneText) {
+                                dropzoneText.textContent = 'Clique ou arraste uma imagem';
+                            }
+                            if (dropzoneIcon) {
+                                dropzoneIcon.className = 'fa-duotone fa-cloud-arrow-up ftx-dropzone-icon';
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "btnLimparFoto.click", error);
+                        }
+                    });
                 }
 
                 // =====================================================
