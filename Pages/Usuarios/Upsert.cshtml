@@ -95,7 +95,7 @@
             box-shadow: 0 0 8px rgba(0,0,0,0.15);
         }
 
-        /* ====== SEÇÃO DE FOTO (Padrão Encarregado) ====== */
+        /* ====== SEÇÃO DE FOTO - Dropzone Estilizado ====== */
         .ftx-foto-section {
             display: flex;
             flex-direction: column;
@@ -104,12 +104,13 @@
         }
 
         .ftx-foto-container {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 4px solid #3D5771;
+            border: 3px solid #3D5771;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: #fff;
         }
 
         .ftx-foto-container img {
@@ -118,18 +119,82 @@
             object-fit: cover;
         }
 
-        .ftx-foto-upload {
+        /* Dropzone Visual Elegante */
+        .ftx-dropzone {
+            position: relative;
             width: 100%;
+            cursor: pointer;
         }
 
-        .ftx-foto-upload .form-control {
-            font-size: 0.8rem;
-            padding: 0.35rem 0.5rem;
+        .ftx-dropzone-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .ftx-dropzone-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transition: all 0.3s ease;
+        }
+
+        .ftx-dropzone:hover .ftx-dropzone-area {
+            border-color: #3D5771;
+            background: linear-gradient(135deg, #e8f4fc 0%, #dbeafe 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(61, 87, 113, 0.15);
+        }
+
+        .ftx-dropzone-icon {
+            font-size: 2rem;
+            color: #3D5771;
+            margin-bottom: 0.5rem;
+            --fa-primary-color: #3D5771;
+            --fa-secondary-color: #6b8ba3;
+            --fa-secondary-opacity: 0.7;
+        }
+
+        .ftx-dropzone-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .ftx-dropzone-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin: 0.25rem 0 0 0;
+        }
+
+        /* Estado com arquivo selecionado */
+        .ftx-dropzone.has-file .ftx-dropzone-area {
+            border-color: #22c55e;
+            border-style: solid;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        .ftx-dropzone.has-file .ftx-dropzone-icon {
+            color: #22c55e;
+            --fa-primary-color: #22c55e;
+            --fa-secondary-color: #86efac;
+        }
+
+        .ftx-dropzone.has-file .ftx-dropzone-text {
+            color: #166534;
         }
 
         .foto-container {
             text-align: center;
-            padding: 1rem;
+            padding: 1.25rem;
             background: linear-gradient(180deg, #f8f9fa, #fff);
             border-radius: 12px;
             border: 1px solid #e2e8f0;
@@ -253,13 +318,14 @@
                                 </div>
                             </div>
 
-                            <!-- Coluna da Foto (à direita) - Padrão Encarregado -->
+                            <!-- Coluna da Foto (à direita) -->
                             <div class="col-md-4">
                                 <div class="foto-container">
                                     <h6 class="label-ftx mb-3">
                                         <i class="fa-duotone fa-camera me-1"></i> Foto do Usuário
                                     </h6>
                                     <div class="ftx-foto-section">
+                                        <!-- Preview da Foto -->
                                         <div class="ftx-foto-container">
                                             @if (fotoBase64 != null)
                                             {
@@ -270,12 +336,19 @@
                                                 <img id="imgPreview" src="/Images/sucesso_transparente.png" alt="Foto do Usuário" />
                                             }
                                         </div>
-                                        <div class="ftx-foto-upload">
-                                            <input class="form-control" 
+
+                                        <!-- Dropzone Estilizado -->
+                                        <div class="ftx-dropzone" id="dropzoneArea">
+                                            <input type="file" 
+                                                   class="ftx-dropzone-input" 
                                                    id="inputFoto" 
-                                                   type="file" 
-                                                   accept="image/*" 
-                                                   name="FotoUpload" />
+                                                   name="FotoUpload" 
+                                                   accept="image/*" />
+                                            <div class="ftx-dropzone-area">
+                                                <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon"></i>
+                                                <p class="ftx-dropzone-text">Clique ou arraste uma imagem</p>
+                                                <p class="ftx-dropzone-hint">JPG, PNG ou GIF</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -325,10 +398,13 @@
 
             try {
                 // =====================================================
-                // PREVIEW DA FOTO (Padrão Encarregado - Simples)
+                // PREVIEW DA FOTO - Dropzone Estilizado
                 // =====================================================
                 const inputFoto = document.getElementById('inputFoto');
                 const imgPreview = document.getElementById('imgPreview');
+                const dropzoneArea = document.getElementById('dropzoneArea');
+                const dropzoneText = dropzoneArea ? dropzoneArea.querySelector('.ftx-dropzone-text') : null;
+                const dropzoneIcon = dropzoneArea ? dropzoneArea.querySelector('.ftx-dropzone-icon') : null;
 
                 // Preview da foto ao selecionar arquivo
                 if (inputFoto) {
@@ -336,12 +412,46 @@
                         try {
                             const files = e.target.files;
                             if (files && files[0]) {
+                                // Atualiza preview
                                 imgPreview.src = window.URL.createObjectURL(files[0]);
+                                
+                                // Atualiza visual do dropzone
+                                if (dropzoneArea) {
+                                    dropzoneArea.classList.add('has-file');
+                                }
+                                if (dropzoneText) {
+                                    dropzoneText.textContent = files[0].name;
+                                }
+                                if (dropzoneIcon) {
+                                    dropzoneIcon.className = 'fa-duotone fa-circle-check ftx-dropzone-icon';
+                                }
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "inputFoto.change", error);
                         }
                     });
+
+                    // Drag and drop visual feedback
+                    if (dropzoneArea) {
+                        dropzoneArea.addEventListener('dragover', function (e) {
+                            e.preventDefault();
+                            dropzoneArea.querySelector('.ftx-dropzone-area').style.borderColor = '#3D5771';
+                            dropzoneArea.querySelector('.ftx-dropzone-area').style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
+                        });
+
+                        dropzoneArea.addEventListener('dragleave', function (e) {
+                            e.preventDefault();
+                            if (!dropzoneArea.classList.contains('has-file')) {
+                                dropzoneArea.querySelector('.ftx-dropzone-area').style.borderColor = '';
+                                dropzoneArea.querySelector('.ftx-dropzone-area').style.background = '';
+                            }
+                        });
+
+                        dropzoneArea.addEventListener('drop', function (e) {
+                            dropzoneArea.querySelector('.ftx-dropzone-area').style.borderColor = '';
+                            dropzoneArea.querySelector('.ftx-dropzone-area').style.background = '';
+                        });
+                    }
                 }
 
                 // =====================================================
