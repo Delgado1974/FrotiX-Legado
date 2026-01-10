@@ -9,31 +9,31 @@
 
 ## Visão Geral
 
-A classe `Repository<T>` é a implementação genérica base do padrão Repository para Entity Framework Core no sistema FrotiX. Fornece operações CRUD genéricas sem lógica específica de domínio.
+A classe `Repository<T>` é a implementação genérica base de repositório para Entity Framework Core, fornecendo operações CRUD padrão sem lógica específica de domínio.
 
 **Principais características:**
 
 ✅ **Genérico**: Funciona com qualquer entidade (`where T : class`)  
 ✅ **CRUD Completo**: Create, Read, Update, Delete  
-✅ **Suporte a Includes**: Eager loading via string CSV  
-✅ **AsNoTracking/AsTracking**: Controle de tracking do EF Core  
-✅ **Projeções**: Suporte a DTOs e projeções otimizadas  
-✅ **Assíncrono**: Métodos assíncronos para operações I/O  
-✅ **Tratamento de Concorrência**: Tratamento de erros de concorrência
+✅ **Suporte a Includes**: Carregamento eager de relacionamentos  
+✅ **Tracking Control**: Controle explícito de `AsTracking`/`AsNoTracking`  
+✅ **Projeções**: Suporte a `GetAllReduced` para DTOs  
+✅ **Async Support**: Métodos assíncronos disponíveis  
+✅ **Tratamento de Concorrência**: Trata erros de "second operation"
 
 ---
 
 ## Estrutura da Classe
 
-### Herança e Implementação
+### Herança e Constraints
 
 ```csharp
 public class Repository<T> : IRepository<T>
     where T : class
 ```
 
-**Herança**: Implementa `IRepository<T>`  
-**Constraint**: `T` deve ser uma classe (entidade EF Core)
+**Interface**: Implementa `IRepository<T>`  
+**Constraint**: `T` deve ser uma classe (entidade do EF Core)
 
 ---
 
@@ -43,7 +43,7 @@ public class Repository<T> : IRepository<T>
 
 **Descrição**: Contexto de banco de dados injetado
 
-**Uso**: Acesso direto ao contexto quando necessário
+**Uso**: Acesso ao contexto para operações avançadas
 
 ---
 
@@ -53,7 +53,7 @@ public class Repository<T> : IRepository<T>
 
 **Uso**: Operações CRUD na entidade
 
-**Inicialização**: `dbSet = _db.Set<T>()` no construtor
+**Inicialização**: `_db.Set<T>()` no construtor
 
 ---
 
@@ -86,23 +86,21 @@ protected IQueryable<T> PrepareQuery(
 )
 ```
 
-**Funcionalidades**:
-1. **Tracking Control**: 
-   - Se `asNoTracking == true`: Aplica `AsNoTracking()` (read-only, performance)
-   - Se `asNoTracking == false`: Aplica `AsTracking()` (permite persistência)
+**Lógica**:
+1. **Tracking**: Se `asNoTracking == true`, usa `AsNoTracking()`, senão `AsTracking()`
+   - **Nota Importante**: DbContext está configurado globalmente como NoTracking
+   - Para permitir persistência, força `AsTracking()` quando necessário
+2. **Filtro**: Aplica `Where(filter)` se fornecido
+3. **Includes**: Processa `includeProperties` (CSV) e aplica `.Include()` para cada propriedade
 
-2. **Filtros**: Aplica `Where(filter)` se fornecido
+**Exemplo de Includes**:
+```csharp
+// includeProperties = "MarcaVeiculo,ModeloVeiculo"
+// Resulta em:
+query.Include("MarcaVeiculo").Include("ModeloVeiculo")
+```
 
-3. **Eager Loading**: Processa `includeProperties` (CSV):
-   ```csharp
-   // Exemplo: "MarcaVeiculo,ModeloVeiculo"
-   foreach (var inc in includeProperties.Split(','))
-   {
-       query = query.Include(inc.Trim());
-   }
-   ```
-
-**Nota Importante**: O DbContext está configurado globalmente como `NoTracking`, então é necessário forçar `AsTracking()` quando `asNoTracking == false` para permitir persistência.
+**Retorno**: `IQueryable<T>` pronto para uso
 
 ---
 
@@ -110,9 +108,9 @@ protected IQueryable<T> PrepareQuery(
 
 ### `Get(object id)`
 
-**Descrição**: Obtém entidade pela chave primária (chave simples)
+**Descrição**: Obtém entidade pela chave primária
 
-**Parâmetros**: `id` - Valor da chave primária
+**Parâmetros**: `id` - Chave primária (simples)
 
 **Retorno**: `T` ou `null` se não encontrado
 
@@ -121,25 +119,23 @@ protected IQueryable<T> PrepareQuery(
 var veiculo = repository.Get(veiculoId);
 ```
 
-**Nota**: Não funciona com chaves compostas (usa `Find()` do EF Core)
-
 ---
 
 ### `GetFirstOrDefault(...)`
 
 **Descrição**: Obtém primeira entidade que satisfaz o filtro
 
-**Assinatura**:
-```csharp
-T GetFirstOrDefault(
-    Expression<Func<T, bool>> filter = null,
-    string includeProperties = null
-)
-```
+**Parâmetros**:
+- `filter`: Expressão lambda de filtro (opcional)
+- `includeProperties`: Propriedades para incluir via `.Include()` (CSV, opcional)
 
-**Características**:
-- Usa `asNoTracking: true` (read-only)
-- Tratamento de concorrência: Retorna `null` se erro de "second operation"
+**Retorno**: `T` ou `null`
+
+**Tracking**: Sempre usa `AsNoTracking` (read-only)
+
+**Tratamento de Erros**:
+- Captura `InvalidOperationException` com mensagem "second operation"
+- Retorna `null` em caso de erro de concorrência
 - Re-lança outras exceções
 
 **Uso**:
@@ -156,9 +152,16 @@ var veiculo = repository.GetFirstOrDefault(
 
 **Descrição**: Versão assíncrona de `GetFirstOrDefault`
 
+**Parâmetros**: Mesmos de `GetFirstOrDefault`
+
 **Retorno**: `Task<T>`
 
-**Uso**: Para operações I/O não bloqueantes
+**Uso**:
+```csharp
+var veiculo = await repository.GetFirstOrDefaultAsync(
+    v => v.Placa == "ABC1234"
+);
+```
 
 ---
 
@@ -166,20 +169,13 @@ var veiculo = repository.GetFirstOrDefault(
 
 **Descrição**: Retorna conjunto materializado de entidades
 
-**Assinatura**:
-```csharp
-IEnumerable<T> GetAll(
-    Expression<Func<T, bool>> filter = null,
-    Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-    string includeProperties = null,
-    bool asNoTracking = true
-)
-```
+**Parâmetros**:
+- `filter`: Expressão lambda de filtro (opcional)
+- `orderBy`: Função de ordenação (opcional)
+- `includeProperties`: Propriedades para incluir (CSV, opcional)
+- `asNoTracking`: Se `true`, não rastreia mudanças (padrão: `true`)
 
-**Características**:
-- Materializa resultado (`ToList()`)
-- Suporte a ordenação
-- `asNoTracking: true` por padrão (performance)
+**Retorno**: `IEnumerable<T>` materializado (`.ToList()`)
 
 **Uso**:
 ```csharp
@@ -194,20 +190,21 @@ var veiculos = repository.GetAll(
 
 ### `GetAllAsync(...)`
 
-**Descrição**: Versão assíncrona de `GetAll` com suporte a `Take`
+**Descrição**: Versão assíncrona de `GetAll`
 
-**Assinatura**:
+**Parâmetros Adicionais**:
+- `take`: Limite de registros (opcional)
+
+**Retorno**: `Task<IEnumerable<T>>`
+
+**Uso**:
 ```csharp
-Task<IEnumerable<T>> GetAllAsync(
-    Expression<Func<T, bool>> filter = null,
-    Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-    string includeProperties = null,
-    bool asNoTracking = true,
-    int? take = null  // ← Adicional
-)
+var veiculos = await repository.GetAllAsync(
+    filter: v => v.Status == true,
+    orderBy: q => q.OrderBy(v => v.Placa),
+    take: 100
+);
 ```
-
-**Uso**: Para paginação ou limitar resultados
 
 ---
 
@@ -217,26 +214,24 @@ Task<IEnumerable<T>> GetAllAsync(
 
 **Descrição**: **MÉTODO OTIMIZADO** - Projeta entidades para DTOs e materializa
 
-**Assinatura**:
-```csharp
-IEnumerable<TResult> GetAllReduced<TResult>(
-    Expression<Func<T, TResult>> selector,
-    Expression<Func<T, bool>> filter = null,
-    Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-    string includeProperties = null,
-    bool asNoTracking = true
-)
-```
+**Parâmetros**:
+- `selector`: Expressão lambda de projeção (obrigatório)
+- `filter`: Filtro (opcional)
+- `orderBy`: Ordenação (opcional)
+- `includeProperties`: Includes (opcional)
+- `asNoTracking`: Tracking (padrão: `true`)
+
+**Retorno**: `IEnumerable<TResult>` materializado
 
 **Vantagens**:
 - Reduz dados transferidos (apenas campos necessários)
-- Melhora performance (menos dados do banco)
-- Materializa resultado (`ToList()`)
+- Melhora performance em consultas grandes
+- Compatível com código legado
 
 **Uso**:
 ```csharp
-var veiculosLeves = repository.GetAllReduced(
-    selector: v => new { v.VeiculoId, v.Placa, v.Status },
+var veiculosDTO = repository.GetAllReduced(
+    selector: v => new { v.VeiculoId, v.Placa, v.MarcaVeiculo.DescricaoMarca },
     filter: v => v.Status == true,
     orderBy: q => q.OrderBy(v => v.Placa)
 );
@@ -248,21 +243,14 @@ var veiculosLeves = repository.GetAllReduced(
 
 **Descrição**: Retorna `IQueryable` projetado sem materializar
 
-**Assinatura**:
-```csharp
-IQueryable<TResult> GetAllReducedIQueryable<TResult>(
-    Expression<Func<T, TResult>> selector,
-    Expression<Func<T, bool>> filter = null,
-    Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-    string includeProperties = null,
-    bool asNoTracking = true
-)
-```
+**Parâmetros**: Mesmos de `GetAllReduced`
+
+**Retorno**: `IQueryable<TResult>` (não materializado)
 
 **Vantagens**:
 - Permite composição adicional de queries
 - EF Core traduz para SQL parametrizado
-- Não materializa até execução
+- Lazy evaluation
 
 **Uso**:
 ```csharp
@@ -270,9 +258,9 @@ var query = repository.GetAllReducedIQueryable(
     selector: v => new { v.VeiculoId, v.Placa }
 );
 
-// Composição adicional
+// Pode adicionar mais filtros depois
 var resultado = query
-    .Where(v => v.Placa.Contains("ABC"))
+    .Where(v => v.Placa.StartsWith("ABC"))
     .Take(10)
     .ToList();
 ```
@@ -289,8 +277,8 @@ var resultado = query
 
 **Uso**:
 ```csharp
-var novoVeiculo = new Veiculo { Placa = "ABC1234" };
-repository.Add(novoVeiculo);
+var veiculo = new Veiculo { Placa = "ABC1234" };
+repository.Add(veiculo);
 unitOfWork.Save(); // Persiste no banco
 ```
 
@@ -302,15 +290,21 @@ unitOfWork.Save(); // Persiste no banco
 
 **Retorno**: `Task`
 
+**Uso**:
+```csharp
+await repository.AddAsync(veiculo);
+await unitOfWork.SaveAsync();
+```
+
 ---
 
 ### `Update(T entity)`
 
-**Descrição**: Atualiza entidade no contexto
-
-**Nota**: Usa `new` para ocultar método da classe base
+**Descrição**: Marca entidade como modificada no contexto
 
 **Validação**: Lança `ArgumentNullException` se `entity` for null
+
+**Nota**: Usa `new` para ocultar método da classe base
 
 **Uso**:
 ```csharp
@@ -325,9 +319,9 @@ unitOfWork.Save();
 
 **Descrição**: Remove entidade pela chave primária
 
-**Comportamento**: 
-- Retorna silenciosamente se `id` for null
-- Busca entidade com `Find()` antes de remover
+**Parâmetros**: `id` - Chave primária
+
+**Lógica**: Busca entidade com `Find()` e remove se encontrada
 
 **Uso**:
 ```csharp
@@ -341,7 +335,7 @@ unitOfWork.Save();
 
 **Descrição**: Remove entidade informada
 
-**Comportamento**: Retorna silenciosamente se `entity` for null
+**Parâmetros**: `entity` - Entidade a remover
 
 **Uso**:
 ```csharp
@@ -355,13 +349,14 @@ unitOfWork.Save();
 
 ### Quem Usa Esta Classe
 
-- **Todos os Repositories Específicos**: Herdam de `Repository<T>`
-- **UnitOfWork**: Instancia repositories específicos
+- **Todos os Repositories Específicos**: Herdam ou usam como base
+- **UnitOfWork**: Instancia repositories genéricos quando necessário
+- **Controllers**: Via `IUnitOfWork` que expõe repositories
 
 ### O Que Esta Classe Usa
 
-- **Microsoft.EntityFrameworkCore**: `DbContext`, `DbSet<T>`
-- **System.Linq**: `IQueryable<T>`, `Expression<Func<>>`
+- **Microsoft.EntityFrameworkCore**: `DbContext`, `DbSet`, `IQueryable`
+- **System.Linq.Expressions**: `Expression<Func<T, bool>>`
 - **FrotiX.Repository.IRepository**: `IRepository<T>`
 
 ---
@@ -371,66 +366,36 @@ unitOfWork.Save();
 ### Exemplo Completo
 
 ```csharp
-// 1. Injeção via UnitOfWork
-var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
-
-// 2. Leitura com includes
-var veiculo = unitOfWork.Veiculo.GetFirstOrDefault(
-    v => v.VeiculoId == id,
-    "MarcaVeiculo,ModeloVeiculo"
-);
-
-// 3. Listagem com filtros
-var veiculosAtivos = unitOfWork.Veiculo.GetAll(
-    filter: v => v.Status == true,
-    orderBy: q => q.OrderBy(v => v.Placa)
-);
-
-// 4. Projeção otimizada
-var veiculosLeves = unitOfWork.Veiculo.GetAllReduced(
-    selector: v => new { v.VeiculoId, v.Placa },
-    filter: v => v.Status == true
-);
-
-// 5. Escrita
-var novoVeiculo = new Veiculo { Placa = "ABC1234" };
-unitOfWork.Veiculo.Add(novoVeiculo);
-unitOfWork.Save();
+// Injeção via UnitOfWork
+public class MeuController : ControllerBase
+{
+    private readonly IUnitOfWork _unitOfWork;
+    
+    public MeuController(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+    
+    public IActionResult ListarVeiculos()
+    {
+        var veiculos = _unitOfWork.Veiculo.GetAll(
+            filter: v => v.Status == true,
+            orderBy: q => q.OrderBy(v => v.Placa),
+            includeProperties: "MarcaVeiculo,ModeloVeiculo"
+        );
+        
+        return Ok(veiculos);
+    }
+    
+    public IActionResult CriarVeiculo([FromBody] Veiculo veiculo)
+    {
+        _unitOfWork.Veiculo.Add(veiculo);
+        _unitOfWork.Save();
+        
+        return Ok();
+    }
+}
 ```
-
----
-
-## Observações Importantes
-
-### Tracking vs NoTracking
-
-⚠️ **Padrão**: `asNoTracking: true` por padrão em leituras
-
-**Motivo**: Performance - não rastreia mudanças em entidades read-only
-
-**Quando usar `asNoTracking: false`**:
-- Quando precisa atualizar a entidade depois
-- Quando precisa acessar propriedades de navegação lazy-loaded
-
----
-
-### Includes (Eager Loading)
-
-⚠️ **Formato**: String CSV separada por vírgula
-
-**Exemplo**: `"MarcaVeiculo,ModeloVeiculo,Unidade"`
-
-**Performance**: Use apenas quando necessário - includes aumentam complexidade da query
-
----
-
-### Tratamento de Concorrência
-
-⚠️ **Erro "second operation"**: Retorna `null` silenciosamente
-
-**Motivo**: Evita quebra de fluxo em casos de concorrência
-
-**Recomendação**: Verificar `null` após chamadas a `GetFirstOrDefault`
 
 ---
 

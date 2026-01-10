@@ -9,14 +9,15 @@
 
 ## Visão Geral
 
-A interface `IUnitOfWork` define o contrato para o padrão UnitOfWork no sistema FrotiX, fornecendo acesso a todos os repositories e métodos de persistência.
+A interface `IUnitOfWork` define o contrato do padrão Unit of Work para o sistema FrotiX, expondo acesso a todos os repositories e métodos de persistência.
 
 **Principais características:**
 
-✅ **Contrato Unificado**: Define acesso a todos os repositories  
-✅ **Partial Interface**: Dividida em múltiplos arquivos  
+✅ **Centralização**: Acesso único a todos os repositories  
+✅ **Transações**: Métodos `Save()` e `SaveAsync()`  
 ✅ **Disposable**: Herda de `IDisposable`  
-✅ **Métodos de Persistência**: `Save()` e `SaveAsync()`
+✅ **Partial Interface**: Dividida em múltiplos arquivos  
+✅ **Mais de 100 Repositories**: Expõe todos os repositories do sistema
 
 **Nota**: Esta interface é implementada como `partial interface`, dividida em:
 - `IUnitOfWork.cs` (principal)
@@ -27,85 +28,141 @@ A interface `IUnitOfWork` define o contrato para o padrão UnitOfWork no sistema
 
 ## Estrutura da Interface
 
-### Definição
+### Herança
 
 ```csharp
 public partial interface IUnitOfWork : IDisposable
 ```
 
-**Herança**: `IDisposable` - Para liberação de recursos
+**Herança**: `IDisposable` para liberação de recursos
 
 ---
 
-## Método Principal
+## Método de Acesso ao DbContext
 
-### `GetDbContext()`
+### `DbContext GetDbContext()`
 
 **Descrição**: Retorna o DbContext para operações avançadas
 
-**Retorno**: `DbContext`
-
-**Uso**: Para acessar `ChangeTracker`, `Database`, operações SQL brutas, etc.
+**Uso**: Para acessar `ChangeTracker`, `Database`, etc.
 
 ---
 
-## Propriedades de Repositories
+## Repositories Expostos
+
+A interface expõe mais de 100 repositories organizados por categoria:
 
 ### Repositories de Cadastros
 
-```csharp
-IVeiculoRepository Veiculo { get; }
-IMotoristaRepository Motorista { get; }
-IContratoRepository Contrato { get; }
-IAtaRegistroPrecosRepository AtaRegistroPrecos { get; }
-ICombustivelRepository Combustivel { get; }
-IUnidadeRepository Unidade { get; }
-// ... e muitos outros
-```
+- `IUnidadeRepository Unidade`
+- `ICombustivelRepository Combustivel`
+- `IMarcaVeiculoRepository MarcaVeiculo`
+- `IModeloVeiculoRepository ModeloVeiculo`
+- `IVeiculoRepository Veiculo`
+- `IFornecedorRepository Fornecedor`
+- `IContratoRepository Contrato`
+- `IAtaRegistroPrecosRepository AtaRegistroPrecos`
+- `IMotoristaRepository Motorista`
+- `IEncarregadoRepository Encarregado`
+- `IOperadorRepository Operador`
+- `ILavadorRepository Lavador`
+- `IRequisitanteRepository Requisitante`
+- `ISetorSolicitanteRepository SetorSolicitante`
+- `ISetorPatrimonialRepository SetorPatrimonial`
+- `ISecaoPatrimonialRepository SecaoPatrimonial`
+- `IPatrimonioRepository Patrimonio`
+- `IPlacaBronzeRepository PlacaBronze`
+- `IAspNetUsersRepository AspNetUsers`
+- `IRecursoRepository Recurso`
 
-**Total**: Mais de 50 repositories de cadastros e operações
+### Repositories de Operações
 
----
+- `IViagemRepository Viagem`
+- `IViagensEconomildoRepository ViagensEconomildo`
+- `IAbastecimentoRepository Abastecimento`
+- `ILavagemRepository Lavagem`
+- `IManutencaoRepository Manutencao`
+- `IMultaRepository Multa`
+- `IEmpenhoRepository Empenho`
+- `INotaFiscalRepository NotaFiscal`
+- `IEventoRepository Evento`
+- `IOcorrenciaViagemRepository OcorrenciaViagem` (partial)
+
+### Repositories de Relacionamentos
+
+- `IVeiculoContratoRepository VeiculoContrato`
+- `IVeiculoAtaRepository VeiculoAta`
+- `IMotoristaContratoRepository MotoristaContrato`
+- `IOperadorContratoRepository OperadorContrato`
+- `IEncarregadoContratoRepository EncarregadoContrato`
+- `ILavadorContratoRepository LavadorContrato`
+- `IItemVeiculoContratoRepository ItemVeiculoContrato`
+- `IItemVeiculoAtaRepository ItemVeiculoAta`
+- `ILavadoresLavagemRepository LavadoresLavagem`
+- `ILotacaoMotoristaRepository LotacaoMotorista`
 
 ### Repositories de Views
 
-```csharp
-IViewVeiculosRepository ViewVeiculos { get; }
-IViewViagensRepository ViewViagens { get; }
-IViewAbastecimentosRepository ViewAbastecimentos { get; }
-IViewMotoristasRepository ViewMotoristas { get; }
-// ... e muitos outros
-```
-
-**Total**: Mais de 30 repositories de views
-
----
+- `IViewAbastecimentosRepository ViewAbastecimentos`
+- `IViewVeiculosRepository ViewVeiculos`
+- `IViewMotoristasRepository ViewMotoristas`
+- `IViewViagensRepository ViewViagens`
+- `IViewCustosViagemRepository ViewCustosViagem`
+- `IViewManutencaoRepository ViewManutencao`
+- `IviewMultasRepository viewMultas`
+- `IViewEmpenhosRepository ViewEmpenhos`
+- `IViewFluxoEconomildoRepository ViewFluxoEconomildo`
+- `IViewLavagemRepository ViewLavagem`
+- `IViewEventosRepository ViewEventos`
+- `IViewOcorrenciaRepository ViewOcorrencia`
+- E mais de 30 outras views...
 
 ### Repositories Especiais
 
-#### `IRepository<AbastecimentoPendente> AbastecimentoPendente`
-
-**Descrição**: Repository genérico para pendências de abastecimento
-
-**Tipo**: `IRepository<T>` genérico (não tem interface específica)
+- `IRepository<AbastecimentoPendente> AbastecimentoPendente`: Repository genérico
+- `IAlertasFrotiXRepository AlertasFrotiX`: Sistema de alertas
+- `IAlertasUsuarioRepository AlertasUsuario`: Sistema de alertas
+- `IViagemEstatisticaRepository ViagemEstatistica`: Estatísticas de viagens
+- `IVeiculoPadraoViagemRepository VeiculoPadraoViagem`: Veículo padrão
+- `IRepactuacaoVeiculoRepository RepactuacaoVeiculo`: Repactuações (partial)
 
 ---
 
 ## Métodos de Persistência
 
-### `Save()`
+### `void Save()`
 
 **Descrição**: Persiste todas as mudanças no banco de dados
 
-**Comportamento**: Executa `SaveChanges()` em uma única transação
+**Uso**: Síncrono, bloqueia thread até completar
 
 ---
 
-### `SaveAsync()`
+### `Task SaveAsync()`
 
-**Descrição**: Versão assíncrona de `Save`
+**Descrição**: Versão assíncrona de `Save()`
 
 **Retorno**: `Task`
+
+**Uso**: Assíncrono, não bloqueia thread
+
+---
+
+## Extensões Parciais
+
+### `IUnitOfWork.OcorrenciaViagem.cs`
+
+**Repositories Adicionados**:
+- `IOcorrenciaViagemRepository OcorrenciaViagem`
+- `IViewOcorrenciasViagemRepository ViewOcorrenciasViagem`
+- `IViewOcorrenciasAbertasVeiculoRepository ViewOcorrenciasAbertasVeiculo`
+
+---
+
+### `IUnitOfWork.RepactuacaoVeiculo.cs`
+
+**Repositories Adicionados**:
+- `IRepactuacaoVeiculoRepository RepactuacaoVeiculo`
 
 ---
 
@@ -125,29 +182,33 @@ IViewMotoristasRepository ViewMotoristas { get; }
 
 ## Padrão de Uso
 
-### Exemplo: Injeção em Controller
+### Exemplo em Controller
 
 ```csharp
 public class VeiculoController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
-
+    
     public VeiculoController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
-
-    public IActionResult Get(Guid id)
-    {
-        var veiculo = _unitOfWork.Veiculo.Get(id);
-        return Ok(veiculo);
-    }
-
-    public IActionResult Create([FromBody] Veiculo veiculo)
+    
+    [HttpPost]
+    public IActionResult Criar([FromBody] Veiculo veiculo)
     {
         _unitOfWork.Veiculo.Add(veiculo);
         _unitOfWork.Save();
         return Ok();
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Listar()
+    {
+        var veiculos = await _unitOfWork.ViewVeiculos.GetAllAsync(
+            orderBy: q => q.OrderBy(v => v.Placa)
+        );
+        return Ok(veiculos);
     }
 }
 ```
@@ -165,7 +226,7 @@ public class VeiculoController : ControllerBase
 - `Repository/IRepository/IUnitOfWork.OcorrenciaViagem.cs`
 - `Repository/IRepository/IUnitOfWork.RepactuacaoVeiculo.cs`
 
-**Impacto**: Documentação de referência para contrato UnitOfWork
+**Impacto**: Documentação de referência para contrato Unit of Work
 
 **Status**: ✅ **Concluído**
 

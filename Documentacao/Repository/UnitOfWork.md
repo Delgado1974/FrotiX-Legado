@@ -9,13 +9,13 @@
 
 ## Visão Geral
 
-A classe `UnitOfWork` é o orquestrador central do padrão Repository/UnitOfWork no sistema FrotiX. Gerencia todos os repositories, coordena transações e fornece acesso unificado aos dados.
+A classe `UnitOfWork` é o padrão Unit of Work implementado para o sistema FrotiX, centralizando acesso a todos os repositories e gerenciando transações de banco de dados.
 
 **Principais características:**
 
-✅ **Centralização**: Um único ponto de acesso a todos os repositories  
-✅ **Gerenciamento de Transações**: Coordena `SaveChanges()`  
-✅ **Lazy Loading de Repositories**: Repositories específicos são instanciados sob demanda  
+✅ **Centralização**: Acesso único a todos os repositories  
+✅ **Transações**: Gerencia `SaveChanges()` e `SaveChangesAsync()`  
+✅ **Lazy Loading**: Alguns repositories são instanciados sob demanda  
 ✅ **Disposable**: Implementa `IDisposable` para liberação de recursos  
 ✅ **Partial Class**: Dividido em múltiplos arquivos para organização
 
@@ -28,14 +28,13 @@ A classe `UnitOfWork` é o orquestrador central do padrão Repository/UnitOfWork
 
 ## Estrutura da Classe
 
-### Herança e Implementação
+### Herança e Interface
 
 ```csharp
 public partial class UnitOfWork : IUnitOfWork
 ```
 
-**Herança**: Implementa `IUnitOfWork`  
-**Padrão**: Partial class para organização
+**Interface**: Implementa `IUnitOfWork` que expõe todos os repositories
 
 ---
 
@@ -53,7 +52,7 @@ public partial class UnitOfWork : IUnitOfWork
 
 **Descrição**: Repository lazy-loaded para estatísticas de viagens
 
-**Uso**: Instanciado sob demanda na propriedade `ViagemEstatistica`
+**Uso**: Instanciado apenas quando acessado pela primeira vez
 
 ---
 
@@ -61,7 +60,7 @@ public partial class UnitOfWork : IUnitOfWork
 
 **Descrição**: Repository lazy-loaded para veículo padrão de viagens
 
-**Uso**: Instanciado sob demanda na propriedade `VeiculoPadraoViagem`
+**Uso**: Instanciado apenas quando acessado pela primeira vez
 
 ---
 
@@ -71,52 +70,67 @@ public partial class UnitOfWork : IUnitOfWork
 public UnitOfWork(FrotiXDbContext db)
 {
     _db = db;
-    // Inicializa todos os repositories...
+    // Inicializa TODOS os repositories
+    Unidade = new UnidadeRepository(_db);
+    Combustivel = new CombustivelRepository(_db);
+    // ... mais de 100 repositories inicializados
 }
 ```
 
 **Inicialização**: Instancia todos os repositories no construtor
 
-**Repositories Inicializados** (mais de 80):
-- Cadastros: `Veiculo`, `Motorista`, `Contrato`, `AtaRegistroPrecos`, etc.
-- Operações: `Viagem`, `Abastecimento`, `Manutencao`, `Multa`, etc.
-- Views: `ViewVeiculos`, `ViewViagens`, `ViewAbastecimentos`, etc.
-- Relacionamentos: `VeiculoContrato`, `MotoristaContrato`, etc.
+**Total de Repositories**: Mais de 100 repositories diferentes
 
 ---
 
-## Propriedades de Repositories
+## Repositories Expostos
 
 ### Repositories de Cadastros
 
-```csharp
-public IVeiculoRepository Veiculo { get; private set; }
-public IMotoristaRepository Motorista { get; private set; }
-public IContratoRepository Contrato { get; private set; }
-public IAtaRegistroPrecosRepository AtaRegistroPrecos { get; private set; }
-// ... e muitos outros
-```
+- `Unidade`, `Combustivel`, `MarcaVeiculo`, `ModeloVeiculo`
+- `Veiculo`, `Fornecedor`, `Contrato`, `AtaRegistroPrecos`
+- `Motorista`, `Encarregado`, `Operador`, `Lavador`
+- `Requisitante`, `SetorSolicitante`
+- `SetorPatrimonial`, `SecaoPatrimonial`, `Patrimonio`
+- `PlacaBronze`, `AspNetUsers`, `Recurso`
 
-**Padrão**: Propriedades `get; private set;` inicializadas no construtor
+### Repositories de Operações
 
----
+- `Viagem`, `ViagensEconomildo`, `Abastecimento`
+- `Lavagem`, `Manutencao`, `Multa`
+- `Empenho`, `NotaFiscal`, `Evento`
+- `OcorrenciaViagem` (lazy-loaded)
+
+### Repositories de Relacionamentos
+
+- `VeiculoContrato`, `VeiculoAta`
+- `MotoristaContrato`, `OperadorContrato`
+- `EncarregadoContrato`, `LavadorContrato`
+- `ItemVeiculoContrato`, `ItemVeiculoAta`
+- `LavadoresLavagem`, `LotacaoMotorista`
 
 ### Repositories de Views
 
-```csharp
-public IViewVeiculosRepository ViewVeiculos { get; private set; }
-public IViewViagensRepository ViewViagens { get; private set; }
-public IViewAbastecimentosRepository ViewAbastecimentos { get; private set; }
-// ... e muitos outros
-```
+- `ViewAbastecimentos`, `ViewVeiculos`, `ViewMotoristas`
+- `ViewViagens`, `ViewCustosViagem`
+- `ViewManutencao`, `ViewMultas`, `ViewEmpenhos`
+- `ViewFluxoEconomildo`, `ViewLavagem`
+- `ViewEventos`, `ViewOcorrencia`
+- E mais de 30 outras views...
 
-**Uso**: Para consultas otimizadas em views do banco
+### Repositories Especiais
+
+- `AbastecimentoPendente`: Repository genérico (`IRepository<AbastecimentoPendente>`)
+- `AlertasFrotiX`, `AlertasUsuario`: Sistema de alertas
+- `ViagemEstatistica`: Lazy-loaded
+- `VeiculoPadraoViagem`: Lazy-loaded
+- `RepactuacaoVeiculo`: Lazy-loaded (partial)
 
 ---
 
-### Repositories Lazy-Loaded
+## Propriedades Lazy-Loaded
 
-#### `ViagemEstatistica`
+### `ViagemEstatistica`
 
 ```csharp
 public IViagemEstatisticaRepository ViagemEstatistica
@@ -132,11 +146,11 @@ public IViagemEstatisticaRepository ViagemEstatistica
 }
 ```
 
-**Motivo**: Instanciado sob demanda para otimização
+**Motivo**: Repository usado menos frequentemente, economiza memória
 
 ---
 
-#### `VeiculoPadraoViagem`
+### `VeiculoPadraoViagem`
 
 ```csharp
 public IVeiculoPadraoViagemRepository VeiculoPadraoViagem
@@ -152,29 +166,15 @@ public IVeiculoPadraoViagemRepository VeiculoPadraoViagem
 }
 ```
 
----
-
-## Métodos Principais
-
-### `GetDbContext()`
-
-**Descrição**: Retorna o DbContext para operações avançadas
-
-**Retorno**: `DbContext`
-
-**Uso**: Para acessar `ChangeTracker`, `Database`, etc.
-
-**Exemplo**:
-```csharp
-var dbContext = unitOfWork.GetDbContext();
-var entries = dbContext.ChangeTracker.Entries();
-```
+**Motivo**: Repository usado menos frequentemente
 
 ---
+
+## Métodos de Persistência
 
 ### `Save()`
 
-**Descrição**: **MÉTODO CRÍTICO** - Persiste todas as mudanças no banco de dados
+**Descrição**: Persiste todas as mudanças no banco de dados
 
 **Implementação**:
 ```csharp
@@ -184,30 +184,61 @@ public void Save()
 }
 ```
 
-**Uso**: Após operações de escrita (Add, Update, Remove)
-
-**Exemplo**:
+**Uso**:
 ```csharp
-unitOfWork.Veiculo.Add(novoVeiculo);
-unitOfWork.Motorista.Update(motorista);
-unitOfWork.Save(); // Persiste tudo em uma transação
+_unitOfWork.Veiculo.Add(veiculo);
+_unitOfWork.Motorista.Add(motorista);
+_unitOfWork.Save(); // Persiste tudo em uma transação
 ```
 
-**Comportamento**: 
-- Executa `SaveChanges()` em uma única transação
-- Se uma operação falhar, todas são revertidas (rollback)
+**Transação**: Todas as mudanças são commitadas juntas (atomicidade)
 
 ---
 
 ### `SaveAsync()`
 
-**Descrição**: Versão assíncrona de `Save`
+**Descrição**: Versão assíncrona de `Save()`
 
-**Retorno**: `Task`
+**Implementação**:
+```csharp
+public async Task SaveAsync()
+{
+    await _db.SaveChangesAsync();
+}
+```
 
-**Uso**: Para operações não bloqueantes
+**Uso**:
+```csharp
+await _unitOfWork.Veiculo.AddAsync(veiculo);
+await _unitOfWork.SaveAsync();
+```
 
 ---
+
+## Método de Acesso ao DbContext
+
+### `GetDbContext()`
+
+**Descrição**: Retorna o DbContext para operações avançadas
+
+**Implementação**:
+```csharp
+public DbContext GetDbContext() => _db;
+```
+
+**Uso**: Para acessar `ChangeTracker`, `Database`, etc.
+
+**Exemplo**:
+```csharp
+var context = _unitOfWork.GetDbContext();
+var entries = context.ChangeTracker.Entries()
+    .Where(e => e.State == EntityState.Modified)
+    .ToList();
+```
+
+---
+
+## Método Dispose
 
 ### `Dispose()`
 
@@ -221,7 +252,34 @@ public void Dispose()
 }
 ```
 
-**Uso**: Chamado automaticamente em `using` ou pelo container DI
+**Uso**: Chamado automaticamente em `using` ou manualmente
+
+**Exemplo**:
+```csharp
+using (var unitOfWork = serviceProvider.GetService<IUnitOfWork>())
+{
+    // operações
+    unitOfWork.Save();
+} // Dispose() chamado automaticamente
+```
+
+---
+
+## Extensões Parciais
+
+### `UnitOfWork.OcorrenciaViagem.cs`
+
+**Repositories Adicionados**:
+- `OcorrenciaViagem` (lazy-loaded)
+- `ViewOcorrenciasViagem` (lazy-loaded)
+- `ViewOcorrenciasAbertasVeiculo` (lazy-loaded)
+
+---
+
+### `UnitOfWork.RepactuacaoVeiculo.cs`
+
+**Repositories Adicionados**:
+- `RepactuacaoVeiculo` (lazy-loaded)
 
 ---
 
@@ -229,15 +287,15 @@ public void Dispose()
 
 ### Quem Usa Esta Classe
 
-- **Todos os Controllers**: Via injeção de dependência (`IUnitOfWork`)
+- **Todos os Controllers**: Via injeção de dependência `IUnitOfWork`
 - **Services**: Para operações de negócio
 - **Startup.cs/Program.cs**: Configuração de DI
 
 ### O Que Esta Classe Usa
 
 - **FrotiX.Data**: `FrotiXDbContext`
-- **FrotiX.Repository.IRepository**: Interfaces de repositories
-- **Todos os Repositories**: Instancia e gerencia
+- **FrotiX.Repository.IRepository**: Todas as interfaces de repositories
+- **Todos os Repositories**: Instancia todos os repositories específicos
 
 ---
 
@@ -246,113 +304,72 @@ public void Dispose()
 ### Startup.cs ou Program.cs
 
 ```csharp
-services.AddScoped<IUnitOfWork, UnitOfWork>(provider =>
-{
-    var dbContext = provider.GetRequiredService<FrotiXDbContext>();
-    return new UnitOfWork(dbContext);
-});
+services.AddScoped<IUnitOfWork, UnitOfWork>();
+services.AddDbContext<FrotiXDbContext>(options =>
+    options.UseSqlServer(connectionString));
 ```
 
-**Escopo**: `Scoped` - Uma instância por requisição HTTP
+**Lifetime**: `Scoped` - Uma instância por requisição HTTP
 
-**Vantagens**:
-- Compartilha mesma transação em uma requisição
-- Libera recursos automaticamente ao final da requisição
+**Vantagem**: Todas as operações em uma requisição compartilham o mesmo contexto
 
 ---
 
 ## Padrão de Uso
 
-### Exemplo 1: Operação Simples
+### Exemplo Completo
 
 ```csharp
 public class VeiculoController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
-
+    
     public VeiculoController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
-
-    public IActionResult Get(Guid id)
+    
+    [HttpPost]
+    public IActionResult Criar([FromBody] Veiculo veiculo)
     {
-        var veiculo = _unitOfWork.Veiculo.Get(id);
-        return Ok(veiculo);
+        // Adiciona veículo
+        _unitOfWork.Veiculo.Add(veiculo);
+        
+        // Adiciona relacionamento com contrato
+        var veiculoContrato = new VeiculoContrato 
+        { 
+            VeiculoId = veiculo.VeiculoId,
+            ContratoId = contratoId 
+        };
+        _unitOfWork.VeiculoContrato.Add(veiculoContrato);
+        
+        // Persiste tudo em uma transação
+        _unitOfWork.Save();
+        
+        return Ok();
+    }
+    
+    [HttpGet]
+    public IActionResult Listar()
+    {
+        var veiculos = _unitOfWork.ViewVeiculos.GetAll(
+            orderBy: q => q.OrderBy(v => v.Placa)
+        );
+        
+        return Ok(veiculos);
     }
 }
 ```
 
-### Exemplo 2: Operação com Múltiplas Entidades
-
-```csharp
-public IActionResult CriarViagemCompleta([FromBody] ViagemDTO dto)
-{
-    // Criar viagem
-    var viagem = new Viagem { /* ... */ };
-    _unitOfWork.Viagem.Add(viagem);
-
-    // Criar ocorrências
-    foreach (var ocorrenciaDto in dto.Ocorrencias)
-    {
-        var ocorrencia = new OcorrenciaViagem { /* ... */ };
-        _unitOfWork.OcorrenciaViagem.Add(ocorrencia);
-    }
-
-    // Persistir tudo em uma transação
-    _unitOfWork.Save(); // Se qualquer operação falhar, todas são revertidas
-
-    return Ok();
-}
-```
-
-### Exemplo 3: Consulta com View
-
-```csharp
-public IActionResult ListarAbastecimentos(DateTime dataInicio, DateTime dataFim)
-{
-    var abastecimentos = _unitOfWork.ViewAbastecimentos.GetAll(
-        filter: a => a.DataHora >= dataInicio && a.DataHora <= dataFim,
-        orderBy: q => q.OrderByDescending(a => a.DataHora)
-    );
-
-    return Ok(abastecimentos);
-}
-```
-
 ---
 
-## Observações Importantes
+## Vantagens do Padrão Unit of Work
 
-### Transações
-
-⚠️ **CRÍTICO**: `Save()` executa todas as mudanças em uma única transação
-
-**Vantagem**: Atomicidade - tudo ou nada
-
-**Desvantagem**: Se uma operação falhar, todas são revertidas
-
-**Solução**: Use `TransactionScope` para transações mais complexas se necessário
-
----
-
-### Escopo de Instância
-
-⚠️ **Scoped**: Uma instância por requisição HTTP
-
-**Implicação**: 
-- Compartilha mesma transação em uma requisição
-- Não compartilha entre requisições diferentes
-
----
-
-### Lazy Loading de Repositories
-
-⚠️ **Apenas 2 Repositories**: `ViagemEstatistica` e `VeiculoPadraoViagem`
-
-**Motivo**: Otimização - instanciados apenas quando necessários
-
-**Demais Repositories**: Instanciados no construtor (eager initialization)
+1. **Transações Atômicas**: Múltiplas operações em uma única transação
+2. **Consistência**: Garante que todas as mudanças são commitadas juntas
+3. **Reversibilidade**: Se uma operação falhar, todas são revertidas
+4. **Performance**: Uma única chamada `SaveChanges()` para múltiplas operações
+5. **Simplicidade**: Controllers não precisam gerenciar transações manualmente
 
 ---
 
@@ -367,7 +384,7 @@ public IActionResult ListarAbastecimentos(DateTime dataInicio, DateTime dataFim)
 - `Repository/UnitOfWork.OcorrenciaViagem.cs`
 - `Repository/UnitOfWork.RepactuacaoVeiculo.cs`
 
-**Impacto**: Documentação de referência para orquestração de repositories
+**Impacto**: Documentação de referência para padrão Unit of Work
 
 **Status**: ✅ **Concluído**
 
