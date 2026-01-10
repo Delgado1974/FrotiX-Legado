@@ -124,8 +124,8 @@
         /* Botão de Limpar Foto (lixeira) - 40% dentro, 60% fora */
         .ftx-foto-clear {
             position: absolute;
-            bottom: -14px;  /* 36px * 0.4 = 14.4px dentro */
-            right: -14px;   /* 60% fora do container */
+            bottom: -22px;  /* 36px * 0.6 = 21.6px fora (60%) */
+            right: -22px;    /* 36px * 0.6 = 21.6px fora (60%) */
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -384,7 +384,8 @@
                                             <button type="button" 
                                                     class="ftx-foto-clear @(fotoBase64 == null ? "d-none" : "")" 
                                                     id="btnLimparFoto" 
-                                                    data-ejtip="Remover foto">
+                                                    data-ejtip="Remover foto"
+                                                    style="@(fotoBase64 == null ? "display: none !important;" : "display: flex;")">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
@@ -460,6 +461,69 @@
                 const dropzoneIcon = dropzoneArea ? dropzoneArea.querySelector('.ftx-dropzone-icon') : null;
                 const btnLimparFoto = document.getElementById('btnLimparFoto');
                 const fotoPadraoPath = '/Images/sucesso_transparente.png';
+                const hasFotoInicial = @(fotoBase64 != null ? "true" : "false") === "true";
+
+                // #region agent log - H1 visibilidade inicial
+                fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        sessionId:'debug-session',
+                        runId:'button-position-2',
+                        hypothesisId:'H1',
+                        location:'Upsert.cshtml:init',
+                        message:'Estado inicial foto/botao',
+                        data:{
+                            hasFotoInicial,
+                            btnExists: !!btnLimparFoto,
+                            btnClasses: btnLimparFoto ? btnLimparFoto.className : 'NO_BTN',
+                            btnHasDNone: btnLimparFoto ? btnLimparFoto.classList.contains('d-none') : false,
+                            dropzoneHasFile: dropzoneArea ? dropzoneArea.classList.contains('has-file') : false
+                        },
+                        timestamp: Date.now()
+                    })
+                }).catch(()=>{});
+                // #endregion
+
+                // Ajusta estado inicial do botão e dropzone - FORÇA OCULTAÇÃO SE NÃO HÁ FOTO
+                if (!hasFotoInicial) {
+                    if (btnLimparFoto) {
+                        btnLimparFoto.classList.add('d-none');
+                        btnLimparFoto.style.display = 'none';
+                    }
+                    if (dropzoneArea) dropzoneArea.classList.remove('has-file');
+                } else {
+                    if (btnLimparFoto) {
+                        btnLimparFoto.classList.remove('d-none');
+                        btnLimparFoto.style.display = 'flex';
+                    }
+                    if (dropzoneArea) dropzoneArea.classList.add('has-file');
+                }
+
+                // #region agent log - H2 posicao botao após layout
+                setTimeout(function() {
+                    if (btnLimparFoto && imgPreview) {
+                        const btnRect = btnLimparFoto.getBoundingClientRect();
+                        const imgRect = imgPreview.getBoundingClientRect();
+                        fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
+                            method:'POST',
+                            headers:{'Content-Type':'application/json'},
+                            body:JSON.stringify({
+                                sessionId:'debug-session',
+                                runId:'button-position-1',
+                                hypothesisId:'H2',
+                                location:'Upsert.cshtml:layout',
+                                message:'Bounding boxes btn/img',
+                                data:{
+                                    btn:{top:btnRect.top,left:btnRect.left,width:btnRect.width,height:btnRect.height},
+                                    img:{top:imgRect.top,left:imgRect.left,width:imgRect.width,height:imgRect.height}
+                                },
+                                timestamp: Date.now()
+                            })
+                        }).catch(()=>{});
+                    }
+                }, 50);
+                // #endregion
 
                 // Preview da foto ao selecionar arquivo
                 if (inputFoto) {
@@ -473,6 +537,7 @@
                                 // Mostra botão de limpar
                                 if (btnLimparFoto) {
                                     btnLimparFoto.classList.remove('d-none');
+                                    btnLimparFoto.style.display = 'flex';
                                 }
                                 
                                 // Atualiza visual do dropzone
@@ -535,6 +600,7 @@
 
                             // Esconde o botão de limpar
                             btnLimparFoto.classList.add('d-none');
+                            btnLimparFoto.style.display = 'none';
 
                             // Reseta o visual do dropzone
                             if (dropzoneArea) {
@@ -548,6 +614,24 @@
                             if (dropzoneIcon) {
                                 dropzoneIcon.className = 'fa-duotone fa-cloud-arrow-up ftx-dropzone-icon';
                             }
+
+                            // #region agent log - H3 click limpar
+                            fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
+                                method:'POST',
+                                headers:{'Content-Type':'application/json'},
+                                body:JSON.stringify({
+                                    sessionId:'debug-session',
+                                    runId:'button-position-1',
+                                    hypothesisId:'H3',
+                                    location:'Upsert.cshtml:btnLimpar',
+                                    message:'Limpar foto acionado',
+                                    data:{
+                                        dropzoneHasFile: dropzoneArea ? dropzoneArea.classList.contains('has-file') : false
+                                    },
+                                    timestamp: Date.now()
+                                })
+                            }).catch(()=>{});
+                            // #endregion
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "btnLimparFoto.click", error);
                         }
