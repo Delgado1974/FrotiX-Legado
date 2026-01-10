@@ -770,7 +770,15 @@ namespace FrotiX.Controllers
                 }
                 
                 recurso.Descricao = dto.Descricao;
-                recurso.Ordem = dto.Ordem > 0 ? dto.Ordem : GetNextOrdem();
+                
+                // ✅ Ordem: para novos itens, usa GetNextOrdem() para garantir unicidade
+                // Para itens existentes, mantém a ordem atual (movimentos são salvos pelo SaveTreeToDb)
+                if (isNew)
+                {
+                    recurso.Ordem = GetNextOrdem();
+                }
+                // Se não é novo, mantém a ordem existente (não modifica)
+                
                 recurso.Nivel = dto.Nivel;
                 recurso.Ativo = dto.Ativo;
                 recurso.HasChild = dto.HasChild;

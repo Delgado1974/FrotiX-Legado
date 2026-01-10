@@ -55,6 +55,8 @@ namespace FrotiX.Pages.Usuarios
         [BindProperty]
         public IFormFile FotoUpload { get; set; }
 
+        public byte[] FotoPadraoBytes { get; set; }
+
         private void SetViewModel()
         {
             try
@@ -64,6 +66,26 @@ namespace FrotiX.Pages.Usuarios
             catch (Exception error)
             {
                 Alerta.TratamentoErroComLinha("Upsert.cshtml.cs", "SetViewModel", error);
+            }
+        }
+
+        private byte[] CarregarFotoPadrao()
+        {
+            try
+            {
+                string caminhoFotoPadrao = Path.Combine(_hostingEnvironment.WebRootPath, "Images", "sucesso_transparente.png");
+                
+                if (System.IO.File.Exists(caminhoFotoPadrao))
+                {
+                    return System.IO.File.ReadAllBytes(caminhoFotoPadrao);
+                }
+                
+                return null;
+            }
+            catch (Exception error)
+            {
+                Alerta.TratamentoErroComLinha("Upsert.cshtml.cs", "CarregarFotoPadrao", error);
+                return null;
             }
         }
 
@@ -85,6 +107,15 @@ namespace FrotiX.Pages.Usuarios
                     if (UsuarioObj == null)
                     {
                         return NotFound();
+                    }
+                }
+                else
+                {
+                    // Se for criação (novo usuário), carrega a foto padrão
+                    FotoPadraoBytes = CarregarFotoPadrao();
+                    if (FotoPadraoBytes != null)
+                    {
+                        UsuarioObj.AspNetUsers.Foto = FotoPadraoBytes;
                     }
                 }
 
@@ -120,16 +151,73 @@ namespace FrotiX.Pages.Usuarios
                     return Page();
                 }
 
-                string valor = UsuarioObj.AspNetUsers.Ponto.Trim();
-
-                if (!valor.StartsWith("p_") && !valor.StartsWith("P_"))
+                // Formata Ponto como p_XXXX (minúsculo seguido de números)
+                string valor = UsuarioObj.AspNetUsers.Ponto?.Trim() ?? "";
+                
+                // Remove qualquer prefixo p_ ou P_ existente
+                valor = System.Text.RegularExpressions.Regex.Replace(valor, "^[pP]_", "");
+                
+                // Remove tudo que não é número
+                valor = System.Text.RegularExpressions.Regex.Replace(valor, @"\D", "");
+                
+                // Formata como p_XXXX
+                if (!string.IsNullOrEmpty(valor))
                 {
                     valor = "p_" + valor;
                 }
+                else
+                {
+                    ModelState.AddModelError("UsuarioObj.AspNetUsers.Ponto", "(O ponto é obrigatório e deve conter números)");
+                    SetViewModel();
+                    return Page();
+                }
 
+                UsuarioObj.AspNetUsers.Ponto = valor;
                 UsuarioObj.AspNetUsers.UserName = valor;
+                
+                // Valida Email termina em @camara.leg.br
+                if (!string.IsNullOrEmpty(UsuarioObj.AspNetUsers.Email))
+                {
+                    string email = UsuarioObj.AspNetUsers.Email.Trim().ToLower();
+                    if (!email.EndsWith("@camara.leg.br"))
+                    {
+                        // Remove @camara.leg.br se existir
+                        email = System.Text.RegularExpressions.Regex.Replace(email, "@camara\\.leg\\.br$", "");
+                        email = System.Text.RegularExpressions.Regex.Replace(email, "@+$", "");
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            UsuarioObj.AspNetUsers.Email = email + "@camara.leg.br";
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("UsuarioObj.AspNetUsers.Email", "(O email deve terminar em @camara.leg.br)");
+                            SetViewModel();
+                            return Page();
+                        }
+                    }
+                }
+                
+                // Valida Celular formato (xx) xxxx-xxxx
+                if (!string.IsNullOrEmpty(UsuarioObj.AspNetUsers.PhoneNumber))
+                {
+                    string celular = UsuarioObj.AspNetUsers.PhoneNumber.Trim();
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(celular, @"^\(\d{2}\) \d{4}-\d{4}$"))
+                    {
+                        ModelState.AddModelError("UsuarioObj.AspNetUsers.PhoneNumber", "(O celular deve estar no formato (xx) xxxx-xxxx)");
+                        SetViewModel();
+                        return Page();
+                    }
+                }
+                
+                // Valida Ramal é numérico
+                if (UsuarioObj.AspNetUsers.Ramal.HasValue && (UsuarioObj.AspNetUsers.Ramal.Value < 0 || UsuarioObj.AspNetUsers.Ramal.Value > 99999))
+                {
+                    ModelState.AddModelError("UsuarioObj.AspNetUsers.Ramal", "(O ramal deve ser um número entre 0 e 99999)");
+                    SetViewModel();
+                    return Page();
+                }
 
-                // Processa foto se foi enviada
+                // Processa foto se foi enviada, caso contrário usa foto padrão
                 byte[] fotoBytes = null;
                 if (FotoUpload != null && FotoUpload.Length > 0)
                 {
@@ -138,6 +226,11 @@ namespace FrotiX.Pages.Usuarios
                         await FotoUpload.CopyToAsync(memoryStream);
                         fotoBytes = memoryStream.ToArray();
                     }
+                }
+                else
+                {
+                    // Se não houver foto enviada, usa a foto padrão
+                    fotoBytes = CarregarFotoPadrao();
                 }
 
                 var user = new Models.AspNetUsers
@@ -214,6 +307,64 @@ namespace FrotiX.Pages.Usuarios
 
                 UsuarioObj.AspNetUsers.Id = id;
                 UsuarioObj.AspNetUsers.Discriminator = "Usuario";
+                
+                // Formata Ponto como p_XXXX (minúsculo seguido de números)
+                if (!string.IsNullOrEmpty(UsuarioObj.AspNetUsers.Ponto))
+                {
+                    string valor = UsuarioObj.AspNetUsers.Ponto.Trim();
+                    
+                    // Remove qualquer prefixo p_ ou P_ existente
+                    valor = System.Text.RegularExpressions.Regex.Replace(valor, "^[pP]_", "");
+                    
+                    // Remove tudo que não é número
+                    valor = System.Text.RegularExpressions.Regex.Replace(valor, @"\D", "");
+                    
+                    // Formata como p_XXXX
+                    if (!string.IsNullOrEmpty(valor))
+                    {
+                        valor = "p_" + valor;
+                        UsuarioObj.AspNetUsers.Ponto = valor;
+                        UsuarioObj.AspNetUsers.UserName = valor;
+                    }
+                }
+                
+                // Valida Email termina em @camara.leg.br
+                if (!string.IsNullOrEmpty(UsuarioObj.AspNetUsers.Email))
+                {
+                    string email = UsuarioObj.AspNetUsers.Email.Trim().ToLower();
+                    if (!email.EndsWith("@camara.leg.br"))
+                    {
+                        // Remove @camara.leg.br se existir
+                        email = System.Text.RegularExpressions.Regex.Replace(email, "@camara\\.leg\\.br$", "");
+                        email = System.Text.RegularExpressions.Regex.Replace(email, "@+$", "");
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            UsuarioObj.AspNetUsers.Email = email + "@camara.leg.br";
+                        }
+                    }
+                }
+                
+                // Valida Celular formato (xx) xxxx-xxxx
+                if (!string.IsNullOrEmpty(UsuarioObj.AspNetUsers.PhoneNumber))
+                {
+                    string celular = UsuarioObj.AspNetUsers.PhoneNumber.Trim();
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(celular, @"^\(\d{2}\) \d{4}-\d{4}$"))
+                    {
+                        ModelState.AddModelError("UsuarioObj.AspNetUsers.PhoneNumber", "(O celular deve estar no formato (xx) xxxx-xxxx)");
+                        SetViewModel();
+                        UsuarioObj.AspNetUsers.Id = id;
+                        return Page();
+                    }
+                }
+                
+                // Valida Ramal é numérico
+                if (UsuarioObj.AspNetUsers.Ramal.HasValue && (UsuarioObj.AspNetUsers.Ramal.Value < 0 || UsuarioObj.AspNetUsers.Ramal.Value > 99999))
+                {
+                    ModelState.AddModelError("UsuarioObj.AspNetUsers.Ramal", "(O ramal deve ser um número entre 0 e 99999)");
+                    SetViewModel();
+                    UsuarioObj.AspNetUsers.Id = id;
+                    return Page();
+                }
 
                 // Processa foto se foi enviada
                 if (FotoUpload != null && FotoUpload.Length > 0)
@@ -224,10 +375,15 @@ namespace FrotiX.Pages.Usuarios
                         UsuarioObj.AspNetUsers.Foto = memoryStream.ToArray();
                     }
                 }
-                else if (usuarioExistente != null)
+                else if (usuarioExistente != null && usuarioExistente.Foto != null && usuarioExistente.Foto.Length > 0)
                 {
-                    // Mantém a foto existente
+                    // Mantém a foto existente se houver
                     UsuarioObj.AspNetUsers.Foto = usuarioExistente.Foto;
+                }
+                else
+                {
+                    // Se não houver foto existente nem nova foto, usa a foto padrão
+                    UsuarioObj.AspNetUsers.Foto = CarregarFotoPadrao();
                 }
 
                 _unitOfWork.AspNetUsers.Update(UsuarioObj.AspNetUsers);

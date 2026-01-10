@@ -392,12 +392,66 @@
             color: #333;
         }
 
+        /* SweetAlert mais largo para dropdown de páginas */
+        .swal-wide {
+            width: 550px !important;
+            max-width: 90vw !important;
+        }
+        
+        .swal-wide .swal2-html-container {
+            text-align: center;
+            padding: 1rem 1.5rem !important;
+        }
+        
+        .swal-wide select {
+            margin-top: 8px;
+            border: 2px solid #3D5771;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        
+        .swal-wide select:focus {
+            border-color: #ff6b35;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        /* Badge clicável (transforma Grupo ↔ Página) */
         #gestaoTreeView .tree-node .node-badge {
             font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #e9ecef;
-            color: #6c757d;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        #gestaoTreeView .tree-node .node-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        /* Badge Página - Azul */
+        #gestaoTreeView .tree-node .node-badge.badge-pagina {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: #fff;
+        }
+        
+        #gestaoTreeView .tree-node .node-badge.badge-pagina:hover {
+            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+        }
+        
+        /* Badge Grupo - Laranja */
+        #gestaoTreeView .tree-node .node-badge.badge-grupo {
+            background: linear-gradient(135deg, #fd7e14 0%, #e96b02 100%);
+            color: #fff;
+        }
+        
+        #gestaoTreeView .tree-node .node-badge.badge-grupo:hover {
+            background: linear-gradient(135deg, #e96b02 0%, #d35400 100%);
         }
 
         /* Drag and drop */
@@ -434,6 +488,243 @@
             border-radius: 4px;
             z-index: 1000;
             pointer-events: none;
+        }
+
+        /* ====== BOTÕES DE NAVEGAÇÃO DA ÁRVORE ====== */
+        
+        /* Container dos botões de cada item */
+        .tree-nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        /* Mostra botões ao passar mouse no item */
+        #gestaoTreeView .tree-node:hover .tree-nav-buttons {
+            opacity: 1;
+        }
+        
+        /* Mostra botões quando item está selecionado */
+        #gestaoTreeView .tree-node.selected .tree-nav-buttons {
+            opacity: 1;
+        }
+        
+        /* Botão base de navegação */
+        .tree-nav-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+        
+        .tree-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+        
+        .tree-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .tree-nav-btn:disabled:hover {
+            background: transparent;
+        }
+        
+        /* Ícones das setas */
+        .tree-nav-btn i {
+            font-size: 0.85rem;
+        }
+        
+        /* Setas de Ordenação (Esquerda) - Vinho/Vermelho claro */
+        .tree-nav-btn.btn-order i {
+            --fa-primary-color: #722F37;      /* Vinho */
+            --fa-secondary-color: #FFCCCB;    /* Vermelho claro */
+            --fa-primary-opacity: 1;
+            --fa-secondary-opacity: 0.7;
+        }
+        
+        .tree-nav-btn.btn-order:hover i {
+            --fa-primary-color: #5a252c;      /* Vinho mais escuro */
+            --fa-secondary-color: #ff9999;    /* Vermelho mais visível */
+        }
+        
+        /* Setas de Hierarquia (Direita) - Roxo/Azul claro */
+        .tree-nav-btn.btn-level i {
+            --fa-primary-color: #6B3FA0;      /* Roxo */
+            --fa-secondary-color: #ADD8E6;    /* Azul claro */
+            --fa-primary-opacity: 1;
+            --fa-secondary-opacity: 0.7;
+        }
+        
+        .tree-nav-btn.btn-level:hover i {
+            --fa-primary-color: #522f7a;      /* Roxo mais escuro */
+            --fa-secondary-color: #87CEEB;    /* Azul mais visível */
+        }
+        
+        /* Separador entre botões esquerda/direita e o conteúdo */
+        .tree-nav-separator {
+            width: 1px;
+            height: 20px;
+            background: #dee2e6;
+            margin: 0 4px;
+        }
+        
+        /* ====== CARD DE CONFIRMAÇÃO DE ALTERAÇÕES ====== */
+        .tree-changes-card {
+            display: none !important;  /* Oculto por padrão */
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            margin: 0 1.5rem 1rem 1.5rem;  /* Margem para alinhar com o container */
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+        }
+        
+        .tree-changes-card.show {
+            display: flex !important;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tree-changes-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        
+        .tree-changes-info i {
+            color: #ffc107;
+        }
+        
+        .tree-changes-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Botão Confirmar (Check-mark) - Verde escuro / Verde claro */
+        .btn-confirmar-alteracoes {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #e8f5e9;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-confirmar-alteracoes:hover {
+            background: #c8e6c9;
+            transform: scale(1.08);
+        }
+        
+        .btn-confirmar-alteracoes i {
+            font-size: 0.95rem;
+            --fa-primary-color: #2e7d32;      /* Verde escuro */
+            --fa-secondary-color: #81c784;    /* Verde claro */
+            --fa-primary-opacity: 1;
+            --fa-secondary-opacity: 0.8;
+        }
+        
+        /* Botão Cancelar (X no círculo) - Vinho escuro / Vermelho claro */
+        .btn-cancelar-alteracoes {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #ffebee;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-cancelar-alteracoes:hover {
+            background: #ffcdd2;
+            transform: scale(1.08);
+        }
+        
+        .btn-cancelar-alteracoes i {
+            font-size: 0.95rem;
+            --fa-primary-color: #722F37;      /* Vinho escuro */
+            --fa-secondary-color: #FFCCCB;    /* Vermelho claro */
+            --fa-primary-opacity: 1;
+            --fa-secondary-opacity: 0.8;
+        }
+        
+        /* ====== TOGGLE TIPO DE ITEM (PÁGINA/GRUPO) ====== */
+        .tipo-item-toggle {
+            display: flex;
+            gap: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #3D5771;
+        }
+        
+        .tipo-item-btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+        
+        .tipo-item-btn:first-child {
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .tipo-item-btn:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .tipo-item-btn.active {
+            background: #3D5771;
+            color: #fff;
+        }
+        
+        .tipo-item-btn i {
+            font-size: 1.1rem;
+        }
+        
+        .tipo-item-btn.active i {
+            --fa-primary-color: #fff;
+            --fa-secondary-color: #a0c4e8;
+            --fa-primary-opacity: 1;
+            --fa-secondary-opacity: 0.8;
+        }
+        
+        .tipo-item-btn:not(.active) i {
+            --fa-primary-color: #6c757d;
+            --fa-secondary-color: #adb5bd;
         }
 
         /* ====== BOTOES ====== */
@@ -533,12 +824,29 @@
             <h5><i class="fa-duotone fa-folder-tree"></i> Estrutura do Menu</h5>
             <span id="itemCount" class="badge bg-secondary">0 itens</span>
         </div>
+        
+        <!-- ✅ Card de Confirmação de Alterações (dentro do tree-panel) -->
+        <div class="tree-changes-card" id="treeChangesCard">
+            <div class="tree-changes-info">
+                <i class="fa-duotone fa-triangle-exclamation"></i>
+                <span id="changesMessage">Alterações pendentes</span>
+            </div>
+            <div class="tree-changes-actions">
+                <button type="button" class="btn-confirmar-alteracoes" id="btnConfirmarAlteracoes" title="Confirmar e salvar">
+                    <i class="fa-duotone fa-circle-check"></i>
+                </button>
+                <button type="button" class="btn-cancelar-alteracoes" id="btnCancelarAlteracoes" title="Cancelar alterações">
+                    <i class="fa-duotone fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
         <div class="tree-content" id="gestaoTreeView">
             <div class="empty-state" id="emptyTreeState">
                 <i class="fa-duotone fa-folder-open"></i>
                 <p>Nenhum recurso encontrado.<br>Clique em "Migrar do JSON" para importar ou adicione novos itens.</p>
             </div>
         </div>
+        
         <div class="tree-actions">
             <button type="button" class="btn btn-header-orange btn-submit-spin" onclick="adicionarNovoItem()">
                 <i class="fa-duotone fa-plus icon-space icon-pulse"></i> Novo Item
@@ -576,10 +884,54 @@
                     </div>
 
                     <!-- DropDownTree de Páginas - DEVE FICAR ANTES DO CAMPO URL -->
+                    <!-- ✅ POSICIONAR ABAIXO DE... -->
                     <div class="row">
                         <div class="col-12">
                             <div class="form-group">
-                                <label for="ddlPagina">Selecione a Página do Sistema</label>
+                                <label for="ddlPosicao">Posicionar abaixo de...</label>
+                                <ejs-dropdowntree id="ddlPosicao"
+                                                 placeholder="Selecione a posição na estrutura..."
+                                                 popupHeight="350px"
+                                                 showCheckBox="false"
+                                                 showClearButton="true"
+                                                 allowFiltering="true"
+                                                 filterType="Contains"
+                                                 ignoreCase="true"
+                                                 cssClass="e-outline"
+                                                 change="onPosicaoChange">
+                                </ejs-dropdowntree>
+                                <small class="form-text text-muted mt-1">
+                                    O item será posicionado logo após o item selecionado
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ✅ TIPO DE ITEM: PÁGINA OU GRUPO -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Tipo de Item</label>
+                                <div class="tipo-item-toggle" id="tipoItemToggle">
+                                    <button type="button" class="tipo-item-btn active" id="btnTipoPagina" onclick="selecionarTipoItem('pagina')">
+                                        <i class="fa-duotone fa-file-lines"></i>
+                                        <span>Página</span>
+                                    </button>
+                                    <button type="button" class="tipo-item-btn" id="btnTipoGrupo" onclick="selecionarTipoItem('grupo')">
+                                        <i class="fa-duotone fa-folder-tree"></i>
+                                        <span>Grupo</span>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="tipoItem" value="pagina" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ✅ SELECIONE A PÁGINA (só aparece se for Página) -->
+                    <div class="row" id="rowPaginaSistema">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="ddlPagina">Selecione a Página do Sistema<span class="required-asterisk">*</span></label>
 
                                 <ejs-dropdowntree id="ddlPagina"
                                                  placeholder="Busque ou selecione uma página..."
@@ -594,69 +946,16 @@
                                 </ejs-dropdowntree>
 
                                 <small class="form-text text-muted mt-1">
-                                    Ao selecionar uma página, a URL será preenchida automaticamente abaixo
+                                    Ao selecionar uma página, a URL será preenchida automaticamente
                                 </small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- DropDown de Seleção do Item Pai (Grupo) -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="form-group">
-                                <label for="ddlItemPai">Item Pai (Grupo)</label>
-                                <ejs-dropdownlist id="ddlItemPai"
-                                                 placeholder="Selecione o grupo pai deste item..."
-                                                 popupHeight="300px"
-                                                 showClearButton="true"
-                                                 allowFiltering="true"
-                                                 filterType="Contains"
-                                                 ignoreCase="true"
-                                                 cssClass="e-outline"
-                                                 change="onItemPaiChange">
-                                </ejs-dropdownlist>
-                                <small class="form-text text-muted mt-1">
-                                    Ao mudar o Item Pai, a Ordem será recalculada automaticamente
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="txtHref">URL da Página (gerada automaticamente)</label>
-                                <input type="text" class="form-control" id="txtHref" readonly
-                                       placeholder="Selecione uma página acima para gerar a URL..."
-                                       style="background-color: #f8f9fa; cursor: not-allowed;" />
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="txtOrdem">Ordem (calculada automaticamente)</label>
-                                <div class="order-input-group">
-                                    <input type="number" class="form-control" id="txtOrdem" value="0" readonly
-                                           style="background-color: #f8f9fa;" />
-                                    <div class="order-controls" id="orderControls">
-                                        <button type="button" class="btn-order" id="btnOrderUp" 
-                                                data-bs-toggle="tooltip" 
-                                                data-bs-custom-class="tooltip-ftx-azul"
-                                                data-bs-placement="top"
-                                                title="Mover item para cima">
-                                            <i class="fa-duotone fa-arrow-up"></i>
-                                        </button>
-                                        <button type="button" class="btn-order" id="btnOrderDown"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-custom-class="tooltip-ftx-azul"
-                                                data-bs-placement="bottom"
-                                                title="Mover item para baixo">
-                                            <i class="fa-duotone fa-arrow-down"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Campos ocultos para compatibilidade -->
+                    <input type="hidden" id="ddlItemPai" />
+                    <input type="hidden" id="txtOrdem" value="0" />
+                    <input type="hidden" id="txtHref" />
 
                     <div class="row">
                         <div class="col-md-8">
@@ -745,6 +1044,10 @@
     var treeObj = null;
     var selectedItem = null;
     var lastDragInfo = null; // guarda informação do movimento para o toast
+    
+    // ✅ Controle de alterações pendentes na estrutura
+    var treeDataOriginal = null;  // Estado original antes das alterações
+    var alteracoesPendentes = false;  // Flag para indicar se há alterações não salvas
 
     // Helper para achar ícone no dataSource do DropDownTree
     function findIconById(iconId) {
@@ -894,6 +1197,9 @@
         carregarArvore();
         carregarIconesFontAwesome();
         carregarPaginasSistema();
+        
+        // ✅ Configura botões de confirmação/cancelamento de alterações
+        configurarBotoesAlteracoes();
     });
 
     // Popula dropdown de Item Pai com todos os grupos (não-página)
@@ -972,162 +1278,751 @@
             });
 
             console.log('Grupos encontrados:', grupos.length - 1, '+ <sem grupo>');
-
-            // Popula o DropDownList
-            var ddlItemPai = document.getElementById('ddlItemPai');
-            if (ddlItemPai && ddlItemPai.ej2_instances && ddlItemPai.ej2_instances[0]) {
-                var ddl = ddlItemPai.ej2_instances[0];
-                ddl.dataSource = grupos;
-                ddl.fields = { text: 'textFormatado', value: 'id' };
-                ddl.dataBind();
-                console.log('✅ DropDownList de Item Pai populado');
-            }
+            // ✅ Dropdown removido - hierarquia agora é gerenciada pelos botões de seta
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "popularDropdownItemPai", erro);
         }
     }
-
-    // Evento change do dropdown de Item Pai
-    function onItemPaiChange(args) {
+    
+    // =====================================================
+    // ✅ CONTROLES DE POSIÇÃO E TIPO DE ITEM
+    // =====================================================
+    
+    // Popula o dropdown "Posicionar abaixo de..."
+    function popularDropdownPosicao() {
         try {
-            console.log('=== Item Pai alterado ===');
-            console.log('Novo Pai ID:', args.value);
-
-            if (!selectedItem || !selectedItem.id) {
-                console.warn('Nenhum item selecionado');
-                return;
-            }
-
-            var novoPaiId = args.value; // '_SEM_GRUPO_' se "<sem grupo>"
-            var item = buscarItemPorId(treeData, selectedItem.id);
-
-            if (!item) {
-                console.error('Item não encontrado na árvore');
-                return;
-            }
-
-            // ✅ Se selecionou "<sem grupo>" e item é grupo (sem href)
-            if (novoPaiId === '_SEM_GRUPO_' && (!item.href || item.href === 'javascript:void(0);')) {
-                console.log('[TRANSFORMAR] Transformando grupo em página raiz');
-                
-                // Remove filhos se houver (grupo não pode ter filhos se vira página)
-                if (item.items && item.items.length > 0) {
-                    Alerta.Confirmar(
-                        'Transformar Grupo em Página',
-                        'Este grupo possui ' + item.items.length + ' filho(s). Ao transformá-lo em página, os filhos serão movidos para a raiz. Deseja continuar?',
-                        'Sim, Transformar',
-                        'Cancelar'
-                    ).then(function(confirmado) {
-                        if (!confirmado) {
-                            // Cancela - restaura valor anterior no dropdown
-                            var ddlItemPai = document.getElementById('ddlItemPai').ej2_instances[0];
-                            if (ddlItemPai) {
-                                ddlItemPai.value = item.parentId || '_SEM_GRUPO_';
-                                ddlItemPai.dataBind();
-                            }
-                            return;
-                        }
-                        
-                        // Prossegue com transformação
-                        transformarGrupoEmPagina(item);
+            var itens = [];
+            
+            // Adiciona opção "No início (raiz)"
+            itens.push({
+                id: '_INICIO_',
+                text: '📍 No início (primeiro item)',
+                hasChildren: false
+            });
+            
+            // Função recursiva para extrair todos os itens com hierarquia
+            function extrairItensHierarquicos(lista, nivel) {
+                lista.forEach(function(item) {
+                    var indentacao = '  '.repeat(nivel);
+                    var icone = (item.items && item.items.length > 0) ? '📁' : '📄';
+                    
+                    itens.push({
+                        id: item.id,
+                        text: indentacao + icone + ' ' + decodeHtml(item.text),
+                        hasChildren: false
                     });
-                    return;
-                } else {
-                    // Não tem filhos, transforma diretamente
-                    transformarGrupoEmPagina(item);
-                }
+                    
+                    if (item.items && item.items.length > 0) {
+                        extrairItensHierarquicos(item.items, nivel + 1);
+                    }
+                });
+            }
+            
+            extrairItensHierarquicos(treeData, 0);
+            
+            // Popula o DropDownTree
+            var ddlPosicao = document.getElementById('ddlPosicao');
+            if (ddlPosicao && ddlPosicao.ej2_instances && ddlPosicao.ej2_instances[0]) {
+                var ddl = ddlPosicao.ej2_instances[0];
+                ddl.fields = {
+                    dataSource: itens,
+                    value: 'id',
+                    text: 'text',
+                    hasChildren: 'hasChildren'
+                };
+                ddl.dataBind();
+                console.log('✅ Dropdown de posição populado com', itens.length, 'itens');
+            }
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "popularDropdownPosicao", erro);
+        }
+    }
+    
+    // Alterna entre Página e Grupo
+    function selecionarTipoItem(tipo) {
+        try {
+            var btnPagina = document.getElementById('btnTipoPagina');
+            var btnGrupo = document.getElementById('btnTipoGrupo');
+            var tipoItemInput = document.getElementById('tipoItem');
+            var rowPagina = document.getElementById('rowPaginaSistema');
+            
+            if (tipo === 'pagina') {
+                btnPagina.classList.add('active');
+                btnGrupo.classList.remove('active');
+                tipoItemInput.value = 'pagina';
                 
+                // Mostra seleção de página
+                if (rowPagina) rowPagina.style.display = 'block';
+                
+            } else {
+                btnPagina.classList.remove('active');
+                btnGrupo.classList.add('active');
+                tipoItemInput.value = 'grupo';
+                
+                // Esconde seleção de página
+                if (rowPagina) rowPagina.style.display = 'none';
+                
+                // Limpa URL quando vira grupo
+                document.getElementById('txtHref').value = '';
+            }
+            
+            console.log('[TIPO] Tipo de item alterado para:', tipo);
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "selecionarTipoItem", erro);
+        }
+    }
+    
+    // Evento de mudança de posição
+    function onPosicaoChange(args) {
+        try {
+            console.log('[POSIÇÃO] Nova posição selecionada:', args.value);
+            // A posição será aplicada ao salvar
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onPosicaoChange", erro);
+        }
+    }
+    
+    // Atualiza o toggle de tipo baseado no item selecionado
+    function atualizarToggleTipo(item) {
+        if (!item) return;
+        
+        var ehGrupo = !item.href || item.href === 'javascript:void(0);' || (item.items && item.items.length > 0);
+        
+        if (ehGrupo) {
+            selecionarTipoItem('grupo');
+        } else {
+            selecionarTipoItem('pagina');
+        }
+    }
+    
+    // ✅ Alterna tipo do item (clique no badge)
+    function alternarTipoItem(itemId, event) {
+        try {
+            console.log('[TOGGLE-TIPO] Alternando tipo do item:', itemId);
+            
+            var item = buscarItemPorId(treeData, itemId);
+            if (!item) {
+                console.error('[TOGGLE-TIPO] Item não encontrado:', itemId);
                 return;
             }
             
-            function transformarGrupoEmPagina(item) {
-                console.log('[TRANSFORMAR] Iniciando transformação do grupo:', item.id, item.text);
+            var nomeItem = decodeHtml(item.text);
+            var ehGrupoAtual = !item.href || item.href === 'javascript:void(0);';
+            
+            if (ehGrupoAtual) {
+                // ═══════════════════════════════════════════════════════════
+                // GRUPO → PÁGINA
+                // ═══════════════════════════════════════════════════════════
                 
-                // Guarda os filhos antes de modificar
-                var filhosOriginais = item.items ? item.items.slice() : [];
-                console.log('[TRANSFORMAR] Filhos originais:', filhosOriginais.length);
+                // Monta HTML com dropdown de páginas dentro do SweetAlert
+                var htmlPaginas = montarSelectPaginasParaSwal(itemId);
                 
-                // 1. Primeiro, move os filhos para a raiz do treeData
-                if (filhosOriginais.length > 0) {
-                    filhosOriginais.forEach(function(filho) {
-                        console.log('[TRANSFORMAR] Movendo filho para raiz:', filho.id, filho.text);
-                        filho.parentId = null;
-                        
-                        // Se o filho não está na raiz do treeData, adiciona
-                        var existeNaRaiz = treeData.some(function(i) { return i.id === filho.id; });
-                        if (!existeNaRaiz) {
-                            treeData.push(filho);
+                var mensagemBase = 'O Grupo <strong>"' + nomeItem + '"</strong> será transformado em uma <strong>Página</strong>.<br><br>';
+                
+                if (item.items && item.items.length > 0) {
+                    mensagemBase += '<div class="alert alert-warning" style="text-align:left; font-size:0.9rem; margin-bottom:15px;">' +
+                        '<i class="fa-duotone fa-triangle-exclamation"></i> ' +
+                        'Este grupo possui <strong>' + item.items.length + '</strong> filho(s).<br>' +
+                        'Eles serão movidos para o nível acima.' +
+                        '</div>';
+                }
+                
+                mensagemBase += '<div style="text-align:left; margin-top:10px;">' +
+                    '<label style="font-weight:600; margin-bottom:8px; display:block;">Selecione a Página do Sistema:</label>' +
+                    htmlPaginas +
+                    '</div>';
+                
+                Swal.fire({
+                    title: 'Transformar Grupo em Página',
+                    html: mensagemBase,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-duotone fa-check"></i> Transformar',
+                    cancelButtonText: '<i class="fa-duotone fa-xmark"></i> Cancelar',
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    customClass: {
+                        popup: 'swal-wide'
+                    },
+                    preConfirm: function() {
+                        var selectPagina = document.getElementById('swalSelectPagina');
+                        if (!selectPagina || !selectPagina.value) {
+                            Swal.showValidationMessage('Selecione uma página do sistema!');
+                            return false;
+                        }
+                        return {
+                            paginaId: selectPagina.value,
+                            paginaUrl: selectPagina.options[selectPagina.selectedIndex].dataset.url
+                        };
+                    }
+                }).then(function(result) {
+                    if (result.isConfirmed && result.value) {
+                        executarTransformacaoGrupoEmPagina(item, result.value.paginaUrl);
+                    }
+                });
+                
+            } else {
+                // ═══════════════════════════════════════════════════════════
+                // PÁGINA → GRUPO
+                // ═══════════════════════════════════════════════════════════
+                
+                // Encontra itens irmãos ABAIXO deste item
+                var irmaosAbaixo = encontrarIrmaosAbaixo(item);
+                
+                var mensagem = 'A Página <strong>"' + nomeItem + '"</strong> será transformada em <strong>Grupo</strong>.<br><br>' +
+                    '<div class="alert alert-info" style="text-align:left; font-size:0.9rem;">' +
+                    '<i class="fa-duotone fa-info-circle"></i> A URL da página será removida.' +
+                    '</div>';
+                
+                if (irmaosAbaixo.length > 0) {
+                    // Tem itens abaixo - pergunta se quer subordinar
+                    mensagem += '<div style="margin-top:15px; text-align:left;">' +
+                        '<strong>Existem ' + irmaosAbaixo.length + ' item(ns) abaixo desta página:</strong><br>' +
+                        '<ul style="margin:10px 0; padding-left:20px;">';
+                    
+                    irmaosAbaixo.slice(0, 5).forEach(function(irmao) {
+                        mensagem += '<li>' + decodeHtml(irmao.text) + '</li>';
+                    });
+                    
+                    if (irmaosAbaixo.length > 5) {
+                        mensagem += '<li><em>... e mais ' + (irmaosAbaixo.length - 5) + ' item(ns)</em></li>';
+                    }
+                    
+                    mensagem += '</ul>' +
+                        '<p style="margin-top:10px; font-size:0.9rem; color:#666;">Para onde deseja mover estes itens?</p>' +
+                        '</div>';
+                    
+                    Swal.fire({
+                        title: 'Transformar Página em Grupo',
+                        html: mensagem,
+                        icon: 'question',
+                        showDenyButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fa-duotone fa-folder-tree" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Subordinar ao Novo Grupo',
+                        denyButtonText: '<i class="fa-duotone fa-folder-open" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Mover para Outro Grupo',
+                        cancelButtonText: '<i class="fa-duotone fa-xmark" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Cancelar',
+                        confirmButtonColor: '#fd7e14',
+                        denyButtonColor: '#17a2b8',
+                        cancelButtonColor: '#6c757d'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            // Transforma em grupo E subordina itens abaixo (viram filhos do novo grupo)
+                            executarTransformacaoPaginaEmGrupo(item, true, irmaosAbaixo, null);
+                        } else if (result.isDenied) {
+                            // Mostra segundo SweetAlert para escolher o grupo destino
+                            mostrarSelecaoGrupoDestino(item, irmaosAbaixo);
+                        }
+                    });
+                    
+                } else {
+                    // Não tem itens abaixo - confirmação simples
+                    Alerta.Confirmar(
+                        'Transformar Página em Grupo',
+                        mensagem,
+                        'Sim, Transformar',
+                        'Cancelar'
+                    ).then(function(confirmado) {
+                        if (confirmado) {
+                            executarTransformacaoPaginaEmGrupo(item, false, [], null);
                         }
                     });
                 }
-                
-                // 2. Limpa os filhos do item (agora ele não tem mais filhos)
-                item.items = [];
-                
-                // 3. Define item como página (sem href por enquanto - usuário vai escolher)
-                item.href = null;
-                item.parentId = null;
-                
-                // 4. Força reconstrução completa do treeData
-                treeData = JSON.parse(JSON.stringify(treeData));
-                
-                console.log('[TRANSFORMAR] treeData após transformação:', treeData);
-                
-                // 5. Atualiza TreeView forçando refresh completo
-                treeObj.fields.dataSource = treeData;
-                treeObj.dataBind();
-                treeObj.refresh();
-                
-                // 6. Atualiza formulário
-                document.getElementById('parentId').value = '';
-                var txtHref = document.getElementById('txtHref');
-                if (txtHref) txtHref.value = '';
-                
-                // 7. Limpa campo de página para usuário escolher
-                var ddlPagina = document.getElementById('ddlPagina');
-                if (ddlPagina && ddlPagina.ej2_instances && ddlPagina.ej2_instances[0]) {
-                    ddlPagina.ej2_instances[0].value = null;
-                    ddlPagina.ej2_instances[0].dataBind();
-                }
-                
-                // 8. Atualiza dropdown de Item Pai para mostrar "<sem grupo>" selecionado
-                var ddlItemPai = document.getElementById('ddlItemPai').ej2_instances[0];
-                if (ddlItemPai) {
-                    ddlItemPai.value = '_SEM_GRUPO_';
-                    ddlItemPai.dataBind();
-                }
-                
-                // 9. Repopula dropdown de grupos (lista mudou)
-                popularDropdownItemPai();
-                
-                // 10. Atualiza item selecionado (busca novamente pois foi reconstruído)
-                var itemAtualizado = buscarItemPorId(treeData, item.id);
-                if (itemAtualizado) {
-                    selecionarItem(itemAtualizado);
-                }
-                
-                // 11. Salva alterações no banco
-                console.log('[TRANSFORMAR] Salvando alterações...');
-                salvarOrdenacaoAutomatica();
-                
-                // 12. Mostra mensagem de sucesso
-                Alerta.Sucesso('Grupo transformado em página. Agora selecione uma página do sistema para completar a transformação.');
             }
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "alternarTipoItem", erro);
+        }
+    }
+    
+    // Monta HTML do <select> de páginas para usar no SweetAlert
+    function montarSelectPaginasParaSwal(itemIdExcluir) {
+        try {
+            var ddlPaginaObj = document.getElementById('ddlPagina');
+            if (!ddlPaginaObj || !ddlPaginaObj.ej2_instances || !ddlPaginaObj.ej2_instances[0]) {
+                return '<p class="text-danger">Erro ao carregar páginas</p>';
+            }
+            
+            var ddl = ddlPaginaObj.ej2_instances[0];
+            var dataSource = ddl.fields && ddl.fields.dataSource ? ddl.fields.dataSource : [];
+            
+            if (dataSource.length === 0) {
+                return '<p class="text-warning">Nenhuma página disponível</p>';
+            }
+            
+            var html = '<select id="swalSelectPagina" class="form-control" style="width:100%; padding:10px; font-size:1rem;">';
+            html += '<option value="">-- Selecione uma página --</option>';
+            
+            // Função recursiva para montar opções hierárquicas
+            function adicionarOpcoes(items, nivel) {
+                items.forEach(function(item) {
+                    var indent = '&nbsp;&nbsp;'.repeat(nivel * 2);
+                    var icone = (item.child && item.child.length > 0) ? '📁' : '📄';
+                    html += '<option value="' + item.id + '" data-url="' + (item.url || '') + '">' + 
+                            indent + icone + ' ' + item.text + '</option>';
+                    
+                    if (item.child && item.child.length > 0) {
+                        adicionarOpcoes(item.child, nivel + 1);
+                    }
+                });
+            }
+            
+            adicionarOpcoes(dataSource, 0);
+            html += '</select>';
+            
+            return html;
+            
+        } catch (erro) {
+            console.error('[SWAL-SELECT]', erro);
+            return '<p class="text-danger">Erro ao carregar páginas</p>';
+        }
+    }
+    
+    // Encontra itens irmãos que estão ABAIXO do item atual
+    function encontrarIrmaosAbaixo(item) {
+        try {
+            var lista = item.parentId ? null : treeData;
+            
+            if (item.parentId) {
+                var pai = buscarItemPorId(treeData, item.parentId);
+                lista = pai ? pai.items : null;
+            }
+            
+            if (!lista) return [];
+            
+            var indexAtual = lista.findIndex(function(i) { return i.id === item.id; });
+            if (indexAtual === -1 || indexAtual >= lista.length - 1) return [];
+            
+            // Retorna todos os itens após o atual
+            return lista.slice(indexAtual + 1);
+            
+        } catch (erro) {
+            console.error('[IRMAOS-ABAIXO]', erro);
+            return [];
+        }
+    }
+    
+    // Executa transformação GRUPO → PÁGINA
+    function executarTransformacaoGrupoEmPagina(item, novaUrl) {
+        try {
+            // Se tem filhos, move para o nível do pai
+            if (item.items && item.items.length > 0) {
+                var paiId = item.parentId;
+                var listaDestino = paiId ? null : treeData;
+                
+                if (paiId) {
+                    var pai = buscarItemPorId(treeData, paiId);
+                    listaDestino = pai ? pai.items : null;
+                }
+                
+                if (listaDestino) {
+                    var indexItem = listaDestino.findIndex(function(i) { return i.id === item.id; });
+                    
+                    // Insere filhos após o item
+                    item.items.forEach(function(filho, idx) {
+                        filho.parentId = paiId || null;
+                        listaDestino.splice(indexItem + 1 + idx, 0, filho);
+                    });
+                }
+                
+                item.items = [];
+            }
+            
+            // Define a nova URL
+            item.href = novaUrl;
+            
+            // Atualiza TreeView
+            atualizarTreeViewAposMovimento(item.id);
+            
+            // Atualiza formulário se o item está selecionado
+            if (selectedItem && selectedItem.id === item.id) {
+                selecionarTipoItem('pagina');
+                document.getElementById('txtHref').value = novaUrl;
+            }
+            
+            mostrarAlerta('Grupo transformado em Página!', 'success');
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
+        }
+    }
+    
+    // Mostra SweetAlert para escolher grupo destino dos itens
+    function mostrarSelecaoGrupoDestino(itemOrigem, itensParaMover) {
+        try {
+            var htmlGrupos = montarSelectGruposParaSwal(itemOrigem.id);
+            
+            var mensagem = '<div style="text-align:left;">' +
+                '<p>Os <strong>' + itensParaMover.length + '</strong> item(ns) abaixo serão movidos para o grupo selecionado:</p>' +
+                '<ul style="margin:10px 0; padding-left:20px; max-height:150px; overflow-y:auto;">';
+            
+            itensParaMover.forEach(function(item) {
+                mensagem += '<li>' + decodeHtml(item.text) + '</li>';
+            });
+            
+            mensagem += '</ul>' +
+                '<label style="font-weight:600; margin-top:15px; display:block;">Selecione o Grupo destino:</label>' +
+                htmlGrupos +
+                '</div>';
+            
+            Swal.fire({
+                title: 'Mover Itens para Outro Grupo',
+                html: mensagem,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-duotone fa-check" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Confirmar',
+                cancelButtonText: '<i class="fa-duotone fa-xmark" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Cancelar',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                customClass: {
+                    popup: 'swal-wide'
+                },
+                preConfirm: function() {
+                    var selectGrupo = document.getElementById('swalSelectGrupo');
+                    if (!selectGrupo || !selectGrupo.value) {
+                        Swal.showValidationMessage('Selecione um grupo destino!');
+                        return false;
+                    }
+                    return selectGrupo.value;
+                }
+            }).then(function(result) {
+                if (result.isConfirmed && result.value) {
+                    executarTransformacaoPaginaEmGrupo(itemOrigem, false, itensParaMover, result.value);
+                }
+            });
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "mostrarSelecaoGrupoDestino", erro);
+        }
+    }
+    
+    // Monta HTML do <select> de grupos para usar no SweetAlert
+    function montarSelectGruposParaSwal(itemIdExcluir) {
+        try {
+            var grupos = [];
+            
+            // Adiciona opção "Raiz (sem grupo pai)"
+            grupos.push({
+                id: '_RAIZ_',
+                text: '📍 Raiz (nível principal)',
+                nivel: 0
+            });
+            
+            // Função recursiva para encontrar grupos
+            function coletarGrupos(items, nivel) {
+                items.forEach(function(item) {
+                    // É grupo se não tem href ou tem filhos
+                    var ehGrupo = !item.href || item.href === 'javascript:void(0);' || (item.items && item.items.length > 0);
+                    
+                    // Não inclui o item que está sendo transformado
+                    if (ehGrupo && item.id !== itemIdExcluir) {
+                        grupos.push({
+                            id: item.id,
+                            text: decodeHtml(item.text),
+                            nivel: nivel
+                        });
+                    }
+                    
+                    if (item.items && item.items.length > 0) {
+                        coletarGrupos(item.items, nivel + 1);
+                    }
+                });
+            }
+            
+            coletarGrupos(treeData, 1);
+            
+            var html = '<select id="swalSelectGrupo" class="form-control" style="width:100%; padding:10px; font-size:1rem; margin-top:8px;">';
+            html += '<option value="">-- Selecione um grupo --</option>';
+            
+            grupos.forEach(function(grupo) {
+                var indent = '&nbsp;&nbsp;'.repeat(grupo.nivel * 2);
+                var icone = grupo.id === '_RAIZ_' ? '📍' : '📁';
+                html += '<option value="' + grupo.id + '">' + indent + icone + ' ' + grupo.text + '</option>';
+            });
+            
+            html += '</select>';
+            
+            return html;
+            
+        } catch (erro) {
+            console.error('[SWAL-SELECT-GRUPOS]', erro);
+            return '<p class="text-danger">Erro ao carregar grupos</p>';
+        }
+    }
+    
+    // Executa transformação PÁGINA → GRUPO
+    function executarTransformacaoPaginaEmGrupo(item, subordinarAoNovoGrupo, itensParaMover, grupoDestinoId) {
+        try {
+            // Transforma em grupo
+            item.href = 'javascript:void(0);';
+            item.items = item.items || [];
+            
+            // Obtém lista onde o item está atualmente
+            var listaOrigem = item.parentId ? null : treeData;
+            if (item.parentId) {
+                var paiOrigem = buscarItemPorId(treeData, item.parentId);
+                listaOrigem = paiOrigem ? paiOrigem.items : null;
+            }
+            
+            if (itensParaMover && itensParaMover.length > 0 && listaOrigem) {
+                if (subordinarAoNovoGrupo) {
+                    // ════════════════════════════════════════════════════════
+                    // OPÇÃO 1: Subordinar ao novo grupo (viram filhos)
+                    // ════════════════════════════════════════════════════════
+                    itensParaMover.forEach(function(irmao) {
+                        var idx = listaOrigem.findIndex(function(i) { return i.id === irmao.id; });
+                        if (idx !== -1) {
+                            listaOrigem.splice(idx, 1);
+                            irmao.parentId = item.id;
+                            item.items.push(irmao);
+                        }
+                    });
+                } else if (grupoDestinoId) {
+                    // ════════════════════════════════════════════════════════
+                    // OPÇÃO 2: Mover para outro grupo
+                    // ════════════════════════════════════════════════════════
+                    var listaDestino;
+                    var novoParentId;
+                    
+                    if (grupoDestinoId === '_RAIZ_') {
+                        listaDestino = treeData;
+                        novoParentId = null;
+                    } else {
+                        var grupoDestino = buscarItemPorId(treeData, grupoDestinoId);
+                        if (grupoDestino) {
+                            grupoDestino.items = grupoDestino.items || [];
+                            listaDestino = grupoDestino.items;
+                            novoParentId = grupoDestinoId;
+                        }
+                    }
+                    
+                    if (listaDestino) {
+                        itensParaMover.forEach(function(irmao) {
+                            var idx = listaOrigem.findIndex(function(i) { return i.id === irmao.id; });
+                            if (idx !== -1) {
+                                listaOrigem.splice(idx, 1);
+                                irmao.parentId = novoParentId;
+                                listaDestino.push(irmao);
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Atualiza TreeView
+            atualizarTreeViewAposMovimento(item.id);
+            
+            // Atualiza formulário se o item está selecionado
+            if (selectedItem && selectedItem.id === item.id) {
+                selecionarTipoItem('grupo');
+                document.getElementById('txtHref').value = '';
+            }
+            
+            // Mensagem de sucesso
+            var msg = 'Página transformada em Grupo!';
+            if (itensParaMover && itensParaMover.length > 0) {
+                if (subordinarAoNovoGrupo) {
+                    msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s)!';
+                } else if (grupoDestinoId) {
+                    msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo.';
+                }
+            }
+            
+            mostrarAlerta(msg, 'success');
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
+        }
+    }
+    
+    // ✅ REMOVIDO: Função transformarGrupoEmPaginaComFilhos substituída por executarTransformacaoGrupoEmPagina
+    // ✅ REMOVIDO: Evento onItemPaiChange - hierarquia agora é gerenciada pelos botões de seta na TreeView
 
-            if (!novoPaiId || novoPaiId === '_SEM_GRUPO_') {
-                console.log('Pai removido - mantém ordem atual');
-                document.getElementById('parentId').value = '';  // Limpa parentId
+    // =====================================================
+    // ✅ CONTROLE DE ALTERAÇÕES PENDENTES
+    // =====================================================
+    
+    // Guarda o estado original do treeData (para poder cancelar alterações)
+    function guardarEstadoOriginal() {
+        treeDataOriginal = JSON.parse(JSON.stringify(treeData));
+        alteracoesPendentes = false;
+        esconderCardAlteracoes();
+        console.log('[ALTERAÇÕES] Estado original guardado');
+    }
+    
+    // Marca que há alterações pendentes e mostra o card
+    function marcarAlteracoesPendentes() {
+        alteracoesPendentes = true;
+        mostrarCardAlteracoes();
+        console.log('[ALTERAÇÕES] ⚠️ Alterações pendentes marcadas');
+    }
+    
+    // Mostra o card de confirmação de alterações
+    function mostrarCardAlteracoes() {
+        var card = document.getElementById('treeChangesCard');
+        console.log('[ALTERAÇÕES] Tentando mostrar card:', card);
+        if (card) {
+            card.classList.add('show');
+            console.log('[ALTERAÇÕES] Card show adicionado. Classes:', card.className);
+        } else {
+            console.error('[ALTERAÇÕES] Card treeChangesCard não encontrado!');
+        }
+    }
+    
+    // Esconde o card de confirmação de alterações
+    function esconderCardAlteracoes() {
+        var card = document.getElementById('treeChangesCard');
+        if (card) {
+            card.classList.remove('show');
+        }
+    }
+    
+    // Confirma as alterações e salva no banco
+    function confirmarAlteracoes() {
+        try {
+            console.log('[ALTERAÇÕES] ✅ Confirmando alterações...');
+            
+            // ✅ Verifica se há grupos vazios (sem filhos) que devem ser excluídos
+            var gruposVazios = encontrarGruposVazios(treeData);
+            console.log('[ALTERAÇÕES] Grupos vazios encontrados:', gruposVazios.length);
+            
+            if (gruposVazios.length > 0) {
+                // Monta lista de nomes
+                var nomes = gruposVazios.map(function(g) { return decodeHtml(g.text); }).join(', ');
+                
+                Alerta.Confirmar(
+                    'Grupos Vazios Encontrados',
+                    'Os seguintes grupos ficaram sem itens: <strong>' + nomes + '</strong>.<br><br>Deseja excluí-los?',
+                    'Sim, Excluir Grupos Vazios',
+                    'Não, Manter como Grupos'
+                ).then(function(excluir) {
+                    if (excluir) {
+                        // Remove grupos vazios
+                        gruposVazios.forEach(function(grupo) {
+                            removerItemDaArvore(treeData, grupo.id);
+                            console.log('[ALTERAÇÕES] Grupo vazio removido:', grupo.text);
+                        });
+                        
+                        // Força reconstrução
+                        treeData = JSON.parse(JSON.stringify(treeData));
+                    }
+                    
+                    // Continua com o salvamento
+                    finalizarConfirmacaoAlteracoes();
+                });
+            } else {
+                // Sem grupos vazios, salva direto
+                finalizarConfirmacaoAlteracoes();
+            }
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "confirmarAlteracoes", erro);
+        }
+    }
+    
+    // Finaliza a confirmação de alterações (após verificar grupos vazios)
+    function finalizarConfirmacaoAlteracoes() {
+        try {
+            // Salva no banco
+            salvarOrdenacaoAutomatica();
+            
+            // Atualiza TreeView
+            treeObj.fields.dataSource = treeData;
+            treeObj.dataBind();
+            treeObj.refresh();
+            treeObj.expandAll();
+            configurarBotoesNavegacao();
+            
+            // Atualiza o estado original para o novo estado
+            guardarEstadoOriginal();
+            
+            // Mostra mensagem de sucesso
+            mostrarAlerta('Alterações salvas com sucesso!', 'success');
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "finalizarConfirmacaoAlteracoes", erro);
+        }
+    }
+    
+    // Encontra grupos vazios (sem filhos) na árvore
+    function encontrarGruposVazios(items) {
+        var vazios = [];
+        
+        function buscarRecursivo(lista) {
+            lista.forEach(function(item) {
+                // Um grupo é identificado por não ter href válido ou ter href = javascript:void(0);
+                var ehGrupo = !item.href || item.href === 'javascript:void(0);';
+                var temFilhos = item.items && item.items.length > 0;
+                
+                // Se é grupo mas não tem filhos, está vazio
+                if (ehGrupo && !temFilhos) {
+                    vazios.push(item);
+                }
+                
+                // Busca recursivamente nos filhos
+                if (temFilhos) {
+                    buscarRecursivo(item.items);
+                }
+            });
+        }
+        
+        buscarRecursivo(items);
+        return vazios;
+    }
+    
+    // Cancela as alterações e restaura o estado original
+    function cancelarAlteracoes() {
+        try {
+            console.log('[ALTERAÇÕES] ❌ Cancelando alterações...');
+            
+            if (!treeDataOriginal) {
+                console.warn('[ALTERAÇÕES] Não há estado original para restaurar');
                 return;
             }
-
-            // Calcula nova ordem baseada nos filhos do novo pai
-            calcularOrdemAutomatica(novoPaiId);
-
-            // Atualiza campo parentId oculto
-            document.getElementById('parentId').value = novoPaiId;
+            
+            // Restaura o estado original
+            treeData = JSON.parse(JSON.stringify(treeDataOriginal));
+            
+            // Atualiza TreeView
+            treeObj.fields.dataSource = treeData;
+            treeObj.dataBind();
+            treeObj.refresh();
+            treeObj.expandAll();
+            
+            // Reconfigura event listeners
+            configurarBotoesNavegacao();
+            
+            // Limpa seleção
+            selectedItem = null;
+            limparFormulario(false);
+            
+            // Marca como sem alterações pendentes
+            alteracoesPendentes = false;
+            esconderCardAlteracoes();
+            
+            // Mostra mensagem
+            mostrarAlerta('Alterações canceladas. Estrutura restaurada.', 'info');
+            
+            console.log('[ALTERAÇÕES] ✅ Estado original restaurado');
+            
         } catch (erro) {
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "onItemPaiChange", erro);
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "cancelarAlteracoes", erro);
         }
+    }
+    
+    // Configura os event listeners dos botões de confirmação/cancelamento
+    function configurarBotoesAlteracoes() {
+        var btnConfirmar = document.getElementById('btnConfirmarAlteracoes');
+        var btnCancelar = document.getElementById('btnCancelarAlteracoes');
+        
+        if (btnConfirmar) {
+            btnConfirmar.onclick = confirmarAlteracoes;
+        }
+        if (btnCancelar) {
+            btnCancelar.onclick = cancelarAlteracoes;
+        }
+        
+        console.log('✅ Botões de confirmação/cancelamento configurados');
     }
 
     // Calcula ordem automaticamente baseada nos filhos do pai
@@ -1205,6 +2100,13 @@
                         console.log('[DEBUG] Chamando popularDropdownItemPai()...');
                         // ✅ Popula dropdown de Item Pai após carregar árvore
                         popularDropdownItemPai();
+                        
+                        // ✅ Popula dropdown de posição
+                        popularDropdownPosicao();
+                        
+                        // ✅ Guarda o estado original para poder cancelar alterações
+                        guardarEstadoOriginal();
+                        
                         console.log('[DEBUG] ✅ Árvore carregada com sucesso!');
                     } else {
                         console.log('[DEBUG] ❌ Condição falhou - Mostrando estado vazio');
@@ -1266,7 +2168,8 @@
                 nodeTemplate: function(data) {
                     var isGroup = !data.href || data.href === 'javascript:void(0);' || (data.items && data.items.length > 0);
                     var badge = isGroup ? 'Grupo' : 'Página';
-                    var badgeClass = badge === 'Página' ? 'bg-info' : 'bg-warning text-dark';
+                    var badgeClass = isGroup ? 'badge-grupo' : 'badge-pagina';
+                    var badgeTitle = isGroup ? 'Clique para transformar em Página' : 'Clique para transformar em Grupo';
                     var displayText = decodeHtml(data.text);  // ✅ DECODIFICA para exibição
                     
                     // ✅ Normaliza ícone para DUOTONE
@@ -1275,10 +2178,40 @@
                         iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
                     }
                     
+                    // ✅ Botões de navegação da árvore
+                    // Usa data-itemid para evitar problemas com escape de aspas em GUIDs
+                    var btnsEsquerda = 
+                        '<div class="tree-nav-buttons tree-nav-left">' +
+                            '<button type="button" class="tree-nav-btn btn-order btn-mover-cima" data-itemid="' + data.id + '" title="Mover para cima">' +
+                                '<i class="fa-duotone fa-arrow-up-from-bracket"></i>' +
+                            '</button>' +
+                            '<button type="button" class="tree-nav-btn btn-order btn-mover-baixo" data-itemid="' + data.id + '" title="Mover para baixo">' +
+                                '<i class="fa-duotone fa-arrow-down-from-bracket"></i>' +
+                            '</button>' +
+                        '</div>';
+                    
+                    var btnsDireita = 
+                        '<div class="tree-nav-buttons tree-nav-right">' +
+                            '<button type="button" class="tree-nav-btn btn-level btn-mover-esq" data-itemid="' + data.id + '" title="Subir nível (vira irmão do pai)">' +
+                                '<i class="fa-duotone fa-arrow-left-from-bracket"></i>' +
+                            '</button>' +
+                            '<button type="button" class="tree-nav-btn btn-level btn-mover-dir" data-itemid="' + data.id + '" title="Descer nível (vira filho do item acima)">' +
+                                '<i class="fa-duotone fa-arrow-right-from-bracket"></i>' +
+                            '</button>' +
+                        '</div>';
+                    
+                    // ✅ Badge clicável para alternar tipo
+                    var badgeBtn = '<button type="button" class="node-badge ' + badgeClass + ' btn-toggle-tipo" ' +
+                                   'data-itemid="' + data.id + '" title="' + badgeTitle + '">' + badge + '</button>';
+                    
                     return '<div class="tree-node" data-id="' + data.id + '">' +
+                           btnsEsquerda +
+                           '<div class="tree-nav-separator"></div>' +
                            '<i class="' + iconClass + ' icon-duotone-ftx"></i>' +
                            '<span class="node-text ' + (isGroup ? 'node-group' : '') + '">' + displayText + '</span>' +
-                           '<span class="node-badge ' + badgeClass + '">' + badge + '</span>' +
+                           badgeBtn +
+                           '<div class="tree-nav-separator"></div>' +
+                           btnsDireita +
                            '</div>';
                 },
                 allowDragAndDrop: false,  // ✅ DESABILITADO - usar apenas Propriedades
@@ -1330,8 +2263,76 @@
 
             treeObj.appendTo('#treeViewControl');
             console.log('✅ TreeView renderizado com sucesso! Total de itens:', treeData.length);
+            
+            // ✅ Adiciona event listeners com delegação para os botões de navegação
+            configurarBotoesNavegacao();
+            
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "renderizarTreeView", erro);
+        }
+    }
+    
+    // ✅ Configura event listeners para botões de navegação (com delegação)
+    function configurarBotoesNavegacao() {
+        var treeContainer = document.getElementById('gestaoTreeView');
+        if (!treeContainer) {
+            console.error('[NAV-BTNS] Container da árvore não encontrado');
+            return;
+        }
+        
+        // Remove listeners anteriores (se houver)
+        treeContainer.removeEventListener('click', handleNavButtonClick);
+        
+        // Adiciona listener com delegação
+        treeContainer.addEventListener('click', handleNavButtonClick, true); // useCapture = true
+        
+        console.log('✅ Event listeners de navegação configurados');
+    }
+    
+    // ✅ Handler para cliques nos botões de navegação
+    function handleNavButtonClick(event) {
+        var target = event.target;
+        
+        // Se clicou no ícone, pega o botão pai
+        if (target.tagName === 'I') {
+            target = target.parentElement;
+        }
+        
+        // Verifica se é um botão de navegação OU badge de tipo
+        var isNavBtn = target.classList.contains('tree-nav-btn');
+        var isToggleTipo = target.classList.contains('btn-toggle-tipo');
+        
+        if (!isNavBtn && !isToggleTipo) {
+            return; // Não é um botão, deixa propagar
+        }
+        
+        // Para a propagação para evitar que o nodeClicked seja chamado
+        event.stopPropagation();
+        event.preventDefault();
+        
+        var itemId = target.getAttribute('data-itemid');
+        console.log('[NAV-BTN] Botão clicado, itemId:', itemId);
+        
+        if (!itemId) {
+            console.error('[NAV-BTN] data-itemid não encontrado no botão');
+            return;
+        }
+        
+        // ✅ Clique no badge de tipo (Grupo ↔ Página)
+        if (isToggleTipo) {
+            alternarTipoItem(itemId, event);
+            return;
+        }
+        
+        // Identifica qual botão foi clicado
+        if (target.classList.contains('btn-mover-cima')) {
+            moverItemCima(itemId, event);
+        } else if (target.classList.contains('btn-mover-baixo')) {
+            moverItemBaixo(itemId, event);
+        } else if (target.classList.contains('btn-mover-esq')) {
+            moverItemEsquerda(itemId, event);
+        } else if (target.classList.contains('btn-mover-dir')) {
+            moverItemDireita(itemId, event);
         }
     }
 
@@ -1511,27 +2512,10 @@
                 console.log('URL não está no formato esperado ou está vazia');
             }
 
-            // ========== ATUALIZA DROPDOWN DE ITEM PAI ==========
+            // ========== ATUALIZA PARENT ID (campo oculto) ==========
             var parentId = selectedItem.parentId;
             console.log('Parent ID do item:', parentId);
-
-            var ddlItemPaiObj = document.getElementById('ddlItemPai');
-            if (ddlItemPaiObj && ddlItemPaiObj.ej2_instances && ddlItemPaiObj.ej2_instances[0]) {
-                var ddlItemPai = ddlItemPaiObj.ej2_instances[0];
-                // ✅ Aguarda um pouco para garantir que dropdown está populado
-                setTimeout(function() {
-                    if (parentId) {
-                        ddlItemPai.value = parentId;
-                        ddlItemPai.dataBind();
-                        console.log('✅ DropDownList de Item Pai atualizado para:', parentId);
-                    } else {
-                        // ✅ Para "<sem grupo>", usa valor especial que dropdown consegue selecionar
-                        ddlItemPai.value = '_SEM_GRUPO_';
-                        ddlItemPai.dataBind();
-                        console.log('✅ DropDownList de Item Pai definido como _SEM_GRUPO_');
-                    }
-                }, 200);
-            }
+            document.getElementById('parentId').value = parentId || '';
 
             // Atualiza indicador de modo
             if (modoEdicao) {
@@ -1545,6 +2529,9 @@
             // ✅ Carrega e mostra controle de acesso
             carregarControleAcesso(selectedItem.id);
             document.getElementById('acessoCard').style.display = 'block';
+            
+            // ✅ Atualiza toggle de tipo (Página/Grupo)
+            atualizarToggleTipo(selectedItem);
 
             console.log('=== FIM selecionarItem (sucesso) ===');
         } catch (error) {
@@ -2050,28 +3037,61 @@
     // Salva propriedades do item
     function salvarPropriedades() {
         try {
+            // ✅ Obtém o tipo de item do toggle
+            var tipoItem = document.getElementById('tipoItem').value;
+            var ehGrupo = (tipoItem === 'grupo');
+            
             // ✅ CODIFICA valores antes de enviar ao backend
             var txtHref = document.getElementById('txtHref').value;
             var parentIdValue = document.getElementById('parentId').value;
             
-            // ✅ Se parentId está vazio e href está vazio, é grupo sendo transformado em página
-            // Neste caso, envia href como null explicitamente para backend não definir javascript:void(0);
-            var hrefFinal = txtHref || null;
-            if (!txtHref && !parentIdValue) {
-                // Grupo sendo transformado em página raiz - href deve ser null
-                hrefFinal = null;
+            // ✅ Define href baseado no tipo
+            var hrefFinal;
+            if (ehGrupo) {
+                // Grupo não tem URL de página
+                hrefFinal = 'javascript:void(0);';
+            } else {
+                // Página deve ter URL
+                hrefFinal = txtHref || null;
+                
+                if (!hrefFinal) {
+                    mostrarAlerta('Para itens do tipo Página, selecione uma página do sistema!', 'warning');
+                    return;
+                }
+            }
+            
+            // ✅ Obtém posição selecionada no dropdown
+            var posicaoSelecionada = null;
+            var ddlPosicaoObj = document.getElementById('ddlPosicao');
+            if (ddlPosicaoObj && ddlPosicaoObj.ej2_instances && ddlPosicaoObj.ej2_instances[0]) {
+                var ddlPosicao = ddlPosicaoObj.ej2_instances[0];
+                posicaoSelecionada = ddlPosicao.value && ddlPosicao.value.length > 0 ? ddlPosicao.value[0] : null;
+            }
+            console.log('[SALVAR] Posição selecionada:', posicaoSelecionada);
+            
+            // ✅ Calcula parentId baseado na posição (para novos itens ou quando alterado)
+            var parentIdFinal = parentIdValue || null;
+            var ehNovoItem = !document.getElementById('recursoId').value;
+            
+            if (ehNovoItem && posicaoSelecionada && posicaoSelecionada !== '_INICIO_') {
+                // Se posicionou abaixo de um item, herda o parentId desse item
+                var itemReferencia = buscarItemPorId(treeData, posicaoSelecionada);
+                if (itemReferencia) {
+                    parentIdFinal = itemReferencia.parentId || null;
+                }
             }
             
             var dto = {
                 id: document.getElementById('recursoId').value,
                 text: encodeHtml(document.getElementById('txtNome').value),
                 nomeMenu: encodeHtml(document.getElementById('txtNomeMenu').value),
-                href: hrefFinal,  // null se grupo sendo transformado em página
+                href: hrefFinal,
                 icon: document.getElementById('txtIconClass').value,
-                ordem: parseFloat(document.getElementById('txtOrdem').value) || 0,
+                ordem: 0,  // ✅ Backend calcula automaticamente
                 descricao: encodeHtml(document.getElementById('txtDescricao').value),
                 ativo: document.getElementById('chkAtivo').checked,
-                parentId: parentIdValue || null  // null se "<sem grupo>"
+                parentId: parentIdFinal,
+                posicaoAbaixoDe: posicaoSelecionada  // ✅ Envia para backend posicionar corretamente
             };
 
             console.log('DTO codificado para envio:', dto);
@@ -2239,52 +3259,11 @@
         return nome && nomeMenu && pagina && pagina.length > 0 && icone && icone.length > 0;
     }
 
-    // ✅ Atualiza estado dos botões de ordenação
+    // ✅ REMOVIDO: Botões de ordenação agora estão inline na TreeView
+    // Função mantida vazia para compatibilidade
     function atualizarEstadoBotoesOrdenacao() {
-        try {
-            var btnUp = document.getElementById('btnOrderUp');
-            var btnDown = document.getElementById('btnOrderDown');
-            
-            if (!btnUp || !btnDown) return;
-            
-            var ehNovoItem = !selectedItem || !selectedItem.id;
-            var camposValidos = validarCamposObrigatorios();
-            
-            // Para itens novos, só habilita se campos obrigatórios estiverem preenchidos
-            if (ehNovoItem) {
-                var habilitado = camposValidos;
-                btnUp.disabled = !habilitado;
-                btnDown.disabled = !habilitado;
-                
-                // Atualiza tooltip se desabilitado
-                if (!habilitado) {
-                    var tooltipText = 'Preencha os campos obrigatórios: Nome, NomeMenu, Página do Sistema e Ícone';
-                    btnUp.setAttribute('data-bs-original-title', tooltipText);
-                    btnDown.setAttribute('data-bs-original-title', tooltipText);
-                    // Reinicializa tooltip
-                    var tooltipUp = bootstrap.Tooltip.getInstance(btnUp);
-                    var tooltipDown = bootstrap.Tooltip.getInstance(btnDown);
-                    if (tooltipUp) tooltipUp.setContent({ '.tooltip-inner': tooltipText });
-                    if (tooltipDown) tooltipDown.setContent({ '.tooltip-inner': tooltipText });
-                } else {
-                    btnUp.setAttribute('data-bs-original-title', 'Mover item para cima');
-                    btnDown.setAttribute('data-bs-original-title', 'Mover item para baixo');
-                    var tooltipUp = bootstrap.Tooltip.getInstance(btnUp);
-                    var tooltipDown = bootstrap.Tooltip.getInstance(btnDown);
-                    if (tooltipUp) tooltipUp.setContent({ '.tooltip-inner': 'Mover item para cima' });
-                    if (tooltipDown) tooltipDown.setContent({ '.tooltip-inner': 'Mover item para baixo' });
-                }
-            } else {
-                // Para itens existentes, verifica se pode mover
-                var podeMoverCima = podeMoverParaCima();
-                var podeMoverBaixo = podeMoverParaBaixo();
-                
-                btnUp.disabled = !podeMoverCima;
-                btnDown.disabled = !podeMoverBaixo;
-            }
-        } catch (erro) {
-            console.error('[atualizarEstadoBotoesOrdenacao] Erro:', erro);
-        }
+        // Botões de navegação agora estão inline na TreeView
+        // Não há mais botões externos para atualizar
     }
 
     // ✅ Verifica se pode mover para cima
@@ -2335,6 +3314,289 @@
         return null;
     }
 
+    // =====================================================
+    // ✅ NOVAS FUNÇÕES DE NAVEGAÇÃO (chamadas pelos botões inline)
+    // =====================================================
+
+    // ✅ Move item para CIMA (ordenação vertical)
+    function moverItemCima(itemId, event) {
+        console.log('[MOVER-CIMA] === FUNÇÃO CHAMADA ===');
+        console.log('[MOVER-CIMA] itemId recebido:', itemId, 'tipo:', typeof itemId);
+        
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        
+        try {
+            console.log('[MOVER-CIMA] treeData:', treeData);
+            var item = buscarItemPorId(treeData, itemId);
+            console.log('[MOVER-CIMA] Item encontrado:', item);
+            if (!item) {
+                console.error('[MOVER-CIMA] Item não encontrado:', itemId);
+                return;
+            }
+
+            // Encontra a lista que contém o item e seu índice
+            var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+            if (!resultado || resultado.indice <= 0) {
+                console.log('[MOVER-CIMA] Item já está na primeira posição');
+                return;
+            }
+
+            var listaIrmaos = resultado.lista;
+            var indexAtual = resultado.indice;
+
+            // Troca posição com o item anterior
+            var temp = listaIrmaos[indexAtual];
+            listaIrmaos[indexAtual] = listaIrmaos[indexAtual - 1];
+            listaIrmaos[indexAtual - 1] = temp;
+
+            console.log('[MOVER-CIMA] ✅ Item movido para cima:', item.text);
+            
+            // Força reconstrução e atualiza TreeView
+            atualizarTreeViewAposMovimento(itemId);
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemCima", erro);
+        }
+    }
+
+    // ✅ Move item para BAIXO (ordenação vertical)
+    function moverItemBaixo(itemId, event) {
+        console.log('[MOVER-BAIXO] === FUNÇÃO CHAMADA ===');
+        console.log('[MOVER-BAIXO] itemId recebido:', itemId, 'tipo:', typeof itemId);
+        
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        
+        try {
+            var item = buscarItemPorId(treeData, itemId);
+            console.log('[MOVER-BAIXO] Item encontrado:', item);
+            if (!item) {
+                console.error('[MOVER-BAIXO] Item não encontrado:', itemId);
+                return;
+            }
+
+            // Encontra a lista que contém o item e seu índice
+            var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+            if (!resultado || resultado.indice >= resultado.lista.length - 1) {
+                console.log('[MOVER-BAIXO] Item já está na última posição');
+                return;
+            }
+
+            var listaIrmaos = resultado.lista;
+            var indexAtual = resultado.indice;
+
+            // Troca posição com o item seguinte
+            var temp = listaIrmaos[indexAtual];
+            listaIrmaos[indexAtual] = listaIrmaos[indexAtual + 1];
+            listaIrmaos[indexAtual + 1] = temp;
+
+            console.log('[MOVER-BAIXO] ✅ Item movido para baixo:', item.text);
+            
+            // Força reconstrução e atualiza TreeView
+            atualizarTreeViewAposMovimento(itemId);
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemBaixo", erro);
+        }
+    }
+
+    // ✅ Move item para ESQUERDA (sobe nível - vira irmão do pai)
+    function moverItemEsquerda(itemId, event) {
+        console.log('[MOVER-ESQ] === FUNÇÃO CHAMADA ===');
+        console.log('[MOVER-ESQ] itemId recebido:', itemId, 'tipo:', typeof itemId);
+        
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        
+        try {
+            var item = buscarItemPorId(treeData, itemId);
+            console.log('[MOVER-ESQ] Item encontrado:', item);
+            if (!item) {
+                console.error('[MOVER-ESQ] Item não encontrado:', itemId);
+                return;
+            }
+
+            // Se já está na raiz, não pode subir mais
+            if (!item.parentId) {
+                console.log('[MOVER-ESQ] Item já está na raiz');
+                return;
+            }
+
+            // Encontra o pai atual
+            var paiAtual = buscarItemPorId(treeData, item.parentId);
+            if (!paiAtual) {
+                console.error('[MOVER-ESQ] Pai não encontrado:', item.parentId);
+                return;
+            }
+
+            console.log('[MOVER-ESQ] Movendo item para nível do pai:', paiAtual.text);
+
+            // Remove item da lista de filhos do pai atual
+            if (paiAtual.items) {
+                var indexNoFilho = paiAtual.items.findIndex(function(i) { return i.id === item.id; });
+                if (indexNoFilho !== -1) {
+                    paiAtual.items.splice(indexNoFilho, 1);
+                }
+            }
+
+            // Item agora tem o parentId do avô (ou null se pai era raiz)
+            var novoParentId = paiAtual.parentId || null;
+            item.parentId = novoParentId;
+
+            // Se novo pai é null (raiz), adiciona ao treeData
+            if (!novoParentId) {
+                // Encontra posição do pai antigo e insere depois dele
+                var indexPai = treeData.findIndex(function(i) { return i.id === paiAtual.id; });
+                if (indexPai !== -1) {
+                    treeData.splice(indexPai + 1, 0, item);
+                } else {
+                    treeData.push(item);
+                }
+            } else {
+                // Adiciona na lista de filhos do avô
+                var avo = buscarItemPorId(treeData, novoParentId);
+                if (avo) {
+                    if (!avo.items) avo.items = [];
+                    // Insere depois do pai antigo
+                    var indexPaiNoAvo = avo.items.findIndex(function(i) { return i.id === paiAtual.id; });
+                    if (indexPaiNoAvo !== -1) {
+                        avo.items.splice(indexPaiNoAvo + 1, 0, item);
+                    } else {
+                        avo.items.push(item);
+                    }
+                }
+            }
+
+            // Se pai ficou sem filhos, transforma em página
+            if (paiAtual.items && paiAtual.items.length === 0) {
+                console.log('[MOVER-ESQ] Pai ficou sem filhos, transformando em página');
+                paiAtual.items = [];
+                // Marca para usuário escolher href depois
+            }
+
+            console.log('[MOVER-ESQ] ✅ Item movido para esquerda (subiu nível)');
+            
+            // Força reconstrução e atualiza TreeView
+            atualizarTreeViewAposMovimento(itemId);
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemEsquerda", erro);
+        }
+    }
+
+    // ✅ Move item para DIREITA (desce nível - vira filho do item acima)
+    function moverItemDireita(itemId, event) {
+        console.log('[MOVER-DIR] === FUNÇÃO CHAMADA ===');
+        console.log('[MOVER-DIR] itemId recebido:', itemId, 'tipo:', typeof itemId);
+        
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        
+        try {
+            var item = buscarItemPorId(treeData, itemId);
+            console.log('[MOVER-DIR] Item encontrado:', item);
+            if (!item) {
+                console.error('[MOVER-DIR] Item não encontrado:', itemId);
+                return;
+            }
+
+            // Encontra a lista que contém o item
+            var resultado = encontrarListaPaiEIndice(treeData, item.id, item.parentId);
+            if (!resultado || resultado.indice <= 0) {
+                console.log('[MOVER-DIR] Não há item acima para virar pai');
+                return;
+            }
+
+            var listaIrmaos = resultado.lista;
+            var indexAtual = resultado.indice;
+            var itemAcima = listaIrmaos[indexAtual - 1];
+
+            console.log('[MOVER-DIR] Item acima que virará pai:', itemAcima.text);
+
+            // Remove item da lista atual
+            listaIrmaos.splice(indexAtual, 1);
+
+            // Define novo parentId
+            item.parentId = itemAcima.id;
+
+            // Adiciona item como filho do item acima
+            if (!itemAcima.items) {
+                itemAcima.items = [];
+            }
+            itemAcima.items.push(item);
+
+            // Item acima agora é grupo (se não tinha href, continua sem)
+            if (!itemAcima.href || itemAcima.href === 'javascript:void(0);') {
+                // Já era grupo, mantém
+            } else {
+                // Era página, vira grupo - limpa href
+                console.log('[MOVER-DIR] Item acima transformado em grupo');
+                itemAcima.href = 'javascript:void(0);';
+            }
+
+            console.log('[MOVER-DIR] ✅ Item movido para direita (desceu nível, virou filho de ' + itemAcima.text + ')');
+            
+            // Força reconstrução e atualiza TreeView
+            atualizarTreeViewAposMovimento(itemId);
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemDireita", erro);
+        }
+    }
+
+    // ✅ Função auxiliar para atualizar TreeView após movimentos
+    function atualizarTreeViewAposMovimento(itemIdParaManter) {
+        try {
+            console.log('[ATUALIZAR] Atualizando TreeView após movimento...');
+            
+            // Força reconstrução completa
+            treeData = JSON.parse(JSON.stringify(treeData));
+            
+            // Atualiza TreeView
+            treeObj.fields.dataSource = treeData;
+            treeObj.dataBind();
+            treeObj.refresh();
+            treeObj.expandAll();
+            
+            // ✅ Reconfigura event listeners (necessário após refresh)
+            configurarBotoesNavegacao();
+            
+            // Repopula dropdowns
+            popularDropdownItemPai();
+            popularDropdownPosicao();
+            
+            // Mantém seleção no item movido
+            if (itemIdParaManter) {
+                var itemAtualizado = buscarItemPorId(treeData, itemIdParaManter);
+                if (itemAtualizado) {
+                    selectedItem = itemAtualizado;
+                    selecionarItem(itemAtualizado);
+                }
+            }
+            
+            // ✅ NÃO salva automaticamente - marca alterações pendentes
+            // O usuário precisa confirmar ou cancelar com os botões ✓ e ✗
+            marcarAlteracoesPendentes();
+            
+            console.log('[ATUALIZAR] ✅ TreeView atualizado (alterações pendentes)');
+            
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "atualizarTreeViewAposMovimento", erro);
+        }
+    }
+
+    // =====================================================
+    // ✅ FUNÇÕES ANTIGAS (mantidas para compatibilidade)
+    // =====================================================
 
     // ✅ Move item para cima (move grupo inteiro se for grupo)
     function moverItemParaCima() {
@@ -2482,11 +3744,8 @@
                 ddlPaginaObj.value = null;
             }
 
-            // Limpa DropDownList de Item Pai
-            var ddlItemPaiObj = document.getElementById('ddlItemPai').ej2_instances[0];
-            if (ddlItemPaiObj) {
-                ddlItemPaiObj.value = null;
-            }
+            // ✅ Limpa campo oculto parentId (dropdown foi removido)
+            document.getElementById('parentId').value = '';
 
             document.getElementById('listaAcessos').innerHTML = '<p class="text-muted text-center">Selecione um item para gerenciar acessos</p>';
             document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));

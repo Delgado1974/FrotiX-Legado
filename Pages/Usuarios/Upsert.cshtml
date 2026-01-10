@@ -16,6 +16,7 @@
     var fotoBase64 = Model.UsuarioObj?.AspNetUsers?.Foto != null 
         ? Convert.ToBase64String(Model.UsuarioObj.AspNetUsers.Foto) 
         : null;
+    var isEdicaoJs = isEdicao ? "true" : "false";
 }
 
 @section HeadBlock {
@@ -144,9 +145,82 @@
             background: #f1f5f9;
         }
 
+        .dropify-wrapper .dropify-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
         .dropify-wrapper .dropify-message span.file-icon {
             font-size: 40px;
             color: #3D5771;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .dropify-wrapper .dropify-message p {
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* Oculta o nome do arquivo base64 e informações estranhas */
+        .dropify-wrapper .dropify-filename,
+        .dropify-wrapper .dropify-filename-inner {
+            display: none !important;
+        }
+
+        .dropify-wrapper .dropify-infos {
+            background: rgba(61, 87, 113, 0.9) !important;
+        }
+
+        .dropify-wrapper .dropify-infos .dropify-infos-inner {
+            padding: 10px !important;
+        }
+
+        .dropify-wrapper .dropify-infos .dropify-infos-inner p {
+            color: #fff !important;
+            font-size: 13px !important;
+        }
+
+        .dropify-wrapper .dropify-infos-message {
+            font-size: 13px !important;
+        }
+
+        /* Oculta render quebrado (quadrado com números) */
+        .dropify-wrapper .dropify-render img[src=""],
+        .dropify-wrapper .dropify-render img:not([src]),
+        .dropify-wrapper .dropify-render img[src*="data:"] {
+            display: block !important;
+        }
+
+        .dropify-wrapper .dropify-render .dropify-font-file {
+            display: none !important;
+        }
+
+        /* Botão Remover - Padrão FrotiX (classe vinho) */
+        .dropify-wrapper .dropify-clear {
+            background: linear-gradient(135deg, #722F37, #8B3A3A) !important;
+            color: #fff !important;
+            border: 2px solid #fff !important;
+            border-radius: 8px !important;
+            padding: 6px 14px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            text-transform: none !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+            transition: all 0.2s ease !important;
+            position: absolute !important;
+            top: 10px !important;
+            right: 10px !important;
+            bottom: auto !important;
+        }
+
+        .dropify-wrapper .dropify-clear:hover {
+            background: linear-gradient(135deg, #8B3A3A, #A04040) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+            transform: translateY(-1px) !important;
         }
     </style>
 }
@@ -203,7 +277,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ramal">Ramal</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ramal"></span>
-                                            <input class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="1234" />
+                                            <input id="txtRamal" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="1234" type="number" min="0" max="99999" />
                                         </div>
                                     </div>
 
@@ -276,27 +350,43 @@
 
                                     @if (fotoBase64 != null)
                                     {
-                                        <img src="data:image/jpeg;base64,@fotoBase64" 
+                                        <img src="data:image/png;base64,@fotoBase64" 
                                              class="foto-preview" 
                                              alt="Foto atual" 
                                              id="imgPreview" />
                                     }
                                     else
                                     {
-                                        <div class="foto-placeholder" id="divPlaceholder">
+                                        <div class="foto-placeholder d-none" id="divPlaceholder">
                                             <i class="fa-duotone fa-user"></i>
                                         </div>
-                                        <img src="" class="foto-preview d-none" id="imgPreview" alt="Preview" />
+                                        <img src="/Images/sucesso_transparente.png" 
+                                             class="foto-preview" 
+                                             id="imgPreview" 
+                                             alt="Foto padrão" />
                                     }
 
-                                    <input type="file" 
-                                           id="inputFoto" 
-                                           name="FotoUpload" 
-                                           class="dropify" 
-                                           data-allowed-file-extensions="jpg jpeg png gif"
-                                           data-max-file-size="2M"
-                                           data-default-file="@(fotoBase64 != null ? $"data:image/jpeg;base64,{fotoBase64}" : "")"
-                                           data-show-remove="true" />
+                                    @if (fotoBase64 != null)
+                                    {
+                                        <input type="file" 
+                                               id="inputFoto" 
+                                               name="FotoUpload" 
+                                               class="dropify" 
+                                               data-allowed-file-extensions="jpg jpeg png gif"
+                                               data-max-file-size="2M"
+                                               data-default-file="data:image/png;base64,@fotoBase64"
+                                               data-show-remove="true" />
+                                    }
+                                    else
+                                    {
+                                        <input type="file" 
+                                               id="inputFoto" 
+                                               name="FotoUpload" 
+                                               class="dropify" 
+                                               data-allowed-file-extensions="jpg jpeg png gif"
+                                               data-max-file-size="2M"
+                                               data-show-remove="true" />
+                                    }
 
                                     <small class="text-muted d-block mt-2">
                                         <i class="fa-duotone fa-info-circle me-1"></i>
@@ -351,7 +441,7 @@
 
             try {
                 // Inicializa Dropify
-                $('.dropify').dropify({
+                const dropifyInstance = $('.dropify').dropify({
                     messages: {
                         'default': 'Arraste ou clique para selecionar',
                         'replace': 'Arraste ou clique para substituir',
@@ -361,13 +451,55 @@
                     error: {
                         'fileSize': 'Arquivo muito grande (máx 2MB)',
                         'fileExtension': 'Tipo não permitido (use JPG, PNG ou GIF)'
+                    },
+                    showRemove: true,
+                    showLoader: false,
+                    showErrors: true,
+                    tpl: {
+                        wrap: '<div class="dropify-wrapper"></div>',
+                        loader: '<div class="dropify-loader"></div>',
+                        message: '<div class="dropify-message"><span class="file-icon"><i class="fa-duotone fa-cloud-arrow-up" style="font-size:40px;color:#3D5771;"></i></span><p>{{ default }}</p></div>',
+                        preview: '<div class="dropify-preview"><span class="dropify-render"></span><div class="dropify-infos"><div class="dropify-infos-inner"><p class="dropify-infos-message">{{ replace }}</p></div></div></div>',
+                        filename: '<p class="dropify-filename" style="display:none;"></p>',
+                        clearButton: '<button type="button" class="dropify-clear"><i class="fa-duotone fa-trash-can"></i> {{ remove }}</button>',
+                        errorLine: '<p class="dropify-error">{{ error }}</p>',
+                        errorsContainer: '<div class="dropify-errors-container"><ul></ul></div>'
                     }
                 });
+
+                // Remove tooltips nativos do Dropify para usar padrão FrotiX
+                setTimeout(function() {
+                    document.querySelectorAll('.dropify-wrapper [title], .dropify-wrapper[title]').forEach(function(el) {
+                        el.removeAttribute('title');
+                    });
+                    // Remove filename que mostra texto estranho
+                    document.querySelectorAll('.dropify-filename, .dropify-filename-inner').forEach(function(el) {
+                        el.style.display = 'none';
+                        el.textContent = '';
+                    });
+                }, 100);
 
                 // Preview da foto
                 const inputFoto = document.getElementById('inputFoto');
                 const imgPreview = document.getElementById('imgPreview');
                 const divPlaceholder = document.getElementById('divPlaceholder');
+                const fotoPadraoPath = '/Images/sucesso_transparente.png';
+                const isEdicao = @isEdicaoJs;
+
+                // Quando Dropify remove o arquivo, volta para a foto padrão
+                dropifyInstance.on('dropify.afterClear', function() {
+                    try {
+                        if (imgPreview) {
+                            imgPreview.src = fotoPadraoPath;
+                            imgPreview.classList.remove('d-none');
+                        }
+                        if (divPlaceholder) {
+                            divPlaceholder.classList.add('d-none');
+                        }
+                    } catch (error) {
+                        Alerta.TratamentoErroComLinha("Upsert.cshtml", "dropify.afterClear", error);
+                    }
+                });
 
                 if (inputFoto) {
                     inputFoto.addEventListener('change', function (e) {
@@ -389,6 +521,15 @@
                                     }
                                 };
                                 reader.readAsDataURL(file);
+                            } else {
+                                // Se não houver arquivo, volta para a foto padrão
+                                if (imgPreview) {
+                                    imgPreview.src = fotoPadraoPath;
+                                    imgPreview.classList.remove('d-none');
+                                }
+                                if (divPlaceholder) {
+                                    divPlaceholder.classList.add('d-none');
+                                }
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "inputFoto.change", error);
@@ -435,7 +576,7 @@
                 }
 
                 // =====================================================
-                // VALIDAÇÃO: Ponto com prefixo P_
+                // VALIDAÇÃO: Ponto com prefixo p_ (minúsculo) seguido de números
                 // =====================================================
                 const txtPonto = document.getElementById('txtPonto');
                 const txtUserName = document.getElementById('txtUserName');
@@ -443,17 +584,25 @@
                 if (txtPonto && txtUserName) {
                     txtPonto.addEventListener('blur', function () {
                         try {
-                            let valor = txtPonto.value.trim();
+                            let valor = txtPonto.value.trim().toLowerCase();
 
-                            if (valor && !valor.toLowerCase().startsWith('p_')) {
-                                valor = 'P_' + valor;
-                            } else if (valor) {
-                                // Garante que o P_ esteja em maiúsculo
-                                valor = 'P_' + valor.substring(2);
+                            if (valor) {
+                                // Remove qualquer prefixo p_ ou P_ existente
+                                valor = valor.replace(/^[pP]_/, '');
+                                
+                                // Remove tudo que não é número
+                                valor = valor.replace(/\D/g, '');
+                                
+                                // Se tiver números, formata como p_XXXX
+                                if (valor.length > 0) {
+                                    valor = 'p_' + valor;
+                                } else {
+                                    valor = '';
+                                }
                             }
 
-                            txtUserName.value = valor;
                             txtPonto.value = valor;
+                            txtUserName.value = valor;
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.blur", error);
                         }
@@ -461,15 +610,23 @@
 
                     txtPonto.addEventListener('input', function () {
                         try {
-                            let valor = txtPonto.value.trim();
-
-                            if (valor && !valor.toLowerCase().startsWith('p_')) {
-                                txtUserName.value = 'P_' + valor;
-                            } else if (valor) {
-                                txtUserName.value = 'P_' + valor.substring(2);
+                            let valor = txtPonto.value.trim().toLowerCase();
+                            
+                            // Remove qualquer prefixo p_ ou P_ existente
+                            valor = valor.replace(/^[pP]_/, '');
+                            
+                            // Remove tudo que não é número
+                            valor = valor.replace(/\D/g, '');
+                            
+                            // Se tiver números, formata como p_XXXX
+                            if (valor.length > 0) {
+                                valor = 'p_' + valor;
                             } else {
-                                txtUserName.value = '';
+                                valor = '';
                             }
+
+                            txtPonto.value = valor;
+                            txtUserName.value = valor;
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.input", error);
                         }
@@ -477,7 +634,7 @@
                 }
 
                 // =====================================================
-                // VALIDAÇÃO: Email minúsculo com @@camara.leg.br
+                // VALIDAÇÃO: Email obrigatoriamente terminando em @@camara.leg.br
                 // =====================================================
                 const txtEmail = document.getElementById('txtEmail');
                 if (txtEmail) {
@@ -490,11 +647,28 @@
                                 valor = valor.replace(/@@camara\.leg\.br$/i, '');
                                 // Remove qualquer @@ que possa existir no final
                                 valor = valor.replace(/@@+$/, '');
-                                // Adiciona o domínio
-                                valor = valor + '@@camara.leg.br';
+                                
+                                // Valida se tem conteúdo antes do @@
+                                if (valor.length > 0) {
+                                    // Adiciona o domínio obrigatório
+                                    valor = valor + '@@camara.leg.br';
+                                } else {
+                                    // Se não tiver conteúdo, limpa o campo
+                                    valor = '';
+                                }
+                                
+                                txtEmail.value = valor;
+                                
+                                // Valida formato final
+                                const regex = /^[^@@]+@@camara\.leg\.br$/;
+                                if (valor && !regex.test(valor)) {
+                                    txtEmail.classList.add('is-invalid');
+                                } else {
+                                    txtEmail.classList.remove('is-invalid');
+                                }
+                            } else {
+                                txtEmail.classList.add('is-invalid');
                             }
-
-                            txtEmail.value = valor;
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.blur", error);
                         }

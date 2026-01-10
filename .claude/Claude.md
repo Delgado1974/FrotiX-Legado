@@ -5,6 +5,93 @@
 
 ---
 
+# ⚠️ REGRA CRÍTICA - LEIA ANTES DE QUALQUER OPERAÇÃO ⚠️
+
+## 🔴 ATUALIZAÇÃO OBRIGATÓRIA DE DOCUMENTAÇÃO
+
+**TODAS AS INTELIGÊNCIAS ARTIFICIAIS DEVEM LER ESTA SEÇÃO ANTES DE COMEÇAR QUALQUER CONVERSA COM O AGENTE.**
+
+### REGRA ABSOLUTA E INVIOLÁVEL:
+
+**QUALQUER MUDANÇA EM QUALQUER ARQUIVO DOCUMENTADO DEVE SER ATUALIZADA E COMMITADA IMEDIATAMENTE.**
+
+#### Arquivos que REQUEREM atualização imediata da documentação:
+
+- ✅ **CSHTML** (Razor Pages) - Qualquer alteração em `.cshtml`
+- ✅ **CSHTML.CS** (PageModel) - Qualquer alteração em `.cshtml.cs`
+- ✅ **JAVASCRIPT** - Qualquer alteração em `.js` (especialmente em `wwwroot/js/`)
+- ✅ **CONTROLLERS** - Qualquer alteração em `.cs` em `Controllers/`
+- ✅ **HELPERS** - Qualquer alteração em `.cs` em `Helpers/`
+- ✅ **REPOSITORY** - Qualquer alteração em `.cs` em `Repository/`
+- ✅ **DATA** - Qualquer alteração em `.cs` em `Data/`
+- ✅ **SERVICES** - Qualquer alteração em `.cs` em `Services/`
+- ✅ **MIDDLEWARES** - Qualquer alteração em `.cs` em `Middlewares/`
+- ✅ **MODELS** - Qualquer alteração em `.cs` em `Models/`
+- ✅ **CSS** - Qualquer alteração em `.css`
+
+#### Processo OBRIGATÓRIO após qualquer alteração:
+
+1. **IDENTIFICAR** qual arquivo foi alterado
+2. **LOCALIZAR** a documentação correspondente em `Documentacao/`
+3. **ATUALIZAR** a documentação refletindo EXATAMENTE as mudanças feitas
+4. **ATUALIZAR** a seção "PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES" com:
+   - Data da alteração
+   - Descrição do que foi alterado
+   - Arquivos afetados
+   - Impacto da mudança
+5. **COMMITAR** imediatamente com mensagem: `docs: Atualiza documentação de [Nome do Arquivo] - [Breve descrição]`
+6. **VERIFICAR** se o arquivo `0-INDICE-GERAL.md` precisa ser atualizado
+
+#### ⚠️ CONSEQUÊNCIAS DE NÃO ATUALIZAR:
+
+- **RISCO CRÍTICO**: Perda de sincronização entre código e documentação
+- **RISCO ALTO**: Confusão em futuras manutenções
+- **RISCO MÉDIO**: Retrabalho desnecessário
+- **RISCO BAIXO**: Documentação desatualizada causando erros
+
+#### 🎯 AUTOMAÇÃO RECOMENDADA:
+
+Para evitar esquecimentos, configure:
+
+1. **Git Hooks** (pre-commit): Script que verifica se documentação foi atualizada
+2. **Scripts de Validação**: Verificar sincronização código ↔ documentação
+3. **Lembretes Automáticos**: Notificações quando código muda sem atualizar docs
+
+**EXEMPLO DE GIT HOOK (pre-commit)**:
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+# Verifica se arquivo foi alterado e se documentação existe
+# Se existe, verifica se foi atualizada recentemente
+# Se não foi atualizada, bloqueia commit com aviso
+```
+
+**EXEMPLO DE SCRIPT DE VALIDAÇÃO**:
+```powershell
+# Scripts/ValidarDocumentacao.ps1
+# Compara data de modificação do código com data de modificação da documentação
+# Alerta se documentação está desatualizada
+```
+
+#### 📌 LEMBRETE PARA IAs:
+
+**ANTES DE FAZER QUALQUER ALTERAÇÃO:**
+1. ✅ Ler esta seção completamente
+2. ✅ Identificar arquivos que serão alterados
+3. ✅ Verificar se existe documentação para esses arquivos
+4. ✅ Planejar atualização da documentação junto com a alteração do código
+5. ✅ Executar atualização da documentação IMEDIATAMENTE após alteração
+6. ✅ Commitar código + documentação juntos
+
+**NUNCA:**
+- ❌ Alterar código sem atualizar documentação
+- ❌ Commitar código sem atualizar documentação
+- ❌ Deixar documentação desatualizada "para depois"
+- ❌ Assumir que documentação está sincronizada sem verificar
+
+---
+
 ## 📋 Princípios Fundamentais
 
 ### 1. Cobertura Universal

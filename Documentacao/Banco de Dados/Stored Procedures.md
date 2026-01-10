@@ -18,6 +18,42 @@
 
 Este documento contém a documentação completa de todas as **Stored Procedures** do banco de dados FrotiX. As procedures são organizadas por funcionalidade e incluem descrição, parâmetros, retorno e exemplos de uso.
 
+> **Nova organização (09/01/2026):** cada procedure agora possui um arquivo dedicado em `Documentacao/Banco de dados/Stored Procedures/` com resumo de objetivo, acionamento (job/trigger/manual), tabelas envolvidas, cálculos e status de uso. Este arquivo permanece como índice histórico.
+
+---
+
+## Quadro-resumo de execução e dependências 🗺️
+
+Legenda de frequência: 🔄 diário | 📅 mensal | 🛠️ manual/on-demand | 🏁 job/orquestração
+
+| SP / Função | Frequência sugerida | Acionamento típico | Depende de | Gera / Alimenta | Observações |
+|---|---|---|---|---|---|
+| sp_JobAtualizacaoViagens | 🏁 diário (madrugada) | Job SQL Agent | Todas abaixo em sequência | Consumo, custos, estatísticas de viagem | Pipeline completo; orquestra 6 etapas |
+| sp_NormalizarAbastecimentos | 🔄 diário (antes de consumo) | Job (Etapa 1) | Abastecimento | Abastecimento normalizado | Trata outliers (IQR) e normaliza consumo |
+| sp_CalcularConsumoVeiculos | 🔄 diário | Job (Etapa 2) | Abastecimento normalizado | Veiculo.Consumo | Desabilita/reabilita triggers de Veiculo |
+| sp_AtualizarPadroesVeiculos | 🔄 diário | Job (Etapa 3) | Viagem normalizada (km 1–2000) | VeiculoPadraoViagem | Base para correções de km em viagens |
+| sp_NormalizarViagens | 🔄 diário | Job (Etapa 4) | VeiculoPadraoViagem | Viagem.*Normalizado | Corrige datas/km/minutos; outliers >2000 km |
+| sp_RecalcularCustosTodasViagens | 🔄 diário | Job (Etapa 5) | Viagem normalizada | Viagem (custos) | Usa sp_CalculaCustosViagem por cursor |
+| sp_AtualizarTodasEstatisticasViagem | 📅 semanal/mensal (ou após saneamento) | Job (Etapa 6) | Custos recalculados | ViagemEstatistica | Itera dia a dia chamando sp_AtualizarEstatisticasViagem |
+| sp_AtualizarEstatisticasViagem | 🔄 diário (por data) | Chamada pela anterior | Viagem, Motorista, Veiculo | ViagemEstatistica | Gera métricas e JSONs por dia |
+| sp_AtualizarEstatisticasAbastecimentosMesAtual | 🔄 diário | Job dedicado (sug.) | sp_RecalcularEstatisticasAbastecimentos / Anuais | Estatísticas mensais/anuais de abastecimento | Processa mês atual e anterior |
+| sp_RecalcularEstatisticasAbastecimentos | 🛠️ on-demand / mensal | Manual/Job | Abastecimento | EstatísticaAbastecimento* | Recalcula mês específico |
+| sp_RecalcularEstatisticasAbastecimentosAnuais | 🛠️ on-demand / anual | Manual/Job | Abastecimento | EstatísticaAbastecimentoVeiculo, AnosDisponiveisAbastecimento | Por ano |
+| sp_RecalcularTodasEstatisticasAbastecimentos | 🛠️ on-demand | Manual | Abastecimento | Todas estatísticas mensais/anuais | Percorre todos os meses/anos |
+| sp_AtualizarEstatisticasMesAtual | 🔄 diário | Job dedicado (sug.) | sp_RecalcularEstatisticasMotoristas | Estatísticas e rankings de motoristas (mês atual/anterior) | KPIs de condutores |
+| sp_RecalcularEstatisticasMotoristas | 📅 mensal | Manual/Job | Viagem, Multa, Abastecimento | EstatísticaMotoristasMensal, Rankings, Heatmap | Por mês/ano |
+| sp_RecalcularEstatisticasMotoristaUnico | 🛠️ on-demand | Manual | Viagem/Multa/Abastecimento (1 motorista) | Estatísticas do motorista | Uso pontual após correções |
+| sp_RecalcularTodasEstatisticasMotoristas | 🛠️ on-demand | Manual | Viagem/Multa/Abastecimento | Estatísticas e rankings de motoristas | Percorre meses com dados |
+| sp_AtualizarEstatisticasVeiculosMesAtual | 🔄 diário | Job dedicado (sug.) | sp_RecalcularEstatisticasVeiculo* + UsoMensal + Rankings | Snapshot + mês atual/anterior | Versão rápida (não percorre histórico inteiro) |
+| sp_RecalcularEstatisticasVeiculoGeral/Categoria/Status/Modelo/Combustivel/Unidade/AnoFabricacao | 📅 mensal | Manual/Job | Veiculo (+ Combustivel/Unidade/Modelo) | Tabelas de snapshot da frota | Podem rodar em sequência ou via “Todas” |
+| sp_RecalcularEstatisticasVeiculoUsoMensal | 📅 mensal | Manual/Job | Viagem, Abastecimento | EstatisticaVeiculoUsoMensal | Por ano/mês |
+| sp_RecalcularRankingsVeiculoAnual | 📅 mensal/anual | Manual/Job | Viagem, Abastecimento | Rankings de veículo, AnosDisponiveisVeiculo | Por ano |
+| sp_RecalcularTodasEstatisticasVeiculos | 🛠️ on-demand | Manual | Viagem, Abastecimento | Todas as tabelas de veículo | Reprocessa snapshot, uso e rankings |
+| sp_CalculaCustosViagem | 🔄 conforme uso | Chamada por sp_RecalcularCustosTodasViagens ou gatilho | Viagem, Veiculo, Contrato | Viagem (custos) | Pode ser usada isoladamente |
+| sp_Requisitante_TratarNulos / sp_TratarNulosTabela / sp_TratarNulosTodasTabelas / usp_PreencheNulos_Motorista | 🛠️ manual | Administrativa | N/A | Saneamento de dados | Usar com cautela; não há job conhecido |
+
+> Dica: para ambientes produtivos, agende o pipeline de viagens (sp_JobAtualizacaoViagens) em janela de baixa carga, e as “MesAtual” (abastecimento/motorista/veículo) diariamente logo após a virada do dia. Rotinas “Todas” são pesadas e devem ser disparadas apenas após migrações ou correções maciças.
+
 ### Convenções
 
 - **Nome**: Nome completo da procedure no banco

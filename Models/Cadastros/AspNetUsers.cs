@@ -32,6 +32,8 @@ namespace FrotiX.Models
         {
             get; set;
         }
+        [StringLength(256, ErrorMessage = "(O email deve ter no máximo 256 caracteres)")]
+        [RegularExpression(@"^[^@]+@camara\.leg\.br$", ErrorMessage = "(O email deve terminar em @camara.leg.br)")]
         public new string? Email
         {
             get; set;
@@ -88,12 +90,14 @@ namespace FrotiX.Models
         }
 
         [Required(ErrorMessage = "(O nome completo é obrigatório)")]
+        [StringLength(200, ErrorMessage = "(O nome completo deve ter no máximo 200 caracteres)")]
         public string? NomeCompleto
         {
             get; set;
         }
 
         [Required(ErrorMessage = "(O ponto é obrigatório)")]
+        [StringLength(50, ErrorMessage = "(O ponto deve ter no máximo 50 caracteres)")]
         public string? Ponto
         {
             get; set;
@@ -105,6 +109,7 @@ namespace FrotiX.Models
             get; set;
         }
 
+        [Range(0, 99999, ErrorMessage = "(O ramal deve ser um número entre 0 e 99999)")]
         public int? Ramal
         {
             get; set;
