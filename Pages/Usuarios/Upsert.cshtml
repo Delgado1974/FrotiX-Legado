@@ -122,7 +122,7 @@
         }
 
         /* Botão de Limpar Foto (lixeira) - 40% dentro, 60% fora */
-        /* Por padrão, o botão está OCULTO - só aparece quando necessário */
+        /* Por padrão, o botão está COMPLETAMENTE OCULTO - múltiplas camadas de proteção */
         .ftx-foto-container .ftx-foto-clear {
             position: absolute !important;
             bottom: -14px !important;  /* 40% dentro = 14.4px */
@@ -133,7 +133,9 @@
             background: linear-gradient(135deg, #722F37, #8B3A3A) !important;
             border: 3px solid #fff !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
-            display: none !important; /* OCULTO por padrão - evita flash */
+            display: none !important; /* OCULTO por padrão */
+            visibility: hidden !important; /* Backup: oculta mesmo se display falhar */
+            opacity: 0 !important; /* Backup: torna invisível */
             align-items: center !important;
             justify-content: center !important;
             cursor: pointer !important;
@@ -145,9 +147,11 @@
             left: auto !important;
         }
 
-        /* Só mostra quando tiver a classe show */
+        /* Só mostra quando tiver a classe show - remove TODAS as proteções */
         .ftx-foto-container .ftx-foto-clear.show {
             display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .ftx-foto-clear:hover {
@@ -391,7 +395,7 @@
                                                     class="ftx-foto-clear @(fotoBase64 != null ? "show" : "")" 
                                                     id="btnLimparFoto" 
                                                     data-ejtip="Remover foto"
-                                                    style="position: absolute !important; bottom: -14px !important; right: -22px !important; z-index: 999 !important;">
+                                                    style="position: absolute !important; bottom: -14px !important; right: -22px !important; z-index: 999 !important; @(fotoBase64 == null ? "display: none !important; visibility: hidden !important; opacity: 0 !important;" : "display: flex !important; visibility: visible !important; opacity: 1 !important;")">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
@@ -469,6 +473,14 @@
                 const fotoPadraoPath = '/Images/sucesso_transparente.png';
                 const hasFotoInicial = @(fotoBase64 != null ? "true" : "false") === "true";
 
+                // FORÇA OCULTAÇÃO IMEDIATA se não há foto (antes de qualquer log ou processamento)
+                if (btnLimparFoto && !hasFotoInicial) {
+                    btnLimparFoto.style.display = 'none';
+                    btnLimparFoto.style.visibility = 'hidden';
+                    btnLimparFoto.style.opacity = '0';
+                    btnLimparFoto.classList.remove('show');
+                }
+
                 // #region agent log - H1 visibilidade inicial
                 fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
                     method:'POST',
@@ -538,9 +550,12 @@
                                 // Atualiza preview
                                 imgPreview.src = window.URL.createObjectURL(files[0]);
                                 
-                                // Mostra botão de limpar
+                                // Mostra botão de limpar - FORÇA todas as propriedades
                                 if (btnLimparFoto) {
                                     btnLimparFoto.classList.add('show');
+                                    btnLimparFoto.style.display = 'flex';
+                                    btnLimparFoto.style.visibility = 'visible';
+                                    btnLimparFoto.style.opacity = '1';
                                 }
                                 
                                 // Atualiza visual do dropzone
@@ -601,9 +616,11 @@
                                 imgPreview.src = fotoPadraoPath;
                             }
 
-                            // Esconde o botão de limpar
-                            btnLimparFoto.classList.add('d-none');
+                            // Esconde o botão de limpar - FORÇA todas as propriedades
+                            btnLimparFoto.classList.remove('show');
                             btnLimparFoto.style.display = 'none';
+                            btnLimparFoto.style.visibility = 'hidden';
+                            btnLimparFoto.style.opacity = '0';
 
                             // Reseta o visual do dropzone
                             if (dropzoneArea) {
