@@ -104,11 +104,11 @@
         }
 
         .ftx-foto-container {
-            position: relative;
+            position: relative !important;
             width: 180px;
             height: 180px;
             border-radius: 12px;
-            overflow: visible; /* Permite o botão sair da área */
+            overflow: visible !important; /* Permite o botão sair da área */
             border: 3px solid #3D5771;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             background: #fff;
@@ -122,22 +122,26 @@
         }
 
         /* Botão de Limpar Foto (lixeira) - 40% dentro, 60% fora */
-        .ftx-foto-clear {
-            position: absolute;
-            bottom: -22px;  /* 36px * 0.6 = 21.6px fora (60%) */
-            right: -22px;    /* 36px * 0.6 = 21.6px fora (60%) */
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #722F37, #8B3A3A);
-            border: 3px solid #fff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            z-index: 20;
+        .ftx-foto-container .ftx-foto-clear {
+            position: absolute !important;
+            bottom: -14px !important;  /* 40% dentro = 14.4px */
+            right: -22px !important;   /* 60% fora = 21.6px */
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, #722F37, #8B3A3A) !important;
+            border: 3px solid #fff !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            z-index: 999 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            top: auto !important;
+            left: auto !important;
         }
 
         .ftx-foto-clear:hover {
@@ -385,7 +389,7 @@
                                                     class="ftx-foto-clear @(fotoBase64 == null ? "d-none" : "")" 
                                                     id="btnLimparFoto" 
                                                     data-ejtip="Remover foto"
-                                                    style="@(fotoBase64 == null ? "display: none !important;" : "display: flex;")">
+                                                    style="@(fotoBase64 == null ? "display: none !important;" : "display: flex !important; position: absolute !important; bottom: -14px !important; right: -22px !important; z-index: 999 !important;")">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
@@ -496,6 +500,14 @@
                     if (btnLimparFoto) {
                         btnLimparFoto.classList.remove('d-none');
                         btnLimparFoto.style.display = 'flex';
+                        btnLimparFoto.style.position = 'absolute';
+                        btnLimparFoto.style.bottom = '-14px';
+                        btnLimparFoto.style.right = '-22px';
+                        btnLimparFoto.style.zIndex = '999';
+                        btnLimparFoto.style.margin = '0';
+                        btnLimparFoto.style.padding = '0';
+                        btnLimparFoto.style.top = 'auto';
+                        btnLimparFoto.style.left = 'auto';
                     }
                     if (dropzoneArea) dropzoneArea.classList.add('has-file');
                 }
@@ -534,10 +546,18 @@
                                 // Atualiza preview
                                 imgPreview.src = window.URL.createObjectURL(files[0]);
                                 
-                                // Mostra botão de limpar
+                                // Mostra botão de limpar e força posicionamento correto
                                 if (btnLimparFoto) {
                                     btnLimparFoto.classList.remove('d-none');
                                     btnLimparFoto.style.display = 'flex';
+                                    btnLimparFoto.style.position = 'absolute';
+                                    btnLimparFoto.style.bottom = '-14px';
+                                    btnLimparFoto.style.right = '-22px';
+                                    btnLimparFoto.style.zIndex = '999';
+                                    btnLimparFoto.style.margin = '0';
+                                    btnLimparFoto.style.padding = '0';
+                                    btnLimparFoto.style.top = 'auto';
+                                    btnLimparFoto.style.left = 'auto';
                                 }
                                 
                                 // Atualiza visual do dropzone
