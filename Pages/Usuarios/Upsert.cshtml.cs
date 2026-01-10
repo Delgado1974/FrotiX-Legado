@@ -111,7 +111,9 @@ namespace FrotiX.Pages.Usuarios
                 }
                 else
                 {
-                    // Se for criação (novo usuário), carrega a foto padrão
+                    // Se for criação (novo usuário), inicializa com Status ativo e foto padrão
+                    UsuarioObj.AspNetUsers.Status = true;
+                    
                     FotoPadraoBytes = CarregarFotoPadrao();
                     if (FotoPadraoBytes != null)
                     {
