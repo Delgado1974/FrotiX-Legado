@@ -794,9 +794,9 @@
                         try {
                             const icon = btn.querySelector('i');
                             if (icon) {
-                                // Remove pulse e adiciona spin
+                                // Remove pulse e adiciona spin (fa-spin é padrão FontAwesome)
                                 icon.classList.remove('icon-pulse');
-                                icon.classList.add('icon-spin');
+                                icon.classList.add('fa-spin');
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "btn-submit-spin.click", error);
