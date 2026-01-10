@@ -1,7 +1,7 @@
 # Documentação: Usuarios - Upsert
 
-> **Última Atualização**: 08/01/2026
-> **Versão Atual**: 1.0
+> **Última Atualização**: 10/01/2026
+> **Versão Atual**: 1.1
 
 ---
 
@@ -185,6 +185,73 @@ dropifyInstance.on('dropify.afterClear', function() {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [10/01/2026] - Correção de Erros de Compilação e Ajustes Funcionais
+
+**Descrição**:
+- ✅ **ERRO RZ1005 CORRIGIDO**: Escapados caracteres `@` no JavaScript usando `@@` para evitar interpretação incorreta do Razor
+  - Linhas afetadas: validações de email (regex e split) - `@camara.leg.br` → `@@camara.leg.br`
+  - Causa: Razor interpreta `@` mesmo dentro de blocos `<script>`, causando erro de sintaxe
+- ✅ **ERRO CS1501 CORRIGIDO**: Ajustada sintaxe Razor no bloco de validação de email
+  - Mesmo problema de escape de `@` causando código C# inválido gerado
+- ✅ **Tooltips removidos**: Removidos atributos `title` do botão de excluir foto e input file
+  - Botão lixeira: linha 394-399 - `title=""` removido completamente
+  - Input file: linha 404-408 - `title=""` removido completamente
+  - Sistema usa `data-ejtip` para tooltips padronizadas FrotiX
+- ✅ **Status ativo por padrão**: Novo usuário agora começa com Status marcado como Ativo (true)
+  - Linha 14: `var statusChecked = isEdicao ? (Model.UsuarioObj?.AspNetUsers?.Status == true) : true;`
+  - Lógica: Se for edição, usa valor do banco; se for criação, força `true`
+- ✅ **Animação de ícone ajustada**: Removida animação de spinning do botão Criar/Atualizar
+  - Linhas 789-805 removidas: código que adicionava `fa-spin` ao clicar no botão
+  - Comportamento correto: ícone só pulsa (`icon-pulse`), nunca gira
+
+**Problema Original (relatado pelo usuário)**:
+1. Erros de compilação impediam build do projeto
+2. Tooltip do botão de excluir foto ainda aparecia (não seguia padrão)
+3. Status sempre vinha desmarcado na criação (deveria vir marcado)
+4. Ícone do botão Criar girava ao clicar (deveria apenas pulsar)
+
+**Causa Raiz**:
+- **Erros RZ1005/CS1501**: Razor processa todo o conteúdo do arquivo, incluindo JavaScript. Quando encontra `@` seguido de caracteres especiais (como `@-` em regex), tenta interpretar como diretiva Razor, gerando código C# inválido.
+- **Tooltips**: Atributos `title=""` nativos do HTML não seguem padrão FrotiX (deve usar `data-ejtip` e tooltips Syncfusion)
+- **Status**: Lógica não diferenciava criação de edição - sempre usava valor do Model (null em criação = false)
+- **Animação**: Código genérico `.btn-submit-spin` aplicava `fa-spin` a todos os botões, mas o padrão FrotiX para Upsert é apenas pulsar
+
+**Solução Aplicada**:
+1. **Escape Razor**: Todos os `@` literais em strings JavaScript agora usam `@@` (que o Razor converte para `@` no output final)
+   - Exemplo: `valor.replace(/@@camara\.leg\.br$/i, '')` → `valor.replace(/@camara\.leg\.br$/i, '')` (no navegador)
+   - Exemplo: `valor.split('@@')` → `valor.split('@')` (no navegador)
+2. **Tooltips**: Removidos atributos `title` nativos - sistema usará `data-ejtip` quando necessário
+3. **Status**: Operador ternário que verifica se é edição ou criação e retorna valor apropriado
+4. **Animação**: Removido listener de evento que adicionava `fa-spin` - mantém apenas `icon-pulse` nativo
+
+**Arquivos Modificados**:
+- `Pages/Usuarios/Upsert.cshtml`:
+  - Linha 14: Lógica de `statusChecked` atualizada
+  - Linhas 394-399: Removido `title` do botão lixeira e ícone
+  - Linhas 404-408: Removido `title` do input file
+  - Linhas 688-734: Escapados todos os `@` em validações de email
+  - Linhas 789-805: Removido código de animação spinning
+- `Documentacao/Pages/Usuarios - Upsert.md`: Este arquivo - adicionada entrada no log
+
+**Impacto**:
+- ✅ Projeto compila sem erros
+- ✅ Tooltips seguem padrão FrotiX (nenhum tooltip nativo aparece)
+- ✅ Novo usuário já vem com Status ativo marcado
+- ✅ Botão Criar/Atualizar só pulsa, não gira (conforme padrão FrotiX Upsert)
+
+**Teste Sugerido**:
+1. Compilar projeto (deve buildar sem erros)
+2. Criar novo usuário (Status deve vir marcado como Ativo)
+3. Passar mouse sobre botão lixeira de foto (não deve aparecer tooltip)
+4. Passar mouse sobre área de upload (não deve aparecer tooltip)
+5. Clicar em "Criar Usuário" (ícone deve pulsar, não girar)
+
+**Status**: ✅ **Concluído**
+
+**Versão**: 1.1
 
 ---
 

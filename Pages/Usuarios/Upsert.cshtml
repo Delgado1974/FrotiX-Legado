@@ -11,7 +11,7 @@
     ViewData["PageIcon"] = "fa-duotone fa-users";
 
     var isEdicao = Model.UsuarioObj?.AspNetUsers?.Id != null;
-    var statusChecked = Model.UsuarioObj?.AspNetUsers?.Status == true;
+    var statusChecked = isEdicao ? (Model.UsuarioObj?.AspNetUsers?.Status == true) : true; // Novo usuário começa Ativo
     var detentorChecked = Model.UsuarioObj?.AspNetUsers?.DetentorCargaPatrimonial == true;
     var fotoBase64 = Model.UsuarioObj?.AspNetUsers?.Foto != null 
         ? Convert.ToBase64String(Model.UsuarioObj.AspNetUsers.Foto) 
@@ -391,23 +391,21 @@
                                                 <img id="imgPreview" src="/Images/sucesso_transparente.png" alt="Foto do Usuário" />
                                             }
                                             <!-- Botão Limpar: SEMPRE oculto no HTML, JS controla visibilidade -->
-                                            <button type="button" 
-                                                    class="ftx-foto-clear" 
-                                                    id="btnLimparFoto" 
-                                                    title=""
+                                            <button type="button"
+                                                    class="ftx-foto-clear"
+                                                    id="btnLimparFoto"
                                                     style="display: none !important;">
-                                                <i class="fa-solid fa-trash-can" title=""></i>
+                                                <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </div>
 
                                         <!-- Dropzone Estilizado -->
                                         <div class="ftx-dropzone" id="dropzoneArea">
-                                            <input type="file" 
-                                                   class="ftx-dropzone-input" 
-                                                   id="inputFoto" 
-                                                   name="FotoUpload" 
-                                                   accept="image/*" 
-                                                   title="" />
+                                            <input type="file"
+                                                   class="ftx-dropzone-input"
+                                                   id="inputFoto"
+                                                   name="FotoUpload"
+                                                   accept="image/*" />
                                             <div class="ftx-dropzone-area">
                                                 <i class="fa-duotone fa-cloud-arrow-up ftx-dropzone-icon"></i>
                                                 <p class="ftx-dropzone-text">Clique ou arraste uma imagem</p>
@@ -687,26 +685,26 @@
 
                             if (valor) {
                                 // Remove @@camara.leg.br se já existir para evitar duplicação
-                                valor = valor.replace(/@@camara\.leg\.br$/i, '');
+                                valor = valor.replace(/@@@@camara\.leg\.br$/i, '');
                                 // Remove qualquer @@ que possa existir no final
-                                valor = valor.replace(/@@+$/, '');
-                                
+                                valor = valor.replace(/@@@@+$/, '');
+
                                 // Remove caracteres inválidos (permite apenas: letras, números, ponto, hífen, underscore)
                                 valor = valor.replace(/[^a-z0-9._-]/g, '');
-                                
+
                                 // Valida se tem conteúdo antes do @@
                                 if (valor.length > 0) {
                                     // Adiciona o domínio obrigatório
-                                    valor = valor + '@@camara.leg.br';
+                                    valor = valor + '@@@@camara.leg.br';
                                 } else {
                                     // Se não tiver conteúdo, limpa o campo
                                     valor = '';
                                 }
-                                
+
                                 txtEmail.value = valor;
-                                
+
                                 // Valida formato final (apenas caracteres válidos antes do @@)
-                                const regex = /^[a-z0-9._-]+@@camara\.leg\.br$/;
+                                const regex = /^[a-z0-9._-]+@@@@camara\.leg\.br$/;
                                 if (valor && !regex.test(valor)) {
                                     txtEmail.classList.add('is-invalid');
                                 } else {
@@ -726,14 +724,14 @@
                             // Converte para minúsculo e remove caracteres inválidos (exceto @@ para permitir digitação)
                             let valor = txtEmail.value.toLowerCase();
                             // Separa a parte antes do @@ da parte depois (se existir)
-                            const partes = valor.split('@@');
+                            const partes = valor.split('@@@@');
                             if (partes.length > 1) {
                                 // Remove caracteres inválidos apenas da parte antes do @@
                                 partes[0] = partes[0].replace(/[^a-z0-9._-]/g, '');
-                                txtEmail.value = partes[0] + '@@' + partes.slice(1).join('@@');
+                                txtEmail.value = partes[0] + '@@@@' + partes.slice(1).join('@@@@');
                             } else {
                                 // Remove caracteres inválidos (permite @@ para digitação do domínio)
-                                txtEmail.value = valor.replace(/[^a-z0-9._@-]/g, '');
+                                txtEmail.value = valor.replace(/[^a-z0-9._@@-]/g, '');
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.input", error);
@@ -786,23 +784,6 @@
                     });
                 }
 
-                // =====================================================
-                // ANIMAÇÃO: Spinning nos botões de submit ao clicar
-                // =====================================================
-                document.querySelectorAll('.btn-submit-spin').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        try {
-                            const icon = btn.querySelector('i');
-                            if (icon) {
-                                // Remove pulse e adiciona spin (fa-spin é padrão FontAwesome)
-                                icon.classList.remove('icon-pulse');
-                                icon.classList.add('fa-spin');
-                            }
-                        } catch (error) {
-                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "btn-submit-spin.click", error);
-                        }
-                    });
-                });
 
             } catch (error) {
                 Alerta.TratamentoErroComLinha("Upsert.cshtml", "script.init", error);
