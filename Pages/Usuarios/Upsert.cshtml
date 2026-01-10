@@ -291,7 +291,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ponto">Ponto</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ponto"></span>
-                                            <input id="txtPonto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ponto" placeholder="Ex: p_12345" />
+                                            <input id="txtPonto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ponto" placeholder="Ex: p_12345" maxlength="50" />
                                         </div>
                                     </div>
 
@@ -300,7 +300,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.NomeCompleto">Nome Completo</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.NomeCompleto"></span>
-                                            <input id="txtNomeCompleto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" />
+                                            <input id="txtNomeCompleto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" maxlength="200" />
                                         </div>
                                     </div>
 
@@ -327,7 +327,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Email">Email</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Email"></span>
-                                            <input id="txtEmail" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Email" placeholder="usuario@camara.leg.br" />
+                                            <input id="txtEmail" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Email" placeholder="usuario@camara.leg.br" maxlength="256" />
                                         </div>
                                     </div>
 
@@ -394,7 +394,6 @@
                                             <button type="button" 
                                                     class="ftx-foto-clear" 
                                                     id="btnLimparFoto" 
-                                                    data-ejtip="Remover foto"
                                                     style="display: none !important;">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
@@ -428,8 +427,7 @@
                                 <button type="submit"
                                         asp-page-handler="Edit"
                                         asp-route-id="@Model.UsuarioObj.AspNetUsers.Id"
-                                        class="btn btn-azul btn-submit-spin"
-                                        data-ejtip="Atualizar dados do usuário">
+                                        class="btn btn-azul btn-submit-spin">
                                     <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Atualizar Usuário
                                 </button>
                             }
@@ -437,8 +435,7 @@
                             {
                                 <button type="submit"
                                         asp-page-handler="Submit"
-                                        class="btn btn-azul btn-submit-spin"
-                                        data-ejtip="Criar novo usuário">
+                                        class="btn btn-azul btn-submit-spin">
                                     <i class="fa-duotone fa-floppy-disk icon-space icon-pulse"></i> Criar Usuário
                                 </button>
                             }
@@ -473,31 +470,6 @@
                 const fotoPadraoPath = '/Images/sucesso_transparente.png';
                 const hasFotoInicial = @(fotoBase64 != null ? "true" : "false") === "true";
 
-                // Botão já começa oculto no HTML (display: none !important)
-                // Não precisa forçar ocultação - só mostra se hasFotoInicial
-
-                // #region agent log - H1 visibilidade inicial
-                fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({
-                        sessionId:'debug-session',
-                        runId:'button-position-2',
-                        hypothesisId:'H1',
-                        location:'Upsert.cshtml:init',
-                        message:'Estado inicial foto/botao',
-                        data:{
-                            hasFotoInicial,
-                            btnExists: !!btnLimparFoto,
-                            btnClasses: btnLimparFoto ? btnLimparFoto.className : 'NO_BTN',
-                            btnHasDNone: btnLimparFoto ? btnLimparFoto.classList.contains('d-none') : false,
-                            dropzoneHasFile: dropzoneArea ? dropzoneArea.classList.contains('has-file') : false
-                        },
-                        timestamp: Date.now()
-                    })
-                }).catch(()=>{});
-                // #endregion
-
                 // Ajusta estado inicial do botão e dropzone
                 // Botão SEMPRE começa oculto no HTML - JS decide se mostra
                 if (hasFotoInicial && btnLimparFoto) {
@@ -509,31 +481,6 @@
                     // Sem foto - mantém oculto (já está oculto no HTML)
                     if (dropzoneArea) dropzoneArea.classList.remove('has-file');
                 }
-
-                // #region agent log - H2 posicao botao após layout
-                setTimeout(function() {
-                    if (btnLimparFoto && imgPreview) {
-                        const btnRect = btnLimparFoto.getBoundingClientRect();
-                        const imgRect = imgPreview.getBoundingClientRect();
-                        fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
-                            method:'POST',
-                            headers:{'Content-Type':'application/json'},
-                            body:JSON.stringify({
-                                sessionId:'debug-session',
-                                runId:'button-position-1',
-                                hypothesisId:'H2',
-                                location:'Upsert.cshtml:layout',
-                                message:'Bounding boxes btn/img',
-                                data:{
-                                    btn:{top:btnRect.top,left:btnRect.left,width:btnRect.width,height:btnRect.height},
-                                    img:{top:imgRect.top,left:imgRect.left,width:imgRect.width,height:imgRect.height}
-                                },
-                                timestamp: Date.now()
-                            })
-                        }).catch(()=>{});
-                    }
-                }, 50);
-                // #endregion
 
                 // Preview da foto ao selecionar arquivo
                 if (inputFoto) {
@@ -625,23 +572,6 @@
                                 dropzoneIcon.className = 'fa-duotone fa-cloud-arrow-up ftx-dropzone-icon';
                             }
 
-                            // #region agent log - H3 click limpar
-                            fetch('http://127.0.0.1:7242/ingest/ee144bc3-6bc0-4a0e-9062-394bec5877c9',{
-                                method:'POST',
-                                headers:{'Content-Type':'application/json'},
-                                body:JSON.stringify({
-                                    sessionId:'debug-session',
-                                    runId:'button-position-1',
-                                    hypothesisId:'H3',
-                                    location:'Upsert.cshtml:btnLimpar',
-                                    message:'Limpar foto acionado',
-                                    data:{
-                                        dropzoneHasFile: dropzoneArea ? dropzoneArea.classList.contains('has-file') : false
-                                    },
-                                    timestamp: Date.now()
-                                })
-                            }).catch(()=>{});
-                            // #endregion
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "btnLimparFoto.click", error);
                         }
@@ -746,7 +676,7 @@
 
                 // =====================================================
                 // VALIDAÇÃO: Email obrigatoriamente terminando em @@camara.leg.br
-                // SEM ESPAÇOS no nome (antes do @@)
+                // Caracteres válidos antes do @@: letras, números, ponto, hífen, underscore
                 // =====================================================
                 const txtEmail = document.getElementById('txtEmail');
                 if (txtEmail) {
@@ -755,13 +685,13 @@
                             let valor = txtEmail.value.trim().toLowerCase();
 
                             if (valor) {
-                                // Remove TODOS os espaços do email (não pode haver espaços)
-                                valor = valor.replace(/\s+/g, '');
-                                
                                 // Remove @@camara.leg.br se já existir para evitar duplicação
                                 valor = valor.replace(/@@camara\.leg\.br$/i, '');
                                 // Remove qualquer @@ que possa existir no final
                                 valor = valor.replace(/@@+$/, '');
+                                
+                                // Remove caracteres inválidos (permite apenas: letras, números, ponto, hífen, underscore)
+                                valor = valor.replace(/[^a-z0-9._-]/g, '');
                                 
                                 // Valida se tem conteúdo antes do @@
                                 if (valor.length > 0) {
@@ -774,8 +704,8 @@
                                 
                                 txtEmail.value = valor;
                                 
-                                // Valida formato final (não pode ter espaços)
-                                const regex = /^[^\s@@]+@@camara\.leg\.br$/;
+                                // Valida formato final (apenas caracteres válidos antes do @@)
+                                const regex = /^[a-z0-9._-]+@@camara\.leg\.br$/;
                                 if (valor && !regex.test(valor)) {
                                     txtEmail.classList.add('is-invalid');
                                 } else {
@@ -789,11 +719,21 @@
                         }
                     });
 
-                    // Força minúsculo e remove espaços enquanto digita
+                    // Força minúsculo e remove caracteres inválidos enquanto digita
                     txtEmail.addEventListener('input', function () {
                         try {
-                            // Remove espaços e converte para minúsculo
-                            txtEmail.value = txtEmail.value.toLowerCase().replace(/\s+/g, '');
+                            // Converte para minúsculo e remove caracteres inválidos (exceto @@ para permitir digitação)
+                            let valor = txtEmail.value.toLowerCase();
+                            // Separa a parte antes do @@ da parte depois (se existir)
+                            const partes = valor.split('@@');
+                            if (partes.length > 1) {
+                                // Remove caracteres inválidos apenas da parte antes do @@
+                                partes[0] = partes[0].replace(/[^a-z0-9._-]/g, '');
+                                txtEmail.value = partes[0] + '@@' + partes.slice(1).join('@@');
+                            } else {
+                                // Remove caracteres inválidos (permite @@ para digitação do domínio)
+                                txtEmail.value = valor.replace(/[^a-z0-9._@-]/g, '');
+                            }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.input", error);
                         }
