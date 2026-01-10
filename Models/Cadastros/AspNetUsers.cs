@@ -33,7 +33,7 @@ namespace FrotiX.Models
             get; set;
         }
         [StringLength(256, ErrorMessage = "(O email deve ter no máximo 256 caracteres)")]
-        [RegularExpression(@"^[^@]+@camara\.leg\.br$", ErrorMessage = "(O email deve terminar em @camara.leg.br)")]
+        [RegularExpression(@"^[^\s@]+@camara\.leg\.br$", ErrorMessage = "(O email deve terminar em @camara.leg.br e não pode conter espaços)")]
         public new string? Email
         {
             get; set;

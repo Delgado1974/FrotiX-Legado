@@ -756,6 +756,7 @@
 
                 // =====================================================
                 // VALIDAÇÃO: Email obrigatoriamente terminando em @@camara.leg.br
+                // SEM ESPAÇOS no nome (antes do @@)
                 // =====================================================
                 const txtEmail = document.getElementById('txtEmail');
                 if (txtEmail) {
@@ -764,6 +765,9 @@
                             let valor = txtEmail.value.trim().toLowerCase();
 
                             if (valor) {
+                                // Remove TODOS os espaços do email (não pode haver espaços)
+                                valor = valor.replace(/\s+/g, '');
+                                
                                 // Remove @@camara.leg.br se já existir para evitar duplicação
                                 valor = valor.replace(/@@camara\.leg\.br$/i, '');
                                 // Remove qualquer @@ que possa existir no final
@@ -780,8 +784,8 @@
                                 
                                 txtEmail.value = valor;
                                 
-                                // Valida formato final
-                                const regex = /^[^@@]+@@camara\.leg\.br$/;
+                                // Valida formato final (não pode ter espaços)
+                                const regex = /^[^\s@@]+@@camara\.leg\.br$/;
                                 if (valor && !regex.test(valor)) {
                                     txtEmail.classList.add('is-invalid');
                                 } else {
@@ -795,10 +799,11 @@
                         }
                     });
 
-                    // Força minúsculo enquanto digita
+                    // Força minúsculo e remove espaços enquanto digita
                     txtEmail.addEventListener('input', function () {
                         try {
-                            txtEmail.value = txtEmail.value.toLowerCase();
+                            // Remove espaços e converte para minúsculo
+                            txtEmail.value = txtEmail.value.toLowerCase().replace(/\s+/g, '');
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.input", error);
                         }
