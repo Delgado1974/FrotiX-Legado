@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
 > **Última Atualização**: 10/01/2026
-> **Versão Atual**: 1.2
+> **Versão Atual**: 1.3
 
 ---
 
@@ -195,6 +195,35 @@ nodeDragStop: function(args) {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [10/01/2026 23:45] - Correção da inversão de ordem do menu lateral após transformação via badge
+
+**Descrição**:
+Corrigido problema onde a ordem dos itens do menu lateral era invertida após transformar um item via badge (Grupo ↔ Página).
+
+**Problema**:
+A função `salvarPropriedades()` chamava `atualizarNavegacaoLateral()` que fazia `window.location.reload()` ANTES de `salvarArvoreCompleta()` ser executada. Isso causava a inversão da ordem porque a estrutura era recarregada antes de ser salva corretamente.
+
+**Solução**:
+- Criada nova função `salvarOrdenacaoAutomaticaSemReload()` que retorna Promise e não faz reload automático
+- Modificadas as funções `executarTransformacaoGrupoEmPagina()` e `executarTransformacaoPaginaEmGrupo()` para:
+  - Usar `salvarOrdenacaoAutomaticaSemReload()` em vez de `salvarPropriedades().then(() => salvarArvoreCompleta())`
+  - Fazer o `window.location.reload()` apenas APÓS o salvamento ser confirmado (com delay de 1.5s)
+- Isso garante que a estrutura seja salva completamente antes do reload
+
+**Arquivos Afetados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
+  - Nova função `salvarOrdenacaoAutomaticaSemReload()` (linhas ~4283-4346)
+  - Função `executarTransformacaoGrupoEmPagina()` (linhas ~1996-2014)
+  - Função `executarTransformacaoPaginaEmGrupo()` (linhas ~2190-2218)
+
+**Status**: ✅ **Concluído**
+
+**Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.3
 
 ---
 

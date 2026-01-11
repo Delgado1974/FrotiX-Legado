@@ -1993,42 +1993,25 @@
             // Passa null para limpar seleção, false para não marcar pendentes
             atualizarTreeViewAposMovimento(null, false);
 
-            // Aguarda um pouco para garantir que o TreeView foi atualizado
-            setTimeout(function() {
-                // Busca o item atualizado do treeData
-                var itemAtualizado = buscarItemPorId(treeData, itemId);
-                if (!itemAtualizado) {
-                    return;
+            // ✅ Salva a estrutura completa diretamente (já salva href/icon)
+            // Não usa salvarPropriedades() pois ela faz reload da página antes de terminar
+            salvarOrdenacaoAutomaticaSemReload().then(function() {
+                // ✅ Limpa seleção após salvar com sucesso
+                selectedItem = null;
+                if (treeObj) {
+                    treeObj.selectedNodes = [];
                 }
+                limparFormulario();
 
-                // Atualiza selectedItem temporariamente para salvar (mas NÃO seleciona visualmente)
-                selectedItem = itemAtualizado;
+                Alerta.Sucesso('Transformação Realizada', 'O grupo foi transformado em página e salvo com sucesso!');
 
-                // Atualiza formulário
-                var tipoItemEl = document.getElementById('tipoItem');
-                var txtHrefEl = document.getElementById('txtHref');
-
-                if (tipoItemEl) tipoItemEl.value = 'pagina';
-                selecionarTipoItem('pagina');
-                if (txtHrefEl) txtHrefEl.value = novaUrl;
-
-                // ✅ Salva imediatamente (não marca alterações pendentes)
-                salvarPropriedades().then(function() {
-                    // Após salvar propriedades, salva a estrutura completa
-                    salvarArvoreCompleta();
-
-                    // ✅ Limpa seleção após salvar com sucesso
-                    selectedItem = null;
-                    if (treeObj) {
-                        treeObj.selectedNodes = [];
-                    }
-                    limparFormulario();
-
-                    Alerta.Sucesso('Transformação Realizada', 'O grupo foi transformado em página e salvo com sucesso!');
-                }).catch(function(erro) {
-                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
-                });
-            }, 500);
+                // ✅ Agora sim, recarrega a página para atualizar menu lateral
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+            }).catch(function(erro) {
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
+            });
             
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
@@ -2204,51 +2187,35 @@
             // Passa null para limpar seleção, false para não marcar pendentes
             atualizarTreeViewAposMovimento(null, false);
 
-            // Guarda ID do item para referência no setTimeout
-            var itemId = item.id;
+            // ✅ Salva a estrutura completa diretamente (já salva href/icon)
+            // Não usa salvarPropriedades() pois ela faz reload da página antes de terminar
+            salvarOrdenacaoAutomaticaSemReload().then(function() {
+                // ✅ Limpa seleção após salvar com sucesso
+                selectedItem = null;
+                if (treeObj) {
+                    treeObj.selectedNodes = [];
+                }
+                limparFormulario();
 
-            // Aguarda um pouco para garantir que o TreeView foi atualizado
-            setTimeout(function() {
-                // Busca o item atualizado
-                var itemAtualizado = buscarItemPorId(treeData, itemId);
-                if (!itemAtualizado) {
-                    return;
+                // Mensagem de sucesso
+                var msg = 'Página transformada em Grupo e salva com sucesso!';
+                if (itensParaMover && itensParaMover.length > 0) {
+                    if (subordinarAoNovoGrupo) {
+                        msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s) e salvo com sucesso!';
+                    } else if (grupoDestinoId) {
+                        msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo. Alterações salvas.';
+                    }
                 }
 
-                // Atualiza selectedItem temporariamente para salvar
-                selectedItem = itemAtualizado;
+                Alerta.Sucesso('Transformação Realizada', msg);
 
-                selecionarTipoItem('grupo');
-                var txtHrefEl = document.getElementById('txtHref');
-                if (txtHrefEl) txtHrefEl.value = '';
-
-                // ✅ Salva imediatamente (não marca alterações pendentes)
-                salvarPropriedades().then(function() {
-                    // Após salvar propriedades, salva a estrutura completa
-                    salvarArvoreCompleta();
-
-                    // ✅ Limpa seleção após salvar com sucesso
-                    selectedItem = null;
-                    if (treeObj) {
-                        treeObj.selectedNodes = [];
-                    }
-                    limparFormulario();
-
-                    // Mensagem de sucesso
-                    var msg = 'Página transformada em Grupo e salva com sucesso!';
-                    if (itensParaMover && itensParaMover.length > 0) {
-                        if (subordinarAoNovoGrupo) {
-                            msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s) e salvo com sucesso!';
-                        } else if (grupoDestinoId) {
-                            msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo. Alterações salvas.';
-                        }
-                    }
-
-                    Alerta.Sucesso('Transformação Realizada', msg);
-                }).catch(function(erro) {
-                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
-                });
-            }, 500);
+                // ✅ Agora sim, recarrega a página para atualizar menu lateral
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+            }).catch(function(erro) {
+                Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
+            });
             
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
@@ -4311,6 +4278,71 @@
             console.error('[AUTO-SAVE] ❌ Erro no try-catch:', erro);
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarOrdenacaoAutomatica", erro);
         }
+    }
+
+    // ✅ AUTO-SAVE SEM RELOAD: Versão que retorna Promise e não faz reload
+    // Usada para transformações de tipo (Grupo ↔ Página) onde o reload é controlado externamente
+    function salvarOrdenacaoAutomaticaSemReload() {
+        return new Promise(function(resolve, reject) {
+            try {
+                if (!treeObj && !treeData) {
+                    console.error('[AUTO-SAVE-SR] Nem treeObj nem treeData existem!');
+                    reject(new Error('Dados da árvore não disponíveis'));
+                    return;
+                }
+
+                // ✅ Usa treeData diretamente (mais confiável após modificações manuais)
+                var dataSource = treeData || treeObj.getTreeData();
+                console.log('[AUTO-SAVE-SR] DataSource obtido (treeData):', dataSource);
+
+                var items = extrairItensDoTreeView(dataSource, null, 0);
+                console.log('[AUTO-SAVE-SR] Items extraídos para salvar:', items.length);
+
+                if (items.length === 0) {
+                    console.warn('[AUTO-SAVE-SR] Nenhum item para salvar!');
+                    reject(new Error('Nenhum item para salvar'));
+                    return;
+                }
+
+                console.log('[AUTO-SAVE-SR] Enviando para backend...');
+
+                fetch('/api/Navigation/SaveTreeToDb', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(items)
+                })
+                .then(function(r) {
+                    console.log('[AUTO-SAVE-SR] Response status:', r.status);
+                    return r.json().then(function(data) {
+                        return { ok: r.ok, status: r.status, data: data };
+                    });
+                })
+                .then(function(response) {
+                    console.log('[AUTO-SAVE-SR] Response do backend:', response.data);
+
+                    if (!response.ok) {
+                        console.error('[AUTO-SAVE-SR] ❌ HTTP Error:', response.status);
+                        reject(new Error(response.data.message || 'Erro HTTP ' + response.status));
+                        return;
+                    }
+
+                    if (response.data.success) {
+                        console.log('[AUTO-SAVE-SR] ✅ Ordenação salva com sucesso (sem reload)!');
+                        resolve(response.data);
+                    } else {
+                        console.error('[AUTO-SAVE-SR] ❌ Erro no backend:', response.data.message);
+                        reject(new Error(response.data.message));
+                    }
+                })
+                .catch(function(erro) {
+                    console.error('[AUTO-SAVE-SR] ❌ Erro no fetch:', erro);
+                    reject(erro);
+                });
+            } catch (erro) {
+                console.error('[AUTO-SAVE-SR] ❌ Erro no try-catch:', erro);
+                reject(erro);
+            }
+        });
     }
 
     // ✅ Atualiza a navegação lateral (menu do sistema)
