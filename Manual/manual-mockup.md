@@ -1,6 +1,7 @@
 # 📚 MANUAL MOCKUP - Base de Conhecimento FrotiX
 
 > **Criado em**: 2026-01-09  
+> **Atualizado**: 2026-01-10  
 > **Fase**: FASE 1 - Pesquisa e Aprendizado  
 > **Status**: Em construção
 
@@ -22,6 +23,7 @@ Este documento serve como base de conhecimento para a conversão MD→HTML e cri
 6. [Design System](#design-system)
 7. [Controles e Bibliotecas](#controles-e-bibliotecas)
 8. [Sistemas Globais](#sistemas-globais)
+9. [Diretrizes Visuais e Conversão HTML](#diretrizes-visuais-e-conversão-html)
 
 ---
 
@@ -85,11 +87,12 @@ Mais de 30 views configuradas como `HasNoKey()` no Entity Framework:
 
 Principais SPs identificadas:
 
-- `sp_RecalcularEstatisticas*` (várias variações)
-- `sp_CalcularConsumoVeiculos`
-- `sp_AtualizarEstatisticasViagem`
-- `sp_CalculaCustosViagem`
-- `sp_TratarNulos*` (várias variações)
+- Pipeline de viagens (job em etapas): `sp_NormalizarAbastecimentos` → `sp_CalcularConsumoVeiculos` → `sp_AtualizarPadroesVeiculos` → `sp_NormalizarViagens` → `sp_RecalcularCustosTodasViagens` (usa `sp_CalculaCustosViagem`) → `sp_AtualizarTodasEstatisticasViagem`/`sp_AtualizarEstatisticasViagem`.
+- Estatísticas de abastecimento: `sp_AtualizarEstatisticasAbastecimentosMesAtual`, `sp_RecalcularEstatisticasAbastecimentos`, `sp_RecalcularEstatisticasAbastecimentosAnuais`, `sp_RecalcularTodasEstatisticasAbastecimentos`.
+- Estatísticas de motoristas: `sp_AtualizarEstatisticasMesAtual`, `sp_RecalcularEstatisticasMotoristas`, `sp_RecalcularEstatisticasMotoristaUnico`, `sp_RecalcularTodasEstatisticasMotoristas`.
+- Estatísticas de veículos: `sp_AtualizarEstatisticasVeiculosMesAtual`, `sp_RecalcularEstatisticasVeiculo*` (Geral/Categoria/Status/Modelo/Combustivel/Unidade/AnoFabricacao/UsoMensal/Rankings/Todas).
+- Saneamento: `sp_Requisitante_TratarNulos`, `sp_TratarNulosTabela`, `sp_TratarNulosTodasTabelas`, `usp_PreencheNulos_Motorista`.
+- Suporte: `sp_tr_SetString`, `sp_tr_GetString`, utilitários de lock (`sp_tr_AcquireLock`, `sp_tr_SetObject`, etc.).
 
 ---
 
@@ -565,6 +568,38 @@ combo.appendTo('#elemento');
 
 ---
 
+## 🖼️ DIRETRIZES VISUAIS E CONVERSÃO HTML
+
+### Layout e nomenclatura
+- Páginas pensadas para A4 (impressão/PDF). Se exceder, dividir em `A4.01`, `A4.02`, etc.
+- Nome do arquivo: `(<Diretorio>) <NomeArquivo>A4XX.html` (ex.: `(Controllers) HomeControllerA401.html`).
+- Nunca remover os `.md`; gerar `.html` correspondentes em ordem alfabética por diretório/arquivo.
+
+### Header/hero padrão
+- Fundo laranja telha `#b66a3d`, texto branco, borda dupla (preto fino + branco mais espesso).
+- Ícone FontAwesome duotone grande (SVG em `Fontawesome/duotone/`), fonte bold tipo Outfit/Optimum.
+- Fundo da página cinza-claro para destacar o contorno branco.
+
+### Paleta e superfícies
+- Paleta base: Vinho `#722F37`, Azul `#325d88`, Terracota `#A97B6E`, Verde `#557570`; variantes claras `#8B3A44`, `#3d6f9e`, `#C08B7E`, `#6A8A85`; header `#b66a3d`; code-bg petróleo `#33465c`.
+- Cards brancos com sombra suave (`0 20px 45px -18px rgba(0,0,0,.35)`), radius ~14px; grid responsivo `minmax(320px, 1fr)` adequando-se ao A4.
+- Snippets: fundo `#33465c`, texto claro, `pre-wrap`, padding 12–14px; evitar fundo preto.
+
+### Botões e interações
+- Botão laranja (`.btn-header-orange`/`.btn-fundo-laranja`): fundo marrom/laranja, borda preta + outline branco 2px, hover mais escuro.
+- Respeitar automações do `frotix.js`: ripple, spinner (`data-ftx-spin`), loading (`data-ftx-loading`), altura padrão 38px de inputs.
+
+### Ícones e cards
+- Uso generoso de duotones em headers e cards sem poluir; cada card com ícone temático.
+- Narrativa em prosa leve, com trechos de código explicando fluxos técnicos.
+
+### Placeholders e referências
+- Inserir marcadores para screenshots futuras (portfólio PDF).
+- Referência visual: `Documentacao/EndPoints/UsersEndpoint.html` e `RolesEndpoint.html` (header, cards, cores inline).
+- Assets base: `wwwroot/css/frotix.css` (cores, botões, modais, spinner, tooltips), `wwwroot/js/frotix.js`, `alerta.js`/`sweetalert_interop.js`, `global-toast.js`, `syncfusion_tooltips.js`.
+
+---
+
 ## 📝 OBSERVAÇÕES ADICIONAIS
 
 ### Padrões de Arquivos JS
@@ -816,5 +851,5 @@ Documentações seguem formato didático com:
 
 ---
 
-**Última atualização**: 2026-01-09  
-**Status**: ✅ **FASE 1 CONCLUÍDA** - Base de conhecimento completa
+**Última atualização**: 2026-01-10  
+**Status**: ✅ **FASE 1 CONCLUÍDA (refinada)** - Base de conhecimento atualizada para conversão HTML

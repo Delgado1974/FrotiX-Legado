@@ -60,7 +60,12 @@
       "Bash(git rm:*)",
       "Bash(tr:*)",
       "Bash(awk:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(git gc:*)",
+      "Bash(git fetch:*)",
+      "Bash(git worktree:*)",
+      "Bash(taskkill:*)"
     ]
   }
 }
