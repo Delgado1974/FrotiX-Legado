@@ -1988,10 +1988,11 @@
             
             // Força reconstrução da árvore
             treeData = JSON.parse(JSON.stringify(treeData));
-            
-            // Atualiza TreeView
-            atualizarTreeViewAposMovimento(item.id);
-            
+
+            // ✅ Atualiza TreeView SEM marcar alterações pendentes (salva direto no banco)
+            // Passa null para limpar seleção, false para não marcar pendentes
+            atualizarTreeViewAposMovimento(null, false);
+
             // Aguarda um pouco para garantir que o TreeView foi atualizado
             setTimeout(function() {
                 // Busca o item atualizado do treeData
@@ -1999,30 +2000,30 @@
                 if (!itemAtualizado) {
                     return;
                 }
-                
-                // Atualiza selectedItem com o item atualizado
+
+                // Atualiza selectedItem temporariamente para salvar (mas NÃO seleciona visualmente)
                 selectedItem = itemAtualizado;
-                
-                // Seleciona visualmente no TreeView
-                if (treeObj) {
-                    var node = treeObj.getNode(itemId);
-                    if (node) {
-                        treeObj.select([node]);
-                    }
-                }
-                
+
                 // Atualiza formulário
                 var tipoItemEl = document.getElementById('tipoItem');
                 var txtHrefEl = document.getElementById('txtHref');
-                
+
                 if (tipoItemEl) tipoItemEl.value = 'pagina';
                 selecionarTipoItem('pagina');
                 if (txtHrefEl) txtHrefEl.value = novaUrl;
-                
+
                 // ✅ Salva imediatamente (não marca alterações pendentes)
                 salvarPropriedades().then(function() {
                     // Após salvar propriedades, salva a estrutura completa
                     salvarArvoreCompleta();
+
+                    // ✅ Limpa seleção após salvar com sucesso
+                    selectedItem = null;
+                    if (treeObj) {
+                        treeObj.selectedNodes = [];
+                    }
+                    limparFormulario();
+
                     Alerta.Sucesso('Transformação Realizada', 'O grupo foi transformado em página e salvo com sucesso!');
                 }).catch(function(erro) {
                     Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
@@ -2198,41 +2199,42 @@
             
             // Força reconstrução da árvore
             treeData = JSON.parse(JSON.stringify(treeData));
-            
-            // Atualiza TreeView
-            atualizarTreeViewAposMovimento(item.id);
-            
+
+            // ✅ Atualiza TreeView SEM marcar alterações pendentes (salva direto no banco)
+            // Passa null para limpar seleção, false para não marcar pendentes
+            atualizarTreeViewAposMovimento(null, false);
+
+            // Guarda ID do item para referência no setTimeout
+            var itemId = item.id;
+
             // Aguarda um pouco para garantir que o TreeView foi atualizado
             setTimeout(function() {
-                // Atualiza formulário se o item está selecionado
-                if (selectedItem && selectedItem.id === item.id) {
-                    selecionarTipoItem('grupo');
-                    var txtHrefEl = document.getElementById('txtHref');
-                    if (txtHrefEl) txtHrefEl.value = '';
-                    
-                    // ✅ Salva imediatamente (não marca alterações pendentes)
-                    salvarPropriedades().then(function() {
-                        // Após salvar propriedades, salva a estrutura completa
-                        salvarArvoreCompleta();
-                        
-                        // Mensagem de sucesso
-                        var msg = 'Página transformada em Grupo e salva com sucesso!';
-                        if (itensParaMover && itensParaMover.length > 0) {
-                            if (subordinarAoNovoGrupo) {
-                                msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s) e salvo com sucesso!';
-                            } else if (grupoDestinoId) {
-                                msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo. Alterações salvas.';
-                            }
-                        }
-                        
-                        Alerta.Sucesso('Transformação Realizada', msg);
-                    }).catch(function(erro) {
-                        Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
-                    });
-                } else {
-                    // Se não está selecionado, salva apenas a estrutura
+                // Busca o item atualizado
+                var itemAtualizado = buscarItemPorId(treeData, itemId);
+                if (!itemAtualizado) {
+                    return;
+                }
+
+                // Atualiza selectedItem temporariamente para salvar
+                selectedItem = itemAtualizado;
+
+                selecionarTipoItem('grupo');
+                var txtHrefEl = document.getElementById('txtHref');
+                if (txtHrefEl) txtHrefEl.value = '';
+
+                // ✅ Salva imediatamente (não marca alterações pendentes)
+                salvarPropriedades().then(function() {
+                    // Após salvar propriedades, salva a estrutura completa
                     salvarArvoreCompleta();
-                    
+
+                    // ✅ Limpa seleção após salvar com sucesso
+                    selectedItem = null;
+                    if (treeObj) {
+                        treeObj.selectedNodes = [];
+                    }
+                    limparFormulario();
+
+                    // Mensagem de sucesso
                     var msg = 'Página transformada em Grupo e salva com sucesso!';
                     if (itensParaMover && itensParaMover.length > 0) {
                         if (subordinarAoNovoGrupo) {
@@ -2241,9 +2243,11 @@
                             msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo. Alterações salvas.';
                         }
                     }
-                    
+
                     Alerta.Sucesso('Transformação Realizada', msg);
-                }
+                }).catch(function(erro) {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
+                });
             }, 500);
             
         } catch (erro) {
@@ -3961,13 +3965,18 @@
     }
 
     // ✅ Função auxiliar para atualizar TreeView após movimentos
-    function atualizarTreeViewAposMovimento(itemIdParaManter) {
+    // @param itemIdParaManter - ID do item a manter selecionado (ou null para limpar seleção)
+    // @param marcarPendentes - Se true (padrão), marca alterações pendentes. Se false, não marca (usado quando já salvou direto no banco)
+    function atualizarTreeViewAposMovimento(itemIdParaManter, marcarPendentes) {
         try {
-            console.log('[ATUALIZAR] Atualizando TreeView após movimento...');
-            
+            // Se marcarPendentes não for informado, assume true (comportamento padrão)
+            if (marcarPendentes === undefined) marcarPendentes = true;
+
+            console.log('[ATUALIZAR] Atualizando TreeView após movimento... marcarPendentes=' + marcarPendentes);
+
             // Força reconstrução completa
             treeData = JSON.parse(JSON.stringify(treeData));
-            
+
             // Atualiza TreeView
             if (treeObj) {
                 treeObj.fields.dataSource = treeData;
@@ -3975,15 +3984,15 @@
                 treeObj.refresh();
                 treeObj.expandAll();
             }
-            
+
             // ✅ Reconfigura event listeners (necessário após refresh)
             configurarBotoesNavegacao();
-            
+
             // Repopula dropdowns
             popularDropdownItemPai();
             popularDropdownPosicao();
-            
-            // Mantém seleção no item movido
+
+            // Mantém seleção no item movido (se itemIdParaManter for informado)
             if (itemIdParaManter) {
                 var itemAtualizado = buscarItemPorId(treeData, itemIdParaManter);
                 if (itemAtualizado) {
@@ -3991,14 +4000,23 @@
                     // NÃO chama selecionarItem aqui para evitar recarregar dados antigos
                     // selecionarItem será chamado separadamente se necessário
                 }
+            } else {
+                // ✅ Se itemIdParaManter for null/undefined/false, limpa a seleção
+                selectedItem = null;
+                if (treeObj) {
+                    treeObj.selectedNodes = [];
+                }
             }
-            
-            // ✅ Marca alterações pendentes apenas para movimentos de posição
-            // Transformações de tipo (Grupo ↔ Página) salvam imediatamente
-            marcarAlteracoesPendentes();
-            
-            console.log('[ATUALIZAR] ✅ TreeView atualizado (alterações pendentes)');
-            
+
+            // ✅ Marca alterações pendentes apenas se solicitado (movimentos de posição)
+            // Transformações de tipo (Grupo ↔ Página) passam marcarPendentes=false pois salvam imediatamente
+            if (marcarPendentes) {
+                marcarAlteracoesPendentes();
+                console.log('[ATUALIZAR] ✅ TreeView atualizado (alterações pendentes)');
+            } else {
+                console.log('[ATUALIZAR] ✅ TreeView atualizado (sem marcar pendentes - já salvo no banco)');
+            }
+
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "atualizarTreeViewAposMovimento", erro);
         }

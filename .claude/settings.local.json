@@ -65,7 +65,8 @@
       "Bash(git gc:*)",
       "Bash(git fetch:*)",
       "Bash(git worktree:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

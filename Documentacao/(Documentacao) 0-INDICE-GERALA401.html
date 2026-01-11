@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Índice Geral | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    @page { size: A4; margin: 16mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), var(--cinza);
+      color: var(--texto);
+      padding: 22px;
+      display: flex;
+      justify-content: center;
+    }
+    .page { width: 210mm; max-width: 100%; }
+    .hero {
+      background: var(--header-bg);
+      color: #fff;
+      padding: 22px 24px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px #000, 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .hero img { width: 50px; height: 50px; filter: drop-shadow(0 6px 8px rgba(0,0,0,.25)); }
+    h1 { margin: 0; font-size: 26px; letter-spacing: 0.2px; }
+    .subtitle { margin: 6px 0 0; font-size: 13px; opacity: 0.92; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 18px; }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .section-title { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 15px; font-weight: 800; color: var(--vinho); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      background: rgba(169,123,110,.12);
+      color: var(--terracota);
+      margin-right: 8px;
+      font-size: 12px;
+    }
+    .table-like { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .table-like th, .table-like td { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .ok { background: rgba(85,117,112,.18); color: var(--verde); }
+    .warn { background: rgba(169,123,110,.18); color: var(--terracota); }
+    .alert { background: rgba(114,47,55,.16); color: var(--vinho); }
+    .list-scroll { max-height: 360px; overflow: auto; padding-right: 6px; font-size: 12.5px; line-height: 1.45; }
+    ul { margin: 6px 0 0 18px; padding: 0; }
+    li { margin-bottom: 6px; }
+    .icon { width: 18px; height: 18px; vertical-align: middle; filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <img src="../Fontawesome/duotone/book-open-cover.svg" alt="Índice" />
+      <div>
+        <h1>Índice Geral da Documentação</h1>
+        <p class="subtitle">Visão completa do acervo técnico FrotiX · Última atualização: 08/01/2026 · Versão: 1.0 · Status: Em progresso</p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <div class="section-title">
+          <img class="icon" src="../Fontawesome/duotone/info.svg" alt="info" />
+          Resumo rápido
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;">
+          <span class="pill"><img class="icon" src="../Fontawesome/duotone/clipboard-list.svg" alt="">Raiz e subpastas mapeadas</span>
+          <span class="pill"><img class="icon" src="../Fontawesome/duotone/arrows-rotate.svg" alt="">Conversão MD→HTML obrigatória</span>
+          <span class="pill"><img class="icon" src="../Fontawesome/duotone/print.svg" alt="">Formato A4 · pronto para PDF/print</span>
+        </div>
+        <p style="margin-top:10px;font-size:13px;">Use este índice para navegar pelas seções (Pages, Controllers, Services, Helpers, Middlewares, Models, Repository/IRepository, Data, JavaScript, CSS) e manter a documentação em sincronia com o código.</p>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <img class="icon" src="../Fontawesome/duotone/list-check.svg" alt="sumário" />
+          Sumário e status por categoria
+        </div>
+        <table class="table-like">
+          <thead><tr><th>Categoria</th><th>Status</th><th>Notas</th></tr></thead>
+          <tbody>
+            <tr><td>Pages (Razor)</td><td><span class="warn badge">Parcial</span></td><td>~63 de ~290 páginas em MD; PageModels ausentes.</td></tr>
+            <tr><td>Controllers</td><td><span class="ok badge">Listados</span></td><td>Índice completo em MD; aguarda HTML.</td></tr>
+            <tr><td>Services</td><td><span class="ok badge">Listados</span></td><td>22/30 serviços documentados.</td></tr>
+            <tr><td>Helpers</td><td><span class="ok badge">Completo</span></td><td>6/6 em MD.</td></tr>
+            <tr><td>Middlewares</td><td><span class="ok badge">Completo</span></td><td>2/2 em MD.</td></tr>
+            <tr><td>Models</td><td><span class="ok badge">Listados</span></td><td>~135 modelos documentados.</td></tr>
+            <tr><td>Repository / IRepository</td><td><span class="warn badge">Parcial</span></td><td>Índices prontos; maioria em MD.</td></tr>
+            <tr><td>Data</td><td><span class="ok badge">Completo</span></td><td>5 DbContexts mapeados.</td></tr>
+            <tr><td>JavaScript</td><td><span class="warn badge">Parcial</span></td><td>6 arquivos raiz; cadastros/agenda/viagens pendentes.</td></tr>
+            <tr><td>CSS</td><td><span class="ok badge">Completo</span></td><td>`frotix.css` documentado.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <img class="icon" src="../Fontawesome/duotone/folder-tree.svg" alt="escopo" />
+          Escopo (listagem rápida)
+        </div>
+        <div class="list-scroll">
+          <p><strong>Pages</strong>: Abastecimento, Administracao, Agenda, AlertasFrotiX, AtaRegistroPrecos, Combustivel, Contrato, Empenho, Encarregado, Fornecedor, Frota, Intel, Lavador, Manutencao, MarcaVeiculo, ModeloVeiculo, Motorista, Multa, NotaFiscal, Ocorrencia, Operador, Page (genéricas), Patrimonio, PlacaBronze, Relatorio, Requisitante, SecaoPatrimonial, SetorPatrimonial, SetorSolicitante, TaxiLeg, Temp, Unidade, Uploads, Usuarios, Veiculo, Viagens, WhatsApp, Shared.</p>
+          <p><strong>Controllers</strong>: Abastecimento, Administracao, Agenda, AlertasFrotiX, Api (WhatsApp), AtaRegistroPrecos, Combustivel, Contrato, CustosViagem, Dashboards (Eventos/Lavagem/Motoristas/Veiculos/Viagens), Editor, Empenho, Encarregado, Fornecedor, Glosa, GridAta, GridContrato, Home, ItensContrato, Lavador, LogErros, Login, Manutencao, MarcaVeiculo, ModeloVeiculo, Motorista, Multa, Navigation, Normalize, NotaFiscal, OcorrenciaViagem, Operador, Patrimonio, PdfViewer(CNH), PlacaBronze, Recurso, Relatorios, RelatorioSetorSolicitante, Reports, Requisitante, Secao, Setor, SetorSolicitante, TaxiLeg, TestePdf, Unidade, Upload(CNH/CRLV), Usuario, Veiculo, VeiculosUnidade, Viagem, ViagemEvento, ViagemLimpeza.</p>
+          <p><strong>Services</strong>: AlertasBackground, CacheWarmup, CustomReportSourceResolver, Glosa, LogService, MailService, MotoristaFotoService, RazorRenderService, ReCaptchaService, Servicos/ServicosAsync, TelerikReportWarmup, ToastService, Validations, VeiculoEstatisticaService, ViagemEstatisticaService, Pdf (RelatorioEconomildo), WhatsApp (EvolutionApiWhatsAppService).</p>
+          <p><strong>Helpers</strong>: Alerta, AlertaBackend, ErroHelper, ImageHelper, ListasCompartilhadas, SfdtHelper.</p>
+          <p><strong>Middlewares</strong>: ErrorLoggingMiddleware, UiExceptionMiddleware.</p>
+          <p><strong>Models</strong>: Índice completo (cadastros, DTOs, estatísticas, navigation, viagens, veículos).</p>
+          <p><strong>Repository/IRepository</strong>: Índices completos + impls (Abastecimento, Contrato, ControleAcesso, Evento, Fornecedor, Manutencao, Marca/ModeloVeiculo, Motorista, Multa, NotaFiscal, OcorrenciaViagem, Patrimonio, Recurso, Requisitante, Unidade, Veiculo, VeiculoContrato, Viagem, UnitOfWork).</p>
+          <p><strong>Data</strong>: ApplicationDbContext, ControleAcessoDbContext, FrotiXDbContext (parciais OcorrenciaViagem, RepactuacaoVeiculo).</p>
+          <p><strong>JavaScript</strong>: raiz (alerta.js, frotix.js, global-toast.js, higienizarviagens_054.js, sweetalert_interop.js, syncfusion_tooltips.js); cadastros/agenda/viagens/dashboards a mapear.</p>
+          <p><strong>CSS</strong>: frotix.css.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <img class="icon" src="../Fontawesome/duotone/triangle-exclamation.svg" alt="regras" />
+          Regras críticas
+        </div>
+        <ul>
+          <li>Não apagar os arquivos `.md`; criar `.html` correspondentes com sufixo A4 em ordem alfabética.</li>
+          <li>Atualizar documentação no mesmo ciclo de mudança de código (ver <code>REGRA-CRITICA-ATUALIZACAO-DOCUMENTACAO.md</code>).</li>
+          <li>Respeitar visual FrotiX: header laranja, borda preta + branca, fundo cinza-claro, cards brancos, snippets em azul petróleo.</li>
+          <li>Usar ícones duotone abundantes, mas sem poluição; cada card com ícone temático.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <img class="icon" src="../Fontawesome/duotone/route.svg" alt="próximos" />
+          Próximas etapas (para este nível)
+        </div>
+        <ul>
+          <li>Converter os demais arquivos da raiz: <code>Documentacao em Html.md</code>, <code>REGRA-CRITICA-ATUALIZACAO-DOCUMENTACAO.md</code>, <code>RELATORIO-FALTANTES.md</code>.</li>
+          <li>Prosseguir para diretórios em ordem alfabética: <code>Banco de Dados</code> → <code>Controllers</code> → <code>CSS</code> → <code>Data</code> → ...</li>
+          <li>Consultar <code>/Manual/manual-mockup.md</code> para diretrizes visuais, pipeline de SPs e padrões A4.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

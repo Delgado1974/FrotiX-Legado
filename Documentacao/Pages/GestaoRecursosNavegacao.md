@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
-> **Última Atualização**: 06/01/2026
-> **Versão Atual**: 1.0
+> **Última Atualização**: 10/01/2026
+> **Versão Atual**: 1.1
 
 ---
 
@@ -195,6 +195,35 @@ nodeDragStop: function(args) {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [10/01/2026 09:30] - Correção da barra de alterações pendentes após troca de tipo via badge
+
+**Descrição**:
+Corrigido problema onde a barra de "alterações pendentes" (confirmar/cancelar) aparecia incorretamente após clicar no badge para alternar entre Grupo e Página, mesmo que a alteração já fosse salva diretamente no banco de dados.
+
+**Problema**:
+A função `atualizarTreeViewAposMovimento()` era chamada tanto para movimentos de posição (setas) quanto para transformações de tipo (badge). Em ambos os casos, ela chamava `marcarAlteracoesPendentes()`, mas transformações de tipo já salvam imediatamente no banco e não deveriam exibir a barra de pendências.
+
+**Solução**:
+- Adicionado parâmetro opcional `marcarPendentes` na função `atualizarTreeViewAposMovimento(itemIdParaManter, marcarPendentes)` com default `true`
+- Nas funções `executarTransformacaoGrupoEmPagina()` e `executarTransformacaoPaginaEmGrupo()`:
+  - Passamos `(null, false)` para não marcar pendentes (pois salvam direto no banco)
+  - Limpamos a seleção do TreeView e formulário após salvar com sucesso
+- Movimentos de posição (setas para cima/baixo/esquerda/direita) continuam marcando pendentes normalmente
+
+**Arquivos Afetados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
+  - Função `atualizarTreeViewAposMovimento()` (linhas ~3964-4019)
+  - Função `executarTransformacaoGrupoEmPagina()` (linhas ~1958-2035)
+  - Função `executarTransformacaoPaginaEmGrupo()` (linhas ~2141-2255)
+
+**Status**: ✅ **Concluído**
+
+**Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.1
 
 ---
 
