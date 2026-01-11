@@ -1477,38 +1477,8 @@
                     '</div>';
                 
                 if (irmaosAbaixo.length > 0) {
-                    // Tem itens abaixo - pergunta se quer subordinar
-                    // ✅ Usa sistema padrão Alerta com fluxo de duas perguntas
-                    var listaItens = irmaosAbaixo.slice(0, 5).map(function(irmao) {
-                        return '• ' + decodeHtml(irmao.text);
-                    }).join('<br>');
-
-                    if (irmaosAbaixo.length > 5) {
-                        listaItens += '<br><em>... e mais ' + (irmaosAbaixo.length - 5) + ' item(ns)</em>';
-                    }
-
-                    var mensagemComItens = mensagem +
-                        '<div style="margin-top:15px; text-align:left;">' +
-                        '<strong>Existem ' + irmaosAbaixo.length + ' item(ns) abaixo desta página:</strong><br><br>' +
-                        listaItens +
-                        '<br><br><strong>Deseja subordiná-los ao novo grupo?</strong>' +
-                        '</div>';
-
-                    // ✅ Primeira pergunta: Subordinar ao novo grupo?
-                    Alerta.Confirmar(
-                        'Transformar Página em Grupo',
-                        mensagemComItens,
-                        'Sim, Subordinar',
-                        'Não, Mover para Outro'
-                    ).then(function(subordinar) {
-                        if (subordinar) {
-                            // Transforma em grupo E subordina itens abaixo (viram filhos do novo grupo)
-                            executarTransformacaoPaginaEmGrupo(item, true, irmaosAbaixo, null);
-                        } else {
-                            // ✅ Segunda pergunta: Escolher grupo destino
-                            mostrarSelecaoGrupoDestino(item, irmaosAbaixo);
-                        }
-                    });
+                    // ✅ Tem itens abaixo - mostra modal customizado com 4 opções
+                    mostrarModalTransformacaoPaginaEmGrupo(item, nomeItem, irmaosAbaixo);
 
                 } else {
                     // Não tem itens abaixo - confirmação simples
@@ -2012,47 +1982,320 @@
         }
     }
     
-    // ✅ Mostra alerta padrão para escolher grupo destino dos itens
-    function mostrarSelecaoGrupoDestino(itemOrigem, itensParaMover) {
+    // ✅ Modal customizado FrotiX para transformação Página→Grupo com 4 opções
+    function mostrarModalTransformacaoPaginaEmGrupo(item, nomeItem, irmaosAbaixo) {
+        try {
+            // Monta lista de itens (máximo 5 + contador)
+            var listaItensHtml = irmaosAbaixo.slice(0, 5).map(function(irmao) {
+                return '<div style="padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.1);">• ' + decodeHtml(irmao.text) + '</div>';
+            }).join('');
+
+            if (irmaosAbaixo.length > 5) {
+                listaItensHtml += '<div style="padding:4px 0; font-style:italic; color:#aaa;">... e mais ' + (irmaosAbaixo.length - 5) + ' item(ns)</div>';
+            }
+
+            var htmlModal = `
+            <div id="modalTransformPaginaGrupo" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+            ">
+                <div style="
+                    background: linear-gradient(135deg, #1e1e2f 0%, #2d2d4d 100%);
+                    border-radius: 12px;
+                    max-width: 500px;
+                    width: 90%;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    overflow: hidden;
+                    font-family: 'Segoe UI', sans-serif;
+                ">
+                    <!-- Header com emoji -->
+                    <div style="background:#2d2d4d; padding:25px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <div style="font-size:50px; margin-bottom:10px;">🤔</div>
+                        <div style="font-size:22px; color:#c9a8ff; font-weight:bold;">Transformar Página em Grupo</div>
+                    </div>
+
+                    <!-- Conteúdo -->
+                    <div style="padding:20px; color:#e0e0e0;">
+                        <p style="text-align:center; margin-bottom:15px;">
+                            A Página <strong style="color:#ff6b35;">"${decodeHtml(nomeItem)}"</strong> será transformada em <strong>Grupo</strong>.
+                        </p>
+
+                        <!-- Card de aviso laranja -->
+                        <div style="
+                            background: rgba(255,107,53,0.2);
+                            border: 1px solid rgba(255,255,255,0.3);
+                            border-radius: 8px;
+                            padding: 12px 15px;
+                            margin-bottom: 20px;
+                            color: #fff;
+                            font-size: 0.9rem;
+                        ">
+                            <i class="fa-duotone fa-info-circle" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#fff; margin-right:8px;"></i>
+                            A URL da página será removida.
+                        </div>
+
+                        <!-- Lista de itens abaixo -->
+                        <div style="text-align:left;">
+                            <strong style="color:#c9a8ff;">Existem ${irmaosAbaixo.length} item(ns) abaixo desta página:</strong>
+                            <div style="
+                                margin-top:10px;
+                                max-height:150px;
+                                overflow-y:auto;
+                                background:rgba(0,0,0,0.2);
+                                border-radius:6px;
+                                padding:10px;
+                            ">
+                                ${listaItensHtml}
+                            </div>
+                        </div>
+
+                        <p style="text-align:center; margin-top:20px; font-weight:600; color:#c9a8ff;">
+                            O que deseja fazer com estes itens?
+                        </p>
+                    </div>
+
+                    <!-- Botões - 4 opções -->
+                    <div style="background:#3b3b5c; padding:20px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+                        <!-- Subordinar ao Novo Grupo (Verde Militar FrotiX) -->
+                        <button id="btnSubordinarNovoGrupo" style="
+                            background: #4a5d23;
+                            border: none;
+                            color: #fff;
+                            padding: 12px 16px;
+                            font-size: 13px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            flex: 1 1 45%;
+                            min-width: 180px;
+                        " onmouseover="this.style.background='#3d4d1c'" onmouseout="this.style.background='#4a5d23'">
+                            <i class="fa-duotone fa-folder-tree" style="--fa-primary-color:#90EE90; --fa-secondary-color:#fff; margin-right:6px;"></i>
+                            Subordinar ao Novo Grupo
+                        </button>
+
+                        <!-- Subordinar a Outro Grupo (Marrom FrotiX) -->
+                        <button id="btnSubordinarOutroGrupo" style="
+                            background: #68432C;
+                            border: none;
+                            color: #fff;
+                            padding: 12px 16px;
+                            font-size: 13px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            flex: 1 1 45%;
+                            min-width: 180px;
+                        " onmouseover="this.style.background='#523522'" onmouseout="this.style.background='#68432C'">
+                            <i class="fa-duotone fa-folder-open" style="--fa-primary-color:#DEB887; --fa-secondary-color:#fff; margin-right:6px;"></i>
+                            Subordinar a Outro Grupo
+                        </button>
+
+                        <!-- Manter Onde Estão (Azul Petróleo FrotiX) -->
+                        <button id="btnManterOndeEstao" style="
+                            background: #154c62;
+                            border: none;
+                            color: #fff;
+                            padding: 12px 16px;
+                            font-size: 13px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            flex: 1 1 45%;
+                            min-width: 180px;
+                        " onmouseover="this.style.background='#0f3a4a'" onmouseout="this.style.background='#154c62'">
+                            <i class="fa-duotone fa-location-dot" style="--fa-primary-color:#87CEEB; --fa-secondary-color:#fff; margin-right:6px;"></i>
+                            Manter Onde Estão
+                        </button>
+
+                        <!-- Cancelar Operação (Vinho FrotiX) -->
+                        <button id="btnCancelarTransformacao" style="
+                            background: #722F37;
+                            border: none;
+                            color: #fff;
+                            padding: 12px 16px;
+                            font-size: 13px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            flex: 1 1 45%;
+                            min-width: 180px;
+                        " onmouseover="this.style.background='#5a252b'" onmouseout="this.style.background='#722F37'">
+                            <i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#FFCCCB; --fa-secondary-color:#fff; margin-right:6px;"></i>
+                            Cancelar Operação
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+
+            // Adiciona ao DOM
+            document.body.insertAdjacentHTML('beforeend', htmlModal);
+
+            var modal = document.getElementById('modalTransformPaginaGrupo');
+
+            // Event listeners para os botões
+            document.getElementById('btnSubordinarNovoGrupo').onclick = function() {
+                modal.remove();
+                executarTransformacaoPaginaEmGrupo(item, true, irmaosAbaixo, null);
+            };
+
+            document.getElementById('btnSubordinarOutroGrupo').onclick = function() {
+                // Abre modal de seleção de grupo (por cima deste)
+                mostrarModalSelecionarGrupoDestino(item, irmaosAbaixo, modal);
+            };
+
+            document.getElementById('btnManterOndeEstao').onclick = function() {
+                modal.remove();
+                // Transforma em grupo mas NÃO move os itens (ficam onde estão)
+                executarTransformacaoPaginaEmGrupo(item, false, [], null);
+            };
+
+            document.getElementById('btnCancelarTransformacao').onclick = function() {
+                modal.remove();
+            };
+
+            // Fecha com ESC
+            var escHandler = function(e) {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "mostrarModalTransformacaoPaginaEmGrupo", erro);
+        }
+    }
+
+    // ✅ Modal secundário para selecionar grupo destino (aparece por cima do modal principal)
+    function mostrarModalSelecionarGrupoDestino(itemOrigem, itensParaMover, modalPrincipal) {
         try {
             var htmlGrupos = montarSelectGruposParaSwal(itemOrigem.id);
 
-            var listaItens = itensParaMover.map(function(item) {
-                return '• ' + decodeHtml(item.text);
-            }).join('<br>');
+            var htmlModal = `
+            <div id="modalSelecionarGrupo" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 100000;
+            ">
+                <div style="
+                    background: linear-gradient(135deg, #1e1e2f 0%, #2d2d4d 100%);
+                    border-radius: 12px;
+                    max-width: 450px;
+                    width: 90%;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    overflow: hidden;
+                    font-family: 'Segoe UI', sans-serif;
+                ">
+                    <!-- Header -->
+                    <div style="background:#2d2d4d; padding:20px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <div style="font-size:40px; margin-bottom:8px;">📁</div>
+                        <div style="font-size:18px; color:#c9a8ff; font-weight:bold;">Selecionar Grupo Destino</div>
+                    </div>
 
-            var mensagem = 'Os <strong>' + itensParaMover.length + '</strong> item(ns) serão movidos para o grupo selecionado:<br><br>' +
-                '<div style="text-align:left; max-height:120px; overflow-y:auto; margin-bottom:15px;">' +
-                listaItens +
-                '</div>' +
-                '<div style="text-align:left;">' +
-                '<label style="font-weight:600;">Selecione o Grupo destino:</label>' +
-                htmlGrupos +
-                '</div>';
+                    <!-- Conteúdo -->
+                    <div style="padding:20px; color:#e0e0e0;">
+                        <p style="margin-bottom:15px;">
+                            Os <strong style="color:#ff6b35;">${itensParaMover.length}</strong> item(ns) serão movidos para o grupo selecionado:
+                        </p>
 
-            // ✅ Usa sistema padrão Alerta.Confirmar com HTML
-            Alerta.Confirmar(
-                'Mover Itens para Outro Grupo',
-                mensagem,
-                'Confirmar',
-                'Cancelar'
-            ).then(function(confirmado) {
-                if (confirmado) {
-                    var selectGrupo = document.getElementById('swalSelectGrupo');
-                    if (!selectGrupo || !selectGrupo.value) {
-                        Alerta.Warning('Atenção', 'Selecione um grupo destino!');
-                        // Reabre o diálogo
-                        setTimeout(function() {
-                            mostrarSelecaoGrupoDestino(itemOrigem, itensParaMover);
-                        }, 500);
-                        return;
-                    }
-                    executarTransformacaoPaginaEmGrupo(itemOrigem, false, itensParaMover, selectGrupo.value);
+                        <div style="text-align:left;">
+                            <label style="font-weight:600; margin-bottom:8px; display:block; color:#c9a8ff;">
+                                Selecione o Grupo:
+                            </label>
+                            ${htmlGrupos}
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div style="background:#3b3b5c; padding:15px; display:flex; gap:10px; justify-content:center;">
+                        <!-- Confirmar (Verde Militar) -->
+                        <button id="btnConfirmarGrupo" style="
+                            background: #4a5d23;
+                            border: none;
+                            color: #fff;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        " onmouseover="this.style.background='#3d4d1c'" onmouseout="this.style.background='#4a5d23'">
+                            <i class="fa-duotone fa-check" style="--fa-primary-color:#90EE90; --fa-secondary-color:#fff; margin-right:6px;"></i>
+                            Confirmar
+                        </button>
+
+                        <!-- Voltar (Azul Petróleo) -->
+                        <button id="btnVoltarSelecao" style="
+                            background: #154c62;
+                            border: none;
+                            color: #fff;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        " onmouseover="this.style.background='#0f3a4a'" onmouseout="this.style.background='#154c62'">
+                            <i class="fa-duotone fa-arrow-left" style="--fa-primary-color:#87CEEB; --fa-secondary-color:#fff; margin-right:6px;"></i>
+                            Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+
+            // Adiciona ao DOM
+            document.body.insertAdjacentHTML('beforeend', htmlModal);
+
+            var modalSelecao = document.getElementById('modalSelecionarGrupo');
+
+            // Event listeners
+            document.getElementById('btnConfirmarGrupo').onclick = function() {
+                var selectGrupo = document.getElementById('swalSelectGrupo');
+                if (!selectGrupo || !selectGrupo.value) {
+                    Alerta.Warning('Atenção', 'Selecione um grupo destino!');
+                    return;
                 }
-            });
+
+                var grupoDestinoId = selectGrupo.value;
+
+                // Fecha ambos os modais
+                modalSelecao.remove();
+                modalPrincipal.remove();
+
+                // Executa a transformação
+                executarTransformacaoPaginaEmGrupo(itemOrigem, false, itensParaMover, grupoDestinoId);
+            };
+
+            document.getElementById('btnVoltarSelecao').onclick = function() {
+                // Apenas fecha este modal, volta pro anterior
+                modalSelecao.remove();
+            };
+
+            // Fecha com ESC (volta pro modal anterior)
+            var escHandler = function(e) {
+                if (e.key === 'Escape') {
+                    modalSelecao.remove();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
 
         } catch (erro) {
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "mostrarSelecaoGrupoDestino", erro);
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "mostrarModalSelecionarGrupoDestino", erro);
         }
     }
     

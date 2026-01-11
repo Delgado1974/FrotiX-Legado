@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
 > **Última Atualização**: 11/01/2026
-> **Versão Atual**: 1.4
+> **Versão Atual**: 1.5
 
 ---
 
@@ -198,28 +198,54 @@ nodeDragStop: function(args) {
 
 ---
 
-## [11/01/2026 00:05] - Substituição de Swal.fire direto por sistema padrão Alerta
+## [11/01/2026 00:30] - Modal customizado FrotiX para transformação Página→Grupo com 4 opções
 
 **Descrição**:
-Substituídas as chamadas diretas a `Swal.fire()` pelo sistema padrão `Alerta.*` (alerta.js e sweetalert_interop.js) nos diálogos de transformação Página→Grupo.
+Criado modal customizado no padrão visual FrotiX para transformação de Página em Grupo, com 4 opções de ação e modal secundário para seleção de grupo destino.
 
-**Problema**:
-Os diálogos de transformação Página→Grupo usavam `Swal.fire()` diretamente, resultando em modais fora do padrão visual do sistema FrotiX (sem estilização correta, botões desalinhados, cores incorretas).
+**Funcionalidades implementadas**:
+1. **Modal principal** (`mostrarModalTransformacaoPaginaEmGrupo`):
+   - Card de aviso em laranja médio com borda branca e fonte branca
+   - Lista de itens abaixo da página (máximo 5 + contador)
+   - 4 botões nas cores padrão FrotiX:
+     - **Subordinar ao Novo Grupo** (Verde Militar #4a5d23)
+     - **Subordinar a Outro Grupo** (Marrom #68432C)
+     - **Manter Onde Estão** (Azul Petróleo #154c62)
+     - **Cancelar Operação** (Vinho #722F37)
 
-**Solução**:
-- Função `alternarTipoItem()` (caso PÁGINA→GRUPO com itens abaixo): Substituído `Swal.fire` com 3 botões por fluxo de 2 alertas `Alerta.Confirmar()` sequenciais
-- Função `mostrarSelecaoGrupoDestino()`: Substituído `Swal.fire` por `Alerta.Confirmar()` com HTML para seleção de grupo
+2. **Modal secundário** (`mostrarModalSelecionarGrupoDestino`):
+   - Aparece por cima do modal principal quando escolhe "Subordinar a Outro Grupo"
+   - Dropdown com lista de grupos disponíveis
+   - Botões: Confirmar (Verde) e Voltar (Azul Petróleo)
+   - Ao cancelar, volta para o modal principal
+   - Ao confirmar, fecha ambos e executa a transformação
 
-**Nota**: O modal de transformação Grupo→Página (`mostrarModalTransformacaoGrupoEmPagina`) foi mantido como está por ser muito customizado (seleção visual de páginas).
+**Fluxo**:
+- Usuário clica no badge Página→Grupo em item com itens abaixo
+- Modal principal abre com 4 opções
+- Se escolher "Subordinar a Outro Grupo", modal secundário abre por cima
+- Usuário pode confirmar ou voltar para escolher outra opção
 
 **Arquivos Afetados**:
 - `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
-  - Função `alternarTipoItem()` (linhas ~1479-1512)
-  - Função `mostrarSelecaoGrupoDestino()` (linhas ~2015-2057)
+  - Nova função `mostrarModalTransformacaoPaginaEmGrupo()` (linhas ~1985-2175)
+  - Nova função `mostrarModalSelecionarGrupoDestino()` (linhas ~2178-2300)
+  - Modificada `alternarTipoItem()` para chamar novo modal
 
 **Status**: ✅ **Concluído**
 
 **Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.5
+
+---
+
+## [11/01/2026 00:05] - Substituição inicial de Swal.fire (substituída pela versão 1.5)
+
+**Descrição**:
+Versão intermediária que foi substituída pela implementação completa com modal customizado.
+
+**Status**: ⏭️ **Substituída pela versão 1.5**
 
 **Versão**: 1.4
 
