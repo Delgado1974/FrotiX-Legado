@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
 > **Última Atualização**: 11/01/2026
-> **Versão Atual**: 1.6
+> **Versão Atual**: 1.7
 
 ---
 
@@ -248,6 +248,47 @@ Versão intermediária que foi substituída pela implementação completa com mo
 **Status**: ⏭️ **Substituída pela versão 1.5**
 
 **Versão**: 1.4
+
+---
+
+## [11/01/2026 19:00] - Correção do erro ao clicar Transformar sem selecionar página (Grupo→Página)
+
+**Descrição**:
+Corrigido problema onde ao clicar em "Transformar" no modal de transformação Grupo→Página sem selecionar uma página da lista, um SweetAlert genérico era exibido por cima do modal, confundindo o usuário.
+
+**Problema**:
+Quando o usuário tentava transformar um Grupo em Página via badge e clicava em "Transformar" sem antes selecionar uma página da lista, o sistema exibia um `Alerta.Warning()` que abria outro SweetAlert por cima do modal existente. Isso causava:
+- Confusão visual (dois modais sobrepostos)
+- Mensagem de erro genérica que não fazia sentido no contexto
+- Ao dar OK no alerta de erro, o modal original continuava aberto mas nada funcionava
+
+**Solução**:
+- Adicionada mensagem de erro **inline** dentro do próprio modal (`swalMensagemErro`)
+- A mensagem usa o card laranja padrão FrotiX com ícone de atenção
+- Quando o usuário clica em "Transformar" sem seleção, a mensagem aparece dentro do modal
+- Quando o usuário seleciona uma página válida, a mensagem de erro é automaticamente escondida
+- Removido o uso de `Alerta.Warning()` que abria modal por cima
+
+**Código da Mensagem Inline**:
+```html
+<div id="swalMensagemErro" style="display:none; margin-top:15px; background:linear-gradient(135deg, #ff6b35, #e55a2b); color:white; padding:10px 15px; border-radius:8px; border:2px solid rgba(255,255,255,0.5); text-align:center;">
+  <i class="fa-duotone fa-triangle-exclamation" style="--fa-primary-color:#ffffff; --fa-secondary-color:#ffcc00; margin-right:8px;"></i>
+  <strong>Selecione uma página</strong> clicando em um item da lista acima!
+</div>
+```
+
+**Arquivos Afetados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
+  - Função `mostrarModalTransformacaoGrupoEmPagina()` (linhas ~1702-1910)
+  - Adicionado elemento `swalMensagemErro` no HTML do modal
+  - Handler do botão Transformar agora mostra mensagem inline
+  - Handler de seleção de página agora esconde mensagem de erro
+
+**Status**: ✅ **Concluído**
+
+**Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.7
 
 ---
 

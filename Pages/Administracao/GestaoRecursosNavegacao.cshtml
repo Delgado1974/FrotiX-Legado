@@ -1720,6 +1720,10 @@
                   <label style="font-weight:600; margin-bottom:8px; display:block; color:#e0e0e0;">Selecione a Página do Sistema:</label>
                   ${htmlSelect}
                 </div>
+                <div id="swalMensagemErro" style="display:none; margin-top:15px; background:linear-gradient(135deg, #ff6b35, #e55a2b); color:white; padding:10px 15px; border-radius:8px; border:2px solid rgba(255,255,255,0.5); text-align:center;">
+                  <i class="fa-duotone fa-triangle-exclamation" style="--fa-primary-color:#ffffff; --fa-secondary-color:#ffcc00; margin-right:8px;"></i>
+                  <strong>Selecione uma página</strong> clicando em um item da lista acima!
+                </div>
               </div>
 
               <div style="background:#3b3b5c; padding: 15px; text-align: center;">
@@ -1817,15 +1821,21 @@
                                 item.style.borderLeft = '3px solid #ff6b35';
                                 item.classList.add('swal-item-selected');
                                 item.dataset.selected = 'true';
-                                
+
+                                // Esconde mensagem de erro quando usuário seleciona uma página
+                                var mensagemErro = document.getElementById('swalMensagemErro');
+                                if (mensagemErro) {
+                                    mensagemErro.style.display = 'none';
+                                }
+
                                 // Atualiza campos hidden
                                 var paginaIdInput = document.getElementById('swalPaginaSelecionada');
                                 var urlInput = document.getElementById('swalUrlSelecionada');
-                                
+
                                 if (!paginaIdInput || !urlInput) {
                                     return;
                                 }
-                                
+
                                 paginaIdInput.value = item.dataset.itemid;
                                 urlInput.value = item.dataset.url || '';
                             }, true); // useCapture = true para garantir captura
@@ -1868,15 +1878,21 @@
                         confirmBtn.onclick = function() {
                             var paginaIdInput = document.getElementById('swalPaginaSelecionada');
                             var urlInput = document.getElementById('swalUrlSelecionada');
-                            
+                            var mensagemErro = document.getElementById('swalMensagemErro');
+
                             if (!paginaIdInput || !paginaIdInput.value || !urlInput || !urlInput.value) {
-                                Alerta.Warning('Atenção', 'Selecione uma página do sistema clicando em um item da lista!');
+                                // Mostra mensagem de erro inline no modal (não abre outro SweetAlert)
+                                if (mensagemErro) {
+                                    mensagemErro.style.display = 'block';
+                                    // Scroll para a mensagem de erro
+                                    mensagemErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
                                 return;
                             }
-                            
+
                             var paginaId = paginaIdInput.value;
                             var paginaUrl = urlInput.value;
-                            
+
                             Swal.close();
                             resolve({ confirmado: true, paginaId: paginaId, paginaUrl: paginaUrl });
                         };
