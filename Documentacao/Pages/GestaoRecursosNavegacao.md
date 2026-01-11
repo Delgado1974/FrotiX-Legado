@@ -268,6 +268,7 @@ Quando duas páginas estavam uma em cima da outra e o usuário clicava na seta p
 - Se o usuário confirmar: executa a movimentação normalmente
 - Se o usuário cancelar: exibe mensagem informando que nenhuma alteração foi feita
 - Criada nova função auxiliar `executarMovimentacaoDireita()` para encapsular a lógica de movimentação
+- **Ícones padrão FrotiX**: Botões do modal usam ícones `fa-duotone` com cores padrão (#ff6b35 primary, #6c757d secondary)
 
 **Código do Modal de Aviso**:
 ```javascript
@@ -283,8 +284,8 @@ Alerta.Confirmar(
         '</div>' +
         '<p>Deseja prosseguir com esta operação?</p>' +
     '</div>',
-    'Sim, Transformar em Grupo',
-    'Cancelar'
+    '<i class="fa-duotone fa-check" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Sim, Transformar em Grupo',
+    '<i class="fa-duotone fa-xmark" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Cancelar'
 )
 ```
 

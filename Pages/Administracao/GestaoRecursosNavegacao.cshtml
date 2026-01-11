@@ -4151,8 +4151,8 @@
                         '</div>' +
                         '<p style="margin-top: 15px;">Deseja prosseguir com esta operação?</p>' +
                     '</div>',
-                    'Sim, Transformar em Grupo',
-                    'Cancelar'
+                    '<i class="fa-duotone fa-check" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d; margin-right: 6px;"></i>Sim, Transformar em Grupo',
+                    '<i class="fa-duotone fa-xmark" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d; margin-right: 6px;"></i>Cancelar'
                 ).then(function(confirmado) {
                     if (confirmado) {
                         console.log('[MOVER-DIR] Usuário confirmou transformação - executando movimentação');
