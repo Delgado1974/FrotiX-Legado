@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
 > **Última Atualização**: 10/01/2026
-> **Versão Atual**: 1.1
+> **Versão Atual**: 1.2
 
 ---
 
@@ -195,6 +195,28 @@ nodeDragStop: function(args) {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [10/01/2026 23:33] - Correção de erro Razor nos comentários JavaScript
+
+**Descrição**:
+Corrigido erro de compilação CS0103 causado pelo Razor interpretando `@param` nos comentários JavaScript como código C#.
+
+**Problema**:
+Os comentários JSDoc da função `atualizarTreeViewAposMovimento()` usavam `@param` para documentar parâmetros, mas o Razor interpretava o `@` como início de código C#.
+
+**Solução**:
+Substituído `@param` por `Param:` nos comentários da função para evitar conflito com sintaxe Razor.
+
+**Arquivos Afetados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml` (linhas 3968-3969)
+
+**Status**: ✅ **Concluído**
+
+**Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.2
 
 ---
 
