@@ -22,7 +22,7 @@ namespace FrotiX.Models
         public new string Id
         {
             get; set;
-        }
+        } = Guid.NewGuid().ToString();
 
         public new string? UserName
         {
