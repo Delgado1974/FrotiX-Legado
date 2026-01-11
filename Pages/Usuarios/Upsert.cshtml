@@ -710,8 +710,8 @@
                 }
 
                 // =====================================================
-                // VALIDAÇÃO: Email obrigatoriamente terminando em @camara.leg.br
-                // Caracteres válidos antes do @: letras, números, ponto, hífen, underscore
+                // VALIDAÇÃO: Email obrigatoriamente terminando em @@camara.leg.br
+                // Caracteres válidos antes do @@: letras, números, ponto, hífen, underscore
                 // =====================================================
                 const txtEmail = document.getElementById('txtEmail');
                 if (txtEmail) {
@@ -720,15 +720,15 @@
                             let valor = txtEmail.value.trim().toLowerCase();
 
                             if (valor) {
-                                // Remove @camara.leg.br se já existir para evitar duplicação
+                                // Remove @@camara.leg.br se já existir para evitar duplicação
                                 valor = valor.replace(/@@camara\.leg\.br$/i, '');
-                                // Remove qualquer @ que possa existir
+                                // Remove qualquer @@ que possa existir
                                 valor = valor.replace(/@@/g, '');
 
                                 // Remove caracteres inválidos (permite apenas: letras, números, ponto, hífen, underscore)
                                 valor = valor.replace(/[^a-z0-9._-]/g, '');
 
-                                // Valida se tem conteúdo antes do @
+                                // Valida se tem conteúdo antes do @@
                                 if (valor.length > 0) {
                                     // Adiciona o domínio obrigatório
                                     valor = valor + '@@camara.leg.br';
@@ -739,7 +739,7 @@
 
                                 txtEmail.value = valor;
 
-                                // Valida formato final (apenas caracteres válidos antes do @)
+                                // Valida formato final (apenas caracteres válidos antes do @@)
                                 const regex = /^[a-z0-9._-]+@@camara\.leg\.br$/;
                                 if (valor && !regex.test(valor)) {
                                     txtEmail.classList.add('is-invalid');
@@ -760,15 +760,15 @@
                             // Converte para minúsculo
                             let valor = txtEmail.value.toLowerCase();
 
-                            // Remove TUDO que não é letra, número, ponto, hífen, underscore ou @
+                            // Remove TUDO que não é letra, número, ponto, hífen, underscore ou @@
                             valor = valor.replace(/[^a-z0-9._@@-]/g, '');
 
-                            // Conta quantos @ existem
+                            // Conta quantos @@ existem
                             const numArrobas = (valor.match(/@@/g) || []).length;
 
-                            // Se tem mais de 1 @, remove os extras
+                            // Se tem mais de 1 @@, remove os extras
                             if (numArrobas > 1) {
-                                // Mantém apenas o primeiro @
+                                // Mantém apenas o primeiro @@
                                 const partes = valor.split('@@');
                                 valor = partes[0] + '@@' + partes.slice(1).join('');
                             }

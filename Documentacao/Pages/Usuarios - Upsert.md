@@ -1,7 +1,7 @@
 # Documentação: Usuarios - Upsert
 
 > **Última Atualização**: 10/01/2026
-> **Versão Atual**: 1.2
+> **Versão Atual**: 1.3
 
 ---
 
@@ -185,6 +185,56 @@ dropifyInstance.on('dropify.afterClear', function() {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [10/01/2026 22:50] - Correção de Erros de Sintaxe Razor em Comentários JavaScript
+
+**Descrição**:
+Corrigidos **16 erros de compilação** (RZ1003, RZ1005, CS1501) causados por caracteres `@` sem escaping em comentários JavaScript dentro do código Razor.
+
+**Problema**:
+- **Sintoma**: Build falhava com erros:
+  - `RZ1003`: "A space or line break was encountered after the '@' character"
+  - `RZ1005`: "':' is not valid at the start of a code block"
+  - `CS1501`: "Nenhuma sobrecarga para o método 'Write' leva 0 argumentos"
+- **Causa**: Comentários JavaScript usavam `@` literal (ex: `// antes do @`)
+- **Explicação**: Em arquivos Razor (`.cshtml`), o caractere `@` é especial e indica início de código C#. Quando usado em comentários JavaScript, HTML ou texto, precisa ser escapado como `@@`.
+
+**Linhas Afetadas**:
+- **Linha 714**: `// VALIDAÇÃO: Email obrigatoriamente terminando em @camara.leg.br`
+- **Linha 715**: `// Caracteres válidos antes do @: letras, números...`
+- **Linha 724**: `// Remove @camara.leg.br se já existir...`
+- **Linha 726**: `// Remove qualquer @ que possa existir`
+- **Linha 732**: `// Valida se tem conteúdo antes do @`
+- **Linha 743**: `// Valida formato final (apenas caracteres válidos antes do @)`
+- **Linha 764**: `// Remove TUDO que não é letra, número, ponto, hífen, underscore ou @`
+- **Linha 767**: `// Conta quantos @ existem`
+- **Linha 770**: `// Se tem mais de 1 @, remove os extras`
+- **Linha 772**: `// Mantém apenas o primeiro @`
+
+**Solução Aplicada**:
+Substituído **todos os `@` em comentários JavaScript** por `@@`:
+- ✅ Linha 714: `@camara.leg.br` → `@@camara.leg.br`
+- ✅ Linha 715: `antes do @:` → `antes do @@:`
+- ✅ Linha 724: `Remove @camara` → `Remove @@camara`
+- ✅ Linha 726: `qualquer @` → `qualquer @@`
+- ✅ Linha 732: `antes do @` → `antes do @@`
+- ✅ Linha 743: `antes do @)` → `antes do @@)`
+- ✅ Linha 764: `underscore ou @` → `underscore ou @@`
+- ✅ Linha 767: `quantos @` → `quantos @@`
+- ✅ Linha 770: `de 1 @,` → `de 1 @@,`
+- ✅ Linha 772: `primeiro @` → `primeiro @@`
+
+**Resultado**:
+- ✅ **Build compilando com sucesso**: 0 Erros, apenas warnings de nullable
+- ✅ Sintaxe Razor correta
+- ✅ JavaScript funcional (o `@@` vira `@` quando renderizado no browser)
+
+**Arquivos Afetados**:
+- `Pages/Usuarios/Upsert.cshtml` (linhas 714-772)
+
+**Status**: ✅ **Concluído**
 
 ---
 
