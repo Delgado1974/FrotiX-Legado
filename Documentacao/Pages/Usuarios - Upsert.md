@@ -1,7 +1,7 @@
 # Documentação: Usuarios - Upsert
 
-> **Última Atualização**: 10/01/2026
-> **Versão Atual**: 1.3
+> **Última Atualização**: 11/01/2026
+> **Versão Atual**: 1.4
 
 ---
 
@@ -133,6 +133,29 @@ dropifyInstance.on('dropify.afterClear', function() {
 
 ## Troubleshooting
 
+### Problema: Formulário não grava dados (página recarrega sem salvar)
+
+**Sintoma**: Ao clicar em "Criar Usuário" ou "Atualizar Usuário", a página recarrega mostrando os mesmos dados, sem gravar no banco e sem exibir erro.
+
+**Causa Possível**: O formulário HTML contém `asp-action="..."` que é sintaxe de MVC Controllers, não de Razor Pages.
+
+**Solução**:
+1. Verificar a tag `<form>` no arquivo `.cshtml`
+2. Remover qualquer atributo `asp-action` ou `asp-controller`
+3. O form deve ter apenas `method="post"` e `enctype="multipart/form-data"` (se upload de arquivo)
+4. Os handlers são especificados nos botões com `asp-page-handler="Submit"` ou `asp-page-handler="Edit"`
+
+**Código Correto**:
+```html
+<form method="post" enctype="multipart/form-data">
+    <!-- campos -->
+    <button type="submit" asp-page-handler="Submit">Criar</button>
+    <button type="submit" asp-page-handler="Edit" asp-route-id="@Model.Id">Atualizar</button>
+</form>
+```
+
+---
+
 ### Problema: Campo Ponto não está formatando corretamente
 
 **Sintoma**: O campo Ponto não está sendo formatado como `p_XXXX` ao perder o foco.
@@ -185,6 +208,56 @@ dropifyInstance.on('dropify.afterClear', function() {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [11/01/2026 10:30] - Correção Crítica: Formulário não gravava dados (Submit não funcionava)
+
+**Descrição**:
+Corrigido bug crítico onde o formulário de cadastro de usuários não salvava os dados - a página apenas recarregava exibindo os mesmos dados sem processar os handlers `OnPostSubmit` ou `OnPostEdit`.
+
+**Problema**:
+- **Sintoma**: Ao clicar em "Criar Usuário" ou "Atualizar Usuário", a página recarregava mostrando os mesmos dados sem salvar, sem emitir nenhum erro ou mensagem.
+- **Causa Raiz**: O formulário HTML continha o atributo `asp-action="Upsert"` que é **sintaxe de MVC Controllers**, não de Razor Pages.
+- **Explicação Técnica**: Em Razor Pages, o form deve usar apenas `method="post"` e os handlers são definidos pelos botões com `asp-page-handler`. O atributo `asp-action` faz o form tentar postar para uma action MVC que não existe, resultando em comportamento silencioso de recarregamento da página.
+
+**Código Antes (INCORRETO)**:
+```html
+<form method="post" asp-action="Upsert" enctype="multipart/form-data">
+```
+
+**Código Depois (CORRETO)**:
+```html
+<form method="post" enctype="multipart/form-data">
+```
+
+**Comparação com Encarregado/Upsert**:
+A página de Encarregados (que funcionava corretamente) já usava a sintaxe correta:
+```html
+<form method="post" enctype="multipart/form-data">
+```
+
+**Arquivos Afetados**:
+- `Pages/Usuarios/Upsert.cshtml` (linha 260)
+
+**Impacto**:
+- ✅ Formulário agora submete corretamente para os handlers Razor Pages
+- ✅ `OnPostSubmit()` é chamado ao criar novo usuário
+- ✅ `OnPostEdit(id)` é chamado ao atualizar usuário existente
+- ✅ Dados são gravados no banco de dados corretamente
+
+**Teste Sugerido**:
+1. Criar novo usuário preenchendo todos os campos
+2. Clicar em "Criar Usuário"
+3. Verificar que redireciona para Index e mostra toast de sucesso
+4. Verificar que usuário foi criado no banco
+5. Editar usuário existente, alterar campos
+6. Clicar em "Atualizar Usuário"
+7. Verificar que alterações foram salvas
+
+**Status**: ✅ **Concluído**
+
+**Versão**: 1.4
 
 ---
 

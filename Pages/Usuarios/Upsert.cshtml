@@ -1,3 +1,23 @@
+@*
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                          ║
+ * ║  DOCUMENTACAO DISPONIVEL                                                 ║
+ * ║                                                                          ║
+ * ║  Este arquivo esta completamente documentado em:                         ║
+ * ║  Documentacao/Pages/Usuarios - Upsert.md                                 ║
+ * ║                                                                          ║
+ * ║  A documentacao inclui:                                                  ║
+ * ║  - Visao geral da funcionalidade                                         ║
+ * ║  - Explicacao detalhada de cada metodo                                   ║
+ * ║  - Interconexoes com outros arquivos                                     ║
+ * ║  - Exemplos de uso                                                       ║
+ * ║  - Troubleshooting                                                       ║
+ * ║                                                                          ║
+ * ║  Ultima atualizacao: 11/01/2026                                          ║
+ * ║                                                                          ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ *@
+
 @page
 @addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -257,7 +277,7 @@
     </style>
 }
 
-<form method="post" asp-action="Upsert" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-xl-12">
             <div id="panel-1" class="panel ftx-card-styled">
@@ -291,7 +311,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ponto">Ponto</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ponto"></span>
-                                            <input id="txtPonto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ponto" placeholder="Ex: p_12345" maxlength="50" />
+                                            <input id="txtPonto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ponto" placeholder="Ex: p_1234567890" maxlength="12" />
                                         </div>
                                     </div>
 
@@ -300,7 +320,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.NomeCompleto">Nome Completo</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.NomeCompleto"></span>
-                                            <input id="txtNomeCompleto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" maxlength="200" />
+                                            <input id="txtNomeCompleto" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.NomeCompleto" placeholder="Nome completo" maxlength="80" />
                                         </div>
                                     </div>
 
@@ -309,7 +329,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ramal">Ramal</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ramal"></span>
-                                            <input id="txtRamal" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="1234" type="text" maxlength="5" />
+                                            <input id="txtRamal" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="12345678" type="text" maxlength="8" inputmode="numeric" pattern="[1-9][0-9]{7}" />
                                         </div>
                                     </div>
 
@@ -601,13 +621,32 @@
                 // =====================================================
                 // VALIDAÇÃO: Nome Completo em Camel Case
                 // =====================================================
+                function sanitizeNomeCompleto(valor) {
+                    let limpo = valor.replace(/[^\p{L} ]+/gu, '');
+                    if (limpo.length > 80) {
+                        limpo = limpo.substring(0, 80);
+                    }
+                    return limpo;
+                }
+
                 const txtNomeCompleto = document.getElementById('txtNomeCompleto');
                 if (txtNomeCompleto) {
+                    txtNomeCompleto.addEventListener('input', function () {
+                        try {
+                            txtNomeCompleto.value = sanitizeNomeCompleto(txtNomeCompleto.value);
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtNomeCompleto.input", error);
+                        }
+                    });
+
                     txtNomeCompleto.addEventListener('blur', function () {
                         try {
-                            const valor = txtNomeCompleto.value.trim();
+                            const valor = sanitizeNomeCompleto(txtNomeCompleto.value.trim());
                             if (valor) {
                                 txtNomeCompleto.value = toCamelCase(valor);
+                                txtNomeCompleto.classList.remove('is-invalid');
+                            } else {
+                                txtNomeCompleto.classList.add('is-invalid');
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtNomeCompleto.blur", error);
@@ -620,29 +659,38 @@
                 // =====================================================
                 const txtPonto = document.getElementById('txtPonto');
                 const txtUserName = document.getElementById('txtUserName');
+                const maxPontoDigits = 10;
+
+                function formatPonto(valor) {
+                    let digits = valor.trim().toLowerCase();
+                    digits = digits.replace(/^[pP]_/, '');
+                    digits = digits.replace(/\D/g, '');
+
+                    const overflow = digits.length > maxPontoDigits;
+                    if (overflow) {
+                        digits = digits.substring(0, maxPontoDigits);
+                    }
+
+                    return {
+                        formatted: digits.length > 0 ? 'p_' + digits : '',
+                        digitsLength: digits.length,
+                        overflow: overflow
+                    };
+                }
 
                 if (txtPonto && txtUserName) {
                     txtPonto.addEventListener('blur', function () {
                         try {
-                            let valor = txtPonto.value.trim().toLowerCase();
+                            const info = formatPonto(txtPonto.value);
 
-                            if (valor) {
-                                // Remove qualquer prefixo p_ ou P_ existente
-                                valor = valor.replace(/^[pP]_/, '');
-                                
-                                // Remove tudo que não é número
-                                valor = valor.replace(/\D/g, '');
-                                
-                                // Se tiver números, formata como p_XXXX
-                                if (valor.length > 0) {
-                                    valor = 'p_' + valor;
-                                } else {
-                                    valor = '';
-                                }
+                            txtPonto.value = info.formatted;
+                            txtUserName.value = info.formatted;
+
+                            if (info.digitsLength === 0 || info.overflow) {
+                                txtPonto.classList.add('is-invalid');
+                            } else {
+                                txtPonto.classList.remove('is-invalid');
                             }
-
-                            txtPonto.value = valor;
-                            txtUserName.value = valor;
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.blur", error);
                         }
@@ -650,28 +698,22 @@
 
                     txtPonto.addEventListener('input', function () {
                         try {
-                            let valor = txtPonto.value.trim().toLowerCase();
-                            
-                            // Remove qualquer prefixo p_ ou P_ existente
-                            valor = valor.replace(/^[pP]_/, '');
-                            
-                            // Remove tudo que não é número
-                            valor = valor.replace(/\D/g, '');
-                            
-                            // Se tiver números, formata como p_XXXX
-                            if (valor.length > 0) {
-                                valor = 'p_' + valor;
-                            } else {
-                                valor = '';
-                            }
+                            const info = formatPonto(txtPonto.value);
 
-                            txtPonto.value = valor;
-                            txtUserName.value = valor;
+                            txtPonto.value = info.formatted;
+                            txtUserName.value = info.formatted;
+
+                            if (info.digitsLength === 0 || info.overflow) {
+                                txtPonto.classList.add('is-invalid');
+                            } else {
+                                txtPonto.classList.remove('is-invalid');
+                            }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtPonto.input", error);
                         }
                     });
                 }
+
 
                 // =====================================================
                 // VALIDAÇÃO: Ramal - apenas números (máx 5 dígitos)
@@ -680,11 +722,9 @@
                 if (txtRamal) {
                     txtRamal.addEventListener('input', function () {
                         try {
-                            // Remove tudo que não é número
                             let valor = txtRamal.value.replace(/\D/g, '');
 
-                            // Limita a 5 dígitos (0-99999)
-                            valor = valor.substring(0, 5);
+                            valor = valor.substring(0, 8);
 
                             txtRamal.value = valor;
                         } catch (error) {
@@ -692,13 +732,12 @@
                         }
                     });
 
-                    // Valida se está vazio ou se é numérico válido
                     txtRamal.addEventListener('blur', function () {
                         try {
                             const valor = txtRamal.value.trim();
+                            const regex = /^[1-9]\d{7}$/;
 
-                            // Se tiver valor, valida se é número entre 0 e 99999
-                            if (valor && (isNaN(valor) || parseInt(valor) < 0 || parseInt(valor) > 99999)) {
+                            if (valor && !regex.test(valor)) {
                                 txtRamal.classList.add('is-invalid');
                             } else {
                                 txtRamal.classList.remove('is-invalid');
@@ -708,6 +747,7 @@
                         }
                     });
                 }
+
 
                 // =====================================================
                 // VALIDAÇÃO: Email obrigatoriamente terminando em @@camara.leg.br
@@ -833,6 +873,12 @@
                     formulario.addEventListener('submit', function (e) {
                         try {
                             // Força validação de todos os campos antes de submeter
+                            if (txtPonto) {
+                                txtPonto.dispatchEvent(new Event('blur'));
+                            }
+                            if (txtNomeCompleto) {
+                                txtNomeCompleto.dispatchEvent(new Event('blur'));
+                            }
                             if (txtEmail) {
                                 txtEmail.dispatchEvent(new Event('blur'));
                             }
