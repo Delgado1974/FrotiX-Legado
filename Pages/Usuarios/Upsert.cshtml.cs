@@ -141,6 +141,7 @@ namespace FrotiX.Pages.Usuarios
                         foreach (var modelError in modelState.Errors)
                         {
                             var erromodel = modelError.ErrorMessage;
+                            _notyf.Error(erromodel, 5);
                             SetViewModel();
                             return Page();
                         }
