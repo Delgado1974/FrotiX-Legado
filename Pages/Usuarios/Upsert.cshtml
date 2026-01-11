@@ -309,7 +309,7 @@
                                         <div class="form-group">
                                             <label class="label-ftx" asp-for="UsuarioObj.AspNetUsers.Ramal">Ramal</label>
                                             <span class="text-danger" asp-validation-for="UsuarioObj.AspNetUsers.Ramal"></span>
-                                            <input id="txtRamal" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="1234" type="number" min="0" max="99999" />
+                                            <input id="txtRamal" class="form-control form-control-sm" asp-for="UsuarioObj.AspNetUsers.Ramal" placeholder="1234" type="text" maxlength="5" />
                                         </div>
                                     </div>
 
@@ -674,8 +674,44 @@
                 }
 
                 // =====================================================
-                // VALIDAÇÃO: Email obrigatoriamente terminando em @@camara.leg.br
-                // Caracteres válidos antes do @@: letras, números, ponto, hífen, underscore
+                // VALIDAÇÃO: Ramal - apenas números (máx 5 dígitos)
+                // =====================================================
+                const txtRamal = document.getElementById('txtRamal');
+                if (txtRamal) {
+                    txtRamal.addEventListener('input', function () {
+                        try {
+                            // Remove tudo que não é número
+                            let valor = txtRamal.value.replace(/\D/g, '');
+
+                            // Limita a 5 dígitos (0-99999)
+                            valor = valor.substring(0, 5);
+
+                            txtRamal.value = valor;
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtRamal.input", error);
+                        }
+                    });
+
+                    // Valida se está vazio ou se é numérico válido
+                    txtRamal.addEventListener('blur', function () {
+                        try {
+                            const valor = txtRamal.value.trim();
+
+                            // Se tiver valor, valida se é número entre 0 e 99999
+                            if (valor && (isNaN(valor) || parseInt(valor) < 0 || parseInt(valor) > 99999)) {
+                                txtRamal.classList.add('is-invalid');
+                            } else {
+                                txtRamal.classList.remove('is-invalid');
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtRamal.blur", error);
+                        }
+                    });
+                }
+
+                // =====================================================
+                // VALIDAÇÃO: Email obrigatoriamente terminando em @camara.leg.br
+                // Caracteres válidos antes do @: letras, números, ponto, hífen, underscore
                 // =====================================================
                 const txtEmail = document.getElementById('txtEmail');
                 if (txtEmail) {
@@ -684,18 +720,18 @@
                             let valor = txtEmail.value.trim().toLowerCase();
 
                             if (valor) {
-                                // Remove @@camara.leg.br se já existir para evitar duplicação
-                                valor = valor.replace(/@@@@camara\.leg\.br$/i, '');
-                                // Remove qualquer @@ que possa existir no final
-                                valor = valor.replace(/@@@@+$/, '');
+                                // Remove @camara.leg.br se já existir para evitar duplicação
+                                valor = valor.replace(/@@camara\.leg\.br$/i, '');
+                                // Remove qualquer @ que possa existir
+                                valor = valor.replace(/@@/g, '');
 
                                 // Remove caracteres inválidos (permite apenas: letras, números, ponto, hífen, underscore)
                                 valor = valor.replace(/[^a-z0-9._-]/g, '');
 
-                                // Valida se tem conteúdo antes do @@
+                                // Valida se tem conteúdo antes do @
                                 if (valor.length > 0) {
                                     // Adiciona o domínio obrigatório
-                                    valor = valor + '@@@@camara.leg.br';
+                                    valor = valor + '@@camara.leg.br';
                                 } else {
                                     // Se não tiver conteúdo, limpa o campo
                                     valor = '';
@@ -703,8 +739,8 @@
 
                                 txtEmail.value = valor;
 
-                                // Valida formato final (apenas caracteres válidos antes do @@)
-                                const regex = /^[a-z0-9._-]+@@@@camara\.leg\.br$/;
+                                // Valida formato final (apenas caracteres válidos antes do @)
+                                const regex = /^[a-z0-9._-]+@@camara\.leg\.br$/;
                                 if (valor && !regex.test(valor)) {
                                     txtEmail.classList.add('is-invalid');
                                 } else {
@@ -721,18 +757,23 @@
                     // Força minúsculo e remove caracteres inválidos enquanto digita
                     txtEmail.addEventListener('input', function () {
                         try {
-                            // Converte para minúsculo e remove caracteres inválidos (exceto @@ para permitir digitação)
+                            // Converte para minúsculo
                             let valor = txtEmail.value.toLowerCase();
-                            // Separa a parte antes do @@ da parte depois (se existir)
-                            const partes = valor.split('@@@@');
-                            if (partes.length > 1) {
-                                // Remove caracteres inválidos apenas da parte antes do @@
-                                partes[0] = partes[0].replace(/[^a-z0-9._-]/g, '');
-                                txtEmail.value = partes[0] + '@@@@' + partes.slice(1).join('@@@@');
-                            } else {
-                                // Remove caracteres inválidos (permite @@ para digitação do domínio)
-                                txtEmail.value = valor.replace(/[^a-z0-9._@@-]/g, '');
+
+                            // Remove TUDO que não é letra, número, ponto, hífen, underscore ou @
+                            valor = valor.replace(/[^a-z0-9._@@-]/g, '');
+
+                            // Conta quantos @ existem
+                            const numArrobas = (valor.match(/@@/g) || []).length;
+
+                            // Se tem mais de 1 @, remove os extras
+                            if (numArrobas > 1) {
+                                // Mantém apenas o primeiro @
+                                const partes = valor.split('@@');
+                                valor = partes[0] + '@@' + partes.slice(1).join('');
                             }
+
+                            txtEmail.value = valor;
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtEmail.input", error);
                         }
@@ -780,6 +821,48 @@
                             }
                         } catch (error) {
                             Alerta.TratamentoErroComLinha("Upsert.cshtml", "txtCelular.blur", error);
+                        }
+                    });
+                }
+
+                // =====================================================
+                // VALIDAÇÃO: Impedir submit se houver campos inválidos
+                // =====================================================
+                const formulario = document.querySelector('form');
+                if (formulario) {
+                    formulario.addEventListener('submit', function (e) {
+                        try {
+                            // Força validação de todos os campos antes de submeter
+                            if (txtEmail) {
+                                txtEmail.dispatchEvent(new Event('blur'));
+                            }
+                            if (txtCelular) {
+                                txtCelular.dispatchEvent(new Event('blur'));
+                            }
+                            if (txtRamal) {
+                                txtRamal.dispatchEvent(new Event('blur'));
+                            }
+
+                            // Verifica se existe algum campo com is-invalid
+                            const camposInvalidos = formulario.querySelectorAll('.is-invalid');
+
+                            if (camposInvalidos.length > 0) {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                // Mostra alerta ao usuário
+                                Alerta.Warning(
+                                    'Campos Inválidos',
+                                    'Por favor, corrija os campos destacados em vermelho antes de salvar.',
+                                    'OK'
+                                );
+
+                                // Foca no primeiro campo inválido
+                                camposInvalidos[0].focus();
+                                return false;
+                            }
+                        } catch (error) {
+                            Alerta.TratamentoErroComLinha("Upsert.cshtml", "form.submit", error);
                         }
                     });
                 }

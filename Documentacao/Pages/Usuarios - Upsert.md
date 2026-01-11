@@ -1,7 +1,7 @@
 # Documentação: Usuarios - Upsert
 
 > **Última Atualização**: 10/01/2026
-> **Versão Atual**: 1.1
+> **Versão Atual**: 1.2
 
 ---
 
@@ -185,6 +185,94 @@ dropifyInstance.on('dropify.afterClear', function() {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [10/01/2026 - Segundo Commit] - Correção Completa de Validações (Email, Ramal, Celular)
+
+**Descrição**:
+- ✅ **VALIDAÇÃO DE EMAIL CORRIGIDA**: Corrigida lógica de escape `@@` no Razor
+  - **Problema anterior**: Estava usando `@@@@` (4 arrobas) quando deveria ser `@@` (2 arrobas)
+  - **Explicação Razor**: No Razor, `@@` vira `@` no HTML/JavaScript final
+  - **Erro identificado pelo usuário**: Campo aceitava `fafesaesdfsdsdsadcamara.leg.brwsdeze3e3rre@@camara.leg.br`
+  - **Correção**:
+    - No `blur`: Remove TUDO (@, caracteres inválidos), mantém apenas `[a-z0-9._-]`, adiciona `@camara.leg.br`
+    - No `input`: Remove caracteres inválidos, permite apenas 1 arroba, força minúsculo
+  - Linhas 687-745: Refatorada toda a lógica de validação de email
+
+- ✅ **VALIDAÇÃO DE RAMAL CORRIGIDA**: Campo agora é `type="text"` com validação JavaScript
+  - **Problema anterior**: `type="number"` permitia letras como 'e' (notação científica: 1e3 = 1000)
+  - **Erro identificado pelo usuário**: Campo aceitava `e3343242343233333443`
+  - **Correção**:
+    - Linha 312: Mudado de `type="number"` para `type="text"` com `maxlength="5"`
+    - Linhas 677-710: Adicionada validação JavaScript no `input` que remove tudo que não é número
+    - Permite apenas 0-99999 (5 dígitos)
+  - No `input`: Remove `\D` (tudo que não é dígito), limita a 5 caracteres
+  - No `blur`: Valida se é número válido entre 0 e 99999
+
+- ✅ **VALIDAÇÃO DE CELULAR MELHORADA**: Agora impede submit se inválido
+  - **Problema anterior**: Marcava em vermelho mas permitia salvar
+  - **Erro identificado pelo usuário**: `(56) 5456-565` ficava vermelho mas poderia ser salvo
+  - **Correção**:
+    - Linhas 828-868: Adicionada validação no `submit` do formulário
+    - Dispara evento `blur` em todos os campos antes de submeter
+    - Verifica se há campos com classe `is-invalid`
+    - Se houver, mostra `Alerta.Warning` e impede submit
+    - Foca no primeiro campo inválido
+
+**Problema Original (relatado pelo usuário)**:
+1. Email aceitava texto antes e depois do domínio (ex: `textocamara.leg.brmais@@camara.leg.br`)
+2. Ramal aceitava letras (ex: `e3343242343233333443`)
+3. Celular marcava vermelho mas permitia salvar incompleto
+
+**Causa Raiz**:
+- **Email**: Escape Razor incorreto (`@@@@` ao invés de `@@`) fazia regex buscar `@@camara` literal
+- **Ramal**: Input `type="number"` no HTML5 permite `e`, `E`, `+`, `-` (notação científica)
+- **Celular**: Faltava validação no submit do formulário
+
+**Solução Aplicada**:
+1. **Email**:
+   - No `blur`: `valor.replace(/@@/g, '')` remove TODOS os @, `replace(/[^a-z0-9._-]/g, '')` limpa caracteres inválidos, depois adiciona `@camara.leg.br`
+   - No `input`: Conta quantos @ existem, mantém apenas o primeiro, remove caracteres inválidos em tempo real
+2. **Ramal**:
+   - Mudado para `type="text"` com `maxlength="5"`
+   - No `input`: `valor.replace(/\D/g, '')` remove tudo que não é dígito
+   - No `blur`: Valida se é número entre 0-99999
+3. **Celular e Geral**:
+   - Adicionado listener de `submit` no formulário
+   - Dispara validação (`blur`) em todos os campos antes de processar
+   - Conta campos `.is-invalid`, se > 0 bloqueia submit e mostra alerta
+
+**Arquivos Modificados**:
+- `Pages/Usuarios/Upsert.cshtml`:
+  - Linha 312: `type="number"` → `type="text"` no campo Ramal
+  - Linhas 677-710: Validação de Ramal (input + blur)
+  - Linhas 712-745: Validação de Email corrigida (escape `@@` correto)
+  - Linhas 828-868: Validação de submit do formulário
+- `Documentacao/Pages/Usuarios - Upsert.md`: Este arquivo - adicionada entrada no log
+
+**Impacto**:
+- ✅ Email só aceita formato `usuario@camara.leg.br` (sempre minúsculo, sem caracteres inválidos)
+- ✅ Ramal só aceita números de 0 a 99999 (5 dígitos máximo, sem letras)
+- ✅ Celular deve estar completo `(XX) XXXX-XXXX` ou formulário não submete
+- ✅ Qualquer campo inválido impede salvamento e mostra alerta explicativo
+
+**Teste Sugerido**:
+1. **Email**:
+   - Tentar digitar: `abc@@def@@ghi` → deve limpar para `abcdefghi` no blur e virar `abcdefghi@camara.leg.br`
+   - Tentar digitar: `ABC123` → deve virar `abc123@camara.leg.br` no blur
+   - Tentar digitar caracteres especiais: `test!@#$%` → deve limpar e virar `test@camara.leg.br`
+2. **Ramal**:
+   - Tentar digitar: `e123` → deve aparecer apenas `123` (remove 'e' automaticamente)
+   - Tentar digitar: `123456` → deve truncar para `12345`
+3. **Celular**:
+   - Digitar: `(11) 1234-567` → fica vermelho
+   - Tentar submeter → mostra alerta "Campos Inválidos"
+   - Completar: `(11) 1234-5678` → fica verde, permite submeter
+
+**Status**: ✅ **Concluído**
+
+**Versão**: 1.2
 
 ---
 
