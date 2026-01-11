@@ -1478,44 +1478,38 @@
                 
                 if (irmaosAbaixo.length > 0) {
                     // Tem itens abaixo - pergunta se quer subordinar
-                    mensagem += '<div style="margin-top:15px; text-align:left;">' +
-                        '<strong>Existem ' + irmaosAbaixo.length + ' item(ns) abaixo desta página:</strong><br>' +
-                        '<ul style="margin:10px 0; padding-left:20px;">';
-                    
-                    irmaosAbaixo.slice(0, 5).forEach(function(irmao) {
-                        mensagem += '<li>' + decodeHtml(irmao.text) + '</li>';
-                    });
-                    
+                    // ✅ Usa sistema padrão Alerta com fluxo de duas perguntas
+                    var listaItens = irmaosAbaixo.slice(0, 5).map(function(irmao) {
+                        return '• ' + decodeHtml(irmao.text);
+                    }).join('<br>');
+
                     if (irmaosAbaixo.length > 5) {
-                        mensagem += '<li><em>... e mais ' + (irmaosAbaixo.length - 5) + ' item(ns)</em></li>';
+                        listaItens += '<br><em>... e mais ' + (irmaosAbaixo.length - 5) + ' item(ns)</em>';
                     }
-                    
-                    mensagem += '</ul>' +
-                        '<p style="margin-top:10px; font-size:0.9rem; color:#666;">Para onde deseja mover estes itens?</p>' +
+
+                    var mensagemComItens = mensagem +
+                        '<div style="margin-top:15px; text-align:left;">' +
+                        '<strong>Existem ' + irmaosAbaixo.length + ' item(ns) abaixo desta página:</strong><br><br>' +
+                        listaItens +
+                        '<br><br><strong>Deseja subordiná-los ao novo grupo?</strong>' +
                         '</div>';
-                    
-                    Swal.fire({
-                        title: 'Transformar Página em Grupo',
-                        html: mensagem,
-                        icon: 'question',
-                        showDenyButton: true,
-                        showCancelButton: true,
-                        confirmButtonText: '<i class="fa-duotone fa-folder-tree" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Subordinar ao Novo Grupo',
-                        denyButtonText: '<i class="fa-duotone fa-folder-open" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Mover para Outro Grupo',
-                        cancelButtonText: '<i class="fa-duotone fa-xmark" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Cancelar',
-                        confirmButtonColor: '#fd7e14',
-                        denyButtonColor: '#17a2b8',
-                        cancelButtonColor: '#6c757d'
-                    }).then(function(result) {
-                        if (result.isConfirmed) {
+
+                    // ✅ Primeira pergunta: Subordinar ao novo grupo?
+                    Alerta.Confirmar(
+                        'Transformar Página em Grupo',
+                        mensagemComItens,
+                        'Sim, Subordinar',
+                        'Não, Mover para Outro'
+                    ).then(function(subordinar) {
+                        if (subordinar) {
                             // Transforma em grupo E subordina itens abaixo (viram filhos do novo grupo)
                             executarTransformacaoPaginaEmGrupo(item, true, irmaosAbaixo, null);
-                        } else if (result.isDenied) {
-                            // Mostra segundo SweetAlert para escolher o grupo destino
+                        } else {
+                            // ✅ Segunda pergunta: Escolher grupo destino
                             mostrarSelecaoGrupoDestino(item, irmaosAbaixo);
                         }
                     });
-                    
+
                 } else {
                     // Não tem itens abaixo - confirmação simples
                     Alerta.Confirmar(
@@ -2018,50 +2012,45 @@
         }
     }
     
-    // Mostra SweetAlert para escolher grupo destino dos itens
+    // ✅ Mostra alerta padrão para escolher grupo destino dos itens
     function mostrarSelecaoGrupoDestino(itemOrigem, itensParaMover) {
         try {
             var htmlGrupos = montarSelectGruposParaSwal(itemOrigem.id);
-            
-            var mensagem = '<div style="text-align:left;">' +
-                '<p>Os <strong>' + itensParaMover.length + '</strong> item(ns) abaixo serão movidos para o grupo selecionado:</p>' +
-                '<ul style="margin:10px 0; padding-left:20px; max-height:150px; overflow-y:auto;">';
-            
-            itensParaMover.forEach(function(item) {
-                mensagem += '<li>' + decodeHtml(item.text) + '</li>';
-            });
-            
-            mensagem += '</ul>' +
-                '<label style="font-weight:600; margin-top:15px; display:block;">Selecione o Grupo destino:</label>' +
+
+            var listaItens = itensParaMover.map(function(item) {
+                return '• ' + decodeHtml(item.text);
+            }).join('<br>');
+
+            var mensagem = 'Os <strong>' + itensParaMover.length + '</strong> item(ns) serão movidos para o grupo selecionado:<br><br>' +
+                '<div style="text-align:left; max-height:120px; overflow-y:auto; margin-bottom:15px;">' +
+                listaItens +
+                '</div>' +
+                '<div style="text-align:left;">' +
+                '<label style="font-weight:600;">Selecione o Grupo destino:</label>' +
                 htmlGrupos +
                 '</div>';
-            
-            Swal.fire({
-                title: 'Mover Itens para Outro Grupo',
-                html: mensagem,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '<i class="fa-duotone fa-check" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Confirmar',
-                cancelButtonText: '<i class="fa-duotone fa-xmark" style="--fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i> Cancelar',
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                customClass: {
-                    popup: 'swal-wide'
-                },
-                preConfirm: function() {
+
+            // ✅ Usa sistema padrão Alerta.Confirmar com HTML
+            Alerta.Confirmar(
+                'Mover Itens para Outro Grupo',
+                mensagem,
+                'Confirmar',
+                'Cancelar'
+            ).then(function(confirmado) {
+                if (confirmado) {
                     var selectGrupo = document.getElementById('swalSelectGrupo');
                     if (!selectGrupo || !selectGrupo.value) {
-                        Swal.showValidationMessage('Selecione um grupo destino!');
-                        return false;
+                        Alerta.Warning('Atenção', 'Selecione um grupo destino!');
+                        // Reabre o diálogo
+                        setTimeout(function() {
+                            mostrarSelecaoGrupoDestino(itemOrigem, itensParaMover);
+                        }, 500);
+                        return;
                     }
-                    return selectGrupo.value;
-                }
-            }).then(function(result) {
-                if (result.isConfirmed && result.value) {
-                    executarTransformacaoPaginaEmGrupo(itemOrigem, false, itensParaMover, result.value);
+                    executarTransformacaoPaginaEmGrupo(itemOrigem, false, itensParaMover, selectGrupo.value);
                 }
             });
-            
+
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "mostrarSelecaoGrupoDestino", erro);
         }

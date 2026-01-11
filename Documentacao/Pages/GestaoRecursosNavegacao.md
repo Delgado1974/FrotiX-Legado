@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
-> **Última Atualização**: 10/01/2026
-> **Versão Atual**: 1.3
+> **Última Atualização**: 11/01/2026
+> **Versão Atual**: 1.4
 
 ---
 
@@ -195,6 +195,33 @@ nodeDragStop: function(args) {
 # PARTE 2: LOG DE MODIFICAÇÕES/CORREÇÕES
 
 > **FORMATO**: Entradas em ordem **decrescente** (mais recente primeiro)
+
+---
+
+## [11/01/2026 00:05] - Substituição de Swal.fire direto por sistema padrão Alerta
+
+**Descrição**:
+Substituídas as chamadas diretas a `Swal.fire()` pelo sistema padrão `Alerta.*` (alerta.js e sweetalert_interop.js) nos diálogos de transformação Página→Grupo.
+
+**Problema**:
+Os diálogos de transformação Página→Grupo usavam `Swal.fire()` diretamente, resultando em modais fora do padrão visual do sistema FrotiX (sem estilização correta, botões desalinhados, cores incorretas).
+
+**Solução**:
+- Função `alternarTipoItem()` (caso PÁGINA→GRUPO com itens abaixo): Substituído `Swal.fire` com 3 botões por fluxo de 2 alertas `Alerta.Confirmar()` sequenciais
+- Função `mostrarSelecaoGrupoDestino()`: Substituído `Swal.fire` por `Alerta.Confirmar()` com HTML para seleção de grupo
+
+**Nota**: O modal de transformação Grupo→Página (`mostrarModalTransformacaoGrupoEmPagina`) foi mantido como está por ser muito customizado (seleção visual de páginas).
+
+**Arquivos Afetados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
+  - Função `alternarTipoItem()` (linhas ~1479-1512)
+  - Função `mostrarSelecaoGrupoDestino()` (linhas ~2015-2057)
+
+**Status**: ✅ **Concluído**
+
+**Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.4
 
 ---
 
