@@ -1,7 +1,7 @@
 # Documentação: Administração - Gestão de Recursos e Navegação
 
 > **Última Atualização**: 11/01/2026
-> **Versão Atual**: 1.5
+> **Versão Atual**: 1.6
 
 ---
 
@@ -248,6 +248,56 @@ Versão intermediária que foi substituída pela implementação completa com mo
 **Status**: ⏭️ **Substituída pela versão 1.5**
 
 **Versão**: 1.4
+
+---
+
+## [11/01/2026 18:30] - Aviso de transformação Página→Grupo ao usar seta direita (→)
+
+**Descrição**:
+Adicionado aviso de confirmação quando o usuário usa a seta para direita (→) para subordinar uma página a outra página, o que automaticamente transforma a página de cima em Grupo.
+
+**Problema/Necessidade**:
+Quando duas páginas estavam uma em cima da outra e o usuário clicava na seta para direita para transformar a de baixo em filho, a página de cima era automaticamente convertida em Grupo (perdendo seu link HTML). Isso acontecia sem aviso prévio, podendo confundir o usuário.
+
+**Solução**:
+- Função `moverItemDireita()` agora verifica se o item acima (que será o novo pai) é uma Página
+- Se for Página, exibe um modal de confirmação usando `Alerta.Confirmar()` informando:
+  - Que a página será transformada em GRUPO
+  - Aviso em card laranja de que o link HTML será removido permanentemente
+  - Que a página não acessará mais nenhuma funcionalidade diretamente
+- Se o usuário confirmar: executa a movimentação normalmente
+- Se o usuário cancelar: exibe mensagem informando que nenhuma alteração foi feita
+- Criada nova função auxiliar `executarMovimentacaoDireita()` para encapsular a lógica de movimentação
+
+**Código do Modal de Aviso**:
+```javascript
+Alerta.Confirmar(
+    'Transformação em Grupo',
+    '<div style="text-align: left; padding: 10px;">' +
+        '<p>Ao subordinar "Item" como filho de "ItemAcima", ' +
+        'a página "ItemAcima" será transformada em GRUPO.</p>' +
+        '<div style="background: linear-gradient(135deg, #ff6b35, #e55a2b); ' +
+            'color: white; padding: 12px 15px; border-radius: 8px; ' +
+            'border: 2px solid rgba(255,255,255,0.5);">' +
+            'ATENÇÃO: O link HTML será removido permanentemente!' +
+        '</div>' +
+        '<p>Deseja prosseguir com esta operação?</p>' +
+    '</div>',
+    'Sim, Transformar em Grupo',
+    'Cancelar'
+)
+```
+
+**Arquivos Afetados**:
+- `Pages/Administracao/GestaoRecursosNavegacao.cshtml`
+  - Função `moverItemDireita()` (linhas ~4104-4174) - Adicionada verificação e modal de confirmação
+  - Nova função `executarMovimentacaoDireita()` (linhas ~4176-4213) - Lógica de movimentação separada
+
+**Status**: ✅ **Concluído**
+
+**Responsável**: Claude (AI Assistant)
+
+**Versão**: 1.6
 
 ---
 

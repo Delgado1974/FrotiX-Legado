@@ -4102,15 +4102,16 @@
     }
 
     // ✅ Move item para DIREITA (desce nível - vira filho do item acima)
+    // Se o item acima for uma Página, exibe aviso de que será transformado em Grupo e perderá o link HTML
     function moverItemDireita(itemId, event) {
         console.log('[MOVER-DIR] === FUNÇÃO CHAMADA ===');
         console.log('[MOVER-DIR] itemId recebido:', itemId, 'tipo:', typeof itemId);
-        
+
         if (event) {
             event.stopPropagation();
             event.preventDefault();
         }
-        
+
         try {
             var item = buscarItemPorId(treeData, itemId);
             console.log('[MOVER-DIR] Item encontrado:', item);
@@ -4132,6 +4133,54 @@
 
             console.log('[MOVER-DIR] Item acima que virará pai:', itemAcima.text);
 
+            // ✅ VERIFICAÇÃO: Se o item acima é uma Página (tem href válido), avisar que será transformado em Grupo
+            var itemAcimaEhPagina = itemAcima.href && itemAcima.href !== 'javascript:void(0);' && itemAcima.href.trim() !== '';
+
+            if (itemAcimaEhPagina) {
+                // Exibir aviso de que a página acima será transformada em Grupo
+                console.log('[MOVER-DIR] Item acima é uma Página - exibindo aviso de transformação');
+
+                Alerta.Confirmar(
+                    'Transformação em Grupo',
+                    '<div style="text-align: left; padding: 10px;">' +
+                        '<p style="margin-bottom: 15px;">Ao subordinar <strong>"' + item.text + '"</strong> como filho de <strong>"' + itemAcima.text + '"</strong>, ' +
+                        'a página <strong>"' + itemAcima.text + '"</strong> será <span style="color: #d9534f; font-weight: bold;">transformada em GRUPO</span>.</p>' +
+                        '<div style="background: linear-gradient(135deg, #ff6b35, #e55a2b); color: white; padding: 12px 15px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.5); margin: 10px 0;">' +
+                            '<i class="fa-duotone fa-triangle-exclamation" style="--fa-primary-color:#ffffff; --fa-secondary-color:#ffcc00; margin-right: 8px;"></i>' +
+                            '<strong>ATENÇÃO:</strong> O link HTML da página será removido permanentemente e ela não acessará mais nenhuma funcionalidade diretamente!' +
+                        '</div>' +
+                        '<p style="margin-top: 15px;">Deseja prosseguir com esta operação?</p>' +
+                    '</div>',
+                    'Sim, Transformar em Grupo',
+                    'Cancelar'
+                ).then(function(confirmado) {
+                    if (confirmado) {
+                        console.log('[MOVER-DIR] Usuário confirmou transformação - executando movimentação');
+                        executarMovimentacaoDireita(item, listaIrmaos, indexAtual, itemAcima, itemId);
+                    } else {
+                        console.log('[MOVER-DIR] Usuário cancelou - operação revertida');
+                        Alerta.Info('Operação Cancelada', 'A movimentação foi cancelada. Nenhuma alteração foi feita.', 'OK');
+                    }
+                });
+            } else {
+                // Item acima já é grupo, executa diretamente sem aviso
+                console.log('[MOVER-DIR] Item acima já é Grupo - executando movimentação direta');
+                executarMovimentacaoDireita(item, listaIrmaos, indexAtual, itemAcima, itemId);
+            }
+
+        } catch (erro) {
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemDireita", erro);
+        }
+    }
+
+    // ✅ Função auxiliar para executar a movimentação para direita (após confirmação, se necessário)
+    // Param: item - O item sendo movido
+    // Param: listaIrmaos - Lista de irmãos onde o item está atualmente
+    // Param: indexAtual - Índice atual do item na lista
+    // Param: itemAcima - O item que será o novo pai
+    // Param: itemId - ID do item para manter selecionado após atualização
+    function executarMovimentacaoDireita(item, listaIrmaos, indexAtual, itemAcima, itemId) {
+        try {
             // Remove item da lista atual
             listaIrmaos.splice(indexAtual, 1);
 
@@ -4154,12 +4203,12 @@
             }
 
             console.log('[MOVER-DIR] ✅ Item movido para direita (desceu nível, virou filho de ' + itemAcima.text + ')');
-            
+
             // Força reconstrução e atualiza TreeView
             atualizarTreeViewAposMovimento(itemId);
-            
+
         } catch (erro) {
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "moverItemDireita", erro);
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarMovimentacaoDireita", erro);
         }
     }
 
