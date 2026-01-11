@@ -1,0 +1,1143 @@
+﻿[00:03:17.431] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:03:17.436] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:03:22.067] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:03:25.389] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:03:25.501] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:03:25.578] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:03:28.253] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:04:39.419] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:04:39.494] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:04:39.544] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:04:49.542] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:04:49.588] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:04:49.625] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:05:12.856] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:05:12.896] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:05:12.938] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:39.901] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:08:39.906] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:08:45.337] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:08:47.809] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:48.124] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:48.179] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:48.222] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:55.514] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:55.595] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:08:55.650] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:13:08.751] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:13:08.782] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:13:08.850] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:15.958] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:18:15.964] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:18:20.387] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:18:22.660] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:23.499] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:23.598] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:23.702] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:28.958] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:29.035] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:29.072] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:32.948] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:32.997] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:18:33.039] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:22:56.967] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:22:56.975] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:23:03.946] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:23:06.758] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:23:07.097] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:23:07.126] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:23:07.207] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:24:55.226] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:24:55.283] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:24:55.393] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:24:55.446] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:25:08.910] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:25:08.981] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:25:09.039] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:28:11.373] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:28:11.378] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:28:16.282] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:28:20.174] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:28:55.001] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:28:55.067] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:28:55.107] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:33:15.527] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:33:15.535] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:33:23.695] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:33:27.918] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:33:28.149] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:33:28.219] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:33:28.307] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:35:43.519] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff2
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:35:43.611] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:35:43.649] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /webfonts/fa-light-300.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[00:45:00.643] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:45:00.648] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:45:04.878] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:45:07.098] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[06:36:39.676] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[06:36:39.680] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[06:36:42.858] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[06:36:44.806] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[07:03:06.984] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[07:03:06.988] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[07:03:10.248] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[07:03:12.092] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[07:13:27.649] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[07:13:27.658] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[07:13:32.369] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[07:13:34.413] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[09:27:52.111] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[09:27:52.133] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[09:34:04.110] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[09:34:14.874] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[10:25:33.004] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[10:25:33.012] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[10:25:37.693] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[10:25:40.213] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[11:36:53.317] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[11:36:53.324] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[11:43:08.426] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[14:30:40.735] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[14:30:40.738] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[14:30:43.042] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[14:33:56.363] [HTTP-ERROR] 🌐 Status: 400
+  📍 Path: /api/Navigation/SaveTreeToDb
+  🔧 Method: POST
+  💬 Message: Bad Request - Requisição inválida
+  👤 Usuário: p_7661
+
+[14:34:03.073] [HTTP-ERROR] 🌐 Status: 400
+  📍 Path: /api/Navigation/SaveTreeToDb
+  🔧 Method: POST
+  💬 Message: Bad Request - Requisição inválida
+  👤 Usuário: p_7661
+
+[14:34:10.274] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:34:10.274] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:34:10.437] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:34:10.437] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:34:23.388] [HTTP-ERROR] 🌐 Status: 400
+  📍 Path: /api/Navigation/SaveTreeToDb
+  🔧 Method: POST
+  💬 Message: Bad Request - Requisição inválida
+  👤 Usuário: p_7661
+
+[14:44:30.951] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[14:44:30.954] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[14:44:33.083] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[14:52:44.421] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[14:52:44.424] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[14:52:46.679] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[14:53:53.124] [HTTP-ERROR] 🌐 Status: 400
+  📍 Path: /api/Navigation/SaveTreeToDb
+  🔧 Method: POST
+  💬 Message: Bad Request - Requisição inválida
+  👤 Usuário: p_7661
+
+[14:54:47.953] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:54:47.953] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:54:48.074] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:54:48.074] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:57:54.958] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[14:57:54.961] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[14:57:57.128] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:02:57.707] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[15:02:57.710] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[15:02:59.632] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:04:25.536] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:25.536] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:25.634] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:25.634] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:46.935] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:48.002] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:48.002] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:48.284] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:04:49.304] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/favicon/favicon-32x32.png
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:09:25.954] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[15:09:25.957] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[15:09:28.429] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:09:36.111] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/favicon/favicon-32x32.png
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:09:37.983] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:09:37.990] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:09:38.175] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:09:38.185] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:12:58.133] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[15:12:58.137] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[15:13:00.514] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:13:17.716] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:17.716] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:17.835] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:17.860] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:28.193] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:28.476] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:28.476] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:13:29.341] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:17:30.357] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[15:17:30.360] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[15:17:32.921] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:24:02.013] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:02.013] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:02.109] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:02.111] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:17.468] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:17.783] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:17.783] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:24:18.391] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:31:41.021] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[15:31:41.024] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[15:31:42.950] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:31:55.887] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:31:55.893] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:31:56.080] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:31:56.171] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:55:27.456] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[15:55:27.462] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[15:55:30.463] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[15:56:39.191] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:56:39.191] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:56:39.381] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[15:56:39.381] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:12:50.692] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[16:12:50.696] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[16:12:53.309] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[16:17:07.647] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[16:17:07.652] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[16:17:10.648] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[16:23:13.264] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:23:13.264] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:23:13.433] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:23:13.433] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:48.985] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:49.440] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:49.440] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:51.616] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:54.565] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:54.914] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:54.914] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:24:56.227] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:45:04.154] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[16:45:04.159] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[16:45:06.545] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[16:45:25.916] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:45:25.916] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:45:26.070] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:45:26.070] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:07.023] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:07.293] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:07.296] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:08.210] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:37.362] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:37.517] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:37.517] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:46:38.395] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:58:28.911] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[16:58:28.916] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[16:58:32.042] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[16:59:31.155] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:59:31.155] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:59:31.386] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[16:59:31.386] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:18.162] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:18.443] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:18.443] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:19.387] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:28.837] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:29.125] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:29.125] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:30.146] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:57.613] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:57.854] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:57.854] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:05:58.937] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:14.733] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:15.050] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:15.052] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:15.849] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:37.364] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:37.580] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:37.580] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:39.011] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:52.019] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:52.260] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:52.260] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:06:53.361] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:15.075] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:15.333] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:15.333] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:16.409] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:55.150] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:55.430] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:55.430] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:09:56.750] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:19:55.523] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:19:55.526] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:19:57.916] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:28:54.679] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:28:54.682] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:28:56.897] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:41:34.762] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:41:34.765] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:41:38.964] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:44:47.300] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:44:47.303] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:44:49.256] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:53:23.489] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:53:23.492] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:53:25.734] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:59:48.536] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:59:48.539] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:59:50.540] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:07:55.973] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:07:55.977] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:07:58.984] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:15:17.226] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:15:17.230] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:15:19.958] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:19:08.356] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:19:08.359] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:19:10.976] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:21:47.534] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:21:47.537] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:21:49.817] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:43:17.810] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:43:17.812] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:43:20.421] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[21:27:23.042] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[21:27:23.058] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[21:33:38.592] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure

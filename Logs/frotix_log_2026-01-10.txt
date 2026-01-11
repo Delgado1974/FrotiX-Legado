@@ -1,0 +1,281 @@
+﻿[00:09:22.224] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[00:09:22.233] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[00:09:31.033] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[00:09:35.800] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[01:00:06.503] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[01:00:06.520] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[01:00:22.772] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[01:00:30.078] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[01:28:52.961] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[01:28:52.968] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[01:28:58.139] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[01:29:00.583] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[02:00:23.336] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[02:00:23.346] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[02:00:39.310] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[02:00:44.571] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[05:40:36.815] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[05:40:36.823] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[05:40:41.438] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[05:40:43.440] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[06:25:31.915] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[06:25:32.194] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[07:12:28.746] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[07:12:28.755] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[07:12:37.793] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[07:12:41.724] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:08:28.647] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:08:28.920] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:23:39.889] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[08:23:39.914] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[08:23:59.669] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[08:24:26.543] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:25:27.953] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:25:30.624] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:33:33.001] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[08:33:33.015] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[08:33:43.122] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[08:33:47.964] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:34:56.990] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:34:57.141] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:38:16.693] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:38:16.828] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[08:52:38.546] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[08:52:38.551] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[08:52:43.610] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[08:54:02.466] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[09:02:47.258] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.woff
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[09:02:47.444] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /fonts/dropify.ttf
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:27:06.133] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:27:06.163] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:27:20.239] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:27:27.901] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:57:06.212] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:57:06.226] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:57:17.291] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:57:22.482] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:15:10.914] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:15:10.934] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:15:31.375] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:15:41.695] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:21:50.492] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:21:50.509] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:22:11.612] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:22:20.167] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:25:06.416] [ERROR-JS] ❌ Uncaught TypeError: treeObj.select is not a function
+  📄 Arquivo: Gestaorecursosnavegacao
+  📍 Linha: 4086, Coluna: 33
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: treeObj.select is not a function
+      at https://localhost:44340/Administracao/Gestaorecursosnavegacao:4086:33
+
+[19:32:10.835] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:32:10.853] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:32:33.182] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:32:43.241] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:41:34.083] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:41:34.101] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:41:45.549] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:41:51.411] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:46:50.931] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:46:50.951] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:47:07.867] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:47:13.601] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:56:29.424] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:56:29.435] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:56:39.045] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:56:43.967] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[20:04:44.002] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[20:04:44.008] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[20:04:49.082] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[20:04:51.515] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[20:10:05.273] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[20:10:05.284] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[20:10:09.925] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[20:10:12.258] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[21:11:14.501] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[21:11:14.508] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[21:11:18.942] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[21:11:21.666] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:55:30.893] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[22:55:30.901] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[22:55:47.494] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[22:56:03.124] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:58:00.086] [ERROR-JS] ❌ Uncaught TypeError: treeObj.select is not a function
+  📄 Arquivo: Gestaorecursosnavegacao
+  📍 Linha: 4057, Coluna: 33
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: treeObj.select is not a function
+      at https://localhost:44340/Administracao/Gestaorecursosnavegacao:4057:33
+

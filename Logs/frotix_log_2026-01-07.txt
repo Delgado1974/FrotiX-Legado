@@ -1,0 +1,828 @@
+﻿[11:41:08.373] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[11:41:08.381] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[11:47:27.837] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[13:36:42.357] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[13:36:42.362] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[13:36:46.052] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[13:37:04.896] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[13:37:07.199] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/favicon/favicon-32x32.png
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[13:57:35.571] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[13:57:35.583] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[13:57:44.578] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[13:57:48.139] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:17:25.747] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[14:17:25.753] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[14:17:30.022] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[14:17:32.218] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:35:14.244] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:17.370] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:22.307] [ERROR-JS] ❌ Script error.
+  📄 Arquivo: (não identificado)
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+
+[14:35:31.691] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:35.301] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:38.102] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:39.012] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:39.177] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:39.319] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:39.464] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2631, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2631:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[14:35:47.090] [ERROR-JS] ❌ Uncaught TypeError: Cannot set properties of null (setting 'innerHTML')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: limparFormulario
+  📍 Linha: 2910, Coluna: 58
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot set properties of null (setting 'innerHTML')
+      at limparFormulario (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2910:58)
+      at adicionarNovoItem (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2866:9)
+      at HTMLButtonElement.onclick (https://localhost:44340/Administracao/Gestaorecursosnavegacao:1313:102)
+
+[14:57:10.834] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[14:57:10.838] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[14:57:14.617] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[14:57:17.466] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[14:59:06.689] [ERROR-JS] ❌ Uncaught TypeError: Cannot set properties of null (setting 'innerHTML')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: limparFormulario
+  📍 Linha: 3044, Coluna: 58
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot set properties of null (setting 'innerHTML')
+      at limparFormulario (https://localhost:44340/Administracao/Gestaorecursosnavegacao:3044:58)
+      at adicionarNovoItem (https://localhost:44340/Administracao/Gestaorecursosnavegacao:3000:9)
+      at HTMLButtonElement.onclick (https://localhost:44340/Administracao/Gestaorecursosnavegacao:1334:111)
+
+[17:22:39.601] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:22:39.605] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:22:43.428] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:22:45.398] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:22:57.501] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2680, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2680:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[17:23:00.887] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2680, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2680:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[17:23:05.829] [ERROR-JS] ❌ Uncaught TypeError: Cannot set properties of null (setting 'innerHTML')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: limparFormulario
+  📍 Linha: 3044, Coluna: 58
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot set properties of null (setting 'innerHTML')
+      at limparFormulario (https://localhost:44340/Administracao/Gestaorecursosnavegacao:3044:58)
+      at adicionarNovoItem (https://localhost:44340/Administracao/Gestaorecursosnavegacao:3000:9)
+      at HTMLButtonElement.onclick (https://localhost:44340/Administracao/Gestaorecursosnavegacao:1334:111)
+
+[17:31:59.750] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:31:59.753] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:32:02.561] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:32:04.432] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:32:23.108] [ERROR-JS] ❌ Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+  📄 Arquivo: Gestaorecursosnavegacao
+  🔧 Função: z3.nodeClicked
+  📍 Linha: 2677, Coluna: 44
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+  📚 Stack Trace:
+      TypeError: Cannot read properties of undefined (reading 'id')
+      at z3.nodeClicked (https://localhost:44340/Administracao/Gestaorecursosnavegacao:2677:44)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at z3.triggerClickEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2853144)
+      at z3.clickHandler (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2852226)
+      at Qn.tap (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:2911727)
+      at yt.notify (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:37350)
+      at bt.trigger (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:40718)
+      at Qn.s.endEvent (https://cdn.syncfusion.com/ej2/31.1.22/dist/ej2.min.js:10:252447)
+
+[17:35:54.512] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:35:54.518] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:35:58.466] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:36:00.635] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:36:16.137] [ERROR-JS] ❌ Script error.
+  📄 Arquivo: (não identificado)
+  🌐 URL: https://localhost:44340/Administracao/Gestaorecursosnavegacao
+  🖥️ Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+  👤 Usuário: p_7661
+
+[17:37:49.548] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:37:51.369] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:37:52.004] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:37:52.004] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:45:16.860] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:45:16.866] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:45:20.295] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:45:22.172] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:45:33.927] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:45:35.220] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:45:35.550] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:45:35.558] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:52:54.814] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[17:52:54.818] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[17:52:57.995] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[17:52:59.842] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:53:09.601] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:53:10.905] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:53:11.223] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[17:53:11.223] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:06:59.478] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:06:59.483] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:07:02.918] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:07:04.882] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:07:16.989] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:07:18.284] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:07:18.573] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:07:18.573] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:17:46.597] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:17:46.601] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:17:50.037] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:17:52.250] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:26:59.824] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:26:59.832] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:27:07.341] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:27:10.548] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:43:05.134] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:43:05.143] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:43:12.601] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:43:16.056] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:51:18.076] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:51:18.079] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:51:21.258] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:51:23.372] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[18:53:26.573] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[18:53:26.579] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[18:53:31.600] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[18:53:34.041] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:00:45.066] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:00:45.070] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:00:49.971] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:00:52.410] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:08:51.819] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:08:51.823] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:08:55.044] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:08:57.092] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:20:36.066] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:20:36.072] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:20:40.251] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:20:43.225] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[19:46:55.062] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[19:46:55.066] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[19:46:57.819] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[19:47:00.087] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[21:43:20.471] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[21:43:20.474] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[21:43:23.571] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[21:43:25.538] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:30:05.285] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[22:30:05.292] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[22:30:08.670] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[22:30:10.604] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:31:03.614] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:31:04.756] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:31:05.149] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:31:05.149] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:31:27.658] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.316] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.438] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.620] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.672] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.683] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.740] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:38.740] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:41.470] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:41.831] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:41.835] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:32:43.131] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:22.704] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:22.950] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:22.950] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:24.320] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:35.793] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:36.135] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:36.170] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:33:37.448] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:53:26.464] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[22:53:26.470] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[22:53:30.507] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[22:53:32.908] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[22:55:45.172] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[22:55:45.179] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[22:55:49.572] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[22:55:52.129] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:18:18.442] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[23:18:18.447] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[23:18:22.261] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[23:18:24.795] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:24:26.114] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[23:24:26.119] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[23:24:29.934] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[23:24:32.258] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:24:57.850] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:24:59.368] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:24:59.557] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:24:59.564] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:31:06.891] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[23:31:06.895] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[23:31:10.402] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[23:31:12.915] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:31:41.500] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /.well-known/appspecific/com.chrome.devtools.json
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:31:42.807] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /js/popper.js.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:31:43.067] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/app.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:31:43.075] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /css/vendors.bundle.css.map
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:39:39.341] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[23:39:39.347] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[23:39:44.014] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[23:39:47.404] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
+[23:45:15.001] [INFO] LogService inicializado | Arquivo: LogService.cs | Método: Constructor
+[23:45:15.006] [INFO] Sistema de log de erros inicializado | Arquivo: Program.cs | Método: ConfigureGlobalExceptionHandlers
+[23:45:19.172] [INFO] FrotiX Web inicializado com sucesso | Arquivo: Startup.cs | Método: Configure
+[23:45:21.656] [HTTP-ERROR] 🌐 Status: 404
+  📍 Path: /img/profile-bg-1.jpg
+  🔧 Method: GET
+  💬 Message: Not Found - Página não encontrada
+  👤 Usuário: p_7661
+
