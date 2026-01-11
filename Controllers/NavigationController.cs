@@ -758,15 +758,27 @@ namespace FrotiX.Controllers
                 recurso.NomeMenu = !string.IsNullOrEmpty(dto.NomeMenu) ? dto.NomeMenu : $"menu_{Guid.NewGuid():N}";
                 recurso.Icon = !string.IsNullOrEmpty(dto.Icon) ? dto.Icon : "fa-duotone fa-folder";
                 
-                // ✅ Se href é null explicitamente, mantém null (grupo sendo transformado em página)
-                // Se href é vazio ou null mas não foi explicitamente null, define como grupo
-                if (dto.Href == null)
+                // Verifica se tem filhos para determinar se é Grupo
+                var temFilhos = dto.HasChild || _unitOfWork.Recurso.GetAll(r => r.ParentId == recurso.RecursoId).Any();
+                
+                // ✅ REGRA: Grupos NUNCA têm href, apenas Páginas têm href
+                if (temFilhos)
                 {
-                    recurso.Href = null; // Grupo sendo transformado em página - mantém null
+                    // Se tem filhos, é Grupo - SEMPRE define href como void
+                    recurso.Href = "javascript:void(0);";
                 }
                 else
                 {
-                    recurso.Href = !string.IsNullOrEmpty(dto.Href) ? dto.Href : "javascript:void(0);";
+                    // Se não tem filhos, é Página - pode ter href válido
+                    if (!string.IsNullOrEmpty(dto.Href) && dto.Href != "javascript:void(0);")
+                    {
+                        recurso.Href = dto.Href;
+                    }
+                    else
+                    {
+                        // Se href é vazio/null, define como void (será uma página sem link ainda)
+                        recurso.Href = "javascript:void(0);";
+                    }
                 }
                 
                 recurso.Descricao = dto.Descricao;
@@ -781,7 +793,7 @@ namespace FrotiX.Controllers
                 
                 recurso.Nivel = dto.Nivel;
                 recurso.Ativo = dto.Ativo;
-                recurso.HasChild = dto.HasChild;
+                recurso.HasChild = temFilhos; // Atualiza HasChild baseado em ter filhos
                 recurso.ParentId = Guid.TryParse(dto.ParentId, out var parentId) ? parentId : null;
 
                 if (isNew)

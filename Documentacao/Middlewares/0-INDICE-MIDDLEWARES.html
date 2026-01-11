@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Índice: Documentação de Middlewares | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: floatSoft 3s ease-in-out infinite;
+    }
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(-1deg); }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.status { color: var(--verde); }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(85,117,112,.15), rgba(85,117,112,.10));
+      color: var(--verde);
+      border: 1px solid rgba(85,117,112,.2);
+      margin: 8px 8px 8px 0;
+    }
+    .list-item {
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--terracota);
+      transition: all 0.2s ease;
+    }
+    .list-item:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--azul);
+      transform: translateX(4px);
+    }
+    .list-item strong {
+      color: var(--azul);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/arrow-down-arrow-up.svg" alt="Middlewares" />
+    <div>
+      <h1>Índice: Documentação de Middlewares</h1>
+      <p class="subtitle">Pipeline HTTP e tratamento de exceções do sistema FrotiX</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title status">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/circle-check.svg" alt="Status" />
+        Status da Documentação
+      </div>
+      <div class="status-badge">
+        <img class="icon" src="../../Fontawesome/duotone/file-lines.svg" alt="Total" />
+        <span>Total de Arquivos: 2 arquivos</span>
+      </div>
+      <div class="status-badge" style="margin-top: 8px;">
+        <img class="icon" src="../../Fontawesome/duotone/check-double.svg" alt="Documentados" />
+        <span>Documentados: 2/2 (100%)</span>
+      </div>
+      <div class="status-badge" style="margin-top: 8px;">
+        <img class="icon" src="../../Fontawesome/duotone/circle-check.svg" alt="Status" />
+        <span>Status: ✅ Completo</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/book.svg" alt="Documentados" />
+        Arquivos Documentados
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/file-lines.svg" alt="" /> ErrorLoggingMiddleware.md</strong>
+        Middleware para captura e logging de erros HTTP
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="" /> UiExceptionMiddleware.md</strong>
+        Middleware para tratamento de exceções na UI
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Informações" />
+        Informações Gerais
+      </div>
+      <div style="padding: 16px 18px; background: linear-gradient(135deg, rgba(50,93,136,.06), rgba(50,93,136,.03)); border-radius: 10px; margin-top: 12px; border-left: 3px solid var(--azul);">
+        <strong>Localização:</strong> <code style="display: inline; background: rgba(50,93,136,.1); padding: 4px 8px; border-radius: 6px; font-size: 13px;">Middlewares/</code>
+      </div>
+      <div style="padding: 16px 18px; background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03)); border-radius: 10px; margin-top: 12px; border-left: 3px solid var(--verde);">
+        <strong>Padrão:</strong> Middlewares ASP.NET Core que interceptam requisições HTTP para tratamento de erros e logging centralizado.
+      </div>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 1.0</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

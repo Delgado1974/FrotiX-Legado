@@ -1,10 +1,44 @@
 # sp_RecalcularEstatisticasVeiculoModelo
 
-- **Objetivo**: consolidar frota por modelo de veículo.
-- **Acionamento**: usado por `sp_RecalcularTodasEstatisticasVeiculos` e `sp_AtualizarEstatisticasVeiculosMesAtual`.
-- **Parâmetros**: nenhum.
-- **Tabelas afetadas**: `EstatisticaVeiculoModelo`.
-- **Tabelas lidas**: `Veiculo`, `ModeloVeiculo`.
-- **Principais cálculos**: total e ativos por modelo (agrupa somente pela descrição do modelo, pega o primeiro `ModeloId` encontrado).
-- **Benefício para o FrotiX**: dá visibilidade do mix de modelos para gestão de frota.
-- **Status de uso**: ativo em rotinas de atualização; não chamado na aplicação.
+## Código completo
+
+```sql
+CREATE PROCEDURE dbo.sp_RecalcularEstatisticasVeiculoModelo
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DELETE FROM EstatisticaVeiculoModelo;
+
+        INSERT INTO EstatisticaVeiculoModelo (
+            ModeloId, Modelo, TotalVeiculos, VeiculosAtivos, DataAtualizacao
+        )
+        SELECT
+            MIN(v.ModeloId), -- primeiro ModeloId encontrado por descrição
+            ISNULL(m.DescricaoModelo, 'Não Informado'),
+            COUNT(*),
+            SUM(CASE WHEN v.Status = 1 THEN 1 ELSE 0 END),
+            GETDATE()
+        FROM Veiculo v
+        LEFT JOIN ModeloVeiculo m ON v.ModeloId = m.ModeloId
+        GROUP BY m.DescricaoModelo;
+
+        COMMIT TRANSACTION;
+        PRINT 'Estatísticas por modelo recalculadas com sucesso.';
+
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END
+```
+
+## Explicação por blocos
+
+- **Transação**: limpa e recria `EstatisticaVeiculoModelo`.
+- **Cálculo**: total e ativos por descrição de modelo; mantém um `ModeloId` representativo.
+- **Uso**: snapshot de modelo; chamado nas rotinas “todas” e “mês atual”.

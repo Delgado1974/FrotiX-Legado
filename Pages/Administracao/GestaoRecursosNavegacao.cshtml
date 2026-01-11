@@ -253,6 +253,32 @@
             background: transparent;
         }
 
+        /* ✅ LINHAS VISUAIS CONECTANDO NÓS (Grupos e Páginas) */
+        #gestaoTreeView .e-treeview .e-list-item {
+            position: relative;
+        }
+
+        /* Container de filhos - adiciona padding para espaço das linhas */
+        #gestaoTreeView .e-treeview .e-list-children {
+            position: relative;
+            margin-left: 1.25rem;
+            padding-left: 0.5rem;
+            border-left: 1px solid #d0d0d0;
+            opacity: 0.6;
+        }
+
+        /* Linha horizontal conectando ao nó pai */
+        #gestaoTreeView .e-treeview .e-list-item:not(:first-child)::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 50%;
+            width: 1.25rem;
+            height: 1px;
+            background-color: #d0d0d0;
+            opacity: 0.6;
+        }
+
         /* REMOVE o ícone padrão do Syncfusion (evita duplicação) */
         #gestaoTreeView .e-treeview .e-list-icon {
             display: none !important;
@@ -619,12 +645,12 @@
             gap: 0.5rem;
         }
         
-        /* Botão Confirmar (Check-mark) - Verde escuro / Verde claro */
+        /* Botão Confirmar (Check-mark) - Azul Petróleo padrão FrotiX */
         .btn-confirmar-alteracoes {
             width: 28px;
             height: 28px;
             border: none;
-            background: #e8f5e9;
+            background: #3D5771;
             border-radius: 5px;
             cursor: pointer;
             display: flex;
@@ -634,24 +660,24 @@
         }
         
         .btn-confirmar-alteracoes:hover {
-            background: #c8e6c9;
+            background: #2d4154;
             transform: scale(1.08);
         }
         
         .btn-confirmar-alteracoes i {
             font-size: 0.95rem;
-            --fa-primary-color: #2e7d32;      /* Verde escuro */
-            --fa-secondary-color: #81c784;    /* Verde claro */
+            --fa-primary-color: #fff;         /* Branco */
+            --fa-secondary-color: #a0c4e8;    /* Azul claro */
             --fa-primary-opacity: 1;
             --fa-secondary-opacity: 0.8;
         }
         
-        /* Botão Cancelar (X no círculo) - Vinho escuro / Vermelho claro */
+        /* Botão Cancelar (X no círculo) - Vinho padrão FrotiX */
         .btn-cancelar-alteracoes {
             width: 28px;
             height: 28px;
             border: none;
-            background: #ffebee;
+            background: #722F37;
             border-radius: 5px;
             cursor: pointer;
             display: flex;
@@ -661,13 +687,13 @@
         }
         
         .btn-cancelar-alteracoes:hover {
-            background: #ffcdd2;
+            background: #5a252b;
             transform: scale(1.08);
         }
         
         .btn-cancelar-alteracoes i {
             font-size: 0.95rem;
-            --fa-primary-color: #722F37;      /* Vinho escuro */
+            --fa-primary-color: #fff;         /* Branco */
             --fa-secondary-color: #FFCCCB;    /* Vermelho claro */
             --fa-primary-opacity: 1;
             --fa-secondary-opacity: 0.8;
@@ -1428,39 +1454,14 @@
                         '</div>';
                 }
                 
-                mensagemBase += '<div style="text-align:left; margin-top:10px;">' +
-                    '<label style="font-weight:600; margin-bottom:8px; display:block;">Selecione a Página do Sistema:</label>' +
-                    htmlPaginas +
-                    '</div>';
+                // Não inclui o select na mensagemBase - será inserido pela função do modal
                 
-                Swal.fire({
-                    title: 'Transformar Grupo em Página',
-                    html: mensagemBase,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-duotone fa-check"></i> Transformar',
-                    cancelButtonText: '<i class="fa-duotone fa-xmark"></i> Cancelar',
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    customClass: {
-                        popup: 'swal-wide'
-                    },
-                    preConfirm: function() {
-                        var selectPagina = document.getElementById('swalSelectPagina');
-                        if (!selectPagina || !selectPagina.value) {
-                            Swal.showValidationMessage('Selecione uma página do sistema!');
-                            return false;
+                mostrarModalTransformacaoGrupoEmPagina('Transformar Grupo em Página', mensagemBase, htmlPaginas)
+                    .then(function(result) {
+                        if (result.confirmado && result.paginaUrl) {
+                            executarTransformacaoGrupoEmPagina(item, result.paginaUrl);
                         }
-                        return {
-                            paginaId: selectPagina.value,
-                            paginaUrl: selectPagina.options[selectPagina.selectedIndex].dataset.url
-                        };
-                    }
-                }).then(function(result) {
-                    if (result.isConfirmed && result.value) {
-                        executarTransformacaoGrupoEmPagina(item, result.value.paginaUrl);
-                    }
-                });
+                    });
                 
             } else {
                 // ═══════════════════════════════════════════════════════════
@@ -1535,47 +1536,398 @@
         }
     }
     
-    // Monta HTML do <select> de páginas para usar no SweetAlert
+    // Busca ícone personalizado na treeData por URL/href
+    function buscarIconePorUrl(items, url) {
+        try {
+            if (!items || !url) return null;
+            
+            // Normaliza URL para comparação (múltiplos formatos)
+            var normalizarUrl = function(u) {
+                if (!u) return '';
+                u = u.toLowerCase().trim();
+                u = u.replace(/^\//, ''); // Remove barra inicial
+                u = u.replace(/\.html$/, ''); // Remove .html se existir
+                u = u.replace(/\.cshtml$/, ''); // Remove .cshtml se existir
+                u = u.replace(/_/g, ''); // Remove underscores para comparação flexível
+                u = u.replace(/\//g, ''); // Remove barras
+                return u;
+            };
+            
+            // Extrai partes da URL (módulo e página) para correspondência mais precisa
+            var extrairPartesUrl = function(u) {
+                if (!u) return { modulo: '', pagina: '', completa: '' };
+                u = u.toLowerCase().trim();
+                var partes = u.replace(/\.(html|cshtml)$/, '').split(/[\/_]/);
+                return {
+                    modulo: partes[0] || '',
+                    pagina: partes[1] || partes[0] || '',
+                    completa: u.replace(/\.(html|cshtml)$/, '').replace(/[\/_]/g, '')
+                };
+            };
+            
+            var urlNormalizada = normalizarUrl(url);
+            var partesUrl = extrairPartesUrl(url);
+            
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                
+                // Compara href do item com a URL normalizada (múltiplas estratégias)
+                if (item.href) {
+                    var hrefNormalizado = normalizarUrl(item.href);
+                    var partesHref = extrairPartesUrl(item.href);
+                    
+                    // Estratégia 1: Comparação exata normalizada
+                    var matchExato = hrefNormalizado === urlNormalizada;
+                    
+                    // Estratégia 2: Comparação por partes (módulo + página)
+                    var matchPartes = partesHref.completa === partesUrl.completa || 
+                                     (partesHref.modulo === partesUrl.modulo && partesHref.pagina === partesUrl.pagina);
+                    
+                    // Estratégia 3: Comparação flexível (contém)
+                    var matchFlexivel = hrefNormalizado.includes(urlNormalizada) || urlNormalizada.includes(hrefNormalizado);
+                    
+                    if ((matchExato || matchPartes || matchFlexivel) && item.icon) {
+                        // Normaliza ícone para duotone se necessário
+                        var iconClass = item.icon || '';
+                        if (iconClass && !iconClass.includes('fa-duotone')) {
+                            iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
+                        }
+                        return iconClass || null;
+                    }
+                }
+                
+                // Busca recursivamente nos filhos
+                if (item.items && item.items.length > 0) {
+                    var found = buscarIconePorUrl(item.items, url);
+                    if (found) return found;
+                }
+            }
+            
+            return null;
+        } catch (erro) {
+            console.error('[buscarIconePorUrl]', erro);
+            return null;
+        }
+    }
+    
+    // Busca item na treeData por texto/nome (para grupos/categorias)
+    function buscarItemPorTexto(items, texto) {
+        try {
+            if (!items || !texto) return null;
+            
+            var textoBusca = (texto || '').toLowerCase().trim();
+            
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var textoItem = (item.text || '').toLowerCase().trim();
+                
+                // Compara texto normalizado
+                if (textoItem === textoBusca) {
+                    return item;
+                }
+                
+                // Busca recursivamente nos filhos
+                if (item.items && item.items.length > 0) {
+                    var found = buscarItemPorTexto(item.items, texto);
+                    if (found) return found;
+                }
+            }
+            
+            return null;
+        } catch (erro) {
+            console.error('[buscarItemPorTexto]', erro);
+            return null;
+        }
+    }
+    
+    // Monta HTML do <select> de páginas com ícones personalizados da treeData
     function montarSelectPaginasParaSwal(itemIdExcluir) {
         try {
             var ddlPaginaObj = document.getElementById('ddlPagina');
             if (!ddlPaginaObj || !ddlPaginaObj.ej2_instances || !ddlPaginaObj.ej2_instances[0]) {
-                return '<p class="text-danger">Erro ao carregar páginas</p>';
+                return '<p style="color:#ff6b35;">Erro ao carregar páginas</p>';
             }
             
             var ddl = ddlPaginaObj.ej2_instances[0];
             var dataSource = ddl.fields && ddl.fields.dataSource ? ddl.fields.dataSource : [];
             
-            if (dataSource.length === 0) {
-                return '<p class="text-warning">Nenhuma página disponível</p>';
+            if (!dataSource || dataSource.length === 0) {
+                return '<p style="color:#ff6b35; padding:20px; text-align:center;">⚠️ Nenhuma página disponível. Aguarde o carregamento das páginas do sistema.</p>';
             }
             
-            var html = '<select id="swalSelectPagina" class="form-control" style="width:100%; padding:10px; font-size:1rem;">';
-            html += '<option value="">-- Selecione uma página --</option>';
+            // Lista customizada com divs clicáveis (permite HTML e ícones FontAwesome)
+            var html = '<div id="swalListaPaginas" style="max-height:300px; overflow-y:auto; border:2px solid #3D5771; border-radius:6px; background:#1e1e2f;">';
             
-            // Função recursiva para montar opções hierárquicas
+            var totalOpcoes = 0;
+            
+            // Função recursiva para montar lista hierárquica com ícones FontAwesome oficiais
             function adicionarOpcoes(items, nivel) {
                 items.forEach(function(item) {
-                    var indent = '&nbsp;&nbsp;'.repeat(nivel * 2);
-                    var icone = (item.child && item.child.length > 0) ? '📁' : '📄';
-                    html += '<option value="' + item.id + '" data-url="' + (item.url || '') + '">' + 
-                            indent + icone + ' ' + item.text + '</option>';
+                    var indentPx = nivel * 20;
+                    var temFilhos = item.child && item.child.length > 0;
+                    // Categoria é identificada por: isCategory=true OU (tem filhos E não tem paginaRef)
+                    var isCategory = item.isCategory || (temFilhos && !item.paginaRef);
                     
-                    if (item.child && item.child.length > 0) {
+                    // URL vem do campo paginaRef (igual ao DropDownTree)
+                    var paginaUrl = item.paginaRef || item.url || '';
+                    
+                    // ✅ Busca ícone personalizado na treeData (igual à Estrutura do Menu)
+                    var iconClass = '';
+                    if (isCategory) {
+                        // Para categorias/grupos, busca na treeData por texto/nome
+                        var grupoEncontrado = buscarItemPorTexto(treeData || [], item.text);
+                        if (grupoEncontrado && grupoEncontrado.icon) {
+                            iconClass = grupoEncontrado.icon;
+                            // Normaliza ícone para duotone se necessário
+                            if (!iconClass.includes('fa-duotone')) {
+                                iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
+                            }
+                        } else {
+                            // Fallback: usa folder-tree se não encontrar ícone personalizado
+                            iconClass = 'fa-duotone fa-folder-tree';
+                        }
+                    } else {
+                        // Para páginas, busca ícone personalizado pela URL
+                        var iconPersonalizado = buscarIconePorUrl(treeData || [], paginaUrl);
+                        if (iconPersonalizado) {
+                            iconClass = iconPersonalizado;
+                        } else {
+                            // Fallback: usa file-lines se não encontrar ícone personalizado
+                            iconClass = 'fa-duotone fa-file-lines';
+                        }
+                    }
+                    
+                    // Só permite selecionar páginas (não categorias)
+                    var podeSelecionar = !isCategory && paginaUrl;
+                    
+                    html += '<div class="swal-item-pagina' + (isCategory ? ' swal-item-categoria' : ' swal-item-pagina-sel') + '" ' +
+                            'data-itemid="' + item.id + '" ' +
+                            'data-url="' + paginaUrl + '" ' +
+                            'data-iscategory="' + (isCategory ? 'true' : 'false') + '" ' +
+                            'data-podeselecionar="' + (podeSelecionar ? 'true' : 'false') + '" ' +
+                            'style="padding:10px 15px; padding-left:' + (15 + indentPx) + 'px; border-bottom:1px solid #2d2d4d; ' +
+                            'display:flex; align-items:center; gap:8px; transition:all 0.2s; ' +
+                            (isCategory ? 'font-weight:700; color:#6c757d; cursor:not-allowed; opacity:0.7;' : 'font-weight:400; color:#e0e0e0; cursor:pointer;') + '">' +
+                            '<i class="' + iconClass + '" style="font-size:16px; width:20px; flex-shrink:0; --fa-primary-color:#ff6b35; --fa-secondary-color:#6c757d;"></i>' +
+                            '<span style="flex:1;">' + decodeHtml(item.text) + '</span>' +
+                            (podeSelecionar ? '' : '<i class="fa-duotone fa-ban" style="font-size:14px; flex-shrink:0; --fa-primary-color:#ff4444; --fa-secondary-color:#ff8888;"></i>') +
+                            '</div>';
+                    totalOpcoes++;
+                    
+                    if (temFilhos) {
                         adicionarOpcoes(item.child, nivel + 1);
                     }
                 });
             }
             
             adicionarOpcoes(dataSource, 0);
-            html += '</select>';
+            html += '</div>';
+            // Campos hidden para armazenar seleção
+            html += '<input type="hidden" id="swalPaginaSelecionada" value="" />';
+            html += '<input type="hidden" id="swalUrlSelecionada" value="" />';
             
             return html;
             
         } catch (erro) {
             console.error('[SWAL-SELECT]', erro);
-            return '<p class="text-danger">Erro ao carregar páginas</p>';
+            return '<p style="color:#ff6b35;">Erro ao carregar páginas</p>';
         }
+    }
+    
+    // Modal customizado padrão FrotiX para transformação Grupo→Página
+    function mostrarModalTransformacaoGrupoEmPagina(titulo, mensagem, htmlSelect) {
+        return new Promise(function(resolve) {
+            var iconHtml = '<img src="/images/confirmar_transparente.png" style="max-width: 150px; width: 100%; height: auto; margin-bottom: 10px;">';
+            
+            var msg = `
+            <div style="background:#1e1e2f; border-radius: 8px; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: #e0e0e0;">
+              <div style="background:#2d2d4d; padding: 20px; text-align: center;">
+                <div style="margin-bottom: 10px;">
+                  <div style="display: inline-block; max-width: 200px; width: 100%;">
+                    ${iconHtml}
+                  </div>
+                </div>
+                <div style="font-size: 20px; color: #c9a8ff; font-weight: bold;">${titulo}</div>
+              </div>
+
+              <div style="padding: 20px; font-size: 15px; line-height: 1.6; text-align: center; background:#1e1e2f">
+                <div style="margin-bottom: 20px;">${mensagem}</div>
+                <div style="margin-top: 15px; text-align: left;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#e0e0e0;">Selecione a Página do Sistema:</label>
+                  ${htmlSelect}
+                </div>
+              </div>
+
+              <div style="background:#3b3b5c; padding: 15px; text-align: center;">
+                <button id="btnCancelTransform" style="
+                  background: #722F37;
+                  border: none;
+                  color: #fff;
+                  padding: 10px 20px;
+                  margin-right: 10px;
+                  font-size: 14px;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  transition: background 0.3s;
+                " onmouseover="this.style.background='#5a252b'" onmouseout="this.style.background='#722F37'">
+                  <i class="fa-duotone fa-circle-xmark" style="--fa-primary-color:#fff; --fa-secondary-color:#FFCCCB; margin-right: 5px;"></i>Cancelar
+                </button>
+
+                <button id="btnConfirmTransform" style="
+                  background: #3D5771;
+                  border: none;
+                  color: #fff;
+                  padding: 10px 20px;
+                  font-size: 14px;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  transition: background 0.3s;
+                " onmouseover="this.style.background='#2d4154'" onmouseout="this.style.background='#3D5771'">
+                  <i class="fa-duotone fa-arrow-right-arrow-left" style="--fa-primary-color:#fff; --fa-secondary-color:#a0c4e8; margin-right: 5px;"></i>Transformar
+                </button>
+              </div>
+            </div>`;
+
+            Swal.fire({
+                showConfirmButton: false,
+                html: msg,
+                backdrop: true,
+                heightAuto: false,
+                allowOutsideClick: false,
+                allowEscapeKey: true,
+                focusConfirm: false,
+                customClass: {
+                    popup: 'swal2-popup swal2-no-border swal2-no-shadow'
+                },
+                didOpen: function() {
+                    var popup = document.querySelector('.swal2-popup');
+                    if (popup) {
+                        popup.style.border = 'none';
+                        popup.style.boxShadow = 'none';
+                        popup.style.background = 'transparent';
+                    }
+                    
+                    // ✅ Event delegation para cliques nos itens da lista
+                    // Usa setTimeout para garantir que o DOM foi completamente renderizado
+                    setTimeout(function() {
+                        var listaPaginas = document.getElementById('swalListaPaginas');
+                        if (listaPaginas) {
+                            listaPaginas.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                // Busca o item pai mais próximo que tenha a classe swal-item-pagina
+                                var target = e.target;
+                                var item = null;
+                                
+                                // Tenta encontrar o item pai
+                                while (target && target !== listaPaginas) {
+                                    if (target.classList && target.classList.contains('swal-item-pagina')) {
+                                        item = target;
+                                        break;
+                                    }
+                                    target = target.parentElement;
+                                }
+                                
+                                if (!item) {
+                                    return;
+                                }
+                                
+                                var podeSelecionar = item.dataset.podeselecionar === 'true';
+                                var isCategory = item.dataset.iscategory === 'true';
+                                
+                                if (!podeSelecionar || isCategory || !item.dataset.itemid) {
+                                    return; // Não permite selecionar categorias ou placeholder
+                                }
+                                
+                                // Remove seleção anterior
+                                document.querySelectorAll('.swal-item-pagina').forEach(function(el) {
+                                    el.style.background = 'transparent';
+                                    el.style.borderLeft = 'none';
+                                    el.classList.remove('swal-item-selected');
+                                    delete el.dataset.selected;
+                                });
+                                
+                                // Seleciona item atual
+                                item.style.background = '#3D5771';
+                                item.style.borderLeft = '3px solid #ff6b35';
+                                item.classList.add('swal-item-selected');
+                                item.dataset.selected = 'true';
+                                
+                                // Atualiza campos hidden
+                                var paginaIdInput = document.getElementById('swalPaginaSelecionada');
+                                var urlInput = document.getElementById('swalUrlSelecionada');
+                                
+                                if (!paginaIdInput || !urlInput) {
+                                    return;
+                                }
+                                
+                                paginaIdInput.value = item.dataset.itemid;
+                                urlInput.value = item.dataset.url || '';
+                            }, true); // useCapture = true para garantir captura
+                            
+                            // Hover effect para páginas selecionáveis
+                            listaPaginas.addEventListener('mouseover', function(e) {
+                                var target = e.target;
+                                var item = null;
+                                while (target && target !== listaPaginas) {
+                                    if (target.classList && target.classList.contains('swal-item-pagina')) {
+                                        item = target;
+                                        break;
+                                    }
+                                    target = target.parentElement;
+                                }
+                                if (item && item.dataset.podeselecionar === 'true' && item.dataset.selected !== 'true') {
+                                    item.style.background = '#2d2d4d';
+                                }
+                            }, true);
+                            
+                            listaPaginas.addEventListener('mouseout', function(e) {
+                                var target = e.target;
+                                var item = null;
+                                while (target && target !== listaPaginas) {
+                                    if (target.classList && target.classList.contains('swal-item-pagina')) {
+                                        item = target;
+                                        break;
+                                    }
+                                    target = target.parentElement;
+                                }
+                                if (item && item.dataset.selected !== 'true') {
+                                    item.style.background = 'transparent';
+                                }
+                            }, true);
+                        }
+                    }, 100);
+                    
+                    var confirmBtn = document.getElementById('btnConfirmTransform');
+                    if (confirmBtn) {
+                        confirmBtn.onclick = function() {
+                            var paginaIdInput = document.getElementById('swalPaginaSelecionada');
+                            var urlInput = document.getElementById('swalUrlSelecionada');
+                            
+                            if (!paginaIdInput || !paginaIdInput.value || !urlInput || !urlInput.value) {
+                                Alerta.Warning('Atenção', 'Selecione uma página do sistema clicando em um item da lista!');
+                                return;
+                            }
+                            
+                            var paginaId = paginaIdInput.value;
+                            var paginaUrl = urlInput.value;
+                            
+                            Swal.close();
+                            resolve({ confirmado: true, paginaId: paginaId, paginaUrl: paginaUrl });
+                        };
+                    }
+                    
+                    var cancelBtn = document.getElementById('btnCancelTransform');
+                    if (cancelBtn) {
+                        cancelBtn.onclick = function() {
+                            Swal.close();
+                            resolve({ confirmado: false });
+                        };
+                    }
+                }
+            });
+        });
     }
     
     // Encontra itens irmãos que estão ABAIXO do item atual
@@ -1602,9 +1954,12 @@
         }
     }
     
-    // Executa transformação GRUPO → PÁGINA
+    // Executa transformação GRUPO → PÁGINA (salva imediatamente)
     function executarTransformacaoGrupoEmPagina(item, novaUrl) {
         try {
+            // Guarda o ID do item
+            var itemId = item.id;
+            
             // Se tem filhos, move para o nível do pai
             if (item.items && item.items.length > 0) {
                 var paiId = item.parentId;
@@ -1631,16 +1986,48 @@
             // Define a nova URL
             item.href = novaUrl;
             
+            // Força reconstrução da árvore
+            treeData = JSON.parse(JSON.stringify(treeData));
+            
             // Atualiza TreeView
             atualizarTreeViewAposMovimento(item.id);
             
-            // Atualiza formulário se o item está selecionado
-            if (selectedItem && selectedItem.id === item.id) {
+            // Aguarda um pouco para garantir que o TreeView foi atualizado
+            setTimeout(function() {
+                // Busca o item atualizado do treeData
+                var itemAtualizado = buscarItemPorId(treeData, itemId);
+                if (!itemAtualizado) {
+                    return;
+                }
+                
+                // Atualiza selectedItem com o item atualizado
+                selectedItem = itemAtualizado;
+                
+                // Seleciona visualmente no TreeView
+                if (treeObj) {
+                    var node = treeObj.getNode(itemId);
+                    if (node) {
+                        treeObj.select([node]);
+                    }
+                }
+                
+                // Atualiza formulário
+                var tipoItemEl = document.getElementById('tipoItem');
+                var txtHrefEl = document.getElementById('txtHref');
+                
+                if (tipoItemEl) tipoItemEl.value = 'pagina';
                 selecionarTipoItem('pagina');
-                document.getElementById('txtHref').value = novaUrl;
-            }
-            
-            mostrarAlerta('Grupo transformado em Página!', 'success');
+                if (txtHrefEl) txtHrefEl.value = novaUrl;
+                
+                // ✅ Salva imediatamente (não marca alterações pendentes)
+                salvarPropriedades().then(function() {
+                    // Após salvar propriedades, salva a estrutura completa
+                    salvarArvoreCompleta();
+                    Alerta.Sucesso('Transformação Realizada', 'O grupo foi transformado em página e salvo com sucesso!');
+                }).catch(function(erro) {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
+                });
+            }, 500);
             
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoGrupoEmPagina", erro);
@@ -1809,26 +2196,55 @@
                 }
             }
             
+            // Força reconstrução da árvore
+            treeData = JSON.parse(JSON.stringify(treeData));
+            
             // Atualiza TreeView
             atualizarTreeViewAposMovimento(item.id);
             
-            // Atualiza formulário se o item está selecionado
-            if (selectedItem && selectedItem.id === item.id) {
-                selecionarTipoItem('grupo');
-                document.getElementById('txtHref').value = '';
-            }
-            
-            // Mensagem de sucesso
-            var msg = 'Página transformada em Grupo!';
-            if (itensParaMover && itensParaMover.length > 0) {
-                if (subordinarAoNovoGrupo) {
-                    msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s)!';
-                } else if (grupoDestinoId) {
-                    msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo.';
+            // Aguarda um pouco para garantir que o TreeView foi atualizado
+            setTimeout(function() {
+                // Atualiza formulário se o item está selecionado
+                if (selectedItem && selectedItem.id === item.id) {
+                    selecionarTipoItem('grupo');
+                    var txtHrefEl = document.getElementById('txtHref');
+                    if (txtHrefEl) txtHrefEl.value = '';
+                    
+                    // ✅ Salva imediatamente (não marca alterações pendentes)
+                    salvarPropriedades().then(function() {
+                        // Após salvar propriedades, salva a estrutura completa
+                        salvarArvoreCompleta();
+                        
+                        // Mensagem de sucesso
+                        var msg = 'Página transformada em Grupo e salva com sucesso!';
+                        if (itensParaMover && itensParaMover.length > 0) {
+                            if (subordinarAoNovoGrupo) {
+                                msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s) e salvo com sucesso!';
+                            } else if (grupoDestinoId) {
+                                msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo. Alterações salvas.';
+                            }
+                        }
+                        
+                        Alerta.Sucesso('Transformação Realizada', msg);
+                    }).catch(function(erro) {
+                        Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
+                    });
+                } else {
+                    // Se não está selecionado, salva apenas a estrutura
+                    salvarArvoreCompleta();
+                    
+                    var msg = 'Página transformada em Grupo e salva com sucesso!';
+                    if (itensParaMover && itensParaMover.length > 0) {
+                        if (subordinarAoNovoGrupo) {
+                            msg = 'Grupo criado com ' + itensParaMover.length + ' filho(s) e salvo com sucesso!';
+                        } else if (grupoDestinoId) {
+                            msg = 'Grupo criado! ' + itensParaMover.length + ' item(ns) movido(s) para outro grupo. Alterações salvas.';
+                        }
+                    }
+                    
+                    Alerta.Sucesso('Transformação Realizada', msg);
                 }
-            }
-            
-            mostrarAlerta(msg, 'success');
+            }, 500);
             
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "executarTransformacaoPaginaEmGrupo", erro);
@@ -1882,46 +2298,42 @@
         try {
             console.log('[ALTERAÇÕES] ✅ Confirmando alterações...');
             
-            // ✅ Verifica se há grupos vazios (sem filhos) que devem ser excluídos
-            var gruposVazios = encontrarGruposVazios(treeData);
-            console.log('[ALTERAÇÕES] Grupos vazios encontrados:', gruposVazios.length);
-            
-            if (gruposVazios.length > 0) {
-                // Monta lista de nomes
-                var nomes = gruposVazios.map(function(g) { return decodeHtml(g.text); }).join(', ');
+            // Se há item selecionado com alterações (ex: transformação de tipo), salva primeiro
+            if (selectedItem && selectedItem._transformado) {
+                console.log('[ALTERAÇÕES] Item foi transformado, salvando primeiro...');
                 
-                Alerta.Confirmar(
-                    'Grupos Vazios Encontrados',
-                    'Os seguintes grupos ficaram sem itens: <strong>' + nomes + '</strong>.<br><br>Deseja excluí-los?',
-                    'Sim, Excluir Grupos Vazios',
-                    'Não, Manter como Grupos'
-                ).then(function(excluir) {
-                    if (excluir) {
-                        // Remove grupos vazios
-                        gruposVazios.forEach(function(grupo) {
-                            removerItemDaArvore(treeData, grupo.id);
-                            console.log('[ALTERAÇÕES] Grupo vazio removido:', grupo.text);
-                        });
-                        
-                        // Força reconstrução
-                        treeData = JSON.parse(JSON.stringify(treeData));
-                    }
+                // Garante que os campos do formulário estão corretos
+                var tipoItem = document.getElementById('tipoItem');
+                var txtHref = document.getElementById('txtHref');
+                
+                if (tipoItem) tipoItem.value = 'pagina';
+                if (txtHref && selectedItem._novaUrl) txtHref.value = selectedItem._novaUrl;
+                
+                // Salva o item transformado primeiro
+                salvarPropriedades().then(function() {
+                    // Remove a flag de transformação
+                    delete selectedItem._transformado;
+                    delete selectedItem._novaUrl;
                     
-                    // Continua com o salvamento
-                    finalizarConfirmacaoAlteracoes();
+                    // Depois salva a árvore
+                    salvarArvoreCompleta();
+                }).catch(function(erro) {
+                    console.error('[ALTERAÇÕES] Erro ao salvar item transformado:', erro);
+                    Alerta.Erro('Erro ao Salvar', 'Não foi possível salvar a transformação do item.');
                 });
-            } else {
-                // Sem grupos vazios, salva direto
-                finalizarConfirmacaoAlteracoes();
+                return;
             }
+            
+            // Salva apenas a árvore (reordenação)
+            salvarArvoreCompleta();
             
         } catch (erro) {
             Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "confirmarAlteracoes", erro);
         }
     }
     
-    // Finaliza a confirmação de alterações (após verificar grupos vazios)
-    function finalizarConfirmacaoAlteracoes() {
+    // Salva a árvore completa após confirmação
+    function salvarArvoreCompleta() {
         try {
             // Salva no banco
             salvarOrdenacaoAutomatica();
@@ -1936,38 +2348,16 @@
             // Atualiza o estado original para o novo estado
             guardarEstadoOriginal();
             
+            // Esconde o card de alterações
+            alteracoesPendentes = false;
+            esconderCardAlteracoes();
+            
             // Mostra mensagem de sucesso
-            mostrarAlerta('Alterações salvas com sucesso!', 'success');
+            Alerta.Sucesso('Alterações Salvas', 'As alterações na estrutura do menu foram salvas com sucesso!');
             
         } catch (erro) {
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "finalizarConfirmacaoAlteracoes", erro);
+            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarArvoreCompleta", erro);
         }
-    }
-    
-    // Encontra grupos vazios (sem filhos) na árvore
-    function encontrarGruposVazios(items) {
-        var vazios = [];
-        
-        function buscarRecursivo(lista) {
-            lista.forEach(function(item) {
-                // Um grupo é identificado por não ter href válido ou ter href = javascript:void(0);
-                var ehGrupo = !item.href || item.href === 'javascript:void(0);';
-                var temFilhos = item.items && item.items.length > 0;
-                
-                // Se é grupo mas não tem filhos, está vazio
-                if (ehGrupo && !temFilhos) {
-                    vazios.push(item);
-                }
-                
-                // Busca recursivamente nos filhos
-                if (temFilhos) {
-                    buscarRecursivo(item.items);
-                }
-            });
-        }
-        
-        buscarRecursivo(items);
-        return vazios;
     }
     
     // Cancela as alterações e restaura o estado original
@@ -2166,7 +2556,14 @@
                     child: 'items'
                 },
                 nodeTemplate: function(data) {
-                    var isGroup = !data.href || data.href === 'javascript:void(0);' || (data.items && data.items.length > 0);
+                    // ✅ REGRA: Grupo nunca tem href, apenas Páginas têm href
+                    // Grupo = tem filhos OU href vazio/null/javascript:void(0)
+                    var isGroup = (data.items && data.items.length > 0) || !data.href || data.href === 'javascript:void(0);' || data.href === '';
+                    // Se tem href válido (não vazio, não void), é Página
+                    if (data.href && data.href !== 'javascript:void(0);' && data.href !== '') {
+                        isGroup = false;
+                    }
+                    
                     var badge = isGroup ? 'Grupo' : 'Página';
                     var badgeClass = isGroup ? 'badge-grupo' : 'badge-pagina';
                     var badgeTitle = isGroup ? 'Clique para transformar em Página' : 'Clique para transformar em Grupo';
@@ -3036,29 +3433,31 @@
 
     // Salva propriedades do item
     function salvarPropriedades() {
-        try {
-            // ✅ Obtém o tipo de item do toggle
-            var tipoItem = document.getElementById('tipoItem').value;
-            var ehGrupo = (tipoItem === 'grupo');
-            
-            // ✅ CODIFICA valores antes de enviar ao backend
-            var txtHref = document.getElementById('txtHref').value;
-            var parentIdValue = document.getElementById('parentId').value;
-            
-            // ✅ Define href baseado no tipo
-            var hrefFinal;
-            if (ehGrupo) {
-                // Grupo não tem URL de página
-                hrefFinal = 'javascript:void(0);';
-            } else {
-                // Página deve ter URL
-                hrefFinal = txtHref || null;
+        return new Promise(function(resolve, reject) {
+            try {
+                // ✅ Obtém o tipo de item do toggle
+                var tipoItem = document.getElementById('tipoItem').value;
+                var ehGrupo = (tipoItem === 'grupo');
                 
-                if (!hrefFinal) {
-                    mostrarAlerta('Para itens do tipo Página, selecione uma página do sistema!', 'warning');
-                    return;
+                // ✅ CODIFICA valores antes de enviar ao backend
+                var txtHref = document.getElementById('txtHref').value;
+                var parentIdValue = document.getElementById('parentId').value;
+                
+                // ✅ Define href baseado no tipo
+                var hrefFinal;
+                if (ehGrupo) {
+                    // Grupo não tem URL de página
+                    hrefFinal = 'javascript:void(0);';
+                } else {
+                    // Página deve ter URL
+                    hrefFinal = txtHref || null;
+                    
+                    if (!hrefFinal) {
+                        Alerta.Warning('Atenção', 'Para itens do tipo Página, selecione uma página do sistema!');
+                        reject(new Error('URL não informada'));
+                        return;
+                    }
                 }
-            }
             
             // ✅ Obtém posição selecionada no dropdown
             var posicaoSelecionada = null;
@@ -3094,92 +3493,100 @@
                 posicaoAbaixoDe: posicaoSelecionada  // ✅ Envia para backend posicionar corretamente
             };
 
-            console.log('DTO codificado para envio:', dto);
+                console.log('DTO codificado para envio:', dto);
 
-            if (!dto.text || !dto.nomeMenu) {
-                mostrarAlerta('Preencha Nome e NomeMenu!', 'warning');
-                return;
-            }
-
-            var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
-
-            fetch('/api/Navigation/SaveRecurso', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dto)
-            })
-            .then(r => r.json())
-            .then(result => {
-                if (result.success) {
-                    mostrarAlerta(result.message, 'success');
-
-                    // ✅ Atualiza árvore após pequeno delay para garantir que backend processou
-                    setTimeout(function() {
-                        carregarArvore();
-                    }, 300);
-
-                    // ✅ Atualiza navegação lateral após salvar
-                    atualizarNavegacaoLateral();
-
-                    var recursoId = result.id || dto.id;
-
-                    // ✅ APENAS para NOVO ITEM: habilita acesso e pergunta sobre gerenciamento
-                    if (ehNovoItem && recursoId) {
-                        // Habilita acesso para todos usuários automaticamente
-                        habilitarAcessoTodosUsuarios(recursoId);
-
-                        // Pergunta se deseja fazer controle de acesso
-                        Alerta.Confirmar(
-                            'Gerenciar Controle de Acesso',
-                            'Deseja gerenciar o controle de acesso deste item agora?',
-                            'Sim',
-                            'Não'
-                        ).then(function(result) {
-                            if (result) {
-                                // Atualiza selectedItem com o ID retornado
-                                selectedItem = {
-                                    id: recursoId,
-                                    text: dto.text,
-                                    nomeMenu: dto.nomeMenu,
-                                    href: dto.href,
-                                    icon: dto.icon,
-                                    ordem: dto.ordem,
-                                    descricao: dto.descricao,
-                                    ativo: dto.ativo,
-                                    parentId: dto.parentId
-                                };
-                                document.getElementById('recursoId').value = recursoId;
-
-                                // Desabilita Card de Propriedades
-                                habilitarCardPropriedades(false);
-
-                                // Carrega controle de acesso
-                                carregarControleAcesso(recursoId);
-
-                                // Mostra Card de Controle de Acesso
-                                document.getElementById('acessoCard').style.display = 'block';
-                            } else {
-                                // Não quer gerenciar acesso, fecha os cards
-                                document.getElementById('propsCard').style.display = 'none';
-                                document.getElementById('acessoCard').style.display = 'none';
-                                habilitarCardPropriedades(true);
-                            }
-                        });
-                    } else {
-                        // ✅ EDIÇÃO de item existente: apenas fecha card de propriedades
-                        document.getElementById('propsCard').style.display = 'none';
-                        habilitarCardPropriedades(true);
-                    }
-                } else {
-                    mostrarAlerta('Erro: ' + result.message, 'danger');
+                if (!dto.text || !dto.nomeMenu) {
+                    Alerta.Warning('Atenção', 'Preencha Nome e NomeMenu!');
+                    reject(new Error('Campos obrigatórios não preenchidos'));
+                    return;
                 }
-            })
-            .catch(erro => {
+
+                var ehNovoItem = !dto.id;  // Se não tem ID, é novo item
+
+                fetch('/api/Navigation/SaveRecurso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.success) {
+                        mostrarAlerta(result.message, 'success');
+
+                        // ✅ Atualiza árvore após pequeno delay para garantir que backend processou
+                        setTimeout(function() {
+                            carregarArvore();
+                        }, 300);
+
+                        // ✅ Atualiza navegação lateral após salvar
+                        atualizarNavegacaoLateral();
+
+                        var recursoId = result.id || dto.id;
+
+                        // ✅ APENAS para NOVO ITEM: habilita acesso e pergunta sobre gerenciamento
+                        if (ehNovoItem && recursoId) {
+                            // Habilita acesso para todos usuários automaticamente
+                            habilitarAcessoTodosUsuarios(recursoId);
+
+                            // Pergunta se deseja fazer controle de acesso
+                            Alerta.Confirmar(
+                                'Gerenciar Controle de Acesso',
+                                'Deseja gerenciar o controle de acesso deste item agora?',
+                                'Sim',
+                                'Não'
+                            ).then(function(result) {
+                                if (result) {
+                                    // Atualiza selectedItem com o ID retornado
+                                    selectedItem = {
+                                        id: recursoId,
+                                        text: dto.text,
+                                        nomeMenu: dto.nomeMenu,
+                                        href: dto.href,
+                                        icon: dto.icon,
+                                        ordem: dto.ordem,
+                                        descricao: dto.descricao,
+                                        ativo: dto.ativo,
+                                        parentId: dto.parentId
+                                    };
+                                    document.getElementById('recursoId').value = recursoId;
+
+                                    // Desabilita Card de Propriedades
+                                    habilitarCardPropriedades(false);
+
+                                    // Carrega controle de acesso
+                                    carregarControleAcesso(recursoId);
+
+                                    // Mostra Card de Controle de Acesso
+                                    document.getElementById('acessoCard').style.display = 'block';
+                                } else {
+                                    // Não quer gerenciar acesso, fecha os cards
+                                    document.getElementById('propsCard').style.display = 'none';
+                                    document.getElementById('acessoCard').style.display = 'none';
+                                    habilitarCardPropriedades(true);
+                                }
+                            });
+                        } else {
+                            // ✅ EDIÇÃO de item existente: apenas fecha card de propriedades
+                            document.getElementById('propsCard').style.display = 'none';
+                            habilitarCardPropriedades(true);
+                        }
+                        
+                        // Resolve a Promise após sucesso
+                        resolve(result);
+                    } else {
+                        mostrarAlerta('Erro: ' + result.message, 'danger');
+                        reject(new Error(result.message));
+                    }
+                })
+                .catch(erro => {
+                    Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
+                    reject(erro);
+                });
+            } catch (erro) {
                 Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
-            });
-        } catch (erro) {
-            Alerta.TratamentoErroComLinha("GestaoRecursosNavegacao.cshtml", "salvarPropriedades", erro);
-        }
+                reject(erro);
+            }
+        });
     }
 
     // Adiciona novo item
@@ -3562,10 +3969,12 @@
             treeData = JSON.parse(JSON.stringify(treeData));
             
             // Atualiza TreeView
-            treeObj.fields.dataSource = treeData;
-            treeObj.dataBind();
-            treeObj.refresh();
-            treeObj.expandAll();
+            if (treeObj) {
+                treeObj.fields.dataSource = treeData;
+                treeObj.dataBind();
+                treeObj.refresh();
+                treeObj.expandAll();
+            }
             
             // ✅ Reconfigura event listeners (necessário após refresh)
             configurarBotoesNavegacao();
@@ -3579,12 +3988,13 @@
                 var itemAtualizado = buscarItemPorId(treeData, itemIdParaManter);
                 if (itemAtualizado) {
                     selectedItem = itemAtualizado;
-                    selecionarItem(itemAtualizado);
+                    // NÃO chama selecionarItem aqui para evitar recarregar dados antigos
+                    // selecionarItem será chamado separadamente se necessário
                 }
             }
             
-            // ✅ NÃO salva automaticamente - marca alterações pendentes
-            // O usuário precisa confirmar ou cancelar com os botões ✓ e ✗
+            // ✅ Marca alterações pendentes apenas para movimentos de posição
+            // Transformações de tipo (Grupo ↔ Página) salvam imediatamente
             marcarAlteracoesPendentes();
             
             console.log('[ATUALIZAR] ✅ TreeView atualizado (alterações pendentes)');

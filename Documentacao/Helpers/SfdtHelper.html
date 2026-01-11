@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SfdtHelper.cs | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.vinho { color: var(--vinho); }
+    .section-title.verde { color: var(--verde); }
+    .section-title.terracota { color: var(--terracota); }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.warning {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.05));
+    }
+    .callout.success {
+      border-left-color: var(--verde);
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+    }
+    .method-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--azul);
+      transition: all 0.2s ease;
+    }
+    .method-card:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--verde);
+      transform: translateX(4px);
+    }
+    .method-card h4 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-card p {
+      margin: 8px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+    .feature-list li {
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feature-list li:before {
+      content: "✓";
+      color: var(--verde);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pipeline-step {
+      padding: 14px 16px;
+      margin: 10px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.06), rgba(50,93,136,.03));
+      border-radius: 10px;
+      border-left: 4px solid var(--azul);
+    }
+    .pipeline-step h5 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--azul), var(--azul-light));
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/file-arrow-up.svg" alt="SfdtHelper" />
+    <div>
+      <h1>SfdtHelper.cs</h1>
+      <p class="subtitle">Utilitário estático para conversão de documentos DOCX em imagens PNG usando Syncfusion e SkiaSharp</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Visão Geral" />
+        Visão Geral
+      </div>
+      <div class="callout">
+        <p>A classe <code class="inline">SfdtHelper</code> é um utilitário estático para conversão de documentos DOCX em imagens PNG usando Syncfusion e SkiaSharp.</p>
+      </div>
+      <ul class="feature-list">
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/arrows-rotate.svg" alt="Conversão DOCX → PNG" />
+          <span><strong>Conversão DOCX → PNG:</strong> Converte documentos Word em imagens</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/plug.svg" alt="Syncfusion Integration" />
+          <span><strong>Syncfusion Integration:</strong> Usa Syncfusion DocIO e PDF Viewer</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/paintbrush.svg" alt="SkiaSharp" />
+          <span><strong>SkiaSharp:</strong> Para renderização de imagens</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/right-left.svg" alt="Pipeline Completo" />
+          <span><strong>Pipeline Completo:</strong> DOCX → PDF → Imagem PNG</span>
+        </li>
+      </ul>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última Atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 2.0</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Arquivo" />
+          <span>Helpers/SfdtHelper.cs</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/screwdriver-wrench.svg" alt="Método Principal" />
+        Método Principal
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/floppy-disk.svg" alt="SalvarImagemDeDocx" />
+          SalvarImagemDeDocx(byte[] docxBytes)
+        </h4>
+        <p><strong>Descrição:</strong> Converte um documento DOCX em imagem PNG (primeira página)</p>
+        <p><strong>Parâmetros:</strong> <code class="inline">docxBytes</code> - Array de bytes do arquivo DOCX</p>
+        <p><strong>Retorno:</strong> <code class="inline">byte[]</code> - Bytes da imagem PNG, ou exceção se erro</p>
+        <code>byte[] docxBytes = File.ReadAllBytes("documento.docx");
+byte[] imagemPng = SfdtHelper.SalvarImagemDeDocx(docxBytes);
+
+File.WriteAllBytes("preview.png", imagemPng);</code>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title terracota">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/right-left.svg" alt="Fluxo Detalhado" />
+        Pipeline de Conversão
+      </div>
+      
+      <div class="pipeline-step">
+        <h5>
+          <span class="number-badge">1</span>
+          Passo 1: Carregar DOCX
+        </h5>
+        <code>using var docStream = new MemoryStream(docxBytes);
+using var document = new WordDocument(docStream, FormatType.Docx);</code>
+        <p style="margin-top: 8px; font-size: 13px; color: #666;"><strong>Biblioteca:</strong> <code class="inline">Syncfusion.DocIO</code></p>
+      </div>
+
+      <div class="pipeline-step">
+        <h5>
+          <span class="number-badge">2</span>
+          Passo 2: Converter para PDF
+        </h5>
+        <code>using var renderer = new DocIORenderer();
+using var pdfDoc = renderer.ConvertToPDF(document);</code>
+        <p style="margin-top: 8px; font-size: 13px; color: #666;"><strong>Biblioteca:</strong> <code class="inline">Syncfusion.DocIORenderer</code></p>
+        <p style="margin-top: 4px; font-size: 13px; color: #666;"><strong>Resultado:</strong> Documento PDF em memória</p>
+      </div>
+
+      <div class="pipeline-step">
+        <h5>
+          <span class="number-badge">3</span>
+          Passo 3: Salvar PDF em Stream
+        </h5>
+        <code>using var pdfStream = new MemoryStream();
+pdfDoc.Save(pdfStream);
+byte[] pdfBytes = pdfStream.ToArray();</code>
+        <p style="margin-top: 8px; font-size: 13px; color: #666;"><strong>Resultado:</strong> Bytes do PDF</p>
+      </div>
+
+      <div class="pipeline-step">
+        <h5>
+          <span class="number-badge">4</span>
+          Passo 4: Carregar PDF e Renderizar Primeira Página
+        </h5>
+        <code>using var input = new MemoryStream(pdfBytes);
+using var loadedPdf = new PdfLoadedDocument(input);
+var pdfRenderer = new PdfRenderer();
+pdfRenderer.Load(input);
+
+using var bitmap = pdfRenderer.ExportAsImage(0); // página 0 (primeira)</code>
+        <p style="margin-top: 8px; font-size: 13px; color: #666;"><strong>Biblioteca:</strong> <code class="inline">Syncfusion.Pdf</code>, <code class="inline">Syncfusion.EJ2.PdfViewer</code></p>
+        <p style="margin-top: 4px; font-size: 13px; color: #666;"><strong>Resultado:</strong> Bitmap da primeira página</p>
+      </div>
+
+      <div class="pipeline-step">
+        <h5>
+          <span class="number-badge">5</span>
+          Passo 5: Converter Bitmap para PNG
+        </h5>
+        <code>using var img = SKImage.FromBitmap(bitmap);
+using var encoded = img.Encode(SKEncodedImageFormat.Png, 100);
+return encoded.ToArray();</code>
+        <p style="margin-top: 8px; font-size: 13px; color: #666;"><strong>Biblioteca:</strong> <code class="inline">SkiaSharp</code></p>
+        <p style="margin-top: 4px; font-size: 13px; color: #666;"><strong>Qualidade:</strong> 100 (máxima)</p>
+        <p style="margin-top: 4px; font-size: 13px; color: #666;"><strong>Resultado:</strong> Bytes da imagem PNG</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title vinho">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="Limitações" />
+        Limitações
+      </div>
+      
+      <div class="callout warning">
+        <strong>⚠️ Apenas Primeira Página</strong>
+        <p style="margin-top: 8px;">Método sempre retorna apenas a primeira página do documento</p>
+        <p style="margin-top: 8px;"><strong>Motivo:</strong> <code class="inline">ExportAsImage(0)</code> está hardcoded</p>
+        <p style="margin-top: 8px;"><strong>Solução Futura:</strong> Adicionar parâmetro <code class="inline">pageIndex</code> se necessário</p>
+      </div>
+
+      <div class="callout warning">
+        <strong>⚠️ Qualidade Fixa</strong>
+        <p style="margin-top: 8px;"><strong>Qualidade:</strong> PNG sempre com qualidade 100</p>
+        <p style="margin-top: 8px;"><strong>Impacto:</strong> Arquivos podem ser grandes</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/code.svg" alt="Casos de Uso" />
+        Casos de Uso
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 1" />
+          Exemplo 1: Preview de Documento
+        </h4>
+        <code>public IActionResult UploadDocumento(IFormFile arquivo)
+{
+    byte[] docxBytes;
+    using (var stream = new MemoryStream())
+    {
+        arquivo.CopyTo(stream);
+        docxBytes = stream.ToArray();
+    }
+
+    // Gerar preview da primeira página
+    byte[] previewPng = SfdtHelper.SalvarImagemDeDocx(docxBytes);
+    
+    // Salvar preview
+    _documento.PreviewImagem = previewPng;
+    _unitOfWork.Save();
+    
+    return Ok();
+}</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 2" />
+          Exemplo 2: Thumbnail de Documento
+        </h4>
+        <code>public byte[] GerarThumbnail(byte[] docxBytes)
+{
+    // Gerar imagem da primeira página
+    byte[] imagem = SfdtHelper.SalvarImagemDeDocx(docxBytes);
+    
+    // Redimensionar para thumbnail (usando ImageHelper)
+    byte[] thumbnail = ImageHelper.ResizeImage(imagem, 200, 200);
+    
+    return thumbnail;
+}</code>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/network-wired.svg" alt="Interconexões" />
+        Interconexões
+      </div>
+      <div class="callout">
+        <strong>Quem Usa Esta Classe:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>EditorController:</strong> Para extrair imagens de documentos DOCX</li>
+          <li><strong>Sistema de Documentos:</strong> Para gerar previews de documentos</li>
+        </ul>
+      </div>
+      <div class="callout success" style="margin-top: 12px;">
+        <strong>O Que Esta Classe Usa:</strong>
+        <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">Syncfusion.DocIO</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">Syncfusion.DocIORenderer</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">Syncfusion.Pdf</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">Syncfusion.EJ2.PdfViewer</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">SkiaSharp</code></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ErroHelper.cs | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.vinho { color: var(--vinho); }
+    .section-title.verde { color: var(--verde); }
+    .section-title.terracota { color: var(--terracota); }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.warning {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.05));
+    }
+    .callout.success {
+      border-left-color: var(--verde);
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+    }
+    .method-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--azul);
+      transition: all 0.2s ease;
+    }
+    .method-card:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--verde);
+      transform: translateX(4px);
+    }
+    .method-card h4 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-card p {
+      margin: 8px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+    .feature-list li {
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feature-list li:before {
+      content: "✓";
+      color: var(--verde);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .comparison-table th {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      color: var(--azul);
+      font-weight: 700;
+    }
+    .comparison-table tr:hover {
+      background: rgba(50,93,136,.04);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(50,93,136,.1);
+      color: var(--azul);
+      border: 1px solid rgba(50,93,136,.2);
+      margin: 4px 6px 4px 0;
+    }
+    .pill.verde {
+      background: rgba(85,117,112,.1);
+      color: var(--verde);
+      border-color: rgba(85,117,112,.2);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/code.svg" alt="ErroHelper" />
+    <div>
+      <h1>ErroHelper.cs</h1>
+      <p class="subtitle">Utilitário estático para montar scripts JavaScript que exibem alertas SweetAlert2 no cliente</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Visão Geral" />
+        Visão Geral
+      </div>
+      <div class="callout">
+        <p>A classe <code class="inline">ErroHelper</code> é um utilitário estático para montar scripts JavaScript que exibem alertas SweetAlert2 no cliente, especialmente para tratamento de erros.</p>
+      </div>
+      <ul class="feature-list">
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/wand-magic-sparkles.svg" alt="Geração de Scripts" />
+          <span><strong>Geração de Scripts:</strong> Cria scripts JavaScript dinamicamente</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/bell.svg" alt="Integração SweetAlert" />
+          <span><strong>Integração SweetAlert:</strong> Scripts para SweetAlertInterop</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/shield-halved.svg" alt="Sanitização" />
+          <span><strong>Sanitização:</strong> Escapa caracteres especiais para JavaScript</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/layer-group.svg" alt="Múltiplos Tipos" />
+          <span><strong>Múltiplos Tipos:</strong> Erro, aviso, informação, confirmação</span>
+        </li>
+      </ul>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última Atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 2.0</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Arquivo" />
+          <span>Helpers/ErroHelper.cs</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/screwdriver-wrench.svg" alt="Métodos Principais" />
+        Métodos Principais
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-xmark.svg" alt="MontarScriptErro" />
+          MontarScriptErro(string classe, string metodo, Exception ex)
+        </h4>
+        <p><strong>Descrição:</strong> Monta script JavaScript para exibir erro técnico com SweetAlert</p>
+        <p><strong>Script Gerado:</strong></p>
+        <code>SweetAlertInterop.ShowTratamentoErroComLinha(
+    'MeuController', 
+    'SalvarDados', 
+    { 
+        message: 'Mensagem do erro', 
+        stack: 'Stack trace completo' 
+    }
+);</code>
+        <div class="callout success" style="margin-top: 12px;">
+          <strong>Sanitização:</strong> Escapa aspas simples (<code class="inline">'</code> → <code class="inline">\'</code>) e remove quebras de linha
+        </div>
+        <code style="margin-top: 12px;">try
+{
+    // código
+}
+catch (Exception ex)
+{
+    string script = ErroHelper.MontarScriptErro("MeuController", "Salvar", ex);
+    // Executar script no cliente
+}</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="MontarScriptAviso" />
+          MontarScriptAviso(string titulo, string mensagem)
+        </h4>
+        <p><strong>Descrição:</strong> Monta script para alerta de aviso</p>
+        <code>string script = ErroHelper.MontarScriptAviso("Atenção", "Esta ação não pode ser desfeita.");</code>
+        <div style="margin-top: 8px;">
+          <code style="font-size: 11px;">SweetAlertInterop.ShowWarning('Título', 'Mensagem');</code>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-info.svg" alt="MontarScriptInfo" />
+          MontarScriptInfo(string titulo, string mensagem)
+        </h4>
+        <p><strong>Descrição:</strong> Monta script para alerta de informação</p>
+        <code>string script = ErroHelper.MontarScriptInfo("Informação", "Operação concluída.");</code>
+        <div style="margin-top: 8px;">
+          <code style="font-size: 11px;">SweetAlertInterop.ShowInfo('Título', 'Mensagem');</code>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-question.svg" alt="MontarScriptConfirmacao" />
+          MontarScriptConfirmacao(string titulo, string mensagem, string textoConfirmar, string textoCancelar)
+        </h4>
+        <p><strong>Descrição:</strong> Monta script para alerta de confirmação</p>
+        <code>string script = ErroHelper.MontarScriptConfirmacao(
+    "Confirmar Exclusão", 
+    "Deseja realmente excluir?", 
+    "Sim", 
+    "Não"
+);</code>
+        <div style="margin-top: 8px;">
+          <code style="font-size: 11px;">SweetAlertInterop.ShowConfirm('Título', 'Mensagem', 'Confirmar', 'Cancelar');</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title terracota">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/shield-halved.svg" alt="Sanitização" />
+        Método Auxiliar Privado
+      </div>
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/eraser.svg" alt="Sanitize" />
+          Sanitize(string input)
+        </h4>
+        <p><strong>Descrição:</strong> Sanitiza string para uso em JavaScript</p>
+        <p><strong>Transformações:</strong></p>
+        <ul>
+          <li>Substitui <code class="inline">'</code> por <code class="inline">\'</code> (escape de aspas)</li>
+          <li>Remove <code class="inline">\r</code> (carriage return)</li>
+          <li>Remove <code class="inline">\n</code> (newline)</li>
+          <li>Substitui <code class="inline">\n</code> por espaço</li>
+        </ul>
+        <code>string input = "Erro: 'Não foi possível salvar'\nLinha 2";
+string sanitized = Sanitize(input);
+// Resultado: "Erro: \'Não foi possível salvar\' Linha 2"</code>
+        <div class="callout warning" style="margin-top: 12px;">
+          <strong>Uso:</strong> Chamado internamente por todos os métodos públicos
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/arrow-right-arrow-left.svg" alt="Comparação" />
+        Comparação com Alerta.cs
+      </div>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Característica</th>
+            <th>Alerta.cs</th>
+            <th>ErroHelper.cs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Método</strong></td>
+            <td>TempData</td>
+            <td>Script JavaScript</td>
+          </tr>
+          <tr>
+            <td><strong>Execução</strong></td>
+            <td>Automática (via JS)</td>
+            <td>Manual (executar script)</td>
+          </tr>
+          <tr>
+            <td><strong>Uso</strong></td>
+            <td>Controllers/API</td>
+            <td>Views Razor</td>
+          </tr>
+          <tr>
+            <td><strong>Flexibilidade</strong></td>
+            <td>Menor</td>
+            <td><span class="pill verde">Maior (controle total)</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout warning" style="margin-top: 16px;">
+        <strong>Uso Recomendado:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>Alerta.cs:</strong> Para uso em Controllers/API (mais simples)</li>
+          <li><strong>ErroHelper.cs:</strong> Para uso em Views Razor quando precisa de controle manual</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/code.svg" alt="Exemplos de Uso" />
+        Exemplos de Uso
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 1" />
+          Exemplo 1: Erro em View Razor
+        </h4>
+        <code>@page
+@{
+    try
+    {
+        // código
+    }
+    catch (Exception ex)
+    {
+        string script = ErroHelper.MontarScriptErro("MinhaPage", "OnGet", ex);
+        &lt;script&gt;@Html.Raw(script)&lt;/script&gt;
+    }
+}</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 2" />
+          Exemplo 2: Confirmação em View
+        </h4>
+        <code>@{
+    string scriptConfirmacao = ErroHelper.MontarScriptConfirmacao(
+        "Confirmar Exclusão",
+        "Deseja realmente excluir este item?",
+        "Sim, excluir",
+        "Cancelar"
+    );
+}
+
+&lt;button onclick="@Html.Raw(scriptConfirmacao)"&gt;Excluir&lt;/button&gt;</code>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/network-wired.svg" alt="Interconexões" />
+        Interconexões
+      </div>
+      <div class="callout">
+        <strong>Quem Usa Esta Classe:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>Controllers:</strong> Para gerar scripts de erro em views Razor</li>
+          <li><strong>Pages:</strong> Para exibir alertas em páginas Razor</li>
+          <li><strong>JavaScript:</strong> Executa scripts gerados via SweetAlertInterop</li>
+        </ul>
+      </div>
+      <div class="callout success" style="margin-top: 12px;">
+        <strong>O Que Esta Classe Usa:</strong>
+        <div style="margin-top: 8px;">
+          <div class="pill"><code class="inline">Exception</code></div>
+          <div class="pill"><code class="inline">String</code></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

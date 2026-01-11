@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Índice: Documentação de Helpers | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: floatSoft 3s ease-in-out infinite;
+    }
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(-1deg); }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.status { color: var(--verde); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(50,93,136,.12), rgba(85,117,112,.10));
+      color: var(--azul);
+      margin: 6px 8px 6px 0;
+      font-size: 13px;
+      border: 1px solid rgba(50,93,136,.15);
+      transition: all 0.2s ease;
+    }
+    .pill:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.18), rgba(85,117,112,.15));
+      transform: scale(1.02);
+    }
+    .pill.success {
+      background: linear-gradient(135deg, rgba(85,117,112,.15), rgba(85,117,112,.12));
+      color: var(--verde);
+      border-color: rgba(85,117,112,.2);
+    }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(85,117,112,.15), rgba(85,117,112,.10));
+      color: var(--verde);
+      border: 1px solid rgba(85,117,112,.2);
+    }
+    .status-badge.success::before {
+      content: "✓";
+      font-weight: bold;
+      color: var(--verde);
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    a {
+      color: var(--azul);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s ease;
+    }
+    a:hover {
+      border-bottom-color: var(--azul);
+    }
+    .list-item {
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--terracota);
+      transition: all 0.2s ease;
+    }
+    .list-item:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--azul);
+      transform: translateX(4px);
+    }
+    .list-item strong {
+      color: var(--azul);
+      display: block;
+      margin-bottom: 4px;
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/circle-info.svg" alt="Helpers" />
+    <div>
+      <h1>Índice: Documentação de Helpers</h1>
+      <p class="subtitle">Utilitários e classes auxiliares do sistema FrotiX</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title status">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/circle-check.svg" alt="Status" />
+        Status da Documentação
+      </div>
+      <div class="status-badge success">
+        <span>Total de Arquivos: 6 arquivos</span>
+      </div>
+      <div class="status-badge success" style="margin-top: 8px;">
+        <span>Documentados: 6/6 (100%)</span>
+      </div>
+      <div class="status-badge success" style="margin-top: 8px;">
+        <span>Status: ✅ Completo</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/book.svg" alt="Documentados" />
+        Arquivos Documentados
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="" /> Alerta.md</strong>
+        Utilitário de alertas visuais e tratamento de erros
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/server.svg" alt="" /> AlertaBackend.md</strong>
+        Helper backend-only para logging estruturado
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/code.svg" alt="" /> ErroHelper.md</strong>
+        Geração de scripts JavaScript para alertas
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/image.svg" alt="" /> ImageHelper.md</strong>
+        Validação e redimensionamento de imagens
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/list.svg" alt="" /> ListasCompartilhadas.md</strong>
+        Classes helper para listas compartilhadas
+      </div>
+      <div class="list-item">
+        <strong><img class="icon" src="../../Fontawesome/duotone/file-arrow-up.svg" alt="" /> SfdtHelper.md</strong>
+        Conversão de documentos DOCX para PNG
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Informações" />
+        Informações Gerais
+      </div>
+      <div class="callout">
+        <strong>Localização:</strong> <code>Helpers/</code>
+      </div>
+      <div class="callout" style="margin-top: 10px; border-left-color: var(--verde);">
+        <strong>Padrão:</strong> Classes estáticas com métodos utilitários para funcionalidades específicas do sistema.
+      </div>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 1.0</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

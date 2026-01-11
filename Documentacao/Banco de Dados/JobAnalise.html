@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise dos Jobs SQL Server (FrotiX) | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37; --vinho-light: #8B3A44;
+      --azul: #325d88; --azul-light: #3d6f9e;
+      --terracota: #A97B6E; --terracota-light: #C08B7E;
+      --verde: #557570; --verde-light: #6A8A85;
+      --cinza: #f5f7fb; --card: #ffffff; --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px; --header-bg: #b66a3d; --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.verde { color: var(--verde); }
+    .section-title.vinho { color: var(--vinho); }
+    .section-title.terracota { color: var(--terracota); }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large { width: 24px; height: 24px; }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.warning {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.05));
+    }
+    .callout.success {
+      border-left-color: var(--verde);
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+    }
+    .info-item {
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+    }
+    .info-item strong { color: var(--verde); font-weight: 700; }
+    .analysis-item {
+      padding: 14px 16px;
+      margin: 10px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.06), rgba(50,93,136,.03));
+      border-radius: 10px;
+      border-left: 4px solid var(--azul);
+    }
+    .analysis-item h5 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .recommendation-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+      border-radius: 10px;
+      border-left: 3px solid var(--verde);
+    }
+    .recommendation-card h4 {
+      color: var(--verde);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page { size: A4; margin: 2cm; }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/chart-bar.svg" alt="Análise dos Jobs SQL Server" />
+    <div>
+      <h1>Análise dos Jobs SQL Server (FrotiX)</h1>
+      <p class="subtitle">Análise completa dos jobs de manutenção do banco de dados</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/circle-info.svg" alt="Visão Geral" />
+        Visão Geral
+      </div>
+      <div class="callout">
+        <p><strong>Jobs mapeados:</strong> FrotiX - Atualização de Viagens, FrotiX_AtualizarEstatisticasAbastecimentos, FrotiX_AtualizarEstatisticasMotoristas, FrotiX_AtualizarEstatisticasVeiculos, FrotiX_TratarNulos.</p>
+        <p style="margin-top: 8px;"><strong>Frequência:</strong> 4 jobs horários (00:00-23:59) e 1 job a cada 10 minutos.</p>
+        <p style="margin-top: 8px;"><strong>Stored procedures chamadas:</strong> <code class="inline">sp_JobAtualizacaoViagens</code>; <code class="inline">sp_AtualizarEstatisticasAbastecimentosMesAtual</code>; <code class="inline">sp_RecalcularEstatisticasMotoristas</code> (mês atual e anterior); <code class="inline">sp_AtualizarEstatisticasVeiculosMesAtual</code>; <code class="inline">dbo.sp_TratarNulosTodasTabelas</code>.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title vinho">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="Convergências e Possíveis Sobreposições" />
+        Convergências e Possíveis Sobreposições
+      </div>
+      
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/clock.svg" alt="Horários" />
+          Horários de Execução
+        </h5>
+        <p>Três jobs horários iniciam em 00:00 (Viagens, Abastecimentos, Motoristas); podem disputar recursos simultaneamente. Apenas Veículos inicia às 00:30, reduzindo, mas não elimina sobreposição com o job de nulos (10/20/30/40/50 minutos).</p>
+      </div>
+
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/gauge-high.svg" alt="Performance" />
+          Tempo de Execução
+        </h5>
+        <p>Se os tempos de execução forem longos, o job de nulos (a cada 10 min) pode encadear com os demais; monitorar para evitar instâncias em paralelo.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/shield-check.svg" alt="Robustez" />
+        Robustez (Retries e Tolerância a Falhas)
+      </div>
+      
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/rotate-right.svg" alt="Com Retries" />
+          Com Retries
+        </h5>
+        <p>Abastecimentos (3x, 5 min), Veículos (3x, 5 min).</p>
+      </div>
+
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/circle-xmark.svg" alt="Sem Retries" />
+          Sem Retries
+        </h5>
+        <p>Viagens, Motoristas, TratarNulos. Recomenda-se adicionar ao menos 1–2 tentativas com backoff, especialmente para Viagens e Motoristas.</p>
+      </div>
+
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/envelope.svg" alt="Notificações" />
+          Notificações
+        </h5>
+        <p>Nenhum job tem notificação por e-mail configurada; avaliar adicionar alertas em falha.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/circle-check.svg" alt="Cobertura Funcional" />
+        Cobertura Funcional e Lacunas
+      </div>
+      
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/road.svg" alt="Viagens" />
+          Viagens
+        </h5>
+        <p>Recalcula custos/normalização/estatísticas hora a hora — cobre base completa.</p>
+      </div>
+
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/users.svg" alt="Motoristas" />
+          Motoristas
+        </h5>
+        <p>Cobre mês atual e anterior (mitiga lançamentos retroativos).</p>
+      </div>
+
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/chart-line-up.svg" alt="Abastecimentos e Veículos" />
+          Abastecimentos e Veículos
+        </h5>
+        <p>Apenas mês atual; lançamentos retroativos podem ficar sem recalcular. Sugestão: agendar rotina diária/noturna para mês anterior ou mensal completa (há stored procedures de retrocálculo no repositório).</p>
+      </div>
+
+      <div class="analysis-item">
+        <h5>
+          <img class="icon" src="../../Fontawesome/duotone/broom.svg" alt="TratarNulos" />
+          TratarNulos
+        </h5>
+        <p>Mantém dados higienizados, mas alta frequência pode ocultar falhas silenciosas; registrar métricas/tempo de execução.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title terracota">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/calendar-clock.svg" alt="Recomendações de Agendamento" />
+        Recomendações de Agendamento
+      </div>
+      
+      <div class="recommendation-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/clock-rotate-left.svg" alt="Escalonamento" />
+          Escalonamento de Horários
+        </h4>
+        <p>Escalonar horários para reduzir contenção. Exemplo: Viagens hh:00, Motoristas hh:10, Abastecimentos hh:20, Veículos hh:30 (já escalonado), mantendo TratarNulos nos minutos 05/15/25/35/45/55.</p>
+      </div>
+
+      <div class="recommendation-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/calendar-xmark.svg" alt="Janelas de Manutenção" />
+          Janelas de Manutenção
+        </h4>
+        <p>Garantir que a janela diária e início não se sobreponham a janelas de manutenção/backup.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/lightbulb.svg" alt="Recomendações Adicionais" />
+        Recomendações Adicionais
+      </div>
+      
+      <div class="info-item">
+        <strong>Métricas:</strong>
+        <span>Registrar tempo médio/máximo de execução e taxa de falha por job.</span>
+      </div>
+      <div class="info-item">
+        <strong>Histórico:</strong>
+        <span>Garantir que <code class="inline">msdb</code> esteja com histórico de job habilitado para auditoria.</span>
+      </div>
+      <div class="info-item">
+        <strong>Validação:</strong>
+        <span>Validar que as stored procedures chamadas existam e estejam versionadas (todas já estão documentadas em <code class="inline">Documentacao/Banco de Dados/Stored Procedures/</code>).</span>
+      </div>
+      <div class="info-item">
+        <strong>Dependências:</strong>
+        <span>Se houver dependência entre estatísticas (ex.: viagens antes de estatísticas derivadas), reforçar ordem de disparo no agendamento.</span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

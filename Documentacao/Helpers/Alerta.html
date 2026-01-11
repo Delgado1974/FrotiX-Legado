@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alerta.cs | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.vinho { color: var(--vinho); }
+    .section-title.verde { color: var(--verde); }
+    .section-title.terracota { color: var(--terracota); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(50,93,136,.12), rgba(85,117,112,.10));
+      color: var(--azul);
+      margin: 6px 8px 6px 0;
+      font-size: 13px;
+      border: 1px solid rgba(50,93,136,.15);
+      transition: all 0.2s ease;
+    }
+    .pill:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.18), rgba(85,117,112,.15));
+      transform: scale(1.02);
+    }
+    .pill.vinho {
+      background: linear-gradient(135deg, rgba(114,47,55,.15), rgba(114,47,55,.12));
+      color: var(--vinho);
+      border-color: rgba(114,47,55,.2);
+    }
+    .pill.verde {
+      background: linear-gradient(135deg, rgba(85,117,112,.15), rgba(85,117,112,.12));
+      color: var(--verde);
+      border-color: rgba(85,117,112,.2);
+    }
+    .pill.terracota {
+      background: linear-gradient(135deg, rgba(169,123,110,.15), rgba(169,123,110,.12));
+      color: var(--terracota);
+      border-color: rgba(169,123,110,.2);
+    }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.warning {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.05));
+    }
+    .callout.success {
+      border-left-color: var(--verde);
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+    }
+    .method-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--azul);
+      transition: all 0.2s ease;
+    }
+    .method-card:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--verde);
+      transform: translateX(4px);
+    }
+    .method-card h4 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-card p {
+      margin: 8px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .method-signature {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+    .feature-list li {
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feature-list li:before {
+      content: "✓";
+      color: var(--verde);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(50,93,136,.1);
+      color: var(--azul);
+      border: 1px solid rgba(50,93,136,.2);
+    }
+    .tag.critical {
+      background: rgba(114,47,55,.1);
+      color: var(--vinho);
+      border-color: rgba(114,47,55,.2);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="Alerta" />
+    <div>
+      <h1>Alerta.cs</h1>
+      <p class="subtitle">Utilitário estático centralizado para tratamento de erros e alertas visuais no sistema FrotiX</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Visão Geral" />
+        Visão Geral
+      </div>
+      <div class="callout">
+        <p>A classe <code class="inline">Alerta</code> é um utilitário estático centralizado para tratamento de erros e exibição de alertas visuais no sistema FrotiX, integrado com SweetAlert2 e sistema de logging.</p>
+      </div>
+      <ul class="feature-list">
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/eye.svg" alt="Alertas Visuais" />
+          <span><strong>Alertas Visuais:</strong> Sucesso, erro, informação, aviso, confirmação</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/bug.svg" alt="Tratamento de Erros" />
+          <span><strong>Tratamento de Erros:</strong> Log com arquivo e linha do erro</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/bell.svg" alt="Integração SweetAlert" />
+          <span><strong>Integração SweetAlert:</strong> Alertas personalizados via TempData</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/star.svg" alt="Prioridades" />
+          <span><strong>Prioridades de Alerta:</strong> Suporte a ícones e cores por prioridade</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/plug.svg" alt="Dependency Injection" />
+          <span><strong>Dependency Injection:</strong> Bridges para serviços injetados</span>
+        </li>
+      </ul>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última Atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 2.0</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Arquivo" />
+          <span>Helpers/Alerta.cs</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/building.svg" alt="Estrutura da Classe" />
+        Estrutura da Classe
+      </div>
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-nodes.svg" alt="Classe Estática" />
+          Classe Estática
+        </h4>
+        <div class="method-signature">public static class Alerta</div>
+        <p><strong>Padrão:</strong> Classe estática com métodos utilitários</p>
+      </div>
+      <div class="callout">
+        <strong>Dependency Injection Bridges:</strong>
+        <div style="margin-top: 8px;">
+          <div class="pill"><code class="inline">IHttpContextAccessor HttpCtx</code></div>
+          <div class="pill"><code class="inline">ITempDataDictionaryFactory TempFactory</code></div>
+          <div class="pill"><code class="inline">ILoggerFactory LoggerFactory</code></div>
+        </div>
+      </div>
+      <code>Alerta.HttpCtx = serviceProvider.GetRequiredService&lt;IHttpContextAccessor&gt;();
+Alerta.TempFactory = serviceProvider.GetRequiredService&lt;ITempDataDictionaryFactory&gt;();
+Alerta.LoggerFactory = serviceProvider.GetRequiredService&lt;ILoggerFactory&gt;();</code>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/check-circle.svg" alt="Métodos de Alerta Visual" />
+        Métodos de Alerta Visual
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-xmark.svg" alt="Erro" />
+          Erro(string titulo, string texto, string confirmButtonText = "OK")
+        </h4>
+        <p><strong>Descrição:</strong> Exibe alerta de erro</p>
+        <code>Alerta.Erro("Erro ao Salvar", "Não foi possível salvar os dados.");</code>
+        <div class="pill vinho" style="margin-top: 8px;">
+          <img class="icon" src="../../Fontawesome/duotone/palette.svg" alt="Resultado" />
+          <span>Alerta vermelho com ícone de erro</span>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-check.svg" alt="Sucesso" />
+          Sucesso(string titulo, string texto, string confirmButtonText = "OK")
+        </h4>
+        <p><strong>Descrição:</strong> Exibe alerta de sucesso</p>
+        <code>Alerta.Sucesso("Sucesso!", "Dados salvos com sucesso.");</code>
+        <div class="pill verde" style="margin-top: 8px;">
+          <img class="icon" src="../../Fontawesome/duotone/palette.svg" alt="Resultado" />
+          <span>Alerta verde com ícone de sucesso</span>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-info.svg" alt="Info" />
+          Info(string titulo, string texto, string confirmButtonText = "OK")
+        </h4>
+        <p><strong>Descrição:</strong> Exibe alerta de informação</p>
+        <code>Alerta.Info("Informação", "Operação concluída.");</code>
+        <div class="pill" style="margin-top: 8px;">
+          <img class="icon" src="../../Fontawesome/duotone/palette.svg" alt="Resultado" />
+          <span>Alerta azul com ícone de informação</span>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/triangle-exclamation.svg" alt="Warning" />
+          Warning(string titulo, string texto, string confirmButtonText = "OK")
+        </h4>
+        <p><strong>Descrição:</strong> Exibe alerta de aviso</p>
+        <code>Alerta.Warning("Atenção", "Esta ação não pode ser desfeita.");</code>
+        <div class="pill terracota" style="margin-top: 8px;">
+          <img class="icon" src="../../Fontawesome/duotone/palette.svg" alt="Resultado" />
+          <span>Alerta amarelo/laranja com ícone de aviso</span>
+        </div>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/circle-question.svg" alt="Confirmar" />
+          Confirmar(string titulo, string texto, string confirmButtonText = "Sim", string cancelButtonText = "Cancelar")
+        </h4>
+        <p><strong>Descrição:</strong> Exibe alerta de confirmação</p>
+        <code>Alerta.Confirmar("Confirmar Exclusão", "Deseja realmente excluir?");</code>
+        <div class="pill" style="margin-top: 8px;">
+          <img class="icon" src="../../Fontawesome/duotone/window-maximize.svg" alt="Resultado" />
+          <span>Alerta com botões de confirmação e cancelamento</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title vinho">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/bug.svg" alt="Tratamento de Erro" />
+        Tratamento de Erro com Linha
+      </div>
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/screwdriver-wrench.svg" alt="Método Crítico" />
+          TratamentoErroComLinha(string arquivo, string funcao, Exception error, ILogger logger = null)
+        </h4>
+        <div class="tag critical" style="margin-bottom: 8px;">
+          <img class="icon" src="../../Fontawesome/duotone/star.svg" alt="Crítico" />
+          MÉTODO CRÍTICO
+        </div>
+        <p><strong>Descrição:</strong> Trata erro com log detalhado incluindo arquivo e linha</p>
+        <p><strong>Funcionalidades:</strong></p>
+        <ul>
+          <li>Extrai informações do stack trace (arquivo, linha, método)</li>
+          <li>Registra log estruturado</li>
+          <li>Exibe alerta visual com detalhes técnicos</li>
+        </ul>
+        <code>try
+{
+    // código que pode lançar exceção
+}
+catch (Exception ex)
+{
+    Alerta.TratamentoErroComLinha("MeuController.cs", "SalvarDados", ex);
+}</code>
+        <div class="callout success" style="margin-top: 12px;">
+          <strong>Log Gerado:</strong>
+          <code style="margin-top: 8px;">MeuController.cs::SalvarDados (linha 42): SqlException - Timeout expired</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title terracota">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/star.svg" alt="Prioridades" />
+        Métodos de Prioridade de Alertas
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/icon.svg" alt="GetIconePrioridade" />
+          GetIconePrioridade(PrioridadeAlerta prioridade)
+        </h4>
+        <p><strong>Descrição:</strong> Retorna ícone FontAwesome Duotone baseado na prioridade</p>
+        <ul>
+          <li><code class="inline">Baixa</code>: <code class="inline">"fa-duotone fa-circle-info"</code></li>
+          <li><code class="inline">Media</code>: <code class="inline">"fa-duotone fa-circle-exclamation"</code></li>
+          <li><code class="inline">Alta</code>: <code class="inline">"fa-duotone fa-triangle-exclamation"</code></li>
+        </ul>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/palette.svg" alt="GetCorPrioridade" />
+          GetCorPrioridade(PrioridadeAlerta prioridade)
+        </h4>
+        <p><strong>Descrição:</strong> Retorna classe CSS Bootstrap baseada na prioridade</p>
+        <ul>
+          <li><code class="inline">Baixa</code>: <code class="inline">"text-info"</code></li>
+          <li><code class="inline">Media</code>: <code class="inline">"text-warning"</code></li>
+          <li><code class="inline">Alta</code>: <code class="inline">"text-danger"</code></li>
+        </ul>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/hashtag.svg" alt="GetCorHexPrioridade" />
+          GetCorHexPrioridade(PrioridadeAlerta prioridade)
+        </h4>
+        <p><strong>Descrição:</strong> Retorna cor hexadecimal baseada na prioridade</p>
+        <ul>
+          <li><code class="inline">Baixa</code>: <code class="inline">"#0ea5e9"</code> (azul)</li>
+          <li><code class="inline">Media</code>: <code class="inline">"#f59e0b"</code> (laranja)</li>
+          <li><code class="inline">Alta</code>: <code class="inline">"#dc2626"</code> (vermelho)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/code.svg" alt="Exemplos de Uso" />
+        Exemplos de Uso
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 1" />
+          Exemplo 1: Tratamento de Erro Completo
+        </h4>
+        <code>public IActionResult SalvarDados([FromBody] MeuModel model)
+{
+    try
+    {
+        _unitOfWork.MeuModel.Add(model);
+        _unitOfWork.Save();
+        
+        Alerta.Sucesso("Sucesso!", "Dados salvos com sucesso.");
+        return Ok();
+    }
+    catch (Exception ex)
+    {
+        Alerta.TratamentoErroComLinha("MeuController.cs", "SalvarDados", ex);
+        return StatusCode(500);
+    }
+}</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 2" />
+          Exemplo 2: Confirmação Antes de Excluir
+        </h4>
+        <code>public IActionResult Excluir(Guid id)
+{
+    Alerta.Confirmar("Confirmar Exclusão", "Deseja realmente excluir este item?");
+    // JavaScript lê TempData e exibe confirmação
+    // Se confirmado, chama endpoint de exclusão
+}</code>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/network-wired.svg" alt="Interconexões" />
+        Interconexões
+      </div>
+      <div class="callout">
+        <strong>Quem Usa Esta Classe:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>Todos os Controllers:</strong> Para tratamento de erros e alertas</li>
+          <li><strong>Services:</strong> Para notificações de sucesso/erro</li>
+          <li><strong>JavaScript:</strong> Lê TempData["ShowSweetAlert"] e exibe alertas</li>
+        </ul>
+      </div>
+      <div class="callout success" style="margin-top: 12px;">
+        <strong>O Que Esta Classe Usa:</strong>
+        <div style="margin-top: 8px;">
+          <div class="pill"><code class="inline">IHttpContextAccessor</code></div>
+          <div class="pill"><code class="inline">ITempDataDictionaryFactory</code></div>
+          <div class="pill"><code class="inline">ILoggerFactory</code></div>
+          <div class="pill"><code class="inline">System.Text.Json</code></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

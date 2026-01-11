@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>API Roles Endpoint | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d; /* tom laranja/telha do botão */
+      --code-bg: #33465c;   /* azul petróleo escurecido ~20% */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(120deg, rgba(114,47,55,0.08), rgba(50,93,136,0.06));
+      color: var(--texto);
+      padding: 28px;
+    }
+    .hero {
+      background: var(--header-bg);
+      color: #fff;
+      padding: 26px 28px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px #000, 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .hero img { width: 48px; height: 48px; filter: drop-shadow(0 6px 8px rgba(0,0,0,.25)); }
+    h1 { margin: 0; font-size: 26px; letter-spacing: 0.2px; }
+    .subtitle { margin: 6px 0 0; font-size: 14px; opacity: 0.9; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-top: 22px; }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .section-title { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--azul); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      background: rgba(50,93,136,.08);
+      color: var(--azul);
+      margin-right: 8px;
+      font-size: 13px;
+    }
+    .endpoint {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(50,93,136,.06), rgba(169,123,110,.06));
+      margin-bottom: 10px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .method {
+      font-weight: 800;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .GET { background: linear-gradient(135deg, var(--verde), var(--verde-light)); }
+    .POST { background: linear-gradient(135deg, #0d6efd, #3e8bff); }
+    .PUT { background: linear-gradient(135deg, var(--terracota), var(--terracota-light)); }
+    .DELETE { background: linear-gradient(135deg, var(--vinho), var(--vinho-light)); }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 12px 14px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.5;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    ul { margin: 6px 0 0 20px; padding: 0; }
+    li { margin-bottom: 6px; }
+    .icon { width: 18px; height: 18px; vertical-align: middle; filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
+    .callout {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/shield-check.svg" alt="Roles" />
+    <div>
+      <h1>Roles Endpoint</h1>
+      <p class="subtitle">CRUD de perfis de acesso via Identity &middot; Rota base: <strong>/api/roles</strong></p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon" src="../../Fontawesome/duotone/info.svg" alt="Info" />
+        Visão geral
+      </div>
+      <div class="pill"><img class="icon" src="../../Fontawesome/duotone/route.svg" alt="">/api/roles</div>
+      <div class="pill"><img class="icon" src="../../Fontawesome/duotone/database.svg" alt="">IdentityRole</div>
+      <div class="callout">
+        <strong>Objetivo:</strong> expõe CRUD de perfis (roles) via <code>RoleManager&lt;IdentityRole&gt;</code>. Usa o valor padrão de <code>_settings.Theme.Role</code> para bloquear exclusão do papel padrão.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon" src="../../Fontawesome/duotone/list-check.svg" alt="Endpoints" />
+        Endpoints
+      </div>
+
+      <div class="endpoint">
+        <div class="method GET"><img class="icon" src="../../Fontawesome/duotone/list.svg" alt=""> GET</div>
+        <div>
+          <strong><img class="icon" src="../../Fontawesome/duotone/table.svg" alt=""> Listar</strong> — retorna todas as roles (recordsTotal/recordsFiltered).
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method GET"><img class="icon" src="../../Fontawesome/duotone/magnifying-glass.svg" alt=""> GET</div>
+        <div>
+          <strong><img class="icon" src="../../Fontawesome/duotone/id-card-clip.svg" alt=""> Obter por id</strong> — <code>/api/roles/{id}</code>, retorna <code>IdentityRole</code>.
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method POST"><img class="icon" src="../../Fontawesome/duotone/plus.svg" alt=""> POST</div>
+        <div>
+          <strong><img class="icon" src="../../Fontawesome/duotone/square-plus.svg" alt=""> Criar</strong> — body <em>form-data</em> com campos de <code>IdentityRole</code>. Server-side gera <code>Id</code> e <code>ConcurrencyStamp</code>.
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method PUT"><img class="icon" src="../../Fontawesome/duotone/pen-to-square.svg" alt=""> PUT</div>
+        <div>
+          <strong><img class="icon" src="../../Fontawesome/duotone/file-pen.svg" alt=""> Atualizar</strong> — body <em>form-data</em> de <code>IdentityRole</code>; usa <code>UpdateAsync</code>.
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="method DELETE"><img class="icon" src="../../Fontawesome/duotone/trash-can.svg" alt=""> DELETE</div>
+        <div>
+          <strong><img class="icon" src="../../Fontawesome/duotone/ban.svg" alt=""> Remover</strong> — body <em>form-data</em> de <code>IdentityRole</code>; bloqueia exclusão se <code>model.Name == _settings.Theme.Role</code>. Retorna 204 ou erro do Identity.
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Fluxo" />
+        Fluxo e validações
+      </div>
+      <ul>
+        <li><strong>Listagem</strong>: usa <code>AsNoTracking()</code>; responde em envelope <code>{ data, recordsTotal, recordsFiltered }</code> (padrão DataTables).</li>
+        <li><strong>POST</strong>: IDs e concurrency são sempre novos GUIDs; responde 201 com <code>Location</code> para <code>Get</code>.</li>
+        <li><strong>DELETE</strong>: regra de negócio simples para impedir remoção do papel padrão configurado em <code>SmartSettings</code>.</li>
+      </ul>
+      <div class="callout">
+        <strong>Segurança:</strong> Endpoint está como <code>[ApiController]</code>/<code>ControllerBase</code>. Confirme políticas de autenticação/autorização na pipeline global (não definidas aqui).
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon" src="../../Fontawesome/duotone/terminal.svg" alt="Exemplo" />
+        Exemplo de requisição (cURL)
+      </div>
+      <code>
+curl -X POST https://seu-host/api/roles ^
+  -F "Name=Operador" ^
+  -H "Authorization: Bearer &lt;token&gt;"
+      </code>
+      <p style="margin-top:8px;font-size:12px;color:#555;">Ajuste o header de autorização conforme o esquema ativo (Bearer/Cookie/etc.).</p>
+    </section>
+  </main>
+</body>
+</html>

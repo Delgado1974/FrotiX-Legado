@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ListasCompartilhadas.cs | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.vinho { color: var(--vinho); }
+    .section-title.verde { color: var(--verde); }
+    .section-title.terracota { color: var(--terracota); }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.success {
+      border-left-color: var(--verde);
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+    }
+    .method-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--azul);
+      transition: all 0.2s ease;
+    }
+    .method-card:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--verde);
+      transform: translateX(4px);
+    }
+    .method-card h4 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-card p {
+      margin: 8px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+    .feature-list li {
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feature-list li:before {
+      content: "✓";
+      color: var(--verde);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .list-item {
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--terracota);
+      transition: all 0.2s ease;
+    }
+    .list-item:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--azul);
+      transform: translateX(4px);
+    }
+    .list-item strong {
+      color: var(--azul);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--azul), var(--azul-light));
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/list.svg" alt="ListasCompartilhadas" />
+    <div>
+      <h1>ListasCompartilhadas.cs</h1>
+      <p class="subtitle">Múltiplas classes helper para geração de listas compartilhadas usadas em dropdowns, treeviews e seleções</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Visão Geral" />
+        Visão Geral
+      </div>
+      <div class="callout">
+        <p>O arquivo <code class="inline">ListasCompartilhadas.cs</code> contém múltiplas classes helper para geração de listas compartilhadas usadas em dropdowns, treeviews e seleções em todo o sistema FrotiX.</p>
+      </div>
+      <ul class="feature-list">
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/list.svg" alt="Múltiplas Listas" />
+          <span><strong>Múltiplas Listas:</strong> 15+ classes de listas diferentes</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/sort-alpha-down.svg" alt="Ordenação pt-BR" />
+          <span><strong>Ordenação pt-BR:</strong> Comparador que ignora acentos e case</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/database.svg" alt="Repository" />
+          <span><strong>Integração com Repository:</strong> Usa IUnitOfWork para dados dinâmicos</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/eye.svg" alt="Views Otimizadas" />
+          <span><strong>Views Otimizadas:</strong> Usa views quando disponíveis</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/shield-halved.svg" alt="Tratamento de Erros" />
+          <span><strong>Tratamento de Erros:</strong> Try-catch em todos os métodos</span>
+        </li>
+      </ul>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última Atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 2.0</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Arquivo" />
+          <span>Helpers/ListasCompartilhadas.cs</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/sort-alpha-down.svg" alt="Comparador pt-BR" />
+        Comparador pt-BR
+      </div>
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/arrow-up-arrow-down.svg" alt="PtBrComparer" />
+          PtBrComparer
+        </h4>
+        <p><strong>Descrição:</strong> Comparador que ignora case e acentos para ordenação em português brasileiro</p>
+        <code>var comparer = new PtBrComparer();
+finalidades.OrderBy(f => f.Descricao, comparer);</code>
+        <ul style="margin-top: 12px;">
+          <li>Ordena corretamente palavras com acentos</li>
+          <li>Ignora diferenças entre maiúsculas/minúsculas</li>
+          <li>Usa <code class="inline">CultureInfo("pt-BR")</code> com <code class="inline">CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/layer-group.svg" alt="Estrutura do Arquivo" />
+        Estrutura do Arquivo
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">1</span>
+          <strong>Comparadores: PtBrComparer</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">2</span>
+          <strong>Lista de Finalidades: ListaFinalidade</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">3</span>
+          <strong>Lista de Nível de Combustível: ListaNivelCombustivel</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">4</span>
+          <strong>Lista de Veículos: ListaVeiculos</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">5</span>
+          <strong>Lista de Motoristas: ListaMotorista</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">6</span>
+          <strong>Lista de Requisitantes: ListaRequisitante</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">7</span>
+          <strong>Lista de Eventos: ListaEvento</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">8</span>
+          <strong>Lista de Setores: ListaSetores (TreeView)</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">9</span>
+          <strong>Lista de Setores para Evento: ListaSetoresEvento (Lista Plana)</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">10</span>
+          <strong>Lista de Setores Flat: ListaSetoresFlat (DropDown com Indentação)</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">11</span>
+          <strong>Lista de Dias da Semana: ListaDias</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">12</span>
+          <strong>Lista de Períodos: ListaPeriodos</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">13</span>
+          <strong>Lista de Recorrente: ListaRecorrente</strong>
+        </div>
+      </div>
+      <div class="list-item">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+          <span class="number-badge">14</span>
+          <strong>Lista de Status: ListaStatus</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title terracota">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/list-check.svg" alt="Classes de Listas Principais" />
+        Classes de Listas Principais
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/route.svg" alt="ListaFinalidade" />
+          ListaFinalidade
+        </h4>
+        <p><strong>Descrição:</strong> Lista de finalidades de viagens</p>
+        <p><strong>Método:</strong> <code class="inline">FinalidadesList()</code></p>
+        <p><strong>Dados:</strong> Lista hardcoded com 22 finalidades (Transporte de Funcionários, Economildo Norte/Sul/Rodoviária, Mesa, TV/Rádio Câmara, etc.)</p>
+        <p><strong>Ordenação:</strong> Alfabética usando <code class="inline">PtBrComparer</code></p>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/gas-pump.svg" alt="ListaNivelCombustivel" />
+          ListaNivelCombustivel
+        </h4>
+        <p><strong>Descrição:</strong> Lista de níveis de combustível com ícones</p>
+        <p><strong>Método:</strong> <code class="inline">NivelCombustivelList()</code></p>
+        <p><strong>Dados:</strong> 5 níveis (Vazio, 1/4, 1/2, 3/4, Cheio)</p>
+        <p><strong>Propriedades:</strong> <code class="inline">Nivel</code>, <code class="inline">Descricao</code>, <code class="inline">Imagem</code></p>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/car.svg" alt="ListaVeiculos" />
+          ListaVeiculos
+        </h4>
+        <p><strong>Descrição:</strong> Lista de veículos ativos com marca e modelo</p>
+        <p><strong>Método:</strong> <code class="inline">VeiculosList()</code></p>
+        <p><strong>Fonte:</strong> <code class="inline">_unitOfWork.Veiculo.GetAllReduced()</code> com join em <code class="inline">MarcaVeiculo</code> e <code class="inline">ModeloVeiculo</code></p>
+        <p><strong>Formato:</strong> <code class="inline">"{Placa} - {Marca}/{Modelo}"</code></p>
+        <p><strong>Filtro:</strong> Apenas veículos com <code class="inline">Status == true</code></p>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/user-tie.svg" alt="ListaMotorista" />
+          ListaMotorista
+        </h4>
+        <p><strong>Descrição:</strong> Lista de motoristas ativos com foto Base64</p>
+        <p><strong>Método:</strong> <code class="inline">MotoristaList()</code></p>
+        <p><strong>Fonte:</strong> <code class="inline">_unitOfWork.ViewMotoristas.GetAllReduced()</code></p>
+        <p><strong>Propriedades:</strong> <code class="inline">MotoristaId</code>, <code class="inline">Nome</code>, <code class="inline">FotoBase64</code>, <code class="inline">Status</code></p>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/sitemap.svg" alt="ListaSetores" />
+          ListaSetores (TreeView)
+        </h4>
+        <p><strong>Descrição:</strong> Lista hierárquica de setores para TreeView Syncfusion</p>
+        <p><strong>Método:</strong> <code class="inline">SetoresList()</code></p>
+        <p><strong>Fonte:</strong> <code class="inline">_unitOfWork.ViewSetores.GetAll()</code></p>
+        <p><strong>Estrutura Hierárquica:</strong> Detecta filhos via <code class="inline">SetorPaiId</code>, propriedade <code class="inline">HasChild</code> indica se tem filhos</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/cogs.svg" alt="Padrão de Implementação" />
+        Padrão de Implementação
+      </div>
+      <div class="callout success">
+        <p>Todas as classes seguem o mesmo padrão:</p>
+        <ol style="margin-top: 12px; padding-left: 20px;">
+          <li><strong>Construtor Vazio:</strong> Para uso sem <code class="inline">IUnitOfWork</code></li>
+          <li><strong>Construtor com IUnitOfWork:</strong> Para acesso a dados</li>
+          <li><strong>Método de Lista:</strong> Retorna <code class="inline">List&lt;T&gt;</code> ou <code class="inline">IEnumerable&lt;T&gt;</code></li>
+          <li><strong>Try-Catch:</strong> Tratamento de erros com log</li>
+          <li><strong>Retorno Seguro:</strong> Retorna lista vazia em caso de erro</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/code.svg" alt="Exemplos de Uso" />
+        Exemplos de Uso
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 1" />
+          Exemplo 1: Dropdown de Finalidades
+        </h4>
+        <code>public IActionResult Index()
+{
+    var listaFinalidade = new ListaFinalidade();
+    var finalidades = listaFinalidade.FinalidadesList();
+    
+    ViewBag.Finalidades = finalidades;
+    return View();
+}</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 2" />
+          Exemplo 2: TreeView de Setores
+        </h4>
+        <code>public IActionResult SelecionarSetor()
+{
+    var listaSetores = new ListaSetores(_unitOfWork);
+    var setores = listaSetores.SetoresList();
+    
+    return Json(setores);
+}</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Exemplo 3" />
+          Exemplo 3: Dropdown de Veículos
+        </h4>
+        <code>public IActionResult SelecionarVeiculo()
+{
+    var listaVeiculos = new ListaVeiculos(_unitOfWork);
+    var veiculos = listaVeiculos.VeiculosList();
+    
+    return Json(veiculos);
+}</code>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/network-wired.svg" alt="Interconexões" />
+        Interconexões
+      </div>
+      <div class="callout">
+        <strong>Quem Usa Estas Classes:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>Controllers:</strong> Para popular dropdowns em views</li>
+          <li><strong>Pages Razor:</strong> Para seleções em formulários</li>
+          <li><strong>JavaScript:</strong> Dados serializados para componentes Syncfusion</li>
+        </ul>
+      </div>
+      <div class="callout success" style="margin-top: 12px;">
+        <strong>O Que Estas Classes Usam:</strong>
+        <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">IUnitOfWork</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">System.Linq</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">System.Globalization</code></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

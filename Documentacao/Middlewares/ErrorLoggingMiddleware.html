@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ErrorLoggingMiddleware.cs | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37;
+      --vinho-light: #8B3A44;
+      --azul: #325d88;
+      --azul-light: #3d6f9e;
+      --terracota: #A97B6E;
+      --terracota-light: #C08B7E;
+      --verde: #557570;
+      --verde-light: #6A8A85;
+      --cinza: #f5f7fb;
+      --card: #ffffff;
+      --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px;
+      --header-bg: #b66a3d;
+      --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; 
+      height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large {
+      width: 24px;
+      height: 24px;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.success {
+      border-left-color: var(--verde);
+      background: linear-gradient(135deg, rgba(85,117,112,.08), rgba(85,117,112,.05));
+    }
+    .method-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--azul);
+      transition: all 0.2s ease;
+    }
+    .method-card:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--verde);
+      transform: translateX(4px);
+    }
+    .method-card h4 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-card p {
+      margin: 8px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+    .feature-list li {
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feature-list li:before {
+      content: "✓";
+      color: var(--verde);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-step {
+      padding: 14px 16px;
+      margin: 10px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.06), rgba(50,93,136,.03));
+      border-radius: 10px;
+      border-left: 4px solid var(--azul);
+    }
+    .flow-step h5 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--azul), var(--azul-light));
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/file-lines.svg" alt="ErrorLoggingMiddleware" />
+    <div>
+      <h1>ErrorLoggingMiddleware.cs</h1>
+      <p class="subtitle">Middleware ASP.NET Core que captura e registra erros HTTP em toda a aplicação</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Visão Geral" />
+        Visão Geral
+      </div>
+      <div class="callout">
+        <p>O <code class="inline">ErrorLoggingMiddleware</code> é um middleware ASP.NET Core que captura e registra erros HTTP em toda a aplicação, interceptando exceções não tratadas e erros de status HTTP (4xx e 5xx).</p>
+      </div>
+      <ul class="feature-list">
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/globe.svg" alt="Captura Global" />
+          <span><strong>Captura Global:</strong> Intercepta todas as requisições</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/file-lines.svg" alt="Logging Estruturado" />
+          <span><strong>Logging Estruturado:</strong> Logs detalhados com ILogService</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/exclamation-triangle.svg" alt="Status HTTP" />
+          <span><strong>Status HTTP:</strong> Registra erros 4xx e 5xx</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/hashtag.svg" alt="Extração de Linha" />
+          <span><strong>Extração de Linha:</strong> Extrai linha do erro do stack trace</span>
+        </li>
+        <li>
+          <img class="icon" src="../../Fontawesome/duotone/link.svg" alt="Correlação" />
+          <span><strong>Correlação:</strong> Integra com sistema de logging do FrotiX</span>
+        </li>
+      </ul>
+      <div class="meta-info">
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/calendar.svg" alt="Data" />
+          <span>Última Atualização: 08/01/2026</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/tag.svg" alt="Versão" />
+          <span>Versão: 2.0</span>
+        </div>
+        <div class="meta-item">
+          <img class="icon" src="../../Fontawesome/duotone/file-code.svg" alt="Arquivo" />
+          <span>Middlewares/ErrorLoggingMiddleware.cs</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/building.svg" alt="Estrutura da Classe" />
+        Estrutura da Classe
+      </div>
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/arrow-down-arrow-up.svg" alt="Middleware ASP.NET Core" />
+          Middleware ASP.NET Core
+        </h4>
+        <code>public class ErrorLoggingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger&lt;ErrorLoggingMiddleware&gt; _logger;
+}</code>
+        <p><strong>Padrão:</strong> Middleware padrão do ASP.NET Core</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/screwdriver-wrench.svg" alt="Método Principal" />
+        Método Principal
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/play.svg" alt="InvokeAsync" />
+          InvokeAsync(HttpContext context, ILogService logService)
+        </h4>
+        <p><strong>Descrição:</strong> Processa requisição e captura erros</p>
+        <p><strong>Fluxo:</strong></p>
+        <ol style="margin-top: 12px; padding-left: 20px;">
+          <li>Executa próximo middleware (<code class="inline">await _next(context)</code>)</li>
+          <li>Verifica status HTTP após execução</li>
+          <li>Se status >= 400, registra erro HTTP</li>
+          <li>Se exceção lançada, captura e registra</li>
+          <li>Re-lança exceção para handler padrão</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title terracota">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/cogs.svg" alt="Funcionalidades" />
+        Funcionalidades
+      </div>
+      
+      <div class="flow-step">
+        <h5>
+          <span class="number-badge">1</span>
+          Captura de Erros HTTP (4xx e 5xx)
+        </h5>
+        <code>if (context.Response.StatusCode >= 400)
+{
+    var statusCode = context.Response.StatusCode;
+    var path = context.Request.Path.Value ?? "";
+    var method = context.Request.Method;
+    var message = GetStatusMessage(statusCode);
+
+    logService.HttpError(statusCode, path, method, message);
+}</code>
+        <p style="margin-top: 12px; font-size: 14px; color: #666;"><strong>Registra:</strong> Status code, Path da requisição, Método HTTP (GET, POST, etc.), Mensagem descritiva do status</p>
+      </div>
+
+      <div class="flow-step">
+        <h5>
+          <span class="number-badge">2</span>
+          Captura de Exceções Não Tratadas
+        </h5>
+        <code>catch (Exception ex)
+{
+    _logger.LogError(ex, "Erro não tratado na requisição");
+
+    // Extrai informações do erro
+    var arquivo = ex.TargetSite?.DeclaringType?.FullName ?? "Desconhecido";
+    var metodo = ex.TargetSite?.Name ?? "Desconhecido";
+    int? linha = null;
+
+    // Tenta extrair linha do StackTrace
+    if (!string.IsNullOrEmpty(ex.StackTrace))
+    {
+        var match = Regex.Match(ex.StackTrace, @":line (\d+)");
+        if (match.Success && int.TryParse(match.Groups[1].Value, out var l))
+        {
+            linha = l;
+        }
+    }
+
+    logService.Error(
+        $"Exceção não tratada: {ex.Message}",
+        ex,
+        arquivo,
+        metodo,
+        linha
+    );
+
+    logService.HttpError(500, context.Request.Path.Value ?? "", context.Request.Method, ex.Message);
+    throw; // Re-lança para handler padrão
+}</code>
+        <p style="margin-top: 12px; font-size: 14px; color: #666;"><strong>Extrai:</strong> Arquivo (via TargetSite.DeclaringType), Método (via TargetSite.Name), Linha (via regex no stack trace)</p>
+        <p style="margin-top: 8px; font-size: 14px; color: #666;"><strong>Registra:</strong> Erro detalhado via logService.Error(), Erro HTTP 500 via logService.HttpError()</p>
+      </div>
+
+      <div class="flow-step">
+        <h5>
+          <span class="number-badge">3</span>
+          Mensagens de Status HTTP
+        </h5>
+        <code>private static string GetStatusMessage(int statusCode)
+{
+    return statusCode switch
+    {
+        400 => "Bad Request - Requisição inválida",
+        401 => "Unauthorized - Não autorizado",
+        403 => "Forbidden - Acesso negado",
+        404 => "Not Found - Página não encontrada",
+        // ... e muitos outros
+    };
+}</code>
+        <p style="margin-top: 12px; font-size: 14px; color: #666;"><strong>Cobertura:</strong> 4xx e 5xx comuns</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/plug.svg" alt="Extension Method" />
+        Extension Method
+      </div>
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/plug.svg" alt="UseErrorLogging" />
+          UseErrorLogging(this IApplicationBuilder builder)
+        </h4>
+        <p><strong>Descrição:</strong> Facilita registro do middleware no pipeline</p>
+        <code>// Startup.cs ou Program.cs
+app.UseErrorLogging();</code>
+        <div class="callout success" style="margin-top: 12px;">
+          <strong>Equivalente a:</strong> <code style="display: inline;">app.UseMiddleware&lt;ErrorLoggingMiddleware&gt;();</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/gear.svg" alt="Configuração no Pipeline" />
+        Configuração no Pipeline
+      </div>
+      <div class="callout success">
+        <strong>Ordem Recomendada:</strong>
+        <code style="margin-top: 8px;">// Program.cs ou Startup.cs
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseErrorLogging(); // ← Registrado aqui
+app.UseEndpoints(...);</code>
+        <p style="margin-top: 12px; font-size: 14px;"><strong>Posição:</strong> Após autenticação/autorização, antes dos endpoints</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/file-lines.svg" alt="Exemplos de Logs" />
+        Exemplos de Logs Gerados
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/file-lines.svg" alt="Erro HTTP 404" />
+          Erro HTTP 404
+        </h4>
+        <code style="font-size: 11px;">HTTP Error 404 | path=/api/veiculo/123 | method=GET | message=Not Found - Página não encontrada</code>
+      </div>
+
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/bug.svg" alt="Exceção Não Tratada" />
+          Exceção Não Tratada
+        </h4>
+        <code style="font-size: 11px;">Unexpected error | arquivo=MeuController.cs | metodo=Salvar | linha=42 | 
+message=Exceção não tratada: Timeout expired</code>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/network-wired.svg" alt="Interconexões" />
+        Interconexões
+      </div>
+      <div class="callout">
+        <strong>Quem Usa Este Middleware:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>Startup.cs/Program.cs:</strong> Registrado no pipeline HTTP</li>
+          <li><strong>Sistema de Logging:</strong> Via ILogService</li>
+        </ul>
+      </div>
+      <div class="callout success" style="margin-top: 12px;">
+        <strong>O Que Este Middleware Usa:</strong>
+        <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">HttpContext</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">RequestDelegate</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">ILogger</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">ILogService</code></span>
+          <span style="padding: 6px 10px; background: rgba(50,93,136,.1); border-radius: 6px; font-size: 12px; font-weight: 600;"><code class="inline">System.Text.RegularExpressions</code></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

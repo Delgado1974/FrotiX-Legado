@@ -1,8 +1,38 @@
 # sp_TratarNulosTodasTabelas
 
-- **Objetivo**: aplicar `sp_TratarNulosTabela` em todas as tabelas base do schema `dbo` (exceto AspNet e EF).
-- **Acionamento**: rotina de saneamento manual; não há job associado.
-- **Parâmetros**: nenhum.
-- **Tabelas afetadas**: todas as tabelas base `dbo` não ignoradas.
-- **Benefício para o FrotiX**: corrige nulos em massa após importações ou migrações, reduzindo problemas de consistência.
-- **Status de uso**: não referenciado no código; usar apenas quando precisar higienizar dados, pois pode mascarar dados faltantes.
+## Código completo
+
+```sql
+CREATE PROCEDURE dbo.sp_TratarNulosTodasTabelas
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Tabela NVARCHAR(128);
+    DECLARE curTabelas CURSOR FOR
+        SELECT TABLE_NAME 
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_SCHEMA = 'dbo' 
+          AND TABLE_TYPE = 'BASE TABLE'
+          AND TABLE_NAME NOT LIKE 'AspNet%'
+          AND TABLE_NAME NOT LIKE '__EF%';
+    
+    OPEN curTabelas;
+    FETCH NEXT FROM curTabelas INTO @Tabela;
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC dbo.sp_TratarNulosTabela @Tabela;
+        FETCH NEXT FROM curTabelas INTO @Tabela;
+    END
+    
+    CLOSE curTabelas;
+    DEALLOCATE curTabelas;
+END
+```
+
+## Explicação por blocos
+
+- **Cursor de tabelas**: percorre todas as tabelas base `dbo`, ignorando AspNet e tabelas EF temporárias.
+- **Chamada**: executa `sp_TratarNulosTabela` para cada tabela selecionada.
+- **Uso**: saneamento em massa; rodar com cautela, pois pode encobrir dados faltantes. Ideal após importações/migrações.

@@ -64,24 +64,26 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* ====== CORES DOS ÍCONES DUOTONE ====== */
+/* ====== CORES DOS ÍCONES DUOTONE (Padrão FrotiX) ====== */
 .nav-syncfusion .nav-icon.fa-duotone {
-    --fa-primary-color: #a0aec0;      /* Cinza claro */
-    --fa-secondary-color: #c67750;    /* Laranja sóbrio */
+    --fa-primary-color: #ff6b35;      /* Laranja forte (padrão FrotiX) */
+    --fa-secondary-color: #6c757d;    /* Cinza médio (padrão FrotiX) */
     --fa-primary-opacity: 1;
     --fa-secondary-opacity: 1;
     font-size: 1.1rem;
     width: 20px;
     text-align: center;
-    margin-right: 10px;
+    margin-right: 12px;  /* Espaçamento adequado entre ícone e texto (2 caracteres) */
+    flex-shrink: 0;  /* Evita que o ícone encolha */
 }
 
-/* Ícones dos subitens - cores um pouco mais suaves */
+/* Ícones dos subitens - mantém mesmo padrão de cores */
 .nav-syncfusion .nivel-1 .nav-icon.fa-duotone,
 .nav-syncfusion .nivel-2 .nav-icon.fa-duotone {
-    --fa-primary-color: #b0bcc8;
-    --fa-secondary-color: #d4917a;
+    --fa-primary-color: #ff6b35;      /* Laranja forte (padrão FrotiX) */
+    --fa-secondary-color: #6c757d;    /* Cinza médio (padrão FrotiX) */
     font-size: 0.95rem;
+    margin-right: 12px;  /* Espaçamento consistente */
 }
 
 /* ====== INDENTAÇÃO POR NÍVEL ====== */
@@ -284,8 +286,24 @@
     function nodeTemplate(data) {
         var nivelClass = 'nivel-' + (data.nivel || 0);
 
+        // ✅ Normaliza ícone para DUOTONE (padrão FrotiX)
+        var iconClass = data.icon || 'fa-duotone fa-file';
+        if (iconClass && !iconClass.includes('fa-duotone')) {
+            // Converte fa-regular/fa-solid/fa-light para fa-duotone
+            iconClass = iconClass.replace(/fa-(regular|solid|light)/g, 'fa-duotone');
+        }
+        // Garante que sempre seja duotone
+        if (!iconClass.includes('fa-duotone')) {
+            // Se não tem prefixo nenhum, assume duotone
+            if (!iconClass.startsWith('fa-')) {
+                iconClass = 'fa-duotone ' + iconClass;
+            } else {
+                iconClass = 'fa-duotone ' + iconClass.replace(/^fa-[a-z]+\s+/, '');
+            }
+        }
+
         var html = '<a class="nav-link ' + nivelClass + '" href="' + (data.href || 'javascript:void(0);') + '">';
-        html += '<i class="' + (data.icon || 'fa-regular fa-file') + ' nav-icon"></i>';
+        html += '<i class="' + iconClass + ' nav-icon"></i>';
         html += '<span class="nav-text">' + data.text + '</span>';
         html += '<i class="fa-solid fa-circle selection-dot"></i>';
         html += '</a>';

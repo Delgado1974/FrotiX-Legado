@@ -59,7 +59,8 @@
       "Bash(Select-Object -ExpandProperty Count)",
       "Bash(git rm:*)",
       "Bash(tr:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(cat:*)"
     ]
   }
 }

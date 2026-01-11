@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JOB - FrotiX - Atualização de Viagens | FrotiX</title>
+  <style>
+    :root {
+      --vinho: #722F37; --vinho-light: #8B3A44;
+      --azul: #325d88; --azul-light: #3d6f9e;
+      --terracota: #A97B6E; --terracota-light: #C08B7E;
+      --verde: #557570; --verde-light: #6A8A85;
+      --cinza: #f5f7fb; --card: #ffffff; --texto: #1f1f1f;
+      --shadow: 0 20px 45px -18px rgba(0, 0, 0, .35);
+      --radius: 14px; --header-bg: #b66a3d; --code-bg: #33465c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 12% 20%, rgba(50,93,136,.08), transparent 26%), 
+                  radial-gradient(circle at 90% 10%, rgba(114,47,55,.10), transparent 30%), 
+                  var(--cinza);
+      color: var(--texto);
+      padding: 28px;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--header-bg) 0%, #d47952 100%);
+      color: #fff;
+      padding: 32px 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 0 0 4px #fff, var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .hero img { 
+      width: 56px; height: 56px; 
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.3));
+      animation: pulseIcon 2s ease-in-out infinite;
+    }
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 0.3px; font-weight: 900; }
+    .subtitle { margin: 8px 0 0; font-size: 15px; opacity: 0.95; font-weight: 400; }
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+      gap: 20px; 
+      margin-top: 24px; 
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 26px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, .4);
+    }
+    .section-title { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      margin: 0 0 16px; 
+      font-size: 17px; 
+      font-weight: 700; 
+      color: var(--azul);
+    }
+    .section-title.verde { color: var(--verde); }
+    .section-title.vinho { color: var(--vinho); }
+    code {
+      background: var(--code-bg);
+      color: #e9edf5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code.inline {
+      display: inline;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+    ul { margin: 8px 0 0 24px; padding: 0; list-style: none; }
+    li { 
+      margin-bottom: 10px; 
+      padding-left: 24px;
+      position: relative;
+    }
+    li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--terracota);
+      font-weight: bold;
+    }
+    .icon { 
+      width: 20px; 
+      height: 20px; 
+      vertical-align: middle; 
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15)); 
+      flex-shrink: 0;
+    }
+    .icon-large { width: 24px; height: 24px; }
+    .callout {
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(114,47,55,.08), rgba(50,93,136,.08));
+      border: 1px solid rgba(0,0,0,0.05);
+      border-left: 4px solid var(--azul);
+    }
+    .callout.warning {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.05));
+    }
+    .method-card {
+      padding: 16px 18px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(50,93,136,.04), rgba(85,117,112,.04));
+      border-radius: 10px;
+      border-left: 3px solid var(--azul);
+      transition: all 0.2s ease;
+    }
+    .method-card:hover {
+      background: linear-gradient(135deg, rgba(50,93,136,.08), rgba(85,117,112,.08));
+      border-left-color: var(--verde);
+      transform: translateX(4px);
+    }
+    .method-card h4 {
+      color: var(--azul);
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(50,93,136,.1);
+      color: var(--azul);
+      border: 1px solid rgba(50,93,136,.2);
+      margin: 4px 6px 4px 0;
+    }
+    .pill.verde {
+      background: rgba(85,117,112,.1);
+      color: var(--verde);
+      border-color: rgba(85,117,112,.2);
+    }
+    .pill.vinho {
+      background: rgba(114,47,55,.1);
+      color: var(--vinho);
+      border-color: rgba(114,47,55,.2);
+    }
+    .info-item {
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: linear-gradient(135deg, rgba(85,117,112,.06), rgba(85,117,112,.03));
+      border-radius: 8px;
+      border-left: 3px solid var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .info-item strong { color: var(--verde); font-weight: 700; }
+    @media print {
+      body { padding: 0; background: white; }
+      .card { break-inside: avoid; page-break-inside: avoid; }
+      .hero { break-after: avoid; }
+    }
+    @page { size: A4; margin: 2cm; }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img src="../../Fontawesome/duotone/database.svg" alt="JOB - FrotiX - Atualização de Viagens" />
+    <div>
+      <h1>JOB - FrotiX - Atualização de Viagens</h1>
+      <p class="subtitle">Recalcula custos, normaliza viagens e atualiza estatísticas de toda a base de hora em hora</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/info-circle.svg" alt="Informações Gerais" />
+        Informações Gerais
+      </div>
+      <div class="callout">
+        <p><strong>Categoria:</strong> <span class="pill">Database Maintenance</span></p>
+        <p style="margin-top: 8px;"><strong>Descrição:</strong> Recalcula custos, normaliza viagens e atualiza estatísticas de toda a base de hora em hora.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title verde">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/list-check.svg" alt="Passos" />
+        Passos
+      </div>
+      
+      <div class="method-card">
+        <h4>
+          <img class="icon" src="../../Fontawesome/duotone/play.svg" alt="Step 1" />
+          Step 1 — Executar sp_JobAtualizacaoViagens
+        </h4>
+        <div class="info-item">
+          <strong>Comando:</strong>
+          <code class="inline">EXEC sp_JobAtualizacaoViagens</code>
+        </div>
+        <div class="info-item">
+          <strong>Banco:</strong>
+          <code class="inline">FrotiX</code>
+        </div>
+        <div class="info-item">
+          <strong>Tentativas:</strong>
+          <span>0 (sem retry)</span>
+        </div>
+        <div class="info-item">
+          <strong>Ação em falha:</strong>
+          <span>termina o job</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/calendar-clock.svg" alt="Agendamento" />
+        Agendamento
+      </div>
+      
+      <div class="info-item">
+        <strong>Tipo:</strong>
+        <span>diário (<code class="inline">freq_type=4</code>)</span>
+      </div>
+      <div class="info-item">
+        <strong>Frequência intradiária:</strong>
+        <span>a cada 1 hora (<code class="inline">freq_subday_type=8</code>, <code class="inline">freq_subday_interval=1</code>)</span>
+      </div>
+      <div class="info-item">
+        <strong>Janela diária:</strong>
+        <span>00:00:00 até 23:59:59 (<code class="inline">active_start_time=000000</code>, <code class="inline">active_end_time=235959</code>)</span>
+      </div>
+      <div class="info-item">
+        <strong>Vigência:</strong>
+        <span>início 2025-12-17, sem data de fim (<code class="inline">active_end_date=9999-12-31</code>)</span>
+      </div>
+      <div class="info-item">
+        <strong>Servidor:</strong>
+        <span>(local)</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title vinho">
+        <img class="icon icon-large" src="../../Fontawesome/duotone/circle-exclamation.svg" alt="Observações" />
+        Observações
+      </div>
+      <div class="callout warning">
+        <ul>
+          <li>Não há retry configurado; avaliar se é desejável reexecutar em caso de falha.</li>
+          <li>Concorre no mesmo ciclo horário com outros jobs de estatísticas; pode valer distribuir horários para reduzir contenção.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
